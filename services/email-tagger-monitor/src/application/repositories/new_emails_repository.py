@@ -12,7 +12,7 @@ class NewEmailsRepository:
         return self._storage_repository.find_all("email_*")
 
     def save_new_email(self, email_data: dict):
-        email_id = email_data['email']['email_id']
+        email_id = email_data["email"]["email_id"]
         key = f"email_{email_id}"
         self._logger.info(f"saving email data '{email_id}'")
         self._storage_repository.save(key, email_data)

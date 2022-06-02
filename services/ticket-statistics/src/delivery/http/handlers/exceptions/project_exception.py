@@ -15,19 +15,15 @@ class ProjectException(Exception):
         elif dynamic_error:
             self.__set_properties(dynamic_error, None)
         else:
-            self.__set_properties(ERRORS['INTERNAL_ERROR'], message)
+            self.__set_properties(ERRORS["INTERNAL_ERROR"], message)
 
     def __set_properties(self, error, message):
-        self.message = error['message']
-        self.code = error['code']
+        self.message = error["message"]
+        self.code = error["code"]
 
         if message is not None:
             self.message = message
 
     @property
     def serialize(self):
-        return {
-            'code': self.code,
-            'tag': self.tag,
-            'message': self.message
-        }
+        return {"code": self.code, "tag": self.tag, "message": self.message}

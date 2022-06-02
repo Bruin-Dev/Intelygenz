@@ -1,14 +1,11 @@
-from unittest.mock import patch
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import application
 from application.clients.email_client import EmailClient
-
 from config import testconfig as config
 
 
 class TestEmailClient:
-
     def instantiation_test(self):
         mock_logger = Mock()
 
@@ -22,14 +19,14 @@ class TestEmailClient:
 
         test_client = EmailClient(config, mock_logger)
 
-        with patch.object(application.clients.email_client.smtplib, 'SMTP'):
+        with patch.object(application.clients.email_client.smtplib, "SMTP"):
             test_client.email_login()
 
             test_client._email_server.ehlo.assert_called_once()
             test_client._email_server.starttls.assert_called_once()
             test_client._email_server.login.assert_called_once_with(
-                test_client._config.EMAIL_DELIVERY_CONFIG['email'],
-                test_client._config.EMAIL_DELIVERY_CONFIG['password'],
+                test_client._config.EMAIL_DELIVERY_CONFIG["email"],
+                test_client._config.EMAIL_DELIVERY_CONFIG["password"],
             )
 
     def send_to_email_test(self):
@@ -41,7 +38,7 @@ class TestEmailClient:
             "images": [],
             "attachments": [],
             "text": "Some email test",
-            "html": "<div>Some message html</div>"
+            "html": "<div>Some message html</div>",
         }
 
         test_client = EmailClient(config, mock_logger)
@@ -60,9 +57,10 @@ class TestEmailClient:
         # Checking the MIME attachment can be too much verbose, so we cannot
         # use assert_called_with here
         test_client._email_server.sendmail.assert_called_once()
-        assert test_client._email_server.sendmail.call_args[0][0] == test_client._config.EMAIL_DELIVERY_CONFIG['email']
-        assert test_client._email_server.sendmail.call_args[0][1] == test_msg['recipient'].split(
-            test_client.EMAIL_SEPARATOR)
+        assert test_client._email_server.sendmail.call_args[0][0] == test_client._config.EMAIL_DELIVERY_CONFIG["email"]
+        assert test_client._email_server.sendmail.call_args[0][1] == test_msg["recipient"].split(
+            test_client.EMAIL_SEPARATOR
+        )
         assert isinstance(test_client._email_server.sendmail.call_args[0][2], str)
         test_client._email_server.quit.assert_called_once()
         test_client._logger.exception.assert_not_called()

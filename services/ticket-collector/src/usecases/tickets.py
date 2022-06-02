@@ -19,7 +19,7 @@ class TicketUseCase:
         self.tickets_repository = tickets_repository
         self.config = config
         self.logger = logger
-        self.semaphore = asyncio.BoundedSemaphore(self.config['concurrent_days'])
+        self.semaphore = asyncio.BoundedSemaphore(self.config["concurrent_days"])
 
     @staticmethod
     def date_range(start_date: date, end_date: date) -> List[date]:
@@ -37,10 +37,10 @@ class TicketUseCase:
         Main function to get data from bruin or database
         """
         today = date.today()
-        start_date = today - timedelta(days=self.config['days_to_retrieve'])
+        start_date = today - timedelta(days=self.config["days_to_retrieve"])
         date_range = self.date_range(start_date=start_date, end_date=today)
 
-        self.logger.info(f'Getting tickets between {start_date} and {today}')
+        self.logger.info(f"Getting tickets between {start_date} and {today}")
         start_time = time.perf_counter()
 
         tasks = [self.get_data_from_bruin(_date=_date, today=today) for _date in date_range]
@@ -48,7 +48,7 @@ class TicketUseCase:
 
         end_time = time.perf_counter()
         elapsed_time = round((end_time - start_time) / 60, 2)
-        self.logger.info(f'Finished getting tickets between {start_date} and {today} in {elapsed_time}m')
+        self.logger.info(f"Finished getting tickets between {start_date} and {today} in {elapsed_time}m")
 
     def should_update(self, _date: date, today: date) -> bool:
         """
@@ -58,12 +58,12 @@ class TicketUseCase:
         :return:
         """
         days = (today - _date).days
-        update = days <= self.config['days_to_update']
+        update = days <= self.config["days_to_update"]
 
         if update:
-            self.logger.info(f'Date {_date} should be updated')
+            self.logger.info(f"Date {_date} should be updated")
         else:
-            self.logger.info(f'Date {_date} should not be updated')
+            self.logger.info(f"Date {_date} should not be updated")
 
         return update
 
@@ -74,14 +74,14 @@ class TicketUseCase:
         :param today:
         """
         async with self.semaphore:
-            start = _date.strftime('%Y-%m-%dT00:00:00Z')
-            end = _date.strftime('%Y-%m-%dT23:59:59Z')
+            start = _date.strftime("%Y-%m-%dT00:00:00Z")
+            end = _date.strftime("%Y-%m-%dT23:59:59Z")
 
             tickets = await self.bruin_repository.request_tickets_by_date_range(start=start, end=end)
             update = self.should_update(_date=_date, today=today)
 
             for ticket in tickets:
-                ticket_id = ticket['ticketID']
+                ticket_id = ticket["ticketID"]
                 ticket_on_mongo = self.tickets_repository.get_ticket_by_id(ticket_id=ticket_id)
 
                 if update:
@@ -92,7 +92,7 @@ class TicketUseCase:
 
                 await self.save_ticket_events(ticket_id)
 
-            self.logger.info(f'Finished getting tickets from {_date}')
+            self.logger.info(f"Finished getting tickets from {_date}")
 
     async def save_ticket_events(self, ticket_id: int) -> None:
         events = await self.bruin_repository.request_ticket_events(ticket_id=ticket_id)

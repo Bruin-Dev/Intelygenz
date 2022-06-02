@@ -1,8 +1,6 @@
 import pytest
-
-from asynctest import CoroutineMock
-
 from application.actions.get_probes import GetProbes
+from asynctest import CoroutineMock
 from config import testconfig as config
 
 
@@ -16,8 +14,9 @@ class TestGetProbesClient:
         assert get_probes._hawkeye_repository is hawkeye_repository
 
     @pytest.mark.asyncio
-    async def get_probes_ok_test(self, get_probes_init, default_call_with_params, response_get_probes_down_ok,
-                                 init_msg):
+    async def get_probes_ok_test(
+        self, get_probes_init, default_call_with_params, response_get_probes_down_ok, init_msg
+    ):
         get_probes_init._hawkeye_repository.get_probes = CoroutineMock(return_value=response_get_probes_down_ok)
         get_probes_init._event_bus.publish_message = CoroutineMock()
         await get_probes_init.get_probes(default_call_with_params)
@@ -27,9 +26,9 @@ class TestGetProbesClient:
         )
 
     @pytest.mark.asyncio
-    async def get_probes_no_filters_ok_test(self, get_probes_init, default_call_without_params,
-                                            response_get_probes_down_ok,
-                                            init_msg):
+    async def get_probes_no_filters_ok_test(
+        self, get_probes_init, default_call_without_params, response_get_probes_down_ok, init_msg
+    ):
         get_probes_init._hawkeye_repository.get_probes = CoroutineMock(return_value=response_get_probes_down_ok)
         get_probes_init._event_bus.publish_message = CoroutineMock()
         await get_probes_init.get_probes(default_call_without_params)
@@ -43,6 +42,4 @@ class TestGetProbesClient:
         get_probes_init._event_bus.publish_message = CoroutineMock()
         await get_probes_init.get_probes(default_call_without_body)
 
-        get_probes_init._event_bus.publish_message.assert_awaited_once_with(
-            "hawkeye.probe.request", response_not_body
-        )
+        get_probes_init._event_bus.publish_message.assert_awaited_once_with("hawkeye.probe.request", response_not_body)

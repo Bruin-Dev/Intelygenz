@@ -9,7 +9,7 @@ class StorageRepository:
         self._redis_key_prefix = config.ENVIRONMENT_NAME
 
     def get(self, key):
-        key = f'{self._redis_key_prefix}-{key}'
+        key = f"{self._redis_key_prefix}-{key}"
 
         if not self._redis.exists(key):
             return None
@@ -18,7 +18,7 @@ class StorageRepository:
         return json.loads(value)
 
     def find_all(self, match):
-        match = f'{self._redis_key_prefix}-{match}'
+        match = f"{self._redis_key_prefix}-{match}"
 
         matches = []
         for key in self._redis.scan_iter(match):
@@ -28,22 +28,22 @@ class StorageRepository:
         return matches
 
     def save(self, key, data):
-        key = f'{self._redis_key_prefix}-{key}'
+        key = f"{self._redis_key_prefix}-{key}"
         self._redis.set(key, json.dumps(data))
 
     def increment(self, key):
-        key = f'{self._redis_key_prefix}-{key}'
+        key = f"{self._redis_key_prefix}-{key}"
         return self._redis.incr(key, amount=1)
 
     def remove(self, *keys):
-        keys = [f'{self._redis_key_prefix}-{key}' for key in keys]
+        keys = [f"{self._redis_key_prefix}-{key}" for key in keys]
         self._redis.delete(*keys)
 
     def rename(self, key, new_key):
-        key = f'{self._redis_key_prefix}-{key}'
-        new_key = f'{self._redis_key_prefix}-{new_key}'
+        key = f"{self._redis_key_prefix}-{key}"
+        new_key = f"{self._redis_key_prefix}-{new_key}"
         self._redis.rename(key, new_key)
 
     def expire(self, key, seconds):
-        key = f'{self._redis_key_prefix}-{key}'
+        key = f"{self._redis_key_prefix}-{key}"
         self._redis.expire(key, seconds)

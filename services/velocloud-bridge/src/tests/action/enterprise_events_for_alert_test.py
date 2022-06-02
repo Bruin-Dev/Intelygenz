@@ -1,13 +1,13 @@
-import pytest
-from unittest.mock import Mock
-from asynctest import CoroutineMock
-from application.actions.enterprise_events_for_alert import EventEnterpriseForAlert
-from igz.packages.eventbus.eventbus import EventBus
 import json
+from unittest.mock import Mock
+
+import pytest
+from application.actions.enterprise_events_for_alert import EventEnterpriseForAlert
+from asynctest import CoroutineMock
+from igz.packages.eventbus.eventbus import EventBus
 
 
 class TestEventEnterpriseForAlert:
-
     def instance_test(self):
         mock_logger = Mock()
         storage_manager = Mock()
@@ -38,8 +38,8 @@ class TestEventEnterpriseForAlert:
                 "start_date": "2019-07-26 14:19:45.334427",
                 "end_date": "now",
                 "limit": 200,
-                "filter": ['EDGE_UP']
-            }
+                "filter": ["EDGE_UP"],
+            },
         }
         await enterprise_for_alert.report_enterprise_event(enterprise_msg)
         assert velocloud_repo.get_all_enterprise_events.called
@@ -51,9 +51,11 @@ class TestEventEnterpriseForAlert:
         assert velocloud_repo.get_all_enterprise_events.call_args[0][5] == enterprise_msg["body"]["filter"]
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == enterprise_msg["response_topic"]
-        assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
-                                                            "body": "Some enterprise event info",
-                                                            "status": 200}
+        assert test_bus.publish_message.call_args[0][1] == {
+            "request_id": "123",
+            "body": "Some enterprise event info",
+            "status": 200,
+        }
         assert enterprise_for_alert._logger.info.called
 
     @pytest.mark.asyncio
@@ -74,8 +76,8 @@ class TestEventEnterpriseForAlert:
                 "host": "host",
                 "enterprise_id": "2",
                 "start_date": "2019-07-26 14:19:45.334427",
-                "end_date": "now"
-            }
+                "end_date": "now",
+            },
         }
         await enterprise_for_alert.report_enterprise_event(enterprise_msg)
         assert velocloud_repo.get_all_enterprise_events.called
@@ -87,9 +89,11 @@ class TestEventEnterpriseForAlert:
         assert velocloud_repo.get_all_enterprise_events.call_args[0][5] is None
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == enterprise_msg["response_topic"]
-        assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
-                                                            "body": "Some enterprise event info",
-                                                            "status": 200}
+        assert test_bus.publish_message.call_args[0][1] == {
+            "request_id": "123",
+            "body": "Some enterprise event info",
+            "status": 200,
+        }
         assert enterprise_for_alert._logger.info.called
 
     @pytest.mark.asyncio
@@ -106,20 +110,17 @@ class TestEventEnterpriseForAlert:
         enterprise_msg = {
             "request_id": "123",
             "response_topic": "alert.request.event.enterprise.response.123",
-            "body": {
-                      "host": "host",
-                      "enterprise_id": "2",
-                      "end_date": "now"
-            }
+            "body": {"host": "host", "enterprise_id": "2", "end_date": "now"},
         }
         await enterprise_for_alert.report_enterprise_event(enterprise_msg)
         assert not velocloud_repo.get_all_enterprise_events.called
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == enterprise_msg["response_topic"]
-        assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
-                                                            "body": 'Must include "enterprise_id", "host", '
-                                                                    '"start_date", "end_date" in request',
-                                                            "status": 400}
+        assert test_bus.publish_message.call_args[0][1] == {
+            "request_id": "123",
+            "body": 'Must include "enterprise_id", "host", ' '"start_date", "end_date" in request',
+            "status": 400,
+        }
 
     @pytest.mark.asyncio
     async def report_enterprise_event_no_body_test(self):
@@ -140,9 +141,11 @@ class TestEventEnterpriseForAlert:
         assert not velocloud_repo.get_all_enterprise_events.called
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == enterprise_msg["response_topic"]
-        assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
-                                                            "body": 'Must include "body" in request',
-                                                            "status": 400}
+        assert test_bus.publish_message.call_args[0][1] == {
+            "request_id": "123",
+            "body": 'Must include "body" in request',
+            "status": 400,
+        }
 
     @pytest.mark.asyncio
     async def report_enterprise_event_empty_ko_test(self):
@@ -159,16 +162,14 @@ class TestEventEnterpriseForAlert:
             "request_id": "123",
             "response_topic": "alert.request.event.enterprise.response.123",
             "body": {
-                      "host": "host",
-                      "enterprise_id": "2",
-                      "start_date": "2019-07-26 14:19:45.334427",
-                      "end_date": "now"
-            }
+                "host": "host",
+                "enterprise_id": "2",
+                "start_date": "2019-07-26 14:19:45.334427",
+                "end_date": "now",
+            },
         }
         await enterprise_for_alert.report_enterprise_event(enterprise_msg)
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == enterprise_msg["response_topic"]
-        assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
-                                                            "body": None,
-                                                            "status": 500}
+        assert test_bus.publish_message.call_args[0][1] == {"request_id": "123", "body": None, "status": 500}
         assert enterprise_for_alert._logger.info.called

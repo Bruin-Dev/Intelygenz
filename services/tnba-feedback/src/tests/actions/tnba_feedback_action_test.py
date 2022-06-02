@@ -1,18 +1,14 @@
 from datetime import datetime
-from unittest.mock import Mock
-from unittest.mock import call
-from unittest.mock import patch
+from unittest.mock import Mock, call, patch
 
 import pytest
-
+from application.actions import tnba_feedback_action as tnba_feedback_action_module
+from application.actions.tnba_feedback_action import TNBAFeedback
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
-from shortuuid import uuid
-
-from application.actions.tnba_feedback_action import TNBAFeedback
-from application.actions import tnba_feedback_action as tnba_feedback_action_module
 from config import testconfig
+from shortuuid import uuid
 
 
 class TestTNBAMonitor:
@@ -27,8 +23,17 @@ class TestTNBAMonitor:
         notifications_repository = Mock()
         redis_client = Mock()
 
-        tnba_feedback = TNBAFeedback(event_bus, logger, scheduler, config, t7_repository, customer_cache_repository,
-                                     bruin_repository, notifications_repository, redis_client)
+        tnba_feedback = TNBAFeedback(
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            t7_repository,
+            customer_cache_repository,
+            bruin_repository,
+            notifications_repository,
+            redis_client,
+        )
 
         assert tnba_feedback._event_bus == event_bus
         assert tnba_feedback._logger == logger
@@ -52,22 +57,32 @@ class TestTNBAMonitor:
         notifications_repository = Mock()
         redis_client = Mock()
 
-        tnba_feedback = TNBAFeedback(event_bus, logger, scheduler, config, t7_repository, customer_cache_repository,
-                                     bruin_repository, notifications_repository, redis_client)
+        tnba_feedback = TNBAFeedback(
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            t7_repository,
+            customer_cache_repository,
+            bruin_repository,
+            notifications_repository,
+            redis_client,
+        )
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
-        with patch.object(tnba_feedback_action_module, 'datetime', new=datetime_mock):
-            with patch.object(tnba_feedback_action_module, 'timezone', new=Mock()):
+        with patch.object(tnba_feedback_action_module, "datetime", new=datetime_mock):
+            with patch.object(tnba_feedback_action_module, "timezone", new=Mock()):
                 await tnba_feedback.start_tnba_automated_process(exec_on_start=True)
 
         scheduler.add_job.assert_called_once_with(
-            tnba_feedback._run_tickets_polling, 'interval',
-            seconds=config.TNBA_FEEDBACK_CONFIG['monitoring_interval_seconds'],
+            tnba_feedback._run_tickets_polling,
+            "interval",
+            seconds=config.TNBA_FEEDBACK_CONFIG["monitoring_interval_seconds"],
             next_run_time=next_run_time,
             replace_existing=False,
-            id='_run_tickets_polling',
+            id="_run_tickets_polling",
         )
 
     @pytest.mark.asyncio
@@ -82,27 +97,37 @@ class TestTNBAMonitor:
         notifications_repository = Mock()
         redis_client = Mock()
 
-        tnba_feedback = TNBAFeedback(event_bus, logger, scheduler, config, t7_repository, customer_cache_repository,
-                                     bruin_repository, notifications_repository, redis_client)
+        tnba_feedback = TNBAFeedback(
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            t7_repository,
+            customer_cache_repository,
+            bruin_repository,
+            notifications_repository,
+            redis_client,
+        )
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
-        with patch.object(tnba_feedback_action_module, 'datetime', new=datetime_mock):
-            with patch.object(tnba_feedback_action_module, 'timezone', new=Mock()):
+        with patch.object(tnba_feedback_action_module, "datetime", new=datetime_mock):
+            with patch.object(tnba_feedback_action_module, "timezone", new=Mock()):
                 await tnba_feedback.start_tnba_automated_process(exec_on_start=True)
 
         scheduler.add_job.assert_called_once_with(
-            tnba_feedback._run_tickets_polling, 'interval',
-            seconds=config.TNBA_FEEDBACK_CONFIG['monitoring_interval_seconds'],
+            tnba_feedback._run_tickets_polling,
+            "interval",
+            seconds=config.TNBA_FEEDBACK_CONFIG["monitoring_interval_seconds"],
             next_run_time=next_run_time,
             replace_existing=False,
-            id='_run_tickets_polling',
+            id="_run_tickets_polling",
         )
 
     @pytest.mark.asyncio
     async def start_tnba_automated_process_with_job_id_already_started_test(self):
-        job_id = 'some-duplicated-id'
+        job_id = "some-duplicated-id"
         exception_instance = ConflictingIdError(job_id)
 
         event_bus = Mock()
@@ -118,18 +143,28 @@ class TestTNBAMonitor:
         notifications_repository = Mock()
         redis_client = Mock()
 
-        tnba_feedback = TNBAFeedback(event_bus, logger, scheduler, config, t7_repository, customer_cache_repository,
-                                     bruin_repository, notifications_repository, redis_client)
+        tnba_feedback = TNBAFeedback(
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            t7_repository,
+            customer_cache_repository,
+            bruin_repository,
+            notifications_repository,
+            redis_client,
+        )
 
         try:
             await tnba_feedback.start_tnba_automated_process()
         except ConflictingIdError:
             scheduler.add_job.assert_called_once_with(
-                tnba_feedback._run_tickets_polling, 'interval',
-                seconds=config.TNBA_FEEDBACK_CONFIG['monitoring_interval_seconds'],
+                tnba_feedback._run_tickets_polling,
+                "interval",
+                seconds=config.TNBA_FEEDBACK_CONFIG["monitoring_interval_seconds"],
                 next_run_time=undefined,
                 replace_existing=False,
-                id='_run_tickets_polling',
+                id="_run_tickets_polling",
             )
 
     @pytest.mark.asyncio
@@ -146,8 +181,17 @@ class TestTNBAMonitor:
         notifications_repository = Mock()
         redis_client = Mock()
 
-        tnba_feedback = TNBAFeedback(event_bus, logger, scheduler, config, t7_repository, customer_cache_repository,
-                                     bruin_repository, notifications_repository, redis_client)
+        tnba_feedback = TNBAFeedback(
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            t7_repository,
+            customer_cache_repository,
+            bruin_repository,
+            notifications_repository,
+            redis_client,
+        )
 
         tnba_feedback._get_all_closed_tickets_for_monitored_companies = CoroutineMock(return_value=ticket_ids_list)
         tnba_feedback._send_ticket_task_history_to_t7 = CoroutineMock()
@@ -160,22 +204,22 @@ class TestTNBAMonitor:
     @pytest.mark.asyncio
     async def get_all_closed_tickets_for_monitored_companies_test(self):
         customer_cache_response = {
-            'body': [
+            "body": [
                 {
-                    'edge': {
-                        'host': 'mettel.velocloud.net',
-                        'enterprise_id': 123,
-                        'edge_id': 9999,
+                    "edge": {
+                        "host": "mettel.velocloud.net",
+                        "enterprise_id": 123,
+                        "edge_id": 9999,
                     },
-                    'last_contact': '2020-08-27T02:23:59',
-                    'serial_number': 'VC1234567',
-                    'bruin_client_info': {
-                        'client_id': 9994,
-                        'client_name': 'METTEL/NEW YORK',
+                    "last_contact": "2020-08-27T02:23:59",
+                    "serial_number": "VC1234567",
+                    "bruin_client_info": {
+                        "client_id": 9994,
+                        "client_name": "METTEL/NEW YORK",
                     },
                 },
             ],
-            'status': 200,
+            "status": 200,
         }
 
         event_bus = Mock()
@@ -191,8 +235,17 @@ class TestTNBAMonitor:
 
         redis_client = Mock()
 
-        tnba_feedback = TNBAFeedback(event_bus, logger, scheduler, config, t7_repository, customer_cache_repository,
-                                     bruin_repository, notifications_repository, redis_client)
+        tnba_feedback = TNBAFeedback(
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            t7_repository,
+            customer_cache_repository,
+            bruin_repository,
+            notifications_repository,
+            redis_client,
+        )
 
         tnba_feedback._get_closed_tickets_by_client_id = CoroutineMock()
 
@@ -207,15 +260,15 @@ class TestTNBAMonitor:
         outage_ticket_id = 123
         affecting_ticket_id = 321
         closed_outage_ticket_response = {
-                                         'request_id': uuid(),
-                                         'body': [{'clientID': client_id, 'ticketID': outage_ticket_id}],
-                                         'status': 200
-                                        }
+            "request_id": uuid(),
+            "body": [{"clientID": client_id, "ticketID": outage_ticket_id}],
+            "status": 200,
+        }
         closed_affecting_ticket_response = {
-                                             'request_id': uuid(),
-                                             'body': [{'clientID': client_id, 'ticketID': affecting_ticket_id}],
-                                             'status': 200
-                                            }
+            "request_id": uuid(),
+            "body": [{"clientID": client_id, "ticketID": affecting_ticket_id}],
+            "status": 200,
+        }
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -230,8 +283,17 @@ class TestTNBAMonitor:
 
         redis_client = Mock()
 
-        tnba_feedback = TNBAFeedback(event_bus, logger, scheduler, config, t7_repository, customer_cache_repository,
-                                     bruin_repository, notifications_repository, redis_client)
+        tnba_feedback = TNBAFeedback(
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            t7_repository,
+            customer_cache_repository,
+            bruin_repository,
+            notifications_repository,
+            redis_client,
+        )
 
         await tnba_feedback._get_closed_tickets_by_client_id(client_id, closed_ticket_ids)
 
@@ -243,16 +305,8 @@ class TestTNBAMonitor:
     async def get_closed_tickets_by_client_id_ticket_non_2xx_status_test(self):
         closed_ticket_ids = []
         client_id = 8594
-        closed_outage_ticket_response = {
-                                         'request_id': uuid(),
-                                         'body': 'Error',
-                                         'status': 400
-                                        }
-        closed_affecting_ticket_response = {
-                                             'request_id': uuid(),
-                                             'body': 'Error',
-                                             'status': 400
-                                            }
+        closed_outage_ticket_response = {"request_id": uuid(), "body": "Error", "status": 400}
+        closed_affecting_ticket_response = {"request_id": uuid(), "body": "Error", "status": 400}
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -267,8 +321,17 @@ class TestTNBAMonitor:
 
         redis_client = Mock()
 
-        tnba_feedback = TNBAFeedback(event_bus, logger, scheduler, config, t7_repository, customer_cache_repository,
-                                     bruin_repository, notifications_repository, redis_client)
+        tnba_feedback = TNBAFeedback(
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            t7_repository,
+            customer_cache_repository,
+            bruin_repository,
+            notifications_repository,
+            redis_client,
+        )
 
         await tnba_feedback._get_closed_tickets_by_client_id(client_id, closed_ticket_ids)
 
@@ -280,16 +343,8 @@ class TestTNBAMonitor:
     async def get_closed_tickets_by_client_id_exception_test(self):
         closed_ticket_ids = []
         client_id = 8594
-        closed_outage_ticket_response = {
-            'request_id': uuid(),
-            'body': 'Error',
-            'status': 400
-        }
-        closed_affecting_ticket_response = {
-            'request_id': uuid(),
-            'body': 'Error',
-            'status': 400
-        }
+        closed_outage_ticket_response = {"request_id": uuid(), "body": "Error", "status": 400}
+        closed_affecting_ticket_response = {"request_id": uuid(), "body": "Error", "status": 400}
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -304,8 +359,17 @@ class TestTNBAMonitor:
 
         redis_client = Mock()
 
-        tnba_feedback = TNBAFeedback(event_bus, logger, scheduler, config, t7_repository, customer_cache_repository,
-                                     bruin_repository, notifications_repository, redis_client)
+        tnba_feedback = TNBAFeedback(
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            t7_repository,
+            customer_cache_repository,
+            bruin_repository,
+            notifications_repository,
+            redis_client,
+        )
 
         await tnba_feedback._get_closed_tickets_by_client_id(client_id, closed_ticket_ids)
 
@@ -317,38 +381,36 @@ class TestTNBAMonitor:
     async def send_ticket_task_history_to_t7_test(self):
         ticket_id = 123
 
-        task_history = [{
-                          "ClientName": "Le Duff Management ",
-                          "Ticket Entered Date": "202008242225",
-                          "EnteredDate": "2020-08-24T22:25:09.953-04:00",
-                          "CallTicketID": 4774915,
-                          "Initial Note @ Ticket Creation": "MetTel's IPA -- Service Outage Trouble",
-                          "DetailID": 5180688,
-                          "Product": "SD-WAN",
-                          "Asset": "VC05200030905",
-                          "Address1": "1320 W Campbell Rd",
-                          "Address2": None,
-                          "City": "Richardson",
-                          "State": "TX",
-                          "Zip": "75080-2814",
-                          "Site Name": "01106 Coit Campbell",
-                          "NoteType": "ADN",
-                          "Notes": "#*MetTel's IPA*#\nAI\n\n",
-                          "Note Entered Date": "202008251726",
-                          "EnteredDate_N": "2020-08-25T17:26:00.583-04:00",
-                          "Note Entered By": "Intelygenz Ai",
-                          "Task Assigned To": None,
-                          "Task": None,
-                          "Task Result": None,
-                          "SLA": 1,
-                          "Ticket Status": "Resolved"
-                        }]
+        task_history = [
+            {
+                "ClientName": "Le Duff Management ",
+                "Ticket Entered Date": "202008242225",
+                "EnteredDate": "2020-08-24T22:25:09.953-04:00",
+                "CallTicketID": 4774915,
+                "Initial Note @ Ticket Creation": "MetTel's IPA -- Service Outage Trouble",
+                "DetailID": 5180688,
+                "Product": "SD-WAN",
+                "Asset": "VC05200030905",
+                "Address1": "1320 W Campbell Rd",
+                "Address2": None,
+                "City": "Richardson",
+                "State": "TX",
+                "Zip": "75080-2814",
+                "Site Name": "01106 Coit Campbell",
+                "NoteType": "ADN",
+                "Notes": "#*MetTel's IPA*#\nAI\n\n",
+                "Note Entered Date": "202008251726",
+                "EnteredDate_N": "2020-08-25T17:26:00.583-04:00",
+                "Note Entered By": "Intelygenz Ai",
+                "Task Assigned To": None,
+                "Task": None,
+                "Task Result": None,
+                "SLA": 1,
+                "Ticket Status": "Resolved",
+            }
+        ]
 
-        task_history_response = {
-                                    "request_id": uuid(),
-                                    "body": task_history,
-                                    "status": 200
-                                }
+        task_history_response = {"request_id": uuid(), "body": task_history, "status": 200}
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -361,14 +423,23 @@ class TestTNBAMonitor:
 
         t7_repository = Mock()
         t7_repository.tnba_note_in_task_history = Mock(return_value=True)
-        t7_repository.post_metrics = CoroutineMock(return_value=dict(body='', status=200))
+        t7_repository.post_metrics = CoroutineMock(return_value=dict(body="", status=200))
 
         redis_client = Mock()
         redis_client.get = Mock(return_value=None)
         redis_client.set = Mock()
 
-        tnba_feedback = TNBAFeedback(event_bus, logger, scheduler, config, t7_repository, customer_cache_repository,
-                                     bruin_repository, notifications_repository, redis_client)
+        tnba_feedback = TNBAFeedback(
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            t7_repository,
+            customer_cache_repository,
+            bruin_repository,
+            notifications_repository,
+            redis_client,
+        )
 
         await tnba_feedback._send_ticket_task_history_to_t7(ticket_id)
 
@@ -381,38 +452,36 @@ class TestTNBAMonitor:
     async def send_ticket_task_history_to_t7_ticket_already_sent_test(self):
         ticket_id = 123
 
-        task_history = [{
-                          "ClientName": "Le Duff Management ",
-                          "Ticket Entered Date": "202008242225",
-                          "EnteredDate": "2020-08-24T22:25:09.953-04:00",
-                          "CallTicketID": 4774915,
-                          "Initial Note @ Ticket Creation": "MetTel's IPA -- Service Outage Trouble",
-                          "DetailID": 5180688,
-                          "Product": "SD-WAN",
-                          "Asset": "VC05200030905",
-                          "Address1": "1320 W Campbell Rd",
-                          "Address2": None,
-                          "City": "Richardson",
-                          "State": "TX",
-                          "Zip": "75080-2814",
-                          "Site Name": "01106 Coit Campbell",
-                          "NoteType": "ADN",
-                          "Notes": "#*MetTel's IPA*#\nAI\n\n",
-                          "Note Entered Date": "202008251726",
-                          "EnteredDate_N": "2020-08-25T17:26:00.583-04:00",
-                          "Note Entered By": "Intelygenz Ai",
-                          "Task Assigned To": None,
-                          "Task": None,
-                          "Task Result": None,
-                          "SLA": 1,
-                          "Ticket Status": "Resolved"
-                        }]
+        task_history = [
+            {
+                "ClientName": "Le Duff Management ",
+                "Ticket Entered Date": "202008242225",
+                "EnteredDate": "2020-08-24T22:25:09.953-04:00",
+                "CallTicketID": 4774915,
+                "Initial Note @ Ticket Creation": "MetTel's IPA -- Service Outage Trouble",
+                "DetailID": 5180688,
+                "Product": "SD-WAN",
+                "Asset": "VC05200030905",
+                "Address1": "1320 W Campbell Rd",
+                "Address2": None,
+                "City": "Richardson",
+                "State": "TX",
+                "Zip": "75080-2814",
+                "Site Name": "01106 Coit Campbell",
+                "NoteType": "ADN",
+                "Notes": "#*MetTel's IPA*#\nAI\n\n",
+                "Note Entered Date": "202008251726",
+                "EnteredDate_N": "2020-08-25T17:26:00.583-04:00",
+                "Note Entered By": "Intelygenz Ai",
+                "Task Assigned To": None,
+                "Task": None,
+                "Task Result": None,
+                "SLA": 1,
+                "Ticket Status": "Resolved",
+            }
+        ]
 
-        task_history_response = {
-                                    "request_id": uuid(),
-                                    "body": task_history,
-                                    "status": 200
-                                }
+        task_history_response = {"request_id": uuid(), "body": task_history, "status": 200}
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -425,14 +494,23 @@ class TestTNBAMonitor:
 
         t7_repository = Mock()
         t7_repository.tnba_note_in_task_history = Mock(return_value=True)
-        t7_repository.post_metrics = CoroutineMock(return_value=dict(body='', status=200))
+        t7_repository.post_metrics = CoroutineMock(return_value=dict(body="", status=200))
 
         redis_client = Mock()
-        redis_client.get = Mock(return_value='')
+        redis_client.get = Mock(return_value="")
         redis_client.set = Mock()
 
-        tnba_feedback = TNBAFeedback(event_bus, logger, scheduler, config, t7_repository, customer_cache_repository,
-                                     bruin_repository, notifications_repository, redis_client)
+        tnba_feedback = TNBAFeedback(
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            t7_repository,
+            customer_cache_repository,
+            bruin_repository,
+            notifications_repository,
+            redis_client,
+        )
 
         await tnba_feedback._send_ticket_task_history_to_t7(ticket_id)
 
@@ -445,38 +523,36 @@ class TestTNBAMonitor:
     async def send_ticket_task_history_to_t7_non_2xx_post_metrics_status_test(self):
         ticket_id = 123
 
-        task_history = [{
-                          "ClientName": "Le Duff Management ",
-                          "Ticket Entered Date": "202008242225",
-                          "EnteredDate": "2020-08-24T22:25:09.953-04:00",
-                          "CallTicketID": 4774915,
-                          "Initial Note @ Ticket Creation": "MetTel's IPA -- Service Outage Trouble",
-                          "DetailID": 5180688,
-                          "Product": "SD-WAN",
-                          "Asset": "VC05200030905",
-                          "Address1": "1320 W Campbell Rd",
-                          "Address2": None,
-                          "City": "Richardson",
-                          "State": "TX",
-                          "Zip": "75080-2814",
-                          "Site Name": "01106 Coit Campbell",
-                          "NoteType": "ADN",
-                          "Notes": "#*MetTel's IPA*#\nAI\n\n",
-                          "Note Entered Date": "202008251726",
-                          "EnteredDate_N": "2020-08-25T17:26:00.583-04:00",
-                          "Note Entered By": "Intelygenz Ai",
-                          "Task Assigned To": None,
-                          "Task": None,
-                          "Task Result": None,
-                          "SLA": 1,
-                          "Ticket Status": "Resolved"
-                        }]
+        task_history = [
+            {
+                "ClientName": "Le Duff Management ",
+                "Ticket Entered Date": "202008242225",
+                "EnteredDate": "2020-08-24T22:25:09.953-04:00",
+                "CallTicketID": 4774915,
+                "Initial Note @ Ticket Creation": "MetTel's IPA -- Service Outage Trouble",
+                "DetailID": 5180688,
+                "Product": "SD-WAN",
+                "Asset": "VC05200030905",
+                "Address1": "1320 W Campbell Rd",
+                "Address2": None,
+                "City": "Richardson",
+                "State": "TX",
+                "Zip": "75080-2814",
+                "Site Name": "01106 Coit Campbell",
+                "NoteType": "ADN",
+                "Notes": "#*MetTel's IPA*#\nAI\n\n",
+                "Note Entered Date": "202008251726",
+                "EnteredDate_N": "2020-08-25T17:26:00.583-04:00",
+                "Note Entered By": "Intelygenz Ai",
+                "Task Assigned To": None,
+                "Task": None,
+                "Task Result": None,
+                "SLA": 1,
+                "Ticket Status": "Resolved",
+            }
+        ]
 
-        task_history_response = {
-                                    "request_id": uuid(),
-                                    "body": task_history,
-                                    "status": 200
-                                }
+        task_history_response = {"request_id": uuid(), "body": task_history, "status": 200}
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -489,14 +565,23 @@ class TestTNBAMonitor:
 
         t7_repository = Mock()
         t7_repository.tnba_note_in_task_history = Mock(return_value=True)
-        t7_repository.post_metrics = CoroutineMock(return_value=dict(body='', status=400))
+        t7_repository.post_metrics = CoroutineMock(return_value=dict(body="", status=400))
 
         redis_client = Mock()
         redis_client.get = Mock(return_value=None)
         redis_client.set = Mock()
 
-        tnba_feedback = TNBAFeedback(event_bus, logger, scheduler, config, t7_repository, customer_cache_repository,
-                                     bruin_repository, notifications_repository, redis_client)
+        tnba_feedback = TNBAFeedback(
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            t7_repository,
+            customer_cache_repository,
+            bruin_repository,
+            notifications_repository,
+            redis_client,
+        )
 
         await tnba_feedback._send_ticket_task_history_to_t7(ticket_id)
 
@@ -509,11 +594,7 @@ class TestTNBAMonitor:
     async def send_ticket_task_history_to_t7_task_history_return_non_2xx_test(self):
         ticket_id = 123
 
-        task_history_response = {
-                                    "request_id": uuid(),
-                                    "body": "Failed",
-                                    "status": 400
-                                }
+        task_history_response = {"request_id": uuid(), "body": "Failed", "status": 400}
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -530,8 +611,17 @@ class TestTNBAMonitor:
 
         redis_client = Mock()
 
-        tnba_feedback = TNBAFeedback(event_bus, logger, scheduler, config, t7_repository, customer_cache_repository,
-                                     bruin_repository, notifications_repository, redis_client)
+        tnba_feedback = TNBAFeedback(
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            t7_repository,
+            customer_cache_repository,
+            bruin_repository,
+            notifications_repository,
+            redis_client,
+        )
 
         await tnba_feedback._send_ticket_task_history_to_t7(ticket_id)
 
@@ -543,38 +633,36 @@ class TestTNBAMonitor:
     async def send_ticket_task_history_to_t7_no_tnba_note_test(self):
         ticket_id = 123
 
-        task_history = [{
-                          "ClientName": "Le Duff Management ",
-                          "Ticket Entered Date": "202008242225",
-                          "EnteredDate": "2020-08-24T22:25:09.953-04:00",
-                          "CallTicketID": 4774915,
-                          "Initial Note @ Ticket Creation": "MetTel's IPA -- Service Outage Trouble",
-                          "DetailID": 5180688,
-                          "Product": "SD-WAN",
-                          "Asset": "VC05200030905",
-                          "Address1": "1320 W Campbell Rd",
-                          "Address2": None,
-                          "City": "Richardson",
-                          "State": "TX",
-                          "Zip": "75080-2814",
-                          "Site Name": "01106 Coit Campbell",
-                          "NoteType": "ADN",
-                          "Notes": "#*MetTel's IPA*#\n",
-                          "Note Entered Date": "202008251726",
-                          "EnteredDate_N": "2020-08-25T17:26:00.583-04:00",
-                          "Note Entered By": "Intelygenz Ai",
-                          "Task Assigned To": None,
-                          "Task": None,
-                          "Task Result": None,
-                          "SLA": 1,
-                          "Ticket Status": "Resolved"
-                        }]
+        task_history = [
+            {
+                "ClientName": "Le Duff Management ",
+                "Ticket Entered Date": "202008242225",
+                "EnteredDate": "2020-08-24T22:25:09.953-04:00",
+                "CallTicketID": 4774915,
+                "Initial Note @ Ticket Creation": "MetTel's IPA -- Service Outage Trouble",
+                "DetailID": 5180688,
+                "Product": "SD-WAN",
+                "Asset": "VC05200030905",
+                "Address1": "1320 W Campbell Rd",
+                "Address2": None,
+                "City": "Richardson",
+                "State": "TX",
+                "Zip": "75080-2814",
+                "Site Name": "01106 Coit Campbell",
+                "NoteType": "ADN",
+                "Notes": "#*MetTel's IPA*#\n",
+                "Note Entered Date": "202008251726",
+                "EnteredDate_N": "2020-08-25T17:26:00.583-04:00",
+                "Note Entered By": "Intelygenz Ai",
+                "Task Assigned To": None,
+                "Task": None,
+                "Task Result": None,
+                "SLA": 1,
+                "Ticket Status": "Resolved",
+            }
+        ]
 
-        task_history_response = {
-                                    "request_id": uuid(),
-                                    "body": task_history,
-                                    "status": 200
-                                }
+        task_history_response = {"request_id": uuid(), "body": task_history, "status": 200}
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -591,8 +679,17 @@ class TestTNBAMonitor:
 
         redis_client = Mock()
 
-        tnba_feedback = TNBAFeedback(event_bus, logger, scheduler, config, t7_repository, customer_cache_repository,
-                                     bruin_repository, notifications_repository, redis_client)
+        tnba_feedback = TNBAFeedback(
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            t7_repository,
+            customer_cache_repository,
+            bruin_repository,
+            notifications_repository,
+            redis_client,
+        )
 
         await tnba_feedback._send_ticket_task_history_to_t7(ticket_id)
 
@@ -604,37 +701,35 @@ class TestTNBAMonitor:
     async def send_ticket_task_history_to_t7_no_assets_test(self):
         ticket_id = 123
 
-        task_history = [{
-                          "ClientName": "Le Duff Management ",
-                          "Ticket Entered Date": "202008242225",
-                          "EnteredDate": "2020-08-24T22:25:09.953-04:00",
-                          "CallTicketID": 4774915,
-                          "Initial Note @ Ticket Creation": "MetTel's IPA -- Service Outage Trouble",
-                          "DetailID": 5180688,
-                          "Product": "SD-WAN",
-                          "Address1": "1320 W Campbell Rd",
-                          "Address2": None,
-                          "City": "Richardson",
-                          "State": "TX",
-                          "Zip": "75080-2814",
-                          "Site Name": "01106 Coit Campbell",
-                          "NoteType": "ADN",
-                          "Notes": "#*MetTel's IPA*#\nAI\n\n",
-                          "Note Entered Date": "202008251726",
-                          "EnteredDate_N": "2020-08-25T17:26:00.583-04:00",
-                          "Note Entered By": "Intelygenz Ai",
-                          "Task Assigned To": None,
-                          "Task": None,
-                          "Task Result": None,
-                          "SLA": 1,
-                          "Ticket Status": "Resolved"
-                        }]
+        task_history = [
+            {
+                "ClientName": "Le Duff Management ",
+                "Ticket Entered Date": "202008242225",
+                "EnteredDate": "2020-08-24T22:25:09.953-04:00",
+                "CallTicketID": 4774915,
+                "Initial Note @ Ticket Creation": "MetTel's IPA -- Service Outage Trouble",
+                "DetailID": 5180688,
+                "Product": "SD-WAN",
+                "Address1": "1320 W Campbell Rd",
+                "Address2": None,
+                "City": "Richardson",
+                "State": "TX",
+                "Zip": "75080-2814",
+                "Site Name": "01106 Coit Campbell",
+                "NoteType": "ADN",
+                "Notes": "#*MetTel's IPA*#\nAI\n\n",
+                "Note Entered Date": "202008251726",
+                "EnteredDate_N": "2020-08-25T17:26:00.583-04:00",
+                "Note Entered By": "Intelygenz Ai",
+                "Task Assigned To": None,
+                "Task": None,
+                "Task Result": None,
+                "SLA": 1,
+                "Ticket Status": "Resolved",
+            }
+        ]
 
-        task_history_response = {
-                                    "request_id": uuid(),
-                                    "body": task_history,
-                                    "status": 200
-                                }
+        task_history_response = {"request_id": uuid(), "body": task_history, "status": 200}
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -652,8 +747,17 @@ class TestTNBAMonitor:
         redis_client.get = Mock(return_value=None)
         redis_client.set = Mock()
 
-        tnba_feedback = TNBAFeedback(event_bus, logger, scheduler, config, t7_repository, customer_cache_repository,
-                                     bruin_repository, notifications_repository, redis_client)
+        tnba_feedback = TNBAFeedback(
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            t7_repository,
+            customer_cache_repository,
+            bruin_repository,
+            notifications_repository,
+            redis_client,
+        )
 
         await tnba_feedback._send_ticket_task_history_to_t7(ticket_id)
 
@@ -680,8 +784,17 @@ class TestTNBAMonitor:
 
         redis_client = Mock()
 
-        tnba_feedback = TNBAFeedback(event_bus, logger, scheduler, config, t7_repository, customer_cache_repository,
-                                     bruin_repository, notifications_repository, redis_client)
+        tnba_feedback = TNBAFeedback(
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            t7_repository,
+            customer_cache_repository,
+            bruin_repository,
+            notifications_repository,
+            redis_client,
+        )
 
         await tnba_feedback._send_ticket_task_history_to_t7(ticket_id)
 

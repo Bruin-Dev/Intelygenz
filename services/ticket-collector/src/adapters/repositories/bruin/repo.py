@@ -1,5 +1,6 @@
 import base64
 import datetime
+
 import httpx
 
 
@@ -11,9 +12,7 @@ class BruinRepository:
         self.login()
 
     def get_headers(self):
-        return {
-            'Authorization': f'Bearer {self._token}'
-        }
+        return {"Authorization": f"Bearer {self._token}"}
 
     def login(self):
         login_credentials = f"{self._config['bruin']['id']}:{self._config['bruin']['secret']}"
@@ -21,25 +20,22 @@ class BruinRepository:
         login_credentials_b64 = base64.b64encode(login_credentials).decode()
 
         headers = {
-            'Authorization': f'Basic {login_credentials_b64}',
-            'Content-Type': 'application/x-www-form-urlencoded'
+            "Authorization": f"Basic {login_credentials_b64}",
+            "Content-Type": "application/x-www-form-urlencoded",
         }
 
-        form_data = {
-            'grant_type': 'client_credentials',
-            'scope': 'public_api'
-        }
+        form_data = {"grant_type": "client_credentials", "scope": "public_api"}
 
         try:
             response = httpx.post(
-                'https://id.bruin.com/identity/connect/token',
+                "https://id.bruin.com/identity/connect/token",
                 data=form_data,
                 headers=headers,
             )
-            self._token = response.json()['access_token']
-            self._logger.info('Logged into bruin!')
+            self._token = response.json()["access_token"]
+            self._logger.info("Logged into bruin!")
         except Exception as e:
-            self._logger.info(f'Failed to log into bruin. Error: {e}')
+            self._logger.info(f"Failed to log into bruin. Error: {e}")
 
     async def request_tickets_by_date_range(self, start: datetime, end: datetime) -> list:
         """
@@ -50,21 +46,21 @@ class BruinRepository:
         """
         async with httpx.AsyncClient() as client:
             try:
-                self._logger.info(f'Requesting bruin tickets between {start} and {end}')
+                self._logger.info(f"Requesting bruin tickets between {start} and {end}")
                 tickets = []
 
                 params = {
-                    'StartDate': start,
-                    'EndDate': end,
-                    'TicketTopic': 'VOO',
-                    'PageSize': 100,
-                    'PageNumber': 1,
+                    "StartDate": start,
+                    "EndDate": end,
+                    "TicketTopic": "VOO",
+                    "PageSize": 100,
+                    "PageNumber": 1,
                 }
 
                 remaining_items = None
                 while remaining_items is None or remaining_items > 0:
                     tickets_response = await client.get(
-                        'https://api.bruin.com/api/Ticket/basic',
+                        "https://api.bruin.com/api/Ticket/basic",
                         params=params,
                         headers=self.get_headers(),
                         timeout=90,
@@ -72,29 +68,31 @@ class BruinRepository:
 
                     if tickets_response.status_code in range(200, 300):
                         response_json = tickets_response.json()
-                        tickets += response_json['responses']
+                        tickets += response_json["responses"]
 
                         if remaining_items is None:
-                            remaining_items = int(response_json['total'])
+                            remaining_items = int(response_json["total"])
 
-                        remaining_items -= len(response_json['responses'])
+                        remaining_items -= len(response_json["responses"])
                         if remaining_items <= 0:
                             break
 
-                        params['PageNumber'] += 1
+                        params["PageNumber"] += 1
                     elif tickets_response.status_code == 401:
-                        self._logger.warning('Bruin token expired, re-logging in...')
+                        self._logger.warning("Bruin token expired, re-logging in...")
                         self.login()
                         continue
                     else:
-                        self._logger.error(f'Failed to get bruin tickets between {start} and {end}. '
-                                           f'Status code: {tickets_response.status_code}')
+                        self._logger.error(
+                            f"Failed to get bruin tickets between {start} and {end}. "
+                            f"Status code: {tickets_response.status_code}"
+                        )
                         return []
 
-                self._logger.info(f'Got {len(tickets)} bruin tickets between {start} and {end}')
+                self._logger.info(f"Got {len(tickets)} bruin tickets between {start} and {end}")
                 return tickets
             except Exception as e:
-                self._logger.error(f'Failed to get bruin tickets between {start} and {end}. Error: {e}')
+                self._logger.error(f"Failed to get bruin tickets between {start} and {end}. Error: {e}")
                 return []
 
     async def request_ticket_events(self, ticket_id: str) -> list:
@@ -105,31 +103,33 @@ class BruinRepository:
         """
         async with httpx.AsyncClient() as client:
             try:
-                self._logger.info(f'Requesting bruin ticket events for ticket {ticket_id}')
+                self._logger.info(f"Requesting bruin ticket events for ticket {ticket_id}")
 
                 params = {
-                    'ticketId': ticket_id,
+                    "ticketId": ticket_id,
                 }
 
                 ticket_events_response = await client.get(
-                    'https://api.bruin.com/api/Ticket/AITicketData',
+                    "https://api.bruin.com/api/Ticket/AITicketData",
                     params=params,
                     headers=self.get_headers(),
                     timeout=90,
                 )
 
                 if ticket_events_response.status_code in range(200, 300):
-                    ticket_events = ticket_events_response.json()['result']
-                    self._logger.info(f'Got {len(ticket_events)} bruin ticket events for ticket {ticket_id}')
+                    ticket_events = ticket_events_response.json()["result"]
+                    self._logger.info(f"Got {len(ticket_events)} bruin ticket events for ticket {ticket_id}")
                     return ticket_events
                 elif ticket_events_response.status_code == 401:
-                    self._logger.warning('Bruin token expired, re-logging in...')
+                    self._logger.warning("Bruin token expired, re-logging in...")
                     self.login()
                     return await self.request_ticket_events(ticket_id)
                 else:
-                    self._logger.error(f'Failed to get bruin ticket events for ticket {ticket_id}. '
-                                       f'Status code: {ticket_events_response.status_code}')
+                    self._logger.error(
+                        f"Failed to get bruin ticket events for ticket {ticket_id}. "
+                        f"Status code: {ticket_events_response.status_code}"
+                    )
                     return []
             except Exception as e:
-                self._logger.error(f'Failed to get bruin ticket events for ticket {ticket_id}. Error: {e}')
+                self._logger.error(f"Failed to get bruin ticket events for ticket {ticket_id}. Error: {e}")
                 return []

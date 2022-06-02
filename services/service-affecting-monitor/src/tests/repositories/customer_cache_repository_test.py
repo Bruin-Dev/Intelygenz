@@ -1,15 +1,14 @@
 from unittest.mock import patch
 
 import pytest
-from asynctest import CoroutineMock
-from shortuuid import uuid
-
 from application.repositories import customer_cache_repository as customer_cache_repository_module
 from application.repositories import nats_error_response
+from asynctest import CoroutineMock
 from config import testconfig
+from shortuuid import uuid
 
 uuid_ = uuid()
-uuid_mock = patch.object(customer_cache_repository_module, 'uuid', return_value=uuid_)
+uuid_mock = patch.object(customer_cache_repository_module, "uuid", return_value=uuid_)
 
 
 class TestCustomerCacheRepository:
@@ -21,8 +20,13 @@ class TestCustomerCacheRepository:
 
     @pytest.mark.asyncio
     async def get_cache__no_filter_specified_test(
-            self, customer_cache_repository, make_cached_edge, make_customer_cache, make_get_cache_request,
-            make_rpc_response):
+        self,
+        customer_cache_repository,
+        make_cached_edge,
+        make_customer_cache,
+        make_get_cache_request,
+        make_rpc_response,
+    ):
         edge_1_cache_info = make_cached_edge()
         edge_2_cache_info = make_cached_edge()
         customer_cache = make_customer_cache(edge_1_cache_info, edge_2_cache_info)
@@ -46,9 +50,14 @@ class TestCustomerCacheRepository:
 
     @pytest.mark.asyncio
     async def get_cache__filter_specified_test(
-            self, customer_cache_repository, make_cached_edge, make_customer_cache, make_get_cache_request,
-            make_rpc_response):
-        filter_ = {'mettel.velocloud.net': []}
+        self,
+        customer_cache_repository,
+        make_cached_edge,
+        make_customer_cache,
+        make_get_cache_request,
+        make_rpc_response,
+    ):
+        filter_ = {"mettel.velocloud.net": []}
 
         edge_1_cache_info = make_cached_edge()
         edge_2_cache_info = make_cached_edge()
@@ -75,8 +84,7 @@ class TestCustomerCacheRepository:
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_cache__rpc_request_failing_test(
-            self, customer_cache_repository, make_get_cache_request):
+    async def get_cache__rpc_request_failing_test(self, customer_cache_repository, make_get_cache_request):
         request = make_get_cache_request(request_id=uuid_)
 
         customer_cache_repository._event_bus.rpc_request.side_effect = Exception
@@ -94,7 +102,8 @@ class TestCustomerCacheRepository:
 
     @pytest.mark.asyncio
     async def get_cache__rpc_request_has_202_status_test(
-            self, customer_cache_repository, make_get_cache_request, get_customer_cache_202_response):
+        self, customer_cache_repository, make_get_cache_request, get_customer_cache_202_response
+    ):
         request = make_get_cache_request(request_id=uuid_)
 
         customer_cache_repository._event_bus.rpc_request.return_value = get_customer_cache_202_response
@@ -129,12 +138,12 @@ class TestCustomerCacheRepository:
         }
 
         custom_monitor_config = customer_cache_repository._config.MONITOR_CONFIG.copy()
-        custom_monitor_config['velo_filter'] = filter_
+        custom_monitor_config["velo_filter"] = filter_
         with patch.dict(customer_cache_repository._config.MONITOR_CONFIG, custom_monitor_config):
             await customer_cache_repository.get_cache_for_affecting_monitoring()
 
         # This snippet makes sure that the enterprises filter is the same for each velocloud host, regardless of the
         # order in which they appear in both lists
         call_args, call_kwargs = customer_cache_repository.get_cache.await_args
-        for velocloud_host, enterprises in call_kwargs['velo_filter'].items():
+        for velocloud_host, enterprises in call_kwargs["velo_filter"].items():
             assert set(enterprises) == set(filter_[velocloud_host])

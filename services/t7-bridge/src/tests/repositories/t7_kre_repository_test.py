@@ -26,7 +26,7 @@ class TestT7KRERepository:
             "Task Result": None,
             "Ticket Status": "Closed",
             "Address1": "address 2",
-        }
+        },
     ]
 
     expected_ticket_rows = [
@@ -49,7 +49,7 @@ class TestT7KRERepository:
             "task_result": None,
             "ticket_status": "Closed",
             "address1": "address 2",
-        }
+        },
     ]
 
     def instance_test(self):
@@ -68,15 +68,12 @@ class TestT7KRERepository:
                     {
                         "asset": "some_serial_number",
                         "task_results": [
-                            {
-                                "name": "Some action",
-                                "probability": 0.9484384655952454
-                            },
-                        ]
+                            {"name": "Some action", "probability": 0.9484384655952454},
+                        ],
                     }
                 ]
             },
-            "status": 200
+            "status": 200,
         }
 
         expected_predictions = {
@@ -84,14 +81,11 @@ class TestT7KRERepository:
                 {
                     "assetId": "some_serial_number",
                     "predictions": [
-                        {
-                            "name": "Some action",
-                            "probability": 0.9484384655952454
-                        },
-                    ]
+                        {"name": "Some action", "probability": 0.9484384655952454},
+                    ],
                 }
             ],
-            "status": 200
+            "status": 200,
         }
 
         logger = Mock()
@@ -103,7 +97,7 @@ class TestT7KRERepository:
         predictions = t7_kre_repository.get_prediction(
             ticket_id=self.valid_ticket_id,
             ticket_rows=self.valid_ticket_rows,
-            assets_to_predict=self.valid_assets_to_predict
+            assets_to_predict=self.valid_assets_to_predict,
         )
 
         t7_kre_repository._t7_kre_client.get_prediction.assert_called_once_with(
@@ -112,10 +106,7 @@ class TestT7KRERepository:
         assert predictions == expected_predictions
 
     def get_prediction_not_200_from_client_test(self):
-        expected_response = {
-            "body": "Error from get_prediction client",
-            "status": 500
-        }
+        expected_response = {"body": "Error from get_prediction client", "status": 500}
 
         logger = Mock()
 
@@ -126,7 +117,7 @@ class TestT7KRERepository:
         response = t7_kre_repository.get_prediction(
             ticket_id=self.valid_ticket_id,
             ticket_rows=self.valid_ticket_rows,
-            assets_to_predict=self.valid_assets_to_predict
+            assets_to_predict=self.valid_assets_to_predict,
         )
 
         t7_kre_repository._t7_kre_client.get_prediction.assert_called_once_with(
@@ -164,9 +155,7 @@ class TestT7KRERepository:
         t7_kre_repository = T7KRERepository(logger, t7_kre_client)
 
         post_automation_metrics = t7_kre_repository.post_live_automation_metrics(
-            ticket_id=valid_ticket_id,
-            asset_id=valid_asset_id,
-            automated_successfully=automated_successfully
+            ticket_id=valid_ticket_id, asset_id=valid_asset_id, automated_successfully=automated_successfully
         )
         t7_kre_repository._t7_kre_client.post_live_automation_metrics.assert_called_once_with(
             valid_ticket_id, valid_asset_id, automated_successfully

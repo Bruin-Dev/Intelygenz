@@ -1,26 +1,33 @@
-from datetime import datetime
-from datetime import timedelta
-from unittest.mock import Mock
-from unittest.mock import call
-from unittest.mock import patch
+from datetime import datetime, timedelta
+from unittest.mock import Mock, call, patch
 
 import pytest
-
+from application.actions import tnba_monitor as tnba_monitor_module
+from application.actions.tnba_monitor import TNBAMonitor
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
+from config import testconfig
 from dateutil.parser import parse
 from pytz import utc
 
-from application.actions.tnba_monitor import TNBAMonitor
-from application.actions import tnba_monitor as tnba_monitor_module
-from config import testconfig
-
 
 class TestTNBAMonitor:
-
-    def instance_test(self, tnba_monitor, event_bus, logger, scheduler, metrics_repository, t7_repository,
-                      customer_cache_repository, bruin_repository, velocloud_repository, ticket_repository,
-                      prediction_repository, notifications_repository, utils_repository):
+    def instance_test(
+        self,
+        tnba_monitor,
+        event_bus,
+        logger,
+        scheduler,
+        metrics_repository,
+        t7_repository,
+        customer_cache_repository,
+        bruin_repository,
+        velocloud_repository,
+        ticket_repository,
+        prediction_repository,
+        notifications_repository,
+        utils_repository,
+    ):
         assert tnba_monitor._event_bus is event_bus
         assert tnba_monitor._logger is logger
         assert tnba_monitor._scheduler is scheduler
@@ -44,16 +51,17 @@ class TestTNBAMonitor:
         next_run_time = datetime.now()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
-        with patch.object(tnba_monitor_module, 'datetime', new=datetime_mock):
-            with patch.object(tnba_monitor_module, 'timezone', new=Mock()):
+        with patch.object(tnba_monitor_module, "datetime", new=datetime_mock):
+            with patch.object(tnba_monitor_module, "timezone", new=Mock()):
                 await tnba_monitor.start_tnba_automated_process(exec_on_start=True)
 
         tnba_monitor._scheduler.add_job.assert_called_once_with(
-            tnba_monitor._run_tickets_polling, 'interval',
-            seconds=testconfig.MONITOR_CONFIG['monitoring_interval_seconds'],
+            tnba_monitor._run_tickets_polling,
+            "interval",
+            seconds=testconfig.MONITOR_CONFIG["monitoring_interval_seconds"],
             next_run_time=next_run_time,
             replace_existing=False,
-            id='_run_tickets_polling',
+            id="_run_tickets_polling",
         )
 
     @pytest.mark.asyncio
@@ -61,18 +69,18 @@ class TestTNBAMonitor:
         await tnba_monitor.start_tnba_automated_process(exec_on_start=False)
 
         tnba_monitor._scheduler.add_job.assert_called_once_with(
-            tnba_monitor._run_tickets_polling, 'interval',
-            seconds=testconfig.MONITOR_CONFIG['monitoring_interval_seconds'],
+            tnba_monitor._run_tickets_polling,
+            "interval",
+            seconds=testconfig.MONITOR_CONFIG["monitoring_interval_seconds"],
             next_run_time=undefined,
             replace_existing=False,
-            id='_run_tickets_polling',
+            id="_run_tickets_polling",
         )
 
     @pytest.mark.asyncio
-    async def run_tickets_polling_with_get_cache_request_having_202_status_test(self, tnba_monitor,
-                                                                                make_rpc_response):
+    async def run_tickets_polling_with_get_cache_request_having_202_status_test(self, tnba_monitor, make_rpc_response):
         get_cache_response = make_rpc_response(
-            body='Cache is still being built for host(s): mettel_velocloud.net, metvco03.mettel.net',
+            body="Cache is still being built for host(s): mettel_velocloud.net, metvco03.mettel.net",
             status=202,
         )
 
@@ -86,9 +94,10 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def run_tickets_polling_with_get_cache_request_having_non_2xx_status_and_different_from_202_test(
-            self, tnba_monitor, make_rpc_response):
+        self, tnba_monitor, make_rpc_response
+    ):
         get_cache_response = make_rpc_response(
-            body='No edges were found for the specified filters',
+            body="No edges were found for the specified filters",
             status=404,
         )
 
@@ -101,8 +110,9 @@ class TestTNBAMonitor:
         assert tnba_monitor._customer_cache_by_serial == {}
 
     @pytest.mark.asyncio
-    async def run_tickets_polling_with_empty_list_of_edges_statuses_test(self, tnba_monitor, make_rpc_response,
-                                                                         edge_cached_info_1, edge_cached_info_2):
+    async def run_tickets_polling_with_empty_list_of_edges_statuses_test(
+        self, tnba_monitor, make_rpc_response, edge_cached_info_1, edge_cached_info_2
+    ):
         customer_cache = [
             edge_cached_info_1,
             edge_cached_info_2,
@@ -129,8 +139,15 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def run_tickets_polling_no_link_metrics_test(
-            self, tnba_monitor, make_edge_with_links_info, make_rpc_response, edge_cached_info_1, edge_cached_info_2,
-            edge_1_connected, link_1_stable):
+        self,
+        tnba_monitor,
+        make_edge_with_links_info,
+        make_rpc_response,
+        edge_cached_info_1,
+        edge_cached_info_2,
+        edge_1_connected,
+        link_1_stable,
+    ):
         customer_cache = [
             edge_cached_info_1,
             edge_cached_info_2,
@@ -147,17 +164,14 @@ class TestTNBAMonitor:
 
         link_metrics = []
 
-        link_metrics_return = {
-            'body': link_metrics,
-            'status': 200
-        }
+        link_metrics_return = {"body": link_metrics, "status": 200}
         tnba_monitor._customer_cache_repository.get_cache_for_tnba_monitoring.return_value = get_cache_response
         tnba_monitor._velocloud_repository.get_edges_for_tnba_monitoring.return_value = edges_statuses
         tnba_monitor._velocloud_repository.get_links_metrics_for_autoresolve.return_value = link_metrics_return
 
-        tnba_monitor._filter_edges_in_customer_cache_and_edges_statuses = Mock(return_value=(
-            customer_cache, edges_statuses
-        ))
+        tnba_monitor._filter_edges_in_customer_cache_and_edges_statuses = Mock(
+            return_value=(customer_cache, edges_statuses)
+        )
         tnba_monitor._filter_tickets_and_details_related_to_edges_under_monitoring.return_value = []
         tnba_monitor._map_ticket_details_with_predictions.return_value = []
 
@@ -179,8 +193,17 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def run_tickets_polling_with_customer_cache_ready_and_edge_statuses_received_and_no_notes_to_append_test(
-            self, tnba_monitor, make_edge_with_links_info, make_rpc_response, edge_cached_info_1, edge_cached_info_2,
-            edge_1_connected, link_1_stable, make_metrics, make_events_by_serial_and_interface):
+        self,
+        tnba_monitor,
+        make_edge_with_links_info,
+        make_rpc_response,
+        edge_cached_info_1,
+        edge_cached_info_2,
+        edge_1_connected,
+        link_1_stable,
+        make_metrics,
+        make_events_by_serial_and_interface,
+    ):
         customer_cache = [
             edge_cached_info_1,
             edge_cached_info_2,
@@ -196,24 +219,19 @@ class TestTNBAMonitor:
         ]
         link_metrics = make_metrics()
 
-        link_metrics_return = {
-            'body': link_metrics,
-            'status': 200
-        }
+        link_metrics_return = {"body": link_metrics, "status": 200}
         events_return = make_events_by_serial_and_interface()
 
-        link_and_event_metrics = {
-            'some.serial': [{'link_metrics': link_metrics, 'link_events': []}]
-        }
+        link_and_event_metrics = {"some.serial": [{"link_metrics": link_metrics, "link_events": []}]}
 
         tnba_monitor._customer_cache_repository.get_cache_for_tnba_monitoring.return_value = get_cache_response
         tnba_monitor._velocloud_repository.get_edges_for_tnba_monitoring.return_value = edges_statuses
         tnba_monitor._velocloud_repository.get_links_metrics_for_autoresolve.return_value = link_metrics_return
         tnba_monitor._velocloud_repository.get_events_by_serial_and_interface.return_value = events_return
         tnba_monitor._velocloud_repository._structure_link_and_event_metrics.return_value = link_and_event_metrics
-        tnba_monitor._filter_edges_in_customer_cache_and_edges_statuses = Mock(return_value=(
-            customer_cache, edges_statuses
-        ))
+        tnba_monitor._filter_edges_in_customer_cache_and_edges_statuses = Mock(
+            return_value=(customer_cache, edges_statuses)
+        )
         tnba_monitor._filter_tickets_and_details_related_to_edges_under_monitoring.return_value = []
         tnba_monitor._map_ticket_details_with_predictions.return_value = []
 
@@ -234,9 +252,19 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def run_tickets_polling_with_customer_cache_ready_and_edge_statuses_received_and_notes_to_append_test(
-            self, tnba_monitor, make_edge_with_links_info, make_detail_object_with_predictions,
-            make_payload_for_note_append_with_ticket_id, make_rpc_response, edge_cached_info_1, edge_cached_info_2,
-            edge_1_connected, link_1_stable, make_metrics, make_events_by_serial_and_interface):
+        self,
+        tnba_monitor,
+        make_edge_with_links_info,
+        make_detail_object_with_predictions,
+        make_payload_for_note_append_with_ticket_id,
+        make_rpc_response,
+        edge_cached_info_1,
+        edge_cached_info_2,
+        edge_1_connected,
+        link_1_stable,
+        make_metrics,
+        make_events_by_serial_and_interface,
+    ):
         customer_cache = [
             edge_cached_info_1,
             edge_cached_info_2,
@@ -253,24 +281,19 @@ class TestTNBAMonitor:
 
         link_metrics = make_metrics()
 
-        link_metrics_return = {
-            'body': link_metrics,
-            'status': 200
-        }
+        link_metrics_return = {"body": link_metrics, "status": 200}
         events_return = make_events_by_serial_and_interface()
 
-        link_and_event_metrics = {
-            'some.serial': [{'link_metrics': link_metrics, 'link_events': []}]
-        }
+        link_and_event_metrics = {"some.serial": [{"link_metrics": link_metrics, "link_events": []}]}
 
         tnba_monitor._customer_cache_repository.get_cache_for_tnba_monitoring.return_value = get_cache_response
         tnba_monitor._velocloud_repository.get_edges_for_tnba_monitoring.return_value = edges_statuses
         tnba_monitor._velocloud_repository.get_links_metrics_for_autoresolve.return_value = link_metrics_return
         tnba_monitor._velocloud_repository.get_events_by_serial_and_interface.return_value = events_return
         tnba_monitor._velocloud_repository._structure_link_and_event_metrics.return_value = link_and_event_metrics
-        tnba_monitor._filter_edges_in_customer_cache_and_edges_statuses = Mock(return_value=(
-            customer_cache, edges_statuses
-        ))
+        tnba_monitor._filter_edges_in_customer_cache_and_edges_statuses = Mock(
+            return_value=(customer_cache, edges_statuses)
+        )
         tnba_monitor._filter_tickets_and_details_related_to_edges_under_monitoring.return_value = []
 
         # Skip most of the logic, since the relevant part is to check if TNBA notes are appended or not
@@ -287,8 +310,8 @@ class TestTNBAMonitor:
         detail_object = make_detail_object_with_predictions()
         tnba_monitor._map_ticket_details_with_predictions.return_value = [detail_object]
 
-        tnba_note_1 = make_payload_for_note_append_with_ticket_id(ticket_id=1, text='This is TNBA note #1')
-        tnba_note_2 = make_payload_for_note_append_with_ticket_id(ticket_id=2, text='This is TNBA note #2')
+        tnba_note_1 = make_payload_for_note_append_with_ticket_id(ticket_id=1, text="This is TNBA note #1")
+        tnba_note_2 = make_payload_for_note_append_with_ticket_id(ticket_id=2, text="This is TNBA note #2")
         tnba_notes = [
             tnba_note_1,
             tnba_note_2,
@@ -304,8 +327,9 @@ class TestTNBAMonitor:
 
         tnba_monitor._append_tnba_notes.assert_awaited_once()
 
-    def filter_edges_in_customer_cache_and_edges_statuses_test(self, make_edge_with_links_info, edge_cached_info_1,
-                                                               edge_cached_info_2, edge_1_connected, link_1_stable):
+    def filter_edges_in_customer_cache_and_edges_statuses_test(
+        self, make_edge_with_links_info, edge_cached_info_1, edge_cached_info_2, edge_1_connected, link_1_stable
+    ):
         customer_cache = [
             edge_cached_info_1,
             edge_cached_info_2,
@@ -316,16 +340,18 @@ class TestTNBAMonitor:
             edge_1_with_links_info,
         ]
 
-        filtered_customer_cache, filtered_edges_statuses = \
-            TNBAMonitor._filter_edges_in_customer_cache_and_edges_statuses(customer_cache, edges_statuses)
+        (
+            filtered_customer_cache,
+            filtered_edges_statuses,
+        ) = TNBAMonitor._filter_edges_in_customer_cache_and_edges_statuses(customer_cache, edges_statuses)
 
         assert filtered_customer_cache == [edge_cached_info_1]
         assert filtered_edges_statuses == [edge_1_with_links_info]
 
     @pytest.mark.asyncio
-    async def get_open_tickets_with_details_for_monitored_companies_test(self, tnba_monitor, edge_cached_info_1,
-                                                                         edge_cached_info_2, serial_number_1,
-                                                                         serial_number_2):
+    async def get_open_tickets_with_details_for_monitored_companies_test(
+        self, tnba_monitor, edge_cached_info_1, edge_cached_info_2, serial_number_1, serial_number_2
+    ):
         customer_cache_by_serial = {
             serial_number_1: edge_cached_info_1,
             serial_number_2: edge_cached_info_2,
@@ -336,19 +362,26 @@ class TestTNBAMonitor:
         await tnba_monitor._get_all_open_tickets_with_details_for_monitored_companies()
 
         bruin_client_ids = set(
-            cached_info['bruin_client_info']['client_id']
-            for cached_info in customer_cache_by_serial.values()
+            cached_info["bruin_client_info"]["client_id"] for cached_info in customer_cache_by_serial.values()
         )
         initial_tickets = []
         for client_id in bruin_client_ids:
             tnba_monitor._get_open_tickets_with_details_by_client_id.assert_any_await(client_id, initial_tickets)
 
     @pytest.mark.asyncio
-    async def get_open_tickets_with_details_by_client_id_test(self, tnba_monitor, make_in_progress_ticket_detail,
-                                                              make_details_of_ticket, make_ticket_object,
-                                                              make_rpc_response, open_affecting_ticket,
-                                                              open_outage_ticket, serial_number_1, serial_number_2,
-                                                              bruin_client_id):
+    async def get_open_tickets_with_details_by_client_id_test(
+        self,
+        tnba_monitor,
+        make_in_progress_ticket_detail,
+        make_details_of_ticket,
+        make_ticket_object,
+        make_rpc_response,
+        open_affecting_ticket,
+        open_outage_ticket,
+        serial_number_1,
+        serial_number_2,
+        bruin_client_id,
+    ):
         outage_tickets = [
             open_outage_ticket,
         ]
@@ -385,27 +418,27 @@ class TestTNBAMonitor:
         await tnba_monitor._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
 
         tnba_monitor._bruin_repository.get_open_outage_tickets.assert_awaited_once_with(bruin_client_id)
-        tnba_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(open_outage_ticket['ticketID']), call(open_affecting_ticket['ticketID'])
-        ], any_order=True)
+        tnba_monitor._bruin_repository.get_ticket_details.assert_has_awaits(
+            [call(open_outage_ticket["ticketID"]), call(open_affecting_ticket["ticketID"])], any_order=True
+        )
 
         expected_outage_ticket_object = make_ticket_object(
             client_id=bruin_client_id,
-            ticket_id=open_outage_ticket['ticketID'],
-            ticket_creation_date=open_outage_ticket['createDate'],
-            ticket_topic=open_outage_ticket['category'],
-            ticket_severity=open_outage_ticket['severity'],
-            ticket_creator=open_outage_ticket['createdBy'],
+            ticket_id=open_outage_ticket["ticketID"],
+            ticket_creation_date=open_outage_ticket["createDate"],
+            ticket_topic=open_outage_ticket["category"],
+            ticket_severity=open_outage_ticket["severity"],
+            ticket_creator=open_outage_ticket["createdBy"],
             ticket_details=[outage_ticket_1_detail_1],
             ticket_notes=[],
         )
         expected_affecting_ticket_object = make_ticket_object(
             client_id=bruin_client_id,
-            ticket_id=open_affecting_ticket['ticketID'],
-            ticket_creation_date=open_affecting_ticket['createDate'],
-            ticket_topic=open_affecting_ticket['category'],
-            ticket_severity=open_affecting_ticket['severity'],
-            ticket_creator=open_affecting_ticket['createdBy'],
+            ticket_id=open_affecting_ticket["ticketID"],
+            ticket_creation_date=open_affecting_ticket["createDate"],
+            ticket_topic=open_affecting_ticket["category"],
+            ticket_severity=open_affecting_ticket["severity"],
+            ticket_creator=open_affecting_ticket["createdBy"],
             ticket_details=[affecting_ticket_1_detail_1],
             ticket_notes=[],
         )
@@ -417,8 +450,16 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def get_open_tickets_with_details_by_client_id_with_open_outage_tickets_request_not_having_2xx_status_test(
-            self, tnba_monitor, make_in_progress_ticket_detail, make_details_of_ticket, make_ticket_object,
-            make_rpc_response, open_affecting_ticket, serial_number_1, bruin_client_id):
+        self,
+        tnba_monitor,
+        make_in_progress_ticket_detail,
+        make_details_of_ticket,
+        make_ticket_object,
+        make_rpc_response,
+        open_affecting_ticket,
+        serial_number_1,
+        bruin_client_id,
+    ):
         affecting_tickets = [
             open_affecting_ticket,
         ]
@@ -430,7 +471,7 @@ class TestTNBAMonitor:
         )
 
         get_open_outage_tickets_response = make_rpc_response(
-            body='Got internal error from Bruin',
+            body="Got internal error from Bruin",
             status=500,
         )
         get_open_affecting_tickets_response = make_rpc_response(body=affecting_tickets, status=200)
@@ -447,15 +488,15 @@ class TestTNBAMonitor:
         await tnba_monitor._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
 
         tnba_monitor._bruin_repository.get_open_outage_tickets.assert_awaited_once_with(bruin_client_id)
-        tnba_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(open_affecting_ticket['ticketID'])
+        tnba_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(open_affecting_ticket["ticketID"])
 
         expected_affecting_ticket_object = make_ticket_object(
             client_id=bruin_client_id,
-            ticket_id=open_affecting_ticket['ticketID'],
-            ticket_creation_date=open_affecting_ticket['createDate'],
-            ticket_topic=open_affecting_ticket['category'],
-            ticket_severity=open_affecting_ticket['severity'],
-            ticket_creator=open_affecting_ticket['createdBy'],
+            ticket_id=open_affecting_ticket["ticketID"],
+            ticket_creation_date=open_affecting_ticket["createDate"],
+            ticket_topic=open_affecting_ticket["category"],
+            ticket_severity=open_affecting_ticket["severity"],
+            ticket_creator=open_affecting_ticket["createdBy"],
             ticket_details=[affecting_ticket_1_detail_1],
             ticket_notes=[],
         )
@@ -466,8 +507,16 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def get_open_tickets_with_details_by_client_id_with_open_affecting_tickets_request_not_having_2xx_status_test(
-            self, tnba_monitor, make_in_progress_ticket_detail, make_details_of_ticket, make_ticket_object,
-            make_rpc_response, open_outage_ticket, serial_number_1, bruin_client_id):
+        self,
+        tnba_monitor,
+        make_in_progress_ticket_detail,
+        make_details_of_ticket,
+        make_ticket_object,
+        make_rpc_response,
+        open_outage_ticket,
+        serial_number_1,
+        bruin_client_id,
+    ):
         outage_tickets = [
             open_outage_ticket,
         ]
@@ -480,7 +529,7 @@ class TestTNBAMonitor:
 
         get_open_outage_tickets_response = make_rpc_response(body=outage_tickets, status=200)
         get_open_affecting_tickets_response = make_rpc_response(
-            body='Got internal error from Bruin',
+            body="Got internal error from Bruin",
             status=500,
         )
 
@@ -496,15 +545,15 @@ class TestTNBAMonitor:
         await tnba_monitor._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
 
         tnba_monitor._bruin_repository.get_open_outage_tickets.assert_awaited_once_with(bruin_client_id)
-        tnba_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(open_outage_ticket['ticketID'])
+        tnba_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(open_outage_ticket["ticketID"])
 
         expected_affecting_ticket_object = make_ticket_object(
             client_id=bruin_client_id,
-            ticket_id=open_outage_ticket['ticketID'],
-            ticket_creation_date=open_outage_ticket['createDate'],
-            ticket_topic=open_outage_ticket['category'],
-            ticket_severity=open_outage_ticket['severity'],
-            ticket_creator=open_outage_ticket['createdBy'],
+            ticket_id=open_outage_ticket["ticketID"],
+            ticket_creation_date=open_outage_ticket["createDate"],
+            ticket_topic=open_outage_ticket["category"],
+            ticket_severity=open_outage_ticket["severity"],
+            ticket_creator=open_outage_ticket["createdBy"],
             ticket_details=[outage_ticket_1_detail_1],
             ticket_notes=[],
         )
@@ -515,8 +564,17 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def get_open_tickets_with_details_by_client_id_with_ticket_details_request_not_having_2xx_status_test(
-            self, tnba_monitor, make_in_progress_ticket_detail, make_details_of_ticket, make_ticket_object,
-            make_rpc_response, open_affecting_ticket, open_outage_ticket, serial_number_1, bruin_client_id):
+        self,
+        tnba_monitor,
+        make_in_progress_ticket_detail,
+        make_details_of_ticket,
+        make_ticket_object,
+        make_rpc_response,
+        open_affecting_ticket,
+        open_outage_ticket,
+        serial_number_1,
+        bruin_client_id,
+    ):
         outage_tickets = [
             open_outage_ticket,
         ]
@@ -534,7 +592,7 @@ class TestTNBAMonitor:
         get_open_affecting_tickets_response = make_rpc_response(body=affecting_tickets, status=200)
 
         get_ticket_1_details_response = make_rpc_response(
-            body='Got internal error from Bruin',
+            body="Got internal error from Bruin",
             status=500,
         )
         get_ticket_2_details_response = make_rpc_response(body=affecting_ticket_1_details, status=200)
@@ -550,17 +608,17 @@ class TestTNBAMonitor:
         await tnba_monitor._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
 
         tnba_monitor._bruin_repository.get_open_outage_tickets.assert_awaited_once_with(bruin_client_id)
-        tnba_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(open_outage_ticket['ticketID']), call(open_affecting_ticket['ticketID'])
-        ], any_order=True)
+        tnba_monitor._bruin_repository.get_ticket_details.assert_has_awaits(
+            [call(open_outage_ticket["ticketID"]), call(open_affecting_ticket["ticketID"])], any_order=True
+        )
 
         expected_affecting_ticket_object = make_ticket_object(
             client_id=bruin_client_id,
-            ticket_id=open_affecting_ticket['ticketID'],
-            ticket_creation_date=open_affecting_ticket['createDate'],
-            ticket_topic=open_affecting_ticket['category'],
-            ticket_severity=open_affecting_ticket['severity'],
-            ticket_creator=open_affecting_ticket['createdBy'],
+            ticket_id=open_affecting_ticket["ticketID"],
+            ticket_creation_date=open_affecting_ticket["createDate"],
+            ticket_topic=open_affecting_ticket["category"],
+            ticket_severity=open_affecting_ticket["severity"],
+            ticket_creator=open_affecting_ticket["createdBy"],
             ticket_details=[affecting_ticket_1_detail_1],
             ticket_notes=[],
         )
@@ -571,8 +629,17 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def get_open_tickets_with_details_by_client_id_with_ticket_details_not_having_details_actually_test(
-            self, tnba_monitor, make_in_progress_ticket_detail, make_details_of_ticket, make_ticket_object,
-            make_rpc_response, open_affecting_ticket, open_outage_ticket, serial_number_1, bruin_client_id):
+        self,
+        tnba_monitor,
+        make_in_progress_ticket_detail,
+        make_details_of_ticket,
+        make_ticket_object,
+        make_rpc_response,
+        open_affecting_ticket,
+        open_outage_ticket,
+        serial_number_1,
+        bruin_client_id,
+    ):
         outage_tickets = [
             open_outage_ticket,
         ]
@@ -608,17 +675,17 @@ class TestTNBAMonitor:
         await tnba_monitor._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
 
         tnba_monitor._bruin_repository.get_open_outage_tickets.assert_awaited_once_with(bruin_client_id)
-        tnba_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(open_outage_ticket['ticketID']), call(open_affecting_ticket['ticketID'])
-        ], any_order=True)
+        tnba_monitor._bruin_repository.get_ticket_details.assert_has_awaits(
+            [call(open_outage_ticket["ticketID"]), call(open_affecting_ticket["ticketID"])], any_order=True
+        )
 
         expected_affecting_ticket_object = make_ticket_object(
             client_id=bruin_client_id,
-            ticket_id=open_affecting_ticket['ticketID'],
-            ticket_creation_date=open_affecting_ticket['createDate'],
-            ticket_topic=open_affecting_ticket['category'],
-            ticket_severity=open_affecting_ticket['severity'],
-            ticket_creator=open_affecting_ticket['createdBy'],
+            ticket_id=open_affecting_ticket["ticketID"],
+            ticket_creation_date=open_affecting_ticket["createDate"],
+            ticket_topic=open_affecting_ticket["category"],
+            ticket_severity=open_affecting_ticket["severity"],
+            ticket_creator=open_affecting_ticket["createdBy"],
             ticket_details=[affecting_ticket_1_detail_1],
             ticket_notes=[],
         )
@@ -627,11 +694,17 @@ class TestTNBAMonitor:
         ]
         assert result == expected
 
-    def filter_tickets_and_details_related_to_edges_under_monitoring_test(self, tnba_monitor, make_ticket_object,
-                                                                          make_in_progress_ticket_detail,
-                                                                          edge_cached_info_1, edge_cached_info_2,
-                                                                          serial_number_1, serial_number_2,
-                                                                          serial_number_3):
+    def filter_tickets_and_details_related_to_edges_under_monitoring_test(
+        self,
+        tnba_monitor,
+        make_ticket_object,
+        make_in_progress_ticket_detail,
+        edge_cached_info_1,
+        edge_cached_info_2,
+        serial_number_1,
+        serial_number_2,
+        serial_number_3,
+    ):
         customer_cache_by_serial = {
             serial_number_1: edge_cached_info_1,
             serial_number_2: edge_cached_info_2,
@@ -667,24 +740,32 @@ class TestTNBAMonitor:
         ]
         assert result == expected
 
-    def filter_irrelevant_notes_in_tickets_test(self, tnba_monitor, make_ticket_object, make_ticket_note,
-                                                edge_cached_info_1, edge_cached_info_2, serial_number_1,
-                                                serial_number_2, serial_number_3):
+    def filter_irrelevant_notes_in_tickets_test(
+        self,
+        tnba_monitor,
+        make_ticket_object,
+        make_ticket_note,
+        edge_cached_info_1,
+        edge_cached_info_2,
+        serial_number_1,
+        serial_number_2,
+        serial_number_3,
+    ):
         customer_cache_by_serial = {
             serial_number_1: edge_cached_info_1,
             serial_number_2: edge_cached_info_2,
         }
 
         ticket_1_note_1 = make_ticket_note(serial_number=serial_number_1, text=None)
-        ticket_1_note_2 = make_ticket_note(serial_number=serial_number_2, text='This is a note')
-        ticket_1_note_3 = make_ticket_note(serial_number=serial_number_3, text='This is a note')
+        ticket_1_note_2 = make_ticket_note(serial_number=serial_number_2, text="This is a note")
+        ticket_1_note_3 = make_ticket_note(serial_number=serial_number_3, text="This is a note")
         ticket_1 = make_ticket_object(ticket_notes=[ticket_1_note_1, ticket_1_note_2, ticket_1_note_3])
 
-        ticket_2_note_1 = make_ticket_note(serial_number=serial_number_3, text='This is a note')
+        ticket_2_note_1 = make_ticket_note(serial_number=serial_number_3, text="This is a note")
         ticket_2 = make_ticket_object(ticket_notes=[ticket_2_note_1])
 
-        ticket_3_note_1 = make_ticket_note(serial_number=serial_number_1, text='This is a note')
-        ticket_3_note_2 = make_ticket_note(serial_number=serial_number_2, text='This is a note')
+        ticket_3_note_1 = make_ticket_note(serial_number=serial_number_1, text="This is a note")
+        ticket_3_note_2 = make_ticket_note(serial_number=serial_number_2, text="This is a note")
         ticket_3 = make_ticket_object(ticket_notes=[ticket_3_note_1, ticket_3_note_2])
 
         tickets = [
@@ -707,11 +788,21 @@ class TestTNBAMonitor:
         assert result == expected
 
     @pytest.mark.asyncio
-    async def get_predictions_by_ticket_id_ok_test(self, tnba_monitor, make_in_progress_ticket_detail,
-                                                   make_ticket_object, make_task_history_item, make_task_history,
-                                                   make_rpc_response, make_prediction_object,
-                                                   make_predictions_by_ticket_id_object, serial_number_1,
-                                                   serial_number_2, serial_number_3, holmdel_noc_prediction):
+    async def get_predictions_by_ticket_id_ok_test(
+        self,
+        tnba_monitor,
+        make_in_progress_ticket_detail,
+        make_ticket_object,
+        make_task_history_item,
+        make_task_history,
+        make_rpc_response,
+        make_prediction_object,
+        make_predictions_by_ticket_id_object,
+        serial_number_1,
+        serial_number_2,
+        serial_number_3,
+        holmdel_noc_prediction,
+    ):
         ticket_id = 12345
 
         ticket_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
@@ -765,8 +856,15 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def get_predictions_by_ticket_id_with_retrieval_of_task_history_returning_non_2xx_status_test(
-            self, tnba_monitor, make_in_progress_ticket_detail, make_ticket_object, make_rpc_response,
-            serial_number_1, serial_number_2, serial_number_3):
+        self,
+        tnba_monitor,
+        make_in_progress_ticket_detail,
+        make_ticket_object,
+        make_rpc_response,
+        serial_number_1,
+        serial_number_2,
+        serial_number_3,
+    ):
         ticket_id = 12345
 
         ticket_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
@@ -784,7 +882,7 @@ class TestTNBAMonitor:
         ]
 
         get_task_history_response = make_rpc_response(
-            body='Got internal error from Bruin',
+            body="Got internal error from Bruin",
             status=500,
         )
 
@@ -800,8 +898,17 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def get_predictions_by_ticket_id_with_not_a_single_valid_asset_in_task_history_test(
-            self, tnba_monitor, make_in_progress_ticket_detail, make_ticket_object, make_task_history_item,
-            make_task_history, make_rpc_response, serial_number_1, serial_number_2, serial_number_3):
+        self,
+        tnba_monitor,
+        make_in_progress_ticket_detail,
+        make_ticket_object,
+        make_task_history_item,
+        make_task_history,
+        make_rpc_response,
+        serial_number_1,
+        serial_number_2,
+        serial_number_3,
+    ):
         ticket_id = 12345
 
         ticket_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
@@ -834,8 +941,17 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def get_predictions_by_ticket_id_with_retrieval_of_predictions_returning_non_2xx_status_test(
-            self, tnba_monitor, make_in_progress_ticket_detail, make_ticket_object, make_task_history_item,
-            make_task_history, make_rpc_response, serial_number_1, serial_number_2, serial_number_3):
+        self,
+        tnba_monitor,
+        make_in_progress_ticket_detail,
+        make_ticket_object,
+        make_task_history_item,
+        make_task_history,
+        make_rpc_response,
+        serial_number_1,
+        serial_number_2,
+        serial_number_3,
+    ):
         ticket_id = 12345
 
         ticket_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
@@ -857,7 +973,7 @@ class TestTNBAMonitor:
         get_task_history_response = make_rpc_response(body=task_history, status=200)
 
         get_predictions_response = make_rpc_response(
-            body='Got internal error from T7',
+            body="Got internal error from T7",
             status=500,
         )
 
@@ -880,8 +996,17 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def get_predictions_by_ticket_id_with_no_predictions_found_for_ticket_test(
-            self, tnba_monitor, make_in_progress_ticket_detail, make_ticket_object, make_task_history_item,
-            make_task_history, make_rpc_response, serial_number_1, serial_number_2, serial_number_3):
+        self,
+        tnba_monitor,
+        make_in_progress_ticket_detail,
+        make_ticket_object,
+        make_task_history_item,
+        make_task_history,
+        make_rpc_response,
+        serial_number_1,
+        serial_number_2,
+        serial_number_3,
+    ):
         ticket_id = 12345
 
         ticket_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
@@ -923,8 +1048,15 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def remove_erroneous_predictions_with_some_predictions_being_erroneous_test(
-            self, tnba_monitor, make_prediction_object, make_erroneous_prediction_object,
-            make_predictions_by_ticket_id_object, serial_number_1, serial_number_2, serial_number_3):
+        self,
+        tnba_monitor,
+        make_prediction_object,
+        make_erroneous_prediction_object,
+        make_predictions_by_ticket_id_object,
+        serial_number_1,
+        serial_number_2,
+        serial_number_3,
+    ):
         ticket_id = 12345
         ticket_prediction_object_1 = make_prediction_object(serial_number=serial_number_1)
         ticket_prediction_object_2 = make_erroneous_prediction_object(serial_number=serial_number_2)
@@ -946,8 +1078,14 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def remove_erroneous_predictions_with_all_predictions_being_erroneous_test(
-            self, tnba_monitor, make_predictions_by_ticket_id_object, make_erroneous_prediction_object,
-            serial_number_1, serial_number_2, serial_number_3):
+        self,
+        tnba_monitor,
+        make_predictions_by_ticket_id_object,
+        make_erroneous_prediction_object,
+        serial_number_1,
+        serial_number_2,
+        serial_number_3,
+    ):
         ticket_id = 12345
         ticket_prediction_object_1 = make_erroneous_prediction_object(serial_number=serial_number_1)
         ticket_prediction_object_2 = make_erroneous_prediction_object(serial_number=serial_number_2)
@@ -964,11 +1102,19 @@ class TestTNBAMonitor:
         assert result == {}
 
     @pytest.mark.asyncio
-    async def map_ticket_details_with_predictions_test(self, tnba_monitor, make_in_progress_ticket_detail,
-                                                       make_detail_object, make_detail_object_with_predictions,
-                                                       make_prediction_object, make_predictions_by_ticket_id_object,
-                                                       serial_number_1, serial_number_2, serial_number_3,
-                                                       holmdel_noc_prediction):
+    async def map_ticket_details_with_predictions_test(
+        self,
+        tnba_monitor,
+        make_in_progress_ticket_detail,
+        make_detail_object,
+        make_detail_object_with_predictions,
+        make_prediction_object,
+        make_predictions_by_ticket_id_object,
+        serial_number_1,
+        serial_number_2,
+        serial_number_3,
+        holmdel_noc_prediction,
+    ):
         ticket_1_id = 12345
         ticket_2_id = 67890
 
@@ -1025,9 +1171,18 @@ class TestTNBAMonitor:
             expected_detail_object_2,
         ]
 
-    def transform_tickets_into_detail_objects_test(self, make_in_progress_ticket_detail, make_ticket_object,
-                                                   make_detail_object, make_ticket_note, make_standard_tnba_note,
-                                                   serial_number_1, serial_number_2, serial_number_3, bruin_client_id):
+    def transform_tickets_into_detail_objects_test(
+        self,
+        make_in_progress_ticket_detail,
+        make_ticket_object,
+        make_detail_object,
+        make_ticket_note,
+        make_standard_tnba_note,
+        serial_number_1,
+        serial_number_2,
+        serial_number_3,
+        bruin_client_id,
+    ):
         ticket_1_id = 12345
         ticket_2_id = 11223
 
@@ -1035,9 +1190,9 @@ class TestTNBAMonitor:
         ticket_1_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
         ticket_1_detail_2 = make_in_progress_ticket_detail(serial_number=serial_number_2)
         ticket_1_detail_3 = make_in_progress_ticket_detail(serial_number=serial_number_3)
-        ticket_1_note_1 = make_ticket_note(serial_number=serial_number_1, text='This is a note')
+        ticket_1_note_1 = make_ticket_note(serial_number=serial_number_1, text="This is a note")
         ticket_1_note_2 = make_standard_tnba_note(serial_number=serial_number_2)
-        ticket_1_note_3 = make_ticket_note(serial_number=serial_number_3, text='This is a note')
+        ticket_1_note_3 = make_ticket_note(serial_number=serial_number_3, text="This is a note")
         ticket_1_with_details = make_ticket_object(
             client_id=bruin_client_id,
             ticket_id=ticket_1_id,
@@ -1108,9 +1263,16 @@ class TestTNBAMonitor:
             expected_ticket_detail_5,
         ]
 
-    def filter_resolved_ticket_details_test(self, tnba_monitor, make_in_progress_ticket_detail,
-                                            make_resolved_ticket_detail, make_detail_object, serial_number_1,
-                                            serial_number_2, serial_number_3):
+    def filter_resolved_ticket_details_test(
+        self,
+        tnba_monitor,
+        make_in_progress_ticket_detail,
+        make_resolved_ticket_detail,
+        make_detail_object,
+        serial_number_1,
+        serial_number_2,
+        serial_number_3,
+    ):
         ticket_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
         ticket_detail_2 = make_resolved_ticket_detail(serial_number=serial_number_2)
         ticket_detail_3 = make_in_progress_ticket_detail(serial_number=serial_number_3)
@@ -1132,16 +1294,17 @@ class TestTNBAMonitor:
         ]
 
     def filter_outage_ticket_details_based_on_last_outage_with_affecting_ticket_details_test(
-            self, tnba_monitor, make_in_progress_ticket_detail, make_detail_object, serial_number_1, serial_number_2):
+        self, tnba_monitor, make_in_progress_ticket_detail, make_detail_object, serial_number_1, serial_number_2
+    ):
         ticket_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
         ticket_detail_object_1 = make_detail_object(
-            ticket_topic='VAS',
+            ticket_topic="VAS",
             ticket_detail=ticket_detail_1,
         )
 
         ticket_detail_2 = make_in_progress_ticket_detail(serial_number=serial_number_2)
         ticket_detail_object_2 = make_detail_object(
-            ticket_topic='VAS',
+            ticket_topic="VAS",
             ticket_detail=ticket_detail_2,
         )
 
@@ -1154,23 +1317,29 @@ class TestTNBAMonitor:
         assert result == ticket_details
 
     def filter_outage_ticket_details_based_on_last_outage_with_outage_ticket_details_test(
-            self, tnba_monitor, make_in_progress_ticket_detail, make_detail_object, serial_number_1, serial_number_2,
-            serial_number_3):
+        self,
+        tnba_monitor,
+        make_in_progress_ticket_detail,
+        make_detail_object,
+        serial_number_1,
+        serial_number_2,
+        serial_number_3,
+    ):
         ticket_detail_1 = make_in_progress_ticket_detail(serial_number=serial_number_1)
         ticket_detail_object_1 = make_detail_object(
-            ticket_topic='VOO',
+            ticket_topic="VOO",
             ticket_detail=ticket_detail_1,
         )
 
         ticket_detail_2 = make_in_progress_ticket_detail(serial_number=serial_number_2)
         ticket_detail_object_2 = make_detail_object(
-            ticket_topic='VAS',
+            ticket_topic="VAS",
             ticket_detail=ticket_detail_2,
         )
 
         ticket_detail_3 = make_in_progress_ticket_detail(serial_number=serial_number_3)
         ticket_detail_object_3 = make_detail_object(
-            ticket_topic='VOO',
+            ticket_topic="VOO",
             ticket_detail=ticket_detail_3,
         )
 
@@ -1195,35 +1364,36 @@ class TestTNBAMonitor:
         assert result == expected
 
     def was_last_outage_detected_recently_with_reopen_note_not_found_and_triage_not_found_test(self, tnba_monitor):
-        ticket_creation_date = '9/25/2020 6:31:54 AM'
+        ticket_creation_date = "9/25/2020 6:31:54 AM"
         ticket_notes = []
 
         new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(minutes=59, seconds=59)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(tnba_monitor_module, 'datetime', new=datetime_mock):
+        with patch.object(tnba_monitor_module, "datetime", new=datetime_mock):
             result = tnba_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(hours=1)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(tnba_monitor_module, 'datetime', new=datetime_mock):
+        with patch.object(tnba_monitor_module, "datetime", new=datetime_mock):
             result = tnba_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(hours=1, seconds=1)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(tnba_monitor_module, 'datetime', new=datetime_mock):
+        with patch.object(tnba_monitor_module, "datetime", new=datetime_mock):
             result = tnba_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is False
 
-    def was_last_outage_detected_recently_with_reopen_note_found_test(self, tnba_monitor, make_reopen_note,
-                                                                      make_triage_note, serial_number_1):
-        ticket_creation_date = '9/25/2020 6:31:54 AM'
-        reopen_timestamp = '2021-01-02T11:00:16.71-05:00'
-        triage_timestamp = '2021-01-02T10:18:16.71-05:00'
+    def was_last_outage_detected_recently_with_reopen_note_found_test(
+        self, tnba_monitor, make_reopen_note, make_triage_note, serial_number_1
+    ):
+        ticket_creation_date = "9/25/2020 6:31:54 AM"
+        reopen_timestamp = "2021-01-02T11:00:16.71-05:00"
+        triage_timestamp = "2021-01-02T10:18:16.71-05:00"
 
         reopen_note = make_reopen_note(serial_number=serial_number_1, date=reopen_timestamp)
         triage_note = make_triage_note(serial_number=serial_number_1, date=triage_timestamp)
@@ -1236,27 +1406,27 @@ class TestTNBAMonitor:
 
         new_now = parse(reopen_timestamp) + timedelta(minutes=59, seconds=59)
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(tnba_monitor_module, 'datetime', new=datetime_mock):
+        with patch.object(tnba_monitor_module, "datetime", new=datetime_mock):
             result = tnba_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(reopen_timestamp) + timedelta(hours=1)
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(tnba_monitor_module, 'datetime', new=datetime_mock):
+        with patch.object(tnba_monitor_module, "datetime", new=datetime_mock):
             result = tnba_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(reopen_timestamp) + timedelta(hours=1, seconds=1)
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(tnba_monitor_module, 'datetime', new=datetime_mock):
+        with patch.object(tnba_monitor_module, "datetime", new=datetime_mock):
             result = tnba_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is False
 
-    def was_last_outage_detected_recently_with_reopen_note_not_found_and_triage_note_found_test(self, tnba_monitor,
-                                                                                                make_triage_note,
-                                                                                                serial_number_1):
-        ticket_creation_date = '9/25/2020 6:31:54 AM'
-        triage_timestamp = '2021-01-02T10:18:16.71-05:00'
+    def was_last_outage_detected_recently_with_reopen_note_not_found_and_triage_note_found_test(
+        self, tnba_monitor, make_triage_note, serial_number_1
+    ):
+        ticket_creation_date = "9/25/2020 6:31:54 AM"
+        triage_timestamp = "2021-01-02T10:18:16.71-05:00"
 
         triage_note = make_triage_note(serial_number=serial_number_1, date=triage_timestamp)
         ticket_notes = [
@@ -1266,26 +1436,34 @@ class TestTNBAMonitor:
         datetime_mock = Mock()
         new_now = parse(triage_timestamp) + timedelta(minutes=59, seconds=59)
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(tnba_monitor_module, 'datetime', new=datetime_mock):
+        with patch.object(tnba_monitor_module, "datetime", new=datetime_mock):
             result = tnba_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(triage_timestamp) + timedelta(hours=1)
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(tnba_monitor_module, 'datetime', new=datetime_mock):
+        with patch.object(tnba_monitor_module, "datetime", new=datetime_mock):
             result = tnba_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(triage_timestamp) + timedelta(hours=1, seconds=1)
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(tnba_monitor_module, 'datetime', new=datetime_mock):
+        with patch.object(tnba_monitor_module, "datetime", new=datetime_mock):
             result = tnba_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is False
 
     @pytest.mark.asyncio
     async def process_ticket_detail_with_tnba_note_found_and_tnba_note_being_too_recent_test(
-            self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail,
-            make_standard_tnba_note, serial_number_1, bruin_client_id, bruin_client_name, host_1):
+        self,
+        tnba_monitor,
+        make_detail_object_with_predictions,
+        make_in_progress_ticket_detail,
+        make_standard_tnba_note,
+        serial_number_1,
+        bruin_client_id,
+        bruin_client_name,
+        host_1,
+    ):
         tnba_note = make_standard_tnba_note(serial_number=serial_number_1)
         ticket_severity = 2
         ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1)
@@ -1298,8 +1476,8 @@ class TestTNBAMonitor:
 
         client_info_by_id = {
             bruin_client_id: {
-                'host': host_1,
-                'name': bruin_client_name,
+                "host": host_1,
+                "name": bruin_client_name,
             }
         }
         tnba_monitor._client_info_by_id = client_info_by_id
@@ -1314,9 +1492,20 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def process_ticket_detail_with_retrieval_of_next_results_returning_non_2xx_status_test(
-            self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
-            serial_number_1, make_edge_with_links_info, edge_1_connected, link_1_stable, link_2_stable, bruin_client_id,
-            bruin_client_name, host_1):
+        self,
+        tnba_monitor,
+        make_detail_object_with_predictions,
+        make_in_progress_ticket_detail,
+        make_rpc_response,
+        serial_number_1,
+        make_edge_with_links_info,
+        edge_1_connected,
+        link_1_stable,
+        link_2_stable,
+        bruin_client_id,
+        bruin_client_name,
+        host_1,
+    ):
         ticket_id = 12345
         ticket_detail_id = 67890
         ticket_severity = 2
@@ -1330,7 +1519,7 @@ class TestTNBAMonitor:
         )
 
         next_results_response = make_rpc_response(
-            body='Got internal error from Bruin',
+            body="Got internal error from Bruin",
             status=500,
         )
         edge_status = make_edge_with_links_info(
@@ -1342,8 +1531,8 @@ class TestTNBAMonitor:
         }
         client_info_by_id = {
             bruin_client_id: {
-                'host': host_1,
-                'name': bruin_client_name,
+                "host": host_1,
+                "name": bruin_client_name,
             }
         }
         tnba_monitor._edge_status_by_serial = edge_status_by_serial
@@ -1361,10 +1550,25 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def process_ticket_detail_with_no_predictions_after_filtering_with_next_results_test(
-            self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
-            make_next_result_item, make_next_results, holmdel_noc_prediction, confident_request_completed_prediction,
-            confident_repair_completed_prediction, serial_number_1, make_edge_with_links_info, edge_1_connected,
-            link_1_stable, link_2_stable, bruin_client_id, bruin_client_name, host_1):
+        self,
+        tnba_monitor,
+        make_detail_object_with_predictions,
+        make_in_progress_ticket_detail,
+        make_rpc_response,
+        make_next_result_item,
+        make_next_results,
+        holmdel_noc_prediction,
+        confident_request_completed_prediction,
+        confident_repair_completed_prediction,
+        serial_number_1,
+        make_edge_with_links_info,
+        edge_1_connected,
+        link_1_stable,
+        link_2_stable,
+        bruin_client_id,
+        bruin_client_name,
+        host_1,
+    ):
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_severity = 2
@@ -1391,16 +1595,16 @@ class TestTNBAMonitor:
         }
         client_info_by_id = {
             bruin_client_id: {
-                'host': host_1,
-                'name': bruin_client_name,
+                "host": host_1,
+                "name": bruin_client_name,
             }
         }
         tnba_monitor._edge_status_by_serial = edge_status_by_serial
         tnba_monitor._client_info_by_id = client_info_by_id
-        holmdel_noc_prediction_name = holmdel_noc_prediction['name']
+        holmdel_noc_prediction_name = holmdel_noc_prediction["name"]
         next_result_item_1 = make_next_result_item(result_name=holmdel_noc_prediction_name)
         next_results = make_next_results(next_result_item_1)
-        next_results_list = next_results['nextResults']
+        next_results_list = next_results["nextResults"]
         next_results_response = make_rpc_response(
             body=next_results,
             status=200,
@@ -1425,11 +1629,25 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def process_ticket_detail_with_tnba_note_found_and_no_changes_since_the_last_best_prediction_test(
-            self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
-            make_next_result_item, make_next_results, make_standard_tnba_note, holmdel_noc_prediction, serial_number_1,
-            edge_1_connected, link_1_stable, link_2_stable, make_edge_with_links_info, bruin_client_id,
-            bruin_client_name, host_1):
-        holmdel_noc_prediction_name = holmdel_noc_prediction['name']
+        self,
+        tnba_monitor,
+        make_detail_object_with_predictions,
+        make_in_progress_ticket_detail,
+        make_rpc_response,
+        make_next_result_item,
+        make_next_results,
+        make_standard_tnba_note,
+        holmdel_noc_prediction,
+        serial_number_1,
+        edge_1_connected,
+        link_1_stable,
+        link_2_stable,
+        make_edge_with_links_info,
+        bruin_client_id,
+        bruin_client_name,
+        host_1,
+    ):
+        holmdel_noc_prediction_name = holmdel_noc_prediction["name"]
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_severity = 2
@@ -1448,7 +1666,7 @@ class TestTNBAMonitor:
 
         next_result_item_1 = make_next_result_item(result_name=holmdel_noc_prediction_name)
         next_results = make_next_results(next_result_item_1)
-        next_results_list = next_results['nextResults']
+        next_results_list = next_results["nextResults"]
         next_results_response = make_rpc_response(
             body=next_results,
             status=200,
@@ -1462,8 +1680,8 @@ class TestTNBAMonitor:
         }
         client_info_by_id = {
             bruin_client_id: {
-                'host': host_1,
-                'name': bruin_client_name,
+                "host": host_1,
+                "name": bruin_client_name,
             }
         }
         tnba_monitor._edge_status_by_serial = edge_status_by_serial
@@ -1479,20 +1697,34 @@ class TestTNBAMonitor:
         tnba_monitor._prediction_repository.filter_predictions_in_next_results.assert_called_once_with(
             ticket_detail_predictions, next_results_list
         )
-        tnba_monitor._prediction_repository.get_best_prediction.assert_called_once_with(
-            ticket_detail_predictions
+        tnba_monitor._prediction_repository.get_best_prediction.assert_called_once_with(ticket_detail_predictions)
+        prediction_repository = tnba_monitor._prediction_repository
+        prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note.assert_called_once_with(
+            tnba_note, holmdel_noc_prediction
         )
-        tnba_monitor._prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note. \
-            assert_called_once_with(tnba_note, holmdel_noc_prediction)
         tnba_monitor._prediction_repository.is_request_or_repair_completed_prediction.assert_not_called()
         tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_not_called()
         assert tnba_monitor._tnba_notes_to_append == []
 
     @pytest.mark.asyncio
     async def process_ticket_detail_with_standard_prediction_and_dev_env_test(
-            self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
-            make_next_result_item, make_next_results, holmdel_noc_prediction, serial_number_1, edge_1_connected,
-            link_1_stable, link_2_stable, make_edge_with_links_info, bruin_client_id, bruin_client_name, host_1):
+        self,
+        tnba_monitor,
+        make_detail_object_with_predictions,
+        make_in_progress_ticket_detail,
+        make_rpc_response,
+        make_next_result_item,
+        make_next_results,
+        holmdel_noc_prediction,
+        serial_number_1,
+        edge_1_connected,
+        link_1_stable,
+        link_2_stable,
+        make_edge_with_links_info,
+        bruin_client_id,
+        bruin_client_name,
+        host_1,
+    ):
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_severity = 2
@@ -1507,10 +1739,10 @@ class TestTNBAMonitor:
             ticket_detail_predictions=ticket_detail_predictions,
         )
 
-        holmdel_noc_prediction_name = holmdel_noc_prediction['name']
+        holmdel_noc_prediction_name = holmdel_noc_prediction["name"]
         next_result_item_1 = make_next_result_item(result_name=holmdel_noc_prediction_name)
         next_results = make_next_results(next_result_item_1)
-        next_results_list = next_results['nextResults']
+        next_results_list = next_results["nextResults"]
         next_results_response = make_rpc_response(
             body=next_results,
             status=200,
@@ -1524,15 +1756,15 @@ class TestTNBAMonitor:
         }
         client_info_by_id = {
             bruin_client_id: {
-                'host': host_1,
-                'name': bruin_client_name,
+                "host": host_1,
+                "name": bruin_client_name,
             }
         }
         tnba_monitor._edge_status_by_serial = edge_status_by_serial
         tnba_monitor._client_info_by_id = client_info_by_id
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
 
-        with patch.object(testconfig, 'CURRENT_ENVIRONMENT', "dev"):
+        with patch.object(testconfig, "CURRENT_ENVIRONMENT", "dev"):
             await tnba_monitor._process_ticket_detail(detail_object)
 
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
@@ -1541,9 +1773,7 @@ class TestTNBAMonitor:
         tnba_monitor._prediction_repository.filter_predictions_in_next_results.assert_called_once_with(
             ticket_detail_predictions, next_results_list
         )
-        tnba_monitor._prediction_repository.get_best_prediction.assert_called_once_with(
-            ticket_detail_predictions
-        )
+        tnba_monitor._prediction_repository.get_best_prediction.assert_called_once_with(ticket_detail_predictions)
         tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_called_once_with(
             holmdel_noc_prediction, serial_number_1
         )
@@ -1552,10 +1782,24 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def process_ticket_detail_with_standard_prediction_and_prod_env_test(
-            self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
-            make_next_result_item, make_next_results, make_payload_for_note_append_with_ticket_id,
-            holmdel_noc_prediction, serial_number_1, edge_1_connected, link_1_stable, link_2_stable,
-            make_edge_with_links_info, bruin_client_id, bruin_client_name, host_1):
+        self,
+        tnba_monitor,
+        make_detail_object_with_predictions,
+        make_in_progress_ticket_detail,
+        make_rpc_response,
+        make_next_result_item,
+        make_next_results,
+        make_payload_for_note_append_with_ticket_id,
+        holmdel_noc_prediction,
+        serial_number_1,
+        edge_1_connected,
+        link_1_stable,
+        link_2_stable,
+        make_edge_with_links_info,
+        bruin_client_id,
+        bruin_client_name,
+        host_1,
+    ):
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_severity = 2
@@ -1570,16 +1814,16 @@ class TestTNBAMonitor:
             ticket_detail_predictions=ticket_detail_predictions,
         )
 
-        holmdel_noc_prediction_name = holmdel_noc_prediction['name']
+        holmdel_noc_prediction_name = holmdel_noc_prediction["name"]
         next_result_item_1 = make_next_result_item(result_name=holmdel_noc_prediction_name)
         next_results = make_next_results(next_result_item_1)
-        next_results_list = next_results['nextResults']
+        next_results_list = next_results["nextResults"]
         next_results_response = make_rpc_response(
             body=next_results,
             status=200,
         )
 
-        built_tnba_note = 'This is a TNBA note'
+        built_tnba_note = "This is a TNBA note"
         edge_status = make_edge_with_links_info(
             edge_info=edge_1_connected,
             links_info=[link_1_stable, link_2_stable],
@@ -1589,8 +1833,8 @@ class TestTNBAMonitor:
         }
         client_info_by_id = {
             bruin_client_id: {
-                'host': host_1,
-                'name': bruin_client_name,
+                "host": host_1,
+                "name": bruin_client_name,
             }
         }
         tnba_monitor._edge_status_by_serial = edge_status_by_serial
@@ -1598,7 +1842,7 @@ class TestTNBAMonitor:
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
         tnba_monitor._ticket_repository.build_tnba_note_from_prediction.return_value = built_tnba_note
 
-        with patch.object(testconfig, 'CURRENT_ENVIRONMENT', "production"):
+        with patch.object(testconfig, "CURRENT_ENVIRONMENT", "production"):
             await tnba_monitor._process_ticket_detail(detail_object)
 
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
@@ -1607,9 +1851,7 @@ class TestTNBAMonitor:
         tnba_monitor._prediction_repository.filter_predictions_in_next_results.assert_called_once_with(
             ticket_detail_predictions, next_results_list
         )
-        tnba_monitor._prediction_repository.get_best_prediction.assert_called_once_with(
-            ticket_detail_predictions
-        )
+        tnba_monitor._prediction_repository.get_best_prediction.assert_called_once_with(ticket_detail_predictions)
         tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_called_once_with(
             holmdel_noc_prediction, serial_number_1
         )
@@ -1626,11 +1868,25 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def process_ticket_detail_with_prod_env_and_request_repair_completed_prediction_and_autoresolve_failed_test(
-            self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
-            make_next_result_item, make_payload_for_note_append_with_ticket_id, make_next_results,
-            unconfident_request_completed_prediction, unconfident_repair_completed_prediction, serial_number_1,
-            make_edge_with_links_info, edge_1_connected, link_1_stable, link_2_stable, bruin_client_id,
-            bruin_client_name, host_1):
+        self,
+        tnba_monitor,
+        make_detail_object_with_predictions,
+        make_in_progress_ticket_detail,
+        make_rpc_response,
+        make_next_result_item,
+        make_payload_for_note_append_with_ticket_id,
+        make_next_results,
+        unconfident_request_completed_prediction,
+        unconfident_repair_completed_prediction,
+        serial_number_1,
+        make_edge_with_links_info,
+        edge_1_connected,
+        link_1_stable,
+        link_2_stable,
+        bruin_client_id,
+        bruin_client_name,
+        host_1,
+    ):
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_severity = 2
@@ -1657,28 +1913,28 @@ class TestTNBAMonitor:
         }
         client_info_by_id = {
             bruin_client_id: {
-                'host': host_1,
-                'name': bruin_client_name,
+                "host": host_1,
+                "name": bruin_client_name,
             }
         }
 
-        request_completed_prediction_name = unconfident_request_completed_prediction['name']
+        request_completed_prediction_name = unconfident_request_completed_prediction["name"]
         next_result_item_1 = make_next_result_item(result_name=request_completed_prediction_name)
         next_results = make_next_results(next_result_item_1)
-        next_results_list = next_results['nextResults']
+        next_results_list = next_results["nextResults"]
         next_results_response = make_rpc_response(
             body=next_results,
             status=200,
         )
 
-        built_tnba_note = 'This is a TNBA note'
+        built_tnba_note = "This is a TNBA note"
         tnba_monitor._edge_status_by_serial = edge_status_by_serial
         tnba_monitor._client_info_by_id = client_info_by_id
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
         tnba_monitor._autoresolve_ticket_detail.return_value = tnba_monitor.AutoresolveTicketDetailStatus.SKIPPED
         tnba_monitor._ticket_repository.build_tnba_note_from_prediction.return_value = built_tnba_note
 
-        with patch.object(testconfig, 'CURRENT_ENVIRONMENT', "production"):
+        with patch.object(testconfig, "CURRENT_ENVIRONMENT", "production"):
             await tnba_monitor._process_ticket_detail(detail_object)
 
         tnba_monitor._prediction_repository.map_request_and_repair_completed_predictions.assert_called_once_with(
@@ -1690,9 +1946,7 @@ class TestTNBAMonitor:
         tnba_monitor._prediction_repository.filter_predictions_in_next_results.assert_called_once_with(
             ticket_detail_predictions_with_mirrored_request_repair_completed, next_results_list
         )
-        tnba_monitor._prediction_repository.get_best_prediction.assert_called_once_with(
-            ticket_detail_predictions
-        )
+        tnba_monitor._prediction_repository.get_best_prediction.assert_called_once_with(ticket_detail_predictions)
         tnba_monitor._prediction_repository.is_request_or_repair_completed_prediction.assert_called_once_with(
             unconfident_request_completed_prediction
         )
@@ -1702,7 +1956,8 @@ class TestTNBAMonitor:
         )
         tnba_monitor._t7_repository.post_live_automation_metrics.assert_not_called()
         tnba_monitor._ticket_repository.build_tnba_note_from_prediction.assert_called_once_with(
-            unconfident_request_completed_prediction, serial_number_1,
+            unconfident_request_completed_prediction,
+            serial_number_1,
         )
         tnba_monitor._ticket_repository.build_tnba_note_for_AI_autoresolve.assert_not_called()
 
@@ -1718,9 +1973,20 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def process_ticket_detail_with_prod_env_and_repair_completed_prediction_and_autoresolve_bad_prediction_test(
-            self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
-            make_next_result_item, make_next_results, unconfident_request_completed_prediction,
-            unconfident_repair_completed_prediction, serial_number_1, bruin_client_id, bruin_client_name, host_1):
+        self,
+        tnba_monitor,
+        make_detail_object_with_predictions,
+        make_in_progress_ticket_detail,
+        make_rpc_response,
+        make_next_result_item,
+        make_next_results,
+        unconfident_request_completed_prediction,
+        unconfident_repair_completed_prediction,
+        serial_number_1,
+        bruin_client_id,
+        bruin_client_name,
+        host_1,
+    ):
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_severity = 2
@@ -1740,15 +2006,15 @@ class TestTNBAMonitor:
         ]
         client_info_by_id = {
             bruin_client_id: {
-                'host': host_1,
-                'name': bruin_client_name,
+                "host": host_1,
+                "name": bruin_client_name,
             }
         }
 
-        request_completed_prediction_name = unconfident_request_completed_prediction['name']
+        request_completed_prediction_name = unconfident_request_completed_prediction["name"]
         next_result_item_1 = make_next_result_item(result_name=request_completed_prediction_name)
         next_results = make_next_results(next_result_item_1)
-        next_results_list = next_results['nextResults']
+        next_results_list = next_results["nextResults"]
         next_results_response = make_rpc_response(
             body=next_results,
             status=200,
@@ -1757,7 +2023,7 @@ class TestTNBAMonitor:
         tnba_monitor._bruin_repository.get_next_results_for_ticket_detail.return_value = next_results_response
         tnba_monitor._autoresolve_ticket_detail.return_value = tnba_monitor.AutoresolveTicketDetailStatus.BAD_PREDICTION
 
-        with patch.object(testconfig, 'CURRENT_ENVIRONMENT', "production"):
+        with patch.object(testconfig, "CURRENT_ENVIRONMENT", "production"):
             await tnba_monitor._process_ticket_detail(detail_object)
 
         tnba_monitor._prediction_repository.map_request_and_repair_completed_predictions.assert_called_once_with(
@@ -1769,9 +2035,7 @@ class TestTNBAMonitor:
         tnba_monitor._prediction_repository.filter_predictions_in_next_results.assert_called_once_with(
             ticket_detail_predictions_with_mirrored_request_repair_completed, next_results_list
         )
-        tnba_monitor._prediction_repository.get_best_prediction.assert_called_once_with(
-            ticket_detail_predictions
-        )
+        tnba_monitor._prediction_repository.get_best_prediction.assert_called_once_with(ticket_detail_predictions)
         tnba_monitor._prediction_repository.is_request_or_repair_completed_prediction.assert_called_once_with(
             unconfident_request_completed_prediction
         )
@@ -1787,11 +2051,25 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def process_ticket_detail_with_prod_env_and_request_repair_completed_prediction_and_autoresolve_ok_test(
-            self, tnba_monitor, make_detail_object_with_predictions, make_in_progress_ticket_detail, make_rpc_response,
-            make_next_result_item, make_next_results, make_payload_for_note_append_with_ticket_id,
-            confident_request_completed_prediction, confident_repair_completed_prediction, serial_number_1,
-            make_edge_with_links_info, edge_1_connected, link_1_stable, link_2_stable, bruin_client_id,
-            bruin_client_name, host_1):
+        self,
+        tnba_monitor,
+        make_detail_object_with_predictions,
+        make_in_progress_ticket_detail,
+        make_rpc_response,
+        make_next_result_item,
+        make_next_results,
+        make_payload_for_note_append_with_ticket_id,
+        confident_request_completed_prediction,
+        confident_repair_completed_prediction,
+        serial_number_1,
+        make_edge_with_links_info,
+        edge_1_connected,
+        link_1_stable,
+        link_2_stable,
+        bruin_client_id,
+        bruin_client_name,
+        host_1,
+    ):
         ticket_id = 12345
         ticket_detail_id = 1
         ticket_severity = 2
@@ -1810,16 +2088,16 @@ class TestTNBAMonitor:
             confident_repair_completed_prediction,
         ]
 
-        request_completed_prediction_name = confident_request_completed_prediction['name']
+        request_completed_prediction_name = confident_request_completed_prediction["name"]
         next_result_item_1 = make_next_result_item(result_name=request_completed_prediction_name)
         next_results = make_next_results(next_result_item_1)
-        next_results_list = next_results['nextResults']
+        next_results_list = next_results["nextResults"]
         next_results_response = make_rpc_response(
             body=next_results,
             status=200,
         )
 
-        built_tnba_note = 'This is a TNBA note'
+        built_tnba_note = "This is a TNBA note"
         edge_status = make_edge_with_links_info(
             edge_info=edge_1_connected,
             links_info=[link_1_stable, link_2_stable],
@@ -1829,8 +2107,8 @@ class TestTNBAMonitor:
         }
         client_info_by_id = {
             bruin_client_id: {
-                'host': host_1,
-                'name': bruin_client_name,
+                "host": host_1,
+                "name": bruin_client_name,
             }
         }
         tnba_monitor._edge_status_by_serial = edge_status_by_serial
@@ -1841,7 +2119,7 @@ class TestTNBAMonitor:
 
         tnba_monitor._ticket_repository.build_tnba_note_for_AI_autoresolve.return_value = built_tnba_note
 
-        with patch.object(testconfig, 'CURRENT_ENVIRONMENT', "production"):
+        with patch.object(testconfig, "CURRENT_ENVIRONMENT", "production"):
             await tnba_monitor._process_ticket_detail(detail_object)
 
         tnba_monitor._prediction_repository.map_request_and_repair_completed_predictions.assert_called_once_with(
@@ -1853,9 +2131,7 @@ class TestTNBAMonitor:
         tnba_monitor._prediction_repository.filter_predictions_in_next_results.assert_called_once_with(
             ticket_detail_predictions_with_mirrored_request_repair_completed, next_results_list
         )
-        tnba_monitor._prediction_repository.get_best_prediction.assert_called_once_with(
-            ticket_detail_predictions
-        )
+        tnba_monitor._prediction_repository.get_best_prediction.assert_called_once_with(ticket_detail_predictions)
         tnba_monitor._prediction_repository.is_request_or_repair_completed_prediction.assert_called_once_with(
             confident_request_completed_prediction
         )
@@ -1880,15 +2156,24 @@ class TestTNBAMonitor:
         ]
 
     @pytest.mark.asyncio
-    async def autoresolve_ticket_detail_ok_test(self, tnba_monitor, make_in_progress_ticket_detail,
-                                                make_detail_object_with_predictions, make_edge_with_links_info,
-                                                make_rpc_response, edge_1_connected, link_1_stable, link_2_stable,
-                                                serial_number_1, confident_request_completed_prediction,
-                                                make_metrics):
+    async def autoresolve_ticket_detail_ok_test(
+        self,
+        tnba_monitor,
+        make_in_progress_ticket_detail,
+        make_detail_object_with_predictions,
+        make_edge_with_links_info,
+        make_rpc_response,
+        edge_1_connected,
+        link_1_stable,
+        link_2_stable,
+        serial_number_1,
+        confident_request_completed_prediction,
+        make_metrics,
+    ):
         ticket_id = 12345
         ticket_detail_id = 1
-        ticket_creator = 'Intelygenz Ai'
-        ticket_topic = 'VOO'
+        ticket_creator = "Intelygenz Ai"
+        ticket_topic = "VOO"
 
         ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
         detail_object = make_detail_object_with_predictions(
@@ -1897,7 +2182,7 @@ class TestTNBAMonitor:
             ticket_creator=ticket_creator,
             ticket_detail=ticket_detail,
             ticket_notes=[],
-            ticket_detail_predictions=[confident_request_completed_prediction]
+            ticket_detail_predictions=[confident_request_completed_prediction],
         )
 
         edge_status = make_edge_with_links_info(
@@ -1912,14 +2197,14 @@ class TestTNBAMonitor:
         metrics = make_metrics()
 
         tnba_monitor._link_metrics_and_events_by_serial = {
-            serial_number_1: [{'link_metrics': metrics, 'link_events': []}],
+            serial_number_1: [{"link_metrics": metrics, "link_events": []}],
         }
-        resolve_detail_response = make_rpc_response(body='ok', status=200)
+        resolve_detail_response = make_rpc_response(body="ok", status=200)
         expected_autoresolved_status = tnba_monitor.AutoresolveTicketDetailStatus.SUCCESS
 
         tnba_monitor._bruin_repository.resolve_ticket_detail.return_value = resolve_detail_response
 
-        with patch.object(testconfig, 'CURRENT_ENVIRONMENT', "production"):
+        with patch.object(testconfig, "CURRENT_ENVIRONMENT", "production"):
             autoresolved_status = await tnba_monitor._autoresolve_ticket_detail(
                 detail_object=detail_object,
                 best_prediction=confident_request_completed_prediction,
@@ -1941,17 +2226,23 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def autoresolve_ticket_detail_with_ticket_not_automatically_created_test(
-            self, tnba_monitor, make_in_progress_ticket_detail, make_detail_object_with_predictions, serial_number_1,
-            confident_request_completed_prediction, make_metrics):
+        self,
+        tnba_monitor,
+        make_in_progress_ticket_detail,
+        make_detail_object_with_predictions,
+        serial_number_1,
+        confident_request_completed_prediction,
+        make_metrics,
+    ):
         ticket_id = 12345
         ticket_detail_id = 1
-        ticket_creator = 'Otacon'
-        ticket_topic = 'VOO'
+        ticket_creator = "Otacon"
+        ticket_topic = "VOO"
 
         metrics = make_metrics()
 
         tnba_monitor._link_metrics_and_events_by_serial = {
-            serial_number_1: [{'link_metrics': metrics, 'link_events': []}],
+            serial_number_1: [{"link_metrics": metrics, "link_events": []}],
         }
 
         ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
@@ -1961,7 +2252,7 @@ class TestTNBAMonitor:
             ticket_creator=ticket_creator,
             ticket_detail=ticket_detail,
             ticket_notes=[],
-            ticket_detail_predictions=[confident_request_completed_prediction]
+            ticket_detail_predictions=[confident_request_completed_prediction],
         )
 
         expected_autoresolved_status = tnba_monitor.AutoresolveTicketDetailStatus.SKIPPED
@@ -1982,13 +2273,22 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def autoresolve_ticket_detail_with_prediction_having_insufficient_confidence_level_test(
-            self, tnba_monitor, make_in_progress_ticket_detail, make_detail_object_with_predictions, serial_number_1,
-            unconfident_request_completed_prediction, make_metrics,
-            make_edge_with_links_info, edge_1_connected, link_1_stable, link_2_stable):
+        self,
+        tnba_monitor,
+        make_in_progress_ticket_detail,
+        make_detail_object_with_predictions,
+        serial_number_1,
+        unconfident_request_completed_prediction,
+        make_metrics,
+        make_edge_with_links_info,
+        edge_1_connected,
+        link_1_stable,
+        link_2_stable,
+    ):
         ticket_id = 12345
         ticket_detail_id = 1
-        ticket_creator = 'Intelygenz Ai'
-        ticket_topic = 'VOO'
+        ticket_creator = "Intelygenz Ai"
+        ticket_topic = "VOO"
 
         edge_status = make_edge_with_links_info(
             edge_info=edge_1_connected,
@@ -2002,7 +2302,7 @@ class TestTNBAMonitor:
         metrics = make_metrics()
 
         tnba_monitor._link_metrics_and_events_by_serial = {
-            serial_number_1: [{'link_metrics': metrics, 'link_events': []}],
+            serial_number_1: [{"link_metrics": metrics, "link_events": []}],
         }
 
         ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
@@ -2012,7 +2312,7 @@ class TestTNBAMonitor:
             ticket_creator=ticket_creator,
             ticket_detail=ticket_detail,
             ticket_notes=[],
-            ticket_detail_predictions=[unconfident_request_completed_prediction]
+            ticket_detail_predictions=[unconfident_request_completed_prediction],
         )
 
         expected_autoresolved_status = tnba_monitor.AutoresolveTicketDetailStatus.SKIPPED
@@ -2034,23 +2334,28 @@ class TestTNBAMonitor:
         assert autoresolved_status == expected_autoresolved_status
 
     @pytest.mark.asyncio
-    async def autoresolve_ticket_detail_with_edge_in_outage_state_test(self, tnba_monitor,
-                                                                       make_in_progress_ticket_detail,
-                                                                       make_detail_object_with_predictions,
-                                                                       make_edge_with_links_info,
-                                                                       edge_1_offline, link_1_disconnected,
-                                                                       link_2_disconnected, serial_number_1,
-                                                                       confident_request_completed_prediction,
-                                                                       make_metrics):
+    async def autoresolve_ticket_detail_with_edge_in_outage_state_test(
+        self,
+        tnba_monitor,
+        make_in_progress_ticket_detail,
+        make_detail_object_with_predictions,
+        make_edge_with_links_info,
+        edge_1_offline,
+        link_1_disconnected,
+        link_2_disconnected,
+        serial_number_1,
+        confident_request_completed_prediction,
+        make_metrics,
+    ):
         ticket_id = 12345
         ticket_detail_id = 1
-        ticket_creator = 'Intelygenz Ai'
-        ticket_topic = 'VOO'
+        ticket_creator = "Intelygenz Ai"
+        ticket_topic = "VOO"
 
         metrics = make_metrics()
 
         tnba_monitor._link_metrics_and_events_by_serial = {
-            serial_number_1: [{'link_metrics': metrics, 'link_events': []}],
+            serial_number_1: [{"link_metrics": metrics, "link_events": []}],
         }
 
         ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
@@ -2060,7 +2365,7 @@ class TestTNBAMonitor:
             ticket_creator=ticket_creator,
             ticket_detail=ticket_detail,
             ticket_notes=[],
-            ticket_detail_predictions=[confident_request_completed_prediction]
+            ticket_detail_predictions=[confident_request_completed_prediction],
         )
 
         edge_status = make_edge_with_links_info(
@@ -2090,13 +2395,22 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def autoresolve_ticket_detail_with_affecting_not_all_metrics_within_threshold_test(
-            self, tnba_monitor, make_in_progress_ticket_detail, make_detail_object_with_predictions, serial_number_1,
-            unconfident_request_completed_prediction, make_metrics,
-            make_edge_with_links_info, edge_1_connected, link_1_stable, link_2_stable):
+        self,
+        tnba_monitor,
+        make_in_progress_ticket_detail,
+        make_detail_object_with_predictions,
+        serial_number_1,
+        unconfident_request_completed_prediction,
+        make_metrics,
+        make_edge_with_links_info,
+        edge_1_connected,
+        link_1_stable,
+        link_2_stable,
+    ):
         ticket_id = 12345
         ticket_detail_id = 1
-        ticket_creator = 'Intelygenz Ai'
-        ticket_topic = 'VAS'
+        ticket_creator = "Intelygenz Ai"
+        ticket_topic = "VAS"
 
         edge_status = make_edge_with_links_info(
             edge_info=edge_1_connected,
@@ -2110,7 +2424,7 @@ class TestTNBAMonitor:
         metrics = make_metrics()
 
         tnba_monitor._link_metrics_and_events_by_serial = {
-            serial_number_1: [{'link_metrics': metrics, 'link_events': []}],
+            serial_number_1: [{"link_metrics": metrics, "link_events": []}],
         }
 
         ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
@@ -2120,7 +2434,7 @@ class TestTNBAMonitor:
             ticket_creator=ticket_creator,
             ticket_detail=ticket_detail,
             ticket_notes=[],
-            ticket_detail_predictions=[unconfident_request_completed_prediction]
+            ticket_detail_predictions=[unconfident_request_completed_prediction],
         )
 
         tnba_monitor._trouble_repository.are_all_metrics_within_thresholds = Mock(return_value=False)
@@ -2136,29 +2450,35 @@ class TestTNBAMonitor:
         tnba_monitor._ticket_repository.is_detail_in_outage_ticket.assert_called_once_with(detail_object)
         tnba_monitor._ticket_repository.is_detail_in_affecting_ticket.assert_called_once_with(detail_object)
         tnba_monitor._trouble_repository.are_all_metrics_within_thresholds.assert_called_once_with(
-            tnba_monitor._link_metrics_and_events_by_serial[serial_number_1])
+            tnba_monitor._link_metrics_and_events_by_serial[serial_number_1]
+        )
         tnba_monitor._bruin_repository.resolve_ticket_detail.assert_not_awaited()
         tnba_monitor._prediction_repository.is_prediction_confident_enough.assert_not_called()
         assert autoresolved_status == expected_autoresolved_status
 
     @pytest.mark.asyncio
-    async def autoresolve_ticket_detail_with_non_production_environment_test(self, tnba_monitor,
-                                                                             make_in_progress_ticket_detail,
-                                                                             make_detail_object_with_predictions,
-                                                                             make_edge_with_links_info,
-                                                                             edge_1_connected, link_1_stable,
-                                                                             link_2_stable, serial_number_1,
-                                                                             confident_request_completed_prediction,
-                                                                             make_metrics):
+    async def autoresolve_ticket_detail_with_non_production_environment_test(
+        self,
+        tnba_monitor,
+        make_in_progress_ticket_detail,
+        make_detail_object_with_predictions,
+        make_edge_with_links_info,
+        edge_1_connected,
+        link_1_stable,
+        link_2_stable,
+        serial_number_1,
+        confident_request_completed_prediction,
+        make_metrics,
+    ):
         ticket_id = 12345
         ticket_detail_id = 1
-        ticket_creator = 'Intelygenz Ai'
-        ticket_topic = 'VOO'
+        ticket_creator = "Intelygenz Ai"
+        ticket_topic = "VOO"
 
         metrics = make_metrics()
 
         tnba_monitor._link_metrics_and_events_by_serial = {
-            serial_number_1: [{'link_metrics': metrics, 'link_events': []}],
+            serial_number_1: [{"link_metrics": metrics, "link_events": []}],
         }
 
         ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
@@ -2168,7 +2488,7 @@ class TestTNBAMonitor:
             ticket_creator=ticket_creator,
             ticket_detail=ticket_detail,
             ticket_notes=[],
-            ticket_detail_predictions=[confident_request_completed_prediction]
+            ticket_detail_predictions=[confident_request_completed_prediction],
         )
 
         edge_status = make_edge_with_links_info(
@@ -2180,7 +2500,7 @@ class TestTNBAMonitor:
         }
         tnba_monitor._edge_status_by_serial = edge_status_by_serial
 
-        with patch.object(testconfig, 'CURRENT_ENVIRONMENT', "dev"):
+        with patch.object(testconfig, "CURRENT_ENVIRONMENT", "dev"):
             expected_autoresolved_status = tnba_monitor.AutoresolveTicketDetailStatus.SKIPPED
 
             autoresolved_status = await tnba_monitor._autoresolve_ticket_detail(
@@ -2201,18 +2521,28 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def autoresolve_ticket_detail_with_failure_in_autoresolve_request_test(
-            self, tnba_monitor, make_in_progress_ticket_detail, make_detail_object_with_predictions,
-            make_edge_with_links_info, make_rpc_response, edge_1_connected, link_1_stable, link_2_stable,
-            serial_number_1, confident_request_completed_prediction, make_metrics):
+        self,
+        tnba_monitor,
+        make_in_progress_ticket_detail,
+        make_detail_object_with_predictions,
+        make_edge_with_links_info,
+        make_rpc_response,
+        edge_1_connected,
+        link_1_stable,
+        link_2_stable,
+        serial_number_1,
+        confident_request_completed_prediction,
+        make_metrics,
+    ):
         ticket_id = 12345
         ticket_detail_id = 1
-        ticket_creator = 'Intelygenz Ai'
-        ticket_topic = 'VOO'
+        ticket_creator = "Intelygenz Ai"
+        ticket_topic = "VOO"
 
         metrics = make_metrics()
 
         tnba_monitor._link_metrics_and_events_by_serial = {
-            serial_number_1: [{'link_metrics': metrics, 'link_events': []}],
+            serial_number_1: [{"link_metrics": metrics, "link_events": []}],
         }
 
         ticket_detail = make_in_progress_ticket_detail(serial_number=serial_number_1, detail_id=ticket_detail_id)
@@ -2222,7 +2552,7 @@ class TestTNBAMonitor:
             ticket_creator=ticket_creator,
             ticket_detail=ticket_detail,
             ticket_notes=[],
-            ticket_detail_predictions=[confident_request_completed_prediction]
+            ticket_detail_predictions=[confident_request_completed_prediction],
         )
 
         edge_status = make_edge_with_links_info(
@@ -2235,13 +2565,13 @@ class TestTNBAMonitor:
         tnba_monitor._edge_status_by_serial = edge_status_by_serial
 
         resolve_detail_response = make_rpc_response(
-            body='Got internal error from Bruin',
+            body="Got internal error from Bruin",
             status=500,
         )
 
         tnba_monitor._bruin_repository.resolve_ticket_detail.return_value = resolve_detail_response
 
-        with patch.object(testconfig, 'CURRENT_ENVIRONMENT', "production"):
+        with patch.object(testconfig, "CURRENT_ENVIRONMENT", "production"):
             expected_autoresolved_status = tnba_monitor.AutoresolveTicketDetailStatus.SKIPPED
 
             autoresolved_status = await tnba_monitor._autoresolve_ticket_detail(
@@ -2261,8 +2591,15 @@ class TestTNBAMonitor:
         assert autoresolved_status == expected_autoresolved_status
 
     @pytest.mark.asyncio
-    async def append_tnba_notes_test(self, tnba_monitor, make_payload_for_note_append_with_ticket_id,
-                                     make_payload_for_note_append, make_rpc_response, serial_number_1, serial_number_2):
+    async def append_tnba_notes_test(
+        self,
+        tnba_monitor,
+        make_payload_for_note_append_with_ticket_id,
+        make_payload_for_note_append,
+        make_rpc_response,
+        serial_number_1,
+        serial_number_2,
+    ):
         ticket_1_id = 12345
         ticket_2_id = 67890
 
@@ -2270,9 +2607,9 @@ class TestTNBAMonitor:
         ticket_detail_2_id = 67890
         ticket_detail_3_id = 87654
 
-        tnba_note_1_text = 'This is a TNBA note (1)'
-        tnba_note_2_text = 'This is a TNBA note (2)'
-        tnba_note_3_text = 'This is a TNBA note (3)'
+        tnba_note_1_text = "This is a TNBA note (1)"
+        tnba_note_2_text = "This is a TNBA note (2)"
+        tnba_note_3_text = "This is a TNBA note (3)"
 
         ticket_1_note_1 = make_payload_for_note_append(
             serial_number=serial_number_1,
@@ -2298,7 +2635,7 @@ class TestTNBAMonitor:
             ticket_2_note_1,
         ]
 
-        append_notes_response = make_rpc_response(body='ok', status=200)
+        append_notes_response = make_rpc_response(body="ok", status=200)
 
         tnba_monitor._bruin_repository.append_multiple_notes_to_ticket.return_value = append_notes_response
         tnba_monitor._notifications_repository.send_slack_message = CoroutineMock()
@@ -2329,14 +2666,25 @@ class TestTNBAMonitor:
 
         await tnba_monitor._append_tnba_notes()
 
-        tnba_monitor._bruin_repository.append_multiple_notes_to_ticket.assert_has_awaits([
-            call(ticket_1_id, ticket_1_notes),
-            call(ticket_2_id, ticket_2_notes),
-        ])
+        tnba_monitor._bruin_repository.append_multiple_notes_to_ticket.assert_has_awaits(
+            [
+                call(ticket_1_id, ticket_1_notes),
+                call(ticket_2_id, ticket_2_notes),
+            ]
+        )
         assert tnba_monitor._notifications_repository.send_slack_message.await_count == 2
 
-    def is_there_an_outage_test(self, tnba_monitor, make_edge_with_links_info, edge_1_connected, edge_1_offline,
-                                link_1_stable, link_1_disconnected, link_2_stable, link_2_disconnected):
+    def is_there_an_outage_test(
+        self,
+        tnba_monitor,
+        make_edge_with_links_info,
+        edge_1_connected,
+        edge_1_offline,
+        link_1_stable,
+        link_1_disconnected,
+        link_2_stable,
+        link_2_disconnected,
+    ):
         edge_with_links_info = make_edge_with_links_info(
             edge_info=edge_1_connected,
             links_info=[link_1_stable, link_2_stable],
@@ -2359,8 +2707,8 @@ class TestTNBAMonitor:
         assert result is True
 
     def is_faulty_edge_test(self, edge_1_connected, edge_1_offline):
-        edge_state_1 = edge_1_connected['edgeState']
-        edge_state_2 = edge_1_offline['edgeState']
+        edge_state_1 = edge_1_connected["edgeState"]
+        edge_state_2 = edge_1_offline["edgeState"]
 
         result = TNBAMonitor._is_faulty_edge(edge_state_1)
         assert result is False
@@ -2369,8 +2717,8 @@ class TestTNBAMonitor:
         assert result is True
 
     def is_faulty_link_test(self, link_1_stable, link_1_disconnected):
-        link_state_1 = link_1_stable['linkState']
-        link_state_2 = link_1_disconnected['linkState']
+        link_state_1 = link_1_stable["linkState"]
+        link_state_2 = link_1_disconnected["linkState"]
 
         result = TNBAMonitor._is_faulty_link(link_state_1)
         assert result is False

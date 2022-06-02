@@ -1,13 +1,11 @@
 from unittest.mock import Mock
 
 import pytest
-from asynctest import CoroutineMock
-
 from application.actions.get_client_info_by_did import GetClientInfoByDID
+from asynctest import CoroutineMock
 
 
 class TestGetClientInfoByDID:
-
     def instance_test(self):
         logger = Mock()
         event_bus = Mock()
@@ -28,25 +26,14 @@ class TestGetClientInfoByDID:
         bruin_repository = Mock()
 
         response = {
-            "body": {
-                "inventoryId": 12345678,
-                "clientId": 87654,
-                "clientName": "Test Client",
-                "btn": "9876543210"
-            },
-            "status": 200
+            "body": {"inventoryId": 12345678, "clientId": 87654, "clientName": "Test Client", "btn": "9876543210"},
+            "status": 200,
         }
         bruin_repository.get_client_info_by_did = CoroutineMock(return_value=response)
 
-        body = {
-            "did": "+14159999999"
-        }
+        body = {"did": "+14159999999"}
 
-        event_bus_request = {
-            "request_id": 1,
-            "body": body,
-            "response_topic": "some.topic"
-        }
+        event_bus_request = {"request_id": 1, "body": body, "response_topic": "some.topic"}
 
         event_bus_response = {
             "request_id": 1,
@@ -69,16 +56,12 @@ class TestGetClientInfoByDID:
         bruin_repository = Mock()
         bruin_repository.get_client_info_by_did = CoroutineMock()
 
-        event_bus_request = {
-            "request_id": 1,
-            "response_topic": "some.topic"
-        }
+        event_bus_request = {"request_id": 1, "response_topic": "some.topic"}
 
         event_bus_response = {
             "request_id": 1,
-            'body': 'You must specify '
-                    '{.."body":{"did":...}} in the request',
-            'status': 400
+            "body": "You must specify " '{.."body":{"did":...}} in the request',
+            "status": 400,
         }
 
         get_client_info_by_did = GetClientInfoByDID(logger, event_bus, bruin_repository)
@@ -97,17 +80,9 @@ class TestGetClientInfoByDID:
         bruin_repository = Mock()
         bruin_repository.get_client_info_by_did = CoroutineMock()
 
-        event_bus_request = {
-            "request_id": 1,
-            "body": {},
-            "response_topic": "some.topic"
-        }
+        event_bus_request = {"request_id": 1, "body": {}, "response_topic": "some.topic"}
 
-        event_bus_response = {
-            "request_id": 1,
-            'body': 'You must specify "did" in the body',
-            'status': 400
-        }
+        event_bus_response = {"request_id": 1, "body": 'You must specify "did" in the body', "status": 400}
 
         get_client_info_by_did = GetClientInfoByDID(logger, event_bus, bruin_repository)
         await get_client_info_by_did.get_client_info_by_did(event_bus_request)

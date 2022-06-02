@@ -1,9 +1,7 @@
-from datetime import datetime
-from datetime import timedelta
-
-from shortuuid import uuid
+from datetime import datetime, timedelta
 
 from application import nats_error_response
+from shortuuid import uuid
 
 
 class CustomerCacheRepository:
@@ -22,17 +20,17 @@ class CustomerCacheRepository:
         }
 
         if last_contact_filter:
-            request['body']['last_contact_filter'] = last_contact_filter
+            request["body"]["last_contact_filter"] = last_contact_filter
 
         try:
             self._logger.info(f"Getting customer cache for Hawkeye...")
             response = await self._event_bus.rpc_request("hawkeye.customer.cache.get", request, timeout=60)
         except Exception as e:
-            err_msg = f'An error occurred when requesting customer cache -> {e}'
+            err_msg = f"An error occurred when requesting customer cache -> {e}"
             response = nats_error_response
         else:
-            response_body = response['body']
-            response_status = response['status']
+            response_body = response["body"]
+            response_status = response["status"]
 
             if response_status not in range(200, 300) or response_status == 202:
                 err_msg = response_body

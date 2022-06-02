@@ -1,7 +1,6 @@
 import base64
 import csv
 import io
-
 from datetime import date
 from os.path import join
 from typing import List
@@ -10,7 +9,6 @@ import jinja2
 
 
 class TemplateRenderer:
-
     def __init__(self, config):
         self._config = config
 
@@ -37,24 +35,18 @@ class TemplateRenderer:
         raw_csv = buf.read()
 
         return {
-            'subject': f'{customer} Lumin.AI Billing Report ({date.today()})',
-            'recipient': self._config["recipient"],
-            'text': 'this is the accessible text for the email',
-            'html': email_html,
-            'images': [
-                {
-                    'name': 'logo',
-                    'data': base64.b64encode(open(logo, 'rb').read()).decode('utf-8')
-                },
-                {
-                    'name': 'header',
-                    'data': base64.b64encode(open(header, 'rb').read()).decode('utf-8')
-                },
+            "subject": f"{customer} Lumin.AI Billing Report ({date.today()})",
+            "recipient": self._config["recipient"],
+            "text": "this is the accessible text for the email",
+            "html": email_html,
+            "images": [
+                {"name": "logo", "data": base64.b64encode(open(logo, "rb").read()).decode("utf-8")},
+                {"name": "header", "data": base64.b64encode(open(header, "rb").read()).decode("utf-8")},
             ],
-            'attachments': [
+            "attachments": [
                 {
-                    'name': f'{customer}-{csv_name}-{date.today()}.csv',
-                    'data': base64.b64encode(raw_csv.encode('utf-8')).decode('utf-8')
+                    "name": f"{customer}-{csv_name}-{date.today()}.csv",
+                    "data": base64.b64encode(raw_csv.encode("utf-8")).decode("utf-8"),
                 }
-            ]
+            ],
         }

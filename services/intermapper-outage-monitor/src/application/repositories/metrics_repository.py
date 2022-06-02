@@ -1,22 +1,22 @@
 from prometheus_client import Counter
 
-COMMON_LABELS = ['feature', 'system', 'topic', 'severity', 'event', 'is_piab']
+COMMON_LABELS = ["feature", "system", "topic", "severity", "event", "is_piab"]
 CREATE_LABELS = []
 REOPEN_LABELS = []
 AUTORESOLVE_LABELS = []
 
 
 class MetricsRepository:
-    _tasks_created = Counter('tasks_created', 'Tasks created', COMMON_LABELS + CREATE_LABELS)
-    _tasks_reopened = Counter('tasks_reopened', 'Tasks reopened', COMMON_LABELS + REOPEN_LABELS)
-    _tasks_autoresolved = Counter('tasks_autoresolved', 'Tasks autoresolved', COMMON_LABELS + AUTORESOLVE_LABELS)
+    _tasks_created = Counter("tasks_created", "Tasks created", COMMON_LABELS + CREATE_LABELS)
+    _tasks_reopened = Counter("tasks_reopened", "Tasks reopened", COMMON_LABELS + REOPEN_LABELS)
+    _tasks_autoresolved = Counter("tasks_autoresolved", "Tasks autoresolved", COMMON_LABELS + AUTORESOLVE_LABELS)
 
     def __init__(self):
         self._STATIC_LABELS = {
-            'feature': 'InterMapper Outage Monitor',
-            'system': 'InterMapper',
-            'topic': 'VOO',
-            'severity': 2,
+            "feature": "InterMapper Outage Monitor",
+            "system": "InterMapper",
+            "topic": "VOO",
+            "severity": 2,
         }
 
     def increment_tasks_created(self, **labels):

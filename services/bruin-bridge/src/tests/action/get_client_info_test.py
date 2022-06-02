@@ -1,13 +1,11 @@
 from unittest.mock import Mock
 
 import pytest
-from asynctest import CoroutineMock
-
 from application.actions.get_client_info import GetClientInfo
+from asynctest import CoroutineMock
 
 
 class TestGetClientInfo:
-
     def instance_test(self):
         logger = Mock()
         event_bus = Mock()
@@ -27,24 +25,12 @@ class TestGetClientInfo:
         event_bus.publish_message = CoroutineMock()
         bruin_repository = Mock()
 
-        client_info = {
-            "body": {
-                "client_id": 1919,
-                "client_name": "Tet Corp"
-            },
-            "status": 200
-        }
+        client_info = {"body": {"client_id": 1919, "client_name": "Tet Corp"}, "status": 200}
         bruin_repository.get_client_info = CoroutineMock(return_value=client_info)
 
-        filters = {
-            "service_number": "VC05400009999"
-        }
+        filters = {"service_number": "VC05400009999"}
 
-        event_bus_request = {
-            "request_id": 19,
-            "body": filters,
-            "response_topic": "some.topic"
-        }
+        event_bus_request = {"request_id": 19, "body": filters, "response_topic": "some.topic"}
 
         event_bus_response = {
             "request_id": 19,
@@ -67,16 +53,12 @@ class TestGetClientInfo:
         bruin_repository = Mock()
         bruin_repository.get_client_info = CoroutineMock()
 
-        event_bus_request = {
-            "request_id": 19,
-            "response_topic": "some.topic"
-        }
+        event_bus_request = {"request_id": 19, "response_topic": "some.topic"}
 
         event_bus_response = {
             "request_id": 19,
-            'body': 'You must specify '
-                    '{.."body":{"service_number":...}} in the request',
-            'status': 400
+            "body": "You must specify " '{.."body":{"service_number":...}} in the request',
+            "status": 400,
         }
 
         get_client_info = GetClientInfo(logger, event_bus, bruin_repository)
@@ -95,17 +77,9 @@ class TestGetClientInfo:
         bruin_repository = Mock()
         bruin_repository.get_client_info = CoroutineMock()
 
-        event_bus_request = {
-            "request_id": 19,
-            "body": {},
-            "response_topic": "some.topic"
-        }
+        event_bus_request = {"request_id": 19, "body": {}, "response_topic": "some.topic"}
 
-        event_bus_response = {
-            "request_id": 19,
-            'body': 'You must specify "service_number" in the body',
-            'status': 400
-        }
+        event_bus_response = {"request_id": 19, "body": 'You must specify "service_number" in the body', "status": 400}
 
         get_client_info = GetClientInfo(logger, event_bus, bruin_repository)
         await get_client_info.get_client_info(event_bus_request)

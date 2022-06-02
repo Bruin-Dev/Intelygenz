@@ -1,39 +1,36 @@
 import asyncio
 
 import redis
-
+from application.actions.get_customers import GetCustomers
+from application.actions.refresh_cache import RefreshCache
+from application.repositories.bruin_repository import BruinRepository
+from application.repositories.hawkeye_repository import HawkeyeRepository
+from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.storage_repository import StorageRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from prometheus_client import start_http_server
-
+from config import config
 from igz.packages.eventbus.action import ActionWrapper
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
-from application.repositories.bruin_repository import BruinRepository
-from application.repositories.hawkeye_repository import HawkeyeRepository
-from application.repositories.storage_repository import StorageRepository
-from application.repositories.notifications_repository import NotificationsRepository
-from application.actions.refresh_cache import RefreshCache
-from application.actions.get_customers import GetCustomers
-
-from config import config
+from prometheus_client import start_http_server
 
 
 class Container:
-
     def __init__(self):
         # LOGGER
         self._logger = LoggerClient(config).get_logger()
-        self._logger.info(f'Hawkeye customer cache starting in {config.ENVIRONMENT_NAME}...')
+        self._logger.info(f"Hawkeye customer cache starting in {config.ENVIRONMENT_NAME}...")
 
         # REDIS
         self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._redis_client.ping()
 
-        self._redis_customer_cache_client = redis.Redis(host=config.REDIS_CUSTOMER_CACHE["host"], port=6379,
-                                                        decode_responses=True)
+        self._redis_customer_cache_client = redis.Redis(
+            host=config.REDIS_CUSTOMER_CACHE["host"], port=6379, decode_responses=True
+        )
         self._redis_customer_cache_client.ping()
 
         # SCHEDULER
@@ -55,33 +52,43 @@ class Container:
         # REPOSITORIES
         self._notifications_repository = NotificationsRepository(self._event_bus, config)
         self._bruin_repository = BruinRepository(config, self._logger, self._event_bus, self._notifications_repository)
-        self._hawkeye_repository = HawkeyeRepository(self._event_bus, self._logger, config,
-                                                     self._notifications_repository)
+        self._hawkeye_repository = HawkeyeRepository(
+            self._event_bus, self._logger, config, self._notifications_repository
+        )
         self._storage_repository = StorageRepository(config, self._logger, self._redis_customer_cache_client)
 
         # ACTIONS
-        self._refresh_cache = RefreshCache(config, self._event_bus, self._logger, self._scheduler,
-                                           self._storage_repository, self._bruin_repository, self._hawkeye_repository,
-                                           self._notifications_repository)
+        self._refresh_cache = RefreshCache(
+            config,
+            self._event_bus,
+            self._logger,
+            self._scheduler,
+            self._storage_repository,
+            self._bruin_repository,
+            self._hawkeye_repository,
+            self._notifications_repository,
+        )
         self._get_customers = GetCustomers(config, self._logger, self._storage_repository, self._event_bus)
 
         # ACTION WRAPPER
-        self._get_customers_w = ActionWrapper(self._get_customers, "get_customers",
-                                              is_async=True, logger=self._logger)
+        self._get_customers_w = ActionWrapper(self._get_customers, "get_customers", is_async=True, logger=self._logger)
 
     async def _start(self):
         self._start_prometheus_metrics_server()
 
         await self._event_bus.connect()
-        await self._event_bus.subscribe_consumer(consumer_name="get_customers", topic="hawkeye.customer.cache.get",
-                                                 action_wrapper=self._get_customers_w,
-                                                 queue="customer_cache")
+        await self._event_bus.subscribe_consumer(
+            consumer_name="get_customers",
+            topic="hawkeye.customer.cache.get",
+            action_wrapper=self._get_customers_w,
+            queue="customer_cache",
+        )
         self._scheduler.start()
         await self._refresh_cache.schedule_cache_refresh()
 
     @staticmethod
     def _start_prometheus_metrics_server():
-        start_http_server(config.METRICS_SERVER_CONFIG['port'])
+        start_http_server(config.METRICS_SERVER_CONFIG["port"])
 
     async def start_server(self):
         await self._server.run_server()
@@ -90,7 +97,7 @@ class Container:
         await self._start()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     container = Container()
     loop = asyncio.get_event_loop()
     asyncio.ensure_future(container.run(), loop=loop)

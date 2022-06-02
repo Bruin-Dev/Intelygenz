@@ -3,12 +3,10 @@ from unittest.mock import Mock
 import pytest
 from application.actions.mark_email_as_read import MarkEmailAsRead
 from asynctest import CoroutineMock
-
 from config import testconfig as config
 
 
 class TestGetEmails:
-
     def instance_test(self):
         logger = Mock()
         event_bus = Mock()
@@ -25,26 +23,17 @@ class TestGetEmails:
     async def mark_email_as_read_ok_test(self):
         request_id = "123"
         response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
-        email = 'fake@gmail.com'
-        msg_uid = '123'
+        email = "fake@gmail.com"
+        msg_uid = "123"
 
         msg_dict = {
             "request_id": request_id,
             "response_topic": response_topic,
-            "body": {
-                'msg_uid': msg_uid,
-                'email_account': email
-            },
+            "body": {"msg_uid": msg_uid, "email_account": email},
         }
 
-        mark_emails_response = {
-            'body': f'Email {msg_uid} marked as read',
-            'status': 200
-        }
-        event_bus_response = {
-            'request_id': request_id,
-            **mark_emails_response
-        }
+        mark_emails_response = {"body": f"Email {msg_uid} marked as read", "status": 200}
+        event_bus_response = {"request_id": request_id, **mark_emails_response}
 
         logger = Mock()
         event_bus = Mock()
@@ -64,8 +53,8 @@ class TestGetEmails:
     async def mark_email_as_read_ko_empty_body_test(self):
         request_id = "123"
         response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
-        email = 'fake@gmail.com'
-        msg_uid = '123'
+        email = "fake@gmail.com"
+        msg_uid = "123"
 
         msg_dict = {
             "request_id": request_id,
@@ -74,13 +63,10 @@ class TestGetEmails:
         }
 
         mark_emails_response = {
-            'body': 'You must include "msg_uid" and "email_account" in the "body" field of the response request',
-            'status': 400
+            "body": 'You must include "msg_uid" and "email_account" in the "body" field of the response request',
+            "status": 400,
         }
-        event_bus_response = {
-            'request_id': request_id,
-            **mark_emails_response
-        }
+        event_bus_response = {"request_id": request_id, **mark_emails_response}
 
         logger = Mock()
         event_bus = Mock()
@@ -100,22 +86,16 @@ class TestGetEmails:
     async def mark_email_as_read_ko_no_body_test(self):
         request_id = "123"
         response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
-        email = 'fake@gmail.com'
-        msg_uid = '123'
+        email = "fake@gmail.com"
+        msg_uid = "123"
 
         msg_dict = {
             "request_id": request_id,
             "response_topic": response_topic,
         }
 
-        mark_emails_response = {
-            'body': 'Must include "body" in request',
-            'status': 400
-        }
-        event_bus_response = {
-            'request_id': request_id,
-            **mark_emails_response
-        }
+        mark_emails_response = {"body": 'Must include "body" in request', "status": 400}
+        event_bus_response = {"request_id": request_id, **mark_emails_response}
 
         logger = Mock()
         event_bus = Mock()

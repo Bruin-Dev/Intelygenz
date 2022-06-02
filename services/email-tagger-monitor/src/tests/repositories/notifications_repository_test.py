@@ -1,17 +1,13 @@
-from unittest.mock import Mock
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
-
+from application.repositories import notifications_repository as notifications_repository_module
+from application.repositories.notifications_repository import NotificationsRepository
 from asynctest import CoroutineMock
 from shortuuid import uuid
 
-from application.repositories import notifications_repository as notifications_repository_module
-from application.repositories.notifications_repository import NotificationsRepository
-
-
 uuid_ = uuid()
-uuid_mock = patch.object(notifications_repository_module, 'uuid', return_value=uuid_)
+uuid_mock = patch.object(notifications_repository_module, "uuid", return_value=uuid_)
 
 
 class TestNotificationsRepository:
@@ -37,8 +33,8 @@ class TestNotificationsRepository:
         event_bus.rpc_request.assert_awaited_once_with(
             "notification.slack.request",
             {
-                'request_id': uuid_,
-                'message': f"[email-tagger-monitor] {message}",
+                "request_id": uuid_,
+                "message": f"[email-tagger-monitor] {message}",
             },
             timeout=10,
         )

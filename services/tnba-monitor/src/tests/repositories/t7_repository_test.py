@@ -1,16 +1,14 @@
 from unittest.mock import patch
 
 import pytest
-
-from asynctest import CoroutineMock
-from shortuuid import uuid
-
 from application.repositories import nats_error_response
 from application.repositories import t7_repository as t7_repository_module
+from asynctest import CoroutineMock
 from config import testconfig
+from shortuuid import uuid
 
 uuid_ = uuid()
-uuid_mock = patch.object(t7_repository_module, 'uuid', return_value=uuid_)
+uuid_mock = patch.object(t7_repository_module, "uuid", return_value=uuid_)
 
 
 class TestT7Repository:
@@ -21,9 +19,18 @@ class TestT7Repository:
         assert t7_repository._notifications_repository is notifications_repository
 
     @pytest.mark.asyncio
-    async def get_prediction_test(self, t7_repository, make_task_history_item, make_task_history, make_rpc_request,
-                                  make_rpc_response, make_prediction_object, serial_number_1, serial_number_2,
-                                  holmdel_noc_prediction):
+    async def get_prediction_test(
+        self,
+        t7_repository,
+        make_task_history_item,
+        make_task_history,
+        make_rpc_request,
+        make_rpc_response,
+        make_prediction_object,
+        serial_number_1,
+        serial_number_2,
+        holmdel_noc_prediction,
+    ):
         ticket_id = 12345
 
         task_history_item_1 = make_task_history_item(serial_number=serial_number_1)
@@ -59,9 +66,15 @@ class TestT7Repository:
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_prediction_with_rpc_request_failing_test(self, t7_repository, make_task_history_item,
-                                                           make_task_history, make_rpc_request,
-                                                           serial_number_1, serial_number_2):
+    async def get_prediction_with_rpc_request_failing_test(
+        self,
+        t7_repository,
+        make_task_history_item,
+        make_task_history,
+        make_rpc_request,
+        serial_number_1,
+        serial_number_2,
+    ):
         ticket_id = 12345
 
         task_history_item_1 = make_task_history_item(serial_number=serial_number_1)
@@ -89,10 +102,16 @@ class TestT7Repository:
         assert result == nats_error_response
 
     @pytest.mark.asyncio
-    async def get_prediction_with_rpc_request_returning_non_2xx_status_test(self, t7_repository, make_task_history_item,
-                                                                            make_task_history, make_rpc_request,
-                                                                            make_rpc_response, serial_number_1,
-                                                                            serial_number_2):
+    async def get_prediction_with_rpc_request_returning_non_2xx_status_test(
+        self,
+        t7_repository,
+        make_task_history_item,
+        make_task_history,
+        make_rpc_request,
+        make_rpc_response,
+        serial_number_1,
+        serial_number_2,
+    ):
         ticket_id = 12345
 
         task_history_item_1 = make_task_history_item(serial_number=serial_number_1)
@@ -110,7 +129,7 @@ class TestT7Repository:
 
         response = make_rpc_response(
             request_id=uuid_,
-            body='Got internal error from T7',
+            body="Got internal error from T7",
             status=500,
         )
 
@@ -178,7 +197,7 @@ class TestT7Repository:
 
     @pytest.mark.asyncio
     async def post_live_automation_metrics_with_rpc_request_returning_non_2xx_status_test(
-            self, t7_repository, make_rpc_request, make_rpc_response
+        self, t7_repository, make_rpc_request, make_rpc_response
     ):
         ticket_id = 12345
         asset_id = "VC000TEST"
@@ -193,7 +212,7 @@ class TestT7Repository:
 
         response = make_rpc_response(
             request_id=uuid_,
-            body='Got internal error from T7',
+            body="Got internal error from T7",
             status=500,
         )
 

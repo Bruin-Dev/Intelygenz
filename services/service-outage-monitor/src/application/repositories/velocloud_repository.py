@@ -2,10 +2,9 @@ import json
 from datetime import datetime
 from typing import List
 
+from application.repositories import nats_error_response
 from pytz import utc
 from shortuuid import uuid
-
-from application.repositories import nats_error_response
 
 
 class VelocloudRepository:
@@ -21,7 +20,7 @@ class VelocloudRepository:
         request = {
             "request_id": uuid(),
             "body": {
-                'host': velocloud_host,
+                "host": velocloud_host,
             },
         }
 
@@ -29,18 +28,18 @@ class VelocloudRepository:
             self._logger.info(f"Getting links with edge info from Velocloud for host {velocloud_host}...")
             response = await self._event_bus.rpc_request("get.links.with.edge.info", request, timeout=30)
         except Exception as e:
-            err_msg = f'An error occurred when requesting edge list from Velocloud -> {e}'
+            err_msg = f"An error occurred when requesting edge list from Velocloud -> {e}"
             response = nats_error_response
         else:
-            response_body = response['body']
-            response_status = response['status']
+            response_body = response["body"]
+            response_status = response["status"]
 
             if response_status in range(200, 300):
                 self._logger.info(f"Got links with edge info from Velocloud for host {velocloud_host}!")
             else:
                 err_msg = (
-                    f'Error while retrieving links with edge info in {self._config.ENVIRONMENT_NAME.upper()} '
-                    f'environment: Error {response_status} - {response_body}'
+                    f"Error while retrieving links with edge info in {self._config.ENVIRONMENT_NAME.upper()} "
+                    f"environment: Error {response_status} - {response_body}"
                 )
 
         if err_msg:
@@ -53,15 +52,15 @@ class VelocloudRepository:
         err_msg = None
 
         if not event_types:
-            event_types = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
+            event_types = ["EDGE_UP", "EDGE_DOWN", "LINK_ALIVE", "LINK_DEAD"]
 
         request = {
-            'request_id': uuid(),
-            'body': {
-                'edge': edge_full_id,
-                'start_date': from_,
-                'end_date': to,
-                'filter': event_types,
+            "request_id": uuid(),
+            "body": {
+                "edge": edge_full_id,
+                "start_date": from_,
+                "end_date": to,
+                "filter": event_types,
             },
         }
 
@@ -77,20 +76,20 @@ class VelocloudRepository:
             )
         except Exception as e:
             err_msg = (
-                f'An error occurred when requesting edge events from Velocloud for edge '
-                f'{json.dumps(edge_full_id)} -> {e}'
+                f"An error occurred when requesting edge events from Velocloud for edge "
+                f"{json.dumps(edge_full_id)} -> {e}"
             )
             response = nats_error_response
         else:
-            response_body = response['body']
-            response_status = response['status']
+            response_body = response["body"]
+            response_status = response["status"]
 
             if response_status not in range(200, 300):
                 err_msg = (
-                    f'Error while retrieving events of edge {json.dumps(edge_full_id)} having any type in '
-                    f'{event_types} that took place between {from_} and {to} in '
-                    f'{self._config.CURRENT_ENVIRONMENT.upper()} environment: '
-                    f'Error {response_status} - {response_body}'
+                    f"Error while retrieving events of edge {json.dumps(edge_full_id)} having any type in "
+                    f"{event_types} that took place between {from_} and {to} in "
+                    f"{self._config.CURRENT_ENVIRONMENT.upper()} environment: "
+                    f"Error {response_status} - {response_body}"
                 )
 
         if err_msg:
@@ -108,8 +107,8 @@ class VelocloudRepository:
         request = {
             "request_id": uuid(),
             "body": {
-                'host': velocloud_host,
-                'enterprise_ids': enterprise_ids,
+                "host": velocloud_host,
+                "enterprise_ids": enterprise_ids,
             },
         }
 
@@ -126,11 +125,11 @@ class VelocloudRepository:
                 )
             response = await self._event_bus.rpc_request("request.network.enterprise.edges", request, timeout=30)
         except Exception as e:
-            err_msg = f'An error occurred when requesting network info from Velocloud host {velocloud_host} -> {e}'
+            err_msg = f"An error occurred when requesting network info from Velocloud host {velocloud_host} -> {e}"
             response = nats_error_response
         else:
-            response_body = response['body']
-            response_status = response['status']
+            response_body = response["body"]
+            response_status = response["status"]
 
             if response_status in range(200, 300):
                 if enterprise_ids:
@@ -144,8 +143,8 @@ class VelocloudRepository:
                     )
             else:
                 err_msg = (
-                    f'Error while retrieving network info from Velocloud host {velocloud_host} in '
-                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: Error {response_status} - {response_body}'
+                    f"Error while retrieving network info from Velocloud host {velocloud_host} in "
+                    f"{self._config.ENVIRONMENT_NAME.upper()} environment: Error {response_status} - {response_body}"
                 )
 
         if err_msg:
@@ -158,10 +157,10 @@ class VelocloudRepository:
         all_edges = []
         for host in self._config.TRIAGE_CONFIG["velo_hosts"]:
             response = await self.get_links_with_edge_info(velocloud_host=host)
-            if response['status'] not in range(200, 300):
+            if response["status"] not in range(200, 300):
                 self._logger.info(f"Error: could not retrieve edges links by host: {host}")
                 continue
-            all_edges += response['body']
+            all_edges += response["body"]
         links_grouped_by_edge = self.group_links_by_edge(all_edges)
         return links_grouped_by_edge
 
@@ -170,11 +169,11 @@ class VelocloudRepository:
 
         for host in self._config.TRIAGE_CONFIG["velo_hosts"]:
             response = await self.get_network_enterprises(velocloud_host=host)
-            if response['status'] not in range(200, 300):
+            if response["status"] not in range(200, 300):
                 self._logger.error(f"Could not retrieve network enterprises for triage using host {host}")
                 continue
 
-            edges += response['body']
+            edges += response["body"]
 
         return edges
 
@@ -184,7 +183,7 @@ class VelocloudRepository:
         return await self.get_edge_events(edge_full_id, from_=since, to=current_datetime, event_types=event_types)
 
     async def get_last_down_edge_events(self, edge_full_id: dict, since: datetime):
-        event_types = ['EDGE_DOWN', 'LINK_DEAD']
+        event_types = ["EDGE_DOWN", "LINK_DEAD"]
 
         return await self.get_last_edge_events(edge_full_id, since=since, event_types=event_types)
 
@@ -192,12 +191,12 @@ class VelocloudRepository:
         edges_by_serial_number = {}
 
         for link in links_with_edge_info:
-            velocloud_host = link['host']
-            enterprise_name = link['enterpriseName']
-            enterprise_id = link['enterpriseId']
-            edge_name = link['edgeName']
-            edge_state = link['edgeState']
-            serial_number = link['edgeSerialNumber']
+            velocloud_host = link["host"]
+            enterprise_name = link["enterpriseName"]
+            enterprise_id = link["enterpriseId"]
+            edge_name = link["edgeName"]
+            edge_state = link["edgeState"]
+            serial_number = link["edgeSerialNumber"]
 
             if edge_state is None:
                 self._logger.info(
@@ -206,7 +205,7 @@ class VelocloudRepository:
                 )
                 continue
 
-            if edge_state == 'NEVER_ACTIVATED':
+            if edge_state == "NEVER_ACTIVATED":
                 self._logger.info(
                     f"Edge {edge_name} in host {velocloud_host} and enterprise {enterprise_name} (ID: {enterprise_id}) "
                     f"has never been activated. Skipping..."
@@ -216,36 +215,36 @@ class VelocloudRepository:
             edges_by_serial_number.setdefault(
                 serial_number,
                 {
-                    'host': link['host'],
-                    'enterpriseName': link['enterpriseName'],
-                    'enterpriseId': link['enterpriseId'],
-                    'enterpriseProxyId': link['enterpriseProxyId'],
-                    'enterpriseProxyName': link['enterpriseProxyName'],
-                    'edgeName': link['edgeName'],
-                    'edgeState': link['edgeState'],
-                    'edgeSystemUpSince': link['edgeSystemUpSince'],
-                    'edgeServiceUpSince': link['edgeServiceUpSince'],
-                    'edgeLastContact': link['edgeLastContact'],
-                    'edgeId': link['edgeId'],
-                    'edgeSerialNumber': serial_number,
-                    'edgeHASerialNumber': link['edgeHASerialNumber'],
-                    'edgeModelNumber': link['edgeModelNumber'],
-                    'edgeLatitude': link['edgeLatitude'],
-                    'edgeLongitude': link['edgeLongitude'],
+                    "host": link["host"],
+                    "enterpriseName": link["enterpriseName"],
+                    "enterpriseId": link["enterpriseId"],
+                    "enterpriseProxyId": link["enterpriseProxyId"],
+                    "enterpriseProxyName": link["enterpriseProxyName"],
+                    "edgeName": link["edgeName"],
+                    "edgeState": link["edgeState"],
+                    "edgeSystemUpSince": link["edgeSystemUpSince"],
+                    "edgeServiceUpSince": link["edgeServiceUpSince"],
+                    "edgeLastContact": link["edgeLastContact"],
+                    "edgeId": link["edgeId"],
+                    "edgeSerialNumber": serial_number,
+                    "edgeHASerialNumber": link["edgeHASerialNumber"],
+                    "edgeModelNumber": link["edgeModelNumber"],
+                    "edgeLatitude": link["edgeLatitude"],
+                    "edgeLongitude": link["edgeLongitude"],
                     "links": [],
-                }
+                },
             )
 
             link_info = {
-                'displayName': link['displayName'],
-                'isp': link['isp'],
-                'interface': link['interface'],
-                'internalId': link['internalId'],
-                'linkState': link['linkState'],
-                'linkLastActive': link['linkLastActive'],
-                'linkVpnState': link['linkVpnState'],
-                'linkId': link['linkId'],
-                'linkIpAddress': link['linkIpAddress'],
+                "displayName": link["displayName"],
+                "isp": link["isp"],
+                "interface": link["interface"],
+                "internalId": link["internalId"],
+                "linkState": link["linkState"],
+                "linkLastActive": link["linkLastActive"],
+                "linkVpnState": link["linkVpnState"],
+                "linkId": link["linkId"],
+                "linkIpAddress": link["linkIpAddress"],
             }
 
             edges_by_serial_number[serial_number]["links"].append(link_info)

@@ -1,21 +1,16 @@
-from datetime import datetime
-from datetime import timedelta
-from unittest.mock import Mock
-from unittest.mock import patch
+from datetime import datetime, timedelta
+from unittest.mock import Mock, patch
 
 import pytest
-
+from application.repositories import nats_error_response
+from application.repositories import velocloud_repository as velocloud_repository_module
+from application.repositories.velocloud_repository import VelocloudRepository
 from asynctest import CoroutineMock
+from config import testconfig
 from shortuuid import uuid
 
-from application.repositories import velocloud_repository as velocloud_repository_module
-from application.repositories import nats_error_response
-from application.repositories.velocloud_repository import VelocloudRepository
-from config import testconfig
-
-
 uuid_ = uuid()
-uuid_mock = patch.object(velocloud_repository_module, 'uuid', return_value=uuid_)
+uuid_mock = patch.object(velocloud_repository_module, "uuid", return_value=uuid_)
 
 
 class TestVelocloudRepository:
@@ -27,21 +22,21 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_links_with_edge_info_default_rpc_timeout_test(self):
-        host = 'mettel.velocloud.net'
+        host = "mettel.velocloud.net"
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'host': host,
+            "request_id": uuid_,
+            "body": {
+                "host": host,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': [
-                {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1},
-                {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2},
+            "request_id": uuid_,
+            "body": [
+                {"host": "some-host", "enterprise_id": 1, "edge_id": 1},
+                {"host": "some-host", "enterprise_id": 1, "edge_id": 2},
             ],
-            'status': 200,
+            "status": 200,
         }
 
         logger = Mock()
@@ -61,12 +56,12 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_links_with_edge_info_with_rpc_request_failing_test(self):
-        host = 'mettel.velocloud.net'
+        host = "mettel.velocloud.net"
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'host': host,
+            "request_id": uuid_,
+            "body": {
+                "host": host,
             },
         }
 
@@ -91,18 +86,18 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_edges_with_rpc_request_returning_non_2xx_status_test(self):
-        host = 'mettel.velocloud.net'
+        host = "mettel.velocloud.net"
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'host': host,
+            "request_id": uuid_,
+            "body": {
+                "host": host,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': 'Got internal error from Velocloud',
-            'status': 500,
+            "request_id": uuid_,
+            "body": "Got internal error from Velocloud",
+            "status": 500,
         }
 
         logger = Mock()
@@ -126,32 +121,32 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_edge_events_test(self):
-        edge_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+        edge_full_id = {"host": "some-host", "enterprise_id": 1, "edge_id": 1}
         current_moment = datetime.now()
         past_moment = current_moment - timedelta(hours=1)
         future_moment = current_moment + timedelta(hours=1)
-        event_types_filter = ['LINK_ALIVE', 'LINK_DEAD']
+        event_types_filter = ["LINK_ALIVE", "LINK_DEAD"]
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'edge': edge_full_id,
-                'start_date': past_moment,
-                'end_date': future_moment,
-                'filter': event_types_filter,
+            "request_id": uuid_,
+            "body": {
+                "edge": edge_full_id,
+                "start_date": past_moment,
+                "end_date": future_moment,
+                "filter": event_types_filter,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': [
+            "request_id": uuid_,
+            "body": [
                 {
-                    'event': 'LINK_ALIVE',
-                    'category': 'NETWORK',
-                    'eventTime': '2019-07-30 07:38:00+00:00',
-                    'message': 'GE2 alive'
+                    "event": "LINK_ALIVE",
+                    "category": "NETWORK",
+                    "eventTime": "2019-07-30 07:38:00+00:00",
+                    "message": "GE2 alive",
                 }
             ],
-            'status': 200,
+            "status": 200,
         }
 
         logger = Mock()
@@ -173,32 +168,32 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_edge_events_with_no_event_types_filter_test(self):
-        edge_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+        edge_full_id = {"host": "some-host", "enterprise_id": 1, "edge_id": 1}
         current_moment = datetime.now()
         past_moment = current_moment - timedelta(hours=1)
         future_moment = current_moment + timedelta(hours=1)
-        event_types_filter = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
+        event_types_filter = ["EDGE_UP", "EDGE_DOWN", "LINK_ALIVE", "LINK_DEAD"]
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'edge': edge_full_id,
-                'start_date': past_moment,
-                'end_date': future_moment,
-                'filter': event_types_filter,
+            "request_id": uuid_,
+            "body": {
+                "edge": edge_full_id,
+                "start_date": past_moment,
+                "end_date": future_moment,
+                "filter": event_types_filter,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': [
+            "request_id": uuid_,
+            "body": [
                 {
-                    'event': 'LINK_ALIVE',
-                    'category': 'NETWORK',
-                    'eventTime': '2019-07-30 07:38:00+00:00',
-                    'message': 'GE2 alive'
+                    "event": "LINK_ALIVE",
+                    "category": "NETWORK",
+                    "eventTime": "2019-07-30 07:38:00+00:00",
+                    "message": "GE2 alive",
                 }
             ],
-            'status': 200,
+            "status": 200,
         }
 
         logger = Mock()
@@ -218,19 +213,19 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_edge_events_with_rpc_request_failing_test(self):
-        edge_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+        edge_full_id = {"host": "some-host", "enterprise_id": 1, "edge_id": 1}
         current_moment = datetime.now()
         past_moment = current_moment - timedelta(hours=1)
         future_moment = current_moment + timedelta(hours=1)
-        event_types_filter = ['LINK_ALIVE', 'LINK_DEAD']
+        event_types_filter = ["LINK_ALIVE", "LINK_DEAD"]
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'edge': edge_full_id,
-                'start_date': past_moment,
-                'end_date': future_moment,
-                'filter': event_types_filter,
+            "request_id": uuid_,
+            "body": {
+                "edge": edge_full_id,
+                "start_date": past_moment,
+                "end_date": future_moment,
+                "filter": event_types_filter,
             },
         }
 
@@ -257,25 +252,25 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_edge_events_with_rpc_request_returning_non_2xx_status_test(self):
-        edge_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+        edge_full_id = {"host": "some-host", "enterprise_id": 1, "edge_id": 1}
         current_moment = datetime.now()
         past_moment = current_moment - timedelta(hours=1)
         future_moment = current_moment + timedelta(hours=1)
-        event_types_filter = ['LINK_ALIVE', 'LINK_DEAD']
+        event_types_filter = ["LINK_ALIVE", "LINK_DEAD"]
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'edge': edge_full_id,
-                'start_date': past_moment,
-                'end_date': future_moment,
-                'filter': event_types_filter,
+            "request_id": uuid_,
+            "body": {
+                "edge": edge_full_id,
+                "start_date": past_moment,
+                "end_date": future_moment,
+                "filter": event_types_filter,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': 'Got internal error from Velocloud',
-            'status': 500,
+            "request_id": uuid_,
+            "body": "Got internal error from Velocloud",
+            "status": 500,
         }
 
         logger = Mock()
@@ -301,31 +296,31 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_network_enterprises_with_no_enterprise_ids_specified_test(self):
-        host = 'mettel.velocloud.net'
+        host = "mettel.velocloud.net"
         enterprise_ids = []
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'host': host,
-                'enterprise_ids': enterprise_ids,
+            "request_id": uuid_,
+            "body": {
+                "host": host,
+                "enterprise_ids": enterprise_ids,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': [
+            "request_id": uuid_,
+            "body": [
                 {
                     # Some fields omitted for simplicity
-                    'edgeState': 'CONNECTED',
-                    'enterpriseId': 1,
-                    'haSerialNumber': 'VC9999999',
-                    'haState': 'READY',
-                    'id': 123,
-                    'name': 'Travis Touchdown',
-                    'serialNumber': 'VC1234567',
+                    "edgeState": "CONNECTED",
+                    "enterpriseId": 1,
+                    "haSerialNumber": "VC9999999",
+                    "haState": "READY",
+                    "id": 123,
+                    "name": "Travis Touchdown",
+                    "serialNumber": "VC1234567",
                 }
             ],
-            'status': 200,
+            "status": 200,
         }
 
         logger = Mock()
@@ -345,31 +340,31 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_network_enterprises_with_enterprise_ids_specified_test(self):
-        host = 'mettel.velocloud.net'
+        host = "mettel.velocloud.net"
         enterprise_ids = [1, 2, 3]
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'host': host,
-                'enterprise_ids': enterprise_ids,
+            "request_id": uuid_,
+            "body": {
+                "host": host,
+                "enterprise_ids": enterprise_ids,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': [
+            "request_id": uuid_,
+            "body": [
                 {
                     # Some fields omitted for simplicity
-                    'edgeState': 'CONNECTED',
-                    'enterpriseId': 1,
-                    'haSerialNumber': 'VC9999999',
-                    'haState': 'READY',
-                    'id': 123,
-                    'name': 'Travis Touchdown',
-                    'serialNumber': 'VC1234567',
+                    "edgeState": "CONNECTED",
+                    "enterpriseId": 1,
+                    "haSerialNumber": "VC9999999",
+                    "haState": "READY",
+                    "id": 123,
+                    "name": "Travis Touchdown",
+                    "serialNumber": "VC1234567",
                 }
             ],
-            'status': 200,
+            "status": 200,
         }
 
         logger = Mock()
@@ -389,14 +384,14 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_network_enterprises_with_rpc_request_failing_test(self):
-        host = 'mettel.velocloud.net'
+        host = "mettel.velocloud.net"
         enterprise_ids = []
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'host': host,
-                'enterprise_ids': enterprise_ids,
+            "request_id": uuid_,
+            "body": {
+                "host": host,
+                "enterprise_ids": enterprise_ids,
             },
         }
 
@@ -421,20 +416,20 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_network_enterprises_with_rpc_request_returning_non_2xx_status_test(self):
-        host = 'mettel.velocloud.net'
+        host = "mettel.velocloud.net"
         enterprise_ids = []
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'host': host,
-                'enterprise_ids': enterprise_ids,
+            "request_id": uuid_,
+            "body": {
+                "host": host,
+                "enterprise_ids": enterprise_ids,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': 'Got internal error from Velocloud',
-            'status': 500,
+            "request_id": uuid_,
+            "body": "Got internal error from Velocloud",
+            "status": 500,
         }
 
         logger = Mock()
@@ -463,15 +458,16 @@ class TestVelocloudRepository:
         config = testconfig
         notifications_repository = Mock()
 
-        host = config.TRIAGE_CONFIG['velo_hosts']
+        host = config.TRIAGE_CONFIG["velo_hosts"]
 
-        edge_list = 'edge'
+        edge_list = "edge"
         full_edge_list = [edge_list, edge_list, edge_list]
-        edge_return = {'body': [edge_list], 'status': 200}
-        edge_return_fail = {'body': 'Fail', 'status': 500}
+        edge_return = {"body": [edge_list], "status": 200}
+        edge_return_fail = {"body": "Fail", "status": 500}
         velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
-        velocloud_repository.get_links_with_edge_info = CoroutineMock(side_effect=[edge_return, edge_return_fail,
-                                                                      edge_return, edge_return])
+        velocloud_repository.get_links_with_edge_info = CoroutineMock(
+            side_effect=[edge_return, edge_return_fail, edge_return, edge_return]
+        )
         velocloud_repository.group_links_by_edge = Mock()
 
         with uuid_mock:
@@ -482,27 +478,27 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_network_enterprises_for_triage_test(self):
-        velocloud_hosts = testconfig.TRIAGE_CONFIG['velo_hosts']
+        velocloud_hosts = testconfig.TRIAGE_CONFIG["velo_hosts"]
 
         edge_1 = {
             # Some fields omitted for simplicity
-            'edgeState': 'CONNECTED',
-            'enterpriseId': 1,
-            'haSerialNumber': 'VC9999999',
-            'haState': 'FAILED',
-            'id': 1,
-            'name': 'Big Boss',
-            'serialNumber': 'VC1234567',
+            "edgeState": "CONNECTED",
+            "enterpriseId": 1,
+            "haSerialNumber": "VC9999999",
+            "haState": "FAILED",
+            "id": 1,
+            "name": "Big Boss",
+            "serialNumber": "VC1234567",
         }
         edge_2 = {
             # Some fields omitted for simplicity
-            'edgeState': 'CONNECTED',
-            'enterpriseId': 1,
-            'haSerialNumber': 'VC8888888',
-            'haState': 'READY',
-            'id': 1,
-            'name': 'Sniper Wolf',
-            'serialNumber': 'VC8901234',
+            "edgeState": "CONNECTED",
+            "enterpriseId": 1,
+            "haSerialNumber": "VC8888888",
+            "haState": "READY",
+            "id": 1,
+            "name": "Sniper Wolf",
+            "serialNumber": "VC8901234",
         }
 
         host_1_edges = [
@@ -512,20 +508,20 @@ class TestVelocloudRepository:
             edge_2,
         ]
         host_1_response = {
-            'body': host_1_edges,
-            'status': 200,
+            "body": host_1_edges,
+            "status": 200,
         }
         host_2_response = {
-            'body': 'Got internal error from Velocloud',
-            'status': 500,
+            "body": "Got internal error from Velocloud",
+            "status": 500,
         }
         host_3_response = {
-            'body': host_3_edges,
-            'status': 200,
+            "body": host_3_edges,
+            "status": 200,
         }
         host_4_response = {
-            'body': 'Got internal error from Velocloud',
-            'status': 500,
+            "body": "Got internal error from Velocloud",
+            "status": 500,
         }
 
         event_bus = Mock()
@@ -534,12 +530,14 @@ class TestVelocloudRepository:
         notifications_repository = Mock()
 
         velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
-        velocloud_repository.get_network_enterprises = CoroutineMock(side_effect=[
-            host_1_response,
-            host_2_response,
-            host_3_response,
-            host_4_response,
-        ])
+        velocloud_repository.get_network_enterprises = CoroutineMock(
+            side_effect=[
+                host_1_response,
+                host_2_response,
+                host_3_response,
+                host_4_response,
+            ]
+        )
 
         result = await velocloud_repository.get_network_enterprises_for_triage()
 
@@ -554,10 +552,10 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_last_edge_events_test(self):
-        edge_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+        edge_full_id = {"host": "some-host", "enterprise_id": 1, "edge_id": 1}
         current_datetime = datetime.now()
         past_moment = current_datetime - timedelta(hours=1)
-        event_types_filter = ['LINK_ALIVE', 'LINK_DEAD']
+        event_types_filter = ["LINK_ALIVE", "LINK_DEAD"]
 
         event_bus = Mock()
         logger = Mock()
@@ -569,22 +567,25 @@ class TestVelocloudRepository:
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
-        with patch.object(velocloud_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(velocloud_repository_module, "datetime", new=datetime_mock):
             with uuid_mock:
                 await velocloud_repository.get_last_edge_events(
                     edge_full_id, since=past_moment, event_types=event_types_filter
                 )
 
         velocloud_repository.get_edge_events.assert_awaited_once_with(
-            edge_full_id, from_=past_moment, to=current_datetime, event_types=event_types_filter,
+            edge_full_id,
+            from_=past_moment,
+            to=current_datetime,
+            event_types=event_types_filter,
         )
 
     @pytest.mark.asyncio
     async def get_last_down_edge_events_test(self):
-        edge_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+        edge_full_id = {"host": "some-host", "enterprise_id": 1, "edge_id": 1}
         current_datetime = datetime.now()
         past_moment = current_datetime - timedelta(hours=1)
-        event_types_filter = ['EDGE_DOWN', 'LINK_DEAD']
+        event_types_filter = ["EDGE_DOWN", "LINK_DEAD"]
 
         event_bus = Mock()
         logger = Mock()
@@ -596,77 +597,79 @@ class TestVelocloudRepository:
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
-        with patch.object(velocloud_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(velocloud_repository_module, "datetime", new=datetime_mock):
             with uuid_mock:
                 await velocloud_repository.get_last_down_edge_events(edge_full_id, since=past_moment)
 
         velocloud_repository.get_last_edge_events.assert_awaited_once_with(
-            edge_full_id, since=past_moment, event_types=event_types_filter,
+            edge_full_id,
+            since=past_moment,
+            event_types=event_types_filter,
         )
 
     def group_links_by_edge_test(self):
-        serial_number_1 = 'VC1111111'
-        serial_number_2 = 'VC2222222'
-        serial_number_3 = 'VC3333333'
+        serial_number_1 = "VC1111111"
+        serial_number_2 = "VC2222222"
+        serial_number_3 = "VC3333333"
 
         edge_1_info = {
-            'host': 'mettel.velocloud.net',
-            'enterpriseName': 'Militaires Sans Frontières',
-            'enterpriseId': 1,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Big Boss',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': 1,
-            'edgeSerialNumber': serial_number_1,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+            "host": "mettel.velocloud.net",
+            "enterpriseName": "Militaires Sans Frontières",
+            "enterpriseId": 1,
+            "enterpriseProxyId": None,
+            "enterpriseProxyName": None,
+            "edgeName": "Big Boss",
+            "edgeState": "CONNECTED",
+            "edgeSystemUpSince": "2020-09-14T05:07:40.000Z",
+            "edgeServiceUpSince": "2020-09-14T05:08:22.000Z",
+            "edgeLastContact": "2020-09-29T04:48:55.000Z",
+            "edgeId": 1,
+            "edgeSerialNumber": serial_number_1,
+            "edgeHASerialNumber": None,
+            "edgeModelNumber": "edge520",
+            "edgeLatitude": None,
+            "edgeLongitude": None,
         }
         edge_2_info = {
-            'host': 'mettel.velocloud.net',
-            'enterpriseName': 'Sarif Industries',
-            'enterpriseId': 2,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Adam Jensen',
-            'edgeState': 'CONNECTED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': 1,
-            'edgeSerialNumber': serial_number_2,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
+            "host": "mettel.velocloud.net",
+            "enterpriseName": "Sarif Industries",
+            "enterpriseId": 2,
+            "enterpriseProxyId": None,
+            "enterpriseProxyName": None,
+            "edgeName": "Adam Jensen",
+            "edgeState": "CONNECTED",
+            "edgeSystemUpSince": "2020-09-14T05:07:40.000Z",
+            "edgeServiceUpSince": "2020-09-14T05:08:22.000Z",
+            "edgeLastContact": "2020-09-29T04:48:55.000Z",
+            "edgeId": 1,
+            "edgeSerialNumber": serial_number_2,
+            "edgeHASerialNumber": None,
+            "edgeModelNumber": "edge520",
+            "edgeLatitude": None,
+            "edgeLongitude": None,
         }
 
         edge_1_link_1_info = {
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'interface': 'REX',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-            'linkState': 'STABLE',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'STABLE',
-            'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
+            "displayName": "70.59.5.185",
+            "isp": None,
+            "interface": "REX",
+            "internalId": "00000001-ac48-47a0-81a7-80c8c320f486",
+            "linkState": "STABLE",
+            "linkLastActive": "2020-09-29T04:45:15.000Z",
+            "linkVpnState": "STABLE",
+            "linkId": 5293,
+            "linkIpAddress": "70.59.5.185",
         }
         edge_1_link_2_info = {
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'interface': 'RAY',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-            'linkState': 'STABLE',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'STABLE',
-            'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
+            "displayName": "70.59.5.185",
+            "isp": None,
+            "interface": "RAY",
+            "internalId": "00000001-ac48-47a0-81a7-80c8c320f486",
+            "linkState": "STABLE",
+            "linkLastActive": "2020-09-29T04:45:15.000Z",
+            "linkVpnState": "STABLE",
+            "linkId": 5293,
+            "linkIpAddress": "70.59.5.185",
         }
         link_1_with_edge_1_info = {
             **edge_1_info,
@@ -678,26 +681,26 @@ class TestVelocloudRepository:
         }
 
         edge_2_link_1_info = {
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'interface': 'Augmented',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-            'linkState': 'STABLE',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'STABLE',
-            'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
+            "displayName": "70.59.5.185",
+            "isp": None,
+            "interface": "Augmented",
+            "internalId": "00000001-ac48-47a0-81a7-80c8c320f486",
+            "linkState": "STABLE",
+            "linkLastActive": "2020-09-29T04:45:15.000Z",
+            "linkVpnState": "STABLE",
+            "linkId": 5293,
+            "linkIpAddress": "70.59.5.185",
         }
         edge_2_link_2_info = {
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'interface': 'Lawrence Barrett',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-            'linkState': 'STABLE',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'STABLE',
-            'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
+            "displayName": "70.59.5.185",
+            "isp": None,
+            "interface": "Lawrence Barrett",
+            "internalId": "00000001-ac48-47a0-81a7-80c8c320f486",
+            "linkState": "STABLE",
+            "linkLastActive": "2020-09-29T04:45:15.000Z",
+            "linkVpnState": "STABLE",
+            "linkId": 5293,
+            "linkIpAddress": "70.59.5.185",
         }
         link_1_with_edge_2_info = {
             **edge_2_info,
@@ -709,58 +712,58 @@ class TestVelocloudRepository:
         }
 
         invalid_link_with_edge_info = {
-            'host': 'mettel.velocloud.net',
-            'enterpriseName': 'Sarif Industries',
-            'enterpriseId': 2,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': None,
-            'edgeState': None,
-            'edgeSystemUpSince': None,
-            'edgeServiceUpSince': None,
-            'edgeLastContact': None,
-            'edgeId': None,
-            'edgeSerialNumber': None,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': None,
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': None,
-            'isp': None,
-            'interface': None,
-            'internalId': None,
-            'linkState': None,
-            'linkLastActive': None,
-            'linkVpnState': None,
-            'linkId': None,
-            'linkIpAddress': None,
+            "host": "mettel.velocloud.net",
+            "enterpriseName": "Sarif Industries",
+            "enterpriseId": 2,
+            "enterpriseProxyId": None,
+            "enterpriseProxyName": None,
+            "edgeName": None,
+            "edgeState": None,
+            "edgeSystemUpSince": None,
+            "edgeServiceUpSince": None,
+            "edgeLastContact": None,
+            "edgeId": None,
+            "edgeSerialNumber": None,
+            "edgeHASerialNumber": None,
+            "edgeModelNumber": None,
+            "edgeLatitude": None,
+            "edgeLongitude": None,
+            "displayName": None,
+            "isp": None,
+            "interface": None,
+            "internalId": None,
+            "linkState": None,
+            "linkLastActive": None,
+            "linkVpnState": None,
+            "linkId": None,
+            "linkIpAddress": None,
         }
         link_with_never_activated_edge_info = {
-            'host': 'mettel.velocloud.net',
-            'enterpriseName': 'Sarif Industries',
-            'enterpriseId': 2,
-            'enterpriseProxyId': None,
-            'enterpriseProxyName': None,
-            'edgeName': 'Travis Touchdown',
-            'edgeState': 'NEVER_ACTIVATED',
-            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
-            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
-            'edgeLastContact': '2020-09-29T04:48:55.000Z',
-            'edgeId': 1,
-            'edgeSerialNumber': serial_number_3,
-            'edgeHASerialNumber': None,
-            'edgeModelNumber': 'edge520',
-            'edgeLatitude': None,
-            'edgeLongitude': None,
-            'displayName': '70.59.5.185',
-            'isp': None,
-            'interface': 'Augmented',
-            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
-            'linkState': 'STABLE',
-            'linkLastActive': '2020-09-29T04:45:15.000Z',
-            'linkVpnState': 'STABLE',
-            'linkId': 5293,
-            'linkIpAddress': '70.59.5.185',
+            "host": "mettel.velocloud.net",
+            "enterpriseName": "Sarif Industries",
+            "enterpriseId": 2,
+            "enterpriseProxyId": None,
+            "enterpriseProxyName": None,
+            "edgeName": "Travis Touchdown",
+            "edgeState": "NEVER_ACTIVATED",
+            "edgeSystemUpSince": "2020-09-14T05:07:40.000Z",
+            "edgeServiceUpSince": "2020-09-14T05:08:22.000Z",
+            "edgeLastContact": "2020-09-29T04:48:55.000Z",
+            "edgeId": 1,
+            "edgeSerialNumber": serial_number_3,
+            "edgeHASerialNumber": None,
+            "edgeModelNumber": "edge520",
+            "edgeLatitude": None,
+            "edgeLongitude": None,
+            "displayName": "70.59.5.185",
+            "isp": None,
+            "interface": "Augmented",
+            "internalId": "00000001-ac48-47a0-81a7-80c8c320f486",
+            "linkState": "STABLE",
+            "linkLastActive": "2020-09-29T04:45:15.000Z",
+            "linkVpnState": "STABLE",
+            "linkId": 5293,
+            "linkIpAddress": "70.59.5.185",
         }
 
         links_with_edge_info = [
@@ -784,14 +787,14 @@ class TestVelocloudRepository:
         expected = [
             {
                 **edge_1_info,
-                'links': [
+                "links": [
                     edge_1_link_1_info,
                     edge_1_link_2_info,
                 ],
             },
             {
                 **edge_2_info,
-                'links': [
+                "links": [
                     edge_2_link_1_info,
                     edge_2_link_2_info,
                 ],

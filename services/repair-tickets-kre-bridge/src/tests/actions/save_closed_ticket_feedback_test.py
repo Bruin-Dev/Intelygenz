@@ -6,7 +6,6 @@ from asynctest import CoroutineMock
 
 
 class TestSaveClosedTicketFeedback:
-
     def instance_test(self):
         config = Mock()
         logger = Mock()
@@ -21,23 +20,21 @@ class TestSaveClosedTicketFeedback:
         assert instance._kre_repository == kre_repository
 
     @pytest.mark.parametrize(
-        'body_in_topic', [
+        "body_in_topic",
+        [
             {},
-            ({'some-key': 'some-data'}),
-        ], ids=[
-            'without_body',
-            'without_params',
-        ]
+            ({"some-key": "some-data"}),
+        ],
+        ids=[
+            "without_body",
+            "without_params",
+        ],
     )
     @pytest.mark.asyncio
     async def save_closed_ticket_feedback_error_400_test(self, body_in_topic):
         request_id = 123
-        response_topic = '_INBOX.2007314fe0fcb2cdc2a2914c1'
-        msg_published_in_topic = {
-            'request_id': request_id,
-            'response_topic': response_topic,
-            'body': body_in_topic
-        }
+        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
+        msg_published_in_topic = {"request_id": request_id, "response_topic": response_topic, "body": body_in_topic}
         config = Mock()
         logger = Mock()
 
@@ -55,28 +52,27 @@ class TestSaveClosedTicketFeedback:
         closed_ticket_action._event_bus.publish_message.assert_awaited_once_with(
             response_topic,
             {
-                'request_id': request_id,
-                'body': f'You must use correct format in the request',
-                'status': 400,
-            }
+                "request_id": request_id,
+                "body": f"You must use correct format in the request",
+                "status": 400,
+            },
         )
         closed_ticket_action._kre_repository.save_closed_ticket_feedback.assert_not_awaited()
         logger.info.assert_not_called()
 
     @pytest.mark.asyncio
     async def save_closed_ticket_feedback_test(
-            self,
-            valid_closed_ticket_request__resolved,
-            valid_closed_ticket_response):
+        self, valid_closed_ticket_request__resolved, valid_closed_ticket_response
+    ):
         config = Mock()
         logger = Mock()
 
         request_id = 123
-        response_topic = '_INBOX.2007314fe0fcb2cdc2a2914c1'
+        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
         msg_published_in_topic = {
-            'request_id': request_id,
-            'body': valid_closed_ticket_request__resolved,
-            'response_topic': response_topic,
+            "request_id": request_id,
+            "body": valid_closed_ticket_request__resolved,
+            "response_topic": response_topic,
         }
 
         event_bus = Mock()
@@ -89,13 +85,14 @@ class TestSaveClosedTicketFeedback:
 
         await closed_ticket_action.save_closed_ticket_feedback(msg_published_in_topic)
 
-        closed_ticket_action._kre_repository.save_closed_ticket_feedback.\
-            assert_awaited_once_with(valid_closed_ticket_request__resolved)
+        closed_ticket_action._kre_repository.save_closed_ticket_feedback.assert_awaited_once_with(
+            valid_closed_ticket_request__resolved
+        )
         closed_ticket_action._event_bus.publish_message.assert_awaited_once_with(
             response_topic,
             {
-                'request_id': request_id,
+                "request_id": request_id,
                 **valid_closed_ticket_response,
-            }
+            },
         )
         logger.info.assert_called_once()

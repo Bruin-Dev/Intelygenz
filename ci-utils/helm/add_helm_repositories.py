@@ -22,9 +22,9 @@ class AddHelmRepositories:
                 repository_name = repository.split(" ")[0]
                 repository_url = repository.split(" ")[1]
                 print(f"It's going to add helm repository with name {repository_name} and URL {repository_url}")
-                subprocess.call(['helm', 'repo', 'add', repository_name, repository_url])
+                subprocess.call(["helm", "repo", "add", repository_name, repository_url])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     add_helm_repositories = AddHelmRepositories()
     add_helm_repositories.add_helm_repositories()

@@ -1,6 +1,6 @@
 from unittest.mock import ANY
 
-from application.domain.asset import Assets, Asset, Topic
+from application.domain.asset import Asset, Assets, Topic
 
 
 class TestAsset:

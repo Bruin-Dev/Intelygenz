@@ -1,6 +1,5 @@
-from shortuuid import uuid
-
 from application.repositories import nats_error_response
+from shortuuid import uuid
 
 
 class CustomerCacheRepository:
@@ -19,7 +18,7 @@ class CustomerCacheRepository:
         request = {
             "request_id": uuid(),
             "body": {
-                'filter': filter_,
+                "filter": filter_,
             },
         }
 
@@ -30,11 +29,11 @@ class CustomerCacheRepository:
                 self._logger.info(f"Getting customer cache for all Velocloud hosts...")
             response = await self._event_bus.rpc_request("customer.cache.get", request, timeout=60)
         except Exception as e:
-            err_msg = f'An error occurred when requesting customer cache -> {e}'
+            err_msg = f"An error occurred when requesting customer cache -> {e}"
             response = nats_error_response
         else:
-            response_body = response['body']
-            response_status = response['status']
+            response_body = response["body"]
+            response_status = response["status"]
 
             if response_status == 202:
                 err_msg = response_body
@@ -51,6 +50,6 @@ class CustomerCacheRepository:
         return response
 
     async def get_cache_for_tnba_monitoring(self):
-        monitoring_filter = self._config.MONITOR_CONFIG['velo_filter']
+        monitoring_filter = self._config.MONITOR_CONFIG["velo_filter"]
 
         return await self.get_cache(filter_=monitoring_filter)

@@ -1,20 +1,16 @@
 from datetime import datetime, timedelta
-from unittest.mock import Mock
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
-
-from asynctest import CoroutineMock
-from shortuuid import uuid
-
 from application.repositories import bruin_repository as bruin_repository_module
 from application.repositories import nats_error_response
 from application.repositories.bruin_repository import BruinRepository
+from asynctest import CoroutineMock
 from config import testconfig
-
+from shortuuid import uuid
 
 uuid_ = uuid()
-uuid_mock = patch.object(bruin_repository_module, 'uuid', return_value=uuid_)
+uuid_mock = patch.object(bruin_repository_module, "uuid", return_value=uuid_)
 
 
 class TestBruinRepository:
@@ -36,15 +32,12 @@ class TestBruinRepository:
         ticket_id = 11111
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                        'ticket_id': ticket_id
-
-            },
+            "request_id": uuid_,
+            "body": {"ticket_id": ticket_id},
         }
         response = {
-            'request_id': uuid_,
-            'body': [
+            "request_id": uuid_,
+            "body": [
                 {
                     "ClientName": "Le Duff Management ",
                     "Ticket Entered Date": "202008242225",
@@ -69,10 +62,10 @@ class TestBruinRepository:
                     "Task": None,
                     "Task Result": None,
                     "SLA": None,
-                    "Ticket Status": "Resolved"
+                    "Ticket Status": "Resolved",
                 }
             ],
-            'status': 200,
+            "status": 200,
         }
 
         logger = Mock()
@@ -95,11 +88,8 @@ class TestBruinRepository:
         ticket_id = 11111
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'ticket_id': ticket_id
-
-            },
+            "request_id": uuid_,
+            "body": {"ticket_id": ticket_id},
         }
         logger = Mock()
         config = testconfig
@@ -125,16 +115,13 @@ class TestBruinRepository:
         ticket_id = 11111
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'ticket_id': ticket_id
-
-            },
+            "request_id": uuid_,
+            "body": {"ticket_id": ticket_id},
         }
         response = {
-            'request_id': uuid_,
-            'body': 'Got internal error from Bruin',
-            'status': 500,
+            "request_id": uuid_,
+            "body": "Got internal error from Bruin",
+            "status": 500,
         }
 
         logger = Mock()

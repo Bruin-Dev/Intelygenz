@@ -1,13 +1,12 @@
+import asyncio
 from unittest.mock import patch
 
-import asyncio
 import pytest
-from asynctest import CoroutineMock
-from shortuuid import uuid
-
 from application.domain.repair_email_output import RepairEmailOutput, TicketOutput
 from application.repositories.repair_ticket_kre_repository import RepairTicketKreRepository
+from asynctest import CoroutineMock
 from config import testconfig as config
+from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_patch = patch("application.repositories.repair_ticket_kre_repository.uuid", return_value=uuid_)

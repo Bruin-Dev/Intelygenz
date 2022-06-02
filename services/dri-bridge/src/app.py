@@ -1,23 +1,22 @@
 import asyncio
-import redis
-from igz.packages.Logger.logger_client import LoggerClient
-from igz.packages.eventbus.action import ActionWrapper
-from igz.packages.eventbus.eventbus import EventBus
-from igz.packages.eventbus.storage_managers import RedisStorageManager
-from igz.packages.nats.clients import NATSClient
-from igz.packages.server.api import QuartServer
-from prometheus_client import start_http_server
 
+import redis
 from application.actions.get_dri_parameters import GetDRIParameters
 from application.clients.dri_client import DRIClient
 from application.repositories.dri_repository import DRIRepository
 from application.repositories.endpoints_usage_repository import EndpointsUsageRepository
 from application.repositories.storage_repository import StorageRepository
 from config import config
+from igz.packages.eventbus.action import ActionWrapper
+from igz.packages.eventbus.eventbus import EventBus
+from igz.packages.eventbus.storage_managers import RedisStorageManager
+from igz.packages.Logger.logger_client import LoggerClient
+from igz.packages.nats.clients import NATSClient
+from igz.packages.server.api import QuartServer
+from prometheus_client import start_http_server
 
 
 class Container:
-
     def __init__(self):
         self._logger = LoggerClient(config).get_logger()
         self._logger.info(f"DRI bridge starting in {config.ENVIRONMENT_NAME}...")
@@ -47,27 +46,31 @@ class Container:
 
         self._get_dri_parameters = GetDRIParameters(self._logger, self._event_bus, self._dri_repository)
 
-        self._action_get_dri_parameters = ActionWrapper(self._get_dri_parameters, "get_dri_parameters",
-                                                        is_async=True, logger=self._logger)
+        self._action_get_dri_parameters = ActionWrapper(
+            self._get_dri_parameters, "get_dri_parameters", is_async=True, logger=self._logger
+        )
         self._server = QuartServer(config)
 
     async def start(self):
         self._start_prometheus_metrics_server()
         await self._event_bus.connect()
         await self._dri_client.login()
-        await self._event_bus.subscribe_consumer(consumer_name="get_dri_parameters", topic="dri.parameters.request",
-                                                 action_wrapper=self._action_get_dri_parameters,
-                                                 queue="dri_bridge")
+        await self._event_bus.subscribe_consumer(
+            consumer_name="get_dri_parameters",
+            topic="dri.parameters.request",
+            action_wrapper=self._action_get_dri_parameters,
+            queue="dri_bridge",
+        )
 
     async def start_server(self):
         await self._server.run_server()
 
     @staticmethod
     def _start_prometheus_metrics_server():
-        start_http_server(config.METRICS_SERVER_CONFIG['port'])
+        start_http_server(config.METRICS_SERVER_CONFIG["port"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     container = Container()
     loop = asyncio.get_event_loop()
     asyncio.ensure_future(container.start(), loop=loop)

@@ -1,13 +1,11 @@
 from unittest.mock import Mock
 
 import pytest
-from asynctest import CoroutineMock
-
 from application.actions.get_site import GetSite
+from asynctest import CoroutineMock
 
 
 class TestGetSite:
-
     def instance_test(self):
         logger = Mock()
         event_bus = Mock()
@@ -29,24 +27,11 @@ class TestGetSite:
 
         client_id = 72959
         site_id = 343443
-        params = {
-            "client_id": client_id,
-            "site_id": site_id
-        }
-        get_site_response = {
-            "body": {
-                "client_id": client_id,
-                "site_id": site_id
-            },
-            "status": 200
-        }
+        params = {"client_id": client_id, "site_id": site_id}
+        get_site_response = {"body": {"client_id": client_id, "site_id": site_id}, "status": 200}
         bruin_repository.get_site = CoroutineMock(return_value=get_site_response)
 
-        event_bus_request = {
-            "request_id": 19,
-            "body": params,
-            "response_topic": "some.topic"
-        }
+        event_bus_request = {"request_id": 19, "body": params, "response_topic": "some.topic"}
 
         event_bus_response = {
             "request_id": 19,
@@ -69,16 +54,12 @@ class TestGetSite:
         bruin_repository = Mock()
         bruin_repository.get_site = CoroutineMock()
 
-        event_bus_request = {
-            "request_id": 19,
-            "response_topic": "some.topic"
-        }
+        event_bus_request = {"request_id": 19, "response_topic": "some.topic"}
 
         event_bus_response = {
             "request_id": 19,
-            'body': 'You must specify '
-                    '{.."body":{"client_id":...}} in the request',
-            'status': 400
+            "body": "You must specify " '{.."body":{"client_id":...}} in the request',
+            "status": 400,
         }
 
         get_site = GetSite(logger, event_bus, bruin_repository)
@@ -99,19 +80,9 @@ class TestGetSite:
         bruin_repository = Mock()
         bruin_repository.get_site = CoroutineMock()
 
-        event_bus_request = {
-            "request_id": 19,
-            "body": {
-                "client_id": client_id
-            },
-            "response_topic": "some.topic"
-        }
+        event_bus_request = {"request_id": 19, "body": {"client_id": client_id}, "response_topic": "some.topic"}
 
-        event_bus_response = {
-            "request_id": 19,
-            'body': 'You must specify "site_id" in the body',
-            'status': 400
-        }
+        event_bus_response = {"request_id": 19, "body": 'You must specify "site_id" in the body', "status": 400}
 
         get_site = GetSite(logger, event_bus, bruin_repository)
         await get_site.get_site(event_bus_request)
@@ -131,19 +102,9 @@ class TestGetSite:
         bruin_repository = Mock()
         bruin_repository.get_site = CoroutineMock()
 
-        event_bus_request = {
-            "request_id": 19,
-            "body": {
-                "site_id": site_id
-            },
-            "response_topic": "some.topic"
-        }
+        event_bus_request = {"request_id": 19, "body": {"site_id": site_id}, "response_topic": "some.topic"}
 
-        event_bus_response = {
-            "request_id": 19,
-            'body': 'You must specify "client_id" in the body',
-            'status': 400
-        }
+        event_bus_response = {"request_id": 19, "body": 'You must specify "client_id" in the body', "status": 400}
 
         get_site = GetSite(logger, event_bus, bruin_repository)
         await get_site.get_site(event_bus_request)

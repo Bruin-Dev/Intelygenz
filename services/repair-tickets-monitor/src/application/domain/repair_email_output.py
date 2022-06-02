@@ -1,9 +1,8 @@
-from typing import List, Dict
-
-from dataclasses import dataclass, field
-from multipledispatch import dispatch
+from typing import Dict, List
 
 from application.domain.ticket import Ticket
+from dataclasses import dataclass, field
+from multipledispatch import dispatch
 
 
 @dataclass
@@ -11,9 +10,10 @@ class CreateTicketsOutput:
     """
     Data structure that holds the result of creating tickets
     """
-    tickets_created: List['TicketOutput'] = field(default_factory=list)
-    tickets_updated: List['TicketOutput'] = field(default_factory=list)
-    tickets_cannot_be_created: List['TicketOutput'] = field(default_factory=list)
+
+    tickets_created: List["TicketOutput"] = field(default_factory=list)
+    tickets_updated: List["TicketOutput"] = field(default_factory=list)
+    tickets_cannot_be_created: List["TicketOutput"] = field(default_factory=list)
 
 
 @dataclass
@@ -21,8 +21,9 @@ class PotentialTicketsOutput:
     """
     Data structure that holds potential actions that could have been taken
     """
-    tickets_could_be_created: List['TicketOutput'] = field(default_factory=list)
-    tickets_could_be_updated: List['TicketOutput'] = field(default_factory=list)
+
+    tickets_could_be_created: List["TicketOutput"] = field(default_factory=list)
+    tickets_could_be_updated: List["TicketOutput"] = field(default_factory=list)
 
 
 @dataclass
@@ -30,14 +31,15 @@ class RepairEmailOutput:
     """
     Data structure that holds information to be returned to KRE as feedback
     """
+
     email_id: int
     service_numbers_sites_map: Dict[str, str] = field(default_factory=dict)
     validated_tickets: List[Ticket] = field(default_factory=list)
-    tickets_created: List['TicketOutput'] = field(default_factory=list)
-    tickets_updated: List['TicketOutput'] = field(default_factory=list)
-    tickets_could_be_created: List['TicketOutput'] = field(default_factory=list)
-    tickets_could_be_updated: List['TicketOutput'] = field(default_factory=list)
-    tickets_cannot_be_created: List['TicketOutput'] = field(default_factory=list)
+    tickets_created: List["TicketOutput"] = field(default_factory=list)
+    tickets_updated: List["TicketOutput"] = field(default_factory=list)
+    tickets_could_be_created: List["TicketOutput"] = field(default_factory=list)
+    tickets_could_be_updated: List["TicketOutput"] = field(default_factory=list)
+    tickets_cannot_be_created: List["TicketOutput"] = field(default_factory=list)
 
     @dispatch(CreateTicketsOutput)
     def extend(self, create_tickets_output: CreateTicketsOutput):
@@ -56,6 +58,7 @@ class TicketOutput:
     """
     Generic data structure to hold information on actions taken on a ticket
     """
+
     site_id: str = None
     ticket_id: str = None
     reason: str = None

@@ -1,57 +1,58 @@
 from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock
 
-from asynctest import CoroutineMock
 import pytest
-
-from application.repositories.lumin_repository import LuminBillingRepository
-from application.repositories.lumin_repository import LuminBillingTypes
+from application.repositories.lumin_repository import LuminBillingRepository, LuminBillingTypes
+from asynctest import CoroutineMock
 
 
 @pytest.fixture
 def lumin_client_responses():
-    return [{
-        "ok": True,
-        "next_token": "foo",
-        "items": [
-            {
-                "conversation_id": "5735605401026560",
-                "host_did": "199234567890",
-                "host_id": "default",
-                "id": "MDAwMDAwMDAwMDAwMDAwMDYyODQwNTU1NDQ4NTY1NzY=",
-                "timestamp": "2019-02-24T21:29:36.798081+00:00",
-                "type": "billing.scheduled"
-            },
-            {
-                "conversation_id": "5711381785477120",
-                "host_did": "199234567890",
-                "host_id": "default",
-                "id": "MDAwMDAwMDAwMDAwMDAwMDYzMDY4ODc1OTEwMDIxMTI=",
-                "timestamp": "2019-02-24T21:36:01.295808+00:00",
-                "type": "billing.scheduled"
-            }
-        ]
-    }, {
-        "ok": True,
-        "items": [
-            {
-                "conversation_id": "5735605401026560",
-                "host_did": "199234567890",
-                "host_id": "default",
-                "id": "MDAwMDAwMDAwMDAwMDAwMDYyODQwNTU1NDQ4NTY1NzY=",
-                "timestamp": "2019-02-24T21:29:36.798081+00:00",
-                "type": "billing.scheduled"
-            },
-            {
-                "conversation_id": "5711381785477120",
-                "host_did": "199234567890",
-                "host_id": "default",
-                "id": "MDAwMDAwMDAwMDAwMDAwMDYzMDY4ODc1OTEwMDIxMTI=",
-                "timestamp": "2019-02-24T21:36:01.295808+00:00",
-                "type": "billing.scheduled"
-            }
-        ]
-    }]
+    return [
+        {
+            "ok": True,
+            "next_token": "foo",
+            "items": [
+                {
+                    "conversation_id": "5735605401026560",
+                    "host_did": "199234567890",
+                    "host_id": "default",
+                    "id": "MDAwMDAwMDAwMDAwMDAwMDYyODQwNTU1NDQ4NTY1NzY=",
+                    "timestamp": "2019-02-24T21:29:36.798081+00:00",
+                    "type": "billing.scheduled",
+                },
+                {
+                    "conversation_id": "5711381785477120",
+                    "host_did": "199234567890",
+                    "host_id": "default",
+                    "id": "MDAwMDAwMDAwMDAwMDAwMDYzMDY4ODc1OTEwMDIxMTI=",
+                    "timestamp": "2019-02-24T21:36:01.295808+00:00",
+                    "type": "billing.scheduled",
+                },
+            ],
+        },
+        {
+            "ok": True,
+            "items": [
+                {
+                    "conversation_id": "5735605401026560",
+                    "host_did": "199234567890",
+                    "host_id": "default",
+                    "id": "MDAwMDAwMDAwMDAwMDAwMDYyODQwNTU1NDQ4NTY1NzY=",
+                    "timestamp": "2019-02-24T21:29:36.798081+00:00",
+                    "type": "billing.scheduled",
+                },
+                {
+                    "conversation_id": "5711381785477120",
+                    "host_did": "199234567890",
+                    "host_id": "default",
+                    "id": "MDAwMDAwMDAwMDAwMDAwMDYzMDY4ODc1OTEwMDIxMTI=",
+                    "timestamp": "2019-02-24T21:36:01.295808+00:00",
+                    "type": "billing.scheduled",
+                },
+            ],
+        },
+    ]
 
 
 @pytest.mark.asyncio

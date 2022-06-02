@@ -3,7 +3,7 @@ from http import HTTPStatus
 
 from application.repositories.bruin_repository import BruinRepository
 
-NO_BODY_MSG = "Must include {..\"body\":{\"client_id\", \"service_number\"}, ..} in request"
+NO_BODY_MSG = 'Must include {.."body":{"client_id", "service_number"}, ..} in request'
 MISSING_PARAMS_MSG = "You must include 'client_id' and 'service_number' in the 'body' field of the response request"
 WRONG_CLIENT_ID_MSG = "body.client_id should be an int"
 EMPTY_SERVICE_NUMBER_MSG = "body.service_number can't be empty"
@@ -16,11 +16,7 @@ class GetAssetTopics:
         self._bruin_repository = bruin_repository
 
     async def get_asset_topics(self, msg: dict):
-        response = {
-            "request_id": msg["request_id"],
-            "body": None,
-            "status": None
-        }
+        response = {"request_id": msg["request_id"], "body": None, "status": None}
         payload = msg.get("body")
 
         if payload is None:
@@ -30,8 +26,7 @@ class GetAssetTopics:
             return
 
         if not all(key in payload.keys() for key in ("client_id", "service_number")):
-            self._logger.error(f"Cannot get asset topics using {json.dumps(msg)}. "
-                               f"JSON malformed")
+            self._logger.error(f"Cannot get asset topics using {json.dumps(msg)}. " f"JSON malformed")
 
             response["body"] = MISSING_PARAMS_MSG
             response["status"] = HTTPStatus.BAD_REQUEST

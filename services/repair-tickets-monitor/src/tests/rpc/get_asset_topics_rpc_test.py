@@ -2,15 +2,14 @@ import logging
 from http import HTTPStatus
 from logging import Logger
 from typing import Callable
-from unittest.mock import Mock, ANY
+from unittest.mock import ANY, Mock
 
+from application.domain.asset import Topic
+from application.rpc import RpcFailedError, RpcLogger, RpcRequest, RpcResponse
+from application.rpc.get_asset_topics_rpc import GetAssetTopicsRpc, RequestBody
 from asynctest import CoroutineMock
 from igz.packages.eventbus.eventbus import EventBus
 from pytest import fixture, mark, raises
-
-from application.domain.asset import Topic
-from application.rpc import RpcLogger, RpcResponse, RpcRequest, RpcFailedError
-from application.rpc.get_asset_topics_rpc import GetAssetTopicsRpc, RequestBody
 
 
 class TestGetAssetTopicsRpc:
@@ -23,13 +22,12 @@ class TestGetAssetTopicsRpc:
 
         await rpc(any_asset_id)
 
-        rpc.send.assert_awaited_once_with(RequestBody.construct(
-            request_id=ANY,
-            body=RequestBody(
-                client_id=any_asset_id.client_id,
-                service_number=any_asset_id.service_number
+        rpc.send.assert_awaited_once_with(
+            RequestBody.construct(
+                request_id=ANY,
+                body=RequestBody(client_id=any_asset_id.client_id, service_number=any_asset_id.service_number),
             )
-        ))
+        )
 
     @mark.asyncio
     async def responses_are_properly_parsed_test(self, make_get_asset_topics_rpc, make_asset_id):
@@ -37,18 +35,14 @@ class TestGetAssetTopicsRpc:
             status=HTTPStatus.OK,
             body={
                 "callTypes": [
-                    {
-                        "callType": "any_call_type",
-                        "category": "any_category"
-                    }, {
-                        "callType": "anything"
-                    }, {
-                        "category": "anything"
-                    },
+                    {"callType": "any_call_type", "category": "any_category"},
+                    {"callType": "anything"},
+                    {"category": "anything"},
                     {},
                     "non_dict_item",
                 ]
-            })
+            },
+        )
         rpc = make_get_asset_topics_rpc()
         rpc.send = CoroutineMock(return_value=rpc_response)
 
@@ -69,9 +63,7 @@ class TestGetAssetTopicsRpc:
 @fixture
 def make_get_asset_topics_rpc() -> Callable[..., GetAssetTopicsRpc]:
     def builder(
-        event_bus: EventBus = Mock(EventBus),
-        logger: Logger = logging.getLogger(),
-        timeout: int = hash("any_timeout")
+        event_bus: EventBus = Mock(EventBus), logger: Logger = logging.getLogger(), timeout: int = hash("any_timeout")
     ):
         rpc = GetAssetTopicsRpc(event_bus, logger, timeout)
         rpc.start = Mock(return_value=(RpcRequest(request_id="a_request_id"), Mock(RpcLogger)))

@@ -1,9 +1,8 @@
 from typing import List
 
-from shortuuid import uuid
-
 from application.domain.repair_email_output import RepairEmailOutput, TicketOutput
 from application.domain.ticket import Ticket
+from shortuuid import uuid
 
 
 def to_output_message(output: RepairEmailOutput):

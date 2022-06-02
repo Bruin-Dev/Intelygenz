@@ -1,19 +1,16 @@
 import datetime
 from datetime import datetime
-from unittest.mock import Mock
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
-
 from application.repositories import digi_repository as digi_repository_module
 from application.repositories.digi_repository import DiGiRepository
+from apscheduler.util import undefined
 from asynctest import CoroutineMock
 from config import testconfig as config
-from apscheduler.util import undefined
 
 
 class TestDiGiRepository:
-
     def instance_test(self):
         logger = Mock()
         scheduler = Mock()
@@ -35,15 +32,16 @@ class TestDiGiRepository:
 
         digi_repository = DiGiRepository(config, logger, scheduler, digi_client)
 
-        with patch.object(digi_repository_module, 'timezone', new=Mock()):
+        with patch.object(digi_repository_module, "timezone", new=Mock()):
             await digi_repository.login_job()
 
         digi_repository._scheduler.add_job.assert_called_once_with(
-            digi_client.login, 'interval',
-            minutes=config.DIGI_CONFIG['login_ttl'],
+            digi_client.login,
+            "interval",
+            minutes=config.DIGI_CONFIG["login_ttl"],
             next_run_time=undefined,
             replace_existing=True,
-            id='login',
+            id="login",
         )
 
     @pytest.mark.asyncio
@@ -59,16 +57,17 @@ class TestDiGiRepository:
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
 
-        with patch.object(digi_repository_module, 'datetime', new=datetime_mock):
-            with patch.object(digi_repository_module, 'timezone', new=Mock()):
+        with patch.object(digi_repository_module, "datetime", new=datetime_mock):
+            with patch.object(digi_repository_module, "timezone", new=Mock()):
                 await digi_repository.login_job(exec_on_start=True)
 
         digi_repository._scheduler.add_job.assert_called_once_with(
-            digi_client.login, 'interval',
-            minutes=config.DIGI_CONFIG['login_ttl'],
+            digi_client.login,
+            "interval",
+            minutes=config.DIGI_CONFIG["login_ttl"],
             next_run_time=next_run_time,
             replace_existing=True,
-            id='login',
+            id="login",
         )
 
     @pytest.mark.asyncio
@@ -79,7 +78,7 @@ class TestDiGiRepository:
         digi_client = Mock()
         digi_client.reboot = CoroutineMock()
 
-        request_id = 'test_id'
+        request_id = "test_id"
 
         payload = {"igzID": request_id, "velo_serial": 123, "ticket": 321}
         digi_repository = DiGiRepository(config, logger, scheduler, digi_client)
@@ -96,7 +95,7 @@ class TestDiGiRepository:
         digi_client = Mock()
         digi_client.get_digi_recovery_logs = CoroutineMock()
 
-        request_id = 'test_id'
+        request_id = "test_id"
 
         payload = {"igzID": request_id}
         digi_repository = DiGiRepository(config, logger, scheduler, digi_client)

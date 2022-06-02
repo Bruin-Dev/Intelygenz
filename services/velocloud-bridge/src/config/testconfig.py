@@ -3,36 +3,29 @@ import logging
 import sys
 
 NATS_CONFIG = {
-    'servers': 'nats://nats-server:4222',
-    'subscriber': {
-        'pending_limits': 65536
-    },
-    'publisher': {
-        'max_pub_acks_inflight': 6000
-    }
+    "servers": "nats://nats-server:4222",
+    "subscriber": {"pending_limits": 65536},
+    "publisher": {"max_pub_acks_inflight": 6000},
 }
 
-TIMEZONE = 'US/Eastern'
+TIMEZONE = "US/Eastern"
 
 VELOCLOUD_CONFIG = {
-    'verify_ssl': True,
-    'servers': [
+    "verify_ssl": True,
+    "servers": [
         {
-            'url': 'someurl',
-            'username': 'someusername',
-            'password': 'somepassword',
-
+            "url": "someurl",
+            "username": "someusername",
+            "password": "somepassword",
         }
     ],
 }
 
 LOG_CONFIG = {
-    'name': 'test-name',
-    'level': logging.DEBUG,
-    'stream_handler': logging.StreamHandler(sys.stdout),
-    'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
+    "name": "test-name",
+    "level": logging.DEBUG,
+    "stream_handler": logging.StreamHandler(sys.stdout),
+    "format": "%(asctime)s: %(module)s: %(levelname)s: %(message)s",
 }
 
-METRICS_SERVER_CONFIG = {
-    'port': 9090
-}
+METRICS_SERVER_CONFIG = {"port": 9090}

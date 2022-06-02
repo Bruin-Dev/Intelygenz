@@ -1,20 +1,16 @@
 from datetime import datetime, timedelta
-from unittest.mock import Mock
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
-
-from asynctest import CoroutineMock
-from shortuuid import uuid
-
 from application.repositories import bruin_repository as bruin_repository_module
 from application.repositories import nats_error_response
 from application.repositories.bruin_repository import BruinRepository
+from asynctest import CoroutineMock
 from config import testconfig
-
+from shortuuid import uuid
 
 uuid_ = uuid()
-uuid_mock = patch.object(bruin_repository_module, 'uuid', return_value=uuid_)
+uuid_mock = patch.object(bruin_repository_module, "uuid", return_value=uuid_)
 
 
 class TestBruinRepository:
@@ -39,23 +35,23 @@ class TestBruinRepository:
         next_run_time = datetime.now()
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'client_id': bruin_client_id,
-                'ticket_statuses': ['Closed'],
-                'product_category': testconfig.PRODUCT_CATEGORY,
-                'ticket_topic': ticket_topic,
+            "request_id": uuid_,
+            "body": {
+                "client_id": bruin_client_id,
+                "ticket_statuses": ["Closed"],
+                "product_category": testconfig.PRODUCT_CATEGORY,
+                "ticket_topic": ticket_topic,
                 "start_date": (next_run_time - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "end_date": next_run_time.strftime("%Y-%m-%dT%H:%M:%SZ")
+                "end_date": next_run_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': [
-                {'ticketID': 11111},
-                {'ticketID': 22222},
+            "request_id": uuid_,
+            "body": [
+                {"ticketID": 11111},
+                {"ticketID": 22222},
             ],
-            'status': 200,
+            "status": 200,
         }
 
         logger = Mock()
@@ -69,7 +65,7 @@ class TestBruinRepository:
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
-        with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(bruin_repository_module, "datetime", new=datetime_mock):
             with uuid_mock:
                 result = await bruin_repository.get_closed_tickets(bruin_client_id, ticket_topic)
 
@@ -84,14 +80,14 @@ class TestBruinRepository:
         next_run_time = datetime.now()
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'client_id': bruin_client_id,
-                'ticket_statuses': ['Closed'],
-                'product_category': testconfig.PRODUCT_CATEGORY,
-                'ticket_topic': ticket_topic,
+            "request_id": uuid_,
+            "body": {
+                "client_id": bruin_client_id,
+                "ticket_statuses": ["Closed"],
+                "product_category": testconfig.PRODUCT_CATEGORY,
+                "ticket_topic": ticket_topic,
                 "start_date": (next_run_time - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "end_date": next_run_time.strftime("%Y-%m-%dT%H:%M:%SZ")
+                "end_date": next_run_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
             },
         }
 
@@ -108,7 +104,7 @@ class TestBruinRepository:
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
-        with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(bruin_repository_module, "datetime", new=datetime_mock):
             with uuid_mock:
                 result = await bruin_repository.get_closed_tickets(bruin_client_id, ticket_topic)
 
@@ -125,21 +121,21 @@ class TestBruinRepository:
         next_run_time = datetime.now()
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'client_id': bruin_client_id,
-                'ticket_statuses': ['Closed'],
-                'product_category': testconfig.PRODUCT_CATEGORY,
-                'ticket_topic': ticket_topic,
+            "request_id": uuid_,
+            "body": {
+                "client_id": bruin_client_id,
+                "ticket_statuses": ["Closed"],
+                "product_category": testconfig.PRODUCT_CATEGORY,
+                "ticket_topic": ticket_topic,
                 "start_date": (next_run_time - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "end_date": next_run_time.strftime("%Y-%m-%dT%H:%M:%SZ")
+                "end_date": next_run_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
             },
         }
 
         response = {
-            'request_id': uuid_,
-            'body': 'Got internal error from Bruin',
-            'status': 500,
+            "request_id": uuid_,
+            "body": "Got internal error from Bruin",
+            "status": 500,
         }
 
         logger = Mock()
@@ -155,7 +151,7 @@ class TestBruinRepository:
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
-        with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(bruin_repository_module, "datetime", new=datetime_mock):
             with uuid_mock:
                 result = await bruin_repository.get_closed_tickets(bruin_client_id, ticket_topic)
 
@@ -177,7 +173,7 @@ class TestBruinRepository:
         bruin_repository.get_closed_tickets = CoroutineMock()
 
         await bruin_repository.get_outage_tickets(bruin_client_id)
-        bruin_repository.get_closed_tickets.assert_awaited_with(bruin_client_id, 'VOO')
+        bruin_repository.get_closed_tickets.assert_awaited_with(bruin_client_id, "VOO")
 
     @pytest.mark.asyncio
     async def get_affecting_tickets_test(self):
@@ -192,22 +188,19 @@ class TestBruinRepository:
         bruin_repository.get_closed_tickets = CoroutineMock()
 
         await bruin_repository.get_affecting_tickets(bruin_client_id)
-        bruin_repository.get_closed_tickets.assert_awaited_with(bruin_client_id, 'VAS')
+        bruin_repository.get_closed_tickets.assert_awaited_with(bruin_client_id, "VAS")
 
     @pytest.mark.asyncio
     async def get_ticket_task_history_test(self):
         ticket_id = 11111
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                        'ticket_id': ticket_id
-
-            },
+            "request_id": uuid_,
+            "body": {"ticket_id": ticket_id},
         }
         response = {
-            'request_id': uuid_,
-            'body': [
+            "request_id": uuid_,
+            "body": [
                 {
                     "ClientName": "Le Duff Management ",
                     "Ticket Entered Date": "202008242225",
@@ -232,10 +225,10 @@ class TestBruinRepository:
                     "Task": None,
                     "Task Result": None,
                     "SLA": None,
-                    "Ticket Status": "Resolved"
+                    "Ticket Status": "Resolved",
                 }
             ],
-            'status': 200,
+            "status": 200,
         }
 
         logger = Mock()
@@ -258,11 +251,8 @@ class TestBruinRepository:
         ticket_id = 11111
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'ticket_id': ticket_id
-
-            },
+            "request_id": uuid_,
+            "body": {"ticket_id": ticket_id},
         }
         logger = Mock()
         config = testconfig
@@ -288,16 +278,13 @@ class TestBruinRepository:
         ticket_id = 11111
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'ticket_id': ticket_id
-
-            },
+            "request_id": uuid_,
+            "body": {"ticket_id": ticket_id},
         }
         response = {
-            'request_id': uuid_,
-            'body': 'Got internal error from Bruin',
-            'status': 500,
+            "request_id": uuid_,
+            "body": "Got internal error from Bruin",
+            "status": 500,
         }
 
         logger = Mock()

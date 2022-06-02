@@ -4,12 +4,11 @@ from logging import Logger
 from typing import Callable
 from unittest.mock import Mock
 
+from application.rpc import RpcLogger, RpcRequest, RpcResponse
+from application.rpc.upsert_outage_ticket_rpc import *
 from asynctest import CoroutineMock
 from igz.packages.eventbus.eventbus import EventBus
-from pytest import mark, fixture, raises
-
-from application.rpc import RpcLogger, RpcResponse, RpcRequest
-from application.rpc.upsert_outage_ticket_rpc import *
+from pytest import fixture, mark, raises
 
 
 class TestUpsertOutageTicketRpc:
@@ -26,9 +25,11 @@ class TestUpsertOutageTicketRpc:
         ]
 
         def side_effect(request: RpcRequest):
-            if request.body == RequestBody(client_id=client_id,
-                                           service_number={"service_number_1", "service_number_2"},
-                                           ticket_contact=TicketContact(email=contact_email)):
+            if request.body == RequestBody(
+                client_id=client_id,
+                service_number={"service_number_1", "service_number_2"},
+                ticket_contact=TicketContact(email=contact_email),
+            ):
                 return RpcResponse(status=HTTPStatus.OK, body=ticket_id)
             else:
                 raise RpcFailedError(request=request, response=RpcResponse(status=HTTPStatus.BAD_REQUEST))
@@ -55,9 +56,11 @@ class TestUpsertOutageTicketRpc:
         ]
 
         def side_effect(request: RpcRequest):
-            if request.body == RequestBody(client_id=client_id,
-                                           service_number={"service_number_1", "service_number_2"},
-                                           ticket_contact=TicketContact(email=contact_email)):
+            if request.body == RequestBody(
+                client_id=client_id,
+                service_number={"service_number_1", "service_number_2"},
+                ticket_contact=TicketContact(email=contact_email),
+            ):
                 raise RpcFailedError(request=request, response=RpcResponse(status=bruin_updated_status, body=ticket_id))
             else:
                 raise RpcFailedError(request=request, response=RpcResponse(status=HTTPStatus.BAD_REQUEST))
@@ -75,16 +78,17 @@ class TestUpsertOutageTicketRpc:
         rpc = make_upsert_outage_ticket_rpc()
 
         with raises(RpcError, match=MULTIPLE_SITES_MSG):
-            await rpc(asset_ids=[make_asset_id(site_id="site_1"), make_asset_id(site_id="site_2")],
-                      contact_email="any")
+            await rpc(asset_ids=[make_asset_id(site_id="site_1"), make_asset_id(site_id="site_2")], contact_email="any")
 
     @mark.asyncio
     async def multiple_client_ids_raise_a_proper_error_test(self, make_upsert_outage_ticket_rpc, make_asset_id):
         rpc = make_upsert_outage_ticket_rpc()
 
         with raises(RpcError, match=MULTIPLE_CLIENTS_MSG):
-            await rpc(asset_ids=[make_asset_id(client_id="client_1"), make_asset_id(client_id="client_2")],
-                      contact_email="any")
+            await rpc(
+                asset_ids=[make_asset_id(client_id="client_1"), make_asset_id(client_id="client_2")],
+                contact_email="any",
+            )
 
     @mark.asyncio
     async def empty_bodies_raise_a_proper_error_test(self, make_upsert_outage_ticket_rpc, make_asset_id):
@@ -108,8 +112,11 @@ class TestUpsertOutageTicketRpc:
     async def other_statuses_raise_a_proper_error_test(self, make_upsert_outage_ticket_rpc, make_asset_id):
         # given
         rpc = make_upsert_outage_ticket_rpc()
-        rpc.send = CoroutineMock(side_effect=RpcFailedError(request=RpcRequest.construct(),
-                                                            response=RpcResponse(status=HTTPStatus.BAD_REQUEST)))
+        rpc.send = CoroutineMock(
+            side_effect=RpcFailedError(
+                request=RpcRequest.construct(), response=RpcResponse(status=HTTPStatus.BAD_REQUEST)
+            )
+        )
 
         with raises(RpcFailedError):
             await rpc(asset_ids=[make_asset_id()], contact_email="any")

@@ -1,14 +1,14 @@
-import pytest
 import json
-import grpc
-from google.protobuf.json_format import Parse
 from unittest.mock import Mock, call, patch
-from asynctest import CoroutineMock
 
-from config import testconfig
-
-from application.clients.generated_grpc import public_input_pb2_grpc as pb2_grpc, public_input_pb2 as pb2
+import grpc
+import pytest
+from application.clients.generated_grpc import public_input_pb2 as pb2
+from application.clients.generated_grpc import public_input_pb2_grpc as pb2_grpc
 from application.clients.repair_ticket_client import RepairTicketClient
+from asynctest import CoroutineMock
+from config import testconfig
+from google.protobuf.json_format import Parse
 
 
 class TestRepairTicketClient:

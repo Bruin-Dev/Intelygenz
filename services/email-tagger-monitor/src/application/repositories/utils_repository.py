@@ -1,10 +1,10 @@
 import re
-import humps
 from typing import Callable
+
+import humps
 
 
 class UtilsRepository:
-
     def convert_dict_to_snake_case(self, data: dict) -> dict:
         return self.convert_dict(data, self.to_snake_case)
 
@@ -35,7 +35,7 @@ class UtilsRepository:
 
     @staticmethod
     def to_snake_case(key: str) -> str:
-        formatted_key = re.sub(r'[\W_]+', '', key)
+        formatted_key = re.sub(r"[\W_]+", "", key)
         formatted_key = humps.decamelize(formatted_key)
         formatted_key = formatted_key.lower()
 

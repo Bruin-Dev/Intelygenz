@@ -1,12 +1,11 @@
 from unittest.mock import patch
 
 import pytest
+from application.repositories import notifications_repository as notifications_repository_module
 from shortuuid import uuid
 
-from application.repositories import notifications_repository as notifications_repository_module
-
 uuid_ = uuid()
-uuid_mock = patch.object(notifications_repository_module, 'uuid', return_value=uuid_)
+uuid_mock = patch.object(notifications_repository_module, "uuid", return_value=uuid_)
 
 
 class TestNotificationsRepository:
@@ -23,8 +22,8 @@ class TestNotificationsRepository:
         notifications_repository._event_bus.rpc_request.assert_awaited_once_with(
             "notification.slack.request",
             {
-                'request_id': uuid_,
-                'message': message,
+                "request_id": uuid_,
+                "message": message,
             },
             timeout=10,
         )
@@ -32,15 +31,14 @@ class TestNotificationsRepository:
     @pytest.mark.asyncio
     async def notify_successful_reminder_note_append_test(self, notifications_repository):
         ticket_id = 12345
-        serial_number = 'VC1234567'
+        serial_number = "VC1234567"
 
         await notifications_repository.notify_successful_reminder_note_append(
-            ticket_id=ticket_id,
-            serial_number=serial_number
+            ticket_id=ticket_id, serial_number=serial_number
         )
 
         message = (
-            f'Service Outage reminder note posted for serial number {serial_number} of ticket {ticket_id}. '
-            f'https://app.bruin.com/t/{ticket_id}'
+            f"Service Outage reminder note posted for serial number {serial_number} of ticket {ticket_id}. "
+            f"https://app.bruin.com/t/{ticket_id}"
         )
         notifications_repository.send_slack_message.assert_awaited_once_with(message)

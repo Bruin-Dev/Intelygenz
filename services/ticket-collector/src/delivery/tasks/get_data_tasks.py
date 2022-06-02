@@ -1,6 +1,6 @@
-from dependency_injector.wiring import inject, Provide
-from usecases.tickets import TicketUseCase
+from dependency_injector.wiring import Provide, inject
 from usecases.containers import UseCases
+from usecases.tickets import TicketUseCase
 
 
 @inject

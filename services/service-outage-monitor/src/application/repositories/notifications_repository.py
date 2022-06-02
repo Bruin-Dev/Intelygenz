@@ -7,14 +7,14 @@ class NotificationsRepository:
 
     async def send_slack_message(self, message: str):
         message = {
-            'request_id': uuid(),
-            'message': message,
+            "request_id": uuid(),
+            "message": message,
         }
         await self._event_bus.rpc_request("notification.slack.request", message, timeout=10)
 
     async def notify_successful_reminder_note_append(self, ticket_id: int, serial_number: str):
         message = (
-            f'Service Outage reminder note posted for serial number {serial_number} of ticket {ticket_id}. '
-            f'https://app.bruin.com/t/{ticket_id}'
+            f"Service Outage reminder note posted for serial number {serial_number} of ticket {ticket_id}. "
+            f"https://app.bruin.com/t/{ticket_id}"
         )
         await self.send_slack_message(message)

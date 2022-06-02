@@ -1,5 +1,4 @@
 class GetTestResults:
-
     def __init__(self, logger, config, event_bus, hawkeye_repository):
         self._config = config
         self._logger = logger
@@ -7,32 +6,28 @@ class GetTestResults:
         self._hawkeye_repository = hawkeye_repository
 
     async def get_test_results(self, msg: dict):
-        probes_response = {
-            'request_id': msg['request_id'],
-            'body': None,
-            'status': None
-        }
+        probes_response = {"request_id": msg["request_id"], "body": None, "status": None}
         body = msg.get("body")
         if body is None:
             probes_response["status"] = 400
             probes_response["body"] = 'Must include "body" in request'
-            await self._event_bus.publish_message(msg['response_topic'], probes_response)
+            await self._event_bus.publish_message(msg["response_topic"], probes_response)
             return
 
-        if 'probe_uids' not in body:
+        if "probe_uids" not in body:
             probes_response["status"] = 400
             probes_response["body"] = 'Must include "probe_uids" in the body of the request'
-            await self._event_bus.publish_message(msg['response_topic'], probes_response)
+            await self._event_bus.publish_message(msg["response_topic"], probes_response)
             return
-        if 'interval' not in body:
+        if "interval" not in body:
             probes_response["status"] = 400
             probes_response["body"] = 'Must include "interval" in the body of the request'
-            await self._event_bus.publish_message(msg['response_topic'], probes_response)
+            await self._event_bus.publish_message(msg["response_topic"], probes_response)
             return
-        self._logger.info(f'Collecting all test results ...')
+        self._logger.info(f"Collecting all test results ...")
 
-        filtered_tests = await self._hawkeye_repository.get_test_results(body['probe_uids'], body['interval'])
+        filtered_tests = await self._hawkeye_repository.get_test_results(body["probe_uids"], body["interval"])
 
         filtered_tests_response = {**probes_response, **filtered_tests}
 
-        await self._event_bus.publish_message(msg['response_topic'], filtered_tests_response)
+        await self._event_bus.publish_message(msg["response_topic"], filtered_tests_response)

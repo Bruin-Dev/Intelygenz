@@ -1,10 +1,9 @@
 from typing import List
 
-from dataclasses import field, dataclass
-from pydantic import BaseModel, Field, ValidationError, validator
-
 from application.domain.asset import AssetId, Topic
 from application.rpc import Rpc, RpcFailedError
+from dataclasses import dataclass, field
+from pydantic import BaseModel, Field, ValidationError, validator
 
 NATS_TOPIC = "bruin.get.asset.topics"
 
@@ -29,8 +28,7 @@ class GetAssetTopicsRpc(Rpc):
 
         try:
             body = ResponseBody.parse_obj(response.body)
-            topics = [Topic(call_type=item.call_type, category=item.category)
-                      for item in body.call_types]
+            topics = [Topic(call_type=item.call_type, category=item.category) for item in body.call_types]
 
             logger.debug(f"__call__(): topics={topics}, response={response.body}")
             return topics
@@ -45,7 +43,7 @@ class RequestBody(BaseModel):
 
 
 class ResponseBody(BaseModel):
-    call_types: List['ResponseCallType'] = Field(alias="callTypes")
+    call_types: List["ResponseCallType"] = Field(alias="callTypes")
 
     @validator("call_types", pre=True)
     def only_valid_items(cls, v):

@@ -1,25 +1,20 @@
 import os
-from datetime import datetime
-from datetime import timedelta
-from unittest.mock import Mock
-from unittest.mock import call
-from unittest.mock import patch
+from datetime import datetime, timedelta
+from unittest.mock import Mock, call, patch
 
 import pytest
+from application.actions import outage_monitoring as outage_monitoring_module
+from application.actions.outage_monitoring import OutageMonitor
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
+from config import testconfig
 from dateutil.parser import parse
-from pytz import timezone
-from pytz import utc
+from pytz import timezone, utc
 from shortuuid import uuid
 
-from application.actions import outage_monitoring as outage_monitoring_module
-from application.actions.outage_monitoring import OutageMonitor
-from config import testconfig
-
 uuid_ = uuid()
-uuid_mock = patch.object(outage_monitoring_module, 'uuid', return_value=uuid_)
+uuid_mock = patch.object(outage_monitoring_module, "uuid", return_value=uuid_)
 
 
 class TestServiceOutageMonitor:
@@ -36,8 +31,16 @@ class TestServiceOutageMonitor:
         utils_repository = Mock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
 
         assert outage_monitor._event_bus is event_bus
@@ -64,23 +67,32 @@ class TestServiceOutageMonitor:
         utils_repository = Mock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            with patch.object(outage_monitoring_module, 'timezone', new=Mock()):
+        with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
+            with patch.object(outage_monitoring_module, "timezone", new=Mock()):
                 await outage_monitor.start_hawkeye_outage_monitoring(exec_on_start=True)
 
         scheduler.add_job.assert_called_once_with(
-            outage_monitor._outage_monitoring_process, 'interval',
-            seconds=config.MONITOR_CONFIG['jobs_intervals']['outage_monitor'],
+            outage_monitor._outage_monitoring_process,
+            "interval",
+            seconds=config.MONITOR_CONFIG["jobs_intervals"]["outage_monitor"],
             next_run_time=next_run_time,
             replace_existing=False,
-            id='_hawkeye_outage_monitor_process',
+            id="_hawkeye_outage_monitor_process",
         )
 
     @pytest.mark.asyncio
@@ -97,23 +109,32 @@ class TestServiceOutageMonitor:
         utils_repository = Mock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
 
         await outage_monitor.start_hawkeye_outage_monitoring(exec_on_start=False)
 
         scheduler.add_job.assert_called_once_with(
-            outage_monitor._outage_monitoring_process, 'interval',
-            seconds=config.MONITOR_CONFIG['jobs_intervals']['outage_monitor'],
+            outage_monitor._outage_monitoring_process,
+            "interval",
+            seconds=config.MONITOR_CONFIG["jobs_intervals"]["outage_monitor"],
             next_run_time=undefined,
             replace_existing=False,
-            id='_hawkeye_outage_monitor_process',
+            id="_hawkeye_outage_monitor_process",
         )
 
     @pytest.mark.asyncio
     async def start_hawkeye_outage_monitoring_with_job_id_already_executing_test(self):
-        job_id = 'some-duplicated-id'
+        job_id = "some-duplicated-id"
         exception_instance = ConflictingIdError(job_id)
 
         event_bus = Mock()
@@ -130,8 +151,16 @@ class TestServiceOutageMonitor:
         scheduler.add_job = Mock(side_effect=exception_instance)
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
 
         try:
@@ -139,11 +168,12 @@ class TestServiceOutageMonitor:
             # TODO: The test should fail at this point if no exception was raised
         except ConflictingIdError:
             scheduler.add_job.assert_called_once_with(
-                outage_monitor._outage_monitoring_process, 'interval',
-                seconds=config.MONITOR_CONFIG['jobs_intervals']['outage_monitor'],
+                outage_monitor._outage_monitoring_process,
+                "interval",
+                seconds=config.MONITOR_CONFIG["jobs_intervals"]["outage_monitor"],
                 next_run_time=undefined,
                 replace_existing=False,
-                id='_hawkeye_outage_monitor_process',
+                id="_hawkeye_outage_monitor_process",
             )
 
     @pytest.mark.asyncio
@@ -178,8 +208,8 @@ class TestServiceOutageMonitor:
             device_3_cached_info,
         ]
         customer_cache_response = {
-            'body': customer_cache,
-            'status': 200,
+            "body": customer_cache,
+            "status": 200,
         }
 
         probe_1_info = {
@@ -206,19 +236,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -226,16 +246,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 1,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
         probe_2_info = {
             "probeId": "2",
@@ -261,19 +275,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -281,16 +285,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 1,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
         probe_3_info = {
             "probeId": "3",
@@ -316,19 +314,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -336,16 +324,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 0,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 0,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 0, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 0, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
         probes = [
             probe_1_info,
@@ -353,8 +335,8 @@ class TestServiceOutageMonitor:
             probe_3_info,
         ]
         probes_response = {
-            'body': probes,
-            'status': 200,
+            "body": probes,
+            "status": 200,
         }
 
         active_probes = [
@@ -363,12 +345,12 @@ class TestServiceOutageMonitor:
         ]
 
         active_probe_with_cached_info_1 = {
-            'device_info': probe_1_info,
-            'cached_info': device_1_cached_info,
+            "device_info": probe_1_info,
+            "cached_info": device_1_cached_info,
         }
         active_probe_with_cached_info_3 = {
-            'device_info': probe_3_info,
-            'cached_info': device_3_cached_info,
+            "device_info": probe_3_info,
+            "cached_info": device_3_cached_info,
         }
         active_probes_with_customer_cache_info = [
             active_probe_with_cached_info_1,
@@ -398,8 +380,16 @@ class TestServiceOutageMonitor:
         hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=active_probes_with_customer_cache_info)
         outage_monitor._schedule_recheck_job_for_devices = Mock()
@@ -416,8 +406,8 @@ class TestServiceOutageMonitor:
     @pytest.mark.asyncio
     async def outage_monitoring_process_with_customer_cache_response_having_202_status_test(self):
         customer_cache_response = {
-            'body': 'Cache is still being built',
-            'status': 202,
+            "body": "Cache is still being built",
+            "status": 202,
         }
 
         event_bus = Mock()
@@ -436,8 +426,16 @@ class TestServiceOutageMonitor:
         hawkeye_repository.get_probes = CoroutineMock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._map_probes_info_with_customer_cache = Mock()
         outage_monitor._schedule_recheck_job_for_devices = Mock()
@@ -454,8 +452,8 @@ class TestServiceOutageMonitor:
     @pytest.mark.asyncio
     async def outage_monitoring_process_with_customer_cache_response_having_non_2xx_status_test(self):
         customer_cache_response = {
-            'body': 'No devices were found for the specified filters',
-            'status': 404,
+            "body": "No devices were found for the specified filters",
+            "status": 404,
         }
 
         event_bus = Mock()
@@ -474,8 +472,16 @@ class TestServiceOutageMonitor:
         hawkeye_repository.get_probes = CoroutineMock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._map_probes_info_with_customer_cache = Mock()
         outage_monitor._schedule_recheck_job_for_devices = Mock()
@@ -521,13 +527,13 @@ class TestServiceOutageMonitor:
             device_3_cached_info,
         ]
         customer_cache_response = {
-            'body': customer_cache,
-            'status': 200,
+            "body": customer_cache,
+            "status": 200,
         }
 
         probes_response = {
-            'body': 'Got internal error from Hawkeye',
-            'status': 500,
+            "body": "Got internal error from Hawkeye",
+            "status": 500,
         }
 
         event_bus = Mock()
@@ -546,8 +552,16 @@ class TestServiceOutageMonitor:
         hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._map_probes_info_with_customer_cache = Mock()
         outage_monitor._schedule_recheck_job_for_devices = Mock()
@@ -593,13 +607,13 @@ class TestServiceOutageMonitor:
             device_3_cached_info,
         ]
         customer_cache_response = {
-            'body': customer_cache,
-            'status': 200,
+            "body": customer_cache,
+            "status": 200,
         }
 
         probes_response = {
-            'body': [],
-            'status': 200,
+            "body": [],
+            "status": 200,
         }
 
         event_bus = Mock()
@@ -618,8 +632,16 @@ class TestServiceOutageMonitor:
         hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._map_probes_info_with_customer_cache = Mock()
         outage_monitor._schedule_recheck_job_for_devices = Mock()
@@ -665,12 +687,12 @@ class TestServiceOutageMonitor:
             device_3_cached_info,
         ]
         customer_cache_response = {
-            'body': customer_cache,
-            'status': 200,
+            "body": customer_cache,
+            "status": 200,
         }
 
         probes_response = {
-            'body': [
+            "body": [
                 {
                     "probeId": "1",
                     "uid": "b8:27:eb:76:a8:de",
@@ -695,19 +717,9 @@ class TestServiceOutageMonitor:
                     "defaultGateway": "192.168.90.99",
                     "availableForMesh": "1",
                     "lastRestart": "2020-10-15T02:13:24Z",
-                    "availability": {
-                        "from": 1,
-                        "to": 1,
-                        "mesh": "1"
-                    },
-                    "ips": [
-                        "192.168.90.102",
-                        "192.226.111.211"
-                    ],
-                    "userGroups": [
-                        "1",
-                        "10"
-                    ],
+                    "availability": {"from": 1, "to": 1, "mesh": "1"},
+                    "ips": ["192.168.90.102", "192.226.111.211"],
+                    "userGroups": ["1", "10"],
                     "wifi": {
                         "available": 0,
                         "associated": 0,
@@ -715,19 +727,13 @@ class TestServiceOutageMonitor:
                         "ssid": "",
                         "frequency": "",
                         "level": "0",
-                        "bitrate": ""
+                        "bitrate": "",
                     },
-                    "nodetonode": {
-                        "status": 1,
-                        "lastUpdate": "2020-11-11T13:00:11Z"
-                    },
-                    "realservice": {
-                        "status": 1,
-                        "lastUpdate": "2020-10-15T02:18:28Z"
-                    }
+                    "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+                    "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
                 }
             ],
-            'status': 200,
+            "status": 200,
         }
 
         event_bus = Mock()
@@ -746,8 +752,16 @@ class TestServiceOutageMonitor:
         hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._map_probes_info_with_customer_cache = Mock()
         outage_monitor._schedule_recheck_job_for_devices = Mock()
@@ -801,8 +815,16 @@ class TestServiceOutageMonitor:
         utils_repository = Mock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
 
         probe = {
@@ -814,14 +836,8 @@ class TestServiceOutageMonitor:
             "managementIp": "none",
             "active": "1",
             # Omitting a few keys for simplicity
-            "nodetonode": {
-                "status": 1,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
         result = outage_monitor._is_there_an_outage(probe)
         assert result is False
@@ -835,14 +851,8 @@ class TestServiceOutageMonitor:
             "managementIp": "none",
             "active": "1",
             # Omitting a few keys for simplicity
-            "nodetonode": {
-                "status": 0,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 0, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
         result = outage_monitor._is_there_an_outage(probe)
         assert result is True
@@ -856,14 +866,8 @@ class TestServiceOutageMonitor:
             "managementIp": "none",
             "active": "1",
             # Omitting a few keys for simplicity
-            "nodetonode": {
-                "status": 1,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 0,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 0, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
         result = outage_monitor._is_there_an_outage(probe)
         assert result is True
@@ -877,24 +881,18 @@ class TestServiceOutageMonitor:
             "managementIp": "none",
             "active": "1",
             # Omitting a few keys for simplicity
-            "nodetonode": {
-                "status": 0,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 0,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 0, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 0, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
         result = outage_monitor._is_there_an_outage(probe)
         assert result is True
 
     def map_probes_info_with_customer_cache_test(self):
-        serial_number_1 = 'B827EB76A8DE'
-        serial_number_2 = 'C827FC76B8EF'
-        serial_number_3 = 'D827GD76C8FG'
-        serial_number_4 = 'E827HE76D8GH'
-        serial_number_5 = 'F827IF76E8HI'
+        serial_number_1 = "B827EB76A8DE"
+        serial_number_2 = "C827FC76B8EF"
+        serial_number_3 = "D827GD76C8FG"
+        serial_number_4 = "E827HE76D8GH"
+        serial_number_5 = "F827IF76E8HI"
 
         probe_1 = {
             "probeId": "1",
@@ -986,20 +984,28 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
 
         result = outage_monitor._map_probes_info_with_customer_cache(probes, customer_cache)
 
         expected = [
             {
-                'device_info': probe_1,
-                'cached_info': device_1_cached_info,
+                "device_info": probe_1,
+                "cached_info": device_1_cached_info,
             },
             {
-                'device_info': probe_2,
-                'cached_info': device_3_cached_info,
+                "device_info": probe_2,
+                "cached_info": device_3_cached_info,
             },
         ]
         assert result == expected
@@ -1007,15 +1013,15 @@ class TestServiceOutageMonitor:
     def schedule_recheck_job_for_devices_test(self):
         devices = [
             {
-                'cached_info': {
-                    'serial_number': 'B827EB76A8DE',
-                    'last_contact': '2020-08-17T02:23:59',
-                    'bruin_client_info': {
-                        'client_id': 9994,
-                        'client_name': 'METTEL/NEW YORK',
+                "cached_info": {
+                    "serial_number": "B827EB76A8DE",
+                    "last_contact": "2020-08-17T02:23:59",
+                    "bruin_client_info": {
+                        "client_id": 9994,
+                        "client_name": "METTEL/NEW YORK",
                     },
                 },
-                'device_info': [
+                "device_info": [
                     {
                         "probeId": "3",
                         "uid": "b8:27:eb:76:a8:de",
@@ -1024,10 +1030,10 @@ class TestServiceOutageMonitor:
                         "testIp": "none",
                         "managementIp": "none",
                         "active": "1",
-                        "serialNumber": 'B827EB76A8DE',
+                        "serialNumber": "B827EB76A8DE",
                         # Omitting a few keys for simplicity
                     }
-                ]
+                ],
             }
         ]
 
@@ -1043,31 +1049,40 @@ class TestServiceOutageMonitor:
         hawkeye_repository = Mock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            with patch.object(outage_monitoring_module, 'timezone', new=Mock()):
+        with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
+            with patch.object(outage_monitoring_module, "timezone", new=Mock()):
                 outage_monitor._schedule_recheck_job_for_devices(devices)
 
-        expected_run_date = next_run_time + timedelta(seconds=config.MONITOR_CONFIG['jobs_intervals']['quarantine'])
+        expected_run_date = next_run_time + timedelta(seconds=config.MONITOR_CONFIG["jobs_intervals"]["quarantine"])
         scheduler.add_job.assert_called_once_with(
-            outage_monitor._recheck_devices_for_ticket_creation, 'date',
+            outage_monitor._recheck_devices_for_ticket_creation,
+            "date",
             args=[devices],
             run_date=expected_run_date,
             replace_existing=False,
             misfire_grace_time=9999,
-            id=f'_ticket_creation_recheck',
+            id=f"_ticket_creation_recheck",
         )
 
     @pytest.mark.asyncio
     async def recheck_devices_with_just_devices_in_outage_state_and_creation_response_having_2xx_status_test(self):
-        serial_number_1 = 'B827EB76A8DE'
-        serial_number_2 = 'D827GD76C8FG'
+        serial_number_1 = "B827EB76A8DE"
+        serial_number_2 = "D827GD76C8FG"
 
         probe_1_info = {
             "probeId": "1",
@@ -1093,19 +1108,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -1113,16 +1118,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 0,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 0, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
         probe_2_info = {
             "probeId": "3",
@@ -1148,19 +1147,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -1168,16 +1157,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 0,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 0, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
 
         bruin_client_id = 9994
@@ -1203,12 +1186,12 @@ class TestServiceOutageMonitor:
         ]
 
         device_1_info = {
-            'device_info': probe_1_info,
-            'cached_info': device_1_cached_info,
+            "device_info": probe_1_info,
+            "cached_info": device_1_cached_info,
         }
         device_2_info = {
-            'device_info': probe_2_info,
-            'cached_info': device_2_cached_info,
+            "device_info": probe_2_info,
+            "cached_info": device_2_cached_info,
         }
         devices_info = [
             device_1_info,
@@ -1220,14 +1203,14 @@ class TestServiceOutageMonitor:
             probe_2_info,
         ]
         probes_response = {
-            'body': probes,
-            'status': 200,
+            "body": probes,
+            "status": 200,
         }
 
         ticket_id = 12345
         create_ticket_response = {
-            'body': ticket_id,
-            'status': 200,
+            "body": ticket_id,
+            "status": 200,
         }
 
         triage_note = "This is Hawkeye's triage note"
@@ -1251,36 +1234,50 @@ class TestServiceOutageMonitor:
         notifications_repository.send_slack_message = CoroutineMock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
         outage_monitor._build_triage_note = Mock(return_value=triage_note)
         outage_monitor._run_ticket_autoresolve = CoroutineMock()
 
-        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
 
         hawkeye_repository.get_probes.assert_awaited_once()
         outage_monitor._map_probes_info_with_customer_cache.assert_called_once_with(probes, devices_cached_info)
-        bruin_repository.create_outage_ticket.assert_has_awaits([
-            call(bruin_client_id, serial_number_1),
-            call(bruin_client_id, serial_number_2),
-        ])
-        outage_monitor._build_triage_note.assert_has_calls([
-            call(probe_1_info),
-            call(probe_2_info),
-        ])
-        bruin_repository.append_triage_note_to_ticket.assert_has_awaits([
-            call(ticket_id, serial_number_1, triage_note),
-            call(ticket_id, serial_number_2, triage_note),
-        ])
+        bruin_repository.create_outage_ticket.assert_has_awaits(
+            [
+                call(bruin_client_id, serial_number_1),
+                call(bruin_client_id, serial_number_2),
+            ]
+        )
+        outage_monitor._build_triage_note.assert_has_calls(
+            [
+                call(probe_1_info),
+                call(probe_2_info),
+            ]
+        )
+        bruin_repository.append_triage_note_to_ticket.assert_has_awaits(
+            [
+                call(ticket_id, serial_number_1, triage_note),
+                call(ticket_id, serial_number_2, triage_note),
+            ]
+        )
         outage_monitor._run_ticket_autoresolve.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def recheck_devices_with_just_devices_in_outage_state_and_creation_response_having_409_status_test(self):
-        serial_number_1 = 'B827EB76A8DE'
-        serial_number_2 = 'D827GD76C8FG'
+        serial_number_1 = "B827EB76A8DE"
+        serial_number_2 = "D827GD76C8FG"
 
         probe_1_info = {
             "probeId": "1",
@@ -1306,19 +1303,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -1326,16 +1313,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 0,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 0, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
         probe_2_info = {
             "probeId": "3",
@@ -1361,19 +1342,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -1381,16 +1352,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 0,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 0, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
 
         bruin_client_id = 9994
@@ -1416,12 +1381,12 @@ class TestServiceOutageMonitor:
         ]
 
         device_1_info = {
-            'device_info': probe_1_info,
-            'cached_info': device_1_cached_info,
+            "device_info": probe_1_info,
+            "cached_info": device_1_cached_info,
         }
         device_2_info = {
-            'device_info': probe_2_info,
-            'cached_info': device_2_cached_info,
+            "device_info": probe_2_info,
+            "cached_info": device_2_cached_info,
         }
         devices_info = [
             device_1_info,
@@ -1433,14 +1398,14 @@ class TestServiceOutageMonitor:
             probe_2_info,
         ]
         probes_response = {
-            'body': probes,
-            'status': 200,
+            "body": probes,
+            "status": 200,
         }
 
         ticket_id = 12345
         create_ticket_response = {
-            'body': ticket_id,
-            'status': 409,
+            "body": ticket_id,
+            "status": 409,
         }
 
         event_bus = Mock()
@@ -1462,33 +1427,45 @@ class TestServiceOutageMonitor:
         notifications_repository.send_slack_message = CoroutineMock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
         outage_monitor._build_triage_note = Mock()
         outage_monitor._append_triage_note_if_needed = CoroutineMock()
         outage_monitor._run_ticket_autoresolve = CoroutineMock()
 
-        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
 
         hawkeye_repository.get_probes.assert_awaited_once()
         outage_monitor._map_probes_info_with_customer_cache.assert_called_once_with(probes, devices_cached_info)
-        bruin_repository.create_outage_ticket.assert_has_awaits([
-            call(bruin_client_id, serial_number_1),
-            call(bruin_client_id, serial_number_2),
-        ])
-        outage_monitor._append_triage_note_if_needed.assert_has_awaits([
-            call(ticket_id, probe_1_info),
-            call(ticket_id, probe_2_info),
-        ])
+        bruin_repository.create_outage_ticket.assert_has_awaits(
+            [
+                call(bruin_client_id, serial_number_1),
+                call(bruin_client_id, serial_number_2),
+            ]
+        )
+        outage_monitor._append_triage_note_if_needed.assert_has_awaits(
+            [
+                call(ticket_id, probe_1_info),
+                call(ticket_id, probe_2_info),
+            ]
+        )
         outage_monitor._run_ticket_autoresolve.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def recheck_devices_with_just_devices_in_outage_state_and_creation_response_having_471_status_test(self):
-        serial_number_1 = 'B827EB76A8DE'
-        serial_number_2 = 'D827GD76C8FG'
+        serial_number_1 = "B827EB76A8DE"
+        serial_number_2 = "D827GD76C8FG"
 
         probe_1_info = {
             "probeId": "1",
@@ -1514,19 +1491,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -1534,16 +1501,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 0,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 0, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
         probe_2_info = {
             "probeId": "3",
@@ -1569,19 +1530,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -1589,16 +1540,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 0,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 0, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
 
         bruin_client_id = 9994
@@ -1624,12 +1569,12 @@ class TestServiceOutageMonitor:
         ]
 
         device_1_info = {
-            'device_info': probe_1_info,
-            'cached_info': device_1_cached_info,
+            "device_info": probe_1_info,
+            "cached_info": device_1_cached_info,
         }
         device_2_info = {
-            'device_info': probe_2_info,
-            'cached_info': device_2_cached_info,
+            "device_info": probe_2_info,
+            "cached_info": device_2_cached_info,
         }
         devices_info = [
             device_1_info,
@@ -1641,14 +1586,14 @@ class TestServiceOutageMonitor:
             probe_2_info,
         ]
         probes_response = {
-            'body': probes,
-            'status': 200,
+            "body": probes,
+            "status": 200,
         }
 
         ticket_id = 12345
         create_ticket_response = {
-            'body': ticket_id,
-            'status': 471,
+            "body": ticket_id,
+            "status": 471,
         }
 
         event_bus = Mock()
@@ -1670,35 +1615,47 @@ class TestServiceOutageMonitor:
         notifications_repository.send_slack_message = CoroutineMock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
         outage_monitor._build_triage_note = Mock()
         outage_monitor._reopen_outage_ticket = CoroutineMock()
         outage_monitor._run_ticket_autoresolve = CoroutineMock()
 
-        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
 
         hawkeye_repository.get_probes.assert_awaited_once()
         outage_monitor._map_probes_info_with_customer_cache.assert_called_once_with(probes, devices_cached_info)
-        bruin_repository.create_outage_ticket.assert_has_awaits([
-            call(bruin_client_id, serial_number_1),
-            call(bruin_client_id, serial_number_2),
-        ])
+        bruin_repository.create_outage_ticket.assert_has_awaits(
+            [
+                call(bruin_client_id, serial_number_1),
+                call(bruin_client_id, serial_number_2),
+            ]
+        )
         outage_monitor._build_triage_note.assert_not_called()
         bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
         outage_monitor._run_ticket_autoresolve.assert_not_awaited()
-        outage_monitor._reopen_outage_ticket.assert_has_awaits([
-            call(ticket_id, device_1_info),
-            call(ticket_id, device_2_info),
-        ])
+        outage_monitor._reopen_outage_ticket.assert_has_awaits(
+            [
+                call(ticket_id, device_1_info),
+                call(ticket_id, device_2_info),
+            ]
+        )
 
     @pytest.mark.asyncio
     async def recheck_devices_with_just_devices_in_outage_state_and_creation_response_having_472_status_test(self):
-        serial_number_1 = 'B827EB76A8DE'
-        serial_number_2 = 'D827GD76C8FG'
+        serial_number_1 = "B827EB76A8DE"
+        serial_number_2 = "D827GD76C8FG"
 
         probe_1_info = {
             "probeId": "1",
@@ -1724,19 +1681,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -1744,16 +1691,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 0,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 0, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
         probe_2_info = {
             "probeId": "3",
@@ -1779,19 +1720,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -1799,16 +1730,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 0,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 0, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
 
         bruin_client_id = 9994
@@ -1834,12 +1759,12 @@ class TestServiceOutageMonitor:
         ]
 
         device_1_info = {
-            'device_info': probe_1_info,
-            'cached_info': device_1_cached_info,
+            "device_info": probe_1_info,
+            "cached_info": device_1_cached_info,
         }
         device_2_info = {
-            'device_info': probe_2_info,
-            'cached_info': device_2_cached_info,
+            "device_info": probe_2_info,
+            "cached_info": device_2_cached_info,
         }
         devices_info = [
             device_1_info,
@@ -1851,14 +1776,14 @@ class TestServiceOutageMonitor:
             probe_2_info,
         ]
         probes_response = {
-            'body': probes,
-            'status': 200,
+            "body": probes,
+            "status": 200,
         }
 
         ticket_id = 12345
         create_ticket_response = {
-            'body': ticket_id,
-            'status': 472,
+            "body": ticket_id,
+            "status": 472,
         }
 
         reopen_note = "#*MetTel's IPA*#\nRe-opening task"
@@ -1883,37 +1808,51 @@ class TestServiceOutageMonitor:
         notifications_repository.send_slack_message = CoroutineMock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
         outage_monitor._build_triage_note = Mock()
         outage_monitor._run_ticket_autoresolve = CoroutineMock()
         outage_monitor._build_triage_note = Mock(return_value=reopen_note)
 
-        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
 
         hawkeye_repository.get_probes.assert_awaited_once()
         outage_monitor._map_probes_info_with_customer_cache.assert_called_once_with(probes, devices_cached_info)
-        bruin_repository.create_outage_ticket.assert_has_awaits([
-            call(bruin_client_id, serial_number_1),
-            call(bruin_client_id, serial_number_2),
-        ])
-        outage_monitor._build_triage_note.assert_has_calls([
-            call(device_1_info['device_info'], is_reopen_note=True),
-            call(device_2_info['device_info'], is_reopen_note=True),
-        ])
-        bruin_repository.append_note_to_ticket.assert_has_awaits([
-            call(ticket_id, reopen_note, service_numbers=[serial_number_1]),
-            call(ticket_id, reopen_note, service_numbers=[serial_number_2]),
-        ])
+        bruin_repository.create_outage_ticket.assert_has_awaits(
+            [
+                call(bruin_client_id, serial_number_1),
+                call(bruin_client_id, serial_number_2),
+            ]
+        )
+        outage_monitor._build_triage_note.assert_has_calls(
+            [
+                call(device_1_info["device_info"], is_reopen_note=True),
+                call(device_2_info["device_info"], is_reopen_note=True),
+            ]
+        )
+        bruin_repository.append_note_to_ticket.assert_has_awaits(
+            [
+                call(ticket_id, reopen_note, service_numbers=[serial_number_1]),
+                call(ticket_id, reopen_note, service_numbers=[serial_number_2]),
+            ]
+        )
         outage_monitor._run_ticket_autoresolve.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def recheck_devices_with_just_devices_in_outage_state_and_creation_response_having_473_status_test(self):
-        serial_number_1 = 'B827EB76A8DE'
-        serial_number_2 = 'D827GD76C8FG'
+        serial_number_1 = "B827EB76A8DE"
+        serial_number_2 = "D827GD76C8FG"
 
         probe_1_info = {
             "probeId": "1",
@@ -1939,19 +1878,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -1959,16 +1888,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 0,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 0, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
         probe_2_info = {
             "probeId": "3",
@@ -1994,19 +1917,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -2014,16 +1927,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 0,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 0, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
 
         bruin_client_id = 9994
@@ -2049,12 +1956,12 @@ class TestServiceOutageMonitor:
         ]
 
         device_1_info = {
-            'device_info': probe_1_info,
-            'cached_info': device_1_cached_info,
+            "device_info": probe_1_info,
+            "cached_info": device_1_cached_info,
         }
         device_2_info = {
-            'device_info': probe_2_info,
-            'cached_info': device_2_cached_info,
+            "device_info": probe_2_info,
+            "cached_info": device_2_cached_info,
         }
         devices_info = [
             device_1_info,
@@ -2066,17 +1973,17 @@ class TestServiceOutageMonitor:
             probe_2_info,
         ]
         probes_response = {
-            'body': probes,
-            'status': 200,
+            "body": probes,
+            "status": 200,
         }
 
         ticket_id = 12345
         create_ticket_response = {
-            'body': ticket_id,
-            'status': 473,
+            "body": ticket_id,
+            "status": 473,
         }
 
-        triage_note = 'This is a triage note'
+        triage_note = "This is a triage note"
 
         event_bus = Mock()
         logger = Mock()
@@ -2098,38 +2005,52 @@ class TestServiceOutageMonitor:
         notifications_repository.send_slack_message = CoroutineMock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
         outage_monitor._build_triage_note = Mock(return_value=triage_note)
         outage_monitor._run_ticket_autoresolve = CoroutineMock()
         outage_monitor._reopen_outage_ticket = CoroutineMock()
 
-        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
 
         hawkeye_repository.get_probes.assert_awaited_once()
         outage_monitor._map_probes_info_with_customer_cache.assert_called_once_with(probes, devices_cached_info)
-        bruin_repository.create_outage_ticket.assert_has_awaits([
-            call(bruin_client_id, serial_number_1),
-            call(bruin_client_id, serial_number_2),
-        ])
-        outage_monitor._build_triage_note.assert_has_calls([
-            call(probe_1_info),
-            call(probe_2_info),
-        ])
-        bruin_repository.append_triage_note_to_ticket.assert_has_awaits([
-            call(ticket_id, serial_number_1, triage_note),
-            call(ticket_id, serial_number_2, triage_note),
-        ])
+        bruin_repository.create_outage_ticket.assert_has_awaits(
+            [
+                call(bruin_client_id, serial_number_1),
+                call(bruin_client_id, serial_number_2),
+            ]
+        )
+        outage_monitor._build_triage_note.assert_has_calls(
+            [
+                call(probe_1_info),
+                call(probe_2_info),
+            ]
+        )
+        bruin_repository.append_triage_note_to_ticket.assert_has_awaits(
+            [
+                call(ticket_id, serial_number_1, triage_note),
+                call(ticket_id, serial_number_2, triage_note),
+            ]
+        )
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
         outage_monitor._run_ticket_autoresolve.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def recheck_devices_with_just_devices_in_healthy_state_test(self):
-        serial_number_1 = 'B827EB76A8DE'
-        serial_number_2 = 'D827GD76C8FG'
+        serial_number_1 = "B827EB76A8DE"
+        serial_number_2 = "D827GD76C8FG"
 
         probe_1_info = {
             "probeId": "1",
@@ -2155,19 +2076,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -2175,16 +2086,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 0,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 0, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
         probe_2_info = {
             "probeId": "3",
@@ -2210,19 +2115,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -2230,16 +2125,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 0,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 0, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
 
         fresh_probe_1_info = {
@@ -2266,19 +2155,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -2286,16 +2165,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 1,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
         fresh_probe_2_info = {
             "probeId": "3",
@@ -2321,19 +2194,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -2341,16 +2204,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 1,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
 
         bruin_client_id = 9994
@@ -2376,12 +2233,12 @@ class TestServiceOutageMonitor:
         ]
 
         device_1_info = {
-            'device_info': probe_1_info,
-            'cached_info': device_1_cached_info,
+            "device_info": probe_1_info,
+            "cached_info": device_1_cached_info,
         }
         device_2_info = {
-            'device_info': probe_2_info,
-            'cached_info': device_2_cached_info,
+            "device_info": probe_2_info,
+            "cached_info": device_2_cached_info,
         }
         devices_info = [
             device_1_info,
@@ -2393,17 +2250,17 @@ class TestServiceOutageMonitor:
             fresh_probe_2_info,
         ]
         probes_response = {
-            'body': fresh_probes,
-            'status': 200,
+            "body": fresh_probes,
+            "status": 200,
         }
 
         fresh_device_1_info = {
-            'device_info': fresh_probe_1_info,
-            'cached_info': device_1_cached_info,
+            "device_info": fresh_probe_1_info,
+            "cached_info": device_1_cached_info,
         }
         fresh_device_2_info = {
-            'device_info': fresh_probe_2_info,
-            'cached_info': device_2_cached_info,
+            "device_info": fresh_probe_2_info,
+            "cached_info": device_2_cached_info,
         }
         fresh_devices_info = [
             fresh_device_1_info,
@@ -2429,14 +2286,22 @@ class TestServiceOutageMonitor:
         notifications_repository.send_slack_message = CoroutineMock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=fresh_devices_info)
         outage_monitor._build_triage_note = Mock()
         outage_monitor._run_ticket_autoresolve = CoroutineMock()
 
-        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
 
         hawkeye_repository.get_probes.assert_awaited_once()
@@ -2444,15 +2309,18 @@ class TestServiceOutageMonitor:
         bruin_repository.create_outage_ticket.assert_not_awaited()
         outage_monitor._build_triage_note.assert_not_called()
         bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
-        outage_monitor._run_ticket_autoresolve.assert_has_awaits([
-            call(fresh_device_1_info),
-            call(fresh_device_2_info),
-        ], any_order=True)
+        outage_monitor._run_ticket_autoresolve.assert_has_awaits(
+            [
+                call(fresh_device_1_info),
+                call(fresh_device_2_info),
+            ],
+            any_order=True,
+        )
 
     @pytest.mark.asyncio
     async def recheck_devices_with_get_probes_response_having_non_2xx_status_test(self):
-        serial_number_1 = 'B827EB76A8DE'
-        serial_number_2 = 'D827GD76C8FG'
+        serial_number_1 = "B827EB76A8DE"
+        serial_number_2 = "D827GD76C8FG"
 
         probe_1_info = {
             "probeId": "1",
@@ -2478,19 +2346,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -2498,16 +2356,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 1,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
         probe_2_info = {
             "probeId": "3",
@@ -2533,19 +2385,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -2553,16 +2395,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 0,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 0, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
 
         bruin_client_id = 9994
@@ -2584,12 +2420,12 @@ class TestServiceOutageMonitor:
         }
 
         device_1_info = {
-            'device_info': probe_1_info,
-            'cached_info': device_1_cached_info,
+            "device_info": probe_1_info,
+            "cached_info": device_1_cached_info,
         }
         device_2_info = {
-            'device_info': probe_2_info,
-            'cached_info': device_2_cached_info,
+            "device_info": probe_2_info,
+            "cached_info": device_2_cached_info,
         }
         devices_info = [
             device_1_info,
@@ -2597,8 +2433,8 @@ class TestServiceOutageMonitor:
         ]
 
         probes_response = {
-            'body': 'Got internal error from Hawkeye',
-            'status': 500,
+            "body": "Got internal error from Hawkeye",
+            "status": 500,
         }
 
         event_bus = Mock()
@@ -2620,8 +2456,16 @@ class TestServiceOutageMonitor:
         notifications_repository.send_slack_message = CoroutineMock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._map_probes_info_with_customer_cache = Mock()
         outage_monitor._build_triage_note = Mock()
@@ -2636,8 +2480,8 @@ class TestServiceOutageMonitor:
 
     @pytest.mark.asyncio
     async def recheck_devices_with_empty_list_of_probes_test(self):
-        serial_number_1 = 'B827EB76A8DE'
-        serial_number_2 = 'D827GD76C8FG'
+        serial_number_1 = "B827EB76A8DE"
+        serial_number_2 = "D827GD76C8FG"
 
         probe_1_info = {
             "probeId": "1",
@@ -2663,19 +2507,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -2683,16 +2517,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 1,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
         probe_2_info = {
             "probeId": "3",
@@ -2718,19 +2546,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -2738,16 +2556,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 0,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 0, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
 
         bruin_client_id = 9994
@@ -2769,12 +2581,12 @@ class TestServiceOutageMonitor:
         }
 
         device_1_info = {
-            'device_info': probe_1_info,
-            'cached_info': device_1_cached_info,
+            "device_info": probe_1_info,
+            "cached_info": device_1_cached_info,
         }
         device_2_info = {
-            'device_info': probe_2_info,
-            'cached_info': device_2_cached_info,
+            "device_info": probe_2_info,
+            "cached_info": device_2_cached_info,
         }
         devices_info = [
             device_1_info,
@@ -2782,8 +2594,8 @@ class TestServiceOutageMonitor:
         ]
 
         probes_response = {
-            'body': [],
-            'status': 200,
+            "body": [],
+            "status": 200,
         }
 
         event_bus = Mock()
@@ -2805,8 +2617,16 @@ class TestServiceOutageMonitor:
         notifications_repository.send_slack_message = CoroutineMock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._map_probes_info_with_customer_cache = Mock()
         outage_monitor._build_triage_note = Mock()
@@ -2821,8 +2641,8 @@ class TestServiceOutageMonitor:
 
     @pytest.mark.asyncio
     async def recheck_devices_with_no_active_probes_test(self):
-        serial_number_1 = 'B827EB76A8DE'
-        serial_number_2 = 'D827GD76C8FG'
+        serial_number_1 = "B827EB76A8DE"
+        serial_number_2 = "D827GD76C8FG"
 
         probe_1_info = {
             "probeId": "1",
@@ -2848,19 +2668,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -2868,16 +2678,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 1,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
         probe_2_info = {
             "probeId": "3",
@@ -2903,19 +2707,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -2923,16 +2717,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 0,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 0, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
 
         bruin_client_id = 9994
@@ -2954,12 +2742,12 @@ class TestServiceOutageMonitor:
         }
 
         device_1_info = {
-            'device_info': probe_1_info,
-            'cached_info': device_1_cached_info,
+            "device_info": probe_1_info,
+            "cached_info": device_1_cached_info,
         }
         device_2_info = {
-            'device_info': probe_2_info,
-            'cached_info': device_2_cached_info,
+            "device_info": probe_2_info,
+            "cached_info": device_2_cached_info,
         }
         devices_info = [
             device_1_info,
@@ -2991,19 +2779,9 @@ class TestServiceOutageMonitor:
                 "defaultGateway": "192.168.90.99",
                 "availableForMesh": "1",
                 "lastRestart": "2020-10-15T02:13:24Z",
-                "availability": {
-                    "from": 1,
-                    "to": 1,
-                    "mesh": "1"
-                },
-                "ips": [
-                    "192.168.90.102",
-                    "192.226.111.211"
-                ],
-                "userGroups": [
-                    "1",
-                    "10"
-                ],
+                "availability": {"from": 1, "to": 1, "mesh": "1"},
+                "ips": ["192.168.90.102", "192.226.111.211"],
+                "userGroups": ["1", "10"],
                 "wifi": {
                     "available": 0,
                     "associated": 0,
@@ -3011,21 +2789,15 @@ class TestServiceOutageMonitor:
                     "ssid": "",
                     "frequency": "",
                     "level": "0",
-                    "bitrate": ""
+                    "bitrate": "",
                 },
-                "nodetonode": {
-                    "status": 1,
-                    "lastUpdate": "2020-11-11T13:00:11Z"
-                },
-                "realservice": {
-                    "status": 1,
-                    "lastUpdate": "2020-10-15T02:18:28Z"
-                }
+                "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+                "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
             }
         ]
         probes_response = {
-            'body': probes,
-            'status': 200,
+            "body": probes,
+            "status": 200,
         }
 
         event_bus = Mock()
@@ -3047,8 +2819,16 @@ class TestServiceOutageMonitor:
         notifications_repository.send_slack_message = CoroutineMock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._map_probes_info_with_customer_cache = Mock()
         outage_monitor._build_triage_note = Mock()
@@ -3063,8 +2843,8 @@ class TestServiceOutageMonitor:
 
     @pytest.mark.asyncio
     async def recheck_devices_with_environment_other_than_production_test(self):
-        serial_number_1 = 'B827EB76A8DE'
-        serial_number_2 = 'D827GD76C8FG'
+        serial_number_1 = "B827EB76A8DE"
+        serial_number_2 = "D827GD76C8FG"
 
         probe_1_info = {
             "probeId": "1",
@@ -3090,19 +2870,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -3110,16 +2880,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 1,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
         probe_2_info = {
             "probeId": "3",
@@ -3145,19 +2909,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -3165,16 +2919,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 0,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 0, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
 
         bruin_client_id = 9994
@@ -3200,12 +2948,12 @@ class TestServiceOutageMonitor:
         ]
 
         device_1_info = {
-            'device_info': probe_1_info,
-            'cached_info': device_1_cached_info,
+            "device_info": probe_1_info,
+            "cached_info": device_1_cached_info,
         }
         device_2_info = {
-            'device_info': probe_2_info,
-            'cached_info': device_2_cached_info,
+            "device_info": probe_2_info,
+            "cached_info": device_2_cached_info,
         }
         devices_info = [
             device_1_info,
@@ -3217,14 +2965,14 @@ class TestServiceOutageMonitor:
             probe_2_info,
         ]
         probes_response = {
-            'body': probes,
-            'status': 200,
+            "body": probes,
+            "status": 200,
         }
 
         ticket_id = 12345
         create_ticket_response = {
-            'body': ticket_id,
-            'status': 200,
+            "body": ticket_id,
+            "status": 200,
         }
 
         triage_note = "This is Hawkeye's triage note"
@@ -3248,13 +2996,21 @@ class TestServiceOutageMonitor:
         notifications_repository.send_slack_message = CoroutineMock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
         outage_monitor._build_triage_note = Mock(return_value=triage_note)
 
-        with patch.object(config, 'CURRENT_ENVIRONMENT', 'dev'):
+        with patch.object(config, "CURRENT_ENVIRONMENT", "dev"):
             await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
 
         hawkeye_repository.get_probes.assert_awaited_once()
@@ -3264,19 +3020,20 @@ class TestServiceOutageMonitor:
         bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def reopen_outage_ticket_test(self, probes_response, outage_monitor, devices_info, ticket_response_reopen,
-                                        bruin_response_ok):
+    async def reopen_outage_ticket_test(
+        self, probes_response, outage_monitor, devices_info, ticket_response_reopen, bruin_response_ok
+    ):
         outage_monitor._bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_response_reopen)
         outage_monitor._bruin_repository.append_triage_note = CoroutineMock()
         outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=bruin_response_ok)
-        outage_monitor._bruin_repository.open_ticket = CoroutineMock(return_value={'status': 200, 'body': None})
+        outage_monitor._bruin_repository.open_ticket = CoroutineMock(return_value={"status": 200, "body": None})
 
         outage_monitor._hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
 
         outage_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
-        with patch.object(testconfig, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(testconfig, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
 
         outage_monitor._hawkeye_repository.get_probes.assert_awaited_once()
@@ -3284,8 +3041,9 @@ class TestServiceOutageMonitor:
         outage_monitor._bruin_repository.create_outage_ticket.assert_awaited()
 
     @pytest.mark.asyncio
-    async def reopen_outage_ticket_bad_get_ticket_detail_test(self, device_1_info, ticket_id, bruin_exception_response,
-                                                              outage_monitor):
+    async def reopen_outage_ticket_bad_get_ticket_detail_test(
+        self, device_1_info, ticket_id, bruin_exception_response, outage_monitor
+    ):
         outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=bruin_exception_response)
         outage_monitor._bruin_repository.open_ticket = CoroutineMock()
 
@@ -3297,12 +3055,16 @@ class TestServiceOutageMonitor:
         outage_monitor._bruin_repository.open_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def reopen_outage_ticket_with_reopen_request_having_non_2xx_status_test(self, device_1_info, ticket_id,
-                                                                                  ticket_detail_for_serial_1,
-                                                                                  bruin_response_ok,
-                                                                                  bruin_exception_response,
-                                                                                  outage_monitor):
-        ticket_detail_for_serial_1_id = ticket_detail_for_serial_1['detailID']
+    async def reopen_outage_ticket_with_reopen_request_having_non_2xx_status_test(
+        self,
+        device_1_info,
+        ticket_id,
+        ticket_detail_for_serial_1,
+        bruin_response_ok,
+        bruin_exception_response,
+        outage_monitor,
+    ):
+        ticket_detail_for_serial_1_id = ticket_detail_for_serial_1["detailID"]
 
         outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=bruin_response_ok)
         outage_monitor._bruin_repository.open_ticket = CoroutineMock(return_value=bruin_exception_response)
@@ -3315,10 +3077,17 @@ class TestServiceOutageMonitor:
         outage_monitor._bruin_repository.append_note_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def reopen_outage_ticket_ok_test(self, device_1_info, ticket_id, ticket_detail_for_serial_1,
-                                           bruin_response_ok, bruin_reopen_response_ok, outage_monitor):
-        ticket_detail_for_serial_1_id = ticket_detail_for_serial_1['detailID']
-        serial_number = ticket_detail_for_serial_1['detailValue']
+    async def reopen_outage_ticket_ok_test(
+        self,
+        device_1_info,
+        ticket_id,
+        ticket_detail_for_serial_1,
+        bruin_response_ok,
+        bruin_reopen_response_ok,
+        outage_monitor,
+    ):
+        ticket_detail_for_serial_1_id = ticket_detail_for_serial_1["detailID"]
+        serial_number = ticket_detail_for_serial_1["detailValue"]
         reopen_note = "#*MetTel's IPA*#\nRe-opening task"
 
         outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=bruin_response_ok)
@@ -3331,41 +3100,45 @@ class TestServiceOutageMonitor:
 
         outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         outage_monitor._bruin_repository.open_ticket.assert_awaited_once_with(ticket_id, ticket_detail_for_serial_1_id)
-        outage_monitor._build_triage_note.assert_called_once_with(device_1_info['device_info'], is_reopen_note=True)
+        outage_monitor._build_triage_note.assert_called_once_with(device_1_info["device_info"], is_reopen_note=True)
         outage_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
             ticket_id, reopen_note, service_numbers=[serial_number]
         )
         outage_monitor._notifications_repository.send_slack_message.assert_awaited()
 
     def build_reopen_note_test(self, device_1_info, outage_monitor):
-        device_info = device_1_info['device_info']
+        device_info = device_1_info["device_info"]
         tz_object = timezone(outage_monitor._config.TIMEZONE)
         current_datetime = datetime.now(utc).astimezone(tz_object)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
-        expected = os.linesep.join([
-            "#*MetTel's IPA*#",
-            f"Re-opening task",
-            "",
-            "Hawkeye Instance: https://ixia.metconnect.net/",
-            "Links: [Dashboard|https://ixia.metconnect.net/ixrr_main.php?type=ProbesManagement] - "
-            f"[Probe|https://ixia.metconnect.net/probeinformation.php?probeid={device_info['probeId']}]",
-            f"Device Name: {device_info['name']}",
-            f"Device Type: {device_info['typeName']}",
-            f"Device Group(s): {device_info['probeGroup']}",
-            f"Serial: {device_info['serialNumber']}",
-            f"Hawkeye ID: {device_info['probeId']}",
-            "",
-            f"Device Node to Node Status: UP",
-            f"Node to Node Last Update: {str(parse(device_info['nodetonode']['lastUpdate']).astimezone(tz_object))}",
-            f"Device Real Service Status: DOWN",
-            f"Real Service Last Update: {str(parse(device_info['realservice']['lastUpdate']).astimezone(tz_object))}",
-            "",
-            f"TimeStamp: {str(current_datetime)}",
-        ])
+        node_last_update = str(parse(device_info["nodetonode"]["lastUpdate"]).astimezone(tz_object))
+        service_last_update = str(parse(device_info["realservice"]["lastUpdate"]).astimezone(tz_object))
+        expected = os.linesep.join(
+            [
+                "#*MetTel's IPA*#",
+                f"Re-opening task",
+                "",
+                "Hawkeye Instance: https://ixia.metconnect.net/",
+                "Links: [Dashboard|https://ixia.metconnect.net/ixrr_main.php?type=ProbesManagement] - "
+                f"[Probe|https://ixia.metconnect.net/probeinformation.php?probeid={device_info['probeId']}]",
+                f"Device Name: {device_info['name']}",
+                f"Device Type: {device_info['typeName']}",
+                f"Device Group(s): {device_info['probeGroup']}",
+                f"Serial: {device_info['serialNumber']}",
+                f"Hawkeye ID: {device_info['probeId']}",
+                "",
+                f"Device Node to Node Status: UP",
+                f"Node to Node Last Update: {node_last_update}",
+                f"Device Real Service Status: DOWN",
+                f"Real Service Last Update: {service_last_update}",
+                "",
+                f"TimeStamp: {str(current_datetime)}",
+            ]
+        )
 
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            result = outage_monitor._build_triage_note(device_1_info['device_info'], is_reopen_note=True)
+        with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
+            result = outage_monitor._build_triage_note(device_1_info["device_info"], is_reopen_note=True)
 
             assert result == expected
 
@@ -3373,7 +3146,7 @@ class TestServiceOutageMonitor:
     async def append_triage_note_if_needed_with_ticket_details_response_having_non_2xx_status_test(self):
         ticket_id = 12345
 
-        serial_number = 'B827EB92EB72'
+        serial_number = "B827EB92EB72"
         device_info = {
             "probeId": "1",
             "uid": "b8:27:eb:76:a8:de",
@@ -3398,19 +3171,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -3418,21 +3181,15 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 1,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
 
         ticket_details_response = {
-            'body': 'Got internal error from Bruin',
-            'status': 500,
+            "body": "Got internal error from Bruin",
+            "status": 500,
         }
 
         event_bus = Mock()
@@ -3450,8 +3207,16 @@ class TestServiceOutageMonitor:
         bruin_repository.append_triage_note_to_ticket = CoroutineMock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._build_triage_note = Mock()
         outage_monitor._triage_note_exists = Mock()
@@ -3467,7 +3232,7 @@ class TestServiceOutageMonitor:
     async def append_triage_note_if_needed_with_triage_note_found_in_ticket_test(self):
         ticket_id = 12345
 
-        serial_number = 'B827EB92EB72'
+        serial_number = "B827EB92EB72"
         device_info = {
             "probeId": "1",
             "uid": "b8:27:eb:76:a8:de",
@@ -3492,19 +3257,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -3512,21 +3267,15 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 1,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
 
         ticket_detail_1 = {
-            'detailID': 12345,
-            'detailValue': serial_number,
+            "detailID": 12345,
+            "detailValue": serial_number,
         }
 
         ticket_notes = [
@@ -3540,13 +3289,13 @@ class TestServiceOutageMonitor:
             },
         ]
         ticket_details_response = {
-            'body': {
-                'ticketDetails': [
+            "body": {
+                "ticketDetails": [
                     ticket_detail_1,
                 ],
-                'ticketNotes': ticket_notes,
+                "ticketNotes": ticket_notes,
             },
-            'status': 200,
+            "status": 200,
         }
 
         event_bus = Mock()
@@ -3564,8 +3313,16 @@ class TestServiceOutageMonitor:
         bruin_repository.append_triage_note_to_ticket = CoroutineMock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._build_triage_note = Mock()
         outage_monitor._triage_note_exists = Mock(return_value=True)
@@ -3581,7 +3338,7 @@ class TestServiceOutageMonitor:
     async def append_triage_note_if_needed_with_triage_note_not_found_in_ticket_test(self):
         ticket_id = 12345
 
-        serial_number = 'B827EB92EB72'
+        serial_number = "B827EB92EB72"
         device_info = {
             "probeId": "1",
             "uid": "b8:27:eb:76:a8:de",
@@ -3606,19 +3363,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -3626,35 +3373,29 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 1,
-                "lastUpdate": "2020-11-11T13:00:11Z"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-10-15T02:18:28Z"
-            }
+            "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+            "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
 
         ticket_detail_1 = {
-            'detailID': 12345,
-            'detailValue': serial_number,
+            "detailID": 12345,
+            "detailValue": serial_number,
         }
 
         ticket_notes = []
         ticket_details_response = {
-            'body': {
-                'ticketDetails': [
+            "body": {
+                "ticketDetails": [
                     ticket_detail_1,
                 ],
-                'ticketNotes': ticket_notes,
+                "ticketNotes": ticket_notes,
             },
-            'status': 200,
+            "status": 200,
         }
 
-        triage_note = 'This is a triage note'
+        triage_note = "This is a triage note"
 
         event_bus = Mock()
         logger = Mock()
@@ -3671,8 +3412,16 @@ class TestServiceOutageMonitor:
         bruin_repository.append_triage_note_to_ticket = CoroutineMock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._build_triage_note = Mock(return_value=triage_note)
         outage_monitor._triage_note_exists = Mock(return_value=False)
@@ -3697,8 +3446,16 @@ class TestServiceOutageMonitor:
         utils_repository = Mock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
 
         ticket_notes = []
@@ -3711,7 +3468,7 @@ class TestServiceOutageMonitor:
                 "noteValue": f"#*MetTel's IPA*#\nAI\nTimeStamp: 2020-02-24 10:07:12+00:00",
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
                 "serviceNumber": [
-                    'B827EB92EB72',
+                    "B827EB92EB72",
                 ],
             },
         ]
@@ -3724,7 +3481,7 @@ class TestServiceOutageMonitor:
                 "noteValue": f"#*Automation Engine*#\nTriage (Ixia)\nTimeStamp: 2020-02-24 10:07:12+00:00",
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
                 "serviceNumber": [
-                    'B827EB92EB72',
+                    "B827EB92EB72",
                 ],
             },
         ]
@@ -3737,7 +3494,7 @@ class TestServiceOutageMonitor:
                 "noteValue": f"#*MetTel's IPA*#\nTriage (Ixia)\nTimeStamp: 2020-02-24 10:07:12+00:00",
                 "createdDate": "2020-02-24T10:07:13.503-05:00",
                 "serviceNumber": [
-                    'B827EB92EB72',
+                    "B827EB92EB72",
                 ],
             },
         ]
@@ -3758,7 +3515,7 @@ class TestServiceOutageMonitor:
             "n2nMode": "1",
             "rsMode": "1",
             "typeName": "xr_pi",
-            "serialNumber": 'B827EB76A8DE',
+            "serialNumber": "B827EB76A8DE",
             "probeGroup": "FIS",
             "location": "",
             "latitude": "0",
@@ -3769,19 +3526,9 @@ class TestServiceOutageMonitor:
             "defaultGateway": "192.168.90.99",
             "availableForMesh": "1",
             "lastRestart": "2020-10-15T02:13:24Z",
-            "availability": {
-                "from": 1,
-                "to": 1,
-                "mesh": "1"
-            },
-            "ips": [
-                "192.168.90.102",
-                "192.226.111.211"
-            ],
-            "userGroups": [
-                "1",
-                "10"
-            ],
+            "availability": {"from": 1, "to": 1, "mesh": "1"},
+            "ips": ["192.168.90.102", "192.226.111.211"],
+            "userGroups": ["1", "10"],
             "wifi": {
                 "available": 0,
                 "associated": 0,
@@ -3789,16 +3536,10 @@ class TestServiceOutageMonitor:
                 "ssid": "",
                 "frequency": "",
                 "level": "0",
-                "bitrate": ""
+                "bitrate": "",
             },
-            "nodetonode": {
-                "status": 0,
-                "lastUpdate": "never"
-            },
-            "realservice": {
-                "status": 1,
-                "lastUpdate": "2020-11-15T10:18:28Z"
-            }
+            "nodetonode": {"status": 0, "lastUpdate": "never"},
+            "realservice": {"status": 1, "lastUpdate": "2020-11-15T10:18:28Z"},
         }
 
         event_bus = Mock()
@@ -3813,45 +3554,55 @@ class TestServiceOutageMonitor:
         utils_repository = Mock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
 
         current_datetime = datetime.now(utc)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+        with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
             triage_note = outage_monitor._build_triage_note(device_info)
 
-        expected_note = os.linesep.join([
-            "#*MetTel's IPA*#",
-            'Triage (Ixia)',
-            '',
-            'Hawkeye Instance: https://ixia.metconnect.net/',
-            'Links: [Dashboard|https://ixia.metconnect.net/ixrr_main.php?type=ProbesManagement] - '
-            '[Probe|https://ixia.metconnect.net/probeinformation.php?probeid=1]',
-            'Device Name: FIS_Demo_XrPi',
-            'Device Type: xr_pi',
-            'Device Group(s): FIS',
-            'Serial: B827EB76A8DE',
-            'Hawkeye ID: 1',
-            '',
-            'Device Node to Node Status: DOWN',
-            'Node to Node Last Update: never',
-            'Device Real Service Status: UP',
-            'Real Service Last Update: 2020-11-15 05:18:28-05:00',
-            '',
-            f'TimeStamp: {str(current_datetime.astimezone(timezone(config.TIMEZONE)))}',
-        ])
+        expected_note = os.linesep.join(
+            [
+                "#*MetTel's IPA*#",
+                "Triage (Ixia)",
+                "",
+                "Hawkeye Instance: https://ixia.metconnect.net/",
+                "Links: [Dashboard|https://ixia.metconnect.net/ixrr_main.php?type=ProbesManagement] - "
+                "[Probe|https://ixia.metconnect.net/probeinformation.php?probeid=1]",
+                "Device Name: FIS_Demo_XrPi",
+                "Device Type: xr_pi",
+                "Device Group(s): FIS",
+                "Serial: B827EB76A8DE",
+                "Hawkeye ID: 1",
+                "",
+                "Device Node to Node Status: DOWN",
+                "Node to Node Last Update: never",
+                "Device Real Service Status: UP",
+                "Real Service Last Update: 2020-11-15 05:18:28-05:00",
+                "",
+                f"TimeStamp: {str(current_datetime.astimezone(timezone(config.TIMEZONE)))}",
+            ]
+        )
         assert triage_note == expected_note
 
     @pytest.mark.asyncio
     async def run_ticket_autoresolve_with_retrieval_of_ticket_returning_non_2xx_status_test(self):
-        serial_number = 'B827EB92EB72'
+        serial_number = "B827EB92EB72"
         client_id = 9994
 
         device = {
-            'cached_info': {
+            "cached_info": {
                 "serial_number": serial_number,
                 "last_contact": "2020-01-16T14:59:56.245Z",
                 "bruin_client_info": {
@@ -3859,7 +3610,7 @@ class TestServiceOutageMonitor:
                     "client_name": "METTEL/NEW YORK",
                 },
             },
-            'device_info': {
+            "device_info": {
                 "probeId": "1",
                 "uid": "b8:27:eb:76:a8:de",
                 "os": "Linux ARM",
@@ -3883,19 +3634,9 @@ class TestServiceOutageMonitor:
                 "defaultGateway": "192.168.90.99",
                 "availableForMesh": "1",
                 "lastRestart": "2020-10-15T02:13:24Z",
-                "availability": {
-                    "from": 1,
-                    "to": 1,
-                    "mesh": "1"
-                },
-                "ips": [
-                    "192.168.90.102",
-                    "192.226.111.211"
-                ],
-                "userGroups": [
-                    "1",
-                    "10"
-                ],
+                "availability": {"from": 1, "to": 1, "mesh": "1"},
+                "ips": ["192.168.90.102", "192.226.111.211"],
+                "userGroups": ["1", "10"],
                 "wifi": {
                     "available": 0,
                     "associated": 0,
@@ -3903,22 +3644,16 @@ class TestServiceOutageMonitor:
                     "ssid": "",
                     "frequency": "",
                     "level": "0",
-                    "bitrate": ""
+                    "bitrate": "",
                 },
-                "nodetonode": {
-                    "status": 1,
-                    "lastUpdate": "2020-11-11T13:00:11Z"
-                },
-                "realservice": {
-                    "status": 1,
-                    "lastUpdate": "2020-10-15T02:18:28Z"
-                }
-            }
+                "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+                "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
+            },
         }
 
         outage_ticket_response = {
-            'body': "Invalid parameters",
-            'status': 400,
+            "body": "Invalid parameters",
+            "status": 400,
         }
 
         event_bus = Mock()
@@ -3936,8 +3671,16 @@ class TestServiceOutageMonitor:
         bruin_repository.get_ticket_details = CoroutineMock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
 
         await outage_monitor._run_ticket_autoresolve(device)
@@ -3947,11 +3690,11 @@ class TestServiceOutageMonitor:
 
     @pytest.mark.asyncio
     async def run_ticket_autoresolve_with_no_open_outage_ticket_found_test(self):
-        serial_number = 'B827EB92EB72'
+        serial_number = "B827EB92EB72"
         client_id = 9994
 
         device = {
-            'cached_info': {
+            "cached_info": {
                 "serial_number": serial_number,
                 "last_contact": "2020-01-16T14:59:56.245Z",
                 "bruin_client_info": {
@@ -3959,7 +3702,7 @@ class TestServiceOutageMonitor:
                     "client_name": "METTEL/NEW YORK",
                 },
             },
-            'device_info': {
+            "device_info": {
                 "probeId": "1",
                 "uid": "b8:27:eb:76:a8:de",
                 "os": "Linux ARM",
@@ -3983,19 +3726,9 @@ class TestServiceOutageMonitor:
                 "defaultGateway": "192.168.90.99",
                 "availableForMesh": "1",
                 "lastRestart": "2020-10-15T02:13:24Z",
-                "availability": {
-                    "from": 1,
-                    "to": 1,
-                    "mesh": "1"
-                },
-                "ips": [
-                    "192.168.90.102",
-                    "192.226.111.211"
-                ],
-                "userGroups": [
-                    "1",
-                    "10"
-                ],
+                "availability": {"from": 1, "to": 1, "mesh": "1"},
+                "ips": ["192.168.90.102", "192.226.111.211"],
+                "userGroups": ["1", "10"],
                 "wifi": {
                     "available": 0,
                     "associated": 0,
@@ -4003,22 +3736,16 @@ class TestServiceOutageMonitor:
                     "ssid": "",
                     "frequency": "",
                     "level": "0",
-                    "bitrate": ""
+                    "bitrate": "",
                 },
-                "nodetonode": {
-                    "status": 1,
-                    "lastUpdate": "2020-11-11T13:00:11Z"
-                },
-                "realservice": {
-                    "status": 1,
-                    "lastUpdate": "2020-10-15T02:18:28Z"
-                }
-            }
+                "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+                "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
+            },
         }
 
         outage_ticket_response = {
-            'body': [],
-            'status': 200,
+            "body": [],
+            "status": 200,
         }
 
         event_bus = Mock()
@@ -4036,8 +3763,16 @@ class TestServiceOutageMonitor:
         bruin_repository.get_ticket_details = CoroutineMock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
 
         await outage_monitor._run_ticket_autoresolve(device)
@@ -4047,11 +3782,11 @@ class TestServiceOutageMonitor:
 
     @pytest.mark.asyncio
     async def run_ticket_autoresolve_with_ticket_not_created_by_automation_engine_test(self):
-        serial_number = 'B827EB92EB72'
+        serial_number = "B827EB92EB72"
         client_id = 9994
 
         device = {
-            'cached_info': {
+            "cached_info": {
                 "serial_number": serial_number,
                 "last_contact": "2020-01-16T14:59:56.245Z",
                 "bruin_client_info": {
@@ -4059,7 +3794,7 @@ class TestServiceOutageMonitor:
                     "client_name": "METTEL/NEW YORK",
                 },
             },
-            'device_info': {
+            "device_info": {
                 "probeId": "1",
                 "uid": "b8:27:eb:76:a8:de",
                 "os": "Linux ARM",
@@ -4083,19 +3818,9 @@ class TestServiceOutageMonitor:
                 "defaultGateway": "192.168.90.99",
                 "availableForMesh": "1",
                 "lastRestart": "2020-10-15T02:13:24Z",
-                "availability": {
-                    "from": 1,
-                    "to": 1,
-                    "mesh": "1"
-                },
-                "ips": [
-                    "192.168.90.102",
-                    "192.226.111.211"
-                ],
-                "userGroups": [
-                    "1",
-                    "10"
-                ],
+                "availability": {"from": 1, "to": 1, "mesh": "1"},
+                "ips": ["192.168.90.102", "192.226.111.211"],
+                "userGroups": ["1", "10"],
                 "wifi": {
                     "available": 0,
                     "associated": 0,
@@ -4103,17 +3828,11 @@ class TestServiceOutageMonitor:
                     "ssid": "",
                     "frequency": "",
                     "level": "0",
-                    "bitrate": ""
+                    "bitrate": "",
                 },
-                "nodetonode": {
-                    "status": 1,
-                    "lastUpdate": "2020-11-11T13:00:11Z"
-                },
-                "realservice": {
-                    "status": 1,
-                    "lastUpdate": "2020-10-15T02:18:28Z"
-                }
-            }
+                "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+                "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
+            },
         }
 
         ticket_id = 99999
@@ -4128,10 +3847,8 @@ class TestServiceOutageMonitor:
             "createdBy": "InterMapper Service",
         }
         outage_ticket_response = {
-            'body': [
-                ticket
-            ],
-            'status': 200,
+            "body": [ticket],
+            "status": 200,
         }
 
         event_bus = Mock()
@@ -4149,8 +3866,16 @@ class TestServiceOutageMonitor:
         bruin_repository.get_ticket_details = CoroutineMock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=False)
 
@@ -4162,11 +3887,11 @@ class TestServiceOutageMonitor:
 
     @pytest.mark.asyncio
     async def run_ticket_autoresolve_with_retrieval_of_ticket_details_returning_non_2xx_status_test(self):
-        serial_number = 'B827EB92EB72'
+        serial_number = "B827EB92EB72"
         client_id = 9994
 
         device = {
-            'cached_info': {
+            "cached_info": {
                 "serial_number": serial_number,
                 "last_contact": "2020-01-16T14:59:56.245Z",
                 "bruin_client_info": {
@@ -4174,7 +3899,7 @@ class TestServiceOutageMonitor:
                     "client_name": "METTEL/NEW YORK",
                 },
             },
-            'device_info': {
+            "device_info": {
                 "probeId": "1",
                 "uid": "b8:27:eb:76:a8:de",
                 "os": "Linux ARM",
@@ -4198,19 +3923,9 @@ class TestServiceOutageMonitor:
                 "defaultGateway": "192.168.90.99",
                 "availableForMesh": "1",
                 "lastRestart": "2020-10-15T02:13:24Z",
-                "availability": {
-                    "from": 1,
-                    "to": 1,
-                    "mesh": "1"
-                },
-                "ips": [
-                    "192.168.90.102",
-                    "192.226.111.211"
-                ],
-                "userGroups": [
-                    "1",
-                    "10"
-                ],
+                "availability": {"from": 1, "to": 1, "mesh": "1"},
+                "ips": ["192.168.90.102", "192.226.111.211"],
+                "userGroups": ["1", "10"],
                 "wifi": {
                     "available": 0,
                     "associated": 0,
@@ -4218,17 +3933,11 @@ class TestServiceOutageMonitor:
                     "ssid": "",
                     "frequency": "",
                     "level": "0",
-                    "bitrate": ""
+                    "bitrate": "",
                 },
-                "nodetonode": {
-                    "status": 1,
-                    "lastUpdate": "2020-11-11T13:00:11Z"
-                },
-                "realservice": {
-                    "status": 1,
-                    "lastUpdate": "2020-10-15T02:18:28Z"
-                }
-            }
+                "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+                "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
+            },
         }
 
         ticket_id = 99999
@@ -4243,15 +3952,13 @@ class TestServiceOutageMonitor:
             "createdBy": "Intelygenz Ai",
         }
         outage_ticket_response = {
-            'body': [
-                ticket
-            ],
-            'status': 200,
+            "body": [ticket],
+            "status": 200,
         }
 
         ticket_details_response = {
-            'body': 'Got internal error from Bruin',
-            'status': 500,
+            "body": "Got internal error from Bruin",
+            "status": 500,
         }
 
         event_bus = Mock()
@@ -4269,8 +3976,16 @@ class TestServiceOutageMonitor:
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock()
@@ -4283,11 +3998,11 @@ class TestServiceOutageMonitor:
 
     @pytest.mark.asyncio
     async def run_ticket_autoresolve_with_retrieval_of_ticket_details_returning_non_2xx_status_test(self):
-        serial_number = 'B827EB92EB72'
+        serial_number = "B827EB92EB72"
         client_id = 9994
 
         device = {
-            'cached_info': {
+            "cached_info": {
                 "serial_number": serial_number,
                 "last_contact": "2020-01-16T14:59:56.245Z",
                 "bruin_client_info": {
@@ -4295,7 +4010,7 @@ class TestServiceOutageMonitor:
                     "client_name": "METTEL/NEW YORK",
                 },
             },
-            'device_info': {
+            "device_info": {
                 "probeId": "1",
                 "uid": "b8:27:eb:76:a8:de",
                 "os": "Linux ARM",
@@ -4319,19 +4034,9 @@ class TestServiceOutageMonitor:
                 "defaultGateway": "192.168.90.99",
                 "availableForMesh": "1",
                 "lastRestart": "2020-10-15T02:13:24Z",
-                "availability": {
-                    "from": 1,
-                    "to": 1,
-                    "mesh": "1"
-                },
-                "ips": [
-                    "192.168.90.102",
-                    "192.226.111.211"
-                ],
-                "userGroups": [
-                    "1",
-                    "10"
-                ],
+                "availability": {"from": 1, "to": 1, "mesh": "1"},
+                "ips": ["192.168.90.102", "192.226.111.211"],
+                "userGroups": ["1", "10"],
                 "wifi": {
                     "available": 0,
                     "associated": 0,
@@ -4339,17 +4044,11 @@ class TestServiceOutageMonitor:
                     "ssid": "",
                     "frequency": "",
                     "level": "0",
-                    "bitrate": ""
+                    "bitrate": "",
                 },
-                "nodetonode": {
-                    "status": 1,
-                    "lastUpdate": "2020-11-11T13:00:11Z"
-                },
-                "realservice": {
-                    "status": 1,
-                    "lastUpdate": "2020-10-15T02:18:28Z"
-                }
-            }
+                "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+                "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
+            },
         }
 
         ticket_id = 99999
@@ -4364,15 +4063,13 @@ class TestServiceOutageMonitor:
             "createdBy": "Intelygenz Ai",
         }
         outage_ticket_response = {
-            'body': [
-                ticket
-            ],
-            'status': 200,
+            "body": [ticket],
+            "status": 200,
         }
 
         ticket_details_response = {
-            'body': 'Got internal error from Bruin',
-            'status': 500,
+            "body": "Got internal error from Bruin",
+            "status": 500,
         }
 
         event_bus = Mock()
@@ -4390,8 +4087,16 @@ class TestServiceOutageMonitor:
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock()
@@ -4404,11 +4109,11 @@ class TestServiceOutageMonitor:
 
     @pytest.mark.asyncio
     async def run_ticket_autoresolve_with_last_outage_detected_long_ago_test(self):
-        serial_number = 'B827EB92EB72'
+        serial_number = "B827EB92EB72"
         client_id = 9994
 
         device = {
-            'cached_info': {
+            "cached_info": {
                 "serial_number": serial_number,
                 "last_contact": "2020-01-16T14:59:56.245Z",
                 "bruin_client_info": {
@@ -4416,7 +4121,7 @@ class TestServiceOutageMonitor:
                     "client_name": "METTEL/NEW YORK",
                 },
             },
-            'device_info': {
+            "device_info": {
                 "probeId": "1",
                 "uid": "b8:27:eb:76:a8:de",
                 "os": "Linux ARM",
@@ -4440,19 +4145,9 @@ class TestServiceOutageMonitor:
                 "defaultGateway": "192.168.90.99",
                 "availableForMesh": "1",
                 "lastRestart": "2020-10-15T02:13:24Z",
-                "availability": {
-                    "from": 1,
-                    "to": 1,
-                    "mesh": "1"
-                },
-                "ips": [
-                    "192.168.90.102",
-                    "192.226.111.211"
-                ],
-                "userGroups": [
-                    "1",
-                    "10"
-                ],
+                "availability": {"from": 1, "to": 1, "mesh": "1"},
+                "ips": ["192.168.90.102", "192.226.111.211"],
+                "userGroups": ["1", "10"],
                 "wifi": {
                     "available": 0,
                     "associated": 0,
@@ -4460,17 +4155,11 @@ class TestServiceOutageMonitor:
                     "ssid": "",
                     "frequency": "",
                     "level": "0",
-                    "bitrate": ""
+                    "bitrate": "",
                 },
-                "nodetonode": {
-                    "status": 1,
-                    "lastUpdate": "2020-11-11T13:00:11Z"
-                },
-                "realservice": {
-                    "status": 1,
-                    "lastUpdate": "2020-10-15T02:18:28Z"
-                }
-            }
+                "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+                "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
+            },
         }
 
         ticket_id = 99999
@@ -4486,10 +4175,10 @@ class TestServiceOutageMonitor:
             "createdBy": "Intelygenz Ai",
         }
         outage_ticket_response = {
-            'body': [
+            "body": [
                 ticket,
             ],
-            'status': 200,
+            "status": 200,
         }
 
         ticket_detail_1_id = 2746937
@@ -4502,7 +4191,7 @@ class TestServiceOutageMonitor:
         ticket_detail_2_id = 999999
         ticket_detail_2 = {
             "detailID": ticket_detail_2_id,
-            "detailValue": 'VC9999999',
+            "detailValue": "VC9999999",
             "detailStatus": "I",
         }
 
@@ -4517,7 +4206,7 @@ class TestServiceOutageMonitor:
             "noteId": 68246615,
             "noteValue": "Some irrelevant note",
             "serviceNumber": [
-                'VC1234567',
+                "VC1234567",
             ],
         }
         ticket_note_3 = {
@@ -4534,14 +4223,14 @@ class TestServiceOutageMonitor:
         ]
 
         ticket_details_response = {
-            'body': {
-                'ticketDetails': [
+            "body": {
+                "ticketDetails": [
                     ticket_detail_1,
                     ticket_detail_2,
                 ],
-                'ticketNotes': ticket_notes,
+                "ticketNotes": ticket_notes,
             },
-            'status': 200,
+            "status": 200,
         }
 
         relevant_notes = [
@@ -4564,8 +4253,16 @@ class TestServiceOutageMonitor:
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=False)
@@ -4580,11 +4277,11 @@ class TestServiceOutageMonitor:
 
     @pytest.mark.asyncio
     async def run_ticket_autoresolve_with_resolve_limit_exceeded_test(self):
-        serial_number = 'B827EB92EB72'
+        serial_number = "B827EB92EB72"
         client_id = 9994
 
         device = {
-            'cached_info': {
+            "cached_info": {
                 "serial_number": serial_number,
                 "last_contact": "2020-01-16T14:59:56.245Z",
                 "bruin_client_info": {
@@ -4592,7 +4289,7 @@ class TestServiceOutageMonitor:
                     "client_name": "METTEL/NEW YORK",
                 },
             },
-            'device_info': {
+            "device_info": {
                 "probeId": "1",
                 "uid": "b8:27:eb:76:a8:de",
                 "os": "Linux ARM",
@@ -4616,19 +4313,9 @@ class TestServiceOutageMonitor:
                 "defaultGateway": "192.168.90.99",
                 "availableForMesh": "1",
                 "lastRestart": "2020-10-15T02:13:24Z",
-                "availability": {
-                    "from": 1,
-                    "to": 1,
-                    "mesh": "1"
-                },
-                "ips": [
-                    "192.168.90.102",
-                    "192.226.111.211"
-                ],
-                "userGroups": [
-                    "1",
-                    "10"
-                ],
+                "availability": {"from": 1, "to": 1, "mesh": "1"},
+                "ips": ["192.168.90.102", "192.226.111.211"],
+                "userGroups": ["1", "10"],
                 "wifi": {
                     "available": 0,
                     "associated": 0,
@@ -4636,17 +4323,11 @@ class TestServiceOutageMonitor:
                     "ssid": "",
                     "frequency": "",
                     "level": "0",
-                    "bitrate": ""
+                    "bitrate": "",
                 },
-                "nodetonode": {
-                    "status": 1,
-                    "lastUpdate": "2020-11-11T13:00:11Z"
-                },
-                "realservice": {
-                    "status": 1,
-                    "lastUpdate": "2020-10-15T02:18:28Z"
-                }
-            }
+                "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+                "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
+            },
         }
 
         ticket_id = 99999
@@ -4662,10 +4343,10 @@ class TestServiceOutageMonitor:
             "createdBy": "Intelygenz Ai",
         }
         outage_ticket_response = {
-            'body': [
+            "body": [
                 ticket,
             ],
-            'status': 200,
+            "status": 200,
         }
 
         ticket_detail_1_id = 2746937
@@ -4678,7 +4359,7 @@ class TestServiceOutageMonitor:
         ticket_detail_2_id = 999999
         ticket_detail_2 = {
             "detailID": ticket_detail_2_id,
-            "detailValue": 'VC9999999',
+            "detailValue": "VC9999999",
             "detailStatus": "I",
         }
 
@@ -4693,7 +4374,7 @@ class TestServiceOutageMonitor:
             "noteId": 68246615,
             "noteValue": "Some irrelevant note",
             "serviceNumber": [
-                'VC1234567',
+                "VC1234567",
             ],
         }
         ticket_note_3 = {
@@ -4718,14 +4399,14 @@ class TestServiceOutageMonitor:
         ]
 
         ticket_details_response = {
-            'body': {
-                'ticketDetails': [
+            "body": {
+                "ticketDetails": [
                     ticket_detail_1,
                     ticket_detail_2,
                 ],
-                'ticketNotes': ticket_notes,
+                "ticketNotes": ticket_notes,
             },
-            'status': 200,
+            "status": 200,
         }
 
         relevant_notes = [
@@ -4749,8 +4430,16 @@ class TestServiceOutageMonitor:
         bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
@@ -4767,11 +4456,11 @@ class TestServiceOutageMonitor:
 
     @pytest.mark.asyncio
     async def run_ticket_autoresolve_with_ticket_detail_already_resolved_test(self):
-        serial_number = 'B827EB92EB72'
+        serial_number = "B827EB92EB72"
         client_id = 9994
 
         device = {
-            'cached_info': {
+            "cached_info": {
                 "serial_number": serial_number,
                 "last_contact": "2020-01-16T14:59:56.245Z",
                 "bruin_client_info": {
@@ -4779,7 +4468,7 @@ class TestServiceOutageMonitor:
                     "client_name": "METTEL/NEW YORK",
                 },
             },
-            'device_info': {
+            "device_info": {
                 "probeId": "1",
                 "uid": "b8:27:eb:76:a8:de",
                 "os": "Linux ARM",
@@ -4803,19 +4492,9 @@ class TestServiceOutageMonitor:
                 "defaultGateway": "192.168.90.99",
                 "availableForMesh": "1",
                 "lastRestart": "2020-10-15T02:13:24Z",
-                "availability": {
-                    "from": 1,
-                    "to": 1,
-                    "mesh": "1"
-                },
-                "ips": [
-                    "192.168.90.102",
-                    "192.226.111.211"
-                ],
-                "userGroups": [
-                    "1",
-                    "10"
-                ],
+                "availability": {"from": 1, "to": 1, "mesh": "1"},
+                "ips": ["192.168.90.102", "192.226.111.211"],
+                "userGroups": ["1", "10"],
                 "wifi": {
                     "available": 0,
                     "associated": 0,
@@ -4823,17 +4502,11 @@ class TestServiceOutageMonitor:
                     "ssid": "",
                     "frequency": "",
                     "level": "0",
-                    "bitrate": ""
+                    "bitrate": "",
                 },
-                "nodetonode": {
-                    "status": 1,
-                    "lastUpdate": "2020-11-11T13:00:11Z"
-                },
-                "realservice": {
-                    "status": 1,
-                    "lastUpdate": "2020-10-15T02:18:28Z"
-                }
-            }
+                "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+                "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
+            },
         }
 
         ticket_id = 99999
@@ -4849,10 +4522,10 @@ class TestServiceOutageMonitor:
             "createdBy": "Intelygenz Ai",
         }
         outage_ticket_response = {
-            'body': [
+            "body": [
                 ticket,
             ],
-            'status': 200,
+            "status": 200,
         }
 
         ticket_detail_1_id = 2746937
@@ -4865,7 +4538,7 @@ class TestServiceOutageMonitor:
         ticket_detail_2_id = 999999
         ticket_detail_2 = {
             "detailID": ticket_detail_2_id,
-            "detailValue": 'VC9999999',
+            "detailValue": "VC9999999",
             "detailStatus": "I",
         }
 
@@ -4880,7 +4553,7 @@ class TestServiceOutageMonitor:
             "noteId": 68246615,
             "noteValue": "Some irrelevant note",
             "serviceNumber": [
-                'VC1234567',
+                "VC1234567",
             ],
         }
         ticket_note_3 = {
@@ -4905,14 +4578,14 @@ class TestServiceOutageMonitor:
         ]
 
         ticket_details_response = {
-            'body': {
-                'ticketDetails': [
+            "body": {
+                "ticketDetails": [
                     ticket_detail_1,
                     ticket_detail_2,
                 ],
-                'ticketNotes': ticket_notes,
+                "ticketNotes": ticket_notes,
             },
-            'status': 200,
+            "status": 200,
         }
 
         relevant_notes = [
@@ -4937,8 +4610,16 @@ class TestServiceOutageMonitor:
         bruin_repository.resolve_ticket = CoroutineMock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
@@ -4956,11 +4637,11 @@ class TestServiceOutageMonitor:
 
     @pytest.mark.asyncio
     async def run_ticket_autoresolve_with_environment_different_from_production_test(self):
-        serial_number = 'B827EB92EB72'
+        serial_number = "B827EB92EB72"
         client_id = 9994
 
         device = {
-            'cached_info': {
+            "cached_info": {
                 "serial_number": serial_number,
                 "last_contact": "2020-01-16T14:59:56.245Z",
                 "bruin_client_info": {
@@ -4968,7 +4649,7 @@ class TestServiceOutageMonitor:
                     "client_name": "METTEL/NEW YORK",
                 },
             },
-            'device_info': {
+            "device_info": {
                 "probeId": "1",
                 "uid": "b8:27:eb:76:a8:de",
                 "os": "Linux ARM",
@@ -4992,19 +4673,9 @@ class TestServiceOutageMonitor:
                 "defaultGateway": "192.168.90.99",
                 "availableForMesh": "1",
                 "lastRestart": "2020-10-15T02:13:24Z",
-                "availability": {
-                    "from": 1,
-                    "to": 1,
-                    "mesh": "1"
-                },
-                "ips": [
-                    "192.168.90.102",
-                    "192.226.111.211"
-                ],
-                "userGroups": [
-                    "1",
-                    "10"
-                ],
+                "availability": {"from": 1, "to": 1, "mesh": "1"},
+                "ips": ["192.168.90.102", "192.226.111.211"],
+                "userGroups": ["1", "10"],
                 "wifi": {
                     "available": 0,
                     "associated": 0,
@@ -5012,17 +4683,11 @@ class TestServiceOutageMonitor:
                     "ssid": "",
                     "frequency": "",
                     "level": "0",
-                    "bitrate": ""
+                    "bitrate": "",
                 },
-                "nodetonode": {
-                    "status": 1,
-                    "lastUpdate": "2020-11-11T13:00:11Z"
-                },
-                "realservice": {
-                    "status": 1,
-                    "lastUpdate": "2020-10-15T02:18:28Z"
-                }
-            }
+                "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+                "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
+            },
         }
 
         ticket_id = 99999
@@ -5038,10 +4703,10 @@ class TestServiceOutageMonitor:
             "createdBy": "Intelygenz Ai",
         }
         outage_ticket_response = {
-            'body': [
+            "body": [
                 ticket,
             ],
-            'status': 200,
+            "status": 200,
         }
 
         ticket_detail_1_id = 2746937
@@ -5054,7 +4719,7 @@ class TestServiceOutageMonitor:
         ticket_detail_2_id = 999999
         ticket_detail_2 = {
             "detailID": ticket_detail_2_id,
-            "detailValue": 'VC9999999',
+            "detailValue": "VC9999999",
             "detailStatus": "I",
         }
 
@@ -5069,7 +4734,7 @@ class TestServiceOutageMonitor:
             "noteId": 68246615,
             "noteValue": "Some irrelevant note",
             "serviceNumber": [
-                'VC1234567',
+                "VC1234567",
             ],
         }
         ticket_note_3 = {
@@ -5094,14 +4759,14 @@ class TestServiceOutageMonitor:
         ]
 
         ticket_details_response = {
-            'body': {
-                'ticketDetails': [
+            "body": {
+                "ticketDetails": [
                     ticket_detail_1,
                     ticket_detail_2,
                 ],
-                'ticketNotes': ticket_notes,
+                "ticketNotes": ticket_notes,
             },
-            'status': 200,
+            "status": 200,
         }
 
         relevant_notes = [
@@ -5126,15 +4791,23 @@ class TestServiceOutageMonitor:
         bruin_repository.resolve_ticket = CoroutineMock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         outage_monitor.is_outage_ticket_auto_resolvable = Mock(return_value=True)
         outage_monitor._is_detail_resolved = Mock(return_value=False)
 
-        with patch.object(config, 'CURRENT_ENVIRONMENT', 'dev'):
+        with patch.object(config, "CURRENT_ENVIRONMENT", "dev"):
             await outage_monitor._run_ticket_autoresolve(device)
 
         bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
@@ -5146,11 +4819,11 @@ class TestServiceOutageMonitor:
 
     @pytest.mark.asyncio
     async def run_ticket_autoresolve_with_resolve_outage_return_non_2xx_status_test(self):
-        serial_number = 'B827EB92EB72'
+        serial_number = "B827EB92EB72"
         client_id = 9994
 
         device = {
-            'cached_info': {
+            "cached_info": {
                 "serial_number": serial_number,
                 "last_contact": "2020-01-16T14:59:56.245Z",
                 "bruin_client_info": {
@@ -5158,7 +4831,7 @@ class TestServiceOutageMonitor:
                     "client_name": "METTEL/NEW YORK",
                 },
             },
-            'device_info': {
+            "device_info": {
                 "probeId": "1",
                 "uid": "b8:27:eb:76:a8:de",
                 "os": "Linux ARM",
@@ -5182,19 +4855,9 @@ class TestServiceOutageMonitor:
                 "defaultGateway": "192.168.90.99",
                 "availableForMesh": "1",
                 "lastRestart": "2020-10-15T02:13:24Z",
-                "availability": {
-                    "from": 1,
-                    "to": 1,
-                    "mesh": "1"
-                },
-                "ips": [
-                    "192.168.90.102",
-                    "192.226.111.211"
-                ],
-                "userGroups": [
-                    "1",
-                    "10"
-                ],
+                "availability": {"from": 1, "to": 1, "mesh": "1"},
+                "ips": ["192.168.90.102", "192.226.111.211"],
+                "userGroups": ["1", "10"],
                 "wifi": {
                     "available": 0,
                     "associated": 0,
@@ -5202,17 +4865,11 @@ class TestServiceOutageMonitor:
                     "ssid": "",
                     "frequency": "",
                     "level": "0",
-                    "bitrate": ""
+                    "bitrate": "",
                 },
-                "nodetonode": {
-                    "status": 1,
-                    "lastUpdate": "2020-11-11T13:00:11Z"
-                },
-                "realservice": {
-                    "status": 1,
-                    "lastUpdate": "2020-10-15T02:18:28Z"
-                }
-            }
+                "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+                "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
+            },
         }
 
         ticket_id = 99999
@@ -5228,10 +4885,10 @@ class TestServiceOutageMonitor:
             "createdBy": "Intelygenz Ai",
         }
         outage_ticket_response = {
-            'body': [
+            "body": [
                 ticket,
             ],
-            'status': 200,
+            "status": 200,
         }
 
         ticket_detail_1_id = 2746937
@@ -5244,7 +4901,7 @@ class TestServiceOutageMonitor:
         ticket_detail_2_id = 999999
         ticket_detail_2 = {
             "detailID": ticket_detail_2_id,
-            "detailValue": 'VC9999999',
+            "detailValue": "VC9999999",
             "detailStatus": "I",
         }
 
@@ -5259,7 +4916,7 @@ class TestServiceOutageMonitor:
             "noteId": 68246615,
             "noteValue": "Some irrelevant note",
             "serviceNumber": [
-                'VC1234567',
+                "VC1234567",
             ],
         }
         ticket_note_3 = {
@@ -5284,14 +4941,14 @@ class TestServiceOutageMonitor:
         ]
 
         ticket_details_response = {
-            'body': {
-                'ticketDetails': [
+            "body": {
+                "ticketDetails": [
                     ticket_detail_1,
                     ticket_detail_2,
                 ],
-                'ticketNotes': ticket_notes,
+                "ticketNotes": ticket_notes,
             },
-            'status': 200,
+            "status": 200,
         }
 
         relevant_notes = [
@@ -5301,8 +4958,8 @@ class TestServiceOutageMonitor:
         ]
 
         resolve_ticket_response = {
-            'body': 'Got internal error from Bruin',
-            'status': 500,
+            "body": "Got internal error from Bruin",
+            "status": 500,
         }
 
         event_bus = Mock()
@@ -5323,8 +4980,16 @@ class TestServiceOutageMonitor:
         bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
@@ -5332,7 +4997,7 @@ class TestServiceOutageMonitor:
         outage_monitor._is_detail_resolved = Mock(return_value=False)
         outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
 
-        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._run_ticket_autoresolve(device)
 
         bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
@@ -5348,11 +5013,11 @@ class TestServiceOutageMonitor:
 
     @pytest.mark.asyncio
     async def run_ticket_autoresolve_with_all_conditions_met_test(self):
-        serial_number = 'B827EB92EB72'
+        serial_number = "B827EB92EB72"
         client_id = 9994
 
         device = {
-            'cached_info': {
+            "cached_info": {
                 "serial_number": serial_number,
                 "last_contact": "2020-01-16T14:59:56.245Z",
                 "bruin_client_info": {
@@ -5360,7 +5025,7 @@ class TestServiceOutageMonitor:
                     "client_name": "METTEL/NEW YORK",
                 },
             },
-            'device_info': {
+            "device_info": {
                 "probeId": "1",
                 "uid": "b8:27:eb:76:a8:de",
                 "os": "Linux ARM",
@@ -5384,19 +5049,9 @@ class TestServiceOutageMonitor:
                 "defaultGateway": "192.168.90.99",
                 "availableForMesh": "1",
                 "lastRestart": "2020-10-15T02:13:24Z",
-                "availability": {
-                    "from": 1,
-                    "to": 1,
-                    "mesh": "1"
-                },
-                "ips": [
-                    "192.168.90.102",
-                    "192.226.111.211"
-                ],
-                "userGroups": [
-                    "1",
-                    "10"
-                ],
+                "availability": {"from": 1, "to": 1, "mesh": "1"},
+                "ips": ["192.168.90.102", "192.226.111.211"],
+                "userGroups": ["1", "10"],
                 "wifi": {
                     "available": 0,
                     "associated": 0,
@@ -5404,17 +5059,11 @@ class TestServiceOutageMonitor:
                     "ssid": "",
                     "frequency": "",
                     "level": "0",
-                    "bitrate": ""
+                    "bitrate": "",
                 },
-                "nodetonode": {
-                    "status": 1,
-                    "lastUpdate": "2020-11-11T13:00:11Z"
-                },
-                "realservice": {
-                    "status": 1,
-                    "lastUpdate": "2020-10-15T02:18:28Z"
-                }
-            }
+                "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
+                "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
+            },
         }
 
         ticket_id = 99999
@@ -5430,10 +5079,10 @@ class TestServiceOutageMonitor:
             "createdBy": "Intelygenz Ai",
         }
         outage_ticket_response = {
-            'body': [
+            "body": [
                 ticket,
             ],
-            'status': 200,
+            "status": 200,
         }
 
         ticket_detail_1_id = 2746937
@@ -5446,7 +5095,7 @@ class TestServiceOutageMonitor:
         ticket_detail_2_id = 999999
         ticket_detail_2 = {
             "detailID": ticket_detail_2_id,
-            "detailValue": 'VC9999999',
+            "detailValue": "VC9999999",
             "detailStatus": "I",
         }
 
@@ -5461,7 +5110,7 @@ class TestServiceOutageMonitor:
             "noteId": 68246615,
             "noteValue": "Some irrelevant note",
             "serviceNumber": [
-                'VC1234567',
+                "VC1234567",
             ],
         }
         ticket_note_3 = {
@@ -5486,14 +5135,14 @@ class TestServiceOutageMonitor:
         ]
 
         ticket_details_response = {
-            'body': {
-                'ticketDetails': [
+            "body": {
+                "ticketDetails": [
                     ticket_detail_1,
                     ticket_detail_2,
                 ],
-                'ticketNotes': ticket_notes,
+                "ticketNotes": ticket_notes,
             },
-            'status': 200,
+            "status": 200,
         }
 
         relevant_notes = [
@@ -5503,8 +5152,8 @@ class TestServiceOutageMonitor:
         ]
 
         resolve_ticket_response = {
-            'body': 'ok',
-            'status': 200,
+            "body": "ok",
+            "status": 200,
         }
 
         event_bus = Mock()
@@ -5525,8 +5174,16 @@ class TestServiceOutageMonitor:
         bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
@@ -5535,7 +5192,7 @@ class TestServiceOutageMonitor:
         outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
 
-        with patch.object(config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._run_ticket_autoresolve(device)
 
         bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
@@ -5563,8 +5220,16 @@ class TestServiceOutageMonitor:
         bruin_repository = Mock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
 
         ticket = {
@@ -5606,8 +5271,16 @@ class TestServiceOutageMonitor:
         utils_repository = Mock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
 
         autoresolve_limit = 3
@@ -5619,7 +5292,7 @@ class TestServiceOutageMonitor:
                     "#*Automation Engine*#\nAuto-resolving detail for serial\nTimeStamp: 2021-01-02 10:18:16-05:00"
                 ),
                 "serviceNumber": [
-                    'B827EB92EB72',
+                    "B827EB92EB72",
                 ],
             },
             {
@@ -5628,7 +5301,7 @@ class TestServiceOutageMonitor:
                     "#*MetTel's IPA*#\nAuto-resolving detail for serial\nTimeStamp: 2021-01-03 10:18:16-05:00"
                 ),
                 "serviceNumber": [
-                    'B827EB92EB72',
+                    "B827EB92EB72",
                 ],
             },
         ]
@@ -5642,7 +5315,7 @@ class TestServiceOutageMonitor:
                     "#*Automation Engine*#\nAuto-resolving detail for serial\nTimeStamp: 2021-01-02 10:18:16-05:00"
                 ),
                 "serviceNumber": [
-                    'B827EB92EB72',
+                    "B827EB92EB72",
                 ],
             },
             {
@@ -5651,7 +5324,7 @@ class TestServiceOutageMonitor:
                     "#*Automation Engine*#\nAuto-resolving detail for serial\nTimeStamp: 2021-01-03 10:18:16-05:00"
                 ),
                 "serviceNumber": [
-                    'B827EB92EB72',
+                    "B827EB92EB72",
                 ],
             },
             {
@@ -5660,7 +5333,7 @@ class TestServiceOutageMonitor:
                     "#*MetTel's IPA*#\nAuto-resolving detail for serial\nTimeStamp: 2021-01-04 10:18:16-05:00"
                 ),
                 "serviceNumber": [
-                    'B827EB92EB72',
+                    "B827EB92EB72",
                 ],
             },
         ]
@@ -5686,19 +5359,27 @@ class TestServiceOutageMonitor:
         notifications_repository.send_slack_message = CoroutineMock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
 
         await outage_monitor._notify_successful_autoresolve(ticket_id, detail_id)
 
         autoresolve_slack_message = (
-            f'Detail {detail_id} of outage ticket {ticket_id} was autoresolved: https://app.bruin.com/t/{ticket_id}'
+            f"Detail {detail_id} of outage ticket {ticket_id} was autoresolved: https://app.bruin.com/t/{ticket_id}"
         )
         notifications_repository.send_slack_message.assert_awaited_once_with(autoresolve_slack_message)
 
     def was_last_outage_detected_recently_with_reopen_note_not_found_and_triage_not_found_test(self):
-        ticket_creation_date = '9/25/2020 6:31:54 AM'
+        ticket_creation_date = "9/25/2020 6:31:54 AM"
         ticket_notes = []
 
         logger = Mock()
@@ -5713,41 +5394,49 @@ class TestServiceOutageMonitor:
         utils_repository = Mock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
 
         new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(minutes=59, seconds=59)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+        with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
             result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(hours=1)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+        with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
             result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(hours=1, seconds=1)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+        with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
             result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is False
 
     def was_last_outage_detected_recently_with_reopen_note_found_test(self):
-        ticket_creation_date = '9/25/2020 6:31:54 AM'
-        triage_timestamp = '2021-01-02T10:18:16.71-05:00'
-        reopen_timestamp = '2021-01-02T11:00:16.71-05:00'
+        ticket_creation_date = "9/25/2020 6:31:54 AM"
+        triage_timestamp = "2021-01-02T10:18:16.71-05:00"
+        reopen_timestamp = "2021-01-02T11:00:16.71-05:00"
 
         ticket_note_1 = {
             "noteId": 68246614,
             "noteValue": "#*MetTel's IPA*#\nTriage\nTimeStamp: 2021-01-02 10:18:16-05:00",
             "serviceNumber": [
-                'B827EB92EB72',
+                "B827EB92EB72",
             ],
             "createdDate": triage_timestamp,
         }
@@ -5755,7 +5444,7 @@ class TestServiceOutageMonitor:
             "noteId": 68246615,
             "noteValue": "#*MetTel's IPA*#\nRe-opening\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
-                'B827EB92EB72',
+                "B827EB92EB72",
             ],
             "createdDate": reopen_timestamp,
         }
@@ -5777,40 +5466,48 @@ class TestServiceOutageMonitor:
         utils_repository = Mock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
 
         datetime_mock = Mock()
 
         new_now = parse(reopen_timestamp) + timedelta(minutes=59, seconds=59)
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+        with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
             result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(reopen_timestamp) + timedelta(hours=1)
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+        with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
             result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(reopen_timestamp) + timedelta(hours=1, seconds=1)
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+        with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
             result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is False
 
     def was_last_outage_detected_recently_with_reopen_note_having_old_watermark_found_test(self):
-        ticket_creation_date = '9/25/2020 6:31:54 AM'
-        triage_timestamp = '2021-01-02T10:18:16.71-05:00'
-        reopen_timestamp = '2021-01-02T11:00:16.71-05:00'
+        ticket_creation_date = "9/25/2020 6:31:54 AM"
+        triage_timestamp = "2021-01-02T10:18:16.71-05:00"
+        reopen_timestamp = "2021-01-02T11:00:16.71-05:00"
 
         ticket_note_1 = {
             "noteId": 68246614,
             "noteValue": "#*MetTel's IPA*#\nTriage\nTimeStamp: 2021-01-02 10:18:16-05:00",
             "serviceNumber": [
-                'B827EB92EB72',
+                "B827EB92EB72",
             ],
             "createdDate": triage_timestamp,
         }
@@ -5818,7 +5515,7 @@ class TestServiceOutageMonitor:
             "noteId": 68246615,
             "noteValue": "#*Automation Engine*#\nRe-opening\nTimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
-                'B827EB92EB72',
+                "B827EB92EB72",
             ],
             "createdDate": reopen_timestamp,
         }
@@ -5840,39 +5537,47 @@ class TestServiceOutageMonitor:
         utils_repository = Mock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
 
         datetime_mock = Mock()
 
         new_now = parse(reopen_timestamp) + timedelta(minutes=59, seconds=59)
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+        with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
             result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(reopen_timestamp) + timedelta(hours=1)
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+        with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
             result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(reopen_timestamp) + timedelta(hours=1, seconds=1)
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+        with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
             result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is False
 
     def was_last_outage_detected_recently_with_reopen_note_not_found_and_triage_note_found_test(self):
-        ticket_creation_date = '9/25/2020 6:31:54 AM'
-        triage_timestamp = '2021-01-02T10:18:16.71-05:00'
+        ticket_creation_date = "9/25/2020 6:31:54 AM"
+        triage_timestamp = "2021-01-02T10:18:16.71-05:00"
 
         ticket_note_1 = {
             "noteId": 68246614,
             "noteValue": "#*MetTel's IPA*#\nTriage (Ixia)\nTimeStamp: 2021-01-02 10:18:16-05:00",
             "serviceNumber": [
-                'B827EB92EB72',
+                "B827EB92EB72",
             ],
             "createdDate": triage_timestamp,
         }
@@ -5893,40 +5598,49 @@ class TestServiceOutageMonitor:
         utils_repository = Mock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
 
         datetime_mock = Mock()
 
         new_now = parse(triage_timestamp) + timedelta(minutes=59, seconds=59)
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+        with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
             result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(triage_timestamp) + timedelta(hours=1)
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+        with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
             result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(triage_timestamp) + timedelta(hours=1, seconds=1)
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+        with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
             result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is False
 
     def was_last_outage_detected_recently_with_reopen_note_not_found_and_triage_note_having_old_watermark_found_test(
-            self):
-        ticket_creation_date = '9/25/2020 6:31:54 AM'
-        triage_timestamp = '2021-01-02T10:18:16.71-05:00'
+        self,
+    ):
+        ticket_creation_date = "9/25/2020 6:31:54 AM"
+        triage_timestamp = "2021-01-02T10:18:16.71-05:00"
 
         ticket_note_1 = {
             "noteId": 68246614,
             "noteValue": "#*Automation Engine*#\nTriage (Ixia)\nTimeStamp: 2021-01-02 10:18:16-05:00",
             "serviceNumber": [
-                'B827EB92EB72',
+                "B827EB92EB72",
             ],
             "createdDate": triage_timestamp,
         }
@@ -5947,26 +5661,34 @@ class TestServiceOutageMonitor:
         utils_repository = Mock()
 
         outage_monitor = OutageMonitor(
-            event_bus, logger, scheduler, config, metrics_repository, bruin_repository, hawkeye_repository,
-            notifications_repository, customer_cache_repository, utils_repository
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            metrics_repository,
+            bruin_repository,
+            hawkeye_repository,
+            notifications_repository,
+            customer_cache_repository,
+            utils_repository,
         )
 
         datetime_mock = Mock()
 
         new_now = parse(triage_timestamp) + timedelta(minutes=59, seconds=59)
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+        with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
             result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(triage_timestamp) + timedelta(hours=1)
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+        with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
             result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(triage_timestamp) + timedelta(hours=1, seconds=1)
         datetime_mock.now = Mock(return_value=new_now)
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+        with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
             result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is False

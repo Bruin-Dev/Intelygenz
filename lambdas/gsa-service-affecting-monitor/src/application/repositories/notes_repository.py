@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import Callable
 
 from pytz import timezone
-
 from src.application import AffectingTroubles
 
 
@@ -30,14 +29,14 @@ class NotesRepository:
         link_metrics = link_data["link_metrics"]
 
         edge_cached_info = link_data["cached_info"]
-        links_configuration = edge_cached_info['links_configuration']
+        links_configuration = edge_cached_info["links_configuration"]
 
         link_status = link_data["link_status"]
-        link_interface = link_status['interface']
+        link_interface = link_status["interface"]
 
         trouble = AffectingTroubles.LATENCY
-        scan_interval = self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble]
-        metrics_threshold = self._config.MONITOR_CONFIG['thresholds'][trouble]
+        scan_interval = self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
+        metrics_threshold = self._config.MONITOR_CONFIG["thresholds"][trouble]
 
         edge_full_id = edge_cached_info["edge"]
         velocloud_base_url = (
@@ -51,7 +50,7 @@ class NotesRepository:
 
         link_config = self._utils_repository.get_first_element_matching(
             links_configuration,
-            lambda config: link_interface in config['interfaces'],
+            lambda config: link_interface in config["interfaces"],
         )
         if link_config:
             link_interface_type = f"{link_config['mode'].capitalize()} {link_config['type'].capitalize()}"
@@ -59,15 +58,15 @@ class NotesRepository:
             link_interface_type = "Unknown"
 
         note_lines += [
-            f'Trouble: {trouble.value}',
-            '',
+            f"Trouble: {trouble.value}",
+            "",
             f'Serial Number: {edge_status["edgeSerialNumber"]}',
             f'Name: {link_status["displayName"]}',
             f'Interface: {link_status["interface"]}',
-            f'Link Type: {link_interface_type}',
-            '',
-            f'Interval for Scan: {scan_interval} minutes',
-            f'Threshold: {metrics_threshold} ms',
+            f"Link Type: {link_interface_type}",
+            "",
+            f"Interval for Scan: {scan_interval} minutes",
+            f"Threshold: {metrics_threshold} ms",
         ]
 
         if not self._trouble_repository.is_latency_rx_within_threshold(link_metrics):
@@ -77,10 +76,10 @@ class NotesRepository:
             note_lines.append(f'Transfer: {link_metrics["bestLatencyMsTx"]} ms')
 
         note_lines += [
-            '',
-            f'Scan Time: {datetime.now(timezone(self._config.TIMEZONE))}',
+            "",
+            f"Scan Time: {datetime.now(timezone(self._config.TIMEZONE))}",
             (
-                'Links: '
+                "Links: "
                 f'<a href="{velocloud_edge_base_url}/">Edge</a> - '
                 f'<a href="{velocloud_edge_base_url}/qoe/">QoE</a> - '
                 f'<a href="{velocloud_edge_base_url}/links/">Transport</a> - '
@@ -94,14 +93,14 @@ class NotesRepository:
         link_metrics = link_data["link_metrics"]
 
         edge_cached_info = link_data["cached_info"]
-        links_configuration = edge_cached_info['links_configuration']
+        links_configuration = edge_cached_info["links_configuration"]
 
         link_status = link_data["link_status"]
-        link_interface = link_status['interface']
+        link_interface = link_status["interface"]
 
         trouble = AffectingTroubles.PACKET_LOSS
-        scan_interval = self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble]
-        metrics_threshold = self._config.MONITOR_CONFIG['thresholds'][trouble]
+        scan_interval = self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
+        metrics_threshold = self._config.MONITOR_CONFIG["thresholds"][trouble]
 
         edge_full_id = edge_cached_info["edge"]
         velocloud_base_url = (
@@ -115,7 +114,7 @@ class NotesRepository:
 
         link_config = self._utils_repository.get_first_element_matching(
             links_configuration,
-            lambda config: link_interface in config['interfaces'],
+            lambda config: link_interface in config["interfaces"],
         )
         if link_config:
             link_interface_type = f"{link_config['mode'].capitalize()} {link_config['type'].capitalize()}"
@@ -123,15 +122,15 @@ class NotesRepository:
             link_interface_type = "Unknown"
 
         note_lines += [
-            f'Trouble: {trouble.value}',
-            '',
+            f"Trouble: {trouble.value}",
+            "",
             f'Serial Number: {edge_status["edgeSerialNumber"]}',
             f'Name: {link_status["displayName"]}',
             f'Interface: {link_status["interface"]}',
-            f'Link Type: {link_interface_type}',
-            '',
-            f'Interval for Scan: {scan_interval} minutes',
-            f'Threshold: {metrics_threshold} packets',
+            f"Link Type: {link_interface_type}",
+            "",
+            f"Interval for Scan: {scan_interval} minutes",
+            f"Threshold: {metrics_threshold} packets",
         ]
 
         if not self._trouble_repository.is_packet_loss_rx_within_threshold(link_metrics):
@@ -141,10 +140,10 @@ class NotesRepository:
             note_lines.append(f'Transfer: {link_metrics["bestLossPctTx"]} packets')
 
         note_lines += [
-            '',
-            f'Scan Time: {datetime.now(timezone(self._config.TIMEZONE))}',
+            "",
+            f"Scan Time: {datetime.now(timezone(self._config.TIMEZONE))}",
             (
-                'Links: '
+                "Links: "
                 f'<a href="{velocloud_edge_base_url}/">Edge</a> - '
                 f'<a href="{velocloud_edge_base_url}/qoe/">QoE</a> - '
                 f'<a href="{velocloud_edge_base_url}/links/">Transport</a> - '
@@ -158,14 +157,14 @@ class NotesRepository:
         link_metrics = link_data["link_metrics"]
 
         edge_cached_info = link_data["cached_info"]
-        links_configuration = edge_cached_info['links_configuration']
+        links_configuration = edge_cached_info["links_configuration"]
 
         link_status = link_data["link_status"]
-        link_interface = link_status['interface']
+        link_interface = link_status["interface"]
 
         trouble = AffectingTroubles.JITTER
-        scan_interval = self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble]
-        metrics_threshold = self._config.MONITOR_CONFIG['thresholds'][trouble]
+        scan_interval = self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
+        metrics_threshold = self._config.MONITOR_CONFIG["thresholds"][trouble]
 
         edge_full_id = edge_cached_info["edge"]
         velocloud_base_url = (
@@ -179,7 +178,7 @@ class NotesRepository:
 
         link_config = self._utils_repository.get_first_element_matching(
             links_configuration,
-            lambda config: link_interface in config['interfaces'],
+            lambda config: link_interface in config["interfaces"],
         )
         if link_config:
             link_interface_type = f"{link_config['mode'].capitalize()} {link_config['type'].capitalize()}"
@@ -187,15 +186,15 @@ class NotesRepository:
             link_interface_type = "Unknown"
 
         note_lines += [
-            f'Trouble: {trouble.value}',
-            '',
+            f"Trouble: {trouble.value}",
+            "",
             f'Serial Number: {edge_status["edgeSerialNumber"]}',
             f'Name: {link_status["displayName"]}',
             f'Interface: {link_status["interface"]}',
-            f'Link Type: {link_interface_type}',
-            '',
-            f'Interval for Scan: {scan_interval} minutes',
-            f'Threshold: {metrics_threshold} ms',
+            f"Link Type: {link_interface_type}",
+            "",
+            f"Interval for Scan: {scan_interval} minutes",
+            f"Threshold: {metrics_threshold} ms",
         ]
 
         if not self._trouble_repository.is_jitter_rx_within_threshold(link_metrics):
@@ -205,10 +204,10 @@ class NotesRepository:
             note_lines.append(f'Transfer: {link_metrics["bestJitterMsTx"]} ms')
 
         note_lines += [
-            '',
-            f'Scan Time: {datetime.now(timezone(self._config.TIMEZONE))}',
+            "",
+            f"Scan Time: {datetime.now(timezone(self._config.TIMEZONE))}",
             (
-                'Links: '
+                "Links: "
                 f'<a href="{velocloud_edge_base_url}/">Edge</a> - '
                 f'<a href="{velocloud_edge_base_url}/qoe/">QoE</a> - '
                 f'<a href="{velocloud_edge_base_url}/links/">Transport</a> - '
@@ -222,14 +221,14 @@ class NotesRepository:
         link_metrics = link_data["link_metrics"]
 
         edge_cached_info = link_data["cached_info"]
-        links_configuration = edge_cached_info['links_configuration']
+        links_configuration = edge_cached_info["links_configuration"]
 
         link_status = link_data["link_status"]
-        link_interface = link_status['interface']
+        link_interface = link_status["interface"]
 
         trouble = AffectingTroubles.BANDWIDTH_OVER_UTILIZATION
-        scan_interval = self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble]
-        metrics_threshold = self._config.MONITOR_CONFIG['thresholds'][trouble]
+        scan_interval = self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
+        metrics_threshold = self._config.MONITOR_CONFIG["thresholds"][trouble]
 
         edge_full_id = edge_cached_info["edge"]
         velocloud_base_url = (
@@ -243,7 +242,7 @@ class NotesRepository:
 
         link_config = self._utils_repository.get_first_element_matching(
             links_configuration,
-            lambda config: link_interface in config['interfaces'],
+            lambda config: link_interface in config["interfaces"],
         )
         if link_config:
             link_interface_type = f"{link_config['mode'].capitalize()} {link_config['type'].capitalize()}"
@@ -251,51 +250,51 @@ class NotesRepository:
             link_interface_type = "Unknown"
 
         note_lines += [
-            f'Trouble: {trouble.value}',
-            '',
+            f"Trouble: {trouble.value}",
+            "",
             f'Serial Number: {edge_status["edgeSerialNumber"]}',
             f'Name: {link_status["displayName"]}',
             f'Interface: {link_status["interface"]}',
-            f'Link Type: {link_interface_type}',
-            '',
-            f'Interval for Scan: {scan_interval} minutes',
+            f"Link Type: {link_interface_type}",
+            "",
+            f"Interval for Scan: {scan_interval} minutes",
         ]
 
-        rx_bandwidth = link_metrics['bpsOfBestPathRx']
+        rx_bandwidth = link_metrics["bpsOfBestPathRx"]
         if self._trouble_repository.is_valid_bps_metric(rx_bandwidth):
             if not self._trouble_repository.is_bandwidth_rx_within_threshold(link_metrics, scan_interval):
                 rx_throughput = self._trouble_repository.get_bandwidth_throughput_bps(
-                    total_bytes=link_metrics['bytesRx'],
+                    total_bytes=link_metrics["bytesRx"],
                     lookup_interval_minutes=scan_interval,
                 )
                 rx_threshold = (metrics_threshold / 100) * rx_bandwidth
 
                 note_lines += [
-                    f'Throughput (Receive): {self._utils_repository.humanize_bps(rx_throughput)}',
-                    f'Bandwidth (Receive): {self._utils_repository.humanize_bps(rx_bandwidth)}',
-                    f'Threshold (Receive): {metrics_threshold}% ({self._utils_repository.humanize_bps(rx_threshold)})',
+                    f"Throughput (Receive): {self._utils_repository.humanize_bps(rx_throughput)}",
+                    f"Bandwidth (Receive): {self._utils_repository.humanize_bps(rx_bandwidth)}",
+                    f"Threshold (Receive): {metrics_threshold}% ({self._utils_repository.humanize_bps(rx_threshold)})",
                 ]
 
-        tx_bandwidth = link_metrics['bpsOfBestPathTx']
+        tx_bandwidth = link_metrics["bpsOfBestPathTx"]
         if self._trouble_repository.is_valid_bps_metric(tx_bandwidth):
             if not self._trouble_repository.is_bandwidth_tx_within_threshold(link_metrics, scan_interval):
                 tx_throughput = self._trouble_repository.get_bandwidth_throughput_bps(
-                    total_bytes=link_metrics['bytesTx'],
+                    total_bytes=link_metrics["bytesTx"],
                     lookup_interval_minutes=scan_interval,
                 )
                 tx_threshold = (metrics_threshold / 100) * tx_bandwidth
 
                 note_lines += [
-                    f'Throughput (Transfer): {self._utils_repository.humanize_bps(tx_throughput)}',
-                    f'Bandwidth (Transfer): {self._utils_repository.humanize_bps(tx_bandwidth)}',
-                    f'Threshold (Transfer): {metrics_threshold}% ({self._utils_repository.humanize_bps(tx_threshold)})',
+                    f"Throughput (Transfer): {self._utils_repository.humanize_bps(tx_throughput)}",
+                    f"Bandwidth (Transfer): {self._utils_repository.humanize_bps(tx_bandwidth)}",
+                    f"Threshold (Transfer): {metrics_threshold}% ({self._utils_repository.humanize_bps(tx_threshold)})",
                 ]
 
         note_lines += [
-            '',
-            f'Scan Time: {datetime.now(timezone(self._config.TIMEZONE))}',
+            "",
+            f"Scan Time: {datetime.now(timezone(self._config.TIMEZONE))}",
             (
-                'Links: '
+                "Links: "
                 f'<a href="{velocloud_edge_base_url}/">Edge</a> - '
                 f'<a href="{velocloud_edge_base_url}/qoe/">QoE</a> - '
                 f'<a href="{velocloud_edge_base_url}/links/">Transport</a> - '
@@ -309,14 +308,14 @@ class NotesRepository:
         link_events = link_data["link_events"]
 
         edge_cached_info = link_data["cached_info"]
-        links_configuration = edge_cached_info['links_configuration']
+        links_configuration = edge_cached_info["links_configuration"]
 
         link_status = link_data["link_status"]
-        link_interface = link_status['interface']
+        link_interface = link_status["interface"]
 
         trouble = AffectingTroubles.BOUNCING
-        scan_interval = self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble]
-        metrics_threshold = self._config.MONITOR_CONFIG['thresholds'][trouble]
+        scan_interval = self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
+        metrics_threshold = self._config.MONITOR_CONFIG["thresholds"][trouble]
 
         edge_full_id = edge_cached_info["edge"]
         velocloud_base_url = (
@@ -330,7 +329,7 @@ class NotesRepository:
 
         link_config = self._utils_repository.get_first_element_matching(
             links_configuration,
-            lambda config: link_interface in config['interfaces'],
+            lambda config: link_interface in config["interfaces"],
         )
         if link_config:
             link_interface_type = f"{link_config['mode'].capitalize()} {link_config['type'].capitalize()}"
@@ -338,20 +337,20 @@ class NotesRepository:
             link_interface_type = "Unknown"
 
         note_lines += [
-            f'Trouble: {trouble.value}',
-            '',
+            f"Trouble: {trouble.value}",
+            "",
             f'Serial Number: {edge_status["edgeSerialNumber"]}',
             f'Name: {link_status["displayName"]}',
             f'Interface: {link_status["interface"]}',
-            f'Link Type: {link_interface_type}',
-            '',
-            f'Interval for Scan: {scan_interval} minutes',
-            f'Threshold: {metrics_threshold} events',
-            f'Events: {len(link_events)}',
-            '',
-            f'Scan Time: {datetime.now(timezone(self._config.TIMEZONE))}',
+            f"Link Type: {link_interface_type}",
+            "",
+            f"Interval for Scan: {scan_interval} minutes",
+            f"Threshold: {metrics_threshold} events",
+            f"Events: {len(link_events)}",
+            "",
+            f"Scan Time: {datetime.now(timezone(self._config.TIMEZONE))}",
             (
-                'Links: '
+                "Links: "
                 f'<a href="{velocloud_edge_base_url}/">Edge</a> - '
                 f'<a href="{velocloud_edge_base_url}/qoe/">QoE</a> - '
                 f'<a href="{velocloud_edge_base_url}/links/">Transport</a>'

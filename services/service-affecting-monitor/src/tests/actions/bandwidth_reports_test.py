@@ -1,29 +1,37 @@
 from datetime import datetime, timedelta
 from datetime import timezone as tz
-from unittest.mock import Mock
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
-from apscheduler.triggers.cron import CronTrigger
-from asynctest import CoroutineMock
-from shortuuid import uuid
-
 from application.actions import bandwidth_reports as bandwidth_reports_module
 from application.actions.bandwidth_reports import BandwidthReports
+from apscheduler.triggers.cron import CronTrigger
+from asynctest import CoroutineMock
 from config import testconfig
+from shortuuid import uuid
 
 uuid_ = uuid()
-uuid_mock = patch.object(bandwidth_reports_module, 'uuid', return_value=uuid_)
+uuid_mock = patch.object(bandwidth_reports_module, "uuid", return_value=uuid_)
 
-frozen_datetime = datetime.strptime('20/12/2021', '%d/%m/%Y')
+frozen_datetime = datetime.strptime("20/12/2021", "%d/%m/%Y")
 datetime_mock = Mock()
 datetime_mock.utcnow = Mock(return_value=frozen_datetime)
 
 
 class TestBandwidthReports:
-    def instance_test(self, bandwidth_reports, logger, scheduler, velocloud_repository, bruin_repository,
-                      trouble_repository, customer_cache_repository, notifications_repository, utils_repository,
-                      template_repository):
+    def instance_test(
+        self,
+        bandwidth_reports,
+        logger,
+        scheduler,
+        velocloud_repository,
+        bruin_repository,
+        trouble_repository,
+        customer_cache_repository,
+        notifications_repository,
+        utils_repository,
+        template_repository,
+    ):
         assert bandwidth_reports._logger is logger
         assert bandwidth_reports._scheduler is scheduler
         assert bandwidth_reports._config is testconfig
@@ -50,11 +58,18 @@ class TestBandwidthReports:
         bandwidth_reports._scheduler.add_job.assert_called_once()
 
     @pytest.mark.asyncio
-    async def bandwidth_reports_job_test(self, bandwidth_reports, make_bruin_client_info, make_cached_edge,
-                                         make_customer_cache, make_metrics_for_link, make_rpc_response):
+    async def bandwidth_reports_job_test(
+        self,
+        bandwidth_reports,
+        make_bruin_client_info,
+        make_cached_edge,
+        make_customer_cache,
+        make_metrics_for_link,
+        make_rpc_response,
+    ):
         client_id = 9994
-        client_name = 'MetTel'
-        serial_number = 'VC1234567'
+        client_name = "MetTel"
+        serial_number = "VC1234567"
 
         bruin_client_info = make_bruin_client_info(client_id=client_id, client_name=client_name)
         cached_edge = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
@@ -80,28 +95,42 @@ class TestBandwidthReports:
 
     @pytest.mark.asyncio
     async def generate_bandwidth_report_for_client_test(
-            self, bandwidth_reports, make_edge_full_id, make_bruin_client_info, make_cached_edge, make_customer_cache,
-            make_link, make_edge, make_link_with_edge_info, make_metrics_for_link, make_ticket, make_detail_item,
-            make_ticket_note, make_ticket_details):
-        host = 'mettel.velocloud.net'
+        self,
+        bandwidth_reports,
+        make_edge_full_id,
+        make_bruin_client_info,
+        make_cached_edge,
+        make_customer_cache,
+        make_link,
+        make_edge,
+        make_link_with_edge_info,
+        make_metrics_for_link,
+        make_ticket,
+        make_detail_item,
+        make_ticket_note,
+        make_ticket_details,
+    ):
+        host = "mettel.velocloud.net"
         enterprise_id = 1
         edge_id = 123
         client_id = 9994
-        client_name = 'MetTel'
-        serial_number = 'VC1234567'
+        client_name = "MetTel"
+        serial_number = "VC1234567"
         ticket_id = 12345
-        edge_name = 'Test Edge'
-        interface = 'GE1'
+        edge_name = "Test Edge"
+        interface = "GE1"
 
         edge_full_id = make_edge_full_id(host=host, enterprise_id=enterprise_id, edge_id=edge_id)
         bruin_client_info = make_bruin_client_info(client_id=client_id, client_name=client_name)
-        cached_edge = make_cached_edge(serial_number=serial_number, full_id=edge_full_id,
-                                       bruin_client_info=bruin_client_info)
+        cached_edge = make_cached_edge(
+            serial_number=serial_number, full_id=edge_full_id, bruin_client_info=bruin_client_info
+        )
         customer_cache = make_customer_cache(cached_edge)
 
         link = make_link(interface=interface)
-        edge = make_edge(host=host, enterprise_id=enterprise_id, id_=edge_id, serial_number=serial_number,
-                         name=edge_name)
+        edge = make_edge(
+            host=host, enterprise_id=enterprise_id, id_=edge_id, serial_number=serial_number, name=edge_name
+        )
         link_with_edge = make_link_with_edge_info(link_info=link, edge_info=edge)
         link_metrics = make_metrics_for_link(link_with_edge_info=link_with_edge)
         links_metrics = [link_metrics]
@@ -115,24 +144,27 @@ class TestBandwidthReports:
         ticket_details = make_ticket_details(detail_items=[detail_item], notes=[note])
         tickets = {
             ticket_id: {
-                'ticket': ticket,
-                'ticket_details': ticket_details,
+                "ticket": ticket,
+                "ticket_details": ticket_details,
             }
         }
 
         bandwidth_reports._bruin_repository.get_affecting_ticket_for_report.return_value = tickets
 
-        with patch.object(bandwidth_reports._config, 'CURRENT_ENVIRONMENT', 'production'):
-            await bandwidth_reports._generate_bandwidth_report_for_client(client_id, client_name, {serial_number},
-                                                                          links_metrics, customer_cache)
+        with patch.object(bandwidth_reports._config, "CURRENT_ENVIRONMENT", "production"):
+            await bandwidth_reports._generate_bandwidth_report_for_client(
+                client_id, client_name, {serial_number}, links_metrics, customer_cache
+            )
 
-        report_items = [{
-            'serial_number': serial_number,
-            'edge_name': edge_name,
-            'interface': interface,
-            'bandwidth': '0.0 bps',
-            'threshold_exceeded': 1,
-            'ticket_ids': {ticket_id}}
+        report_items = [
+            {
+                "serial_number": serial_number,
+                "edge_name": edge_name,
+                "interface": interface,
+                "bandwidth": "0.0 bps",
+                "threshold_exceeded": 1,
+                "ticket_ids": {ticket_id},
+            }
         ]
 
         bandwidth_reports._template_repository.compose_bandwidth_report_email.assert_called_once_with(
@@ -148,14 +180,14 @@ class TestBandwidthReports:
 
         bandwidth_reports._utils_repository.humanize_bps.side_effect = lambda bps: bps
         result = bandwidth_reports._add_bandwidth_to_links_metrics(links_metrics)
-        assert result[0]['avgBandwidth'] == 1_000
+        assert result[0]["avgBandwidth"] == 1_000
 
     def get_start_date_test(self, bandwidth_reports):
-        with patch.object(bandwidth_reports_module, 'datetime', new=datetime_mock):
+        with patch.object(bandwidth_reports_module, "datetime", new=datetime_mock):
             result = bandwidth_reports._get_start_date()
-        assert result == '2021-12-19T00:00:00Z'
+        assert result == "2021-12-19T00:00:00Z"
 
     def get_end_date_test(self, bandwidth_reports):
-        with patch.object(bandwidth_reports_module, 'datetime', new=datetime_mock):
+        with patch.object(bandwidth_reports_module, "datetime", new=datetime_mock):
             result = bandwidth_reports._get_end_date()
-        assert result == '2021-12-20T00:00:00Z'
+        assert result == "2021-12-20T00:00:00Z"

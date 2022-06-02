@@ -3,28 +3,28 @@ import logging
 
 # a set of standard LogRecord attributes to be used when building JSON logs
 LOG_RECORD_ATTRIBUTES = {
-    'args',
-    'asctime',
-    'created',
-    'exc_info',
-    'exc_text',
-    'filename',
-    'funcName',
-    'levelname',
-    'levelno',
-    'lineno',
-    'module',
-    'msecs',
-    'message',
-    'msg',
-    'name',
-    'pathname',
-    'process',
-    'processName',
-    'relativeCreated',
-    'stack_info',
-    'thread',
-    'threadName'
+    "args",
+    "asctime",
+    "created",
+    "exc_info",
+    "exc_text",
+    "filename",
+    "funcName",
+    "levelname",
+    "levelno",
+    "lineno",
+    "module",
+    "msecs",
+    "message",
+    "msg",
+    "name",
+    "pathname",
+    "process",
+    "processName",
+    "relativeCreated",
+    "stack_info",
+    "thread",
+    "threadName",
 }
 
 
@@ -48,7 +48,7 @@ class JsonFormatter(logging.Formatter):
             datefmt (str, optional): strftime date format. For more details
                 check logging.Formatter documentation. Defaults to None.
         """
-        super().__init__(fmt=None, datefmt=datefmt, style='%')
+        super().__init__(fmt=None, datefmt=datefmt, style="%")
         self.fields = fields or {}
         self._uses_time = "asctime" in self.fields.values()
         self.always_extra = always_extra or {}

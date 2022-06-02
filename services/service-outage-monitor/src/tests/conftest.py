@@ -1,7 +1,5 @@
 import pytest
-
 from config import testconfig
-
 from tests.fixtures.bruin import *
 from tests.fixtures.custom_objects import *
 from tests.fixtures.instances import *

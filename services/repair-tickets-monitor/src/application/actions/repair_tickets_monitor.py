@@ -1,30 +1,33 @@
 import asyncio
 import logging
 import os
+import time
 from collections import defaultdict
 from datetime import datetime
 from logging import Logger
 from typing import Any, DefaultDict, Dict, List, Set, Tuple
 
 import html2text
-import time
-from apscheduler.jobstores.base import ConflictingIdError
-from apscheduler.util import undefined
-from pytz import timezone
-
-from application.domain.asset import Assets, AssetId, Asset
-from application.domain.repair_email_output import RepairEmailOutput, TicketOutput, \
-    CreateTicketsOutput, PotentialTicketsOutput
-from application.domain.ticket import Ticket, TicketStatus, Category
+from application.domain.asset import Asset, AssetId, Assets
+from application.domain.repair_email_output import (
+    CreateTicketsOutput,
+    PotentialTicketsOutput,
+    RepairEmailOutput,
+    TicketOutput,
+)
+from application.domain.ticket import Category, Ticket, TicketStatus
 from application.exceptions import ResponseException
 from application.rpc import RpcError
 from application.rpc.append_note_to_ticket_rpc import AppendNoteToTicketRpc
 from application.rpc.get_asset_topics_rpc import GetAssetTopicsRpc
 from application.rpc.subscribe_user_rpc import SubscribeUserRpc
-from application.rpc.upsert_outage_ticket_rpc import UpsertOutageTicketRpc, UpsertedStatus
+from application.rpc.upsert_outage_ticket_rpc import UpsertedStatus, UpsertOutageTicketRpc
+from apscheduler.jobstores.base import ConflictingIdError
+from apscheduler.util import undefined
 from middleware.logging import set_logging_context
+from pytz import timezone
 
-log = logging.getLogger('middleware')
+log = logging.getLogger("middleware")
 
 
 def get_feedback_not_created_due_cancellations(map_with_cancellations: Dict[str, str]) -> List[TicketOutput]:
@@ -56,7 +59,7 @@ class RepairTicketsMonitor:
         append_note_to_ticket_rpc: AppendNoteToTicketRpc,
         get_asset_topics_rpc: GetAssetTopicsRpc,
         upsert_outage_ticket_rpc: UpsertOutageTicketRpc,
-        subscribe_user_rpc: SubscribeUserRpc
+        subscribe_user_rpc: SubscribeUserRpc,
     ):
         self._event_bus = event_bus
         self._logger = logger
@@ -202,11 +205,7 @@ class RepairTicketsMonitor:
         return service_number_site_id_map_with_cancellations, service_number_site_id_map_without_cancellations
 
     # To be refactored in an RPC
-    async def _get_tickets(
-        self,
-        email_id: str,
-        tickets_id: List[int]
-    ) -> List[Ticket]:
+    async def _get_tickets(self, email_id: str, tickets_id: List[int]) -> List[Ticket]:
         """
         Return the tickets that already exist in Bruin
         """
@@ -223,17 +222,14 @@ class RepairTicketsMonitor:
                 except ValueError as e:
                     ticket_status = TicketStatus.UNKNOWN
                     self._logger.warning(
-                        "email_id=%s Unknown ticket status, response=%s, error=%s",
-                        email_id,
-                        bruin_bridge_response,
-                        e
+                        "email_id=%s Unknown ticket status, response=%s, error=%s", email_id, bruin_bridge_response, e
                     )
 
                 ticket = Ticket(
-                    id=str(bruin_bridge_response["body"]['ticket_id']),
+                    id=str(bruin_bridge_response["body"]["ticket_id"]),
                     status=ticket_status,
                     call_type=bruin_bridge_response["body"]["call_type"],
-                    category=bruin_bridge_response["body"]["category"]
+                    category=bruin_bridge_response["body"]["category"],
                 )
 
                 validated_tickets.append(ticket)
@@ -295,19 +291,16 @@ class RepairTicketsMonitor:
 
                 assets = Assets()
                 for service_number, site_id in service_number_site_map.items():
-                    asset_id = AssetId(
-                        client_id=client_id,
-                        site_id=site_id,
-                        service_number=service_number
-                    )
+                    asset_id = AssetId(client_id=client_id, site_id=site_id, service_number=service_number)
 
                     try:
                         allowed_asset_topics = await self.get_asset_topics_rpc(asset_id)
                     except RpcError as e:
                         # TODO: sent slack notification
                         allowed_asset_topics = []
-                        self._logger.warning(f"[email_id={email_id}] _process_repair_email():"
-                                             f"get_topics_device_rpc({asset_id}): {e}")
+                        self._logger.warning(
+                            f"[email_id={email_id}] _process_repair_email():" f"get_topics_device_rpc({asset_id}): {e}"
+                        )
 
                     asset = Asset(id=asset_id, allowed_topics=allowed_asset_topics)
                     assets.append(asset)
@@ -321,11 +314,12 @@ class RepairTicketsMonitor:
                 wireless_assets = not_allowed_assets.with_allowed_category(Category.WIRELESS_SERVICE_NOT_WORKING.value)
                 other_category_assets = Assets(asset for asset in not_allowed_assets if asset not in wireless_assets)
 
-                allowed_service_number_site_map = {asset.id.service_number: asset.id.site_id
-                                                   for asset in allowed_assets}
-                self._logger.info("email_id=%s allowed_service_numbers_site_map=%s",
-                                  email_id,
-                                  allowed_service_number_site_map)
+                allowed_service_number_site_map = {
+                    asset.id.service_number: asset.id.site_id for asset in allowed_assets
+                }
+                self._logger.info(
+                    "email_id=%s allowed_service_numbers_site_map=%s", email_id, allowed_service_number_site_map
+                )
 
                 if wireless_assets:
                     output.tickets_cannot_be_created.append(TicketOutput(reason="contains_wireless_assets"))
@@ -390,15 +384,14 @@ class RepairTicketsMonitor:
             else:
                 output.tickets_cannot_be_created = self._get_class_other_tickets(allowed_service_number_site_map)
 
-            feedback_not_created_due_cancellations = get_feedback_not_created_due_cancellations(
-                map_with_cancellations
-            )
+            feedback_not_created_due_cancellations = get_feedback_not_created_due_cancellations(map_with_cancellations)
 
             output.tickets_cannot_be_created.extend(feedback_not_created_due_cancellations)
 
             # Tickets processing
-            operable_tickets = [ticket for ticket in output.validated_tickets if
-                                ticket.is_active() and ticket.is_repair()]
+            operable_tickets = [
+                ticket for ticket in output.validated_tickets if ticket.is_active() and ticket.is_repair()
+            ]
 
             if not allowed_service_number_site_map:
                 if is_actionable:
@@ -406,22 +399,21 @@ class RepairTicketsMonitor:
                         ticket_updated = await self._update_ticket(ticket, email_id, email_data)
                         if ticket_updated:
                             output.tickets_updated.append(
-                                TicketOutput(ticket_id=ticket.id, reason="update_with_ticket_found"))
+                                TicketOutput(ticket_id=ticket.id, reason="update_with_ticket_found")
+                            )
                 else:
                     for ticket in operable_tickets:
                         output.tickets_could_be_updated.append(TicketOutput(ticket_id=ticket.id))
 
             if not service_number_site_map and not output.tickets_updated and not output.tickets_could_be_updated:
-                output.tickets_cannot_be_created.append(
-                    TicketOutput(reason="No validated service numbers")
-                )
+                output.tickets_cannot_be_created.append(TicketOutput(reason="No validated service numbers"))
 
             self._logger.info("email_id=%s output_send_to_save=%s", email_id, output)
             await self._save_output(output)
 
             # we only mark the email as done in bruin when at least one ticket has been created or updated,
             # and there is no cancellations in any site
-            tickets_automated = (output.tickets_created or output.tickets_updated)
+            tickets_automated = output.tickets_created or output.tickets_updated
             no_tickets_failed = not output.tickets_cannot_be_created
             if tickets_automated and no_tickets_failed and not feedback_not_created_due_cancellations:
                 self._logger.info("email_id=%s Calling bruin to mark email as done", email_id)
@@ -512,11 +504,8 @@ class RepairTicketsMonitor:
         is_update_note: bool = False,
     ) -> List[Dict]:
         note_text = self._compose_bec_note_text(
-            subject=subject,
-            from_address=from_address,
-            body=body,
-            date=date,
-            is_update_note=is_update_note)
+            subject=subject, from_address=from_address, body=body, date=date, is_update_note=is_update_note
+        )
         notes = [{"text": note_text, "service_number": service_number} for service_number in service_numbers]
         self._logger.info("ticket_id=%s Sending note: %s", ticket_id, notes)
 
@@ -545,37 +534,42 @@ class RepairTicketsMonitor:
             site_id_sn_buckets[site_id].append(service_number)
 
         for site_id, service_numbers in site_id_sn_buckets.items():
-            asset_ids = [AssetId(client_id=client_id, site_id=site_id, service_number=service_number)
-                         for service_number in service_numbers]
+            asset_ids = [
+                AssetId(client_id=client_id, site_id=site_id, service_number=service_number)
+                for service_number in service_numbers
+            ]
 
             try:
                 result = await self.upsert_outage_ticket_rpc(asset_ids=asset_ids, contact_email=email_from_address)
             except RpcError:
-                self._logger.exception("email_id=%s Error while creating ticket for %s and client %s",
-                                       email_id,
-                                       service_numbers,
-                                       client_id)
-                create_tickets_output.tickets_cannot_be_created.append(TicketOutput(
-                    site_id=str(site_id),
-                    service_numbers=service_numbers,
-                    reason="Error while creating bruin ticket",
-                ))
+                self._logger.exception(
+                    "email_id=%s Error while creating ticket for %s and client %s", email_id, service_numbers, client_id
+                )
+                create_tickets_output.tickets_cannot_be_created.append(
+                    TicketOutput(
+                        site_id=str(site_id),
+                        service_numbers=service_numbers,
+                        reason="Error while creating bruin ticket",
+                    )
+                )
                 continue
 
             if result.status == UpsertedStatus.created:
                 self._logger.info("email_id=%s Successfully created outage ticket %s", email_id, result.ticket_id)
                 create_tickets_output.tickets_created.append(
-                    TicketOutput(ticket_id=result.ticket_id,
-                                 site_id=site_id,
-                                 service_numbers=service_numbers))
+                    TicketOutput(ticket_id=result.ticket_id, site_id=site_id, service_numbers=service_numbers)
+                )
 
             elif result.status == UpsertedStatus.updated:
                 self._logger.info("email_id=%s Ticket already present", email_id)
                 create_tickets_output.tickets_updated.append(
-                    TicketOutput(ticket_id=result.ticket_id,
-                                 site_id=str(site_id),
-                                 service_numbers=service_numbers,
-                                 reason="update_with_asset_found"))
+                    TicketOutput(
+                        ticket_id=result.ticket_id,
+                        site_id=str(site_id),
+                        service_numbers=service_numbers,
+                        reason="update_with_asset_found",
+                    )
+                )
 
             notes_to_append = self._compose_bec_note_to_ticket(
                 ticket_id=result.ticket_id,
@@ -698,7 +692,7 @@ class RepairTicketsMonitor:
             from_address=email_data.get("from_address"),
             body=email_data.get("body"),
             date=email_data.get("date"),
-            is_update_note=True
+            is_update_note=True,
         )
 
         try:

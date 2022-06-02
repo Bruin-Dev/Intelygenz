@@ -2,14 +2,13 @@ import logging
 from http import HTTPStatus
 from logging import Logger
 from typing import Callable
-from unittest.mock import Mock, ANY
+from unittest.mock import ANY, Mock
 
+from application.rpc import RpcFailedError, RpcLogger, RpcRequest, RpcResponse
+from application.rpc.subscribe_user_rpc import SUBSCRIPTION_TYPE, RequestBody, SubscribeUserRpc
 from asynctest import CoroutineMock
 from igz.packages.eventbus.eventbus import EventBus
-from pytest import mark, fixture, raises
-
-from application.rpc import RpcLogger, RpcResponse, RpcRequest, RpcFailedError
-from application.rpc.subscribe_user_rpc import SubscribeUserRpc, RequestBody, SUBSCRIPTION_TYPE
+from pytest import fixture, mark, raises
 
 
 class TestSubscribeUserRpc:
@@ -25,10 +24,12 @@ class TestSubscribeUserRpc:
         await rpc(ticket_id, user_email)
 
         # then
-        rpc.send.assert_awaited_once_with(RpcRequest.construct(
-            request_id=ANY,
-            body=RequestBody(ticket_id=ticket_id, user_email=user_email, subscription_type=SUBSCRIPTION_TYPE)
-        ))
+        rpc.send.assert_awaited_once_with(
+            RpcRequest.construct(
+                request_id=ANY,
+                body=RequestBody(ticket_id=ticket_id, user_email=user_email, subscription_type=SUBSCRIPTION_TYPE),
+            )
+        )
 
     @mark.asyncio
     async def ok_responses_are_properly_handled_test(self, make_subscribe_user_rpc):
@@ -39,8 +40,9 @@ class TestSubscribeUserRpc:
 
     @mark.asyncio
     async def forbidden_responses_are_properly_handled_test(self, make_subscribe_user_rpc):
-        forbidden_error = RpcFailedError(request=RpcRequest.construct(),
-                                         response=RpcResponse(status=HTTPStatus.FORBIDDEN))
+        forbidden_error = RpcFailedError(
+            request=RpcRequest.construct(), response=RpcResponse(status=HTTPStatus.FORBIDDEN)
+        )
 
         rpc = make_subscribe_user_rpc()
         rpc.send = CoroutineMock(side_effect=forbidden_error)
@@ -49,8 +51,9 @@ class TestSubscribeUserRpc:
 
     @mark.asyncio
     async def internal_service_error_responses_are_properly_handled_test(self, make_subscribe_user_rpc):
-        internal_server_error = RpcFailedError(request=RpcRequest.construct(),
-                                               response=RpcResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR))
+        internal_server_error = RpcFailedError(
+            request=RpcRequest.construct(), response=RpcResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR)
+        )
 
         rpc = make_subscribe_user_rpc()
         rpc.send = CoroutineMock(side_effect=internal_server_error)
@@ -59,8 +62,9 @@ class TestSubscribeUserRpc:
 
     @mark.asyncio
     async def other_error_responses_are_properly_raised_test(self, make_subscribe_user_rpc):
-        other_error = RpcFailedError(request=RpcRequest.construct(),
-                                     response=RpcResponse(status=HTTPStatus.BAD_REQUEST))
+        other_error = RpcFailedError(
+            request=RpcRequest.construct(), response=RpcResponse(status=HTTPStatus.BAD_REQUEST)
+        )
 
         rpc = make_subscribe_user_rpc()
         rpc.send = CoroutineMock(side_effect=other_error)

@@ -15,7 +15,6 @@ class LuminBillingTypes(Enum):
 
 
 class LuminBillingRepository:
-
     def __init__(self, logger, client: LuminBillingClient):
         self.logger = logger
         self.client = client
@@ -33,19 +32,13 @@ class LuminBillingRepository:
         ret = []
 
         while True:
-            self.logger.info("fetching billing data for {}".format({
-                "type": ",".join(billing_types),
-                "start": str(start),
-                "end": str(end),
-                "start_token": start_token
-            }))
-
-            body = await self.client.get_billing_data_for_period(
-                billing_types,
-                start,
-                end,
-                start_token
+            self.logger.info(
+                "fetching billing data for {}".format(
+                    {"type": ",".join(billing_types), "start": str(start), "end": str(end), "start_token": start_token}
+                )
             )
+
+            body = await self.client.get_billing_data_for_period(billing_types, start, end, start_token)
 
             ret.extend(body["items"])
 

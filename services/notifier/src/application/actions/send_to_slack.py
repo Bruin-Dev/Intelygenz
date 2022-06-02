@@ -2,7 +2,6 @@ from igz.packages.eventbus.eventbus import EventBus
 
 
 class SendToSlack:
-
     def __init__(self, config, event_bus: EventBus, slack_repository, logger):
         self._config = config
         self._event_bus = event_bus

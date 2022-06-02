@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 
 import argparse
-
-import requests
+import json
 import os
 import subprocess
 import tarfile
-import config
-import json
 from sys import exit
+
+import config
+import requests
 
 
 class PapertrailProvisioner:
@@ -25,14 +25,14 @@ class PapertrailProvisioner:
         file_download_directory = directory + filename
         print(f"Download papertrail cli in the directory {file_download_directory}")
         r = requests.get(self._papertrail_cli_donwload_url)
-        with open(file_download_directory, 'wb') as f:
+        with open(file_download_directory, "wb") as f:
             f.write(r.content)
         tar = tarfile.open(file_download_directory)
         tar_files = tar.getnames()
         if len(tar_files) > 0:
             files = tar_files
-            subprocess.call(['tar', '-zxf', file_download_directory, '-C', directory])
-            subprocess.call(['rm', '-f', file_download_directory])
+            subprocess.call(["tar", "-zxf", file_download_directory, "-C", directory])
+            subprocess.call(["rm", "-f", file_download_directory])
         else:
             exit(1)
         return files, directory
@@ -42,7 +42,7 @@ class PapertrailProvisioner:
         for file in files:
             file_to_delete = directory + file
             print(f"Deleting file {file_to_delete}")
-            subprocess.call(['rm', file_to_delete])
+            subprocess.call(["rm", file_to_delete])
 
     @staticmethod
     def _load_tag_data():
@@ -52,8 +52,8 @@ class PapertrailProvisioner:
         tag_data_dict = {}
         for element in data:
             try:
-                repository = element['repository']
-                image_tag = element['image_tag']
+                repository = element["repository"]
+                image_tag = element["image_tag"]
                 tag_data_dict[repository] = image_tag
             except KeyError:
                 continue
@@ -64,7 +64,7 @@ class PapertrailProvisioner:
         try:
             return self._tag_data[repository]
         except KeyError:
-            print(f'WARNING repository tag not found for: {repository}')
+            print(f"WARNING repository tag not found for: {repository}")
             return None
 
     def papertrail_provision(self):
@@ -75,36 +75,73 @@ class PapertrailProvisioner:
             papertrail_groups_config = self._papertrail_dashboard_config
             if len(papertrail_groups_config["groups"]) > 0:
                 for group in papertrail_groups_config["groups"]:
-                    group_name = group['group_name']
-                    wildcard = group['wildcard']
-                    destination_port = group['destination_port']
-                    system_type = group['system_type']
-                    is_alarm_group = group.get('alarms', False)
-                    is_notifications_group = group.get('notifications', False)
-                    for search in group['searches']:
-                        search_name = search['search_name']
-                        query = search['query']
+                    group_name = group["group_name"]
+                    wildcard = group["wildcard"]
+                    destination_port = group["destination_port"]
+                    system_type = group["system_type"]
+                    is_alarm_group = group.get("alarms", False)
+                    is_notifications_group = group.get("notifications", False)
+                    for search in group["searches"]:
+                        search_name = search["search_name"]
+                        query = search["query"]
                         if not is_alarm_group and not is_notifications_group:
                             if "repository" in search.keys():
-                                repository = search['repository']
+                                repository = search["repository"]
                                 build_number = self._get_build_number_query(repository)
                                 if not build_number:
                                     continue
-                                query = query.replace('<BUILD_NUMBER>', build_number)
-                            subprocess.call([papertrail_cli_exec, '-a', 'd', '-g', group_name, '-w', wildcard, '-S',
-                                             search_name, '-q', query, '-p', destination_port, '-t', system_type,
-                                             '--delete-only-searches', 'true'])
-                        subprocess.call([papertrail_cli_exec, '-a', 'c', '-g', group_name, '-w', wildcard, '-S',
-                                         search_name, '-q', query, '-p', destination_port, '-t', system_type])
+                                query = query.replace("<BUILD_NUMBER>", build_number)
+                            subprocess.call(
+                                [
+                                    papertrail_cli_exec,
+                                    "-a",
+                                    "d",
+                                    "-g",
+                                    group_name,
+                                    "-w",
+                                    wildcard,
+                                    "-S",
+                                    search_name,
+                                    "-q",
+                                    query,
+                                    "-p",
+                                    destination_port,
+                                    "-t",
+                                    system_type,
+                                    "--delete-only-searches",
+                                    "true",
+                                ]
+                            )
+                        subprocess.call(
+                            [
+                                papertrail_cli_exec,
+                                "-a",
+                                "c",
+                                "-g",
+                                group_name,
+                                "-w",
+                                wildcard,
+                                "-S",
+                                search_name,
+                                "-q",
+                                query,
+                                "-p",
+                                destination_port,
+                                "-t",
+                                system_type,
+                            ]
+                        )
             self._delete_files(go_papertrail_cli_files, directory)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-f', '--docker_images_file',
-                        type=str,
-                        help='Flag to indicate where is stored the file '
-                             'with information of docker images in ECR repositories',
-                        required=True)
+    parser.add_argument(
+        "-f",
+        "--docker_images_file",
+        type=str,
+        help="Flag to indicate where is stored the file " "with information of docker images in ECR repositories",
+        required=True,
+    )
     papertrail_provisioner = PapertrailProvisioner()
     papertrail_provisioner.papertrail_provision()

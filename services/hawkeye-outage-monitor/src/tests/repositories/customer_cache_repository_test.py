@@ -1,21 +1,16 @@
-from datetime import datetime
-from datetime import timedelta
-from unittest.mock import Mock
-from unittest.mock import patch
+from datetime import datetime, timedelta
+from unittest.mock import Mock, patch
 
 import pytest
-
-from asynctest import CoroutineMock
-from shortuuid import uuid
-
 from application import nats_error_response
 from application.repositories import customer_cache_repository as customer_cache_repository_module
 from application.repositories.customer_cache_repository import CustomerCacheRepository
+from asynctest import CoroutineMock
 from config import testconfig
-
+from shortuuid import uuid
 
 uuid_ = uuid()
-uuid_mock = patch.object(customer_cache_repository_module, 'uuid', return_value=uuid_)
+uuid_mock = patch.object(customer_cache_repository_module, "uuid", return_value=uuid_)
 
 
 class TestCustomerCacheRepository:
@@ -34,12 +29,12 @@ class TestCustomerCacheRepository:
     @pytest.mark.asyncio
     async def get_cache_with_no_filters_specified_test(self):
         request = {
-            'request_id': uuid_,
-            'body': {},
+            "request_id": uuid_,
+            "body": {},
         }
         response = {
-            'request_id': uuid_,
-            'body': [
+            "request_id": uuid_,
+            "body": [
                 {
                     "serial_number": "B827EB76A8DE",
                     "last_contact": "2020-01-16T14:59:56.245Z",
@@ -49,7 +44,7 @@ class TestCustomerCacheRepository:
                     },
                 }
             ],
-            'status': 200,
+            "status": 200,
         }
 
         logger = Mock()
@@ -69,17 +64,17 @@ class TestCustomerCacheRepository:
 
     @pytest.mark.asyncio
     async def get_cache_with_custom_filters_specified_test(self):
-        last_contact_filter = '2020-01-16T14:50:00.000Z'
+        last_contact_filter = "2020-01-16T14:50:00.000Z"
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'last_contact_filter': last_contact_filter,
+            "request_id": uuid_,
+            "body": {
+                "last_contact_filter": last_contact_filter,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': [
+            "request_id": uuid_,
+            "body": [
                 {
                     "serial_number": "B827EB76A8DE",
                     "last_contact": "2020-01-16T14:59:56.245Z",
@@ -89,7 +84,7 @@ class TestCustomerCacheRepository:
                     },
                 }
             ],
-            'status': 200,
+            "status": 200,
         }
 
         logger = Mock()
@@ -110,8 +105,8 @@ class TestCustomerCacheRepository:
     @pytest.mark.asyncio
     async def get_cache_with_rpc_request_failing_test(self):
         request = {
-            'request_id': uuid_,
-            'body': {},
+            "request_id": uuid_,
+            "body": {},
         }
 
         logger = Mock()
@@ -136,15 +131,15 @@ class TestCustomerCacheRepository:
     @pytest.mark.asyncio
     async def get_cache_with_rpc_request_returning_202_status_test(self):
         request = {
-            'request_id': uuid_,
-            'body': {},
+            "request_id": uuid_,
+            "body": {},
         }
 
-        response_msg = 'Cache is still being built'
+        response_msg = "Cache is still being built"
         response = {
-            'request_id': uuid_,
-            'body': response_msg,
-            'status': 202,
+            "request_id": uuid_,
+            "body": response_msg,
+            "status": 202,
         }
 
         logger = Mock()
@@ -169,15 +164,15 @@ class TestCustomerCacheRepository:
     @pytest.mark.asyncio
     async def get_cache_with_rpc_request_returning_non_2xx_status_test(self):
         request = {
-            'request_id': uuid_,
-            'body': {},
+            "request_id": uuid_,
+            "body": {},
         }
 
-        response_msg = 'No devices were found for the specified filters'
+        response_msg = "No devices were found for the specified filters"
         response = {
-            'request_id': uuid_,
-            'body': response_msg,
-            'status': 404,
+            "request_id": uuid_,
+            "body": response_msg,
+            "status": 404,
         }
 
         logger = Mock()
@@ -214,7 +209,7 @@ class TestCustomerCacheRepository:
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
-        with patch.object(customer_cache_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(customer_cache_repository_module, "datetime", new=datetime_mock):
             with uuid_mock:
                 await customer_cache_repository.get_cache_for_outage_monitoring()
 

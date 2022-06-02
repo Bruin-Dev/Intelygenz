@@ -18,6 +18,6 @@ class PredictedTagsRepository:
             "email_id": email_id,
             "tag_id": tag_id,
             "tag_probability": tag_probability,
-         }
+        }
         self._storage_repository.save(key, new_pred)
         self._storage_repository.expire(key, seconds=300)

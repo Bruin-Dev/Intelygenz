@@ -1,11 +1,10 @@
 from enum import Enum, auto
 from typing import List, Set
 
+from application.domain.asset import AssetId
+from application.rpc import Rpc, RpcError, RpcFailedError
 from dataclasses import dataclass, field
 from pydantic import BaseModel, Field
-
-from application.domain.asset import AssetId
-from application.rpc import Rpc, RpcFailedError, RpcError
 
 NATS_TOPIC = "bruin.ticket.creation.outage.request"
 BRUIN_UPDATED_STATUS = [409, 471, 472, 473]
@@ -18,7 +17,7 @@ MULTIPLE_CLIENTS_MSG = "Multiple client ids found"
 class UpsertOutageTicketRpc(Rpc):
     topic: str = field(init=False, default=NATS_TOPIC)
 
-    async def __call__(self, asset_ids: List[AssetId], contact_email: str) -> 'UpsertedTicket':
+    async def __call__(self, asset_ids: List[AssetId], contact_email: str) -> "UpsertedTicket":
         request, logger = self.start()
         logger.debug(f"__call__(asset_ids={asset_ids}, contact_email=**)")
 
@@ -31,10 +30,12 @@ class UpsertOutageTicketRpc(Rpc):
 
         client_id = client_ids.pop()
         service_numbers = {asset_id.service_number for asset_id in asset_ids}
-        request.body = RequestBody(client_id=client_id,
-                                   # There is no typo here, the NATS API expects a service_number parameter
-                                   service_number=service_numbers,
-                                   ticket_contact=TicketContact(email=contact_email))
+        request.body = RequestBody(
+            client_id=client_id,
+            # There is no typo here, the NATS API expects a service_number parameter
+            service_number=service_numbers,
+            ticket_contact=TicketContact(email=contact_email),
+        )
 
         try:
             response = await self.send(request)
@@ -57,7 +58,7 @@ class UpsertOutageTicketRpc(Rpc):
 class RequestBody(BaseModel):
     client_id: str
     service_number: Set[str]
-    ticket_contact: 'TicketContact'
+    ticket_contact: "TicketContact"
 
 
 class TicketContact(BaseModel):
@@ -65,7 +66,7 @@ class TicketContact(BaseModel):
 
 
 class UpsertedTicket(BaseModel):
-    status: 'UpsertedStatus'
+    status: "UpsertedStatus"
     ticket_id: str
 
 

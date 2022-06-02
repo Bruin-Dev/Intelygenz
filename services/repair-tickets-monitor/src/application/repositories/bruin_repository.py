@@ -2,10 +2,9 @@ from datetime import datetime
 from typing import Any, Dict, List, Tuple
 
 import humps
-from shortuuid import uuid
-from tenacity import retry, wait_exponential, stop_after_delay
-
 from application.repositories import nats_error_response
+from shortuuid import uuid
+from tenacity import retry, stop_after_delay, wait_exponential
 
 
 class BruinRepository:
@@ -26,7 +25,7 @@ class BruinRepository:
         )
         async def get_single_ticket_basic_info():
             request_id = uuid()
-            self._logger.info('request_id=%s ticket_id=%s Getting ticket basic info', request_id, ticket_id)
+            self._logger.info("request_id=%s ticket_id=%s Getting ticket basic info", request_id, ticket_id)
             request_msg = {
                 "request_id": request_id,
                 "body": {
@@ -43,7 +42,7 @@ class BruinRepository:
                 err_msg = "request_id=%s ticket_id=%s Exception occurred when getting basic info from Bruin: %s" % (
                     request_id,
                     ticket_id,
-                    exception
+                    exception,
                 )
                 response = nats_error_response
                 self._logger.error(err_msg)
@@ -72,9 +71,8 @@ class BruinRepository:
                 "creation_date": response_body["createDate"],
             }
             self._logger.info(
-                "request_id=%s ticket_id=%s Basic info for ticket retrieved from Bruin",
-                request_id,
-                ticket_id)
+                "request_id=%s ticket_id=%s Basic info for ticket retrieved from Bruin", request_id, ticket_id
+            )
 
             return response
 

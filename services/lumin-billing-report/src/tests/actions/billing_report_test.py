@@ -1,18 +1,15 @@
-from datetime import datetime, date, timedelta
+from datetime import date, datetime, timedelta
 from unittest.mock import Mock, patch
 
 import pytest
-
+from application.actions import billing_report as alert_module
+from application.actions.billing_report import BillingReport
+from application.repositories.template_renderer import TemplateRenderer
 from apscheduler.events import EVENT_JOB_ERROR, JobExecutionEvent
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
-from pytz import timezone
-
-from application.actions import billing_report as alert_module
-from application.actions.billing_report import BillingReport
 from config.testconfig import BILLING_REPORT_CONFIG
-
-from application.repositories.template_renderer import TemplateRenderer
+from pytz import timezone
 
 
 @pytest.fixture
@@ -24,7 +21,7 @@ def lumin_repo_responses():
             "host_id": "default",
             "id": "MDAwMDAwMDAwMDAwMDAwMDYyODQwNTU1NDQ4NTY1NzY=",
             "timestamp": "2019-02-24T21:29:36.798081+00:00",
-            "type": "billing.scheduled"
+            "type": "billing.scheduled",
         },
         {
             "conversation_id": "5711381785477120",
@@ -32,7 +29,7 @@ def lumin_repo_responses():
             "host_id": "default",
             "id": "MDAwMDAwMDAwMDAwMDAwMDYzMDY4ODc1OTEwMDIxMTI=",
             "timestamp": "2019-02-24T21:36:01.295808+00:00",
-            "type": "billing.scheduled"
+            "type": "billing.scheduled",
         },
         {
             "conversation_id": "5735605401026560",
@@ -40,7 +37,7 @@ def lumin_repo_responses():
             "host_id": "default",
             "id": "MDAwMDAwMDAwMDAwMDAwMDYyODQwNTU1NDQ4NTY1NzY=",
             "timestamp": "2019-02-24T21:29:36.798081+00:00",
-            "type": "billing.rescheduled"
+            "type": "billing.rescheduled",
         },
         {
             "conversation_id": "5711381785477120",
@@ -48,8 +45,8 @@ def lumin_repo_responses():
             "host_id": "default",
             "id": "MDAwMDAwMDAwMDAwMDAwMDYzMDY4ODc1OTEwMDIxMTI=",
             "timestamp": "2019-02-24T21:36:01.295808+00:00",
-            "type": "billing.rescheduled"
-        }
+            "type": "billing.rescheduled",
+        },
     ]
 
 
@@ -63,29 +60,22 @@ def summary():
         "dates": {
             "current": today.strftime(BILLING_REPORT_CONFIG["date_format"]),
             "start": first.strftime(BILLING_REPORT_CONFIG["date_format"]),
-            "end": last.strftime(BILLING_REPORT_CONFIG["date_format"])
+            "end": last.strftime(BILLING_REPORT_CONFIG["date_format"]),
         },
         "customer": BILLING_REPORT_CONFIG["customer_name"],
         "total_api_uses": 4,
-        "type_counts": {
-            "billing.scheduled": 2,
-            "billing.rescheduled": 2
-        }
+        "type_counts": {"billing.scheduled": 2, "billing.rescheduled": 2},
     }
 
 
 class TestBillingReport:
-
     def instance_test(self):
         email_client = Mock()
         lumin_repo = Mock()
         templ = TemplateRenderer(BILLING_REPORT_CONFIG)
         scheduler = Mock()
 
-        opts = {
-            "logger": Mock(),
-            "config": BILLING_REPORT_CONFIG
-        }
+        opts = {"logger": Mock(), "config": BILLING_REPORT_CONFIG}
 
         report = BillingReport(lumin_repo, email_client, templ, scheduler, **opts)
 
@@ -96,10 +86,7 @@ class TestBillingReport:
         assert report._config is opts["config"]
 
     def start_billing_report_job_with_exec_on_start_test(self):
-        opts = {
-            "logger": Mock(),
-            "config": BILLING_REPORT_CONFIG
-        }
+        opts = {"logger": Mock(), "config": BILLING_REPORT_CONFIG}
 
         email_client = Mock()
         lumin_repo = Mock()
@@ -111,23 +98,22 @@ class TestBillingReport:
         next_run_time = datetime.now()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
-        with patch.object(alert_module, 'datetime', new=datetime_mock):
-            with patch.object(alert_module, 'timezone', new=Mock()):
+        with patch.object(alert_module, "datetime", new=datetime_mock):
+            with patch.object(alert_module, "timezone", new=Mock()):
                 report.start_billing_report_job(exec_on_start=True)
 
         scheduler.add_job.assert_called_once_with(
-            report._billing_report_process, 'cron',
-            day=1, misfire_grace_time=86400,
+            report._billing_report_process,
+            "cron",
+            day=1,
+            misfire_grace_time=86400,
             next_run_time=next_run_time,
             replace_existing=True,
-            id='_billing_report_process',
+            id="_billing_report_process",
         )
 
     def start_billing_report_job_with_no_exec_on_start_test(self):
-        opts = {
-            "logger": Mock(),
-            "config": BILLING_REPORT_CONFIG
-        }
+        opts = {"logger": Mock(), "config": BILLING_REPORT_CONFIG}
 
         email_client = Mock()
         lumin_repo = Mock()
@@ -138,18 +124,17 @@ class TestBillingReport:
         report.start_billing_report_job(exec_on_start=False)
 
         scheduler.add_job.assert_called_once_with(
-            report._billing_report_process, 'cron',
-            day=1, misfire_grace_time=86400,
+            report._billing_report_process,
+            "cron",
+            day=1,
+            misfire_grace_time=86400,
             next_run_time=undefined,
             replace_existing=True,
-            id='_billing_report_process',
+            id="_billing_report_process",
         )
 
     def register_error_handler_test(self):
-        opts = {
-            "logger": Mock(),
-            "config": BILLING_REPORT_CONFIG
-        }
+        opts = {"logger": Mock(), "config": BILLING_REPORT_CONFIG}
 
         email_client = Mock()
         lumin_repo = Mock()
@@ -164,10 +149,7 @@ class TestBillingReport:
     def event_listener_test(self):
         logger = Mock()
 
-        opts = {
-            "logger": logger,
-            "config": BILLING_REPORT_CONFIG
-        }
+        opts = {"logger": logger, "config": BILLING_REPORT_CONFIG}
 
         email_client = Mock()
         lumin_repo = Mock()
@@ -181,12 +163,12 @@ class TestBillingReport:
             job_id=report.JOB_ID,
             jobstore=None,
             scheduled_run_time=None,
-            exception=Exception("Test exception")
+            exception=Exception("Test exception"),
         )
 
         report._event_listener(mock_event)
 
-        logger.exception.assert_called_with('Execution failed for billing report', mock_event.exception)
+        logger.exception.assert_called_with("Execution failed for billing report", mock_event.exception)
         logger.exception.reset_mock()
 
         mock_event.job_id = "foo"
@@ -197,7 +179,7 @@ class TestBillingReport:
 
     @pytest.mark.asyncio
     async def billing_process_test(self, lumin_repo_responses, summary):
-        email_contents = {'email': "<div>Some email</div>"}
+        email_contents = {"email": "<div>Some email</div>"}
 
         email_client = Mock()
         email_client.send_to_email = CoroutineMock()
@@ -207,10 +189,7 @@ class TestBillingReport:
         templ = Mock()
         templ.compose_email_object = Mock(return_value=email_contents)
 
-        opts = {
-            "logger": Mock(),
-            "config": BILLING_REPORT_CONFIG
-        }
+        opts = {"logger": Mock(), "config": BILLING_REPORT_CONFIG}
 
         report = BillingReport(lumin_repo, email_client, templ, scheduler, **opts)
 

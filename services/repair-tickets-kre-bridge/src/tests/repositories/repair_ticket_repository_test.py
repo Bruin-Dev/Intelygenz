@@ -1,13 +1,11 @@
 from unittest.mock import Mock
-from asynctest import CoroutineMock
 
 import pytest
-
 from application.repositories.repair_ticket_repository import RepairTicketRepository
+from asynctest import CoroutineMock
 
 
 class TestRepairTicketRepository:
-
     def instance_test(self):
         logger = Mock()
         client = Mock()
@@ -32,10 +30,7 @@ class TestRepairTicketRepository:
 
     @pytest.mark.asyncio
     async def get_email_inference__not_200_from_client_test(self, valid_inference_request):
-        expected_response = {
-            "body": "Error from get_email_inference client",
-            "status": 500
-        }
+        expected_response = {"body": "Error from get_email_inference client", "status": 500}
 
         logger = Mock()
         kre_client = Mock()
@@ -62,10 +57,7 @@ class TestRepairTicketRepository:
 
     @pytest.mark.asyncio
     async def save_outputs__not_2xx_test(self, valid_output_request):
-        expected_response = {
-            "body": "Error response",
-            "status": 500
-        }
+        expected_response = {"body": "Error response", "status": 500}
         logger = Mock()
         kre_client = Mock()
         kre_client.save_outputs = CoroutineMock(return_value=expected_response)
@@ -90,10 +82,7 @@ class TestRepairTicketRepository:
 
     @pytest.mark.asyncio
     async def save_created_ticket__not_2xx_test(self, valid_created_ticket_request):
-        expected_response = {
-            "body": "Error response",
-            "status": 500
-        }
+        expected_response = {"body": "Error response", "status": 500}
 
         logger = Mock()
         kre_client = Mock()
@@ -121,10 +110,7 @@ class TestRepairTicketRepository:
 
     @pytest.mark.asyncio
     async def save_closed_ticket__not_2xx_test(self, valid_closed_ticket_request__resolved):
-        expected_response = {
-            "body": "Error response",
-            "status": 500
-        }
+        expected_response = {"body": "Error response", "status": 500}
 
         logger = Mock()
         kre_client = Mock()

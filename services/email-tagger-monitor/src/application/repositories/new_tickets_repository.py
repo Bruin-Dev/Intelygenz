@@ -11,14 +11,15 @@ class NewTicketsRepository:
     def validate_ticket(self, ticket: dict) -> bool:
         if not ticket:
             return False
-        elif 'email' not in ticket or not ticket['email'] or 'ticket' not in ticket or not ticket['ticket']:
+        elif "email" not in ticket or not ticket["email"] or "ticket" not in ticket or not ticket["ticket"]:
             return False
-        elif 'email' not in ticket['email'] or not ticket['email']['email']:
+        elif "email" not in ticket["email"] or not ticket["email"]["email"]:
             return False
-        elif ('email_id' not in ticket['email']['email'] or not ticket['email']['email']['email_id']) or (
-                'client_id' not in ticket['email']['email'] or not ticket['email']['email']['client_id']):
+        elif ("email_id" not in ticket["email"]["email"] or not ticket["email"]["email"]["email_id"]) or (
+            "client_id" not in ticket["email"]["email"] or not ticket["email"]["email"]["client_id"]
+        ):
             return False
-        elif 'ticket_id' not in ticket['ticket'] or not ticket['ticket']['ticket_id']:
+        elif "ticket_id" not in ticket["ticket"] or not ticket["ticket"]["ticket_id"]:
             return False
 
         return True
@@ -57,8 +58,8 @@ class NewTicketsRepository:
         self._storage_repository.remove(key)
 
     def save_new_ticket(self, email_data: dict, ticket_data: dict):
-        email_id = email_data['email']['email_id']
-        ticket_id = ticket_data['ticket_id']
+        email_id = email_data["email"]["email_id"]
+        ticket_id = ticket_data["ticket_id"]
         self._logger.info(f"adding email data '{email_id}' and '{ticket_id}'")
         key = f"ticket_{email_id}_{ticket_id}"
         self._storage_repository.save(key, {"email": email_data, "ticket": ticket_data})

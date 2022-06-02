@@ -1,6 +1,5 @@
-from shortuuid import uuid
-
 from application.repositories import nats_error_response
+from shortuuid import uuid
 
 
 class T7Repository:
@@ -14,30 +13,26 @@ class T7Repository:
         err_msg = None
 
         request = {
-            'request_id': uuid(),
-            'body': {
-                'ticket_id': ticket_id,
-                'ticket_rows': ticket_rows
-
-            },
+            "request_id": uuid(),
+            "body": {"ticket_id": ticket_id, "ticket_rows": ticket_rows},
         }
 
         try:
-            self._logger.info(f'Posting metrics for ticket {ticket_id} to T7...')
+            self._logger.info(f"Posting metrics for ticket {ticket_id} to T7...")
             response = await self._event_bus.rpc_request("t7.automation.metrics", request, timeout=60)
-            self._logger.info(f'Metrics posted for ticket {ticket_id}!')
+            self._logger.info(f"Metrics posted for ticket {ticket_id}!")
         except Exception as e:
-            err_msg = f'An error occurred when posting metrics for ticket {ticket_id} to T7. Error: {e}'
+            err_msg = f"An error occurred when posting metrics for ticket {ticket_id} to T7. Error: {e}"
             response = nats_error_response
         else:
-            response_body = response['body']
-            response_status = response['status']
+            response_body = response["body"]
+            response_status = response["status"]
 
             if response_status not in range(200, 300):
                 err_msg = (
-                    f'Error when posting metrics for ticket {ticket_id} to T7 in '
-                    f'{self._config.ENVIRONMENT_NAME.upper()} '
-                    f'environment. Error: Error {response_status} - {response_body}'
+                    f"Error when posting metrics for ticket {ticket_id} to T7 in "
+                    f"{self._config.ENVIRONMENT_NAME.upper()} "
+                    f"environment. Error: Error {response_status} - {response_body}"
                 )
 
         if err_msg:
@@ -47,8 +42,12 @@ class T7Repository:
         return response
 
     def tnba_note_in_task_history(self, task_history):
-        task_history_tnba_filter = [task for task in task_history if task["Notes"] is not None
-                                    if ("TNBA" in task["Notes"] or "AI" in task["Notes"])]
+        task_history_tnba_filter = [
+            task
+            for task in task_history
+            if task["Notes"] is not None
+            if ("TNBA" in task["Notes"] or "AI" in task["Notes"])
+        ]
         if len(task_history_tnba_filter) > 0:
             return True
 

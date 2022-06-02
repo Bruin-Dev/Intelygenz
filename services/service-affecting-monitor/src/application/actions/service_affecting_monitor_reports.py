@@ -3,15 +3,22 @@ from datetime import datetime, timedelta
 from typing import Set
 
 from apscheduler.triggers.cron import CronTrigger
-from pytz import timezone
-
 from igz.packages.eventbus.eventbus import EventBus
+from pytz import timezone
 
 
 class ServiceAffectingMonitorReports:
-
-    def __init__(self, event_bus: EventBus, logger, scheduler, config, template_repository, bruin_repository,
-                 notifications_repository, customer_cache_repository):
+    def __init__(
+        self,
+        event_bus: EventBus,
+        logger,
+        scheduler,
+        config,
+        template_repository,
+        bruin_repository,
+        notifications_repository,
+        customer_cache_repository,
+    ):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
@@ -27,37 +34,37 @@ class ServiceAffectingMonitorReports:
     async def monitor_reports(self):
         self.__reset_state()
         customer_cache_response = await self._customer_cache_repository.get_cache_for_affecting_monitoring()
-        self._customer_cache: list = customer_cache_response['body']
+        self._customer_cache: list = customer_cache_response["body"]
         if not self._customer_cache:
-            err_msg = '[service-affecting-monitor-reports] Got an empty customer cache. Process cannot keep going.'
+            err_msg = "[service-affecting-monitor-reports] Got an empty customer cache. Process cannot keep going."
             self._logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
             return
-        self._clients_id: Set[int] = set(edge['bruin_client_info']['client_id'] for edge in self._customer_cache)
+        self._clients_id: Set[int] = set(edge["bruin_client_info"]["client_id"] for edge in self._customer_cache)
         self._cached_info_by_serial = {
-            cached_info['serial_number']: cached_info
-            for cached_info in self._customer_cache
+            cached_info["serial_number"]: cached_info for cached_info in self._customer_cache
         }
 
         end_date = datetime.utcnow()
-        start_date = end_date - timedelta(days=self._config.MONITOR_REPORT_CONFIG['trailing_days'])
+        start_date = end_date - timedelta(days=self._config.MONITOR_REPORT_CONFIG["trailing_days"])
         start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
         start_date_str = start_date.strftime(self._ISO_8601_FORMAT_UTC)
         end_date_str = end_date.strftime(self._ISO_8601_FORMAT_UTC)
         for client_id in self._clients_id:
-            tickets = await self._bruin_repository.get_affecting_ticket_for_report(client_id,
-                                                                                   start_date_str,
-                                                                                   end_date_str)
+            tickets = await self._bruin_repository.get_affecting_ticket_for_report(
+                client_id, start_date_str, end_date_str
+            )
             if not tickets:
-                err_msg = \
-                    f"[service-affecting-monitor-reports] Reports could not be generated for client: {client_id}. " \
+                err_msg = (
+                    f"[service-affecting-monitor-reports] Reports could not be generated for client: {client_id}. "
                     f"No tickets were found."
+                )
                 self._logger.error(err_msg)
                 await self._notifications_repository.send_slack_message(err_msg)
                 continue
             self._affecting_tickets_per_client[client_id] = tickets
         if not self._affecting_tickets_per_client:
-            err_msg = '[service-affecting-monitor-reports] No tickets available at any customer.'
+            err_msg = "[service-affecting-monitor-reports] No tickets available at any customer."
             self._logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
             return
@@ -70,27 +77,27 @@ class ServiceAffectingMonitorReports:
         self._cached_info_by_serial = {}
 
     async def start_service_affecting_monitor_reports_job(self, exec_on_start=False):
-        self._logger.info(f'Scheduled task: service affecting monitor reports')
+        self._logger.info(f"Scheduled task: service affecting monitor reports")
 
         if exec_on_start:
             await self.monitor_reports()
 
         tz = self._config.TIMEZONE
-        cron = CronTrigger.from_crontab(self._config.MONITOR_REPORT_CONFIG['crontab'], timezone=timezone(tz))
-        self._scheduler.add_job(self.monitor_reports, cron, id=f'_monitor_reports', replace_existing=True)
+        cron = CronTrigger.from_crontab(self._config.MONITOR_REPORT_CONFIG["crontab"], timezone=timezone(tz))
+        self._scheduler.add_job(self.monitor_reports, cron, id=f"_monitor_reports", replace_existing=True)
 
     async def _service_affecting_monitor_report(self):
         self._logger.info(f"Generating all reports for {len(self._affecting_tickets_per_client)} Bruin clients...")
 
         start = datetime.now()
-        serial_numbers: Set[str] = set(edge['serial_number'] for edge in self._customer_cache)
-        active_reports = self._config.MONITOR_REPORT_CONFIG['active_reports']
+        serial_numbers: Set[str] = set(edge["serial_number"] for edge in self._customer_cache)
+        active_reports = self._config.MONITOR_REPORT_CONFIG["active_reports"]
         client_name_by_id = {
-            edge['bruin_client_info']['client_id']: edge['bruin_client_info']['client_name']
+            edge["bruin_client_info"]["client_id"]: edge["bruin_client_info"]["client_name"]
             for edge in self._customer_cache
         }
 
-        threshold = self._config.MONITOR_REPORT_CONFIG['threshold']
+        threshold = self._config.MONITOR_REPORT_CONFIG["threshold"]
         for client_id, affecting_tickets in self._affecting_tickets_per_client.items():
             await asyncio.sleep(0)
 
@@ -98,35 +105,35 @@ class ServiceAffectingMonitorReports:
             ticket_details = self._bruin_repository.transform_tickets_into_ticket_details(affecting_tickets)
 
             filtered_ticket_details = self._bruin_repository.filter_ticket_details_by_serials(
-                ticket_details,
-                serial_numbers)
+                ticket_details, serial_numbers
+            )
 
             filtered_ticket_details = self._bruin_repository.filter_trouble_notes_in_ticket_details(
-                filtered_ticket_details,
-                active_reports)
+                filtered_ticket_details, active_reports
+            )
 
-            ticket_details_by_serial = self._bruin_repository.group_ticket_details_by_serial(
-                filtered_ticket_details)
-            report_list = self._bruin_repository.prepare_items_for_monitor_report(ticket_details_by_serial,
-                                                                                  self._cached_info_by_serial)
+            ticket_details_by_serial = self._bruin_repository.group_ticket_details_by_serial(filtered_ticket_details)
+            report_list = self._bruin_repository.prepare_items_for_monitor_report(
+                ticket_details_by_serial, self._cached_info_by_serial
+            )
 
-            final_report_list = self._bruin_repository.filter_trouble_reports(active_reports=active_reports,
-                                                                              report_list=report_list,
-                                                                              threshold=threshold)
-            final_report_list.sort(key=lambda item: item['serial_number'])
+            final_report_list = self._bruin_repository.filter_trouble_reports(
+                active_reports=active_reports, report_list=report_list, threshold=threshold
+            )
+            final_report_list.sort(key=lambda item: item["serial_number"])
 
             if not final_report_list:
                 self._logger.info(
-                    f"No report for client {client_id} will be sent as there is no info "
-                    f"to put in the report"
+                    f"No report for client {client_id} will be sent as there is no info " f"to put in the report"
                 )
                 continue
 
             working_environment = self._config.CURRENT_ENVIRONMENT
-            if working_environment != 'production':
+            if working_environment != "production":
                 self._logger.info(
                     f"No report for client {client_id} will be sent as the current environment is "
-                    f"{working_environment.upper()}")
+                    f"{working_environment.upper()}"
+                )
                 continue
 
             email = self._template_repository.compose_monitor_report_email(
@@ -142,4 +149,5 @@ class ServiceAffectingMonitorReports:
             end = datetime.now()
             self._logger.info(
                 f"[service-affecting-monitor-reports] Reports generation for client {client_id} finished. "
-                f"Took {round((end - start).total_seconds() / 60, 2)} minutes.")
+                f"Took {round((end - start).total_seconds() / 60, 2)} minutes."
+            )

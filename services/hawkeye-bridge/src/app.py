@@ -1,25 +1,21 @@
 import asyncio
 
 import redis
-from prometheus_client import start_http_server
-
+from application.actions.get_probes import GetProbes
+from application.actions.get_test_results import GetTestResults
+from application.clients.hawkeye_client import HawkeyeClient
+from application.repositories.hawkeye_repository import HawkeyeRepository
+from config import config
 from igz.packages.eventbus.action import ActionWrapper
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
-
-from application.repositories.hawkeye_repository import HawkeyeRepository
-from application.clients.hawkeye_client import HawkeyeClient
-from application.actions.get_probes import GetProbes
-from application.actions.get_test_results import GetTestResults
-
-from config import config
+from prometheus_client import start_http_server
 
 
 class Container:
-
     def __init__(self):
         self._logger = LoggerClient(config).get_logger()
         self._logger.info("Hawkeye bridge starting...")
@@ -45,12 +41,14 @@ class Container:
         self._event_bus.set_producer(self._publisher)
 
         self._get_probes = GetProbes(self._logger, config.HAWKEYE_CONFIG, self._event_bus, self._hawkeye_repository)
-        self._get_test_results = GetTestResults(self._logger, config.HAWKEYE_CONFIG, self._event_bus,
-                                                self._hawkeye_repository)
+        self._get_test_results = GetTestResults(
+            self._logger, config.HAWKEYE_CONFIG, self._event_bus, self._hawkeye_repository
+        )
 
         self._report_hawkeye_probe = ActionWrapper(self._get_probes, "get_probes", is_async=True, logger=self._logger)
-        self._get_test_results_w = ActionWrapper(self._get_test_results, "get_test_results", is_async=True,
-                                                 logger=self._logger)
+        self._get_test_results_w = ActionWrapper(
+            self._get_test_results, "get_test_results", is_async=True, logger=self._logger
+        )
 
         self._server = QuartServer(config)
 
@@ -59,22 +57,28 @@ class Container:
 
         await self._event_bus.connect()
         await self._hawkeye_client.login()
-        await self._event_bus.subscribe_consumer(consumer_name="probes", topic="hawkeye.probe.request",
-                                                 action_wrapper=self._report_hawkeye_probe,
-                                                 queue="hawkeye_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="test_results", topic="hawkeye.test.request",
-                                                 action_wrapper=self._get_test_results_w,
-                                                 queue="hawkeye_bridge")
+        await self._event_bus.subscribe_consumer(
+            consumer_name="probes",
+            topic="hawkeye.probe.request",
+            action_wrapper=self._report_hawkeye_probe,
+            queue="hawkeye_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="test_results",
+            topic="hawkeye.test.request",
+            action_wrapper=self._get_test_results_w,
+            queue="hawkeye_bridge",
+        )
 
     @staticmethod
     def _start_prometheus_metrics_server():
-        start_http_server(config.METRICS_SERVER_CONFIG['port'])
+        start_http_server(config.METRICS_SERVER_CONFIG["port"])
 
     async def start_server(self):
         await self._server.run_server()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     container = Container()
     loop = asyncio.get_event_loop()
     asyncio.ensure_future(container.start(), loop=loop)

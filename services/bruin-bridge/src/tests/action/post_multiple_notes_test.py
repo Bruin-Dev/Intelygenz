@@ -1,13 +1,11 @@
 from unittest.mock import Mock
 
 import pytest
-from asynctest import CoroutineMock
-
 from application.actions.post_multiple_notes import PostMultipleNotes
+from asynctest import CoroutineMock
 
 
 class TestPostMultipleNotes:
-
     def instance_test(self):
         logger = Mock()
         event_bus = Mock()
@@ -24,12 +22,12 @@ class TestPostMultipleNotes:
         ticket_id = 12345
         notes = [
             {
-                'text': 'Test note 1',
-                'service_number': 'VC1234567',
+                "text": "Test note 1",
+                "service_number": "VC1234567",
             },
             {
-                'text': 'Test note 2',
-                'detail_id': 999,
+                "text": "Test note 2",
+                "detail_id": 999,
             },
         ]
         response_topic = "some.topic"
@@ -37,8 +35,8 @@ class TestPostMultipleNotes:
         request = {
             "request_id": request_id,
             "body": {
-                'ticket_id': ticket_id,
-                'notes': notes,
+                "ticket_id": ticket_id,
+                "notes": notes,
             },
             "response_topic": response_topic,
         }
@@ -46,22 +44,22 @@ class TestPostMultipleNotes:
         post_multiple_notes_response = {
             "body": [
                 {
-                  "noteID": 70646090,
-                  "noteType": "ADN",
-                  "noteValue": "Test note 1",
-                  "actionID": None,
-                  "detailID": 5002307,
-                  "enteredBy": 442301,
-                  "enteredDate": "2020-05-20T06:00:38.803-04:00",
-                  "lastViewedBy": None,
-                  "lastViewedDate": None,
-                  "refNoteID": None,
-                  "noteStatus": None,
-                  "noteText": None,
-                  "childNotes": None,
-                  "documents": None,
-                  "alerts": None,
-                  "taggedUserDirIDs": None,
+                    "noteID": 70646090,
+                    "noteType": "ADN",
+                    "noteValue": "Test note 1",
+                    "actionID": None,
+                    "detailID": 5002307,
+                    "enteredBy": 442301,
+                    "enteredDate": "2020-05-20T06:00:38.803-04:00",
+                    "lastViewedBy": None,
+                    "lastViewedDate": None,
+                    "refNoteID": None,
+                    "noteStatus": None,
+                    "noteText": None,
+                    "childNotes": None,
+                    "documents": None,
+                    "alerts": None,
+                    "taggedUserDirIDs": None,
                 },
                 {
                     "noteID": 70646091,
@@ -85,7 +83,7 @@ class TestPostMultipleNotes:
             "status": 200,
         }
         event_bus_response = {
-            'request_id': request_id,
+            "request_id": request_id,
             **post_multiple_notes_response,
         }
 
@@ -114,9 +112,9 @@ class TestPostMultipleNotes:
         }
 
         event_bus_response = {
-            'request_id': request_id,
-            'body': 'Must include "body" in request',
-            'status': 400,
+            "request_id": request_id,
+            "body": 'Must include "body" in request',
+            "status": 400,
         }
 
         logger = Mock()
@@ -138,12 +136,12 @@ class TestPostMultipleNotes:
     async def post_multiple_notes_with_mandatory_keys_missing_in_body_test(self):
         notes = [
             {
-                'text': 'Test note 1',
-                'service_number': 'VC1234567',
+                "text": "Test note 1",
+                "service_number": "VC1234567",
             },
             {
-                'text': 'Test note 2',
-                'detail_id': 999,
+                "text": "Test note 2",
+                "detail_id": 999,
             },
         ]
         response_topic = "some.topic"
@@ -151,15 +149,15 @@ class TestPostMultipleNotes:
         request = {
             "request_id": request_id,
             "body": {
-                'notes': notes,
+                "notes": notes,
             },
             "response_topic": response_topic,
         }
 
         event_bus_response = {
-            'request_id': request_id,
-            'body': 'You must include "ticket_id" and "notes" in the body of the request',
-            'status': 400,
+            "request_id": request_id,
+            "body": 'You must include "ticket_id" and "notes" in the body of the request',
+            "status": 400,
         }
 
         logger = Mock()
@@ -182,11 +180,11 @@ class TestPostMultipleNotes:
         ticket_id = 12345
         notes = [
             {
-                'service_number': 'VC1234567',
+                "service_number": "VC1234567",
             },
             {
-                'text': 'Test note 2',
-                'detail_id': 999,
+                "text": "Test note 2",
+                "detail_id": 999,
             },
         ]
         response_topic = "some.topic"
@@ -194,17 +192,17 @@ class TestPostMultipleNotes:
         request = {
             "request_id": request_id,
             "body": {
-                'ticket_id': ticket_id,
-                'notes': notes,
+                "ticket_id": ticket_id,
+                "notes": notes,
             },
             "response_topic": response_topic,
         }
 
         event_bus_response = {
-            'request_id': request_id,
-            'body': 'You must include "text" and any of "service_number" and "detail_id" for every '
-                    'note in the "notes" field',
-            'status': 400,
+            "request_id": request_id,
+            "body": 'You must include "text" and any of "service_number" and "detail_id" for every '
+            'note in the "notes" field',
+            "status": 400,
         }
 
         logger = Mock()
@@ -227,11 +225,11 @@ class TestPostMultipleNotes:
         ticket_id = 12345
         notes = [
             {
-                'text': 'Test note 1',
+                "text": "Test note 1",
             },
             {
-                'text': 'Test note 2',
-                'detail_id': 999,
+                "text": "Test note 2",
+                "detail_id": 999,
             },
         ]
         response_topic = "some.topic"
@@ -239,17 +237,17 @@ class TestPostMultipleNotes:
         request = {
             "request_id": request_id,
             "body": {
-                'ticket_id': ticket_id,
-                'notes': notes,
+                "ticket_id": ticket_id,
+                "notes": notes,
             },
             "response_topic": response_topic,
         }
 
         event_bus_response = {
-            'request_id': request_id,
-            'body': 'You must include "text" and any of "service_number" and "detail_id" for every '
-                    'note in the "notes" field',
-            'status': 400,
+            "request_id": request_id,
+            "body": 'You must include "text" and any of "service_number" and "detail_id" for every '
+            'note in the "notes" field',
+            "status": 400,
         }
 
         logger = Mock()
@@ -272,17 +270,17 @@ class TestPostMultipleNotes:
         ticket_id = 12345
         notes = [
             {
-                'text': 'Test note 1',
-                'service_number': 'VC1234567',
+                "text": "Test note 1",
+                "service_number": "VC1234567",
             },
             {
-                'text': 'Test note 2',
-                'detail_id': 999,
+                "text": "Test note 2",
+                "detail_id": 999,
             },
             {
-                'text': 'Test note 3',
-                'service_number': 'VC99999999',
-                'detail_id': 888,
+                "text": "Test note 3",
+                "service_number": "VC99999999",
+                "detail_id": 888,
             },
         ]
         response_topic = "some.topic"
@@ -290,8 +288,8 @@ class TestPostMultipleNotes:
         request = {
             "request_id": request_id,
             "body": {
-                'ticket_id': ticket_id,
-                'notes': notes,
+                "ticket_id": ticket_id,
+                "notes": notes,
             },
             "response_topic": response_topic,
         }
@@ -299,22 +297,22 @@ class TestPostMultipleNotes:
         post_multiple_notes_response = {
             "body": [
                 {
-                  "noteID": 70646090,
-                  "noteType": "ADN",
-                  "noteValue": "Test note 1",
-                  "actionID": None,
-                  "detailID": 5002307,
-                  "enteredBy": 442301,
-                  "enteredDate": "2020-05-20T06:00:38.803-04:00",
-                  "lastViewedBy": None,
-                  "lastViewedDate": None,
-                  "refNoteID": None,
-                  "noteStatus": None,
-                  "noteText": None,
-                  "childNotes": None,
-                  "documents": None,
-                  "alerts": None,
-                  "taggedUserDirIDs": None,
+                    "noteID": 70646090,
+                    "noteType": "ADN",
+                    "noteValue": "Test note 1",
+                    "actionID": None,
+                    "detailID": 5002307,
+                    "enteredBy": 442301,
+                    "enteredDate": "2020-05-20T06:00:38.803-04:00",
+                    "lastViewedBy": None,
+                    "lastViewedDate": None,
+                    "refNoteID": None,
+                    "noteStatus": None,
+                    "noteText": None,
+                    "childNotes": None,
+                    "documents": None,
+                    "alerts": None,
+                    "taggedUserDirIDs": None,
                 },
                 {
                     "noteID": 70646091,
@@ -356,7 +354,7 @@ class TestPostMultipleNotes:
             "status": 200,
         }
         event_bus_response = {
-            'request_id': request_id,
+            "request_id": request_id,
             **post_multiple_notes_response,
         }
 

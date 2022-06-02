@@ -1,11 +1,11 @@
 """Adapters containers module."""
 from dependency_injector import containers, providers
 
-from .repositories.tickets.repo import TicketsRepository
 from .config.settings import get_config
 from .db.mongodb import IDB, MongoDB
 from .db.redis import Redis
 from .logger.logger import get_logger
+from .repositories.tickets.repo import TicketsRepository
 
 
 class Adapters(containers.DeclarativeContainer):

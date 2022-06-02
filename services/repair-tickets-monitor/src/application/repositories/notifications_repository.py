@@ -7,7 +7,7 @@ class NotificationsRepository:
 
     async def send_slack_message(self, message: str):
         message = {
-            'request_id': uuid(),
-            'message': f"[repair-tickets-monitor] {message}",
+            "request_id": uuid(),
+            "message": f"[repair-tickets-monitor] {message}",
         }
         await self._event_bus.rpc_request("notification.slack.request", message, timeout=10)

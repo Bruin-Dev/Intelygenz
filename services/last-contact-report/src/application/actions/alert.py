@@ -1,17 +1,23 @@
+from collections import OrderedDict
 from datetime import datetime
 
-from dateutil import relativedelta
-from collections import OrderedDict
 from apscheduler.util import undefined
-from pytz import timezone
-
+from dateutil import relativedelta
 from igz.packages.eventbus.eventbus import EventBus
+from pytz import timezone
 
 
 class Alert:
-
-    def __init__(self, event_bus: EventBus, scheduler, logger, config, velocloud_repository, template_renderer,
-                 notifications_repository):
+    def __init__(
+        self,
+        event_bus: EventBus,
+        scheduler,
+        logger,
+        config,
+        velocloud_repository,
+        template_renderer,
+        notifications_repository,
+    ):
         self._event_bus = event_bus
         self._scheduler = scheduler
         self._logger = logger
@@ -25,10 +31,16 @@ class Alert:
         next_run_time = undefined
         if exec_on_start:
             next_run_time = datetime.now(timezone(self._config.TIMEZONE))
-            self._logger.info(f'It will be executed now')
-        self._scheduler.add_job(self._alert_process, 'cron', day=1, misfire_grace_time=86400, replace_existing=True,
-                                next_run_time=next_run_time,
-                                id='_alert_process')
+            self._logger.info(f"It will be executed now")
+        self._scheduler.add_job(
+            self._alert_process,
+            "cron",
+            day=1,
+            misfire_grace_time=86400,
+            replace_existing=True,
+            next_run_time=next_run_time,
+            id="_alert_process",
+        )
 
     async def _alert_process(self):
         self._logger.info("Requesting all edges with details for alert report")
@@ -45,20 +57,22 @@ class Alert:
             total_months_elapsed = relative_time_elapsed.years * 12 + relative_time_elapsed.months
 
             if time_elapsed.days < 30:
-                self._logger.info(f'Time elapsed is less than 30 days for {serial_number}')
+                self._logger.info(f"Time elapsed is less than 30 days for {serial_number}")
                 continue
 
             edge_for_alert = OrderedDict()
-            edge_for_alert['edge_name'] = edge['edgeName']
-            edge_for_alert['enterprise'] = edge["enterpriseName"]
-            edge_for_alert['serial_number'] = serial_number
-            edge_for_alert['model number'] = edge['edgeModelNumber']
-            edge_for_alert['last_contact'] = edge["edgeLastContact"]
-            edge_for_alert['months in SVC'] = total_months_elapsed
-            edge_for_alert['balance of the 36 months'] = 36 - total_months_elapsed
-            edge_for_alert['url'] = f'https://{edge["host"]}/#!/operator/customer/' \
-                                    f'{edge["enterpriseId"]}' \
-                                    f'/monitor/edge/{edge["edgeId"]}/'
+            edge_for_alert["edge_name"] = edge["edgeName"]
+            edge_for_alert["enterprise"] = edge["enterpriseName"]
+            edge_for_alert["serial_number"] = serial_number
+            edge_for_alert["model number"] = edge["edgeModelNumber"]
+            edge_for_alert["last_contact"] = edge["edgeLastContact"]
+            edge_for_alert["months in SVC"] = total_months_elapsed
+            edge_for_alert["balance of the 36 months"] = 36 - total_months_elapsed
+            edge_for_alert["url"] = (
+                f'https://{edge["host"]}/#!/operator/customer/'
+                f'{edge["enterpriseId"]}'
+                f'/monitor/edge/{edge["edgeId"]}/'
+            )
             edges_to_report.append(edge_for_alert)
 
         email_obj = self._template_renderer.compose_email_object(edges_to_report)

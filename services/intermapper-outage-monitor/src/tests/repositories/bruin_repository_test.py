@@ -1,19 +1,17 @@
 import os
 from datetime import datetime
-from unittest.mock import Mock
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
-from application.repositories.bruin_repository import BruinRepository
-from asynctest import CoroutineMock
-from shortuuid import uuid
-
 from application.repositories import bruin_repository as bruin_repository_module
 from application.repositories import nats_error_response
+from application.repositories.bruin_repository import BruinRepository
+from asynctest import CoroutineMock
 from config import testconfig
+from shortuuid import uuid
 
 uuid_ = uuid()
-uuid_mock = patch.object(bruin_repository_module, 'uuid', return_value=uuid_)
+uuid_mock = patch.object(bruin_repository_module, "uuid", return_value=uuid_)
 
 
 class TestBruinRepository:
@@ -33,19 +31,19 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def append_note_to_ticket_test(self):
         ticket_id = 11111
-        ticket_note = 'This is a ticket note'
+        ticket_note = "This is a ticket note"
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'ticket_id': ticket_id,
-                'note': ticket_note,
+            "request_id": uuid_,
+            "body": {
+                "ticket_id": ticket_id,
+                "note": ticket_note,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': 'Note appended with success',
-            'status': 200,
+            "request_id": uuid_,
+            "body": "Note appended with success",
+            "status": 200,
         }
 
         logger = Mock()
@@ -67,20 +65,16 @@ class TestBruinRepository:
     async def append_note_to_ticket_wtn_provided_test(self):
         circuit_id = 1234
         ticket_id = 11111
-        ticket_note = 'This is a ticket note'
+        ticket_note = "This is a ticket note"
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'ticket_id': ticket_id,
-                'note': ticket_note,
-                'service_numbers': [circuit_id]
-            },
+            "request_id": uuid_,
+            "body": {"ticket_id": ticket_id, "note": ticket_note, "service_numbers": [circuit_id]},
         }
         response = {
-            'request_id': uuid_,
-            'body': 'Note appended with success',
-            'status': 200,
+            "request_id": uuid_,
+            "body": "Note appended with success",
+            "status": 200,
         }
 
         logger = Mock()
@@ -101,13 +95,13 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def append_note_to_ticket_with_rpc_request_failing_test(self):
         ticket_id = 11111
-        ticket_note = 'This is a ticket note'
+        ticket_note = "This is a ticket note"
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'ticket_id': ticket_id,
-                'note': ticket_note,
+            "request_id": uuid_,
+            "body": {
+                "ticket_id": ticket_id,
+                "note": ticket_note,
             },
         }
 
@@ -133,19 +127,19 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def append_note_to_ticket_with_rpc_request_returning_non_2xx_status_test(self):
         ticket_id = 11111
-        ticket_note = 'This is a ticket note'
+        ticket_note = "This is a ticket note"
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'ticket_id': ticket_id,
-                'note': ticket_note,
+            "request_id": uuid_,
+            "body": {
+                "ticket_id": ticket_id,
+                "note": ticket_note,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': 'Got internal error from Bruin',
-            'status': 500,
+            "request_id": uuid_,
+            "body": "Got internal error from Bruin",
+            "status": 500,
         }
 
         logger = Mock()
@@ -170,19 +164,19 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def create_outage_ticket_returning_2xx_status_test(self):
         client_id = 12345
-        service_number = 'VC1234567'
+        service_number = "VC1234567"
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'client_id': client_id,
-                'service_number': service_number,
+            "request_id": uuid_,
+            "body": {
+                "client_id": client_id,
+                "service_number": service_number,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': 9999,
-            'status': 200,
+            "request_id": uuid_,
+            "body": 9999,
+            "status": 200,
         }
 
         logger = Mock()
@@ -203,19 +197,19 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def create_outage_ticket_returning_409_status_test(self):
         client_id = 12345
-        service_number = 'VC1234567'
+        service_number = "VC1234567"
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'client_id': client_id,
-                'service_number': service_number,
+            "request_id": uuid_,
+            "body": {
+                "client_id": client_id,
+                "service_number": service_number,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': 9999,
-            'status': 409,
+            "request_id": uuid_,
+            "body": 9999,
+            "status": 409,
         }
 
         logger = Mock()
@@ -236,19 +230,19 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def create_outage_ticket_returning_471_status_test(self):
         client_id = 12345
-        service_number = 'VC1234567'
+        service_number = "VC1234567"
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'client_id': client_id,
-                'service_number': service_number,
+            "request_id": uuid_,
+            "body": {
+                "client_id": client_id,
+                "service_number": service_number,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': 9999,
-            'status': 471,
+            "request_id": uuid_,
+            "body": 9999,
+            "status": 471,
         }
 
         logger = Mock()
@@ -269,19 +263,19 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def create_outage_ticket_returning_472_status_test(self):
         client_id = 12345
-        service_number = 'VC1234567'
+        service_number = "VC1234567"
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'client_id': client_id,
-                'service_number': service_number,
+            "request_id": uuid_,
+            "body": {
+                "client_id": client_id,
+                "service_number": service_number,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': 9999,
-            'status': 472,
+            "request_id": uuid_,
+            "body": 9999,
+            "status": 472,
         }
 
         logger = Mock()
@@ -302,19 +296,19 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def create_outage_ticket_returning_473_status_test(self):
         client_id = 12345
-        service_number = 'VC1234567'
+        service_number = "VC1234567"
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'client_id': client_id,
-                'service_number': service_number,
+            "request_id": uuid_,
+            "body": {
+                "client_id": client_id,
+                "service_number": service_number,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': 9999,
-            'status': 473,
+            "request_id": uuid_,
+            "body": 9999,
+            "status": 473,
         }
 
         logger = Mock()
@@ -335,13 +329,13 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def create_outage_ticket_with_rpc_request_failing_test(self):
         client_id = 12345
-        service_number = 'VC1234567'
+        service_number = "VC1234567"
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'client_id': client_id,
-                'service_number': service_number,
+            "request_id": uuid_,
+            "body": {
+                "client_id": client_id,
+                "service_number": service_number,
             },
         }
 
@@ -367,19 +361,19 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def create_outage_ticket_with_rpc_request_returning_no_2xx_or_409_or_471_status_test(self):
         client_id = 12345
-        service_number = 'VC1234567'
+        service_number = "VC1234567"
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'client_id': client_id,
-                'service_number': service_number,
+            "request_id": uuid_,
+            "body": {
+                "client_id": client_id,
+                "service_number": service_number,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': 'Got internal error from Bruin',
-            'status': 500,
+            "request_id": uuid_,
+            "body": "Got internal error from Bruin",
+            "status": 500,
         }
 
         logger = Mock()
@@ -403,25 +397,19 @@ class TestBruinRepository:
 
     @pytest.mark.asyncio
     async def get_circuit_id_test(self):
-        circuit_id = '123'
+        circuit_id = "123"
         client_id = 83959
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'circuit_id': circuit_id,
+            "request_id": uuid_,
+            "body": {
+                "circuit_id": circuit_id,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': {
-              "clientID": 83959,
-              "subAccount": "string",
-              "wtn": "3214",
-              "inventoryID": 0,
-              "addressID": 0
-             },
-            'status': 200,
+            "request_id": uuid_,
+            "body": {"clientID": 83959, "subAccount": "string", "wtn": "3214", "inventoryID": 0, "addressID": 0},
+            "status": 200,
         }
 
         event_bus = Mock()
@@ -440,12 +428,12 @@ class TestBruinRepository:
 
     @pytest.mark.asyncio
     async def get_circuit_id_failing_rpc_request_test(self):
-        circuit_id = '123'
+        circuit_id = "123"
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'circuit_id': circuit_id,
+            "request_id": uuid_,
+            "body": {
+                "circuit_id": circuit_id,
             },
         }
 
@@ -470,19 +458,19 @@ class TestBruinRepository:
 
     @pytest.mark.asyncio
     async def get_circuit_id_non_2xx_response_test(self):
-        circuit_id = '123'
+        circuit_id = "123"
         client_id = 83959
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'circuit_id': circuit_id,
+            "request_id": uuid_,
+            "body": {
+                "circuit_id": circuit_id,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': 'Got internal error from Bruin',
-            'status': 500,
+            "request_id": uuid_,
+            "body": "Got internal error from Bruin",
+            "status": 500,
         }
 
         event_bus = Mock()
@@ -504,21 +492,21 @@ class TestBruinRepository:
 
     @pytest.mark.asyncio
     async def get_attributes_serial_test(self):
-        circuit_id = '123'
+        circuit_id = "123"
         client_id = 83959
 
         request = {
-            'request_id': uuid_,
-            'body': {
+            "request_id": uuid_,
+            "body": {
                 "client_id": client_id,
                 "status": "A",
                 "service_number": circuit_id,
             },
         }
         response = {
-            'request_id': uuid_,
+            "request_id": uuid_,
             "body": "705286",
-            'status': 200,
+            "status": 200,
         }
 
         event_bus = Mock()
@@ -537,12 +525,12 @@ class TestBruinRepository:
 
     @pytest.mark.asyncio
     async def get_attributes_serial_rpc_request_test(self):
-        circuit_id = '123'
+        circuit_id = "123"
         client_id = 83959
 
         request = {
-            'request_id': uuid_,
-            'body': {
+            "request_id": uuid_,
+            "body": {
                 "client_id": client_id,
                 "status": "A",
                 "service_number": circuit_id,
@@ -570,21 +558,21 @@ class TestBruinRepository:
 
     @pytest.mark.asyncio
     async def get_circuit_id_non_2xx_response_test(self):
-        circuit_id = '123'
+        circuit_id = "123"
         client_id = 83959
 
         request = {
-            'request_id': uuid_,
-            'body': {
+            "request_id": uuid_,
+            "body": {
                 "client_id": client_id,
                 "status": "A",
                 "service_number": circuit_id,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': 'Got internal error from Bruin',
-            'status': 500,
+            "request_id": uuid_,
+            "body": "Got internal error from Bruin",
+            "status": 500,
         }
 
         event_bus = Mock()
@@ -609,16 +597,16 @@ class TestBruinRepository:
         ticket_id = 11111
         parsed_email_dict = {
             "time": "01/10 15:35:40",
-            'version': '6.1.5',
+            "version": "6.1.5",
             "event": "Alarm",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
             "address": "1.3.4",
             "probe_type": "SNMP - Adtran TA900 ( SNMPv2c)",
-            "condition": "\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
+            "condition": '\t\tdefined("lcpu.avgBusy1") && (lcpu.avgBusy1 > 90)',
             "previous_condition": "OK",
             "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
-            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds"
+            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds",
         }
 
         event_bus = Mock()
@@ -630,25 +618,27 @@ class TestBruinRepository:
         bruin_repository.append_note_to_ticket = CoroutineMock()
 
         current_datetime = datetime.now()
-        intermapper_note = os.linesep.join([
-            f"#*MetTel's IPA*#",
-            f'InterMapper Triage',
-            f"Message from InterMapper {parsed_email_dict['version']}\n",
-            f"CONDITION: {parsed_email_dict['condition']}",
-            f"PREVIOUS CONDITION: {parsed_email_dict['previous_condition']}\n",
-            f"Event:               {parsed_email_dict['event']}",
-            f"Time of Event:       {parsed_email_dict['time']}\n",
-            f"IP Address: {parsed_email_dict['address']}\n",
-            f"IM Device Label:     {parsed_email_dict['name']}\n",
-            f"IM Map Name: 	       {parsed_email_dict['document']}",
-            f"Probe Type:          {parsed_email_dict['probe_type']}\n",
-            f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
-            f"Device's up time: {parsed_email_dict['up_time']}",
-            f'TimeStamp: {current_datetime}'
-        ])
+        intermapper_note = os.linesep.join(
+            [
+                f"#*MetTel's IPA*#",
+                f"InterMapper Triage",
+                f"Message from InterMapper {parsed_email_dict['version']}\n",
+                f"CONDITION: {parsed_email_dict['condition']}",
+                f"PREVIOUS CONDITION: {parsed_email_dict['previous_condition']}\n",
+                f"Event:               {parsed_email_dict['event']}",
+                f"Time of Event:       {parsed_email_dict['time']}\n",
+                f"IP Address: {parsed_email_dict['address']}\n",
+                f"IM Device Label:     {parsed_email_dict['name']}\n",
+                f"IM Map Name: 	       {parsed_email_dict['document']}",
+                f"Probe Type:          {parsed_email_dict['probe_type']}\n",
+                f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
+                f"Device's up time: {parsed_email_dict['up_time']}",
+                f"TimeStamp: {current_datetime}",
+            ]
+        )
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
-        with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(bruin_repository_module, "datetime", new=datetime_mock):
             await bruin_repository.append_intermapper_note(ticket_id, parsed_email_dict, False)
 
         bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, intermapper_note)
@@ -659,15 +649,15 @@ class TestBruinRepository:
         parsed_email_dict = {
             "time": "01/10 15:35:40",
             "event": "Alarm",
-            'version': '6.1.5',
+            "version": "6.1.5",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
             "address": "1.3.4",
             "probe_type": "SNMP - Adtran TA900 ( SNMPv2c)",
-            "condition": "\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
-            "previous_condition": '',
+            "condition": '\t\tdefined("lcpu.avgBusy1") && (lcpu.avgBusy1 > 90)',
+            "previous_condition": "",
             "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
-            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds"
+            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds",
         }
 
         event_bus = Mock()
@@ -679,25 +669,27 @@ class TestBruinRepository:
         bruin_repository.append_note_to_ticket = CoroutineMock()
 
         current_datetime = datetime.now()
-        intermapper_note = os.linesep.join([
-            f"#*MetTel's IPA*#",
-            f'InterMapper Triage',
-            f"Message from InterMapper {parsed_email_dict['version']}\n",
-            f"CONDITION: {parsed_email_dict['condition']}",
-            "",
-            f"Event:               {parsed_email_dict['event']}",
-            f"Time of Event:       {parsed_email_dict['time']}\n",
-            f"IP Address: {parsed_email_dict['address']}\n",
-            f"IM Device Label:     {parsed_email_dict['name']}\n",
-            f"IM Map Name: 	       {parsed_email_dict['document']}",
-            f"Probe Type:          {parsed_email_dict['probe_type']}\n",
-            f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
-            f"Device's up time: {parsed_email_dict['up_time']}",
-            f'TimeStamp: {current_datetime}'
-        ])
+        intermapper_note = os.linesep.join(
+            [
+                f"#*MetTel's IPA*#",
+                f"InterMapper Triage",
+                f"Message from InterMapper {parsed_email_dict['version']}\n",
+                f"CONDITION: {parsed_email_dict['condition']}",
+                "",
+                f"Event:               {parsed_email_dict['event']}",
+                f"Time of Event:       {parsed_email_dict['time']}\n",
+                f"IP Address: {parsed_email_dict['address']}\n",
+                f"IM Device Label:     {parsed_email_dict['name']}\n",
+                f"IM Map Name: 	       {parsed_email_dict['document']}",
+                f"Probe Type:          {parsed_email_dict['probe_type']}\n",
+                f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
+                f"Device's up time: {parsed_email_dict['up_time']}",
+                f"TimeStamp: {current_datetime}",
+            ]
+        )
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
-        with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(bruin_repository_module, "datetime", new=datetime_mock):
             await bruin_repository.append_intermapper_note(ticket_id, parsed_email_dict, False)
 
         bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, intermapper_note)
@@ -707,16 +699,16 @@ class TestBruinRepository:
         ticket_id = 11111
         parsed_email_dict = {
             "time": "01/10 15:35:40",
-            'version': '6.1.5',
+            "version": "6.1.5",
             "event": "Alarm",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
             "address": "1.3.4",
             "probe_type": "SNMP - Adtran TA900 ( SNMPv2c)",
-            "condition": "\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
+            "condition": '\t\tdefined("lcpu.avgBusy1") && (lcpu.avgBusy1 > 90)',
             "previous_condition": "OK",
             "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
-            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds"
+            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds",
         }
 
         event_bus = Mock()
@@ -728,25 +720,27 @@ class TestBruinRepository:
         bruin_repository.append_note_to_ticket = CoroutineMock()
 
         current_datetime = datetime.now()
-        intermapper_note = os.linesep.join([
-            f"#*MetTel's IPA*#",
-            f'InterMapper Triage',
-            f"Message from InterMapper {parsed_email_dict['version']}\n",
-            f"CONDITION: {parsed_email_dict['condition']}",
-            f"PREVIOUS CONDITION: {parsed_email_dict['previous_condition']}\n",
-            f"Event:               {parsed_email_dict['event']}",
-            f"Time of Event:       {parsed_email_dict['time']}\n",
-            f"Wireless IP Address: {parsed_email_dict['address']}\n",
-            f"IM Device Label:     {parsed_email_dict['name']}\n",
-            f"IM Map Name: 	       {parsed_email_dict['document']}",
-            f"Probe Type:          {parsed_email_dict['probe_type']}\n",
-            f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
-            f"Device's up time: {parsed_email_dict['up_time']}",
-            f'TimeStamp: {current_datetime}'
-        ])
+        intermapper_note = os.linesep.join(
+            [
+                f"#*MetTel's IPA*#",
+                f"InterMapper Triage",
+                f"Message from InterMapper {parsed_email_dict['version']}\n",
+                f"CONDITION: {parsed_email_dict['condition']}",
+                f"PREVIOUS CONDITION: {parsed_email_dict['previous_condition']}\n",
+                f"Event:               {parsed_email_dict['event']}",
+                f"Time of Event:       {parsed_email_dict['time']}\n",
+                f"Wireless IP Address: {parsed_email_dict['address']}\n",
+                f"IM Device Label:     {parsed_email_dict['name']}\n",
+                f"IM Map Name: 	       {parsed_email_dict['document']}",
+                f"Probe Type:          {parsed_email_dict['probe_type']}\n",
+                f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
+                f"Device's up time: {parsed_email_dict['up_time']}",
+                f"TimeStamp: {current_datetime}",
+            ]
+        )
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
-        with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(bruin_repository_module, "datetime", new=datetime_mock):
             await bruin_repository.append_intermapper_note(ticket_id, parsed_email_dict, True)
 
         bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, intermapper_note)
@@ -758,15 +752,15 @@ class TestBruinRepository:
         parsed_email_dict = {
             "time": "01/10 15:35:40",
             "event": "Alarm",
-            'version': '6.1.5',
+            "version": "6.1.5",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
             "address": "1.3.4",
             "probe_type": "SNMP - Adtran TA900 ( SNMPv2c)",
-            "condition": "\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
+            "condition": '\t\tdefined("lcpu.avgBusy1") && (lcpu.avgBusy1 > 90)',
             "previous_condition": "OK",
             "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
-            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds"
+            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds",
         }
 
         event_bus = Mock()
@@ -778,24 +772,26 @@ class TestBruinRepository:
         bruin_repository.append_note_to_ticket = CoroutineMock()
 
         current_datetime = datetime.now()
-        intermapper_note = os.linesep.join([
-            f"#*MetTel's IPA*#",
-            f"Message from InterMapper {parsed_email_dict['version']}\n",
-            f"CONDITION: {parsed_email_dict['condition']}",
-            f"PREVIOUS CONDITION: {parsed_email_dict['previous_condition']}\n",
-            f"Event:               {parsed_email_dict['event']}",
-            f"Time of Event:       {parsed_email_dict['time']}\n",
-            f"IP Address: {parsed_email_dict['address']}\n",
-            f"IM Device Label:     {parsed_email_dict['name']}\n",
-            f"IM Map Name: 	       {parsed_email_dict['document']}",
-            f"Probe Type:          {parsed_email_dict['probe_type']}\n",
-            f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
-            f"Device's up time: {parsed_email_dict['up_time']}",
-            f'TimeStamp: {current_datetime}'
-        ])
+        intermapper_note = os.linesep.join(
+            [
+                f"#*MetTel's IPA*#",
+                f"Message from InterMapper {parsed_email_dict['version']}\n",
+                f"CONDITION: {parsed_email_dict['condition']}",
+                f"PREVIOUS CONDITION: {parsed_email_dict['previous_condition']}\n",
+                f"Event:               {parsed_email_dict['event']}",
+                f"Time of Event:       {parsed_email_dict['time']}\n",
+                f"IP Address: {parsed_email_dict['address']}\n",
+                f"IM Device Label:     {parsed_email_dict['name']}\n",
+                f"IM Map Name: 	       {parsed_email_dict['document']}",
+                f"Probe Type:          {parsed_email_dict['probe_type']}\n",
+                f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
+                f"Device's up time: {parsed_email_dict['up_time']}",
+                f"TimeStamp: {current_datetime}",
+            ]
+        )
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
-        with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(bruin_repository_module, "datetime", new=datetime_mock):
             await bruin_repository.append_intermapper_up_note(ticket_id, circuit_id, parsed_email_dict, False)
 
         bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, intermapper_note, wtns=[circuit_id])
@@ -806,16 +802,16 @@ class TestBruinRepository:
         circuit_id = 1345
         parsed_email_dict = {
             "time": "01/10 15:35:40",
-            'version': '6.1.5',
+            "version": "6.1.5",
             "event": "Alarm",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
             "address": "1.3.4",
             "probe_type": "SNMP - Adtran TA900 ( SNMPv2c)",
-            "condition": "\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
-            "previous_condition": '',
+            "condition": '\t\tdefined("lcpu.avgBusy1") && (lcpu.avgBusy1 > 90)',
+            "previous_condition": "",
             "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
-            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds"
+            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds",
         }
 
         event_bus = Mock()
@@ -827,24 +823,26 @@ class TestBruinRepository:
         bruin_repository.append_note_to_ticket = CoroutineMock()
 
         current_datetime = datetime.now()
-        intermapper_note = os.linesep.join([
-            f"#*MetTel's IPA*#",
-            f"Message from InterMapper {parsed_email_dict['version']}\n",
-            f"CONDITION: {parsed_email_dict['condition']}",
-            "",
-            f"Event:               {parsed_email_dict['event']}",
-            f"Time of Event:       {parsed_email_dict['time']}\n",
-            f"IP Address: {parsed_email_dict['address']}\n",
-            f"IM Device Label:     {parsed_email_dict['name']}\n",
-            f"IM Map Name: 	       {parsed_email_dict['document']}",
-            f"Probe Type:          {parsed_email_dict['probe_type']}\n",
-            f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
-            f"Device's up time: {parsed_email_dict['up_time']}",
-            f'TimeStamp: {current_datetime}'
-        ])
+        intermapper_note = os.linesep.join(
+            [
+                f"#*MetTel's IPA*#",
+                f"Message from InterMapper {parsed_email_dict['version']}\n",
+                f"CONDITION: {parsed_email_dict['condition']}",
+                "",
+                f"Event:               {parsed_email_dict['event']}",
+                f"Time of Event:       {parsed_email_dict['time']}\n",
+                f"IP Address: {parsed_email_dict['address']}\n",
+                f"IM Device Label:     {parsed_email_dict['name']}\n",
+                f"IM Map Name: 	       {parsed_email_dict['document']}",
+                f"Probe Type:          {parsed_email_dict['probe_type']}\n",
+                f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
+                f"Device's up time: {parsed_email_dict['up_time']}",
+                f"TimeStamp: {current_datetime}",
+            ]
+        )
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
-        with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(bruin_repository_module, "datetime", new=datetime_mock):
             await bruin_repository.append_intermapper_up_note(ticket_id, circuit_id, parsed_email_dict, False)
 
         bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, intermapper_note, wtns=[circuit_id])
@@ -856,15 +854,15 @@ class TestBruinRepository:
         parsed_email_dict = {
             "time": "01/10 15:35:40",
             "event": "Alarm",
-            'version': '6.1.5',
+            "version": "6.1.5",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
             "address": "1.3.4",
             "probe_type": "SNMP - Adtran TA900 ( SNMPv2c)",
-            "condition": "\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
+            "condition": '\t\tdefined("lcpu.avgBusy1") && (lcpu.avgBusy1 > 90)',
             "previous_condition": "OK",
             "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
-            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds"
+            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds",
         }
 
         event_bus = Mock()
@@ -876,24 +874,26 @@ class TestBruinRepository:
         bruin_repository.append_note_to_ticket = CoroutineMock()
 
         current_datetime = datetime.now()
-        intermapper_note = os.linesep.join([
-            f"#*MetTel's IPA*#",
-            f"Message from InterMapper {parsed_email_dict['version']}\n",
-            f"CONDITION: {parsed_email_dict['condition']}",
-            f"PREVIOUS CONDITION: {parsed_email_dict['previous_condition']}\n",
-            f"Event:               {parsed_email_dict['event']}",
-            f"Time of Event:       {parsed_email_dict['time']}\n",
-            f"Wireless IP Address: {parsed_email_dict['address']}\n",
-            f"IM Device Label:     {parsed_email_dict['name']}\n",
-            f"IM Map Name: 	       {parsed_email_dict['document']}",
-            f"Probe Type:          {parsed_email_dict['probe_type']}\n",
-            f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
-            f"Device's up time: {parsed_email_dict['up_time']}",
-            f'TimeStamp: {current_datetime}'
-        ])
+        intermapper_note = os.linesep.join(
+            [
+                f"#*MetTel's IPA*#",
+                f"Message from InterMapper {parsed_email_dict['version']}\n",
+                f"CONDITION: {parsed_email_dict['condition']}",
+                f"PREVIOUS CONDITION: {parsed_email_dict['previous_condition']}\n",
+                f"Event:               {parsed_email_dict['event']}",
+                f"Time of Event:       {parsed_email_dict['time']}\n",
+                f"Wireless IP Address: {parsed_email_dict['address']}\n",
+                f"IM Device Label:     {parsed_email_dict['name']}\n",
+                f"IM Map Name: 	       {parsed_email_dict['document']}",
+                f"Probe Type:          {parsed_email_dict['probe_type']}\n",
+                f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
+                f"Device's up time: {parsed_email_dict['up_time']}",
+                f"TimeStamp: {current_datetime}",
+            ]
+        )
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
-        with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(bruin_repository_module, "datetime", new=datetime_mock):
             await bruin_repository.append_intermapper_up_note(ticket_id, circuit_id, parsed_email_dict, True)
 
         bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, intermapper_note, wtns=[circuit_id])
@@ -912,14 +912,12 @@ class TestBruinRepository:
         bruin_repository.append_note_to_ticket = CoroutineMock()
 
         current_datetime = datetime.now()
-        intermapper_note = os.linesep.join([
-            f"#*MetTel's IPA*#",
-            f'Auto-resolving task for {circuit_id}',
-            f'TimeStamp: {current_datetime}'
-        ])
+        intermapper_note = os.linesep.join(
+            [f"#*MetTel's IPA*#", f"Auto-resolving task for {circuit_id}", f"TimeStamp: {current_datetime}"]
+        )
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
-        with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(bruin_repository_module, "datetime", new=datetime_mock):
             await bruin_repository.append_autoresolve_note(ticket_id, circuit_id)
 
         bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, intermapper_note, wtns=[circuit_id])
@@ -929,28 +927,28 @@ class TestBruinRepository:
         ticket_id = 11111
         parsed_email_dict = {
             "time": "01/10 15:35:40",
-            'version': '6.1.5',
+            "version": "6.1.5",
             "event": "Alarm",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
             "address": "1.3.4",
             "probe_type": "Data Remote Probe (port 161 SNMPv2c)",
-            "condition": "\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
+            "condition": '\t\tdefined("lcpu.avgBusy1") && (lcpu.avgBusy1 > 90)',
             "previous_condition": "OK",
             "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
-            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds"
+            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds",
         }
 
         dri_body = {
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei": "864839040023968",
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers": "ATT",
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid": "89014103272191198072",
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert": "SIM1 Active and SIM2 Ready",
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum": "15245139487",
-                "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress": "8C:19:2D:69"
+            "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei": "864839040023968",
+            "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers": "ATT",
+            "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid": "89014103272191198072",
+            "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert": "SIM1 Active and SIM2 Ready",
+            "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum": "15245139487",
+            "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress": "8C:19:2D:69",
         }
 
-        sim_insert = dri_body["InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert"].split(' ')
+        sim_insert = dri_body["InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert"].split(" ")
 
         event_bus = Mock()
         logger = Mock()
@@ -960,37 +958,43 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
         bruin_repository.append_note_to_ticket = CoroutineMock()
 
-        sim_note = os.linesep.join([
-            f"SIM1 Status:         {sim_insert[sim_insert.index('SIM1') + 1]}",
-            f"SIM1 Provider:      {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers']}",
-            f"\nSIM2 Status:         {sim_insert[sim_insert.index('SIM2') + 1]}\n"
-        ])
+        sim_note = os.linesep.join(
+            [
+                f"SIM1 Status:         {sim_insert[sim_insert.index('SIM1') + 1]}",
+                f"SIM1 Provider:      {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers']}",
+                f"\nSIM2 Status:         {sim_insert[sim_insert.index('SIM2') + 1]}\n",
+            ]
+        )
 
         current_datetime = datetime.now()
-        dri_note = os.linesep.join([
-            f"#*MetTel's IPA*#",
-            f"InterMapper Triage",
-            f"Message from InterMapper {parsed_email_dict['version']}\n",
-            f"CONDITION: {parsed_email_dict['condition']}",
-            f"PREVIOUS CONDITION: {parsed_email_dict['previous_condition']}\n",
-            f"Event:               {parsed_email_dict['event']}",
-            f"Time of Event:       {parsed_email_dict['time']}\n",
-            f"Wireless IP Address: {parsed_email_dict['address']}\n",
-            f"IM Device Label:     {parsed_email_dict['name']}\n",
-            f"IM Map Name: 	       {parsed_email_dict['document']}",
-            f"Probe Type:          {parsed_email_dict['probe_type']}\n",
-            f"{sim_note}",
-            f"WAN Mac Address:     "
-            f"{dri_body['InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress']}\n",
-            f"SIM ICC ID:          {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid']}",
-            f"Subscriber Number:   {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum']}\n",
-            f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
-            f"Device's up time: {parsed_email_dict['up_time']}",
-            f"Timestamp: {current_datetime}"])
+        dri_body_add = dri_body["InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress"]
+        sub_number = dri_body["InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum"]
+        dri_note = os.linesep.join(
+            [
+                f"#*MetTel's IPA*#",
+                f"InterMapper Triage",
+                f"Message from InterMapper {parsed_email_dict['version']}\n",
+                f"CONDITION: {parsed_email_dict['condition']}",
+                f"PREVIOUS CONDITION: {parsed_email_dict['previous_condition']}\n",
+                f"Event:               {parsed_email_dict['event']}",
+                f"Time of Event:       {parsed_email_dict['time']}\n",
+                f"Wireless IP Address: {parsed_email_dict['address']}\n",
+                f"IM Device Label:     {parsed_email_dict['name']}\n",
+                f"IM Map Name: 	       {parsed_email_dict['document']}",
+                f"Probe Type:          {parsed_email_dict['probe_type']}\n",
+                f"{sim_note}",
+                f"WAN Mac Address:     " f"{dri_body_add}\n",
+                f"SIM ICC ID:          {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid']}",
+                f"Subscriber Number:   {sub_number}\n",
+                f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
+                f"Device's up time: {parsed_email_dict['up_time']}",
+                f"Timestamp: {current_datetime}",
+            ]
+        )
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
-        with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(bruin_repository_module, "datetime", new=datetime_mock):
             await bruin_repository.append_dri_note(ticket_id, dri_body, parsed_email_dict)
 
         bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, dri_note)
@@ -1000,28 +1004,28 @@ class TestBruinRepository:
         ticket_id = 11111
         parsed_email_dict = {
             "time": "01/10 15:35:40",
-            'version': '6.1.5',
+            "version": "6.1.5",
             "event": "Alarm",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
             "address": "1.3.4",
             "probe_type": "Data Remote Probe (port 161 SNMPv2c)",
-            "condition": "\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
+            "condition": '\t\tdefined("lcpu.avgBusy1") && (lcpu.avgBusy1 > 90)',
             "previous_condition": "",
             "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
-            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds"
+            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds",
         }
 
         dri_body = {
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei": "864839040023968",
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers": "ATT",
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid": "89014103272191198072",
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert": "SIM1 Active and SIM2 Ready",
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum": "15245139487",
-                "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress": "8C:19:2D:69"
+            "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei": "864839040023968",
+            "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers": "ATT",
+            "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid": "89014103272191198072",
+            "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert": "SIM1 Active and SIM2 Ready",
+            "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum": "15245139487",
+            "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress": "8C:19:2D:69",
         }
 
-        sim_insert = dri_body["InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert"].split(' ')
+        sim_insert = dri_body["InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert"].split(" ")
 
         event_bus = Mock()
         logger = Mock()
@@ -1031,37 +1035,43 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
         bruin_repository.append_note_to_ticket = CoroutineMock()
 
-        sim_note = os.linesep.join([
-            f"SIM1 Status:         {sim_insert[sim_insert.index('SIM1') + 1]}",
-            f"SIM1 Provider:      {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers']}",
-            f"\nSIM2 Status:         {sim_insert[sim_insert.index('SIM2') + 1]}\n"
-        ])
+        sim_note = os.linesep.join(
+            [
+                f"SIM1 Status:         {sim_insert[sim_insert.index('SIM1') + 1]}",
+                f"SIM1 Provider:      {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers']}",
+                f"\nSIM2 Status:         {sim_insert[sim_insert.index('SIM2') + 1]}\n",
+            ]
+        )
 
         current_datetime = datetime.now()
-        dri_note = os.linesep.join([
-            f"#*MetTel's IPA*#",
-            f"InterMapper Triage",
-            f"Message from InterMapper {parsed_email_dict['version']}\n",
-            f"CONDITION: {parsed_email_dict['condition']}",
-            "",
-            f"Event:               {parsed_email_dict['event']}",
-            f"Time of Event:       {parsed_email_dict['time']}\n",
-            f"Wireless IP Address: {parsed_email_dict['address']}\n",
-            f"IM Device Label:     {parsed_email_dict['name']}\n",
-            f"IM Map Name: 	       {parsed_email_dict['document']}",
-            f"Probe Type:          {parsed_email_dict['probe_type']}\n",
-            f"{sim_note}",
-            f"WAN Mac Address:     "
-            f"{dri_body['InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress']}\n",
-            f"SIM ICC ID:          {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid']}",
-            f"Subscriber Number:   {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum']}\n",
-            f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
-            f"Device's up time: {parsed_email_dict['up_time']}",
-            f"Timestamp: {current_datetime}"])
+        sub_number = dri_body["InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum"]
+        dri_note = os.linesep.join(
+            [
+                f"#*MetTel's IPA*#",
+                f"InterMapper Triage",
+                f"Message from InterMapper {parsed_email_dict['version']}\n",
+                f"CONDITION: {parsed_email_dict['condition']}",
+                "",
+                f"Event:               {parsed_email_dict['event']}",
+                f"Time of Event:       {parsed_email_dict['time']}\n",
+                f"Wireless IP Address: {parsed_email_dict['address']}\n",
+                f"IM Device Label:     {parsed_email_dict['name']}\n",
+                f"IM Map Name: 	       {parsed_email_dict['document']}",
+                f"Probe Type:          {parsed_email_dict['probe_type']}\n",
+                f"{sim_note}",
+                f"WAN Mac Address:     "
+                f"{dri_body['InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress']}\n",
+                f"SIM ICC ID:          {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid']}",
+                f"Subscriber Number:   {sub_number}\n",
+                f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
+                f"Device's up time: {parsed_email_dict['up_time']}",
+                f"Timestamp: {current_datetime}",
+            ]
+        )
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
-        with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(bruin_repository_module, "datetime", new=datetime_mock):
             await bruin_repository.append_dri_note(ticket_id, dri_body, parsed_email_dict)
 
         bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, dri_note)
@@ -1071,25 +1081,25 @@ class TestBruinRepository:
         ticket_id = 11111
         parsed_email_dict = {
             "time": "01/10 15:35:40",
-            'version': '6.1.5',
+            "version": "6.1.5",
             "event": "Alarm",
             "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
             "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
             "address": "1.3.4",
             "probe_type": "Data Remote Probe (port 161 SNMPv2c)",
-            "condition": "\t\tdefined(\"lcpu.avgBusy1\") && (lcpu.avgBusy1 > 90)",
+            "condition": '\t\tdefined("lcpu.avgBusy1") && (lcpu.avgBusy1 > 90)',
             "previous_condition": "OK",
             "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
-            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds"
+            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds",
         }
 
         dri_body = {
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei": "864839040023968",
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers": "ATT",
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid": "89014103272191198072",
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert": "",
-                "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum": "15245139487",
-                "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress": "8C:19:2D:69"
+            "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei": "864839040023968",
+            "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers": "ATT",
+            "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid": "89014103272191198072",
+            "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimInsert": "",
+            "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum": "15245139487",
+            "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress": "8C:19:2D:69",
         }
 
         event_bus = Mock()
@@ -1100,35 +1110,41 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
         bruin_repository.append_note_to_ticket = CoroutineMock()
 
-        sim_note = os.linesep.join([
-            f"SIM1 Provider:      {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers']}\n",
-        ])
+        sim_note = os.linesep.join(
+            [
+                f"SIM1 Provider:      {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers']}\n",
+            ]
+        )
 
         current_datetime = datetime.now()
-        dri_note = os.linesep.join([
-            f"#*MetTel's IPA*#",
-            f"InterMapper Triage",
-            f"Message from InterMapper {parsed_email_dict['version']}\n",
-            f"CONDITION: {parsed_email_dict['condition']}",
-            f"PREVIOUS CONDITION: {parsed_email_dict['previous_condition']}\n",
-            f"Event:               {parsed_email_dict['event']}",
-            f"Time of Event:       {parsed_email_dict['time']}\n",
-            f"Wireless IP Address: {parsed_email_dict['address']}\n",
-            f"IM Device Label:     {parsed_email_dict['name']}\n",
-            f"IM Map Name: 	       {parsed_email_dict['document']}",
-            f"Probe Type:          {parsed_email_dict['probe_type']}\n",
-            f"{sim_note}",
-            f"WAN Mac Address:     "
-            f"{dri_body['InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress']}\n",
-            f"SIM ICC ID:          {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid']}",
-            f"Subscriber Number:   {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum']}\n",
-            f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
-            f"Device's up time: {parsed_email_dict['up_time']}",
-            f"Timestamp: {current_datetime}"])
+        sub_number = dri_body["InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Subscribernum"]
+        dri_note = os.linesep.join(
+            [
+                f"#*MetTel's IPA*#",
+                f"InterMapper Triage",
+                f"Message from InterMapper {parsed_email_dict['version']}\n",
+                f"CONDITION: {parsed_email_dict['condition']}",
+                f"PREVIOUS CONDITION: {parsed_email_dict['previous_condition']}\n",
+                f"Event:               {parsed_email_dict['event']}",
+                f"Time of Event:       {parsed_email_dict['time']}\n",
+                f"Wireless IP Address: {parsed_email_dict['address']}\n",
+                f"IM Device Label:     {parsed_email_dict['name']}\n",
+                f"IM Map Name: 	       {parsed_email_dict['document']}",
+                f"Probe Type:          {parsed_email_dict['probe_type']}\n",
+                f"{sim_note}",
+                f"WAN Mac Address:     "
+                f"{dri_body['InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress']}\n",
+                f"SIM ICC ID:          {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid']}",
+                f"Subscriber Number:   {sub_number}\n",
+                f"Time since last reported down: {parsed_email_dict['last_reported_down']}",
+                f"Device's up time: {parsed_email_dict['up_time']}",
+                f"Timestamp: {current_datetime}",
+            ]
+        )
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
-        with patch.object(bruin_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(bruin_repository_module, "datetime", new=datetime_mock):
             await bruin_repository.append_dri_note(ticket_id, dri_body, parsed_email_dict)
 
         bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, dri_note)
@@ -1136,26 +1152,26 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def get_ticket_basic_info_with_service_number_specified_test(self):
         bruin_client_id = 12345
-        service_number = 'VC1234567'
-        ticket_statuses = ['New', 'InProgress', 'Draft']
+        service_number = "VC1234567"
+        ticket_statuses = ["New", "InProgress", "Draft"]
         ticket_topic = "VOO"
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'client_id': bruin_client_id,
-                'ticket_statuses': ticket_statuses,
-                'ticket_topic': ticket_topic,
-                'service_number': service_number,
+            "request_id": uuid_,
+            "body": {
+                "client_id": bruin_client_id,
+                "ticket_statuses": ticket_statuses,
+                "ticket_topic": ticket_topic,
+                "service_number": service_number,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': [
-                {'ticketID': 11111},
-                {'ticketID': 22222},
+            "request_id": uuid_,
+            "body": [
+                {"ticketID": 11111},
+                {"ticketID": 22222},
             ],
-            'status': 200,
+            "status": 200,
         }
 
         logger = Mock()
@@ -1176,17 +1192,17 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def get_ticket_basic_info_with_rpc_request_failing_test(self):
         bruin_client_id = 12345
-        service_number = 'VC1234567'
-        ticket_statuses = ['New', 'InProgress', 'Draft']
+        service_number = "VC1234567"
+        ticket_statuses = ["New", "InProgress", "Draft"]
         ticket_topic = "VOO"
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'client_id': bruin_client_id,
-                'ticket_statuses': ticket_statuses,
-                'ticket_topic': ticket_topic,
-                'service_number': service_number,
+            "request_id": uuid_,
+            "body": {
+                "client_id": bruin_client_id,
+                "ticket_statuses": ticket_statuses,
+                "ticket_topic": ticket_topic,
+                "service_number": service_number,
             },
         }
 
@@ -1212,23 +1228,23 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def get_ticket_basic_info_with_rpc_request_returning_non_2xx_status_test(self):
         bruin_client_id = 12345
-        service_number = 'VC1234567'
-        ticket_statuses = ['New', 'InProgress', 'Draft']
+        service_number = "VC1234567"
+        ticket_statuses = ["New", "InProgress", "Draft"]
         ticket_topic = "VOO"
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'client_id': bruin_client_id,
-                'ticket_statuses': ticket_statuses,
-                'ticket_topic': ticket_topic,
-                'service_number': service_number,
+            "request_id": uuid_,
+            "body": {
+                "client_id": bruin_client_id,
+                "ticket_statuses": ticket_statuses,
+                "ticket_topic": ticket_topic,
+                "service_number": service_number,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': 'Got internal error from Bruin',
-            'status': 500,
+            "request_id": uuid_,
+            "body": "Got internal error from Bruin",
+            "status": 500,
         }
 
         logger = Mock()
@@ -1253,26 +1269,26 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def get_tickets_test(self):
         bruin_client_id = 12345
-        ticket_statuses = ['New', 'InProgress', 'Draft']
+        ticket_statuses = ["New", "InProgress", "Draft"]
         ticket_topic = "VOO"
         ticket_id = 54321
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'client_id': bruin_client_id,
-                'ticket_status': ticket_statuses,
-                'ticket_topic': ticket_topic,
-                'ticket_id': ticket_id,
+            "request_id": uuid_,
+            "body": {
+                "client_id": bruin_client_id,
+                "ticket_status": ticket_statuses,
+                "ticket_topic": ticket_topic,
+                "ticket_id": ticket_id,
             },
         }
 
         response = {
-            'request_id': uuid_,
-            'body': [
-                {'ticketID': 11111, "category": "DSL"},
+            "request_id": uuid_,
+            "body": [
+                {"ticketID": 11111, "category": "DSL"},
             ],
-            'status': 200,
+            "status": 200,
         }
 
         logger = Mock()
@@ -1293,17 +1309,17 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def get_tickets_rpc_request_failing_test(self):
         bruin_client_id = 12345
-        ticket_statuses = ['New', 'InProgress', 'Draft']
+        ticket_statuses = ["New", "InProgress", "Draft"]
         ticket_topic = "VOO"
         ticket_id = 54321
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'client_id': bruin_client_id,
-                'ticket_status': ticket_statuses,
-                'ticket_topic': ticket_topic,
-                'ticket_id': ticket_id,
+            "request_id": uuid_,
+            "body": {
+                "client_id": bruin_client_id,
+                "ticket_status": ticket_statuses,
+                "ticket_topic": ticket_topic,
+                "ticket_id": ticket_id,
             },
         }
 
@@ -1329,23 +1345,23 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def get_tickets_rpc_request_returning_non_2xx_status_test(self):
         bruin_client_id = 12345
-        ticket_statuses = ['New', 'InProgress', 'Draft']
+        ticket_statuses = ["New", "InProgress", "Draft"]
         ticket_topic = "VOO"
         ticket_id = 54321
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'client_id': bruin_client_id,
-                'ticket_status': ticket_statuses,
-                'ticket_topic': ticket_topic,
-                'ticket_id': ticket_id,
+            "request_id": uuid_,
+            "body": {
+                "client_id": bruin_client_id,
+                "ticket_status": ticket_statuses,
+                "ticket_topic": ticket_topic,
+                "ticket_id": ticket_id,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': 'Got internal error from Bruin',
-            'status': 500,
+            "request_id": uuid_,
+            "body": "Got internal error from Bruin",
+            "status": 500,
         }
 
         logger = Mock()
@@ -1372,21 +1388,21 @@ class TestBruinRepository:
         ticket_id = 11111
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'ticket_id': ticket_id,
+            "request_id": uuid_,
+            "body": {
+                "ticket_id": ticket_id,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': {
-                'ticketDetails': [
+            "request_id": uuid_,
+            "body": {
+                "ticketDetails": [
                     {
                         "detailID": 2746938,
-                        "detailValue": 'VC1234567890',
+                        "detailValue": "VC1234567890",
                     },
                 ],
-                'ticketNotes': [
+                "ticketNotes": [
                     {
                         "noteId": 41894043,
                         "noteValue": f"#*MetTel's IPA*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00",
@@ -1396,10 +1412,10 @@ class TestBruinRepository:
                         "noteId": 41894044,
                         "noteValue": f"#*MetTel's IPA*#\nTriage (VeloCloud)\nTimeStamp: 2019-07-30 06:38:00+00:00",
                         "createdDate": "2020-02-24T10:07:13.503-05:00",
-                    }
-                ]
+                    },
+                ],
             },
-            'status': 200,
+            "status": 200,
         }
 
         logger = Mock()
@@ -1422,9 +1438,9 @@ class TestBruinRepository:
         ticket_id = 11111
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'ticket_id': ticket_id,
+            "request_id": uuid_,
+            "body": {
+                "ticket_id": ticket_id,
             },
         }
 
@@ -1452,15 +1468,15 @@ class TestBruinRepository:
         ticket_id = 11111
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'ticket_id': ticket_id,
+            "request_id": uuid_,
+            "body": {
+                "ticket_id": ticket_id,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': 'Got internal error from Bruin',
-            'status': 500,
+            "request_id": uuid_,
+            "body": "Got internal error from Bruin",
+            "status": 500,
         }
 
         logger = Mock()
@@ -1488,16 +1504,16 @@ class TestBruinRepository:
         detail_id = 67890
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'ticket_id': ticket_id,
-                'detail_id': detail_id,
+            "request_id": uuid_,
+            "body": {
+                "ticket_id": ticket_id,
+                "detail_id": detail_id,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': 'ok',
-            'status': 200,
+            "request_id": uuid_,
+            "body": "ok",
+            "status": 200,
         }
 
         logger = Mock()
@@ -1521,10 +1537,10 @@ class TestBruinRepository:
         detail_id = 67890
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'ticket_id': ticket_id,
-                'detail_id': detail_id,
+            "request_id": uuid_,
+            "body": {
+                "ticket_id": ticket_id,
+                "detail_id": detail_id,
             },
         }
 
@@ -1553,16 +1569,16 @@ class TestBruinRepository:
         detail_id = 67890
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'ticket_id': ticket_id,
-                'detail_id': detail_id,
+            "request_id": uuid_,
+            "body": {
+                "ticket_id": ticket_id,
+                "detail_id": detail_id,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': 'Got internal error from Bruin',
-            'status': 500,
+            "request_id": uuid_,
+            "body": "Got internal error from Bruin",
+            "status": 500,
         }
 
         logger = Mock()
@@ -1590,16 +1606,16 @@ class TestBruinRepository:
         detail_id = 67890
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'ticket_id': ticket_id,
-                'detail_id': detail_id,
+            "request_id": uuid_,
+            "body": {
+                "ticket_id": ticket_id,
+                "detail_id": detail_id,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': 'ok',
-            'status': 200,
+            "request_id": uuid_,
+            "body": "ok",
+            "status": 200,
         }
 
         logger = Mock()
@@ -1620,19 +1636,19 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def unpause_ticket_detail_with_only_service_number_specified_test(self):
         ticket_id = 12345
-        service_number = 'VC1234567'
+        service_number = "VC1234567"
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'ticket_id': ticket_id,
-                'service_number': service_number,
+            "request_id": uuid_,
+            "body": {
+                "ticket_id": ticket_id,
+                "service_number": service_number,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': 'ok',
-            'status': 200,
+            "request_id": uuid_,
+            "body": "ok",
+            "status": 200,
         }
 
         logger = Mock()
@@ -1654,20 +1670,20 @@ class TestBruinRepository:
     async def unpause_ticket_detail_with_detail_id_and_service_number_specified_test(self):
         ticket_id = 12345
         detail_id = 67890
-        service_number = 'VC1234567'
+        service_number = "VC1234567"
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'ticket_id': ticket_id,
-                'detail_id': detail_id,
-                'service_number': service_number,
+            "request_id": uuid_,
+            "body": {
+                "ticket_id": ticket_id,
+                "detail_id": detail_id,
+                "service_number": service_number,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': 'ok',
-            'status': 200,
+            "request_id": uuid_,
+            "body": "ok",
+            "status": 200,
         }
 
         logger = Mock()
@@ -1693,10 +1709,10 @@ class TestBruinRepository:
         detail_id = 67890
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'ticket_id': ticket_id,
-                'detail_id': detail_id,
+            "request_id": uuid_,
+            "body": {
+                "ticket_id": ticket_id,
+                "detail_id": detail_id,
             },
         }
 
@@ -1725,16 +1741,16 @@ class TestBruinRepository:
         detail_id = 67890
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'ticket_id': ticket_id,
-                'detail_id': detail_id,
+            "request_id": uuid_,
+            "body": {
+                "ticket_id": ticket_id,
+                "detail_id": detail_id,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': 'Got internal error from Bruin',
-            'status': 500,
+            "request_id": uuid_,
+            "body": "Got internal error from Bruin",
+            "status": 500,
         }
 
         logger = Mock()

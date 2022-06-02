@@ -7,10 +7,10 @@ class StorageRepository:
         self._logger = logger
         self._redis = redis
 
-        self._redis_key_prefix = f'{config.ENVIRONMENT_NAME}-dri-serial'
+        self._redis_key_prefix = f"{config.ENVIRONMENT_NAME}-dri-serial"
 
     def get(self, key):
-        key = f'{self._redis_key_prefix}-{key}'
+        key = f"{self._redis_key_prefix}-{key}"
 
         if not self._redis.exists(key):
             return None
@@ -19,9 +19,9 @@ class StorageRepository:
         return json.loads(value)
 
     def save(self, key, data):
-        key = f'{self._redis_key_prefix}-{key}'
-        self._redis.set(key, json.dumps(data), ex=self._config.DRI_CONFIG['redis_save_ttl'])
+        key = f"{self._redis_key_prefix}-{key}"
+        self._redis.set(key, json.dumps(data), ex=self._config.DRI_CONFIG["redis_save_ttl"])
 
     def remove(self, *keys):
-        keys = [f'{self._redis_key_prefix}-{key}' for key in keys]
+        keys = [f"{self._redis_key_prefix}-{key}" for key in keys]
         self._redis.delete(*keys)

@@ -7,7 +7,7 @@ from dataclasses import dataclass
 class Ticket:
     id: str
     site_id: str = None
-    status: 'TicketStatus' = None
+    status: "TicketStatus" = None
     call_type: str = None
     category: str = None
 

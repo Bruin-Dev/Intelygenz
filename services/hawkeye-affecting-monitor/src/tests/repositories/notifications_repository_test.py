@@ -1,14 +1,11 @@
 from unittest.mock import patch
 
 import pytest
-
+from application.repositories import notifications_repository as notifications_repository_module
 from shortuuid import uuid
 
-from application.repositories import notifications_repository as notifications_repository_module
-
-
 uuid_ = uuid()
-uuid_mock = patch.object(notifications_repository_module, 'uuid', return_value=uuid_)
+uuid_mock = patch.object(notifications_repository_module, "uuid", return_value=uuid_)
 
 
 class TestNotificationsRepository:
@@ -25,8 +22,8 @@ class TestNotificationsRepository:
         event_bus.rpc_request.assert_awaited_once_with(
             "notification.slack.request",
             {
-                'request_id': uuid_,
-                'message': message,
+                "request_id": uuid_,
+                "message": message,
             },
             timeout=10,
         )
@@ -34,10 +31,10 @@ class TestNotificationsRepository:
     @pytest.mark.asyncio
     async def notify_ticket_creation_test(self, notifications_repository):
         ticket_id = 12345
-        serial_number = 'B827EB76A8DE'
+        serial_number = "B827EB76A8DE"
 
         message = (
-            f'Service Affecting ticket created for Ixia device {serial_number}: https://app.bruin.com/t/{ticket_id}'
+            f"Service Affecting ticket created for Ixia device {serial_number}: https://app.bruin.com/t/{ticket_id}"
         )
 
         with uuid_mock:
@@ -48,11 +45,11 @@ class TestNotificationsRepository:
     @pytest.mark.asyncio
     async def notify_ticket_detail_was_unresolved_test(self, notifications_repository):
         ticket_id = 12345
-        serial_number = 'B827EB76A8DE'
+        serial_number = "B827EB76A8DE"
 
         message = (
-            f'Detail corresponding to Ixia device {serial_number} in Service Affecting ticket {ticket_id} has been '
-            f'unresolved: https://app.bruin.com/t/{ticket_id}'
+            f"Detail corresponding to Ixia device {serial_number} in Service Affecting ticket {ticket_id} has been "
+            f"unresolved: https://app.bruin.com/t/{ticket_id}"
         )
 
         with uuid_mock:
@@ -63,11 +60,11 @@ class TestNotificationsRepository:
     @pytest.mark.asyncio
     async def notify_multiple_notes_were_posted_to_ticket_test(self, notifications_repository):
         ticket_id = 12345
-        serial_number = 'B827EB76A8DE'
+        serial_number = "B827EB76A8DE"
 
         message = (
-            f'Multiple Affecting notes related to Ixia device {serial_number} were posted to Service Affecting ticket '
-            f'{ticket_id}: https://app.bruin.com/t/{ticket_id}'
+            f"Multiple Affecting notes related to Ixia device {serial_number} were posted to Service Affecting ticket "
+            f"{ticket_id}: https://app.bruin.com/t/{ticket_id}"
         )
 
         with uuid_mock:

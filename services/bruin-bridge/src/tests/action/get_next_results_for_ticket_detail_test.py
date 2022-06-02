@@ -1,14 +1,11 @@
 from unittest.mock import Mock
 
 import pytest
-
-from asynctest import CoroutineMock
-
 from application.actions.get_next_results_for_ticket_detail import GetNextResultsForTicketDetail
+from asynctest import CoroutineMock
 
 
 class TestGetNextResultsForTicketDetail:
-
     def instance_test(self):
         logger = Mock()
         event_bus = Mock()
@@ -23,16 +20,13 @@ class TestGetNextResultsForTicketDetail:
     @pytest.mark.asyncio
     async def get_next_results_for_ticket_detail_with_body_not_in_message_test(self):
         request_id = 9999
-        response_topic = 'some.topic'
-        request = {
-            "request_id": request_id,
-            "response_topic": response_topic
-        }
+        response_topic = "some.topic"
+        request = {"request_id": request_id, "response_topic": response_topic}
 
         response = {
-            'request_id': 9999,
-            'body': 'You must specify {.."body": {"ticket_id", "detail_id", "service_number"}...} in the request',
-            'status': 400,
+            "request_id": 9999,
+            "body": 'You must specify {.."body": {"ticket_id", "detail_id", "service_number"}...} in the request',
+            "status": 400,
         }
 
         logger = Mock()
@@ -50,20 +44,20 @@ class TestGetNextResultsForTicketDetail:
     @pytest.mark.asyncio
     async def get_next_results_for_ticket_detail_with_missing_parameters_in_body_test(self):
         request_id = 9999
-        response_topic = 'some.topic'
+        response_topic = "some.topic"
         request = {
             "request_id": request_id,
             "body": {
                 "ticket_id": 12345,
-                "service_number": 'VC1234567',
+                "service_number": "VC1234567",
             },
-            "response_topic": response_topic
+            "response_topic": response_topic,
         }
 
         response = {
-            'request_id': 9999,
-            'body': 'You must specify {.."body": {"ticket_id", "detail_id", "service_number"}...} in the request',
-            'status': 400,
+            "request_id": 9999,
+            "body": 'You must specify {.."body": {"ticket_id", "detail_id", "service_number"}...} in the request',
+            "status": 400,
         }
 
         logger = Mock()
@@ -81,11 +75,11 @@ class TestGetNextResultsForTicketDetail:
     @pytest.mark.asyncio
     async def get_next_results_for_ticket_detail_with_all_conditions_met_test(self):
         request_id = 9999
-        response_topic = 'some.topic'
+        response_topic = "some.topic"
 
         ticket_id = 12345
         detail_id = 67890
-        service_number = 'VC1234567'
+        service_number = "VC1234567"
         request = {
             "request_id": request_id,
             "body": {
@@ -93,7 +87,7 @@ class TestGetNextResultsForTicketDetail:
                 "detail_id": detail_id,
                 "service_number": service_number,
             },
-            "response_topic": response_topic
+            "response_topic": response_topic,
         }
 
         response_body = [
@@ -108,16 +102,16 @@ class TestGetNextResultsForTicketDetail:
                         "defaultValue": None,
                         "required": False,
                     }
-                ]
+                ],
             }
         ]
         response_status = 200
         repository_response = {
-            'body': response_body,
-            'status': response_status,
+            "body": response_body,
+            "status": response_status,
         }
         rpc_response = {
-            'request_id': request_id,
+            "request_id": request_id,
             **repository_response,
         }
 

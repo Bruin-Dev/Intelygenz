@@ -1,25 +1,20 @@
-import pytest
-from shortuuid import uuid
 from datetime import datetime, timedelta
-from unittest.mock import Mock
-from unittest.mock import patch
-from asynctest import CoroutineMock
+from unittest.mock import Mock, call, patch
 
+import pytest
 from application.actions import alert as alert_module
 from application.actions.alert import Alert
-from apscheduler.util import undefined
-
-from config import testconfig
-
 from application.repositories.template_management import TemplateRenderer
-from unittest.mock import call
+from apscheduler.util import undefined
+from asynctest import CoroutineMock
+from config import testconfig
+from shortuuid import uuid
 
 uuid_ = uuid()
-uuid_mock = patch.object(alert_module, 'uuid', return_value=uuid_)
+uuid_mock = patch.object(alert_module, "uuid", return_value=uuid_)
 
 
 class TestAlert:
-
     def instance_test(self):
         event_bus = Mock()
         logger = Mock()
@@ -29,8 +24,9 @@ class TestAlert:
         template_renderer = TemplateRenderer(config.REPORT_CONFIG)
         notifications_repository = Mock()
 
-        alert = Alert(event_bus, scheduler, logger, config, velocloud_repository, template_renderer,
-                      notifications_repository)
+        alert = Alert(
+            event_bus, scheduler, logger, config, velocloud_repository, template_renderer, notifications_repository
+        )
         assert alert._event_bus is event_bus
         assert alert._scheduler is scheduler
         assert alert._logger is logger
@@ -47,22 +43,25 @@ class TestAlert:
         velocloud_repository = Mock()
         notifications_repository = Mock()
 
-        alert = Alert(event_bus, scheduler, logger, testconfig, velocloud_repository, template_renderer,
-                      notifications_repository)
+        alert = Alert(
+            event_bus, scheduler, logger, testconfig, velocloud_repository, template_renderer, notifications_repository
+        )
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
-        with patch.object(alert_module, 'datetime', new=datetime_mock):
-            with patch.object(alert_module, 'timezone', new=Mock()):
+        with patch.object(alert_module, "datetime", new=datetime_mock):
+            with patch.object(alert_module, "timezone", new=Mock()):
                 await alert.start_alert_job(exec_on_start=True)
 
         scheduler.add_job.assert_called_once_with(
-            alert._alert_process, 'cron',
-            day=1, misfire_grace_time=86400,
+            alert._alert_process,
+            "cron",
+            day=1,
+            misfire_grace_time=86400,
             next_run_time=next_run_time,
             replace_existing=True,
-            id='_alert_process',
+            id="_alert_process",
         )
 
     @pytest.mark.asyncio
@@ -75,16 +74,19 @@ class TestAlert:
         velocloud_repository = Mock()
         notifications_repository = Mock()
 
-        alert = Alert(event_bus, scheduler, logger, testconfig, velocloud_repository, template_renderer,
-                      notifications_repository)
+        alert = Alert(
+            event_bus, scheduler, logger, testconfig, velocloud_repository, template_renderer, notifications_repository
+        )
         await alert.start_alert_job(exec_on_start=False)
 
         scheduler.add_job.assert_called_once_with(
-            alert._alert_process, 'cron',
-            day=1, misfire_grace_time=86400,
+            alert._alert_process,
+            "cron",
+            day=1,
+            misfire_grace_time=86400,
             next_run_time=undefined,
             replace_existing=True,
-            id='_alert_process',
+            id="_alert_process",
         )
 
     @pytest.mark.asyncio
@@ -97,7 +99,7 @@ class TestAlert:
         datetime_mock.strptime = Mock(return_value=datetime_now - timedelta(days=40))
         alert._template_renderer.compose_email_object = Mock(return_value=email_obj)
         alert._notifications_repository.send_email = CoroutineMock()
-        with patch.object(alert_module, 'datetime', new=datetime_mock) as _:
+        with patch.object(alert_module, "datetime", new=datetime_mock) as _:
             await alert._alert_process()
 
         alert._template_renderer.compose_email_object.assert_called_once_with(list_edge_alert)
@@ -113,7 +115,7 @@ class TestAlert:
         datetime_mock.strptime = Mock(return_value=datetime_now - timedelta(days=40))
         alert._template_renderer.compose_email_object = Mock(return_value=email_obj)
         alert._notifications_repository.send_email = CoroutineMock()
-        with patch.object(alert_module, 'datetime', new=datetime_mock) as _:
+        with patch.object(alert_module, "datetime", new=datetime_mock) as _:
             await alert._alert_process()
         alert._notifications_repository.send_email.assert_not_awaited()
 
@@ -128,8 +130,9 @@ class TestAlert:
         datetime_mock.strptime = Mock(side_effect=[datetime_now, late_date, late_date, late_date])
         alert._template_renderer.compose_email_object = Mock(return_value=email_obj)
         alert._notifications_repository.send_email = CoroutineMock()
-        with patch.object(alert_module, 'datetime', new=datetime_mock) as _:
+        with patch.object(alert_module, "datetime", new=datetime_mock) as _:
             await alert._alert_process()
         alert._template_renderer.compose_email_object.assert_called_once_with(
-            [list_edge_alert[1], list_edge_alert[2], list_edge_alert[3]])
+            [list_edge_alert[1], list_edge_alert[2], list_edge_alert[3]]
+        )
         alert._notifications_repository.send_email.assert_awaited_once_with(email_obj)

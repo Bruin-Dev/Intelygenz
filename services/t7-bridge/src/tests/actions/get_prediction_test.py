@@ -6,7 +6,6 @@ from asynctest import CoroutineMock
 
 
 class TestGetPrediction:
-
     def instance_test(self):
         config = Mock()
         logger = Mock()
@@ -21,27 +20,20 @@ class TestGetPrediction:
         assert prediction._t7_kre_repository == t7_kre_repository
 
     @pytest.mark.parametrize(
-        'body_in_topic', [
+        "body_in_topic",
+        [
             None,
-            ({'some-key': 'some-data'}),
-            ({'ticket_id': 12345}),
-            ({'ticket_rows': [{'asset': '7627627'}]}),
-        ], ids=[
-            'without_body',
-            'without_params',
-            'without_ticket_rows',
-            'without_ticket_id'
-        ]
+            ({"some-key": "some-data"}),
+            ({"ticket_id": 12345}),
+            ({"ticket_rows": [{"asset": "7627627"}]}),
+        ],
+        ids=["without_body", "without_params", "without_ticket_rows", "without_ticket_id"],
     )
     @pytest.mark.asyncio
     async def get_prediction_error_400_test(self, body_in_topic):
         request_id = 123
-        response_topic = '_INBOX.2007314fe0fcb2cdc2a2914c1'
-        msg_published_in_topic = {
-            'request_id': request_id,
-            'response_topic': response_topic,
-            'body': body_in_topic
-        }
+        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
+        msg_published_in_topic = {"request_id": request_id, "response_topic": response_topic, "body": body_in_topic}
         config = Mock()
         logger = Mock()
         logger.info = Mock()
@@ -61,11 +53,11 @@ class TestGetPrediction:
         prediction_action._event_bus.publish_message.assert_awaited_once_with(
             response_topic,
             {
-                'request_id': request_id,
-                'body': 'You must specify {.."body": {"ticket_id", "ticket_rows", "assets_to_predict"}..} '
-                        'in the request',
-                'status': 400,
-            }
+                "request_id": request_id,
+                "body": 'You must specify {.."body": {"ticket_id", "ticket_rows", "assets_to_predict"}..} '
+                "in the request",
+                "status": 400,
+            },
         )
         prediction_action._t7_kre_repository.get_prediction.assert_not_called()
         logger.info.assert_not_called()
@@ -98,32 +90,24 @@ class TestGetPrediction:
                 "Notes": "note 2",
                 "Task Result": None,
                 "Ticket Status": "Closed",
-            }
-        ]
-        response_topic = '_INBOX.2007314fe0fcb2cdc2a2914c1'
-        msg_published_in_topic = {
-            'request_id': request_id,
-            'body': {
-                'ticket_id': ticket_id,
-                'ticket_rows': ticket_rows,
-                'assets_to_predict': assets_to_predict
             },
-            'response_topic': response_topic,
+        ]
+        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
+        msg_published_in_topic = {
+            "request_id": request_id,
+            "body": {"ticket_id": ticket_id, "ticket_rows": ticket_rows, "assets_to_predict": assets_to_predict},
+            "response_topic": response_topic,
         }
         expected_predictions = {
-            "body":
-                [
-                    {
-                        "assetId": "some_serial_number",
-                        "predictions": [
-                            {
-                                "name": "Some action",
-                                "probability": 0.9484384655952454
-                            },
-                        ]
-                    }
-                ],
-            "status": 200
+            "body": [
+                {
+                    "assetId": "some_serial_number",
+                    "predictions": [
+                        {"name": "Some action", "probability": 0.9484384655952454},
+                    ],
+                }
+            ],
+            "status": 200,
         }
 
         event_bus = Mock()
@@ -143,8 +127,8 @@ class TestGetPrediction:
         prediction_action._event_bus.publish_message.assert_awaited_once_with(
             response_topic,
             {
-                'request_id': request_id,
+                "request_id": request_id,
                 **expected_predictions,
-            }
+            },
         )
         logger.info.assert_called_once()

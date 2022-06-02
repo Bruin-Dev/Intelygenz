@@ -7,7 +7,6 @@ from asynctest import CoroutineMock
 
 
 class TestChangeDetailWorkQueue:
-
     def instance_test(self):
         logger = Mock()
         event_bus = Mock()
@@ -27,12 +26,7 @@ class TestChangeDetailWorkQueue:
         event_bus.publish_message = CoroutineMock()
         bruin_repository = Mock()
 
-        put_response = {
-            "body": {
-                "message": "success"
-            },
-            "status": 200
-        }
+        put_response = {"body": {"message": "success"}, "status": 200}
         bruin_repository.change_detail_work_queue = CoroutineMock(return_value=put_response)
 
         ticket_id = 4503440
@@ -48,11 +42,7 @@ class TestChangeDetailWorkQueue:
             "queue_name": "Repair Completed",
         }
 
-        event_bus_request = {
-            "request_id": 19,
-            "body": msg_body,
-            "response_topic": "some.topic"
-        }
+        event_bus_request = {"request_id": 19, "body": msg_body, "response_topic": "some.topic"}
 
         event_bus_response = {
             "request_id": 19,
@@ -72,18 +62,15 @@ class TestChangeDetailWorkQueue:
         event_bus.publish_message = CoroutineMock()
         bruin_repository = Mock()
 
-        event_bus_request = {
-            "request_id": 19,
-            "response_topic": "some.topic"
-        }
+        event_bus_request = {"request_id": 19, "response_topic": "some.topic"}
 
         event_bus_response = {
             "request_id": 19,
             "body": (
                 'You must specify {.."body": {"service_number", "ticket_id", "detail_id", "queue_name"}..} '
-                'in the request'
+                "in the request"
             ),
-            'status': 400
+            "status": 400,
         }
 
         change_detail_work_queue = ChangeDetailWorkQueue(logger, event_bus, bruin_repository)
@@ -105,19 +92,15 @@ class TestChangeDetailWorkQueue:
             "queue_name": "Repair Completed",
         }
 
-        event_bus_request = {
-            "request_id": 19,
-            "body": filters,
-            "response_topic": "some.topic"
-        }
+        event_bus_request = {"request_id": 19, "body": filters, "response_topic": "some.topic"}
 
         event_bus_response = {
             "request_id": 19,
             "body": (
                 'You must specify {.."body": {"service_number" or "detail_id", "ticket_id", "queue_name"}..} '
-                'in the request'
+                "in the request"
             ),
-            'status': 400
+            "status": 400,
         }
 
         change_detail_work_queue = ChangeDetailWorkQueue(logger, event_bus, bruin_repository)

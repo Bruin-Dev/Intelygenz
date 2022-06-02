@@ -80,51 +80,51 @@ class TestUtilsRepository:
     def humanize_bps_test(self):
         bps = 0
         result = UtilsRepository.humanize_bps(bps)
-        expected = '0 bps'
+        expected = "0 bps"
         assert result == expected
 
         bps = int(10e0)
         result = UtilsRepository.humanize_bps(bps)
-        expected = '10 bps'
+        expected = "10 bps"
         assert result == expected
 
         bps = int(10e2)
         result = UtilsRepository.humanize_bps(bps)
-        expected = '1.0 Kbps'
+        expected = "1.0 Kbps"
         assert result == expected
 
         bps = int(10e5)
         result = UtilsRepository.humanize_bps(bps)
-        expected = '1.0 Mbps'
+        expected = "1.0 Mbps"
         assert result == expected
 
         bps = int(10e8)
         result = UtilsRepository.humanize_bps(bps)
-        expected = '1.0 Gbps'
+        expected = "1.0 Gbps"
         assert result == expected
 
         bps = int(10e14)
         result = UtilsRepository.humanize_bps(bps)
-        expected = '1000000.0 Gbps'
+        expected = "1000000.0 Gbps"
         assert result == expected
 
     def get_interface_from_event_test(self):
-        event = {'message': 'Link GE1 is now DEAD'}
+        event = {"message": "Link GE1 is now DEAD"}
         result = UtilsRepository.get_interface_from_event(event)
-        expected = 'GE1'
+        expected = "GE1"
         assert result == expected
 
-        event = {'message': 'Interface GE1 is down'}
+        event = {"message": "Interface GE1 is down"}
         result = UtilsRepository.get_interface_from_event(event)
-        expected = 'GE1'
+        expected = "GE1"
         assert result == expected
 
     def is_ip_address_test(self):
-        result = UtilsRepository.is_ip_address('Some random text')
+        result = UtilsRepository.is_ip_address("Some random text")
         expected = False
         assert result == expected
 
-        result = UtilsRepository.is_ip_address('127.0.0.1')
+        result = UtilsRepository.is_ip_address("127.0.0.1")
         expected = True
         assert result == expected
 
@@ -136,7 +136,7 @@ class TestUtilsRepository:
         utils_repository = UtilsRepository()
 
         result = utils_repository.has_last_event_happened_recently(
-            notes, ticket_creation_date, max_seconds_since_last_event=3600, regex=re.compile(r'(^Dummy)')
+            notes, ticket_creation_date, max_seconds_since_last_event=3600, regex=re.compile(r"(^Dummy)")
         )
 
         assert result is True

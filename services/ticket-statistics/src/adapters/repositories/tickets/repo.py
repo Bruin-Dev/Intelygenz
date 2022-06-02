@@ -1,10 +1,11 @@
 from datetime import datetime
 from typing import Dict
+
 from adapters.db.mongodb import IDB
 
 
 class TicketsRepository(object):
-    COLLECTION_NAME = 'tickets'
+    COLLECTION_NAME = "tickets"
 
     def __init__(self, database: IDB, logger):
         """
@@ -29,11 +30,11 @@ class TicketsRepository(object):
         :return Dict:
         """
 
-        tickets = self.collection.find({'date': {'$gte': start, '$lte': end}, 'status': status})
+        tickets = self.collection.find({"date": {"$gte": start, "$lte": end}, "status": status})
 
         if tickets.count() == 0:
-            self.logger.info(f'No tickets found between {start} and {end} on the DB')
+            self.logger.info(f"No tickets found between {start} and {end} on the DB")
         else:
-            self.logger.info(f'Found {tickets.count()} tickets between {start} and {end} on the DB')
+            self.logger.info(f"Found {tickets.count()} tickets between {start} and {end} on the DB")
 
         return tickets

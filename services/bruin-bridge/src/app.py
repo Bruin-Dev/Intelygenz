@@ -1,13 +1,6 @@
 import asyncio
-import redis
-from igz.packages.Logger.logger_client import LoggerClient
-from igz.packages.eventbus.action import ActionWrapper
-from igz.packages.eventbus.eventbus import EventBus
-from igz.packages.eventbus.storage_managers import RedisStorageManager
-from igz.packages.nats.clients import NATSClient
-from igz.packages.server.api import QuartServer
-from prometheus_client import start_http_server
 
+import redis
 from application.actions.change_detail_work_queue import ChangeDetailWorkQueue
 from application.actions.change_ticket_severity import ChangeTicketSeverity
 from application.actions.get_asset_topics import GetAssetTopics
@@ -40,10 +33,16 @@ from application.clients.bruin_client import BruinClient
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.endpoints_usage_repository import EndpointsUsageRepository
 from config import config
+from igz.packages.eventbus.action import ActionWrapper
+from igz.packages.eventbus.eventbus import EventBus
+from igz.packages.eventbus.storage_managers import RedisStorageManager
+from igz.packages.Logger.logger_client import LoggerClient
+from igz.packages.nats.clients import NATSClient
+from igz.packages.server.api import QuartServer
+from prometheus_client import start_http_server
 
 
 class Container:
-
     def __init__(self):
         self._logger = LoggerClient(config).get_logger()
         self._logger.info("Bruin bridge starting...")
@@ -99,17 +98,16 @@ class Container:
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.add_consumer(self._subscriber_tickets, consumer_name="tickets")
         self._event_bus.add_consumer(self._subscriber_tickets_basic_info, consumer_name="tickets_basic_info")
-        self._event_bus.add_consumer(self._subscriber_single_ticket_basic_info,
-                                     consumer_name="single_ticket_basic_info")
+        self._event_bus.add_consumer(
+            self._subscriber_single_ticket_basic_info, consumer_name="single_ticket_basic_info"
+        )
         self._event_bus.add_consumer(self._subscriber_ticket_overview, consumer_name="ticket_overview")
         self._event_bus.add_consumer(self._subscriber_details, consumer_name="ticket_details")
         self._event_bus.add_consumer(
-            self._subscriber_affecting_details_by_edge_serial,
-            consumer_name="affecting_ticket_details_by_edge_serial"
+            self._subscriber_affecting_details_by_edge_serial, consumer_name="affecting_ticket_details_by_edge_serial"
         )
         self._event_bus.add_consumer(
-            self._subscriber_outage_details_by_edge_serial,
-            consumer_name="outage_ticket_details_by_edge_serial"
+            self._subscriber_outage_details_by_edge_serial, consumer_name="outage_ticket_details_by_edge_serial"
         )
         self._event_bus.add_consumer(self._subscriber_post_note, consumer_name="post_note")
         self._event_bus.add_consumer(self._subscriber_post_multiple_notes, consumer_name="post_multiple_notes")
@@ -135,22 +133,22 @@ class Container:
         self._event_bus.add_consumer(self._subscriber_mark_email_as_done, consumer_name="mark_email_as_done")
         self._event_bus.add_consumer(self._subscriber_link_ticket_to_email, consumer_name="link_ticket_to_email")
         self._event_bus.add_consumer(
-            self._subscriber_post_notification_email_milestone,
-            consumer_name='post_notification_email_milestone'
+            self._subscriber_post_notification_email_milestone, consumer_name="post_notification_email_milestone"
         )
-        self._event_bus.add_consumer(self._subscriber_get_asset_topics, consumer_name='get_asset_topics')
-        self._event_bus.add_consumer(self._subscriber_subscribe_user, consumer_name='subscribe_user')
+        self._event_bus.add_consumer(self._subscriber_get_asset_topics, consumer_name="get_asset_topics")
+        self._event_bus.add_consumer(self._subscriber_subscribe_user, consumer_name="subscribe_user")
 
         self._event_bus.set_producer(self._publisher)
 
         # Instance each action
-        self._get_tickets = GetTicket(self._logger, config.BRUIN_CONFIG, self._event_bus,
-                                      self._bruin_repository)
+        self._get_tickets = GetTicket(self._logger, config.BRUIN_CONFIG, self._event_bus, self._bruin_repository)
         self._get_tickets_basic_info = GetTicketsBasicInfo(self._logger, self._event_bus, self._bruin_repository)
-        self._get_single_ticket_basic_info = GetSingleTicketBasicInfo(self._logger, self._event_bus,
-                                                                      self._bruin_repository)
-        self._get_ticket_overview = GetTicketOverview(self._logger, config.BRUIN_CONFIG, self._event_bus,
-                                                      self._bruin_repository)
+        self._get_single_ticket_basic_info = GetSingleTicketBasicInfo(
+            self._logger, self._event_bus, self._bruin_repository
+        )
+        self._get_ticket_overview = GetTicketOverview(
+            self._logger, config.BRUIN_CONFIG, self._event_bus, self._bruin_repository
+        )
         self._get_ticket_details = GetTicketDetails(self._logger, self._event_bus, self._bruin_repository)
         self._post_note = PostNote(self._logger, self._event_bus, self._bruin_repository)
         self._post_multiple_notes = PostMultipleNotes(self._logger, self._event_bus, self._bruin_repository)
@@ -175,91 +173,114 @@ class Container:
         self._mark_email_as_done = MarkEmailAsDone(self._logger, self._event_bus, self._bruin_repository)
         self._link_ticket_to_email = LinkTicketToEmail(self._logger, self._event_bus, self._bruin_repository)
         self._post_notification_email_milestone = PostNotificationEmailMilestone(
-            self._logger,
-            self._event_bus,
-            self._bruin_repository
+            self._logger, self._event_bus, self._bruin_repository
         )
         self._get_asset_topics = GetAssetTopics(self._logger, self._event_bus, self._bruin_repository)
         self._subscribe_user = SubscribeUser(self._logger, self._event_bus, self._bruin_client)
 
         # Wrap the actions
-        self._report_bruin_ticket = ActionWrapper(self._get_tickets, "get_all_tickets",
-                                                  is_async=True, logger=self._logger)
-        self._action_get_tickets_basic_info = ActionWrapper(self._get_tickets_basic_info, "get_tickets_basic_info",
-                                                            is_async=True, logger=self._logger)
-        self._action_get_single_ticket_basic_info = ActionWrapper(self._get_single_ticket_basic_info,
-                                                                  "get_single_ticket_basic_info",
-                                                                  is_async=True, logger=self._logger)
-        self._action_get_ticket_detail = ActionWrapper(self._get_ticket_details, "send_ticket_details",
-                                                       is_async=True, logger=self._logger)
-        self._action_get_ticket_overview = ActionWrapper(self._get_ticket_overview, "get_ticket_overview",
-                                                         is_async=True, logger=self._logger)
-        self._action_post_note = ActionWrapper(self._post_note, "post_note",
-                                               is_async=True, logger=self._logger)
-        self._action_post_multiple_notes = ActionWrapper(self._post_multiple_notes, "post_multiple_notes",
-                                                         is_async=True, logger=self._logger)
-        self._action_post_ticket = ActionWrapper(self._post_ticket, "post_ticket",
-                                                 is_async=True, logger=self._logger)
-        self._action_open_ticket = ActionWrapper(self._open_ticket, "open_ticket",
-                                                 is_async=True, logger=self._logger)
-        self._action_resolve_ticket = ActionWrapper(self._resolve_ticket, "resolve_ticket",
-                                                    is_async=True, logger=self._logger)
-        self._action_get_attributes_serial = ActionWrapper(self._get_attributes_serial, "get_attributes_serial",
-                                                           is_async=True, logger=self._logger,
-                                                           )
-        self._action_get_management_status = ActionWrapper(self._get_management_status, "get_management_status",
-                                                           is_async=True, logger=self._logger,
-                                                           )
-        self._action_post_outage_ticket = ActionWrapper(self._post_outage_ticket, "post_outage_ticket",
-                                                        is_async=True, logger=self._logger,
-                                                        )
-        self._action_get_client_info = ActionWrapper(self._get_client_info, "get_client_info",
-                                                     is_async=True, logger=self._logger,
-                                                     )
-        self._action_get_client_info_by_did = ActionWrapper(self._get_client_info_by_did, "get_client_info_by_did",
-                                                            is_async=True, logger=self._logger,
-                                                            )
-        self._action_change_work_queue = ActionWrapper(self._change_work_queue, "change_detail_work_queue",
-                                                       is_async=True, logger=self._logger,
-                                                       )
-        self._action_get_ticket_task_history = ActionWrapper(self._get_ticket_task_history,
-                                                             "get_ticket_task_history",
-                                                             is_async=True, logger=self._logger,
-                                                             )
-        self._action_get_next_results_for_ticket_detail = ActionWrapper(self._get_next_results_for_ticket_detail,
-                                                                        "get_next_results_for_ticket_detail",
-                                                                        is_async=True, logger=self._logger,
-                                                                        )
-        self._action_unpause_ticket = ActionWrapper(self._unpause_ticket, "unpause_ticket",
-                                                    is_async=True, logger=self._logger)
-        self._action_get_circuit_id = ActionWrapper(self._get_circuit_id, "get_circuit_id", is_async=True,
-                                                    logger=self._logger)
-        self._action_post_email_tag = ActionWrapper(self._post_email_tag, "post_email_tag", is_async=True,
-                                                    logger=self._logger)
-        self._action_change_ticket_severity = ActionWrapper(self._change_ticket_severity, "change_ticket_severity",
-                                                            is_async=True, logger=self._logger)
+        self._report_bruin_ticket = ActionWrapper(
+            self._get_tickets, "get_all_tickets", is_async=True, logger=self._logger
+        )
+        self._action_get_tickets_basic_info = ActionWrapper(
+            self._get_tickets_basic_info, "get_tickets_basic_info", is_async=True, logger=self._logger
+        )
+        self._action_get_single_ticket_basic_info = ActionWrapper(
+            self._get_single_ticket_basic_info, "get_single_ticket_basic_info", is_async=True, logger=self._logger
+        )
+        self._action_get_ticket_detail = ActionWrapper(
+            self._get_ticket_details, "send_ticket_details", is_async=True, logger=self._logger
+        )
+        self._action_get_ticket_overview = ActionWrapper(
+            self._get_ticket_overview, "get_ticket_overview", is_async=True, logger=self._logger
+        )
+        self._action_post_note = ActionWrapper(self._post_note, "post_note", is_async=True, logger=self._logger)
+        self._action_post_multiple_notes = ActionWrapper(
+            self._post_multiple_notes, "post_multiple_notes", is_async=True, logger=self._logger
+        )
+        self._action_post_ticket = ActionWrapper(self._post_ticket, "post_ticket", is_async=True, logger=self._logger)
+        self._action_open_ticket = ActionWrapper(self._open_ticket, "open_ticket", is_async=True, logger=self._logger)
+        self._action_resolve_ticket = ActionWrapper(
+            self._resolve_ticket, "resolve_ticket", is_async=True, logger=self._logger
+        )
+        self._action_get_attributes_serial = ActionWrapper(
+            self._get_attributes_serial,
+            "get_attributes_serial",
+            is_async=True,
+            logger=self._logger,
+        )
+        self._action_get_management_status = ActionWrapper(
+            self._get_management_status,
+            "get_management_status",
+            is_async=True,
+            logger=self._logger,
+        )
+        self._action_post_outage_ticket = ActionWrapper(
+            self._post_outage_ticket,
+            "post_outage_ticket",
+            is_async=True,
+            logger=self._logger,
+        )
+        self._action_get_client_info = ActionWrapper(
+            self._get_client_info,
+            "get_client_info",
+            is_async=True,
+            logger=self._logger,
+        )
+        self._action_get_client_info_by_did = ActionWrapper(
+            self._get_client_info_by_did,
+            "get_client_info_by_did",
+            is_async=True,
+            logger=self._logger,
+        )
+        self._action_change_work_queue = ActionWrapper(
+            self._change_work_queue,
+            "change_detail_work_queue",
+            is_async=True,
+            logger=self._logger,
+        )
+        self._action_get_ticket_task_history = ActionWrapper(
+            self._get_ticket_task_history,
+            "get_ticket_task_history",
+            is_async=True,
+            logger=self._logger,
+        )
+        self._action_get_next_results_for_ticket_detail = ActionWrapper(
+            self._get_next_results_for_ticket_detail,
+            "get_next_results_for_ticket_detail",
+            is_async=True,
+            logger=self._logger,
+        )
+        self._action_unpause_ticket = ActionWrapper(
+            self._unpause_ticket, "unpause_ticket", is_async=True, logger=self._logger
+        )
+        self._action_get_circuit_id = ActionWrapper(
+            self._get_circuit_id, "get_circuit_id", is_async=True, logger=self._logger
+        )
+        self._action_post_email_tag = ActionWrapper(
+            self._post_email_tag, "post_email_tag", is_async=True, logger=self._logger
+        )
+        self._action_change_ticket_severity = ActionWrapper(
+            self._change_ticket_severity, "change_ticket_severity", is_async=True, logger=self._logger
+        )
         self._action_get_site = ActionWrapper(self._get_site, "get_site", is_async=True, logger=self._logger)
-        self._action_mark_email_as_done = ActionWrapper(self._mark_email_as_done,
-                                                        "mark_email_as_done", is_async=True, logger=self._logger)
-        self._action_link_ticket_to_email = ActionWrapper(self._link_ticket_to_email,
-                                                          "link_ticket_to_email", is_async=True, logger=self._logger)
+        self._action_mark_email_as_done = ActionWrapper(
+            self._mark_email_as_done, "mark_email_as_done", is_async=True, logger=self._logger
+        )
+        self._action_link_ticket_to_email = ActionWrapper(
+            self._link_ticket_to_email, "link_ticket_to_email", is_async=True, logger=self._logger
+        )
         self._action_post_notification_email_milestone = ActionWrapper(
             self._post_notification_email_milestone,
-            'post_notification_email_milestone',
+            "post_notification_email_milestone",
             is_async=True,
-            logger=self._logger
+            logger=self._logger,
         )
         self._action_get_asset_topics = ActionWrapper(
-            self._get_asset_topics,
-            'get_asset_topics',
-            is_async=True,
-            logger=self._logger
+            self._get_asset_topics, "get_asset_topics", is_async=True, logger=self._logger
         )
         self._action_subscribe_user = ActionWrapper(
-            self._subscribe_user,
-            'subscribe_user',
-            is_async=True,
-            logger=self._logger
+            self._subscribe_user, "subscribe_user", is_async=True, logger=self._logger
         )
 
         self._server = QuartServer(config)
@@ -269,121 +290,181 @@ class Container:
 
         await self._event_bus.connect()
         await self._bruin_client.login()
-        await self._event_bus.subscribe_consumer(consumer_name="tickets", topic="bruin.ticket.request",
-                                                 action_wrapper=self._report_bruin_ticket,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="tickets_basic_info", topic="bruin.ticket.basic.request",
-                                                 action_wrapper=self._action_get_tickets_basic_info,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="single_ticket_basic_info",
-                                                 topic="bruin.single_ticket.basic.request",
-                                                 action_wrapper=self._action_get_single_ticket_basic_info,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="ticket_details", topic="bruin.ticket.details.request",
-                                                 action_wrapper=self._action_get_ticket_detail,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="ticket_overview", topic="bruin.ticket.overview.request",
-                                                 action_wrapper=self._action_get_ticket_overview,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="post_note", topic="bruin.ticket.note.append.request",
-                                                 action_wrapper=self._action_post_note,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="post_multiple_notes",
-                                                 topic="bruin.ticket.multiple.notes.append.request",
-                                                 action_wrapper=self._action_post_multiple_notes,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="post_ticket", topic="bruin.ticket.creation.request",
-                                                 action_wrapper=self._action_post_ticket,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="open_ticket",
-                                                 topic="bruin.ticket.status.open",
-                                                 action_wrapper=self._action_open_ticket,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="resolve_ticket",
-                                                 topic="bruin.ticket.status.resolve",
-                                                 action_wrapper=self._action_resolve_ticket,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="get_attributes_serial",
-                                                 topic="bruin.inventory.attributes.serial",
-                                                 action_wrapper=self._action_get_attributes_serial,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="get_management_status",
-                                                 topic="bruin.inventory.management.status",
-                                                 action_wrapper=self._action_get_management_status,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="post_outage_ticket",
-                                                 topic="bruin.ticket.creation.outage.request",
-                                                 action_wrapper=self._action_post_outage_ticket,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="get_client_info",
-                                                 topic="bruin.customer.get.info",
-                                                 action_wrapper=self._action_get_client_info,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="get_client_info_by_did",
-                                                 topic="bruin.customer.get.info_by_did",
-                                                 action_wrapper=self._action_get_client_info_by_did,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="change_work_queue",
-                                                 topic="bruin.ticket.change.work",
-                                                 action_wrapper=self._action_change_work_queue,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="get_ticket_task_history",
-                                                 topic="bruin.ticket.get.task.history",
-                                                 action_wrapper=self._action_get_ticket_task_history,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="get_next_results_for_ticket_detail",
-                                                 topic="bruin.ticket.detail.get.next.results",
-                                                 action_wrapper=self._action_get_next_results_for_ticket_detail,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="unpause_ticket",
-                                                 topic="bruin.ticket.unpause",
-                                                 action_wrapper=self._action_unpause_ticket,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="post_email_tag", topic="bruin.email.tag.request",
-                                                 action_wrapper=self._action_post_email_tag,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="get_circuit_id",
-                                                 topic="bruin.get.circuit.id",
-                                                 action_wrapper=self._action_get_circuit_id,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="change_ticket_severity",
-                                                 topic="bruin.change.ticket.severity",
-                                                 action_wrapper=self._action_change_ticket_severity,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="get_site",
-                                                 topic="bruin.get.site",
-                                                 action_wrapper=self._action_get_site,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="mark_email_as_done",
-                                                 topic="bruin.mark.email.done",
-                                                 action_wrapper=self._action_mark_email_as_done,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="link_ticket_to_email",
-                                                 topic="bruin.link.ticket.email",
-                                                 action_wrapper=self._action_link_ticket_to_email,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name='post_notification_email_milestone',
-                                                 topic='bruin.notification.email.milestone',
-                                                 action_wrapper=self._action_post_notification_email_milestone,
-                                                 queue='bruin_bridge')
-        await self._event_bus.subscribe_consumer(consumer_name='get_asset_topics',
-                                                 topic='bruin.get.asset.topics',
-                                                 action_wrapper=self._action_get_asset_topics,
-                                                 queue='bruin_bridge')
-        await self._event_bus.subscribe_consumer(consumer_name='subscribe_user',
-                                                 topic='bruin.subscribe.user',
-                                                 action_wrapper=self._action_subscribe_user,
-                                                 queue='bruin_bridge')
+        await self._event_bus.subscribe_consumer(
+            consumer_name="tickets",
+            topic="bruin.ticket.request",
+            action_wrapper=self._report_bruin_ticket,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="tickets_basic_info",
+            topic="bruin.ticket.basic.request",
+            action_wrapper=self._action_get_tickets_basic_info,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="single_ticket_basic_info",
+            topic="bruin.single_ticket.basic.request",
+            action_wrapper=self._action_get_single_ticket_basic_info,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="ticket_details",
+            topic="bruin.ticket.details.request",
+            action_wrapper=self._action_get_ticket_detail,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="ticket_overview",
+            topic="bruin.ticket.overview.request",
+            action_wrapper=self._action_get_ticket_overview,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="post_note",
+            topic="bruin.ticket.note.append.request",
+            action_wrapper=self._action_post_note,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="post_multiple_notes",
+            topic="bruin.ticket.multiple.notes.append.request",
+            action_wrapper=self._action_post_multiple_notes,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="post_ticket",
+            topic="bruin.ticket.creation.request",
+            action_wrapper=self._action_post_ticket,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="open_ticket",
+            topic="bruin.ticket.status.open",
+            action_wrapper=self._action_open_ticket,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="resolve_ticket",
+            topic="bruin.ticket.status.resolve",
+            action_wrapper=self._action_resolve_ticket,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="get_attributes_serial",
+            topic="bruin.inventory.attributes.serial",
+            action_wrapper=self._action_get_attributes_serial,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="get_management_status",
+            topic="bruin.inventory.management.status",
+            action_wrapper=self._action_get_management_status,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="post_outage_ticket",
+            topic="bruin.ticket.creation.outage.request",
+            action_wrapper=self._action_post_outage_ticket,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="get_client_info",
+            topic="bruin.customer.get.info",
+            action_wrapper=self._action_get_client_info,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="get_client_info_by_did",
+            topic="bruin.customer.get.info_by_did",
+            action_wrapper=self._action_get_client_info_by_did,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="change_work_queue",
+            topic="bruin.ticket.change.work",
+            action_wrapper=self._action_change_work_queue,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="get_ticket_task_history",
+            topic="bruin.ticket.get.task.history",
+            action_wrapper=self._action_get_ticket_task_history,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="get_next_results_for_ticket_detail",
+            topic="bruin.ticket.detail.get.next.results",
+            action_wrapper=self._action_get_next_results_for_ticket_detail,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="unpause_ticket",
+            topic="bruin.ticket.unpause",
+            action_wrapper=self._action_unpause_ticket,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="post_email_tag",
+            topic="bruin.email.tag.request",
+            action_wrapper=self._action_post_email_tag,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="get_circuit_id",
+            topic="bruin.get.circuit.id",
+            action_wrapper=self._action_get_circuit_id,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="change_ticket_severity",
+            topic="bruin.change.ticket.severity",
+            action_wrapper=self._action_change_ticket_severity,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="get_site", topic="bruin.get.site", action_wrapper=self._action_get_site, queue="bruin_bridge"
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="mark_email_as_done",
+            topic="bruin.mark.email.done",
+            action_wrapper=self._action_mark_email_as_done,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="link_ticket_to_email",
+            topic="bruin.link.ticket.email",
+            action_wrapper=self._action_link_ticket_to_email,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="post_notification_email_milestone",
+            topic="bruin.notification.email.milestone",
+            action_wrapper=self._action_post_notification_email_milestone,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="get_asset_topics",
+            topic="bruin.get.asset.topics",
+            action_wrapper=self._action_get_asset_topics,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="subscribe_user",
+            topic="bruin.subscribe.user",
+            action_wrapper=self._action_subscribe_user,
+            queue="bruin_bridge",
+        )
 
     async def start_server(self):
         await self._server.run_server()
 
     @staticmethod
     def _start_prometheus_metrics_server():
-        start_http_server(config.METRICS_SERVER_CONFIG['port'])
+        start_http_server(config.METRICS_SERVER_CONFIG["port"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     container = Container()
     loop = asyncio.get_event_loop()
     asyncio.ensure_future(container.start(), loop=loop)

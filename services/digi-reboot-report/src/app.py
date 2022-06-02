@@ -1,24 +1,22 @@
 import asyncio
-import redis
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from prometheus_client import start_http_server
-from igz.packages.Logger.logger_client import LoggerClient
-from igz.packages.eventbus.eventbus import EventBus
-from igz.packages.eventbus.storage_managers import RedisStorageManager
-from igz.packages.nats.clients import NATSClient
-from igz.packages.server.api import QuartServer
-from pytz import timezone
 
-from application.repositories.notifications_repository import NotificationsRepository
+import redis
+from application.actions.digi_reboot_report import DiGiRebootReport
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.digi_repository import DiGiRepository
-
-from application.actions.digi_reboot_report import DiGiRebootReport
+from application.repositories.notifications_repository import NotificationsRepository
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import config
+from igz.packages.eventbus.eventbus import EventBus
+from igz.packages.eventbus.storage_managers import RedisStorageManager
+from igz.packages.Logger.logger_client import LoggerClient
+from igz.packages.nats.clients import NATSClient
+from igz.packages.server.api import QuartServer
+from prometheus_client import start_http_server
+from pytz import timezone
 
 
 class Container:
-
     def __init__(self):
         self._logger = LoggerClient(config).get_logger()
         self._logger.info("DiGi reboot report starting...")
@@ -26,7 +24,7 @@ class Container:
         self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._redis_client.ping()
 
-        self._scheduler = AsyncIOScheduler(timezone=timezone('US/Eastern'))
+        self._scheduler = AsyncIOScheduler(timezone=timezone("US/Eastern"))
         self._server = QuartServer(config)
 
         self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
@@ -37,14 +35,18 @@ class Container:
         self._event_bus.add_consumer(self.subscriber_alert, consumer_name="sub-alert")
         self._event_bus.set_producer(self._publisher)
         self._notifications_repository = NotificationsRepository(event_bus=self._event_bus, config=config)
-        self._bruin_repository = BruinRepository(self._event_bus, self._logger, config,
-                                                 self._notifications_repository)
-        self._digi_repository = DiGiRepository(self._event_bus, self._logger, config,
-                                               self._notifications_repository)
+        self._bruin_repository = BruinRepository(self._event_bus, self._logger, config, self._notifications_repository)
+        self._digi_repository = DiGiRepository(self._event_bus, self._logger, config, self._notifications_repository)
 
-        self._digi_reboot_report = DiGiRebootReport(self._event_bus, self._scheduler, self._logger, config,
-                                                    self._bruin_repository, self._digi_repository,
-                                                    self._notifications_repository)
+        self._digi_reboot_report = DiGiRebootReport(
+            self._event_bus,
+            self._scheduler,
+            self._logger,
+            config,
+            self._bruin_repository,
+            self._digi_repository,
+            self._notifications_repository,
+        )
 
     async def _start(self):
         self._start_prometheus_metrics_server()
@@ -57,7 +59,7 @@ class Container:
 
     @staticmethod
     def _start_prometheus_metrics_server():
-        start_http_server(config.METRICS_SERVER_CONFIG['port'])
+        start_http_server(config.METRICS_SERVER_CONFIG["port"])
 
     async def start_server(self):
         await self._server.run_server()
@@ -66,7 +68,7 @@ class Container:
         await self._start()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     container = Container()
     loop = asyncio.get_event_loop()
     asyncio.ensure_future(container.run(), loop=loop)

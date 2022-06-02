@@ -14,12 +14,13 @@ class Rpc:
     """
     Component that acts as an event_bus wrapper.
     """
+
     event_bus: EventBus
     logger: Logger
     topic: str
     timeout: int
 
-    def start(self) -> (str, 'RpcLogger'):
+    def start(self) -> (str, "RpcLogger"):
         """
         Start the rpc by generating a request_id and an appropriate logger.
         :return: a request_id and a logger
@@ -27,7 +28,7 @@ class Rpc:
         request_id = uuid()
         return RpcRequest(request_id=request_id), RpcLogger(request_id=request_id, logger=self.logger)
 
-    async def send(self, rpc_request: 'RpcRequest') -> 'RpcResponse':
+    async def send(self, rpc_request: "RpcRequest") -> "RpcResponse":
         """
         Send the request message and return a parsed response.
         Responses other than OK will raise an RpcFailedError.
@@ -60,6 +61,7 @@ class RpcRequest(BaseModel):
     """
     Data structure that represents a base request.
     """
+
     request_id: str
     body: Any = None
 
@@ -68,6 +70,7 @@ class RpcResponse(BaseModel):
     """
     Data structure that represents an rpc response.
     """
+
     status: int
     body: Any = None
 
@@ -84,7 +87,7 @@ class RpcLogger(LoggerAdapter):
         super().__init__(logger=logger, extra={"request_id": request_id})
 
     def process(self, base_rpc, kwargs):
-        extra_str = ', '.join(f"{key}={value}" for key, value in self.extra.items())
+        extra_str = ", ".join(f"{key}={value}" for key, value in self.extra.items())
         return "[%s] %s" % (extra_str, base_rpc), kwargs
 
 

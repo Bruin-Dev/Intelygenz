@@ -1,16 +1,14 @@
 from datetime import datetime, timedelta
-from unittest.mock import Mock
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
-from shortuuid import uuid
-from asynctest import CoroutineMock
-
 from application.actions.new_closed_tickets_feedback import NewClosedTicketsFeedback
+from asynctest import CoroutineMock
 from config import testconfig as config
+from shortuuid import uuid
 
 uuid_ = uuid()
-uuid_mock = patch('application.actions.new_closed_tickets_feedback.uuid', return_value=uuid_)
+uuid_mock = patch("application.actions.new_closed_tickets_feedback.uuid", return_value=uuid_)
 
 
 @pytest.fixture(scope="function")
@@ -22,7 +20,7 @@ def ticket_created_ai(make_ticket_decamelized):
         created_by="Intelygenz Ai",
         call_type="REP",
         category="VOO",
-        severity=2
+        severity=2,
     )
 
 
@@ -35,27 +33,14 @@ def ticket_created_human(make_ticket_decamelized):
         created_by="Rando Guy",
         call_type="REP",
         category="VOO",
-        severity=2
+        severity=2,
     )
 
 
 class TestNewClosedTicketsFeedback:
-
-    def instance_test(
-            self,
-            event_bus,
-            logger,
-            scheduler,
-            repair_ticket_kre_repository,
-            bruin_repository
-    ):
+    def instance_test(self, event_bus, logger, scheduler, repair_ticket_kre_repository, bruin_repository):
         new_closed_tickets_feedback_instance = NewClosedTicketsFeedback(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            repair_ticket_kre_repository,
-            bruin_repository
+            event_bus, logger, scheduler, config, repair_ticket_kre_repository, bruin_repository
         )
 
         assert new_closed_tickets_feedback_instance._event_bus is event_bus
@@ -67,9 +52,7 @@ class TestNewClosedTicketsFeedback:
 
     @pytest.mark.asyncio
     async def start_closed_new_tickets_feedback_job_with_exec_on_start_test(
-            self,
-            new_closed_tickets_feedback,
-            scheduler
+        self, new_closed_tickets_feedback, scheduler
     ):
         next_run_time = datetime.now()
         added_seconds = timedelta(0, 5)
@@ -77,16 +60,16 @@ class TestNewClosedTicketsFeedback:
         datetime_mock = Mock()
         datetime_mock.now.return_value = next_run_time
 
-        with patch('application.actions.new_closed_tickets_feedback.datetime', datetime_mock):
+        with patch("application.actions.new_closed_tickets_feedback.datetime", datetime_mock):
             await new_closed_tickets_feedback.start_closed_ticket_feedback(exec_on_start=True)
 
         scheduler.add_job.assert_called_once_with(
             new_closed_tickets_feedback._run_closed_tickets_polling,
-            'interval',
-            seconds=config.MONITOR_CONFIG['scheduler_config']['new_closed_tickets_feedback'],
+            "interval",
+            seconds=config.MONITOR_CONFIG["scheduler_config"]["new_closed_tickets_feedback"],
             next_run_time=next_run_time + added_seconds,
             replace_existing=False,
-            id='_run_closed_tickets_polling'
+            id="_run_closed_tickets_polling",
         )
 
     def get_igz_created_tickets__test(self, new_closed_tickets_feedback, ticket_created_ai, ticket_created_human):
@@ -105,9 +88,7 @@ class TestNewClosedTicketsFeedback:
 
     @pytest.mark.asyncio
     async def get_closed_tickets_created_during_last_3_days__ok__test(
-            self,
-            new_closed_tickets_feedback,
-            ticket_created_ai
+        self, new_closed_tickets_feedback, ticket_created_ai
     ):
         bruin_response = {"status": 200, "body": [ticket_created_ai]}
 
@@ -162,19 +143,17 @@ class TestNewClosedTicketsFeedback:
 
         await new_closed_tickets_feedback._save_closed_ticket_feedback(ticket_created_ai)
 
-        bruin_repository.get_status_and_cancellation_reasons.assert_awaited_once_with(ticket_created_ai['ticket_id'])
+        bruin_repository.get_status_and_cancellation_reasons.assert_awaited_once_with(ticket_created_ai["ticket_id"])
         repair_ticket_kre_repository.save_closed_ticket_feedback.assert_awaited_once_with(
-            ticket_created_ai['ticket_id'],
-            ticket_created_ai['client_id'],
-            bruin_response_body['ticket_status'],
-            bruin_response_body['cancellation_reasons']
+            ticket_created_ai["ticket_id"],
+            ticket_created_ai["client_id"],
+            bruin_response_body["ticket_status"],
+            bruin_response_body["cancellation_reasons"],
         )
 
     @pytest.mark.asyncio
     async def save_closed_ticket_feedback__bruin_status_and_reasons_error_test(
-            self,
-            new_closed_tickets_feedback,
-            ticket_created_ai
+        self, new_closed_tickets_feedback, ticket_created_ai
     ):
         bruin_response = {"status": 500, "body": "Error"}
 
@@ -191,7 +170,7 @@ class TestNewClosedTicketsFeedback:
 
         await new_closed_tickets_feedback._save_closed_ticket_feedback(ticket_created_ai)
 
-        bruin_repository.get_status_and_cancellation_reasons.assert_awaited_once_with(ticket_created_ai['ticket_id'])
+        bruin_repository.get_status_and_cancellation_reasons.assert_awaited_once_with(ticket_created_ai["ticket_id"])
         repair_ticket_kre_repository.save_closed_ticket_feedback.assert_not_awaited()
         logger.error.assert_called_once()
 
@@ -215,11 +194,11 @@ class TestNewClosedTicketsFeedback:
 
         await new_closed_tickets_feedback._save_closed_ticket_feedback(ticket_created_ai)
 
-        bruin_repository.get_status_and_cancellation_reasons.assert_awaited_once_with(ticket_created_ai['ticket_id'])
+        bruin_repository.get_status_and_cancellation_reasons.assert_awaited_once_with(ticket_created_ai["ticket_id"])
         repair_ticket_kre_repository.save_closed_ticket_feedback.assert_awaited_once_with(
-            ticket_created_ai['ticket_id'],
-            ticket_created_ai['client_id'],
-            bruin_response_body['ticket_status'],
-            bruin_response_body['cancellation_reasons']
+            ticket_created_ai["ticket_id"],
+            ticket_created_ai["client_id"],
+            bruin_response_body["ticket_status"],
+            bruin_response_body["cancellation_reasons"],
         )
         logger.error.assert_called_once()

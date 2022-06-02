@@ -3,28 +3,24 @@ import logging
 import sys
 
 NATS_CONFIG = {
-    'servers': 'nats://nats-server:4222',
-    'client_ID': 'last-contact-report-test',
-    'subscriber': {
-        'pending_limits': 65536
-    },
-    'publisher': {
-        'max_pub_acks_inflight': 6000
-    }
+    "servers": "nats://nats-server:4222",
+    "client_ID": "last-contact-report-test",
+    "subscriber": {"pending_limits": 65536},
+    "publisher": {"max_pub_acks_inflight": 6000},
 }
 
 LOG_CONFIG = {
-    'name': 'test-name',
-    'level': logging.DEBUG,
-    'stream_handler': logging.StreamHandler(sys.stdout),
-    'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
+    "name": "test-name",
+    "level": logging.DEBUG,
+    "stream_handler": logging.StreamHandler(sys.stdout),
+    "format": "%(asctime)s: %(module)s: %(levelname)s: %(message)s",
 }
 
-TIMEZONE = 'US/Eastern'
+TIMEZONE = "US/Eastern"
 
 REPORT_CONFIG = {
-    'recipient': "some.recipient@email.com",
-    'monitored_velocloud_hosts': [
+    "recipient": "some.recipient@email.com",
+    "monitored_velocloud_hosts": [
         "mettel.velocloud.net",
         "metvco02.mettel.net",
         "metvco03.mettel.net",
@@ -32,13 +28,8 @@ REPORT_CONFIG = {
     ],
 }
 
-ENVIRONMENT_NAME = 'dev'
+ENVIRONMENT_NAME = "dev"
 
-QUART_CONFIG = {
-    'title': 'last-contact-report',
-    'port': 5000
-}
+QUART_CONFIG = {"title": "last-contact-report", "port": 5000}
 
-METRICS_SERVER_CONFIG = {
-    'port': 9090
-}
+METRICS_SERVER_CONFIG = {"port": 9090}

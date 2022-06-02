@@ -1,28 +1,25 @@
 from datetime import datetime, timedelta
+from unittest.mock import Mock, patch
 
 import pytest
-from shortuuid import uuid
-from unittest.mock import Mock
-from unittest.mock import patch
-from asynctest import CoroutineMock
-
 from application.actions.new_created_tickets_feedback import NewCreatedTicketsFeedback
+from asynctest import CoroutineMock
 from config import testconfig as config
+from shortuuid import uuid
 
 uuid_ = uuid()
-uuid_mock = patch('application.actions.new_created_tickets_feedback.uuid', return_value=uuid_)
+uuid_mock = patch("application.actions.new_created_tickets_feedback.uuid", return_value=uuid_)
 
 
 class TestNewCreatedTicketsFeedback:
-
     def instance_test(
-            self,
-            event_bus,
-            logger,
-            scheduler,
-            new_created_tickets_repository,
-            repair_ticket_kre_repository,
-            bruin_repository,
+        self,
+        event_bus,
+        logger,
+        scheduler,
+        new_created_tickets_repository,
+        repair_ticket_kre_repository,
+        bruin_repository,
     ):
         new_created_tickets_feedback = NewCreatedTicketsFeedback(
             event_bus,
@@ -31,7 +28,7 @@ class TestNewCreatedTicketsFeedback:
             config,
             new_created_tickets_repository,
             repair_ticket_kre_repository,
-            bruin_repository
+            bruin_repository,
         )
 
         assert new_created_tickets_feedback._event_bus is event_bus
@@ -44,9 +41,7 @@ class TestNewCreatedTicketsFeedback:
 
     @pytest.mark.asyncio
     async def start_created_new_tickets_feedback_job_with_exec_on_start_test(
-            self,
-            new_created_tickets_feedback,
-            scheduler
+        self, new_created_tickets_feedback, scheduler
     ):
         next_run_time = datetime.now()
         added_seconds = timedelta(0, 5)
@@ -54,16 +49,16 @@ class TestNewCreatedTicketsFeedback:
         datetime_mock = Mock()
         datetime_mock.now.return_value = next_run_time
 
-        with patch('application.actions.new_created_tickets_feedback.datetime', datetime_mock):
+        with patch("application.actions.new_created_tickets_feedback.datetime", datetime_mock):
             await new_created_tickets_feedback.start_created_ticket_feedback(exec_on_start=True)
 
         scheduler.add_job.assert_called_once_with(
             new_created_tickets_feedback._run_created_tickets_polling,
-            'interval',
-            seconds=config.MONITOR_CONFIG['scheduler_config']['new_created_tickets_feedback'],
+            "interval",
+            seconds=config.MONITOR_CONFIG["scheduler_config"]["new_created_tickets_feedback"],
             next_run_time=next_run_time + added_seconds,
             replace_existing=False,
-            id='_run_created_tickets_polling'
+            id="_run_created_tickets_polling",
         )
 
     def _check_error_test(self, new_created_tickets_feedback):
@@ -82,21 +77,17 @@ class TestNewCreatedTicketsFeedback:
 
     @pytest.mark.asyncio
     async def _save_created_ticket_feedback__ok_test(
-            self,
-            new_created_tickets_feedback,
-            make_email,
-            make_ticket_decamelized,
-            make_rpc_response
+        self, new_created_tickets_feedback, make_email, make_ticket_decamelized, make_rpc_response
     ):
         ticket_id = 1234
         email_id = 5678
         client_id = 4689
-        email_data = make_email(email_id=email_id, client_id=client_id)['email']
-        ticket_input = {'ticket_id': ticket_id}
+        email_data = make_email(email_id=email_id, client_id=client_id)["email"]
+        ticket_input = {"ticket_id": ticket_id}
 
         # create ticket data
         ticket_data = make_ticket_decamelized(ticket_id=ticket_id)
-        ticket_data['service_numbers'] = ["1234"]
+        ticket_data["service_numbers"] = ["1234"]
         ticket_response = make_rpc_response(status=200, body=ticket_data)
 
         # site map response
@@ -120,20 +111,16 @@ class TestNewCreatedTicketsFeedback:
 
         await new_created_tickets_feedback._save_created_ticket_feedback(email_data, ticket_input)
 
-        get_site_map_mock.assert_awaited_once_with(client_id, ticket_data['service_numbers'])
+        get_site_map_mock.assert_awaited_once_with(client_id, ticket_data["service_numbers"])
         new_created_tickets_repository.mark_complete.assert_called_once_with(email_id, ticket_id)
 
     @pytest.mark.asyncio
     async def _save_created_ticket_feedback__404_ticket_body_test(
-            self,
-            new_created_tickets_feedback,
-            make_email,
-            make_ticket_decamelized,
-            make_rpc_response
+        self, new_created_tickets_feedback, make_email, make_ticket_decamelized, make_rpc_response
     ):
         ticket_id = 1234
         email_id = 5678
-        email_data = make_email(email_id=email_id)['email']
+        email_data = make_email(email_id=email_id)["email"]
         ticket_data = make_ticket_decamelized(ticket_id=ticket_id)
         response = make_rpc_response(status=404, body="Not found")
 

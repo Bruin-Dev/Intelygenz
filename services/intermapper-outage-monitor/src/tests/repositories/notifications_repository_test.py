@@ -1,17 +1,15 @@
-from unittest.mock import Mock
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 from application.repositories import nats_error_response
 from application.repositories import notifications_repository as notifications_repository_module
 from application.repositories.notifications_repository import NotificationsRepository
 from asynctest import CoroutineMock
+from config import testconfig
 from shortuuid import uuid
 
-from config import testconfig
-
 uuid_ = uuid()
-uuid_mock = patch.object(notifications_repository_module, 'uuid', return_value=uuid_)
+uuid_mock = patch.object(notifications_repository_module, "uuid", return_value=uuid_)
 
 
 class TestNotificationsRepository:
@@ -44,8 +42,8 @@ class TestNotificationsRepository:
         event_bus.rpc_request.assert_awaited_once_with(
             "notification.slack.request",
             {
-                'request_id': uuid_,
-                'message': f"[{config.LOG_CONFIG['name']}]: {message}",
+                "request_id": uuid_,
+                "message": f"[{config.LOG_CONFIG['name']}]: {message}",
             },
             timeout=10,
         )
@@ -58,31 +56,28 @@ class TestNotificationsRepository:
         msg_dict = {
             "request_id": uuid_,
             "body": {
-                        'email_account': config.INTERMAPPER_CONFIG['inbox_email'],
-                        'email_filter': config.INTERMAPPER_CONFIG['sender_emails_list']
+                "email_account": config.INTERMAPPER_CONFIG["inbox_email"],
+                "email_filter": config.INTERMAPPER_CONFIG["sender_emails_list"],
             },
         }
 
         message_1 = {
-            'message': {
-                'From': 'Alerts@ft-sys.com',
-                'To': '<aaa@bbbb.com>, <ccc@dddd.com>',
-                'Date': 'Fri, 20 Mar 2020 04:34:50 -0400',
-                'subject': 'Idling Alert -- TT Bank - wert wert wert',
-                'Content-Type': 'text/plain; charset="us-ascii"',
-                'Content-Transfer-Encoding': 'quoted-printable',
-                'Message-ID': '<f2a81342-ba43-52d6-8899-babc10e001e5@JJJJ.KKKK.local>',
-                'Return-Path': 'Alerts@ft-sys.com',
-                'X-CCSI-Disclaimer': 'added'
+            "message": {
+                "From": "Alerts@ft-sys.com",
+                "To": "<aaa@bbbb.com>, <ccc@dddd.com>",
+                "Date": "Fri, 20 Mar 2020 04:34:50 -0400",
+                "subject": "Idling Alert -- TT Bank - wert wert wert",
+                "Content-Type": 'text/plain; charset="us-ascii"',
+                "Content-Transfer-Encoding": "quoted-printable",
+                "Message-ID": "<f2a81342-ba43-52d6-8899-babc10e001e5@JJJJ.KKKK.local>",
+                "Return-Path": "Alerts@ft-sys.com",
+                "X-CCSI-Disclaimer": "added",
             },
-            'body': 'tt Bank - yuio yuio has been idling for over 15 minute(s) at 04:28 AM 03/20/2020 \
-                            It is located at LOCATION: zxcv zxcv. It is currently on job 000000.',
-            'msg_uid': '1234'
+            "body": "tt Bank - yuio yuio has been idling for over 15 minute(s) at 04:28 AM 03/20/2020 \
+                            It is located at LOCATION: zxcv zxcv. It is currently on job 000000.",
+            "msg_uid": "1234",
         }
-        expected_response = {
-                                'body': [message_1],
-                                'status': 200
-        }
+        expected_response = {"body": [message_1], "status": 200}
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=expected_response)
 
@@ -102,8 +97,8 @@ class TestNotificationsRepository:
         msg_dict = {
             "request_id": uuid_,
             "body": {
-                        'email_account': config.INTERMAPPER_CONFIG['inbox_email'],
-                        'email_filter': config.INTERMAPPER_CONFIG['sender_emails_list']
+                "email_account": config.INTERMAPPER_CONFIG["inbox_email"],
+                "email_filter": config.INTERMAPPER_CONFIG["sender_emails_list"],
             },
         }
 
@@ -129,14 +124,11 @@ class TestNotificationsRepository:
         msg_dict = {
             "request_id": uuid_,
             "body": {
-                        'email_account': config.INTERMAPPER_CONFIG['inbox_email'],
-                        'email_filter': config.INTERMAPPER_CONFIG['sender_emails_list']
+                "email_account": config.INTERMAPPER_CONFIG["inbox_email"],
+                "email_filter": config.INTERMAPPER_CONFIG["sender_emails_list"],
             },
         }
-        return_body = {
-            'body': 'Failed',
-            'status': 400
-        }
+        return_body = {"body": "Failed", "status": 400}
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=return_body)
 
@@ -153,19 +145,13 @@ class TestNotificationsRepository:
     async def mark_email_as_read_test(self):
         logger = Mock()
         config = testconfig
-        msg_uid = '1234'
+        msg_uid = "1234"
         msg_dict = {
             "request_id": uuid_,
-            "body": {
-                        'email_account': config.INTERMAPPER_CONFIG['inbox_email'],
-                        'msg_uid': msg_uid
-            },
+            "body": {"email_account": config.INTERMAPPER_CONFIG["inbox_email"], "msg_uid": msg_uid},
         }
 
-        expected_response = {
-                                'body': 'Success',
-                                'status': 200
-        }
+        expected_response = {"body": "Success", "status": 200}
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=expected_response)
 
@@ -179,19 +165,13 @@ class TestNotificationsRepository:
     async def mark_email_as_read_failed_rpc_test(self):
         logger = Mock()
         config = testconfig
-        msg_uid = '1234'
+        msg_uid = "1234"
         msg_dict = {
             "request_id": uuid_,
-            "body": {
-                        'email_account': config.INTERMAPPER_CONFIG['inbox_email'],
-                        'msg_uid': msg_uid
-            },
+            "body": {"email_account": config.INTERMAPPER_CONFIG["inbox_email"], "msg_uid": msg_uid},
         }
 
-        expected_response = {
-                                'body': 'Success',
-                                'status': 200
-        }
+        expected_response = {"body": "Success", "status": 200}
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(side_effect=Exception)
 
@@ -208,19 +188,13 @@ class TestNotificationsRepository:
     async def mark_email_as_read_non_2xx_test(self):
         logger = Mock()
         config = testconfig
-        msg_uid = '1234'
+        msg_uid = "1234"
         msg_dict = {
             "request_id": uuid_,
-            "body": {
-                'email_account': config.INTERMAPPER_CONFIG['inbox_email'],
-                'msg_uid': msg_uid
-            },
+            "body": {"email_account": config.INTERMAPPER_CONFIG["inbox_email"], "msg_uid": msg_uid},
         }
 
-        expected_response = {
-            'body': 'Failed',
-            'status': 400
-        }
+        expected_response = {"body": "Failed", "status": 400}
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=expected_response)
 

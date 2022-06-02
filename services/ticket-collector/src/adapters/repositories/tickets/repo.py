@@ -1,13 +1,12 @@
 from datetime import datetime
 from typing import Dict
 
-from pymongo.collection import Collection
-
 from adapters.db.mongodb import IDB
+from pymongo.collection import Collection
 
 
 class TicketsRepository(object):
-    COLLECTION_NAME = 'tickets'
+    COLLECTION_NAME = "tickets"
 
     def __init__(self, database: IDB, logger):
         """
@@ -30,9 +29,9 @@ class TicketsRepository(object):
         list_collections = default_database.collection_names()
 
         if self.COLLECTION_NAME in list_collections:
-            self.logger.info('The tickets collection exists on the DB')
+            self.logger.info("The tickets collection exists on the DB")
         else:
-            self.logger.info('The tickets collection does not exist on the DB')
+            self.logger.info("The tickets collection does not exist on the DB")
             default_database.create_collection(self.COLLECTION_NAME)
 
         return default_database[self.COLLECTION_NAME]
@@ -54,8 +53,8 @@ class TicketsRepository(object):
         :param events:
         :return None:
         """
-        self.logger.info(f'Saving events on ticket {ticket_id}')
-        self.collection.update_one({"ticket_id": ticket_id}, {"$set": {'events': events, 'status': True}})
+        self.logger.info(f"Saving events on ticket {ticket_id}")
+        self.collection.update_one({"ticket_id": ticket_id}, {"$set": {"events": events, "status": True}})
 
     def delete_ticket(self, ticket_id: int) -> None:
         """
@@ -63,7 +62,7 @@ class TicketsRepository(object):
         :param ticket_id:
         :return:
         """
-        self.logger.info(f'Deleting ticket {ticket_id} from the DB')
+        self.logger.info(f"Deleting ticket {ticket_id} from the DB")
         self.collection.delete_one({"ticket_id": ticket_id})
 
     def mark_not_accessible(self, ticket_id: int) -> None:
@@ -73,8 +72,8 @@ class TicketsRepository(object):
         :param events:
         :return None:
         """
-        self.logger.info(f'Marking ticket {ticket_id} as not accessible for us')
-        self.collection.update_one({"ticket_id": ticket_id}, {"$set": {'access': False}})
+        self.logger.info(f"Marking ticket {ticket_id} as not accessible for us")
+        self.collection.update_one({"ticket_id": ticket_id}, {"$set": {"access": False}})
 
     def get_ticket_by_id(self, ticket_id: int) -> Dict:
         """
@@ -82,12 +81,12 @@ class TicketsRepository(object):
         :param ticket_id:
         :return Dict:
         """
-        ticket = self.collection.find_one({'ticket_id': ticket_id})
+        ticket = self.collection.find_one({"ticket_id": ticket_id})
 
         if ticket:
-            self.logger.info(f'Ticket {ticket_id} found on the DB')
+            self.logger.info(f"Ticket {ticket_id} found on the DB")
         else:
-            self.logger.info(f'Ticket {ticket_id} not found on the DB')
+            self.logger.info(f"Ticket {ticket_id} not found on the DB")
 
         return ticket
 
@@ -98,12 +97,12 @@ class TicketsRepository(object):
         :return Dict:
         """
         return {
-            'ticket_id': ticket['ticketID'],
-            'details': ticket,
-            'date': self.get_creation_date_from_ticket(ticket=ticket),
-            'status': False,
-            'access': True,
-            'events': []
+            "ticket_id": ticket["ticketID"],
+            "details": ticket,
+            "date": self.get_creation_date_from_ticket(ticket=ticket),
+            "status": False,
+            "access": True,
+            "events": [],
         }
 
     @staticmethod
@@ -113,5 +112,5 @@ class TicketsRepository(object):
         :param ticket:
         :return datetime:
         """
-        format_ticket = '%m/%d/%Y %I:%M:%S %p'
-        return datetime.strptime(ticket['createDate'], format_ticket)
+        format_ticket = "%m/%d/%Y %I:%M:%S %p"
+        return datetime.strptime(ticket["createDate"], format_ticket)

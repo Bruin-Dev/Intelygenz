@@ -6,7 +6,6 @@ from asynctest import CoroutineMock
 
 
 class TestGetInference:
-
     def instance_test(self):
         config = Mock()
         logger = Mock()
@@ -21,23 +20,21 @@ class TestGetInference:
         assert inference._kre_repository == kre_repository
 
     @pytest.mark.parametrize(
-        'body_in_topic', [
+        "body_in_topic",
+        [
             {},
-            ({'some-key': 'some-data'}),
-        ], ids=[
-            'without_body',
-            'without_params',
-        ]
+            ({"some-key": "some-data"}),
+        ],
+        ids=[
+            "without_body",
+            "without_params",
+        ],
     )
     @pytest.mark.asyncio
     async def get_email_inference_error_400_test(self, body_in_topic):
         request_id = 123
-        response_topic = '_INBOX.2007314fe0fcb2cdc2a2914c1'
-        msg_published_in_topic = {
-            'request_id': request_id,
-            'response_topic': response_topic,
-            'body': body_in_topic
-        }
+        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
+        msg_published_in_topic = {"request_id": request_id, "response_topic": response_topic, "body": body_in_topic}
         config = Mock()
         logger = Mock()
 
@@ -55,10 +52,10 @@ class TestGetInference:
         inference_action._event_bus.publish_message.assert_awaited_once_with(
             response_topic,
             {
-                'request_id': request_id,
-                'body': 'You must specify {.."body": { "email_id", "subject", ...}} in the request',
-                'status': 400,
-            }
+                "request_id": request_id,
+                "body": 'You must specify {.."body": { "email_id", "subject", ...}} in the request',
+                "status": 400,
+            },
         )
         inference_action._kre_repository.get_email_inference.assert_not_awaited()
         logger.info.assert_not_called()
@@ -69,18 +66,15 @@ class TestGetInference:
         logger = Mock()
 
         request_id = 123
-        response_topic = '_INBOX.2007314fe0fcb2cdc2a2914c1'
+        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
         email = make_email(email_id="1234")
         request_body = make_inference_request_payload(email_data=email)
         msg_published_in_topic = {
-            'request_id': request_id,
-            'body': request_body,
-            'response_topic': response_topic,
+            "request_id": request_id,
+            "body": request_body,
+            "response_topic": response_topic,
         }
-        expected_inference = {
-            'status': 200,
-            'body': make_inference_data()
-        }
+        expected_inference = {"status": 200, "body": make_inference_data()}
 
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
@@ -96,8 +90,8 @@ class TestGetInference:
         inference_action._event_bus.publish_message.assert_awaited_once_with(
             response_topic,
             {
-                'request_id': request_id,
+                "request_id": request_id,
                 **expected_inference,
-            }
+            },
         )
         logger.info.assert_called_once()

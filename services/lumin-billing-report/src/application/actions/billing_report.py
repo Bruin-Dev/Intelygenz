@@ -1,28 +1,27 @@
 from collections import defaultdict
 from datetime import date, datetime, time, timedelta
 
+from application.clients.email_client import EmailClient
+from application.repositories.lumin_repository import LuminBillingRepository, LuminBillingTypes
+from application.repositories.template_renderer import TemplateRenderer
 from apscheduler.events import EVENT_JOB_ERROR, JobExecutionEvent
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.util import undefined
 from pytz import timezone
 
-from application.clients.email_client import EmailClient
-from application.repositories.template_renderer import TemplateRenderer
-from application.repositories.lumin_repository import LuminBillingRepository
-from application.repositories.lumin_repository import LuminBillingTypes
-
 
 class BillingReport:
 
-    JOB_ID = '_billing_report_process'
+    JOB_ID = "_billing_report_process"
 
     def __init__(
-            self,
-            lumin_repo: LuminBillingRepository,
-            email_client: EmailClient,
-            template_renderer: TemplateRenderer,
-            scheduler: AsyncIOScheduler,
-            **opts):
+        self,
+        lumin_repo: LuminBillingRepository,
+        email_client: EmailClient,
+        template_renderer: TemplateRenderer,
+        scheduler: AsyncIOScheduler,
+        **opts,
+    ):
         self._lumin_repo = lumin_repo
         self._email_client = email_client
         self._template_renderer = template_renderer
@@ -36,16 +35,18 @@ class BillingReport:
         next_run_time = undefined
 
         if exec_on_start:
-            next_run_time = datetime.now(timezone(self._config['timezone']))
-            self._logger.info(f'It will be executed now')
+            next_run_time = datetime.now(timezone(self._config["timezone"]))
+            self._logger.info(f"It will be executed now")
 
         self._scheduler.add_job(
-            self._billing_report_process, 'cron',
+            self._billing_report_process,
+            "cron",
             day=1,
             misfire_grace_time=86400,
             replace_existing=True,
             next_run_time=next_run_time,
-            id=self.JOB_ID)
+            id=self.JOB_ID,
+        )
 
     def register_error_handler(self):
         self._scheduler.add_listener(self._event_listener, EVENT_JOB_ERROR)
@@ -54,7 +55,7 @@ class BillingReport:
         if event.job_id != self.JOB_ID:
             return
 
-        self._logger.exception('Execution failed for billing report', event.exception)
+        self._logger.exception("Execution failed for billing report", event.exception)
         self.start_billing_report_job(exec_on_start=True)
 
     async def generate_billing_report_data(self):
@@ -68,11 +69,11 @@ class BillingReport:
             "dates": {
                 "current": date.today().strftime(self._config["date_format"]),
                 "start": first.strftime(self._config["date_format"]),
-                "end": last.strftime(self._config["date_format"])
+                "end": last.strftime(self._config["date_format"]),
             },
             "customer": self._config["customer_name"],
             "total_api_uses": 0,
-            "type_counts": defaultdict(int)
+            "type_counts": defaultdict(int),
         }
 
         items = await self._lumin_repo.get_billing_data_for_period(billing_types, first, last)

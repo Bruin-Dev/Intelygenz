@@ -3,12 +3,10 @@ from unittest.mock import Mock
 import pytest
 from application.actions.get_emails import GetEmails
 from asynctest import CoroutineMock
-
 from config import testconfig as config
 
 
 class TestGetEmails:
-
     def instance_test(self):
         logger = Mock()
         event_bus = Mock()
@@ -25,27 +23,18 @@ class TestGetEmails:
     async def get_unread_emails_ok_test(self):
         request_id = "123"
         response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
-        email = 'fake@gmail.com'
-        email_filter = ['filter@gmail.com']
+        email = "fake@gmail.com"
+        email_filter = ["filter@gmail.com"]
 
         msg_dict = {
             "request_id": request_id,
             "response_topic": response_topic,
-            "body": {
-                        'email_account': email,
-                        'email_filter': email_filter
-            },
+            "body": {"email_account": email, "email_filter": email_filter},
         }
 
-        unread_emails = ['unread_email']
-        unread_emails_response = {
-                                    'body': unread_emails,
-                                    'status': 200
-        }
-        event_bus_response = {
-                                'request_id': request_id,
-                                **unread_emails_response
-        }
+        unread_emails = ["unread_email"]
+        unread_emails_response = {"body": unread_emails, "status": 200}
+        event_bus_response = {"request_id": request_id, **unread_emails_response}
         logger = Mock()
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
@@ -64,18 +53,14 @@ class TestGetEmails:
     async def get_unread_emails_ko_no_body_test(self):
         request_id = "123"
         response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
-        email = 'fake@gmail.com'
+        email = "fake@gmail.com"
 
         msg_dict = {
             "request_id": request_id,
             "response_topic": response_topic,
         }
 
-        event_bus_response = {
-                                'request_id': request_id,
-                                'body': 'Must include "body" in request',
-                                'status': 400
-        }
+        event_bus_response = {"request_id": request_id, "body": 'Must include "body" in request', "status": 400}
         logger = Mock()
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
@@ -94,19 +79,15 @@ class TestGetEmails:
     async def get_unread_emails_ko_no_email_or_email_filter_test(self):
         request_id = "123"
         response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
-        email = 'fake@gmail.com'
+        email = "fake@gmail.com"
 
-        msg_dict = {
-            "request_id": request_id,
-            "response_topic": response_topic,
-            "body": {}
-        }
+        msg_dict = {"request_id": request_id, "response_topic": response_topic, "body": {}}
 
         event_bus_response = {
-                                'request_id': request_id,
-                                'body': 'You must include "email_account" and "email_filter" '
-                                        'in the "body" field of the response request',
-                                'status': 400
+            "request_id": request_id,
+            "body": 'You must include "email_account" and "email_filter" '
+            'in the "body" field of the response request',
+            "status": 400,
         }
         logger = Mock()
         event_bus = Mock()

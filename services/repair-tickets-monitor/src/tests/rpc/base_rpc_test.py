@@ -2,14 +2,13 @@ import logging
 from http import HTTPStatus
 from logging import Logger
 from typing import Callable, Set
-from unittest.mock import Mock, ANY
+from unittest.mock import ANY, Mock
 
+from application.rpc import Rpc, RpcError, RpcFailedError, RpcLogger, RpcRequest, RpcResponse
 from asynctest import CoroutineMock
 from igz.packages.eventbus.eventbus import EventBus
 from pydantic import BaseModel
 from pytest import fixture, mark, raises
-
-from application.rpc import Rpc, RpcLogger, RpcRequest, RpcResponse, RpcFailedError, RpcError
 
 
 class SetRpcBody(BaseModel):
@@ -35,9 +34,8 @@ class TestRpc:
         await rpc.send(rpc_request)
 
         rpc.event_bus.rpc_request.assert_awaited_once_with(
-            topic=ANY,
-            message={"request_id": "any", "body": {"set": ["any_value"]}},
-            timeout=ANY)
+            topic=ANY, message={"request_id": "any", "body": {"set": ["any_value"]}}, timeout=ANY
+        )
 
     @mark.asyncio
     async def responses_are_properly_parsed_test(self, make_rpc, any_rpc_request):
@@ -146,7 +144,7 @@ def make_rpc() -> Callable[..., Rpc]:
         event_bus: EventBus = Mock(EventBus),
         logger: Logger = logging.getLogger(),
         topic: str = "any_topic",
-        timeout: int = hash("any_timeout")
+        timeout: int = hash("any_timeout"),
     ):
         return Rpc(event_bus, logger, topic, timeout)
 

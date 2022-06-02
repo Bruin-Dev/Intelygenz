@@ -1,12 +1,12 @@
-import pytest
 from unittest.mock import Mock
-from asynctest import CoroutineMock
+
+import pytest
 from application.actions.links_configuration import LinksConfiguration
+from asynctest import CoroutineMock
 from igz.packages.eventbus.eventbus import EventBus
 
 
 class TestLinksConfiguration:
-
     def instance_test(self):
         mock_logger = Mock()
         storage_manager = Mock()
@@ -34,19 +34,17 @@ class TestLinksConfiguration:
         request = {
             "request_id": 1234,
             "response_topic": "request.edge.config.modules",
-            "body": {
-                "host": "metvco02.mettel.net",
-                "enterprise_id": 1,
-                "edge_id": 4784
-            }
+            "body": {"host": "metvco02.mettel.net", "enterprise_id": 1, "edge_id": 4784},
         }
 
         await links_configuration.links_configuration(request)
         assert links_configuration._velocloud_repository.get_links_configuration.called
         assert links_configuration._event_bus.publish_message.called
-        assert links_configuration._event_bus.publish_message.call_args[0][1] == {"request_id": 1234,
-                                                                                  "body": "Some edge config module",
-                                                                                  "status": 200}
+        assert links_configuration._event_bus.publish_message.call_args[0][1] == {
+            "request_id": 1234,
+            "body": "Some edge config module",
+            "status": 200,
+        }
 
     @pytest.mark.asyncio
     async def links_configuration_ko_missing_keys_in_body_test(self):
@@ -60,19 +58,17 @@ class TestLinksConfiguration:
         request = {
             "request_id": 1234,
             "response_topic": "request.edge.config.modules",
-            "body": {
-                "host": "metvco02.mettel.net",
-                "edge_id": 4784
-            }
+            "body": {"host": "metvco02.mettel.net", "edge_id": 4784},
         }
         await links_configuration.links_configuration(request)
         assert not links_configuration._velocloud_repository.get_config.called
         assert links_configuration._event_bus.publish_message.called
         assert links_configuration._event_bus.publish_message.call_args[0][0] == request["response_topic"]
-        assert links_configuration._event_bus.publish_message.call_args[0][1] == \
-               {"request_id": 1234,
-                "body": 'You must specify {..."body": {"host", "enterprise_id", "edge_id"}...} in the request',
-                "status": 400}
+        assert links_configuration._event_bus.publish_message.call_args[0][1] == {
+            "request_id": 1234,
+            "body": 'You must specify {..."body": {"host", "enterprise_id", "edge_id"}...} in the request',
+            "status": 400,
+        }
 
     @pytest.mark.asyncio
     async def links_configuration_ko_not_body_test(self):
@@ -91,7 +87,8 @@ class TestLinksConfiguration:
         assert not links_configuration._velocloud_repository.get_config.called
         assert links_configuration._event_bus.publish_message.called
         assert links_configuration._event_bus.publish_message.call_args[0][0] == request["response_topic"]
-        assert links_configuration._event_bus.publish_message.call_args[0][1] == \
-               {"request_id": 1234,
-                "body": 'Must include "body" in request',
-                "status": 400}
+        assert links_configuration._event_bus.publish_message.call_args[0][1] == {
+            "request_id": 1234,
+            "body": 'Must include "body" in request',
+            "status": 400,
+        }

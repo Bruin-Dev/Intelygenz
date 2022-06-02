@@ -6,7 +6,6 @@ from asynctest import CoroutineMock
 
 
 class TestGetCircuitID:
-
     def instance_test(self):
         logger = Mock()
         event_bus = Mock()
@@ -20,20 +19,17 @@ class TestGetCircuitID:
 
     @pytest.mark.asyncio
     async def get_circuit_id_test(self):
-        circuit_id_return = {'body': {"clientID": '432', "subAccount": "string", "wtn": "123",
-                                      "inventoryID": 0, "addressID": 0},
-                             'status': 200}
-        circuit_id = '123'
-        client_id = '321'
+        circuit_id_return = {
+            "body": {"clientID": "432", "subAccount": "string", "wtn": "123", "inventoryID": 0, "addressID": 0},
+            "status": 200,
+        }
+        circuit_id = "123"
+        client_id = "321"
 
         payload = {
-            'circuit_id': circuit_id,
+            "circuit_id": circuit_id,
         }
-        event_bus_request = {
-            "request_id": 19,
-            "body": payload,
-            "response_topic": "some.topic"
-        }
+        event_bus_request = {"request_id": 19, "body": payload, "response_topic": "some.topic"}
 
         event_bus_response = {
             "request_id": 19,
@@ -55,18 +51,14 @@ class TestGetCircuitID:
 
     @pytest.mark.asyncio
     async def get_circuit_id_no_body_test(self):
-        circuit_id_return = {'body': 'You must specify {.."body":{"circuit_id"}...} in the request',
-                             'status': 400}
-        circuit_id = '123'
-        client_id = '321'
+        circuit_id_return = {"body": 'You must specify {.."body":{"circuit_id"}...} in the request', "status": 400}
+        circuit_id = "123"
+        client_id = "321"
 
         payload = {
-            'circuit_id': circuit_id,
+            "circuit_id": circuit_id,
         }
-        event_bus_request = {
-            "request_id": 19,
-            "response_topic": "some.topic"
-        }
+        event_bus_request = {"request_id": 19, "response_topic": "some.topic"}
 
         event_bus_response = {
             "request_id": 19,
@@ -88,17 +80,11 @@ class TestGetCircuitID:
 
     @pytest.mark.asyncio
     async def get_circuit_id_no_circuit_id_test(self):
-        circuit_id_return = {'body': 'You must specify "circuit_id" in the body',
-                             'status': 400}
+        circuit_id_return = {"body": 'You must specify "circuit_id" in the body', "status": 400}
 
-        payload = {
-        }
+        payload = {}
 
-        event_bus_request = {
-            "request_id": 19,
-            "body": payload,
-            "response_topic": "some.topic"
-        }
+        event_bus_request = {"request_id": 19, "body": payload, "response_topic": "some.topic"}
 
         event_bus_response = {
             "request_id": 19,

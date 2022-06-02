@@ -1,13 +1,13 @@
+import json
 from unittest.mock import Mock
+
+import pytest
 from application.actions.send_to_slack import SendToSlack
 from asynctest import CoroutineMock
 from config import testconfig as config
-import pytest
-import json
 
 
 class TestSlackNotifier:
-
     def instantiation_test(self):
         mock_slack_repository = Mock()
         test_bus = Mock()
@@ -45,5 +45,5 @@ class TestSlackNotifier:
         test_actions._slack_repository.send_to_slack.assert_called_once_with(msg_body)
         test_bus.publish_message.assert_awaited_once_with(
             response_topic,
-            {'request_id': request_id, 'status': msg_delivery_status},
+            {"request_id": request_id, "status": msg_delivery_status},
         )

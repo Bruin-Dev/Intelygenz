@@ -1,5 +1,6 @@
-import pytest
 from typing import Any, Dict, List
+
+import pytest
 
 
 @pytest.fixture(scope="session")

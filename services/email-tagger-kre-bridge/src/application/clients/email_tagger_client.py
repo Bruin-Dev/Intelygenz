@@ -1,22 +1,22 @@
 import json
-import grpc
-from grpc import aio as grpc_aio
-from google.protobuf.json_format import Parse, MessageToDict
 
-from application.clients.generated_grpc import public_input_pb2_grpc as pb2_grpc, public_input_pb2 as pb2
+import grpc
+from application.clients.generated_grpc import public_input_pb2 as pb2
+from application.clients.generated_grpc import public_input_pb2_grpc as pb2_grpc
+from google.protobuf.json_format import MessageToDict, Parse
+from grpc import aio as grpc_aio
 
 
 class EmailTaggerClient:
-
     def __init__(self, logger, config):
         self._config = config
         self._logger = logger
 
     async def _create_stub(self):
-        if self._config.KRE_CONFIG['grpc_secure_mode']:
-            certificates_file = open('/tmp/root-certificates.txt', 'a+')
+        if self._config.KRE_CONFIG["grpc_secure_mode"]:
+            certificates_file = open("/tmp/root-certificates.txt", "a+")
             certificates_file.seek(0)
-            root_certificates = bytes(certificates_file.read(), 'utf-8')
+            root_certificates = bytes(certificates_file.read(), "utf-8")
             credentials = grpc.ssl_channel_credentials(root_certificates=root_certificates)
             c = grpc_aio.secure_channel(f"{self._config.KRE_CONFIG['base_url']}", credentials=credentials)
         else:
@@ -44,36 +44,29 @@ class EmailTaggerClient:
         try:
             stub = await self._create_stub()
 
-            save_prediction_response = await stub.GetPrediction(Parse(
-                json.dumps(email_data).encode('utf8'),
-                pb2.PredictionRequest(),
-                ignore_unknown_fields=True
-            ), timeout=120)
-
-            dic_prediction_response = MessageToDict(
-                save_prediction_response,
-                preserving_proto_field_name=True
+            save_prediction_response = await stub.GetPrediction(
+                Parse(json.dumps(email_data).encode("utf8"), pb2.PredictionRequest(), ignore_unknown_fields=True),
+                timeout=120,
             )
+
+            dic_prediction_response = MessageToDict(save_prediction_response, preserving_proto_field_name=True)
 
             response = {
                 "body": dic_prediction_response,
                 "status": 200,
             }
-            self._logger.info(f'Got response getting prediction from Konstellation: {dic_prediction_response}')
+            self._logger.info(f"Got response getting prediction from Konstellation: {dic_prediction_response}")
 
         except grpc.RpcError as grpc_e:
             response = {
                 "body": f"Grpc error details: {grpc_e.details()}",
-                "status": self.__grpc_to_http_status(grpc_e.code())
+                "status": self.__grpc_to_http_status(grpc_e.code()),
             }
             self._logger.error(f'Got grpc error getting prediction from Konstellation: {response["body"]}')
 
         except Exception as e:
-            response = {
-                "body": f"Error: {e.args[0]}",
-                "status": 500
-            }
-            self._logger.error(f'Got error getting prediction from Konstellation: {e.args[0]}')
+            response = {"body": f"Error: {e.args[0]}", "status": 500}
+            self._logger.error(f"Got error getting prediction from Konstellation: {e.args[0]}")
 
         return response
 
@@ -81,34 +74,28 @@ class EmailTaggerClient:
         try:
             stub = await self._create_stub()
 
-            save_metrics_response = await stub.SaveMetrics(Parse(
-                json.dumps({
-                    "original_email": email_data,
-                    "ticket": ticket_data
-                }).encode('utf8'),
-                pb2.SaveMetricsRequest(),
-                ignore_unknown_fields=True
-            ), timeout=120)
+            save_metrics_response = await stub.SaveMetrics(
+                Parse(
+                    json.dumps({"original_email": email_data, "ticket": ticket_data}).encode("utf8"),
+                    pb2.SaveMetricsRequest(),
+                    ignore_unknown_fields=True,
+                ),
+                timeout=120,
+            )
 
-            response = {
-                "body": save_metrics_response.message,
-                "status": 200
-            }
+            response = {"body": save_metrics_response.message, "status": 200}
 
             self._logger.info(f'Got response saving metrics from Konstellation: {response["body"]}')
 
         except grpc.RpcError as grpc_e:
             response = {
                 "body": f"Grpc error details: {grpc_e.details()}",
-                "status": self.__grpc_to_http_status(grpc_e.code())
+                "status": self.__grpc_to_http_status(grpc_e.code()),
             }
             self._logger.error(f'Got grpc error saving metrics from Konstellation: {response["body"]}')
 
         except Exception as e:
-            response = {
-                "body": f"Error: {e.args[0]}",
-                "status": 500
-            }
+            response = {"body": f"Error: {e.args[0]}", "status": 500}
             self._logger.error(f'Got error saving metrics from Konstellation: {response["body"]}')
 
         return response

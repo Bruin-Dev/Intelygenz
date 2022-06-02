@@ -1,11 +1,10 @@
 from typing import Any, Dict, List
 
-from shortuuid import uuid
-from tenacity import retry, wait_exponential, stop_after_delay
-
 from application.domain.repair_email_output import RepairEmailOutput
 from application.repositories import nats_error_response
 from application.repositories.repair_ticket_kre_repository_mapper import to_output_message
+from shortuuid import uuid
+from tenacity import retry, stop_after_delay, wait_exponential
 
 
 class RepairTicketKreRepository:
@@ -78,7 +77,6 @@ class RepairTicketKreRepository:
             self._logger.error("email_id=%s Error trying to get prediction from rta KRE %e", email_id, e)
 
     async def save_outputs(self, output: RepairEmailOutput):
-
         @retry(
             wait=wait_exponential(
                 multiplier=self._config.NATS_CONFIG["multiplier"],

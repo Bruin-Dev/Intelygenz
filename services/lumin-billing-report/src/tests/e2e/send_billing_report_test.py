@@ -1,64 +1,65 @@
-import pytest
-
 from datetime import date, datetime, timedelta
 from unittest.mock import Mock
 
+import pytest
 from aioresponses import aioresponses
-from asynctest import CoroutineMock
-from pytz import timezone
-
-from application.clients.lumin_client import LuminBillingClient
-from application.repositories.template_renderer import TemplateRenderer
-from application.repositories.lumin_repository import LuminBillingRepository
 from application.actions.billing_report import BillingReport
+from application.clients.lumin_client import LuminBillingClient
+from application.repositories.lumin_repository import LuminBillingRepository
+from application.repositories.template_renderer import TemplateRenderer
+from asynctest import CoroutineMock
 from config import testconfig
+from pytz import timezone
 
 
 @pytest.fixture
 def mock_responses():
     tz = timezone(testconfig.BILLING_REPORT_CONFIG["timezone"])
-    return [{
-        "ok": True,
-        "next_token": "foo",
-        "items": [
-            {
-                "conversation_id": "5735605401026560",
-                "host_did": "199234567890",
-                "host_id": "default",
-                "id": "MDAwMDAwMDAwMDAwMDAwMDYyODQwNTU1NDQ4NTY1NzY=",
-                "timestamp": str(datetime.now(tz=tz) - timedelta(days=29)),
-                "type": "billing.scheduled"
-            },
-            {
-                "conversation_id": "5711381785477120",
-                "host_did": "199234567890",
-                "host_id": "default",
-                "id": "MDAwMDAwMDAwMDAwMDAwMDYzMDY4ODc1OTEwMDIxMTI=",
-                "timestamp": str(datetime.now(tz=tz) - timedelta(days=20)),
-                "type": "billing.scheduled"
-            }
-        ]
-    }, {
-        "ok": True,
-        "items": [
-            {
-                "conversation_id": "5735605401026560",
-                "host_did": "199234567890",
-                "host_id": "default",
-                "id": "MDAwMDAwMDAwMDAwMDAwMDYyODQwNTU1NDQ4NTY1NzY=",
-                "timestamp": str(datetime.now(tz=tz) - timedelta(days=15)),
-                "type": "billing.rescheduled"
-            },
-            {
-                "conversation_id": "5711381785477120",
-                "host_did": "199234567890",
-                "host_id": "default",
-                "id": "MDAwMDAwMDAwMDAwMDAwMDYzMDY4ODc1OTEwMDIxMTI=",
-                "timestamp": str(datetime.now(tz=tz) - timedelta(days=1)),
-                "type": "billing.rescheduled"
-            }
-        ]
-    }]
+    return [
+        {
+            "ok": True,
+            "next_token": "foo",
+            "items": [
+                {
+                    "conversation_id": "5735605401026560",
+                    "host_did": "199234567890",
+                    "host_id": "default",
+                    "id": "MDAwMDAwMDAwMDAwMDAwMDYyODQwNTU1NDQ4NTY1NzY=",
+                    "timestamp": str(datetime.now(tz=tz) - timedelta(days=29)),
+                    "type": "billing.scheduled",
+                },
+                {
+                    "conversation_id": "5711381785477120",
+                    "host_did": "199234567890",
+                    "host_id": "default",
+                    "id": "MDAwMDAwMDAwMDAwMDAwMDYzMDY4ODc1OTEwMDIxMTI=",
+                    "timestamp": str(datetime.now(tz=tz) - timedelta(days=20)),
+                    "type": "billing.scheduled",
+                },
+            ],
+        },
+        {
+            "ok": True,
+            "items": [
+                {
+                    "conversation_id": "5735605401026560",
+                    "host_did": "199234567890",
+                    "host_id": "default",
+                    "id": "MDAwMDAwMDAwMDAwMDAwMDYyODQwNTU1NDQ4NTY1NzY=",
+                    "timestamp": str(datetime.now(tz=tz) - timedelta(days=15)),
+                    "type": "billing.rescheduled",
+                },
+                {
+                    "conversation_id": "5711381785477120",
+                    "host_did": "199234567890",
+                    "host_id": "default",
+                    "id": "MDAwMDAwMDAwMDAwMDAwMDYzMDY4ODc1OTEwMDIxMTI=",
+                    "timestamp": str(datetime.now(tz=tz) - timedelta(days=1)),
+                    "type": "billing.rescheduled",
+                },
+            ],
+        },
+    ]
 
 
 @pytest.fixture
@@ -71,20 +72,16 @@ def expected_summary():
         "dates": {
             "current": today.strftime(testconfig.BILLING_REPORT_CONFIG["date_format"]),
             "start": first.strftime(testconfig.BILLING_REPORT_CONFIG["date_format"]),
-            "end": last.strftime(testconfig.BILLING_REPORT_CONFIG["date_format"])
+            "end": last.strftime(testconfig.BILLING_REPORT_CONFIG["date_format"]),
         },
         "customer": testconfig.BILLING_REPORT_CONFIG["customer_name"],
         "total_api_uses": 4,
-        "type_counts": {
-            "billing.scheduled": 2,
-            "billing.rescheduled": 2
-        }
+        "type_counts": {"billing.scheduled": 2, "billing.rescheduled": 2},
     }
 
 
 @pytest.mark.asyncio
 class TestSendBillingReport:
-
     async def send_billing_report_test(self, mock_responses, expected_summary):
         with aioresponses() as m:
             m.post(testconfig.LUMIN_CONFIG["uri"], payload=mock_responses[0])
@@ -97,10 +94,7 @@ class TestSendBillingReport:
             templ = TemplateRenderer(testconfig.BILLING_REPORT_CONFIG)
             templ.compose_email_object = Mock(wraps=templ.compose_email_object)
 
-            opts = {
-                "logger": Mock(),
-                "config": testconfig.BILLING_REPORT_CONFIG
-            }
+            opts = {"logger": Mock(), "config": testconfig.BILLING_REPORT_CONFIG}
 
             report = BillingReport(repo, email, templ, Mock(), **opts)
             await report._billing_report_process()
@@ -120,8 +114,8 @@ class TestSendBillingReport:
             end = expected_summary["dates"]["end"]
 
             assert "<!DOCTYPE html" in email_obj["html"]
-            assert f'<b>Generated</b>: {current}' in email_obj["html"]
-            assert f'<b>Period</b>: {start} - {end}' in email_obj["html"]
+            assert f"<b>Generated</b>: {current}" in email_obj["html"]
+            assert f"<b>Period</b>: {start} - {end}" in email_obj["html"]
 
             for r in mock_responses:
                 assert all(item["type"] in email_obj["html"] for item in r["items"])

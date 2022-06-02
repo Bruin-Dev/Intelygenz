@@ -1,12 +1,10 @@
-from collections import defaultdict
-from datetime import datetime
-from datetime import timedelta
-from copy import deepcopy
 import json
+from collections import defaultdict
+from copy import deepcopy
+from datetime import datetime, timedelta
 
 from pytz import utc
 from shortuuid import uuid
-
 from src.application import AffectingTroubles
 from src.application.repositories import nats_error_response
 from src.velocloud_bridge.app import VelocloudBridge
@@ -25,10 +23,10 @@ class VelocloudRepository:
         request = {
             "request_id": uuid(),
             "body": {
-                'host': host,
-                'interval': {
-                    'start': interval['start'].isoformat(),
-                    'end': interval['end'].isoformat(),
+                "host": host,
+                "interval": {
+                    "start": interval["start"].isoformat(),
+                    "end": interval["end"].isoformat(),
                 },
             },
         }
@@ -41,16 +39,16 @@ class VelocloudRepository:
             response = await self._velocloud_bridge.get_links_metric_info(request)
             self._logger.info(f"Got links metrics from Velocloud host {host}!")
         except Exception as e:
-            err_msg = f'An error occurred when requesting links metrics from Velocloud -> {e}'
+            err_msg = f"An error occurred when requesting links metrics from Velocloud -> {e}"
             response = nats_error_response
         else:
-            response_body = response['body']
-            response_status = response['status']
+            response_body = response["body"]
+            response_status = response["status"]
 
             if response_status not in range(200, 300):
                 err_msg = (
-                    f'Error while retrieving links metrics in {self._config.ENVIRONMENT_NAME.upper()} '
-                    f'environment: Error {response_status} - {response_body}'
+                    f"Error while retrieving links metrics in {self._config.ENVIRONMENT_NAME.upper()} "
+                    f"environment: Error {response_status} - {response_body}"
                 )
 
         if err_msg:
@@ -60,17 +58,17 @@ class VelocloudRepository:
 
     async def get_all_links_metrics(self, interval: dict) -> dict:
         all_links_metrics = []
-        for host in self._config.MONITOR_CONFIG['velo_filter']:
+        for host in self._config.MONITOR_CONFIG["velo_filter"]:
             response = await self.get_links_metrics_by_host(host=host, interval=interval)
-            if response['status'] not in range(200, 300):
+            if response["status"] not in range(200, 300):
                 self._logger.info(f"Error: could not retrieve links metrics from Velocloud host {host}")
                 continue
-            all_links_metrics += response['body']
+            all_links_metrics += response["body"]
 
         return_response = {
             "request_id": uuid(),
-            'body': all_links_metrics,
-            'status': 200,
+            "body": all_links_metrics,
+            "status": 200,
         }
         return return_response
 
@@ -78,11 +76,11 @@ class VelocloudRepository:
         trouble = AffectingTroubles.LATENCY
 
         now = datetime.now(utc)
-        past_moment = now - timedelta(minutes=self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble])
+        past_moment = now - timedelta(minutes=self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble])
 
         scan_interval_for_metrics = {
-            'start': past_moment,
-            'end': now,
+            "start": past_moment,
+            "end": now,
         }
         return await self.get_all_links_metrics(interval=scan_interval_for_metrics)
 
@@ -90,13 +88,11 @@ class VelocloudRepository:
         trouble = AffectingTroubles.PACKET_LOSS
 
         now = datetime.now(utc)
-        past_moment = now - timedelta(
-            minutes=self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble]
-        )
+        past_moment = now - timedelta(minutes=self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble])
 
         scan_interval_for_metrics = {
-            'start': past_moment,
-            'end': now,
+            "start": past_moment,
+            "end": now,
         }
         return await self.get_all_links_metrics(interval=scan_interval_for_metrics)
 
@@ -104,11 +100,11 @@ class VelocloudRepository:
         trouble = AffectingTroubles.JITTER
 
         now = datetime.now(utc)
-        past_moment = now - timedelta(minutes=self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble])
+        past_moment = now - timedelta(minutes=self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble])
 
         scan_interval_for_metrics = {
-            'start': past_moment,
-            'end': now,
+            "start": past_moment,
+            "end": now,
         }
         return await self.get_all_links_metrics(interval=scan_interval_for_metrics)
 
@@ -116,11 +112,11 @@ class VelocloudRepository:
         trouble = AffectingTroubles.BANDWIDTH_OVER_UTILIZATION
 
         now = datetime.now(utc)
-        past_moment = now - timedelta(minutes=self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble])
+        past_moment = now - timedelta(minutes=self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble])
 
         scan_interval_for_metrics = {
-            'start': past_moment,
-            'end': now,
+            "start": past_moment,
+            "end": now,
         }
         return await self.get_all_links_metrics(interval=scan_interval_for_metrics)
 
@@ -128,57 +124,59 @@ class VelocloudRepository:
         trouble = AffectingTroubles.BOUNCING
 
         now = datetime.now(utc)
-        past_moment = now - timedelta(minutes=self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble])
+        past_moment = now - timedelta(minutes=self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble])
 
         scan_interval_for_metrics = {
-            'start': past_moment,
-            'end': now,
+            "start": past_moment,
+            "end": now,
         }
         return await self.get_all_links_metrics(interval=scan_interval_for_metrics)
 
     async def get_enterprise_events(self, host, enterprise_id):
         err_msg = None
         now = datetime.now(utc)
-        minutes = self._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][AffectingTroubles.BOUNCING]
+        minutes = self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][AffectingTroubles.BOUNCING]
         past_moment = now - timedelta(minutes=minutes)
-        event_types = ['LINK_DEAD']
+        event_types = ["LINK_DEAD"]
 
         request = {
-            'request_id': uuid(),
-            'body': {
-                'host': host,
-                'enterprise_id': enterprise_id,
-                'filter': event_types,
-                'start_date': past_moment.isoformat(),
-                'end_date': now.isoformat(),
+            "request_id": uuid(),
+            "body": {
+                "host": host,
+                "enterprise_id": enterprise_id,
+                "filter": event_types,
+                "start_date": past_moment.isoformat(),
+                "end_date": now.isoformat(),
             },
         }
 
         try:
             self._logger.info(
-                f'Getting events of host {host} and enterprise id {enterprise_id} having any type of {event_types} '
-                f'that took place between {past_moment} and {now} from Velocloud...'
+                f"Getting events of host {host} and enterprise id {enterprise_id} having any type of {event_types} "
+                f"that took place between {past_moment} and {now} from Velocloud..."
             )
             response = await self._velocloud_bridge.report_enterprise_event(request)
         except Exception as e:
-            err_msg = f'An error occurred when requesting edge events from Velocloud for host {host} ' \
-                      f'and enterprise id {enterprise_id} -> {e}'
+            err_msg = (
+                f"An error occurred when requesting edge events from Velocloud for host {host} "
+                f"and enterprise id {enterprise_id} -> {e}"
+            )
             response = nats_error_response
         else:
-            response_body = response['body']
-            response_status = response['status']
+            response_body = response["body"]
+            response_status = response["status"]
 
             if response_status in range(200, 300):
                 self._logger.info(
-                    f'Got events of host {host} and enterprise id {enterprise_id} having any type in {event_types} '
-                    f'that took place between {past_moment} and {now} from Velocloud!'
+                    f"Got events of host {host} and enterprise id {enterprise_id} having any type in {event_types} "
+                    f"that took place between {past_moment} and {now} from Velocloud!"
                 )
             else:
                 err_msg = (
-                    f'Error while retrieving events of host {host} and enterprise id {enterprise_id} having any type '
-                    f'in {event_types} that took place between {past_moment} and {now} '
-                    f'in {self._config.ENVIRONMENT_NAME.upper()} '
-                    f'environment: Error {response_status} - {response_body}'
+                    f"Error while retrieving events of host {host} and enterprise id {enterprise_id} having any type "
+                    f"in {event_types} that took place between {past_moment} and {now} "
+                    f"in {self._config.ENVIRONMENT_NAME.upper()} "
+                    f"environment: Error {response_status} - {response_body}"
                 )
 
         if err_msg:
@@ -196,22 +194,21 @@ class VelocloudRepository:
             for enterprise_id in edges_by_enterprise:
                 edges = edges_by_enterprise[enterprise_id]
                 enterprise_events_response = await self.get_enterprise_events(host, enterprise_id)
-                enterprise_events = enterprise_events_response['body']
+                enterprise_events = enterprise_events_response["body"]
 
-                if enterprise_events_response['status'] not in range(200, 300):
+                if enterprise_events_response["status"] not in range(200, 300):
                     continue
 
                 for event in enterprise_events:
                     matching_edge = self._utils_repository.get_first_element_matching(
-                        edges,
-                        lambda edge: edge['edge_name'] == event['edgeName']
+                        edges, lambda edge: edge["edge_name"] == event["edgeName"]
                     )
                     if not matching_edge:
-                        self._logger.info(f'No edge in the customer cache matched edge name. Skipping...')
+                        self._logger.info(f"No edge in the customer cache matched edge name. Skipping...")
                         continue
 
-                    serial = matching_edge['serial_number']
-                    self._logger.info(f'Event with matches edge from customer cache with serial number {serial}')
+                    serial = matching_edge["serial_number"]
+                    self._logger.info(f"Event with matches edge from customer cache with serial number {serial}")
 
                     interface = self._utils_repository.get_interface_from_event(event)
                     events[serial][interface].append(event)
@@ -219,12 +216,12 @@ class VelocloudRepository:
         return events
 
     def _structure_edges_by_host_and_enterprise(self, customer_cache):
-        self._logger.info('Organizing customer cache by host and enterprise_id')
+        self._logger.info("Organizing customer cache by host and enterprise_id")
         edges = defaultdict(lambda: defaultdict(list))
 
         for edge in customer_cache:
-            host = edge['edge']['host']
-            enterprise_id = edge['edge']['enterprise_id']
+            host = edge["edge"]["host"]
+            enterprise_id = edge["edge"]["enterprise_id"]
             edges[host][enterprise_id].append(edge)
 
         return edges
@@ -235,12 +232,12 @@ class VelocloudRepository:
         ha_edges = []
 
         for edge in edge_list:
-            if not edge.get('ha_serial_number'):
+            if not edge.get("ha_serial_number"):
                 continue
 
             ha_edge = deepcopy(edge)
-            ha_edge['serial_number'] = edge['ha_serial_number']
-            ha_edge['ha_serial_number'] = edge['serial_number']
+            ha_edge["serial_number"] = edge["ha_serial_number"]
+            ha_edge["ha_serial_number"] = edge["serial_number"]
             ha_edges.append(ha_edge)
 
         edge_list.extend(ha_edges)
@@ -273,10 +270,10 @@ class VelocloudRepository:
 
         for host in self._config.VELOCLOUD_HOSTS:
             response = await self._get_edges_links_by_host(host=host)
-            if response['status'] not in range(200, 300):
+            if response["status"] not in range(200, 300):
                 self._logger.info(f"Error: could not retrieve edges links by host: {host}")
                 continue
-            all_edges += response['body']
+            all_edges += response["body"]
 
         return all_edges
 
@@ -285,9 +282,7 @@ class VelocloudRepository:
 
         request = {
             "request_id": uuid(),
-            "body": {
-                'host': host
-            },
+            "body": {"host": host},
         }
 
         try:
@@ -295,16 +290,16 @@ class VelocloudRepository:
             response = await self._velocloud_bridge.get_links_with_edge_info(request)
             self._logger.info("Got edges links from Velocloud!")
         except Exception as e:
-            err_msg = f'An error occurred when requesting edge list from {host} -> {e}'
+            err_msg = f"An error occurred when requesting edge list from {host} -> {e}"
             response = nats_error_response
         else:
-            response_body = response['body']
-            response_status = response['status']
+            response_body = response["body"]
+            response_status = response["status"]
 
             if response_status not in range(200, 300):
                 err_msg = (
-                    f'Error while retrieving edges links in {self._config.ENVIRONMENT_NAME.upper()} '
-                    f'environment: Error {response_status} - {response_body}'
+                    f"Error while retrieving edges links in {self._config.ENVIRONMENT_NAME.upper()} "
+                    f"environment: Error {response_status} - {response_body}"
                 )
 
         if err_msg:
@@ -315,11 +310,11 @@ class VelocloudRepository:
     def _extract_edge_info(self, links_with_edge_info: list) -> list:
         edges_by_serial = {}
         for link in links_with_edge_info:
-            velocloud_host = link['host']
-            enterprise_name = link['enterpriseName']
-            enterprise_id = link['enterpriseId']
-            edge_state = link['edgeState']
-            serial_number = link['edgeSerialNumber']
+            velocloud_host = link["host"]
+            enterprise_name = link["enterpriseName"]
+            enterprise_id = link["enterpriseId"]
+            edge_state = link["edgeState"]
+            serial_number = link["edgeSerialNumber"]
 
             if edge_state is None:
                 self._logger.info(
@@ -328,18 +323,14 @@ class VelocloudRepository:
                 )
                 continue
 
-            if edge_state == 'NEVER_ACTIVATED':
+            if edge_state == "NEVER_ACTIVATED":
                 self._logger.info(
                     f"Edge {link['edgeId']} in host {velocloud_host} and enterprise {enterprise_name}"
                     f"(ID: {enterprise_id}) has never been activated. Skipping..."
                 )
                 continue
 
-            edge_full_id = {
-                'host': link['host'],
-                'enterprise_id': enterprise_id,
-                'edge_id': link['edgeId']
-            }
+            edge_full_id = {"host": link["host"], "enterprise_id": enterprise_id, "edge_id": link["edgeId"]}
             blacklist_edges = self._config.MONITOR_CONFIG["blacklisted_edges"]
             if edge_full_id in blacklist_edges:
                 self._logger.info(
@@ -348,21 +339,21 @@ class VelocloudRepository:
                 continue
 
             edge = {
-                'enterpriseName': link['enterpriseName'],
-                'enterpriseId': link['enterpriseId'],
-                'enterpriseProxyId': link['enterpriseProxyId'],
-                'enterpriseProxyName': link['enterpriseProxyName'],
-                'edgeState': link['edgeState'],
-                'edgeSystemUpSince': link['edgeSystemUpSince'],
-                'edgeServiceUpSince': link['edgeServiceUpSince'],
-                'edgeLastContact': link['edgeLastContact'],
-                'edgeId': link['edgeId'],
-                'edgeSerialNumber': link['edgeSerialNumber'],
-                'edgeHASerialNumber': link['edgeHASerialNumber'],
-                'edgeModelNumber': link['edgeModelNumber'],
-                'edgeLatitude': link['edgeLatitude'],
-                'edgeLongitude': link['edgeLongitude'],
-                'host': link['host'],
+                "enterpriseName": link["enterpriseName"],
+                "enterpriseId": link["enterpriseId"],
+                "enterpriseProxyId": link["enterpriseProxyId"],
+                "enterpriseProxyName": link["enterpriseProxyName"],
+                "edgeState": link["edgeState"],
+                "edgeSystemUpSince": link["edgeSystemUpSince"],
+                "edgeServiceUpSince": link["edgeServiceUpSince"],
+                "edgeLastContact": link["edgeLastContact"],
+                "edgeId": link["edgeId"],
+                "edgeSerialNumber": link["edgeSerialNumber"],
+                "edgeHASerialNumber": link["edgeHASerialNumber"],
+                "edgeModelNumber": link["edgeModelNumber"],
+                "edgeLatitude": link["edgeLatitude"],
+                "edgeLongitude": link["edgeLongitude"],
+                "host": link["host"],
             }
 
             edges_by_serial.setdefault(serial_number, edge)
@@ -373,27 +364,27 @@ class VelocloudRepository:
     async def _get_logical_id_by_edge_list(self, edge_list):
         host_to_enterprise_id = {}
         for edge in edge_list:
-            host = edge['host']
+            host = edge["host"]
             host_to_enterprise_id.setdefault(host, set())
-            host_to_enterprise_id[host].add(edge['enterpriseId'])
+            host_to_enterprise_id[host].add(edge["enterpriseId"])
 
         logical_id_by_edge_full_id_list = []
         for host in host_to_enterprise_id:
             for enterprise in host_to_enterprise_id[host]:
                 enterprise_edge_list = await self._get_all_enterprise_edges(host, enterprise)
-                if enterprise_edge_list['status'] not in range(200, 300):
-                    self._logger.error(f'Error could not get enterprise edges of enterprise {enterprise}')
+                if enterprise_edge_list["status"] not in range(200, 300):
+                    self._logger.error(f"Error could not get enterprise edges of enterprise {enterprise}")
                     continue
-                for edge in enterprise_edge_list['body']:
+                for edge in enterprise_edge_list["body"]:
                     edge_full_id_and_logical_id = {
-                        'host': host,
-                        'enterprise_id': enterprise,
-                        'edge_id': edge['id'],
-                        'logical_id': []
+                        "host": host,
+                        "enterprise_id": enterprise,
+                        "edge_id": edge["id"],
+                        "logical_id": [],
                     }
                     for link in edge["links"]:
-                        logical_id_dict = {'interface_name': link['interface'], 'logical_id': link['logicalId']}
-                        edge_full_id_and_logical_id['logical_id'].append(logical_id_dict)
+                        logical_id_dict = {"interface_name": link["interface"], "logical_id": link["logicalId"]}
+                        edge_full_id_and_logical_id["logical_id"].append(logical_id_dict)
                     logical_id_by_edge_full_id_list.append(edge_full_id_and_logical_id)
 
         return logical_id_by_edge_full_id_list
@@ -403,10 +394,7 @@ class VelocloudRepository:
 
         request = {
             "request_id": uuid(),
-            "body": {
-                'host': host,
-                'enterprise_id': enterprise_id
-            },
+            "body": {"host": host, "enterprise_id": enterprise_id},
         }
 
         try:
@@ -414,17 +402,19 @@ class VelocloudRepository:
             response = await self._velocloud_bridge.enterprise_edge_list(request)
             self._logger.info(f"Got all edges from Velocloud host {host} and enterprise ID {enterprise_id}!")
         except Exception as e:
-            err_msg = f'An error occurred when requesting edge list from host {host} and enterprise ' \
-                      f'ID {enterprise_id} -> {e}'
+            err_msg = (
+                f"An error occurred when requesting edge list from host {host} and enterprise "
+                f"ID {enterprise_id} -> {e}"
+            )
             response = nats_error_response
         else:
-            response_body = response['body']
-            response_status = response['status']
+            response_body = response["body"]
+            response_status = response["status"]
 
             if response_status not in range(200, 300):
                 err_msg = (
-                    f'Error while retrieving edge list in {self._config.ENVIRONMENT_NAME.upper()} '
-                    f'environment: Error {response_status} - {response_body}'
+                    f"Error while retrieving edge list in {self._config.ENVIRONMENT_NAME.upper()} "
+                    f"environment: Error {response_status} - {response_body}"
                 )
 
         if err_msg:
@@ -437,75 +427,77 @@ class VelocloudRepository:
         edges_with_serials = []
 
         for edge in edge_list:
-            edge_full_id = {
-                'host': edge['host'],
-                'enterprise_id': edge['enterpriseId'],
-                'edge_id': edge['edgeId']
-            }
-            serial_number = edge.get('edgeSerialNumber')
-            ha_serial_number = edge.get('edgeHASerialNumber')
-            last_contact = edge.get('edgeLastContact')
-            edge_name = edge.get('edgeName')
+            edge_full_id = {"host": edge["host"], "enterprise_id": edge["enterpriseId"], "edge_id": edge["edgeId"]}
+            serial_number = edge.get("edgeSerialNumber")
+            ha_serial_number = edge.get("edgeHASerialNumber")
+            last_contact = edge.get("edgeLastContact")
+            edge_name = edge.get("edgeName")
 
-            logical_id_list = next((logical_id_edge for logical_id_edge in logical_ids_by_edge_list
-                                    if logical_id_edge['host'] == edge['host']
-                                    if logical_id_edge['enterprise_id'] == edge['enterpriseId']
-                                    if logical_id_edge['edge_id'] == edge['edgeId']), None)
+            logical_id_list = next(
+                (
+                    logical_id_edge
+                    for logical_id_edge in logical_ids_by_edge_list
+                    if logical_id_edge["host"] == edge["host"]
+                    if logical_id_edge["enterprise_id"] == edge["enterpriseId"]
+                    if logical_id_edge["edge_id"] == edge["edgeId"]
+                ),
+                None,
+            )
             logical_id = []
             if logical_id_list is not None:
-                logical_id = logical_id_list['logical_id']
+                logical_id = logical_id_list["logical_id"]
 
-            edges_with_serials.append({
-                'edge': edge_full_id,
-                'edge_name': edge_name,
-                'serial_number': serial_number,
-                'ha_serial_number': ha_serial_number,
-                'last_contact': last_contact,
-                'logical_ids': logical_id
-            })
+            edges_with_serials.append(
+                {
+                    "edge": edge_full_id,
+                    "edge_name": edge_name,
+                    "serial_number": serial_number,
+                    "ha_serial_number": ha_serial_number,
+                    "last_contact": last_contact,
+                    "logical_ids": logical_id,
+                }
+            )
 
         return edges_with_serials
 
     async def add_edge_config(self, edge):
-        edge['links_configuration'] = []
+        edge["links_configuration"] = []
 
-        edge_request = edge['edge']
+        edge_request = edge["edge"]
         configuration_response = await self.get_links_configuration(edge_request)
-        if configuration_response['status'] not in range(200, 300):
-            self._logger.error(f'Error while getting links configuration for edge {edge_request}')
+        if configuration_response["status"] not in range(200, 300):
+            self._logger.error(f"Error while getting links configuration for edge {edge_request}")
             return edge
 
-        for link in configuration_response['body']:
-            edge['links_configuration'].append({
-                'interfaces': link['interfaces'],
-                'mode': link['mode'],
-                'type': link['type'],
-            })
+        for link in configuration_response["body"]:
+            edge["links_configuration"].append(
+                {
+                    "interfaces": link["interfaces"],
+                    "mode": link["mode"],
+                    "type": link["type"],
+                }
+            )
         return edge
 
     async def get_links_configuration(self, edge):
         err_msg = None
 
-        request = {
-            "request_id": uuid(),
-            "body": edge
-        }
+        request = {"request_id": uuid(), "body": edge}
 
         try:
             self._logger.info(f"Getting links configuration for edge {edge}...")
             response = await self._velocloud_bridge.links_configuration(request)
         except Exception as e:
-            err_msg = f'An error occurred when requesting links configuration for edge {edge} -> {e}'
+            err_msg = f"An error occurred when requesting links configuration for edge {edge} -> {e}"
             response = nats_error_response
         else:
-            response_body = response['body']
-            response_status = response['status']
+            response_body = response["body"]
+            response_status = response["status"]
 
             if response_status not in range(200, 300):
                 err_msg = (
-                    f'Error while retrieving links configuration for edge {edge} in '
-                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: Error {response_status} - {response_body}'
-
+                    f"Error while retrieving links configuration for edge {edge} in "
+                    f"{self._config.ENVIRONMENT_NAME.upper()} environment: Error {response_status} - {response_body}"
                 )
             else:
                 self._logger.info(f"Got links configuration for edge {edge}!")

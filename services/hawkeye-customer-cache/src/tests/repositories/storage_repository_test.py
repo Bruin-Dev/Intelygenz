@@ -2,12 +2,10 @@ import json
 from unittest.mock import Mock
 
 from application.repositories.storage_repository import StorageRepository
-
 from config import testconfig
 
 
 class TestStorageRepository:
-
     def instance_test(self):
         config = testconfig
         logger = Mock()
@@ -37,5 +35,5 @@ class TestStorageRepository:
         storage_repository._redis.set = Mock()
         storage_repository.set_hawkeye_cache(cache_probes)
 
-        redis_key = f'{storage_repository._config.ENVIRONMENT_NAME}-hawkeye'
+        redis_key = f"{storage_repository._config.ENVIRONMENT_NAME}-hawkeye"
         storage_repository._redis.set.assert_called_with(redis_key, json.dumps(cache_probes))

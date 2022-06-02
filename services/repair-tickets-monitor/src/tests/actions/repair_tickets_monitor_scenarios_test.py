@@ -1,16 +1,17 @@
 from http import HTTPStatus
 from typing import List
-from unittest.mock import Mock, ANY
-
-from asynctest import CoroutineMock
-from pytest import mark, fixture
+from unittest.mock import ANY, Mock
 
 from application.actions.repair_tickets_monitor import RepairTicketsMonitor
 from application.domain.asset import AssetId
 from application.rpc import RpcFailedError, RpcRequest, RpcResponse
+from asynctest import CoroutineMock
 from config import testconfig as config
-from tests.actions.repair_tickets_monitor_scenarios import RepairTicketsMonitorScenario, \
-    make_repair_tickets_monitor_scenarios
+from pytest import fixture, mark
+from tests.actions.repair_tickets_monitor_scenarios import (
+    RepairTicketsMonitorScenario,
+    make_repair_tickets_monitor_scenarios,
+)
 
 scenarios = make_repair_tickets_monitor_scenarios()
 
@@ -75,14 +76,14 @@ def inference_data_for(make_inference_data):
             "body": make_inference_data(
                 potential_service_numbers=list(scenario.assets.keys()),
                 potential_tickets_numbers=[ticket.id for ticket in scenario.tickets],
-                predicted_class="" if scenario.email_actionable else "Other"
-            )
+                predicted_class="" if scenario.email_actionable else "Other",
+            ),
         }
 
     return builder
 
 
-@fixture(scope='function')
+@fixture(scope="function")
 def repair_tickets_monitor(
     event_bus,
     logger,
@@ -126,18 +127,12 @@ def mock_bruin_repository(bruin_repository, scenario: RepairTicketsMonitorScenar
                     "ticket_status": ticket.status.value,
                     "call_type": ticket.call_type,
                     "category": ticket.category,
-                }
+                },
             }
         else:
             return {"status": 400}
 
-    bruin_repository.verify_service_number_information = CoroutineMock(
-        side_effect=verify_service_number_information
-    )
-    bruin_repository.get_single_ticket_basic_info = CoroutineMock(
-        side_effect=get_single_ticket_basic_info
-    )
-    bruin_repository.get_existing_tickets_with_service_numbers = CoroutineMock(
-        return_value={"status": 200, "body": []}
-    )
+    bruin_repository.verify_service_number_information = CoroutineMock(side_effect=verify_service_number_information)
+    bruin_repository.get_single_ticket_basic_info = CoroutineMock(side_effect=get_single_ticket_basic_info)
+    bruin_repository.get_existing_tickets_with_service_numbers = CoroutineMock(return_value={"status": 200, "body": []})
     bruin_repository.link_email_to_ticket = CoroutineMock(return_value=scenario.link_email_to_ticket_response)

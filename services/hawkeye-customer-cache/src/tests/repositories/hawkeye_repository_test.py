@@ -1,22 +1,18 @@
-from unittest.mock import Mock
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
-
-from shortuuid import uuid
-
 from application import nats_error_response
 from application.repositories import hawkeye_repository as hawkeye_repository_module
 from application.repositories.hawkeye_repository import HawkeyeRepository
 from asynctest import CoroutineMock
 from config import testconfig
+from shortuuid import uuid
 
 uuid_ = uuid()
-uuid_mock = patch.object(hawkeye_repository_module, 'uuid', return_value=uuid_)
+uuid_mock = patch.object(hawkeye_repository_module, "uuid", return_value=uuid_)
 
 
 class TestHawkeyeRepository:
-
     def instance_test(self):
         event_bus = Mock()
         logger = Mock()
@@ -33,8 +29,8 @@ class TestHawkeyeRepository:
     @pytest.mark.asyncio
     async def get_probes_ok_test(self, hawkeye_repository, response_get_probes_down_ok):
         request = {
-            'request_id': uuid_,
-            'body': {},
+            "request_id": uuid_,
+            "body": {},
         }
 
         event_bus = Mock()
@@ -49,8 +45,8 @@ class TestHawkeyeRepository:
     @pytest.mark.asyncio
     async def get_probes_with_rpc_request_failing_test(self, hawkeye_repository):
         request = {
-            'request_id': uuid_,
-            'body': {},
+            "request_id": uuid_,
+            "body": {},
         }
 
         hawkeye_repository._event_bus.rpc_request = CoroutineMock(side_effect=Exception)
@@ -66,11 +62,12 @@ class TestHawkeyeRepository:
         assert result == nats_error_response
 
     @pytest.mark.asyncio
-    async def get_probes_with_rpc_request_returning_non_2xx_status_test(self, hawkeye_repository,
-                                                                        response_internal_error):
+    async def get_probes_with_rpc_request_returning_non_2xx_status_test(
+        self, hawkeye_repository, response_internal_error
+    ):
         request = {
-            'request_id': uuid_,
-            'body': {},
+            "request_id": uuid_,
+            "body": {},
         }
 
         hawkeye_repository._event_bus.rpc_request = CoroutineMock(return_value=response_internal_error)

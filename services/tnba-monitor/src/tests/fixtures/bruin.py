@@ -1,9 +1,7 @@
 from datetime import datetime
-from typing import List
-from typing import Optional
+from typing import List, Optional
 
 import pytest
-
 from tests.fixtures import _constants as constants
 from tests.fixtures._helpers import bruinize_date
 
@@ -31,7 +29,7 @@ def __generate_ticket_detail(*, status: str, serial_number: str, detail_id: int 
         "currentTaskID": None,
         "currentTaskName": None,
         "lastUpdatedBy": 442301,
-        "lastUpdatedAt": "2021-01-21T11:07:01.467-05:00"
+        "lastUpdatedAt": "2021-01-21T11:07:01.467-05:00",
     }
 
 
@@ -43,20 +41,20 @@ def __generate_ticket_note(*, serial_numbers: List[str], text: str, date: str = 
         "noteValue": text,
         "serviceNumber": serial_numbers,
         "createdDate": date,
-        "creator": "api_1@bruin.com"
+        "creator": "api_1@bruin.com",
     }
 
 
 def __generate_payload_for_note_append(*, detail_id: int = None, serial_number: str = None, text: str):
     payload = {
-        'text': text,
+        "text": text,
     }
 
     if detail_id:
-        payload['detail_id'] = detail_id
+        payload["detail_id"] = detail_id
 
     if serial_number:
-        payload['service_number'] = serial_number
+        payload["service_number"] = serial_number
 
     return payload
 
@@ -73,7 +71,7 @@ def __generate_next_result_item(*, result_name: str):
                 "defaultValue": None,
                 "required": False,
             }
-        ]
+        ],
     }
 
 
@@ -100,7 +98,7 @@ def __generate_task_history(*task_history_items: List[dict]):
 
 
 # Factories
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def make_ticket_note():
     def _inner(*, serial_number: str, date: str = None, text: str = None):
         return __generate_ticket_note(date=date, serial_numbers=[serial_number], text=text)
@@ -108,14 +106,14 @@ def make_ticket_note():
     return _inner
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def make_standard_tnba_note():
     def _inner(*, serial_number: str, prediction_name: str = None, date: str = None):
         prediction_name = prediction_name or constants.HOLMDEL_NOC_PREDICTION_NAME
 
         text = (
             "#*MetTel's IPA*#\n"
-            'AI\n\n'
+            "AI\n\n"
             f"MetTel's IPA AI indicates that the next best action for {serial_number} is: {prediction_name}.\n\n"
             "MetTel's IPA is based on an AI model designed specifically for MetTel."
         )
@@ -124,12 +122,12 @@ def make_standard_tnba_note():
     return _inner
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def make_AI_autoresolve_tnba_note():
     def _inner(*, serial_number: str, date: str = None):
         text = (
             "#*MetTel's IPA*#\n"
-            'AI\n\n'
+            "AI\n\n"
             f"MetTel's IPA AI is resolving the task for {serial_number}.\n\n"
             "MetTel's IPA is based on an AI model designed specifically for MetTel."
         )
@@ -138,31 +136,25 @@ def make_AI_autoresolve_tnba_note():
     return _inner
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def make_reopen_note():
     def _inner(*, serial_number: str, date: str = None):
-        text = (
-            "#*MetTel's IPA*#\n"
-            'Re-opening ticket.'
-        )
+        text = "#*MetTel's IPA*#\n" "Re-opening ticket."
         return __generate_ticket_note(date=date, serial_numbers=[serial_number], text=text)
 
     return _inner
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def make_triage_note():
     def _inner(*, serial_number: str, date: str = None):
-        text = (
-            "#*MetTel's IPA*#\n"
-            'Triage (VeloCloud)'
-        )
+        text = "#*MetTel's IPA*#\n" "Triage (VeloCloud)"
         return __generate_ticket_note(date=date, serial_numbers=[serial_number], text=text)
 
     return _inner
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def make_payload_for_note_append():
     def _inner(*, detail_id: int = None, serial_number: str = None, text: str):
         return __generate_payload_for_note_append(detail_id=detail_id, serial_number=serial_number, text=text)
@@ -170,7 +162,7 @@ def make_payload_for_note_append():
     return _inner
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def make_details_of_ticket():
     def _inner(*, ticket_details: List[dict] = None, ticket_notes: List[dict] = None):
         return __generate_details_of_ticket(ticket_details=ticket_details, ticket_notes=ticket_notes)
@@ -178,25 +170,25 @@ def make_details_of_ticket():
     return _inner
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def make_resolved_ticket_detail():
     def _inner(*, serial_number: str):
-        detail_status = 'R'
+        detail_status = "R"
         return __generate_ticket_detail(status=detail_status, serial_number=serial_number)
 
     return _inner
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def make_in_progress_ticket_detail():
     def _inner(*, serial_number: str, detail_id: int = None):
-        detail_status = 'I'
+        detail_status = "I"
         return __generate_ticket_detail(status=detail_status, serial_number=serial_number, detail_id=detail_id)
 
     return _inner
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def make_next_result_item():
     def _inner(*, result_name: str):
         return __generate_next_result_item(result_name=result_name)
@@ -204,7 +196,7 @@ def make_next_result_item():
     return _inner
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def make_next_results():
     def _inner(*next_result_item: List[dict]):
         return __generate_next_results(*next_result_item)
@@ -212,7 +204,7 @@ def make_next_results():
     return _inner
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def make_task_history_item():
     def _inner(*, serial_number: str, ticket_status: str = None):
         return __generate_task_history_item(serial_number=serial_number, ticket_status=ticket_status)
@@ -220,7 +212,7 @@ def make_task_history_item():
     return _inner
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def make_task_history():
     def _inner(*task_history_items: List[dict]):
         return __generate_task_history(*task_history_items)
@@ -229,34 +221,34 @@ def make_task_history():
 
 
 # Client info
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def bruin_client_id():
     return 9994
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def bruin_client_name():
-    return 'METTEL/NEW YORK'
+    return "METTEL/NEW YORK"
 
 
 # Serial numbers
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def serial_number_1():
-    return 'VC1234567'
+    return "VC1234567"
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def serial_number_2():
-    return 'VC8901234'
+    return "VC8901234"
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def serial_number_3():
-    return 'VC5678901'
+    return "VC5678901"
 
 
 # Tickets
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def open_affecting_ticket(bruin_client_id, bruin_client_name):
     return {
         "clientID": bruin_client_id,
@@ -267,7 +259,7 @@ def open_affecting_ticket(bruin_client_id, bruin_client_name):
             "city": "New York",
             "state": "NY",
             "zip": "10041-3299",
-            "country": "USA"
+            "country": "USA",
         },
         "createDate": "1/21/2021 4:02:30 PM",
         "createdBy": "Intelygenz Ai",
@@ -277,7 +269,7 @@ def open_affecting_ticket(bruin_client_id, bruin_client_name):
     }
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def open_outage_ticket(bruin_client_id, bruin_client_name):
     return {
         "clientID": bruin_client_id,
@@ -288,7 +280,7 @@ def open_outage_ticket(bruin_client_id, bruin_client_name):
             "city": "New York",
             "state": "NY",
             "zip": "10041-3299",
-            "country": "USA"
+            "country": "USA",
         },
         "createDate": "1/21/2021 4:02:30 PM",
         "createdBy": "Intelygenz Ai",
@@ -299,85 +291,72 @@ def open_outage_ticket(bruin_client_id, bruin_client_name):
 
 
 # Ticket task histories
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def task_history_with_invalid_assets():
-    return [
-        {
-            "Asset": None,
-            "Ticket Status": "To do"
-        },
-        {
-            "Asset": None,
-            "Ticket Status": "In Progress"
-        }
-    ]
+    return [{"Asset": None, "Ticket Status": "To do"}, {"Asset": None, "Ticket Status": "In Progress"}]
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def task_history_with_valid_assets(serial_number_1, serial_number_2):
     return [
-        {
-            "Asset": serial_number_1,
-            "Ticket Status": "To do"
-        },
-        {
-            "Asset": serial_number_2,
-            "Ticket Status": "In Progress"
-        }
+        {"Asset": serial_number_1, "Ticket Status": "To do"},
+        {"Asset": serial_number_2, "Ticket Status": "In Progress"},
     ]
 
 
 # RPC responses
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def get_open_affecting_ticket_200_response(open_affecting_ticket):
     return {
-        'body': [
+        "body": [
             open_affecting_ticket,
         ],
-        'status': 200,
+        "status": 200,
     }
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def get_open_outage_ticket_200_response(open_outage_ticket):
     return {
-        'body': [
+        "body": [
             open_outage_ticket,
         ],
-        'status': 200,
+        "status": 200,
     }
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def get_open_ticket_empty_response(open_affecting_ticket):
     return {
-        'body': [],
-        'status': 200,
+        "body": [],
+        "status": 200,
     }
 
 
-@pytest.fixture(scope='session')
-def get_ticket_details_200_response(ticket_detail_in_progress_for_serial_1,
-                                    ticket_note_for_serial_1_posted_on_2020_01_16,
-                                    ticket_note_for_serial_1_posted_on_2020_01_17):
+@pytest.fixture(scope="session")
+def get_ticket_details_200_response(
+    ticket_detail_in_progress_for_serial_1,
+    ticket_note_for_serial_1_posted_on_2020_01_16,
+    ticket_note_for_serial_1_posted_on_2020_01_17,
+):
     return {
-        'body': {
-            'ticketDetails': [
+        "body": {
+            "ticketDetails": [
                 ticket_detail_in_progress_for_serial_1,
             ],
-            'ticketNotes': [
+            "ticketNotes": [
                 ticket_note_for_serial_1_posted_on_2020_01_16,
                 ticket_note_for_serial_1_posted_on_2020_01_17,
             ],
         },
-        'status': 200,
+        "status": 200,
     }
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def append_multiple_notes_200_response():
     return {
-        'body': {
+        "body": {
             "ticketNotes": [
                 {
                     "noteID": 70646090,
@@ -435,29 +414,29 @@ def append_multiple_notes_200_response():
                 },
             ],
         },
-        'status': 200,
+        "status": 200,
     }
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def resolve_ticket_detail_200_response():
     return {
-        'body': 'ok',
-        'status': 200,
+        "body": "ok",
+        "status": 200,
     }
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def bruin_500_response():
     return {
-        'body': 'Got internal error from Bruin',
-        'status': 500,
+        "body": "Got internal error from Bruin",
+        "status": 500,
     }
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def make_address():
-    def _inner(*, street: str = '', city: str = '', state: str = '', zip_code: str = '', country: str = ''):
+    def _inner(*, street: str = "", city: str = "", state: str = "", zip_code: str = "", country: str = ""):
         return {
             "address": street,
             "city": city,
@@ -469,12 +448,25 @@ def make_address():
     return _inner
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def make_site_details(make_address):
-    def _inner(*, client_id: int = 0, client_name: str = '', site_id: int = 0, site_label: str = '',
-               site_add_date: str = '', address: dict = None, longitude: float = 0.0, latitude: float = 0.0,
-               business_hours: str = '', timezone: str = None, tz_offset: int = 0, contact_name: Optional[str] = '',
-               contact_phone: Optional[str] = '', contact_email: Optional[str] = ''):
+    def _inner(
+        *,
+        client_id: int = 0,
+        client_name: str = "",
+        site_id: int = 0,
+        site_label: str = "",
+        site_add_date: str = "",
+        address: dict = None,
+        longitude: float = 0.0,
+        latitude: float = 0.0,
+        business_hours: str = "",
+        timezone: str = None,
+        tz_offset: int = 0,
+        contact_name: Optional[str] = "",
+        contact_phone: Optional[str] = "",
+        contact_email: Optional[str] = "",
+    ):
         address = address or make_address()
         site_add_date = site_add_date or bruinize_date(datetime.now())
 
@@ -494,4 +486,5 @@ def make_site_details(make_address):
             "primaryContactPhone": contact_phone,
             "primaryContactEmail": contact_email,
         }
+
     return _inner

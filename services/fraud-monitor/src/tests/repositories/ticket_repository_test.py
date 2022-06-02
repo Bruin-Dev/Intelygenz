@@ -6,11 +6,11 @@ class TestTicketRepository:
         assert ticket_repository._utils_repository is utils_repository
 
     def is_task_resolved_test(self, ticket_repository, make_detail_item):
-        detail_item = make_detail_item(status='I')
+        detail_item = make_detail_item(status="I")
         result = ticket_repository.is_task_resolved(detail_item)
         assert result is False
 
-        detail_item = make_detail_item(status='R')
+        detail_item = make_detail_item(status="R")
         result = ticket_repository.is_task_resolved(detail_item)
         assert result is True
 
@@ -22,14 +22,14 @@ class TestTicketRepository:
         result = ticket_repository.is_fraud_ticket([note])
         assert result is True
 
-        note = make_ticket_note(text='Dummy note')
+        note = make_ticket_note(text="Dummy note")
         result = ticket_repository.is_fraud_ticket([note])
         assert result is False
 
     def find_task_test(self, ticket_repository, make_detail_item):
-        serial_number = 'VC1234567'
+        serial_number = "VC1234567"
 
-        detail_item = make_detail_item(value='VC0000000')
+        detail_item = make_detail_item(value="VC0000000")
         result = ticket_repository.find_task([detail_item], serial_number)
         assert result is None
 
@@ -66,8 +66,8 @@ class TestTicketRepository:
         assert result == [reopen_note, fraud_note_2]
 
     def note_already_exists_test(self, ticket_repository, make_ticket_note):
-        msg_uid = '123456'
-        note_1 = make_ticket_note(text='Dummy note')
+        msg_uid = "123456"
+        note_1 = make_ticket_note(text="Dummy note")
         note_2 = make_ticket_note(text=f"#*MetTel's IPA*#\nPossible Fraud Warning\nEmail UID: 654321")
         note_3 = make_ticket_note(text=f"#*MetTel's IPA*#\nPossible Fraud Warning\nEmail UID: 123456")
 

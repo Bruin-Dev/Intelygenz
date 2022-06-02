@@ -1,19 +1,19 @@
 from datetime import datetime
+from typing import Any, Dict, List
 
 import pytest
-from typing import Any, Dict, List
 from tests.fixtures._helpers import bruinize_date
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def make_filter_flags():
     def _inner(
-            *,
-            tagger_is_below_threshold: bool = False,
-            rta_model1_is_below_threshold: bool = False,
-            rta_model2_is_below_threshold: bool = False,
-            in_validation_set: bool = False,
-            is_filtered: bool = False,
+        *,
+        tagger_is_below_threshold: bool = False,
+        rta_model1_is_below_threshold: bool = False,
+        rta_model2_is_below_threshold: bool = False,
+        in_validation_set: bool = False,
+        is_filtered: bool = False,
     ):
         return {
             "tagger_is_below_threshold": tagger_is_below_threshold,
@@ -26,21 +26,21 @@ def make_filter_flags():
     return _inner
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def make_existing_ticket(make_address):
     def _inner(
-            *,
-            client_id: int = 0,
-            ticket_id: int = 0,
-            ticket_status: str = '',
-            address: dict = None,
-            create_date: str = '',
-            created_by: str = '',
-            call_type: str = '',
-            category: str = '',
-            severity: int = 0,
-            service_numbers: List[str] = None,
-            site_id: str = '',
+        *,
+        client_id: int = 0,
+        ticket_id: int = 0,
+        ticket_status: str = "",
+        address: dict = None,
+        create_date: str = "",
+        created_by: str = "",
+        call_type: str = "",
+        category: str = "",
+        severity: int = 0,
+        service_numbers: List[str] = None,
+        site_id: str = "",
     ):
         address = address or make_address()
         create_date = create_date or bruinize_date(datetime.now())
@@ -62,33 +62,29 @@ def make_existing_ticket(make_address):
     return _inner
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def make_inference_data(make_filter_flags):
     def _inner(
-            *,
-            potential_service_numbers: List[str] = None,
-            potential_ticket_numbers: List[str] = None,
-            filter_flags: Dict[str, Any] = None,
-            predicted_class: str = "",
+        *,
+        potential_service_numbers: List[str] = None,
+        potential_ticket_numbers: List[str] = None,
+        filter_flags: Dict[str, Any] = None,
+        predicted_class: str = "",
     ):
         filter_flags = filter_flags or make_filter_flags()
         return {
             "potential_service_numbers": potential_service_numbers or [],
             "potential_ticket_numbers": potential_ticket_numbers or [],
             "predicted_class": predicted_class,
-            "filter_flags": filter_flags
+            "filter_flags": filter_flags,
         }
 
     return _inner
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def make_inference_request_payload(make_email):
-    def _inner(
-            *,
-            email_data: Dict[str, Any] = None,
-            tag_info: Dict[str, Any] = None
-    ):
+    def _inner(*, email_data: Dict[str, Any] = None, tag_info: Dict[str, Any] = None):
         email_data = email_data or make_email()
         tag_info = tag_info or {"type": "", "probability": ""}
         return {
@@ -103,21 +99,20 @@ def make_inference_request_payload(make_email):
             "tag": {
                 "type": tag_info["type"],
                 "probability": tag_info["probability"],
-            }
+            },
         }
 
     return _inner
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def make_rta_ticket_payload():
     def _inner(
-            *,
-            site_id: str = None,
-            service_numbers: List[str] = None,
-            ticket_id: str = None,
-            not_created_reason: str = None,
-
+        *,
+        site_id: str = None,
+        service_numbers: List[str] = None,
+        ticket_id: str = None,
+        not_created_reason: str = None,
     ):
         return {
             "site_id": site_id,
@@ -125,22 +120,23 @@ def make_rta_ticket_payload():
             "ticket_id": ticket_id,
             "not_creation_reason": not_created_reason,
         }
+
     return _inner
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def make_save_outputs_request_payload(make_rta_ticket_payload):
     def _inner(
-            *,
-            email_id: str = "",
-            service_numbers: List[str] = None,
-            ticket_numbers: List[str] = None,
-            service_numbers_sites_map: Dict[str, str] = None,
-            tickets_created: List[Dict[str, Any]] = None,
-            tickets_updated: List[Dict[str, Any]] = None,
-            tickets_could_be_created: List[Dict[str, Any]] = None,
-            tickets_could_be_updated: List[Dict[str, Any]] = None,
-            tickets_cannot_be_created: List[Dict[str, Any]] = None,
+        *,
+        email_id: str = "",
+        service_numbers: List[str] = None,
+        ticket_numbers: List[str] = None,
+        service_numbers_sites_map: Dict[str, str] = None,
+        tickets_created: List[Dict[str, Any]] = None,
+        tickets_updated: List[Dict[str, Any]] = None,
+        tickets_could_be_created: List[Dict[str, Any]] = None,
+        tickets_could_be_updated: List[Dict[str, Any]] = None,
+        tickets_cannot_be_created: List[Dict[str, Any]] = None,
     ):
         service_numbers = service_numbers or []
         ticket_numbers = ticket_numbers or []
@@ -152,15 +148,15 @@ def make_save_outputs_request_payload(make_rta_ticket_payload):
         tickets_cannot_be_created = tickets_cannot_be_created or []
 
         return {
-            'email_id': email_id,
-            'validated_service_numbers': service_numbers,
-            'validated_ticket_numbers': service_numbers,
-            'service_numbers_sites_map': service_numbers_sites_map,
-            'tickets_created': tickets_created,
-            'tickets_updated': tickets_updated,
-            'tickets_could_be_created': tickets_could_be_created,
-            'tickets_could_be_updated': tickets_could_be_updated,
-            'tickets_cannot_be_created': tickets_cannot_be_created,
+            "email_id": email_id,
+            "validated_service_numbers": service_numbers,
+            "validated_ticket_numbers": service_numbers,
+            "service_numbers_sites_map": service_numbers_sites_map,
+            "tickets_created": tickets_created,
+            "tickets_updated": tickets_updated,
+            "tickets_could_be_created": tickets_could_be_created,
+            "tickets_could_be_updated": tickets_could_be_updated,
+            "tickets_cannot_be_created": tickets_cannot_be_created,
         }
 
     return _inner
@@ -169,13 +165,13 @@ def make_save_outputs_request_payload(make_rta_ticket_payload):
 @pytest.fixture
 def make_created_ticket_request_payload():
     def _inner(
-            ticket_id: str = "",
-            email_id: str = "",
-            parent_id: str = "",
-            client_id: str = "",
-            real_service_numbers: List[str] = None,
-            real_class: str = "",
-            site_map: Dict[str, Any] = None
+        ticket_id: str = "",
+        email_id: str = "",
+        parent_id: str = "",
+        client_id: str = "",
+        real_service_numbers: List[str] = None,
+        real_class: str = "",
+        site_map: Dict[str, Any] = None,
     ):
         site_map = site_map or {}
         real_service_numbers = real_service_numbers or []
@@ -186,7 +182,7 @@ def make_created_ticket_request_payload():
             "client_id": client_id,
             "real_service_numbers": real_service_numbers,
             "real_class": real_class,
-            "site_map": site_map
+            "site_map": site_map,
         }
 
     return _inner
@@ -195,10 +191,10 @@ def make_created_ticket_request_payload():
 @pytest.fixture
 def make_closed_ticket_request_payload():
     def _inner(
-            ticket_id: str = "",
-            client_id: str = "",
-            ticket_status: str = "",
-            cancelled_reasons: List[str] = None,
+        ticket_id: str = "",
+        client_id: str = "",
+        ticket_status: str = "",
+        cancelled_reasons: List[str] = None,
     ):
         cancelled_reasons = cancelled_reasons or []
         return {

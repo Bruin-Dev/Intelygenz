@@ -1,8 +1,8 @@
 import asyncio
 import types
-from typing import Any
-from typing import List
+from typing import Any, List
 from unittest.mock import Mock
+
 from asynctest import CoroutineMock
 
 
@@ -18,7 +18,7 @@ def wrap_all_methods(instance: Any, *, excluded_methods: List[str] = None):
     wrappable_methods = [
         method
         for method in dir(instance)
-        if not method.startswith('__')
+        if not method.startswith("__")
         if method not in excluded_methods
         if type(getattr(instance, method)) in [types.MethodType, types.FunctionType]
     ]

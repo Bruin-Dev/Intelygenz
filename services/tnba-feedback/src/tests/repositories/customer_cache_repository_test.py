@@ -1,19 +1,15 @@
-from unittest.mock import Mock
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
-
-from asynctest import CoroutineMock
-from shortuuid import uuid
-
 from application.repositories import customer_cache_repository as customer_cache_repository_module
 from application.repositories import nats_error_response
 from application.repositories.customer_cache_repository import CustomerCacheRepository
+from asynctest import CoroutineMock
 from config import testconfig
-
+from shortuuid import uuid
 
 uuid_ = uuid()
-uuid_mock = patch.object(customer_cache_repository_module, 'uuid', return_value=uuid_)
+uuid_mock = patch.object(customer_cache_repository_module, "uuid", return_value=uuid_)
 
 
 class TestCustomerCacheRepository:
@@ -34,18 +30,18 @@ class TestCustomerCacheRepository:
         filter_ = {}
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'filter': filter_,
+            "request_id": uuid_,
+            "body": {
+                "filter": filter_,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': [
-                {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1},
-                {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2},
+            "request_id": uuid_,
+            "body": [
+                {"host": "some-host", "enterprise_id": 1, "edge_id": 1},
+                {"host": "some-host", "enterprise_id": 1, "edge_id": 2},
             ],
-            'status': 200,
+            "status": 200,
         }
 
         logger = Mock()
@@ -65,21 +61,21 @@ class TestCustomerCacheRepository:
 
     @pytest.mark.asyncio
     async def get_cache_with_custom_filter_specified_test(self):
-        filter_ = {'mettel.velocloud.net': []}
+        filter_ = {"mettel.velocloud.net": []}
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'filter': filter_,
+            "request_id": uuid_,
+            "body": {
+                "filter": filter_,
             },
         }
         response = {
-            'request_id': uuid_,
-            'body': [
-                {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1},
-                {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2},
+            "request_id": uuid_,
+            "body": [
+                {"host": "some-host", "enterprise_id": 1, "edge_id": 1},
+                {"host": "some-host", "enterprise_id": 1, "edge_id": 2},
             ],
-            'status': 200,
+            "status": 200,
         }
 
         logger = Mock()
@@ -99,12 +95,12 @@ class TestCustomerCacheRepository:
 
     @pytest.mark.asyncio
     async def get_cache_with_rpc_request_failing_test(self):
-        filter_ = {'mettel.velocloud.net': []}
+        filter_ = {"mettel.velocloud.net": []}
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'filter': filter_,
+            "request_id": uuid_,
+            "body": {
+                "filter": filter_,
             },
         }
 
@@ -130,22 +126,22 @@ class TestCustomerCacheRepository:
     @pytest.mark.asyncio
     async def get_cache_with_rpc_request_returning_202_status_test(self):
         filter_ = {
-            'mettel.velocloud.net': [],
-            'metvco03.mettel.net': [],
+            "mettel.velocloud.net": [],
+            "metvco03.mettel.net": [],
         }
 
         request = {
-            'request_id': uuid_,
-            'body': {
-                'filter': filter_,
+            "request_id": uuid_,
+            "body": {
+                "filter": filter_,
             },
         }
 
-        response_msg = 'Cache is still being built for host(s): mettel_velocloud.net, metvco03.mettel.net'
+        response_msg = "Cache is still being built for host(s): mettel_velocloud.net, metvco03.mettel.net"
         response = {
-            'request_id': uuid_,
-            'body': response_msg,
-            'status': 202,
+            "request_id": uuid_,
+            "body": response_msg,
+            "status": 202,
         }
 
         logger = Mock()
@@ -174,7 +170,7 @@ class TestCustomerCacheRepository:
         config = testconfig
         notifications_repository = Mock()
 
-        filter_ = config.TNBA_FEEDBACK_CONFIG['velo_filter']
+        filter_ = config.TNBA_FEEDBACK_CONFIG["velo_filter"]
 
         customer_cache_repository = CustomerCacheRepository(event_bus, logger, config, notifications_repository)
         customer_cache_repository.get_cache = CoroutineMock()

@@ -1,12 +1,10 @@
 import abc
-from flask import Flask
 
-from delivery.http.blueprints import health
-from delivery.http.blueprints import statistics
+from delivery.http.blueprints import health, statistics
+from flask import Flask
 
 
 class IHTTPServer(metaclass=abc.ABCMeta):
-
     def __init__(self, config, logger, adapters, use_cases) -> None:
         self.config = config
         self.logger = logger
@@ -16,8 +14,8 @@ class IHTTPServer(metaclass=abc.ABCMeta):
         self.adapters.wire(modules=[statistics])
         self.use_cases.wire(modules=[statistics])
 
-        self.client = Flask(self.config['server']['name'])
-        self.client.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
+        self.client = Flask(self.config["server"]["name"])
+        self.client.config["JSONIFY_PRETTYPRINT_REGULAR"] = True
 
         self.initialize()
 
@@ -27,14 +25,12 @@ class IHTTPServer(metaclass=abc.ABCMeta):
 
 
 class FlaskServer(IHTTPServer):
-
     def initialize(self):
+        from delivery.http.handlers.error_handler import constructor_error_handler
+        from delivery.http.handlers.method_not_allowed import constructor_send_method_not_found
+        from delivery.http.handlers.not_found_handler import constructor_not_found
         from flask_cors import CORS
         from flask_log_request_id import RequestID
-
-        from delivery.http.handlers.error_handler import constructor_error_handler
-        from delivery.http.handlers.not_found_handler import constructor_not_found
-        from delivery.http.handlers.method_not_allowed import constructor_send_method_not_found
 
         CORS(self.client)
         RequestID(self.client)
@@ -51,23 +47,24 @@ class FlaskServer(IHTTPServer):
             self.client.register_blueprint(statistics.get_blueprint(), url_prefix=self.config["server"]["root_path"])
 
             # Error handler
-            self.client.register_error_handler(code_or_exception=Exception,
-                                               f=constructor_error_handler(logger=self.client.logger))
-            self.client.register_error_handler(code_or_exception=404,
-                                               f=constructor_not_found(logger=self.client.logger))
-            self.client.register_error_handler(code_or_exception=405,
-                                               f=constructor_send_method_not_found(logger=self.client.logger))
+            self.client.register_error_handler(
+                code_or_exception=Exception, f=constructor_error_handler(logger=self.client.logger)
+            )
+            self.client.register_error_handler(
+                code_or_exception=404, f=constructor_not_found(logger=self.client.logger)
+            )
+            self.client.register_error_handler(
+                code_or_exception=405, f=constructor_send_method_not_found(logger=self.client.logger)
+            )
 
             # Other options
             self.client.url_map.strict_slashes = False
 
     def start(self):
-        is_dev = self.config['current_environment'] == 'dev'
-        self.client.run(host='0.0.0.0',
-                        port=self.config["server"]["port"],
-                        threaded=True,
-                        use_reloader=is_dev,
-                        debug=is_dev)
+        is_dev = self.config["current_environment"] == "dev"
+        self.client.run(
+            host="0.0.0.0", port=self.config["server"]["port"], threaded=True, use_reloader=is_dev, debug=is_dev
+        )
 
     def status(self):
         self.logger.info("Flask HTTP Server Running")

@@ -1,20 +1,16 @@
-from unittest.mock import Mock
-from unittest.mock import patch
+from datetime import datetime, timedelta
+from unittest.mock import Mock, patch
 
 import pytest
-
-from asynctest import CoroutineMock
-from shortuuid import uuid
-
 from application.repositories import digi_repository as digi_repository_module
 from application.repositories import nats_error_response
 from application.repositories.digi_repository import DiGiRepository
+from asynctest import CoroutineMock
 from config import testconfig
-from datetime import datetime, timedelta
-
+from shortuuid import uuid
 
 uuid_ = uuid()
-uuid_mock = patch.object(digi_repository_module, 'uuid', return_value=uuid_)
+uuid_mock = patch.object(digi_repository_module, "uuid", return_value=uuid_)
 
 
 class TestDiGiRepository:
@@ -39,32 +35,28 @@ class TestDiGiRepository:
 
         datetime_now = datetime.now()
 
-        start_date_time = datetime_now - timedelta(days=config.DIGI_CONFIG['days_of_digi_recovery_log'])
-        request = {
-                    'request_id': uuid_,
-                    'body': {
-                        'start_date_time': start_date_time,
-                        'size': '999'
-                    }
-        }
+        start_date_time = datetime_now - timedelta(days=config.DIGI_CONFIG["days_of_digi_recovery_log"])
+        request = {"request_id": uuid_, "body": {"start_date_time": start_date_time, "size": "999"}}
         response = {
-                    'request_id': uuid_,
-                    'body': {
-                        "Logs": [{
-                                    "Id": 142,
-                                    "igzID": "42",
-                                    "RequestID": "959b1e34-2b10-4e04-967e-7ac268d2cb1b",
-                                    "Method": "API Start",
-                                    "System": "NYD",
-                                    "VeloSerial": "VC00000613",
-                                    "TicketID": "3569284",
-                                    "DeviceSN": "NYD",
-                                    "Notes": "API Called 02/15/2021 11:08:26",
-                                    "TimestampSTART": "2021-02-15T16:08:26Z",
-                                    "TimestampEND": "2021-02-15T16:08:28Z"
-                                }]
-                    },
-                    'status': 200
+            "request_id": uuid_,
+            "body": {
+                "Logs": [
+                    {
+                        "Id": 142,
+                        "igzID": "42",
+                        "RequestID": "959b1e34-2b10-4e04-967e-7ac268d2cb1b",
+                        "Method": "API Start",
+                        "System": "NYD",
+                        "VeloSerial": "VC00000613",
+                        "TicketID": "3569284",
+                        "DeviceSN": "NYD",
+                        "Notes": "API Called 02/15/2021 11:08:26",
+                        "TimestampSTART": "2021-02-15T16:08:26Z",
+                        "TimestampEND": "2021-02-15T16:08:28Z",
+                    }
+                ]
+            },
+            "status": 200,
         }
 
         event_bus = Mock()
@@ -74,7 +66,7 @@ class TestDiGiRepository:
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=datetime_now)
-        with patch.object(digi_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(digi_repository_module, "datetime", new=datetime_mock):
             with uuid_mock:
                 result = await digi_repository.get_digi_recovery_logs()
 
@@ -91,32 +83,28 @@ class TestDiGiRepository:
 
         datetime_now = datetime.now()
 
-        start_date_time = datetime_now - timedelta(days=config.DIGI_CONFIG['days_of_digi_recovery_log'])
-        request = {
-                    'request_id': uuid_,
-                    'body': {
-                        'start_date_time': start_date_time,
-                        'size': '999'
-                    }
-        }
+        start_date_time = datetime_now - timedelta(days=config.DIGI_CONFIG["days_of_digi_recovery_log"])
+        request = {"request_id": uuid_, "body": {"start_date_time": start_date_time, "size": "999"}}
         response = {
-                    'request_id': uuid_,
-                    'body': {
-                        "Logs": [{
-                                    "Id": 142,
-                                    "igzID": "42",
-                                    "RequestID": "959b1e34-2b10-4e04-967e-7ac268d2cb1b",
-                                    "Method": "API Start",
-                                    "System": "NYD",
-                                    "VeloSerial": "VC00000613",
-                                    "TicketID": "3569284",
-                                    "DeviceSN": "NYD",
-                                    "Notes": "API Called 02/15/2021 11:08:26",
-                                    "TimestampSTART": "2021-02-15T16:08:26Z",
-                                    "TimestampEND": "2021-02-15T16:08:28Z"
-                                }]
-                    },
-                    'status': 200
+            "request_id": uuid_,
+            "body": {
+                "Logs": [
+                    {
+                        "Id": 142,
+                        "igzID": "42",
+                        "RequestID": "959b1e34-2b10-4e04-967e-7ac268d2cb1b",
+                        "Method": "API Start",
+                        "System": "NYD",
+                        "VeloSerial": "VC00000613",
+                        "TicketID": "3569284",
+                        "DeviceSN": "NYD",
+                        "Notes": "API Called 02/15/2021 11:08:26",
+                        "TimestampSTART": "2021-02-15T16:08:26Z",
+                        "TimestampEND": "2021-02-15T16:08:28Z",
+                    }
+                ]
+            },
+            "status": 200,
         }
 
         event_bus = Mock()
@@ -126,7 +114,7 @@ class TestDiGiRepository:
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=datetime_now)
-        with patch.object(digi_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(digi_repository_module, "datetime", new=datetime_mock):
             with uuid_mock:
                 result = await digi_repository.get_digi_recovery_logs()
 
@@ -146,19 +134,9 @@ class TestDiGiRepository:
 
         datetime_now = datetime.now()
 
-        start_date_time = datetime_now - timedelta(days=config.DIGI_CONFIG['days_of_digi_recovery_log'])
-        request = {
-                    'request_id': uuid_,
-                    'body': {
-                        'start_date_time': start_date_time,
-                        'size': '999'
-                    }
-        }
-        response = {
-                    'request_id': uuid_,
-                    'body': 'ERROR',
-                    'status': 500
-        }
+        start_date_time = datetime_now - timedelta(days=config.DIGI_CONFIG["days_of_digi_recovery_log"])
+        request = {"request_id": uuid_, "body": {"start_date_time": start_date_time, "size": "999"}}
+        response = {"request_id": uuid_, "body": "ERROR", "status": 500}
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=response)
@@ -167,7 +145,7 @@ class TestDiGiRepository:
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=datetime_now)
-        with patch.object(digi_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(digi_repository_module, "datetime", new=datetime_mock):
             with uuid_mock:
                 result = await digi_repository.get_digi_recovery_logs()
 

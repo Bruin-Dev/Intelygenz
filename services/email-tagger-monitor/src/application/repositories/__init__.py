@@ -1,2 +1,1 @@
-
-nats_error_response = {'body': None, 'status': 503}
+nats_error_response = {"body": None, "status": 503}

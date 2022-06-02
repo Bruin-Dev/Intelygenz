@@ -1,7 +1,6 @@
 from unittest.mock import Mock
 
 import pytest
-
 from application.repositories.new_emails_repository import NewEmailsRepository
 from config import testconfig
 
@@ -25,8 +24,7 @@ class TestNewEmailsRepository:
         notifications_repository = Mock()
         storage_repository = Mock()
 
-        new_emails_repository = NewEmailsRepository(logger, config, notifications_repository,
-                                                    storage_repository)
+        new_emails_repository = NewEmailsRepository(logger, config, notifications_repository, storage_repository)
 
         assert new_emails_repository._logger is logger
         assert new_emails_repository._config is config
@@ -43,8 +41,7 @@ class TestNewEmailsRepository:
 
     def save_new_email_ok_test(self, logger, notifications_repository, storage_repository):
         storage_repository.save = Mock()
-        new_emails_repository = NewEmailsRepository(logger, testconfig, notifications_repository,
-                                                    storage_repository)
+        new_emails_repository = NewEmailsRepository(logger, testconfig, notifications_repository, storage_repository)
 
         expected_email_id = "email_123456"
         email_data = {
@@ -52,7 +49,7 @@ class TestNewEmailsRepository:
                 "body": "the issue here",
                 "date": "2021-01-01T08:00:00.001Z",
                 "email_id": "123456",
-                "subject": "the title"
+                "subject": "the title",
             }
         }
         response = new_emails_repository.save_new_email(email_data)
@@ -63,8 +60,7 @@ class TestNewEmailsRepository:
     def mark_complete_ok_test(self, logger, notifications_repository, storage_repository):
         storage_repository.rename = Mock()
         storage_repository.expire = Mock()
-        new_emails_repository = NewEmailsRepository(logger, testconfig, notifications_repository,
-                                                    storage_repository)
+        new_emails_repository = NewEmailsRepository(logger, testconfig, notifications_repository, storage_repository)
 
         email_id = "123456"
         expected_email_id = "email_123456"

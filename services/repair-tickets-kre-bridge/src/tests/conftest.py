@@ -1,6 +1,6 @@
-import pytest
 from typing import Any, Dict
 
+import pytest
 from tests.fixtures.email import *
 from tests.fixtures.rta import *
 
@@ -10,20 +10,17 @@ def valid_inference_request(make_email, make_inference_request_payload) -> Dict[
     email_id = "1234"
     client_id = "5689"
     email_data = make_email(email_id=email_id, client_id=client_id, to=["test@marc.com"])
-    tag_info = {'type': 'Repair', 'probability': 0.9}
-    return make_inference_request_payload(
-        email_data=email_data,
-        tag_info=tag_info
-    )
+    tag_info = {"type": "Repair", "probability": 0.9}
+    return make_inference_request_payload(email_data=email_data, tag_info=tag_info)
 
 
 @pytest.fixture
 def valid_inference_response(make_inference_data) -> Dict[str, Any]:
     potential_service_numbers = ["1234"]
-    body = make_inference_data(potential_service_numbers=potential_service_numbers, predicted_class='VOO')
+    body = make_inference_data(potential_service_numbers=potential_service_numbers, predicted_class="VOO")
     return {
-        'status': 200,
-        'body': body,
+        "status": 200,
+        "body": body,
     }
 
 
@@ -44,7 +41,7 @@ def valid_output_request(make_save_outputs_request_payload, make_rta_ticket_payl
         email_id=email_id,
         service_numbers_sites_map=service_numbers_site_map,
         service_numbers=service_numbers,
-        tickets_created=[ticket_created]
+        tickets_created=[ticket_created],
     )
 
 
@@ -63,7 +60,7 @@ def valid_created_ticket_request(make_created_ticket_request_payload):
         client_id="10000",
         real_service_numbers=["125", "568"],
         real_class="VOO",
-        site_map={"125": "1235", "568": "1235"}
+        site_map={"125": "1235", "568": "1235"},
     )
 
 
@@ -79,17 +76,13 @@ def valid_closed_ticket_request__cancelled(make_closed_ticket_request_payload):
         ticket_id="1234",
         client_id="5678",
         ticket_status="cancelled",
-        cancelled_reasons=["cancelled cause ai", "duplicated ticket"]
+        cancelled_reasons=["cancelled cause ai", "duplicated ticket"],
     )
 
 
 @pytest.fixture
 def valid_closed_ticket_request__resolved(make_closed_ticket_request_payload):
-    return make_closed_ticket_request_payload(
-        ticket_id="1234",
-        client_id="5678",
-        ticket_status="resolved"
-    )
+    return make_closed_ticket_request_payload(ticket_id="1234", client_id="5678", ticket_status="resolved")
 
 
 @pytest.fixture

@@ -1,10 +1,10 @@
 from unittest.mock import Mock
-from config import testconfig as config
+
 from application.repositories.email_repository import EmailRepository
+from config import testconfig as config
 
 
 class TestEmailRepository:
-
     def instantiation_test(self):
         mock_client = Mock()
         mock_logger = Mock()
@@ -19,7 +19,7 @@ class TestEmailRepository:
         mock_client = Mock()
         mock_client.send_to_email = Mock(return_value=200)
         mock_logger = Mock()
-        test_msg = 'This is a dummy message'
+        test_msg = "This is a dummy message"
 
         test_repo = EmailRepository(config, mock_client, mock_logger)
         status = test_repo.send_to_email(test_msg)

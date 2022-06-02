@@ -4,7 +4,6 @@ from pymongo import MongoClient
 
 
 class IDB(metaclass=abc.ABCMeta):
-
     def __init__(self, config, logger) -> None:
         self.config = config
         self.logger = logger
@@ -19,6 +18,6 @@ class IDB(metaclass=abc.ABCMeta):
 
 class MongoDB(IDB):
     def initialize(self):
-        self.client = MongoClient(self.config['mongo']['url'])
+        self.client = MongoClient(self.config["mongo"]["url"])
         self.logger.info("Connected to Mongo DB")
-        self.logger.info(f'Mongo server info: {self.client.server_info()}')
+        self.logger.info(f"Mongo server info: {self.client.server_info()}")

@@ -1,6 +1,7 @@
-from shortuuid import uuid
-from datetime import datetime, timedelta
 import base64
+from datetime import datetime, timedelta
+
+from shortuuid import uuid
 
 
 class NotificationsRepository:
@@ -10,8 +11,8 @@ class NotificationsRepository:
 
     async def send_slack_message(self, message: str):
         message = {
-            'request_id': uuid(),
-            'message': f"[{self._config.LOG_CONFIG['name']}]: {message}",
+            "request_id": uuid(),
+            "message": f"[{self._config.LOG_CONFIG['name']}]: {message}",
         }
         await self._event_bus.rpc_request("notification.slack.request", message, timeout=10)
 
@@ -32,19 +33,16 @@ class NotificationsRepository:
         </html>
         """
         email_object = {
-            'request_id': uuid(),
-            'email_data': {
-                'subject': f'DiGi Recovery Report ({(datetime.now()- timedelta(days=1)).strftime("%Y-%m-%d")}) ',
-                'recipient': self._config.DIGI_CONFIG["recipient"],
-                'text': 'this is the accessible text for the email',
-                'html': html,
-                'images': [],
-                'attachments': [
-                    {
-                        'name': csv,
-                        'data': base64.b64encode(digi_reboot_report.encode('utf-8')).decode('utf-8')
-                    }
-                ]
-            }
+            "request_id": uuid(),
+            "email_data": {
+                "subject": f'DiGi Recovery Report ({(datetime.now()- timedelta(days=1)).strftime("%Y-%m-%d")}) ',
+                "recipient": self._config.DIGI_CONFIG["recipient"],
+                "text": "this is the accessible text for the email",
+                "html": html,
+                "images": [],
+                "attachments": [
+                    {"name": csv, "data": base64.b64encode(digi_reboot_report.encode("utf-8")).decode("utf-8")}
+                ],
+            },
         }
         await self._event_bus.rpc_request("notification.email.request", email_object, timeout=60)

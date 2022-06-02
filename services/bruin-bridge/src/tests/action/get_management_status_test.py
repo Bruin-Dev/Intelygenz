@@ -7,7 +7,6 @@ from asynctest import CoroutineMock
 
 
 class TestGetManagementStatus:
-
     def instance_test(self):
         logger = Mock()
         event_bus = Mock()
@@ -27,29 +26,14 @@ class TestGetManagementStatus:
         event_bus.publish_message = CoroutineMock()
         bruin_repository = Mock()
 
-        management_status = {
-            "body": "Active – Platinum Monitoring",
-            "status": 200
-        }
+        management_status = {"body": "Active – Platinum Monitoring", "status": 200}
         bruin_repository.get_management_status = CoroutineMock(return_value=management_status)
 
-        filters = {
-            "client_id": 9994,
-            "status": "A",
-            "service_number": "VC05400009999"
-        }
+        filters = {"client_id": 9994, "status": "A", "service_number": "VC05400009999"}
 
-        event_bus_request = {
-            "request_id": 19,
-            "body": filters,
-            "response_topic": "some.topic"
-        }
+        event_bus_request = {"request_id": 19, "body": filters, "response_topic": "some.topic"}
 
-        event_bus_response = {
-            "request_id": 19,
-            'body': management_status["body"],
-            'status': 200
-        }
+        event_bus_response = {"request_id": 19, "body": management_status["body"], "status": 200}
 
         get_management_status = GetManagementStatus(logger, event_bus, bruin_repository)
         await get_management_status.get_management_status(event_bus_request)
@@ -67,15 +51,12 @@ class TestGetManagementStatus:
 
         bruin_repository.get_management_status = CoroutineMock()
 
-        event_bus_request = {
-            "request_id": 19,
-            "response_topic": "some.topic"
-        }
+        event_bus_request = {"request_id": 19, "response_topic": "some.topic"}
 
         event_bus_response = {
             "request_id": 19,
-            'body': 'You must specify {.."body":{"client_id", "status", "service_number"}...} in the request',
-            'status': 400
+            "body": 'You must specify {.."body":{"client_id", "status", "service_number"}...} in the request',
+            "status": 400,
         }
 
         get_management_status = GetManagementStatus(logger, event_bus, bruin_repository)
@@ -98,16 +79,12 @@ class TestGetManagementStatus:
             "status": "A",
         }
 
-        event_bus_request = {
-            "request_id": 19,
-            "body": filters,
-            "response_topic": "some.topic"
-        }
+        event_bus_request = {"request_id": 19, "body": filters, "response_topic": "some.topic"}
 
         event_bus_response = {
             "request_id": 19,
-            'body': 'You must specify "client_id", "status", "service_number" in the filter',
-            'status': 400
+            "body": 'You must specify "client_id", "status", "service_number" in the filter',
+            "status": 400,
         }
 
         get_management_status = GetManagementStatus(logger, event_bus, bruin_repository)

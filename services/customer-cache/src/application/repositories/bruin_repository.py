@@ -1,10 +1,10 @@
 import asyncio
-from shortuuid import uuid
+
 from application.repositories import nats_error_response
+from shortuuid import uuid
 
 
 class BruinRepository:
-
     def __init__(self, config, logger, event_bus, notifications_repository):
         self._config = config
         self._logger = logger
@@ -15,29 +15,27 @@ class BruinRepository:
         err_msg = None
 
         request = {
-            'request_id': uuid(),
-            'body': {
-                'service_number': service_number,
+            "request_id": uuid(),
+            "body": {
+                "service_number": service_number,
             },
         }
 
         try:
-            self._logger.info(f'Claiming client info for service number {service_number}...')
+            self._logger.info(f"Claiming client info for service number {service_number}...")
             response = await self._event_bus.rpc_request("bruin.customer.get.info", request, timeout=30)
-            self._logger.info(f'Got client info for service number {service_number}!')
+            self._logger.info(f"Got client info for service number {service_number}!")
         except Exception as e:
-            err_msg = (
-                f'An error occurred when claiming client info for service number {service_number} -> {e}'
-            )
+            err_msg = f"An error occurred when claiming client info for service number {service_number} -> {e}"
             response = nats_error_response
         else:
-            response_body = response['body']
-            response_status = response['status']
+            response_body = response["body"]
+            response_status = response["status"]
 
             if response_status not in range(200, 300):
                 err_msg = (
-                    f'Error while claiming client info for service number {service_number} in '
-                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: Error {response_status} - {response_body}'
+                    f"Error while claiming client info for service number {service_number} in "
+                    f"{self._config.ENVIRONMENT_NAME.upper()} environment: Error {response_status} - {response_body}"
                 )
 
         if err_msg:
@@ -50,8 +48,8 @@ class BruinRepository:
         err_msg = None
 
         request = {
-            'request_id': uuid(),
-            'body': {
+            "request_id": uuid(),
+            "body": {
                 "client_id": client_id,
                 "service_number": service_number,
                 "status": "A",
@@ -60,25 +58,25 @@ class BruinRepository:
 
         try:
             self._logger.info(
-                f'Claiming management status for service number {service_number} and client {client_id}...'
+                f"Claiming management status for service number {service_number} and client {client_id}..."
             )
             response = await self._event_bus.rpc_request("bruin.inventory.management.status", request, timeout=30)
-            self._logger.info(f'Got management status for service number {service_number} and client {client_id}!')
+            self._logger.info(f"Got management status for service number {service_number} and client {client_id}!")
         except Exception as e:
             err_msg = (
-                f'An error occurred when claiming management status for service number {service_number} and '
-                f'client {client_id} -> {e}'
+                f"An error occurred when claiming management status for service number {service_number} and "
+                f"client {client_id} -> {e}"
             )
             response = nats_error_response
         else:
-            response_body = response['body']
-            response_status = response['status']
+            response_body = response["body"]
+            response_status = response["status"]
 
             if response_status not in range(200, 300):
                 err_msg = (
-                    f'Error while claiming management status for service number {service_number} and '
-                    f'client {client_id} in {self._config.ENVIRONMENT_NAME.upper()} environment: '
-                    f'Error {response_status} - {response_body}'
+                    f"Error while claiming management status for service number {service_number} and "
+                    f"client {client_id} in {self._config.ENVIRONMENT_NAME.upper()} environment: "
+                    f"Error {response_status} - {response_body}"
                 )
 
         if err_msg:
@@ -91,30 +89,31 @@ class BruinRepository:
         err_msg = None
 
         request = {
-            'request_id': uuid(),
-            'body': {
-                'client_id': client_id,
-                'site_id': site_id,
+            "request_id": uuid(),
+            "body": {
+                "client_id": client_id,
+                "site_id": site_id,
             },
         }
 
         try:
-            self._logger.info(f'Getting site details of site {site_id} and client {client_id}...')
+            self._logger.info(f"Getting site details of site {site_id} and client {client_id}...")
             response = await self._event_bus.rpc_request("bruin.get.site", request, timeout=60)
         except Exception as e:
-            err_msg = f'An error occurred while getting site details of site {site_id} ' \
-                      f'and client {client_id}... -> {e}'
+            err_msg = (
+                f"An error occurred while getting site details of site {site_id} " f"and client {client_id}... -> {e}"
+            )
             response = nats_error_response
         else:
-            response_body = response['body']
-            response_status = response['status']
+            response_body = response["body"]
+            response_status = response["status"]
 
             if response_status in range(200, 300):
-                self._logger.info(f'Got site details of site {site_id} and client {client_id} successfully!')
+                self._logger.info(f"Got site details of site {site_id} and client {client_id} successfully!")
             else:
                 err_msg = (
-                    f'Error while getting site details of site {site_id} and client {client_id} in '
-                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: Error {response_status} - {response_body}'
+                    f"Error while getting site details of site {site_id} and client {client_id} in "
+                    f"{self._config.ENVIRONMENT_NAME.upper()} environment: Error {response_status} - {response_body}"
                 )
 
         if err_msg:

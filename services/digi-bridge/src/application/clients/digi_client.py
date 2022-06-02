@@ -6,7 +6,6 @@ import humps
 
 
 class DiGiClient:
-
     def __init__(self, config, logger):
         self._config = config
         self._logger = logger
@@ -21,19 +20,16 @@ class DiGiClient:
 
         headers = {
             "authorization": f"Basic {login_credentials_b64}",
-            "Content-Type": "application/x-www-form-urlencoded"
+            "Content-Type": "application/x-www-form-urlencoded",
         }
-        form_data = {
-            "grant_type": "client_credentials",
-            "scope": "write:dms"
-        }
+        form_data = {"grant_type": "client_credentials", "scope": "write:dms"}
 
         try:
             response = await self._session.post(
                 f'{self._config.DIGI_CONFIG["base_url"]}/Identity/rest/oauth/token',
                 data=form_data,
                 headers=headers,
-                ssl=False
+                ssl=False,
             )
 
             self._bearer_token = (await response.json())["access_token"]
@@ -46,17 +42,14 @@ class DiGiClient:
         if not self._bearer_token:
             raise Exception("Missing BEARER token")
 
-        headers = {
-            "authorization": f"Bearer {self._bearer_token}",
-            **params
-        }
+        headers = {"authorization": f"Bearer {self._bearer_token}", **params}
         return headers
 
     async def reboot(self, params):
         try:
             parsed_params = humps.pascalize(params)
 
-            self._logger.info(f'Rebooting DiGi device with params {json.dumps(parsed_params)}')
+            self._logger.info(f"Rebooting DiGi device with params {json.dumps(parsed_params)}")
 
             response = await self._session.post(
                 f"{self._config.DIGI_CONFIG['base_url']}/DeviceManagement_API/rest/Recovery/RecoverDevice",
@@ -74,14 +67,15 @@ class DiGiClient:
                 return_response["status"] = 500
                 return return_response
 
-            response_error = [error_message for error_message in response_json
-                              if error_message.get("error") is not None]
+            response_error = [
+                error_message for error_message in response_json if error_message.get("error") is not None
+            ]
             if len(response_error) > 0:
                 self._logger.error(f"Got an error of {response_error}")
                 return_response["status"] = 400
                 return return_response
 
-            response_message = [message for message in response_json if 'Aborted' in message['Message']]
+            response_message = [message for message in response_json if "Aborted" in message["Message"]]
             if len(response_message) > 0:
                 self._logger.error(f"DiGi reboot aborted with message returning: {response_message}")
                 return_response["status"] = 400
@@ -89,16 +83,13 @@ class DiGiClient:
             return return_response
 
         except Exception as e:
-            return {
-                'body': e.args[0],
-                'status': 500
-            }
+            return {"body": e.args[0], "status": 500}
 
     async def get_digi_recovery_logs(self, params):
         try:
             parsed_params = humps.pascalize(params)
 
-            self._logger.info(f'Getting DiGi recovery logs with params {json.dumps(parsed_params)}')
+            self._logger.info(f"Getting DiGi recovery logs with params {json.dumps(parsed_params)}")
 
             response = await self._session.get(
                 f"{self._config.DIGI_CONFIG['base_url']}/DeviceManagement_API/rest/Recovery/Logs",
@@ -123,7 +114,4 @@ class DiGiClient:
             return return_response
 
         except Exception as e:
-            return {
-                'body': e.args[0],
-                'status': 500
-            }
+            return {"body": e.args[0], "status": 500}

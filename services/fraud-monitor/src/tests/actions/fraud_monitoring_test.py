@@ -1,26 +1,33 @@
-import pytest
-from unittest.mock import Mock
-from unittest.mock import patch
-
-from shortuuid import uuid
 from datetime import datetime
-from apscheduler.util import undefined
-from apscheduler.jobstores.base import ConflictingIdError
+from unittest.mock import Mock, patch
 
+import pytest
 from application.actions import fraud_monitoring as fraud_monitor_module
 from application.actions.fraud_monitoring import EMAIL_REGEXES
 from application.repositories import bruin_repository as bruin_repository_module
+from apscheduler.jobstores.base import ConflictingIdError
+from apscheduler.util import undefined
 from config import testconfig
+from shortuuid import uuid
 
 uuid_ = uuid()
-uuid_mock = patch.object(bruin_repository_module, 'uuid', return_value=uuid_)
+uuid_mock = patch.object(bruin_repository_module, "uuid", return_value=uuid_)
 
-config_mock = patch.object(testconfig, 'CURRENT_ENVIRONMENT', 'production')
+config_mock = patch.object(testconfig, "CURRENT_ENVIRONMENT", "production")
 
 
 class TestFraudMonitor:
-    def instance_test(self, fraud_monitor, event_bus, logger, scheduler, notifications_repository,
-                      bruin_repository, ticket_repository, utils_repository):
+    def instance_test(
+        self,
+        fraud_monitor,
+        event_bus,
+        logger,
+        scheduler,
+        notifications_repository,
+        bruin_repository,
+        ticket_repository,
+        utils_repository,
+    ):
         assert fraud_monitor._event_bus == event_bus
         assert fraud_monitor._logger == logger
         assert fraud_monitor._scheduler == scheduler
@@ -36,30 +43,32 @@ class TestFraudMonitor:
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
 
-        with patch.object(fraud_monitor_module, 'datetime', new=datetime_mock):
+        with patch.object(fraud_monitor_module, "datetime", new=datetime_mock):
             await fraud_monitor.start_fraud_monitoring(exec_on_start=True)
 
         scheduler.add_job.assert_called_once_with(
-            fraud_monitor._fraud_monitoring_process, 'interval',
-            minutes=testconfig.FRAUD_CONFIG['monitoring_interval'],
+            fraud_monitor._fraud_monitoring_process,
+            "interval",
+            minutes=testconfig.FRAUD_CONFIG["monitoring_interval"],
             next_run_time=next_run_time,
             replace_existing=False,
-            id='_fraud_monitor_process',
+            id="_fraud_monitor_process",
         )
 
     @pytest.mark.asyncio
     async def start_fraud_monitoring__conflict_test(self, fraud_monitor, scheduler):
-        job_id = '_fraud_monitor_process'
+        job_id = "_fraud_monitor_process"
         scheduler.add_job.side_effect = ConflictingIdError(job_id)
 
         await fraud_monitor.start_fraud_monitoring()
 
         scheduler.add_job.assert_called_once_with(
-            fraud_monitor._fraud_monitoring_process, 'interval',
-            minutes=testconfig.FRAUD_CONFIG['monitoring_interval'],
+            fraud_monitor._fraud_monitoring_process,
+            "interval",
+            minutes=testconfig.FRAUD_CONFIG["monitoring_interval"],
             next_run_time=undefined,
             replace_existing=False,
-            id=job_id
+            id=job_id,
         )
 
     @pytest.mark.asyncio
@@ -67,8 +76,8 @@ class TestFraudMonitor:
         email = make_email(message=None)
 
         response = {
-            'body': [email],
-            'status': 200,
+            "body": [email],
+            "status": 200,
         }
 
         fraud_monitor._notifications_repository.get_unread_emails.return_value = response
@@ -81,8 +90,8 @@ class TestFraudMonitor:
         email = make_email()
 
         response = {
-            'body': [email],
-            'status': 200,
+            "body": [email],
+            "status": 200,
         }
 
         fraud_monitor._notifications_repository.get_unread_emails.return_value = response
@@ -92,11 +101,11 @@ class TestFraudMonitor:
 
     @pytest.mark.asyncio
     async def fraud_monitoring_process__unexpected_email_body_test(self, fraud_monitor, make_email):
-        email = make_email(subject='Possible Fraud on 12345678')
+        email = make_email(subject="Possible Fraud on 12345678")
 
         response = {
-            'body': [email],
-            'status': 200,
+            "body": [email],
+            "status": 200,
         }
 
         fraud_monitor._notifications_repository.get_unread_emails.return_value = response
@@ -106,30 +115,30 @@ class TestFraudMonitor:
 
     @pytest.mark.asyncio
     async def fraud_monitoring_process__email_processed_test(self, fraud_monitor, make_email):
-        msg_uid = '123456'
+        msg_uid = "123456"
 
         body = (
-            'Possible Fraud Warning with the following information:\n'
-            'DID: 12345678\n'
-            '\n'
-            'Thanks,\n'
-            'Fraud Detection System'
+            "Possible Fraud Warning with the following information:\n"
+            "DID: 12345678\n"
+            "\n"
+            "Thanks,\n"
+            "Fraud Detection System"
         )
 
         email = make_email(
             msg_uid=msg_uid,
             body=body,
-            subject='Possible Fraud on 12345678',
+            subject="Possible Fraud on 12345678",
         )
 
         get_unread_emails_response = {
-            'body': [email],
-            'status': 200,
+            "body": [email],
+            "status": 200,
         }
 
         mark_email_as_read_response = {
-            'body': None,
-            'status': 204,
+            "body": None,
+            "status": 204,
         }
 
         fraud_monitor._notifications_repository.get_unread_emails.return_value = get_unread_emails_response
@@ -144,25 +153,25 @@ class TestFraudMonitor:
 
     @pytest.mark.asyncio
     async def fraud_monitoring_process__email_not_processed_test(self, fraud_monitor, make_email):
-        msg_uid = '123456'
+        msg_uid = "123456"
 
         body = (
-            'Possible Fraud Warning with the following information:\n'
-            'DID: 12345678\n'
-            '\n'
-            'Thanks,\n'
-            'Fraud Detection System'
+            "Possible Fraud Warning with the following information:\n"
+            "DID: 12345678\n"
+            "\n"
+            "Thanks,\n"
+            "Fraud Detection System"
         )
 
         email = make_email(
             msg_uid=msg_uid,
             body=body,
-            subject='Possible Fraud on 12345678',
+            subject="Possible Fraud on 12345678",
         )
 
         get_unread_emails_response = {
-            'body': [email],
-            'status': 200,
+            "body": [email],
+            "status": 200,
         }
 
         fraud_monitor._notifications_repository.get_unread_emails.return_value = get_unread_emails_response
@@ -175,24 +184,19 @@ class TestFraudMonitor:
 
     @pytest.mark.asyncio
     async def process_fraud__append_note_to_ticket_test(
-            self, fraud_monitor, make_ticket, make_detail_item_with_notes_and_ticket_info,
-            make_get_client_info_by_did_response, make_get_tickets_response):
-        service_number = ''
-        msg_uid = '123456'
+        self,
+        fraud_monitor,
+        make_ticket,
+        make_detail_item_with_notes_and_ticket_info,
+        make_get_client_info_by_did_response,
+        make_get_tickets_response,
+    ):
+        service_number = ""
+        msg_uid = "123456"
 
-        body = (
-            'Possible Fraud Warning with the following information:\n'
-            'DID: 12345678\n'
-        )
+        body = "Possible Fraud Warning with the following information:\n" "DID: 12345678\n"
 
-        full_body = (
-            'Network,\n'
-            '\n'
-            f'{body}\n'
-            '\n'
-            'Thanks,\n'
-            'Fraud Detection System'
-        )
+        full_body = "Network,\n" "\n" f"{body}\n" "\n" "Thanks,\n" "Fraud Detection System"
 
         ticket = make_ticket()
         detail_info = make_detail_item_with_notes_and_ticket_info()
@@ -207,24 +211,19 @@ class TestFraudMonitor:
 
     @pytest.mark.asyncio
     async def process_fraud__reopen_resolved_ticket_test(
-            self, fraud_monitor, make_ticket, make_detail_item_with_notes_and_ticket_info,
-            make_get_client_info_by_did_response, make_get_tickets_response):
-        service_number = ''
-        msg_uid = '123456'
+        self,
+        fraud_monitor,
+        make_ticket,
+        make_detail_item_with_notes_and_ticket_info,
+        make_get_client_info_by_did_response,
+        make_get_tickets_response,
+    ):
+        service_number = ""
+        msg_uid = "123456"
 
-        body = (
-            'Possible Fraud Warning with the following information:\n'
-            'DID: 12345678\n'
-        )
+        body = "Possible Fraud Warning with the following information:\n" "DID: 12345678\n"
 
-        full_body = (
-            'Network,\n'
-            '\n'
-            f'{body}\n'
-            '\n'
-            'Thanks,\n'
-            'Fraud Detection System'
-        )
+        full_body = "Network,\n" "\n" f"{body}\n" "\n" "Thanks,\n" "Fraud Detection System"
 
         ticket = make_ticket()
         detail_info = make_detail_item_with_notes_and_ticket_info()
@@ -236,29 +235,25 @@ class TestFraudMonitor:
 
         await fraud_monitor._process_fraud(EMAIL_REGEXES[0], full_body, msg_uid)
 
-        fraud_monitor._unresolve_task_for_ticket.assert_awaited_once_with(detail_info, service_number, EMAIL_REGEXES[0],
-                                                                          body, msg_uid)
+        fraud_monitor._unresolve_task_for_ticket.assert_awaited_once_with(
+            detail_info, service_number, EMAIL_REGEXES[0], body, msg_uid
+        )
 
     @pytest.mark.asyncio
     async def process_fraud__reopen_closed_ticket_test(
-            self, fraud_monitor, make_ticket, make_detail_item_with_notes_and_ticket_info,
-            make_get_client_info_by_did_response, make_get_tickets_response):
-        service_number = ''
-        msg_uid = '123456'
+        self,
+        fraud_monitor,
+        make_ticket,
+        make_detail_item_with_notes_and_ticket_info,
+        make_get_client_info_by_did_response,
+        make_get_tickets_response,
+    ):
+        service_number = ""
+        msg_uid = "123456"
 
-        body = (
-            'Possible Fraud Warning with the following information:\n'
-            'DID: 12345678\n'
-        )
+        body = "Possible Fraud Warning with the following information:\n" "DID: 12345678\n"
 
-        full_body = (
-            'Network,\n'
-            '\n'
-            f'{body}\n'
-            '\n'
-            'Thanks,\n'
-            'Fraud Detection System'
-        )
+        full_body = "Network,\n" "\n" f"{body}\n" "\n" "Thanks,\n" "Fraud Detection System"
 
         ticket = make_ticket()
         detail_info = make_detail_item_with_notes_and_ticket_info()
@@ -270,29 +265,21 @@ class TestFraudMonitor:
 
         await fraud_monitor._process_fraud(EMAIL_REGEXES[0], full_body, msg_uid)
 
-        fraud_monitor._unresolve_task_for_ticket.assert_awaited_once_with(detail_info, service_number, EMAIL_REGEXES[0],
-                                                                          body, msg_uid)
+        fraud_monitor._unresolve_task_for_ticket.assert_awaited_once_with(
+            detail_info, service_number, EMAIL_REGEXES[0], body, msg_uid
+        )
 
     @pytest.mark.asyncio
     async def process_fraud__create_ticket_test(
-            self, fraud_monitor, make_get_client_info_by_did_response, make_get_tickets_response):
+        self, fraud_monitor, make_get_client_info_by_did_response, make_get_tickets_response
+    ):
         client_id = 0
-        service_number = ''
-        msg_uid = '123456'
+        service_number = ""
+        msg_uid = "123456"
 
-        body = (
-            'Possible Fraud Warning with the following information:\n'
-            'DID: 12345678\n'
-        )
+        body = "Possible Fraud Warning with the following information:\n" "DID: 12345678\n"
 
-        full_body = (
-            'Network,\n'
-            '\n'
-            f'{body}\n'
-            '\n'
-            'Thanks,\n'
-            'Fraud Detection System'
-        )
+        full_body = "Network,\n" "\n" f"{body}\n" "\n" "Thanks,\n" "Fraud Detection System"
 
         fraud_monitor._bruin_repository.get_client_info_by_did.return_value = make_get_client_info_by_did_response()
         fraud_monitor._bruin_repository.get_open_fraud_tickets.return_value = make_get_tickets_response()
@@ -300,30 +287,22 @@ class TestFraudMonitor:
 
         await fraud_monitor._process_fraud(EMAIL_REGEXES[0], full_body, msg_uid)
 
-        fraud_monitor._create_fraud_ticket.assert_awaited_once_with(client_id, service_number, EMAIL_REGEXES[0], body,
-                                                                    msg_uid)
+        fraud_monitor._create_fraud_ticket.assert_awaited_once_with(
+            client_id, service_number, EMAIL_REGEXES[0], body, msg_uid
+        )
 
     @pytest.mark.asyncio
     async def process_fraud__create_ticket__default_client_info_test(
-            self, fraud_monitor, make_get_tickets_response, bruin_500_response):
-        default_client_info = testconfig.FRAUD_CONFIG['default_client_info']
-        client_id = default_client_info['client_id']
-        service_number = default_client_info['service_number']
-        msg_uid = '123456'
+        self, fraud_monitor, make_get_tickets_response, bruin_500_response
+    ):
+        default_client_info = testconfig.FRAUD_CONFIG["default_client_info"]
+        client_id = default_client_info["client_id"]
+        service_number = default_client_info["service_number"]
+        msg_uid = "123456"
 
-        body = (
-            'Possible Fraud Warning with the following information:\n'
-            'DID: 12345678\n'
-        )
+        body = "Possible Fraud Warning with the following information:\n" "DID: 12345678\n"
 
-        full_body = (
-            'Network,\n'
-            '\n'
-            f'{body}\n'
-            '\n'
-            'Thanks,\n'
-            'Fraud Detection System'
-        )
+        full_body = "Network,\n" "\n" f"{body}\n" "\n" "Thanks,\n" "Fraud Detection System"
 
         fraud_monitor._bruin_repository.get_client_info_by_did.return_value = bruin_500_response
         fraud_monitor._bruin_repository.get_open_fraud_tickets.return_value = make_get_tickets_response()
@@ -331,14 +310,22 @@ class TestFraudMonitor:
 
         await fraud_monitor._process_fraud(EMAIL_REGEXES[0], full_body, msg_uid)
 
-        fraud_monitor._create_fraud_ticket.assert_awaited_once_with(client_id, service_number, EMAIL_REGEXES[0], body,
-                                                                    msg_uid)
+        fraud_monitor._create_fraud_ticket.assert_awaited_once_with(
+            client_id, service_number, EMAIL_REGEXES[0], body, msg_uid
+        )
 
     @pytest.mark.asyncio
     async def get_oldest_fraud_ticket__found_test(
-            self, fraud_monitor, make_ticket, make_detail_item, make_ticket_note, make_ticket_details,
-            make_detail_item_with_notes_and_ticket_info, make_rpc_response):
-        service_number = 'VC1234567'
+        self,
+        fraud_monitor,
+        make_ticket,
+        make_detail_item,
+        make_ticket_note,
+        make_ticket_details,
+        make_detail_item_with_notes_and_ticket_info,
+        make_rpc_response,
+    ):
+        service_number = "VC1234567"
 
         ticket = make_ticket()
         tickets = [ticket]
@@ -362,9 +349,9 @@ class TestFraudMonitor:
 
     @pytest.mark.asyncio
     async def get_oldest_fraud_ticket__not_found_test(
-            self, fraud_monitor, make_ticket, make_detail_item, make_ticket_note, make_ticket_details,
-            make_rpc_response):
-        service_number = 'VC1234567'
+        self, fraud_monitor, make_ticket, make_detail_item, make_ticket_note, make_ticket_details, make_rpc_response
+    ):
+        service_number = "VC1234567"
 
         ticket = make_ticket()
         tickets = [ticket]
@@ -387,10 +374,11 @@ class TestFraudMonitor:
 
     @pytest.mark.asyncio
     async def append_note_to_ticket__note_already_exists_test(
-            self, fraud_monitor, make_detail_item_with_notes_and_ticket_info):
-        service_number = 'VC1234567'
-        msg_uid = '123456'
-        email_body = 'Possible Fraud Warning'
+        self, fraud_monitor, make_detail_item_with_notes_and_ticket_info
+    ):
+        service_number = "VC1234567"
+        msg_uid = "123456"
+        email_body = "Possible Fraud Warning"
 
         detail_info = make_detail_item_with_notes_and_ticket_info()
 
@@ -403,10 +391,11 @@ class TestFraudMonitor:
 
     @pytest.mark.asyncio
     async def append_note_to_ticket__not_production_test(
-            self, fraud_monitor, make_detail_item_with_notes_and_ticket_info):
-        service_number = 'VC1234567'
-        msg_uid = '123456'
-        email_body = 'Possible Fraud Warning'
+        self, fraud_monitor, make_detail_item_with_notes_and_ticket_info
+    ):
+        service_number = "VC1234567"
+        msg_uid = "123456"
+        email_body = "Possible Fraud Warning"
 
         detail_info = make_detail_item_with_notes_and_ticket_info()
 
@@ -418,11 +407,12 @@ class TestFraudMonitor:
 
     @pytest.mark.asyncio
     async def append_note_to_ticket__rpc_request_has_not_2xx_status_test(
-            self, fraud_monitor, make_ticket, make_detail_item_with_notes_and_ticket_info, make_rpc_response):
+        self, fraud_monitor, make_ticket, make_detail_item_with_notes_and_ticket_info, make_rpc_response
+    ):
         ticket_id = 11111
-        service_number = 'VC1234567'
-        msg_uid = '123456'
-        email_body = 'Possible Fraud Warning'
+        service_number = "VC1234567"
+        msg_uid = "123456"
+        email_body = "Possible Fraud Warning"
 
         ticket = make_ticket(ticket_id=ticket_id)
         detail_info = make_detail_item_with_notes_and_ticket_info(ticket_info=ticket)
@@ -435,19 +425,20 @@ class TestFraudMonitor:
         with config_mock:
             result = await fraud_monitor._append_note_to_ticket(detail_info, service_number, email_body, msg_uid)
 
-        fraud_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, service_number,
-                                                                                       email_body, msg_uid)
+        fraud_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
+            ticket_id, service_number, email_body, msg_uid
+        )
         fraud_monitor._notifications_repository.notify_successful_note_append.assert_not_awaited()
         assert result is False
 
     @pytest.mark.asyncio
     async def append_note_to_ticket__rpc_request_success_test(
-            self, fraud_monitor, make_ticket, make_detail_item_with_notes_and_ticket_info,
-            bruin_generic_200_response):
+        self, fraud_monitor, make_ticket, make_detail_item_with_notes_and_ticket_info, bruin_generic_200_response
+    ):
         ticket_id = 11111
-        service_number = 'VC1234567'
-        msg_uid = '123456'
-        email_body = 'Possible Fraud Warning'
+        service_number = "VC1234567"
+        msg_uid = "123456"
+        email_body = "Possible Fraud Warning"
 
         ticket = make_ticket(ticket_id=ticket_id)
         detail_info = make_detail_item_with_notes_and_ticket_info(ticket_info=ticket)
@@ -457,23 +448,27 @@ class TestFraudMonitor:
         with config_mock:
             result = await fraud_monitor._append_note_to_ticket(detail_info, service_number, email_body, msg_uid)
 
-        fraud_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, service_number,
-                                                                                       email_body, msg_uid)
-        fraud_monitor._notifications_repository.notify_successful_note_append.assert_awaited_once_with(ticket_id,
-                                                                                                       service_number)
+        fraud_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
+            ticket_id, service_number, email_body, msg_uid
+        )
+        fraud_monitor._notifications_repository.notify_successful_note_append.assert_awaited_once_with(
+            ticket_id, service_number
+        )
         assert result is True
 
     @pytest.mark.asyncio
     async def unresolve_task_for_ticket__not_production_test(
-            self, fraud_monitor, make_detail_item_with_notes_and_ticket_info):
-        service_number = 'VC1234567'
-        msg_uid = '123456'
-        email_body = 'Possible Fraud Warning'
+        self, fraud_monitor, make_detail_item_with_notes_and_ticket_info
+    ):
+        service_number = "VC1234567"
+        msg_uid = "123456"
+        email_body = "Possible Fraud Warning"
 
         detail_info = make_detail_item_with_notes_and_ticket_info()
 
-        result = await fraud_monitor._unresolve_task_for_ticket(detail_info, service_number, EMAIL_REGEXES[0],
-                                                                email_body, msg_uid)
+        result = await fraud_monitor._unresolve_task_for_ticket(
+            detail_info, service_number, EMAIL_REGEXES[0], email_body, msg_uid
+        )
 
         fraud_monitor._bruin_repository.open_ticket.assert_not_awaited()
         fraud_monitor._notifications_repository.notify_successful_reopen.assert_not_awaited()
@@ -481,13 +476,18 @@ class TestFraudMonitor:
 
     @pytest.mark.asyncio
     async def unresolve_task_for_ticket__open_ticket_rpc_request_has_not_2xx_status_test(
-            self, fraud_monitor, make_ticket, make_detail_item, make_detail_item_with_notes_and_ticket_info,
-            bruin_500_response):
+        self,
+        fraud_monitor,
+        make_ticket,
+        make_detail_item,
+        make_detail_item_with_notes_and_ticket_info,
+        bruin_500_response,
+    ):
         ticket_id = 11111
         task_id = 22222
-        service_number = 'VC1234567'
-        msg_uid = '123456'
-        email_body = 'Possible Fraud Warning'
+        service_number = "VC1234567"
+        msg_uid = "123456"
+        email_body = "Possible Fraud Warning"
 
         ticket = make_ticket(ticket_id=ticket_id)
         detail_item = make_detail_item(id_=task_id)
@@ -496,8 +496,9 @@ class TestFraudMonitor:
         fraud_monitor._bruin_repository.open_ticket.return_value = bruin_500_response
 
         with config_mock:
-            result = await fraud_monitor._unresolve_task_for_ticket(detail_info, service_number, EMAIL_REGEXES[0],
-                                                                    email_body, msg_uid)
+            result = await fraud_monitor._unresolve_task_for_ticket(
+                detail_info, service_number, EMAIL_REGEXES[0], email_body, msg_uid
+            )
 
         fraud_monitor._bruin_repository.open_ticket.assert_awaited_once_with(ticket_id, task_id)
         fraud_monitor._notifications_repository.notify_successful_reopen.assert_not_awaited()
@@ -505,13 +506,19 @@ class TestFraudMonitor:
 
     @pytest.mark.asyncio
     async def unresolve_task_for_ticket__open_ticket_rpc_request_success__append_note_rpc_request_has_not_2xx_status_test(  # noqa
-            self, fraud_monitor, make_ticket, make_detail_item, make_detail_item_with_notes_and_ticket_info,
-            bruin_generic_200_response, bruin_500_response):
+        self,
+        fraud_monitor,
+        make_ticket,
+        make_detail_item,
+        make_detail_item_with_notes_and_ticket_info,
+        bruin_generic_200_response,
+        bruin_500_response,
+    ):
         ticket_id = 11111
         task_id = 22222
-        service_number = 'VC1234567'
-        msg_uid = '123456'
-        email_body = 'Possible Fraud Warning'
+        service_number = "VC1234567"
+        msg_uid = "123456"
+        email_body = "Possible Fraud Warning"
 
         ticket = make_ticket(ticket_id=ticket_id)
         detail_item = make_detail_item(id_=task_id)
@@ -521,12 +528,14 @@ class TestFraudMonitor:
         fraud_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_500_response
 
         with config_mock:
-            result = await fraud_monitor._unresolve_task_for_ticket(detail_info, service_number, EMAIL_REGEXES[0],
-                                                                    email_body, msg_uid)
+            result = await fraud_monitor._unresolve_task_for_ticket(
+                detail_info, service_number, EMAIL_REGEXES[0], email_body, msg_uid
+            )
 
         fraud_monitor._bruin_repository.open_ticket.assert_awaited_once_with(ticket_id, task_id)
-        fraud_monitor._notifications_repository.notify_successful_reopen.assert_awaited_once_with(ticket_id,
-                                                                                                  service_number)
+        fraud_monitor._notifications_repository.notify_successful_reopen.assert_awaited_once_with(
+            ticket_id, service_number
+        )
         fraud_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
             ticket_id, service_number, email_body, msg_uid, reopening=True
         )
@@ -535,13 +544,18 @@ class TestFraudMonitor:
 
     @pytest.mark.asyncio
     async def unresolve_task_for_ticket__open_ticket_rpc_request_success__append_note_rpc_request_success_test(
-            self, fraud_monitor, make_ticket, make_detail_item, make_detail_item_with_notes_and_ticket_info,
-            bruin_generic_200_response):
+        self,
+        fraud_monitor,
+        make_ticket,
+        make_detail_item,
+        make_detail_item_with_notes_and_ticket_info,
+        bruin_generic_200_response,
+    ):
         ticket_id = 11111
         task_id = 22222
-        service_number = 'VC1234567'
-        msg_uid = '123456'
-        email_body = 'Possible Fraud Warning'
+        service_number = "VC1234567"
+        msg_uid = "123456"
+        email_body = "Possible Fraud Warning"
 
         ticket = make_ticket(ticket_id=ticket_id)
         detail_item = make_detail_item(id_=task_id)
@@ -551,30 +565,34 @@ class TestFraudMonitor:
         fraud_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
 
         with config_mock:
-            result = await fraud_monitor._unresolve_task_for_ticket(detail_info, service_number, EMAIL_REGEXES[0],
-                                                                    email_body, msg_uid)
+            result = await fraud_monitor._unresolve_task_for_ticket(
+                detail_info, service_number, EMAIL_REGEXES[0], email_body, msg_uid
+            )
 
         fraud_monitor._bruin_repository.open_ticket.assert_awaited_once_with(ticket_id, task_id)
-        fraud_monitor._notifications_repository.notify_successful_reopen.assert_awaited_once_with(ticket_id,
-                                                                                                  service_number)
+        fraud_monitor._notifications_repository.notify_successful_reopen.assert_awaited_once_with(
+            ticket_id, service_number
+        )
         fraud_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
             ticket_id, service_number, email_body, msg_uid, reopening=True
         )
-        fraud_monitor._notifications_repository.notify_successful_note_append.assert_awaited_once_with(ticket_id,
-                                                                                                       service_number)
+        fraud_monitor._notifications_repository.notify_successful_note_append.assert_awaited_once_with(
+            ticket_id, service_number
+        )
         assert result is True
 
     @pytest.mark.asyncio
     async def create_fraud_ticket__no_contacts_test(self, fraud_monitor):
         client_id = 12345
-        service_number = 'VC1234567'
-        msg_uid = '123456'
-        email_body = 'Possible Fraud Warning'
+        service_number = "VC1234567"
+        msg_uid = "123456"
+        email_body = "Possible Fraud Warning"
 
         fraud_monitor._get_contacts.return_value = None
 
-        result = await fraud_monitor._create_fraud_ticket(client_id, service_number, EMAIL_REGEXES[0], email_body,
-                                                          msg_uid)
+        result = await fraud_monitor._create_fraud_ticket(
+            client_id, service_number, EMAIL_REGEXES[0], email_body, msg_uid
+        )
 
         fraud_monitor._bruin_repository.create_fraud_ticket.assert_not_awaited()
         fraud_monitor._notifications_repository.notify_successful_ticket_creation.assert_not_awaited()
@@ -584,14 +602,15 @@ class TestFraudMonitor:
     @pytest.mark.asyncio
     async def create_fraud_ticket__not_production_test(self, fraud_monitor, make_contact_info):
         client_id = 12345
-        service_number = 'VC1234567'
-        msg_uid = '123456'
-        email_body = 'Possible Fraud Warning'
+        service_number = "VC1234567"
+        msg_uid = "123456"
+        email_body = "Possible Fraud Warning"
 
         fraud_monitor._get_contacts.return_value = make_contact_info()
 
-        result = await fraud_monitor._create_fraud_ticket(client_id, service_number, EMAIL_REGEXES[0], email_body,
-                                                          msg_uid)
+        result = await fraud_monitor._create_fraud_ticket(
+            client_id, service_number, EMAIL_REGEXES[0], email_body, msg_uid
+        )
 
         fraud_monitor._bruin_repository.create_fraud_ticket.assert_not_awaited()
         fraud_monitor._notifications_repository.notify_successful_ticket_creation.assert_not_awaited()
@@ -600,11 +619,12 @@ class TestFraudMonitor:
 
     @pytest.mark.asyncio
     async def create_fraud_ticket__create_ticket_rpc_request_has_not_2xx_status_test(
-            self, fraud_monitor, make_contact_info, make_rpc_response):
+        self, fraud_monitor, make_contact_info, make_rpc_response
+    ):
         client_id = 12345
-        service_number = 'VC1234567'
-        msg_uid = '123456'
-        email_body = 'Possible Fraud Warning'
+        service_number = "VC1234567"
+        msg_uid = "123456"
+        email_body = "Possible Fraud Warning"
         contacts = make_contact_info()
 
         fraud_monitor._get_contacts.return_value = make_contact_info()
@@ -614,23 +634,26 @@ class TestFraudMonitor:
         )
 
         with config_mock:
-            result = await fraud_monitor._create_fraud_ticket(client_id, service_number, EMAIL_REGEXES[0], email_body,
-                                                              msg_uid)
+            result = await fraud_monitor._create_fraud_ticket(
+                client_id, service_number, EMAIL_REGEXES[0], email_body, msg_uid
+            )
 
-        fraud_monitor._bruin_repository.create_fraud_ticket.assert_awaited_once_with(client_id, service_number,
-                                                                                     contacts)
+        fraud_monitor._bruin_repository.create_fraud_ticket.assert_awaited_once_with(
+            client_id, service_number, contacts
+        )
         fraud_monitor._notifications_repository.notify_successful_ticket_creation.assert_not_awaited()
         fraud_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_not_awaited()
         assert result is False
 
     @pytest.mark.asyncio
     async def create_fraud_ticket__create_ticket_rpc_request_success__append_note_rpc_request_has_not_2xx_status_test(
-            self, fraud_monitor, make_contact_info, make_create_ticket_200_response, bruin_500_response):
+        self, fraud_monitor, make_contact_info, make_create_ticket_200_response, bruin_500_response
+    ):
         ticket_id = 11111
         client_id = 12345
-        service_number = 'VC1234567'
-        msg_uid = '123456'
-        email_body = 'Possible Fraud Warning'
+        service_number = "VC1234567"
+        msg_uid = "123456"
+        email_body = "Possible Fraud Warning"
         contacts = make_contact_info()
 
         fraud_monitor._get_contacts.return_value = make_contact_info()
@@ -640,28 +663,32 @@ class TestFraudMonitor:
         fraud_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_500_response
 
         with config_mock:
-            result = await fraud_monitor._create_fraud_ticket(client_id, service_number, EMAIL_REGEXES[0], email_body,
-                                                              msg_uid)
+            result = await fraud_monitor._create_fraud_ticket(
+                client_id, service_number, EMAIL_REGEXES[0], email_body, msg_uid
+            )
 
-        fraud_monitor._bruin_repository.create_fraud_ticket.assert_awaited_once_with(client_id, service_number,
-                                                                                     contacts)
+        fraud_monitor._bruin_repository.create_fraud_ticket.assert_awaited_once_with(
+            client_id, service_number, contacts
+        )
         fraud_monitor._notifications_repository.notify_successful_ticket_creation.assert_awaited_once_with(
             ticket_id, service_number
         )
-        fraud_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, service_number,
-                                                                                       email_body, msg_uid)
+        fraud_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
+            ticket_id, service_number, email_body, msg_uid
+        )
         fraud_monitor._notifications_repository.notify_successful_note_append.assert_not_awaited()
         fraud_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_not_awaited()
         assert result is False
 
     @pytest.mark.asyncio
     async def create_fraud_ticket__create_ticket_rpc_request_success__append_note_rpc_request_success_test(
-            self, fraud_monitor, make_contact_info, make_create_ticket_200_response, bruin_generic_200_response):
+        self, fraud_monitor, make_contact_info, make_create_ticket_200_response, bruin_generic_200_response
+    ):
         ticket_id = 11111
         client_id = 12345
-        service_number = 'VC1234567'
-        msg_uid = '123456'
-        email_body = 'Possible Fraud Warning'
+        service_number = "VC1234567"
+        msg_uid = "123456"
+        email_body = "Possible Fraud Warning"
         contacts = make_contact_info()
 
         fraud_monitor._get_contacts.return_value = make_contact_info()
@@ -671,27 +698,33 @@ class TestFraudMonitor:
         fraud_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
 
         with config_mock:
-            result = await fraud_monitor._create_fraud_ticket(client_id, service_number, EMAIL_REGEXES[0], email_body,
-                                                              msg_uid)
+            result = await fraud_monitor._create_fraud_ticket(
+                client_id, service_number, EMAIL_REGEXES[0], email_body, msg_uid
+            )
 
-        fraud_monitor._bruin_repository.create_fraud_ticket.assert_awaited_once_with(client_id, service_number,
-                                                                                     contacts)
+        fraud_monitor._bruin_repository.create_fraud_ticket.assert_awaited_once_with(
+            client_id, service_number, contacts
+        )
         fraud_monitor._notifications_repository.notify_successful_ticket_creation.assert_awaited_once_with(
             ticket_id, service_number
         )
-        fraud_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, service_number,
-                                                                                       email_body, msg_uid)
-        fraud_monitor._notifications_repository.notify_successful_note_append.assert_awaited_once_with(ticket_id,
-                                                                                                       service_number)
+        fraud_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
+            ticket_id, service_number, email_body, msg_uid
+        )
+        fraud_monitor._notifications_repository.notify_successful_note_append.assert_awaited_once_with(
+            ticket_id, service_number
+        )
         fraud_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_awaited_once_with(
-            ticket_id=ticket_id, service_number=service_number)
+            ticket_id=ticket_id, service_number=service_number
+        )
         assert result is True
 
     @pytest.mark.asyncio
     async def get_contacts__client_info_rpc_request__has_not_2xx_status_test(
-            self, fraud_monitor, make_contact_info, bruin_500_response):
+        self, fraud_monitor, make_contact_info, bruin_500_response
+    ):
         client_id = 12345
-        service_number = 'VC1234567'
+        service_number = "VC1234567"
         contacts = make_contact_info()
 
         fraud_monitor._bruin_repository.get_client_info.return_value = bruin_500_response
@@ -706,14 +739,16 @@ class TestFraudMonitor:
 
     @pytest.mark.asyncio
     async def get_contacts__client_info_rpc_request_success__site_details_rpc_request_has_not_2xx_status_test(
-            self, fraud_monitor, make_contact_info, make_get_client_info_200_response, bruin_500_response):
+        self, fraud_monitor, make_contact_info, make_get_client_info_200_response, bruin_500_response
+    ):
         site_id = 11111
         client_id = 12345
-        service_number = 'VC1234567'
+        service_number = "VC1234567"
         contacts = make_contact_info()
 
         fraud_monitor._bruin_repository.get_client_info.return_value = make_get_client_info_200_response(
-            site_id=site_id)
+            site_id=site_id
+        )
         fraud_monitor._bruin_repository.get_site_details.return_value = bruin_500_response
 
         result = await fraud_monitor._get_contacts(client_id, service_number)
@@ -726,17 +761,18 @@ class TestFraudMonitor:
 
     @pytest.mark.asyncio
     async def get_contacts__client_info_rpc_request_success__site_details_rpc_request_success_test(
-            self, fraud_monitor, make_contact_info, make_get_client_info_200_response,
-            make_get_site_details_200_response):
+        self, fraud_monitor, make_contact_info, make_get_client_info_200_response, make_get_site_details_200_response
+    ):
         site_id = 11111
         client_id = 12345
-        service_number = 'VC1234567'
+        service_number = "VC1234567"
 
-        contact = {'name': 'Test contact', 'email': 'contact@test.com'}
+        contact = {"name": "Test contact", "email": "contact@test.com"}
         contacts = make_contact_info(**contact)
 
         fraud_monitor._bruin_repository.get_client_info.return_value = make_get_client_info_200_response(
-            site_id=site_id)
+            site_id=site_id
+        )
         fraud_monitor._bruin_repository.get_site_details.return_value = make_get_site_details_200_response(
             contact=contact
         )

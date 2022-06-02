@@ -1,7 +1,5 @@
 import json
-
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 
 class StorageRepository:
@@ -12,11 +10,11 @@ class StorageRepository:
 
         self._redis_key_prefix = config.ENVIRONMENT_NAME
 
-        self.__next_refresh_key = f'{self._redis_key_prefix}-next_refresh_date'
-        self.__next_refresh_date_format = '%m/%d/%Y, %H:%M:%S'
+        self.__next_refresh_key = f"{self._redis_key_prefix}-next_refresh_date"
+        self.__next_refresh_date_format = "%m/%d/%Y, %H:%M:%S"
 
     def get_cache(self, key):
-        key = f'{self._redis_key_prefix}-{key}'
+        key = f"{self._redis_key_prefix}-{key}"
 
         if self._redis.exists(key):
             cache = self._redis.get(key)
@@ -27,7 +25,7 @@ class StorageRepository:
         caches = []
         # If not filter add all velocloud servers to search in all
         if len(filters.keys()) == 0:
-            for velo_dict in self._config.REFRESH_CONFIG['velo_servers']:
+            for velo_dict in self._config.REFRESH_CONFIG["velo_servers"]:
                 filters.update(velo_dict)
         for host in filters.keys():
             host_cache = self.get_cache(host)
@@ -37,7 +35,7 @@ class StorageRepository:
         return caches
 
     def set_cache(self, key, cache):
-        key = f'{self._redis_key_prefix}-{key}'
+        key = f"{self._redis_key_prefix}-{key}"
         self._redis.set(key, json.dumps(cache))
 
     def get_refresh_date(self) -> datetime:
@@ -48,15 +46,15 @@ class StorageRepository:
             self._logger.info(f"Got next refresh date from Redis: {date}")
             date = datetime.strptime(date, self.__next_refresh_date_format)
         else:
-            self._logger.info(f'No {self.__next_refresh_key} key found in Redis')
+            self._logger.info(f"No {self.__next_refresh_key} key found in Redis")
 
         return date
 
     def update_refresh_date(self):
-        self._logger.info('Setting new refresh date in Redis...')
+        self._logger.info("Setting new refresh date in Redis...")
 
-        next_refresh = datetime.utcnow() + timedelta(minutes=self._config.REFRESH_CONFIG['refresh_map_minutes'])
+        next_refresh = datetime.utcnow() + timedelta(minutes=self._config.REFRESH_CONFIG["refresh_map_minutes"])
         date = next_refresh.strftime(self.__next_refresh_date_format)
         self._redis.set(self.__next_refresh_key, date)
 
-        self._logger.info(f'New refresh date: {date} set in Redis')
+        self._logger.info(f"New refresh date: {date} set in Redis")

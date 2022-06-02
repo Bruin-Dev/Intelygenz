@@ -1,30 +1,27 @@
 import asyncio
 
 import redis
-from prometheus_client import start_http_server
-
+from application.actions.fraud_monitoring import FraudMonitor
+from application.repositories.bruin_repository import BruinRepository
+from application.repositories.metrics_repository import MetricsRepository
+from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.ticket_repository import TicketRepository
+from application.repositories.utils_repository import UtilsRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from config import config
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
-
-from application.repositories.utils_repository import UtilsRepository
-from application.repositories.bruin_repository import BruinRepository
-from application.repositories.ticket_repository import TicketRepository
-from application.repositories.metrics_repository import MetricsRepository
-from application.repositories.notifications_repository import NotificationsRepository
-from application.actions.fraud_monitoring import FraudMonitor
-from config import config
+from prometheus_client import start_http_server
 
 
 class Container:
-
     def __init__(self):
         # LOGGER
         self._logger = LoggerClient(config).get_logger()
-        self._logger.info(f'Fraud Monitor starting in {config.CURRENT_ENVIRONMENT}...')
+        self._logger.info(f"Fraud Monitor starting in {config.CURRENT_ENVIRONMENT}...")
 
         # REDIS
         self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
@@ -54,9 +51,17 @@ class Container:
         self._ticket_repository = TicketRepository(self._utils_repository)
 
         # ACTIONS
-        self._fraud_monitoring = FraudMonitor(self._event_bus, self._logger, self._scheduler, config,
-                                              self._metrics_repository, self._notifications_repository,
-                                              self._bruin_repository, self._ticket_repository, self._utils_repository)
+        self._fraud_monitoring = FraudMonitor(
+            self._event_bus,
+            self._logger,
+            self._scheduler,
+            config,
+            self._metrics_repository,
+            self._notifications_repository,
+            self._bruin_repository,
+            self._ticket_repository,
+            self._utils_repository,
+        )
 
     async def _start(self):
         self._start_prometheus_metrics_server()
@@ -67,7 +72,7 @@ class Container:
 
     @staticmethod
     def _start_prometheus_metrics_server():
-        start_http_server(config.METRICS_SERVER_CONFIG['port'])
+        start_http_server(config.METRICS_SERVER_CONFIG["port"])
 
     async def start_server(self):
         await self._server.run_server()
@@ -76,7 +81,7 @@ class Container:
         await self._start()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     container = Container()
     loop = asyncio.get_event_loop()
     asyncio.ensure_future(container.run(), loop=loop)

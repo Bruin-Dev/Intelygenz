@@ -1,39 +1,36 @@
-import pytest
-
 from unittest.mock import Mock
-from asynctest import create_autospec
 
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from igz.packages.eventbus.eventbus import EventBus
-
+import pytest
 from application.actions.fraud_monitoring import FraudMonitor
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.metrics_repository import MetricsRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.ticket_repository import TicketRepository
 from application.repositories.utils_repository import UtilsRepository
-
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from asynctest import create_autospec
 from config import testconfig
+from igz.packages.eventbus.eventbus import EventBus
 from tests.fixtures._helpers import wrap_all_methods
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def logger():
     # Let's suppress all logs in tests
     return Mock()
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def event_bus():
     return create_autospec(EventBus)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def scheduler():
     return create_autospec(AsyncIOScheduler)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def metrics_repository():
     instance = MetricsRepository()
     wrap_all_methods(instance)
@@ -41,7 +38,7 @@ def metrics_repository():
     return instance
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def notifications_repository(logger, event_bus):
     instance = NotificationsRepository(logger=logger, event_bus=event_bus, config=testconfig)
     wrap_all_methods(instance)
@@ -49,7 +46,7 @@ def notifications_repository(logger, event_bus):
     return instance
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def bruin_repository(event_bus, logger, notifications_repository):
     instance = BruinRepository(
         event_bus=event_bus,
@@ -62,7 +59,7 @@ def bruin_repository(event_bus, logger, notifications_repository):
     return instance
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def ticket_repository(utils_repository):
     instance = TicketRepository(utils_repository=utils_repository)
     wrap_all_methods(instance)
@@ -70,7 +67,7 @@ def ticket_repository(utils_repository):
     return instance
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def utils_repository():
     instance = UtilsRepository()
     wrap_all_methods(instance)
@@ -78,9 +75,17 @@ def utils_repository():
     return instance
 
 
-@pytest.fixture(scope='function')
-def fraud_monitor(event_bus, logger, scheduler, metrics_repository, notifications_repository, bruin_repository,
-                  ticket_repository, utils_repository):
+@pytest.fixture(scope="function")
+def fraud_monitor(
+    event_bus,
+    logger,
+    scheduler,
+    metrics_repository,
+    notifications_repository,
+    bruin_repository,
+    ticket_repository,
+    utils_repository,
+):
     instance = FraudMonitor(
         event_bus=event_bus,
         logger=logger,

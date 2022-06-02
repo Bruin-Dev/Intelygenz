@@ -1,9 +1,7 @@
-from datetime import datetime
-from datetime import timedelta
-
-from shortuuid import uuid
+from datetime import datetime, timedelta
 
 from application.repositories import nats_error_response
+from shortuuid import uuid
 
 
 class CustomerCacheRepository:
@@ -22,8 +20,8 @@ class CustomerCacheRepository:
         request = {
             "request_id": uuid(),
             "body": {
-                'filter': velo_filter,
-                'last_contact_filter': last_contact_filter,
+                "filter": velo_filter,
+                "last_contact_filter": last_contact_filter,
             },
         }
 
@@ -34,11 +32,11 @@ class CustomerCacheRepository:
                 self._logger.info(f"Getting customer cache for all Velocloud hosts...")
             response = await self._event_bus.rpc_request("customer.cache.get", request, timeout=60)
         except Exception as e:
-            err_msg = f'An error occurred when requesting customer cache -> {e}'
+            err_msg = f"An error occurred when requesting customer cache -> {e}"
             response = nats_error_response
         else:
-            response_body = response['body']
-            response_status = response['status']
+            response_body = response["body"]
+            response_status = response["status"]
 
             if response_status == 202:
                 err_msg = response_body
@@ -55,12 +53,12 @@ class CustomerCacheRepository:
         return response
 
     async def get_cache_for_triage_monitoring(self):
-        monitoring_filter = self._config.TRIAGE_CONFIG['velo_filter']
+        monitoring_filter = self._config.TRIAGE_CONFIG["velo_filter"]
 
         return await self.get_cache(velo_filter=monitoring_filter)
 
     async def get_cache_for_outage_monitoring(self):
-        monitoring_filter = self._config.MONITOR_CONFIG['velocloud_instances_filter']
+        monitoring_filter = self._config.MONITOR_CONFIG["velocloud_instances_filter"]
         last_contact_filter = str(datetime.now() - timedelta(days=7))
 
         return await self.get_cache(velo_filter=monitoring_filter, last_contact_filter=last_contact_filter)

@@ -1,7 +1,7 @@
+from adapters.config.settings import get_config
+from adapters.logger.logger import get_logger
 from dependency_injector import containers, providers
 from usecases.statistics import StatisticsUseCase
-from adapters.logger.logger import get_logger
-from adapters.config.settings import get_config
 
 
 class UseCases(containers.DeclarativeContainer):
@@ -11,8 +11,5 @@ class UseCases(containers.DeclarativeContainer):
     logger = providers.Singleton(get_logger, config=config)
 
     statistics_use_case: StatisticsUseCase = providers.Singleton(
-        StatisticsUseCase,
-        tickets_repository=tickets_repository,
-        config=config,
-        logger=logger
+        StatisticsUseCase, tickets_repository=tickets_repository, config=config, logger=logger
     )

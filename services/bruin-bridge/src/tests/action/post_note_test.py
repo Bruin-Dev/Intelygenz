@@ -6,7 +6,6 @@ from asynctest import CoroutineMock
 
 
 class TestPostNote:
-
     def instance_test(self):
         logger = Mock()
         event_bus = Mock()
@@ -21,18 +20,14 @@ class TestPostNote:
     @pytest.mark.asyncio
     async def post_note_no_body_test(self):
         logger = Mock()
-        append_note_response = 'Note appended'
+        append_note_response = "Note appended"
         request_id = 123
-        response_topic = '_INBOX.2007314fe0fcb2cdc2a2914c1'
+        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
         msg = {
-            'request_id': request_id,
-            'response_topic': response_topic,
+            "request_id": request_id,
+            "response_topic": response_topic,
         }
-        msg_published_in_topic = {
-            'request_id': request_id,
-            'body': 'Must include "body" in request',
-            'status': 400
-        }
+        msg_published_in_topic = {"request_id": request_id, "body": 'Must include "body" in request', "status": 400}
 
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
@@ -44,25 +39,23 @@ class TestPostNote:
         await post_note.post_note(msg)
 
         post_note._bruin_repository.post_ticket_note.assert_not_awaited()
-        post_note._event_bus.publish_message.assert_awaited_once_with(
-            response_topic, msg_published_in_topic
-        )
+        post_note._event_bus.publish_message.assert_awaited_once_with(response_topic, msg_published_in_topic)
 
     @pytest.mark.asyncio
     async def post_note_no_ticket_id_or_note_test(self):
         logger = Mock()
-        append_note_response = 'Note appended'
+        append_note_response = "Note appended"
         request_id = 123
-        response_topic = '_INBOX.2007314fe0fcb2cdc2a2914c1'
+        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
         msg = {
-            'request_id': request_id,
-            'body': {},
-            'response_topic': response_topic,
+            "request_id": request_id,
+            "body": {},
+            "response_topic": response_topic,
         }
         msg_published_in_topic = {
-            'request_id': request_id,
-            'body': 'You must include "ticket_id" and "note" in the "body" field of the response request',
-            'status': 400
+            "request_id": request_id,
+            "body": 'You must include "ticket_id" and "note" in the "body" field of the response request',
+            "status": 400,
         }
 
         event_bus = Mock()
@@ -75,31 +68,25 @@ class TestPostNote:
         await post_note.post_note(msg)
 
         post_note._bruin_repository.post_ticket_note.assert_not_awaited()
-        post_note._event_bus.publish_message.assert_awaited_once_with(
-            response_topic, msg_published_in_topic
-        )
+        post_note._event_bus.publish_message.assert_awaited_once_with(response_topic, msg_published_in_topic)
 
     @pytest.mark.asyncio
     async def post_note_200_test(self):
         logger = Mock()
-        append_note_response = {'body': 'Note appended', 'status': 200}
+        append_note_response = {"body": "Note appended", "status": 200}
         request_id = 123
         ticket_id = 321
-        response_topic = '_INBOX.2007314fe0fcb2cdc2a2914c1'
-        note_contents = 'Some Note'
+        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
+        note_contents = "Some Note"
         msg = {
-            'request_id': request_id,
-            'response_topic': response_topic,
-            'body': {
-                     'ticket_id': ticket_id,
-                     'note': note_contents,
-            }
+            "request_id": request_id,
+            "response_topic": response_topic,
+            "body": {
+                "ticket_id": ticket_id,
+                "note": note_contents,
+            },
         }
-        msg_published_in_topic = {
-            'request_id': request_id,
-            'body': append_note_response['body'],
-            'status': 200
-        }
+        msg_published_in_topic = {"request_id": request_id, "body": append_note_response["body"], "status": 200}
 
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
@@ -113,35 +100,29 @@ class TestPostNote:
         post_note._bruin_repository.post_ticket_note.assert_awaited_once_with(
             ticket_id, note_contents, service_numbers=None
         )
-        post_note._event_bus.publish_message.assert_awaited_once_with(
-            response_topic, msg_published_in_topic
-        )
+        post_note._event_bus.publish_message.assert_awaited_once_with(response_topic, msg_published_in_topic)
 
     @pytest.mark.asyncio
     async def post_note_with_optional_service_numbers_list_test(self):
         request_id = 123
-        response_topic = '_INBOX.2007314fe0fcb2cdc2a2914c1'
+        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
 
         ticket_id = 321
-        note_contents = 'Some Note'
-        service_numbers = ['VC1234567']
+        note_contents = "Some Note"
+        service_numbers = ["VC1234567"]
 
-        append_note_response = {'body': 'Note appended', 'status': 200}
+        append_note_response = {"body": "Note appended", "status": 200}
 
         msg = {
-            'request_id': request_id,
-            'response_topic': response_topic,
-            'body': {
-                'ticket_id': ticket_id,
-                'note': note_contents,
-                'service_numbers': service_numbers,
-            }
+            "request_id": request_id,
+            "response_topic": response_topic,
+            "body": {
+                "ticket_id": ticket_id,
+                "note": note_contents,
+                "service_numbers": service_numbers,
+            },
         }
-        msg_published_in_topic = {
-            'request_id': request_id,
-            'body': append_note_response['body'],
-            'status': 200
-        }
+        msg_published_in_topic = {"request_id": request_id, "body": append_note_response["body"], "status": 200}
 
         logger = Mock()
 
@@ -157,6 +138,4 @@ class TestPostNote:
         post_note._bruin_repository.post_ticket_note.assert_awaited_once_with(
             ticket_id, note_contents, service_numbers=service_numbers
         )
-        post_note._event_bus.publish_message.assert_awaited_once_with(
-            response_topic, msg_published_in_topic
-        )
+        post_note._event_bus.publish_message.assert_awaited_once_with(response_topic, msg_published_in_topic)

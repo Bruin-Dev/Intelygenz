@@ -1,15 +1,12 @@
 import asyncio
 import types
-
-from typing import Any
-from typing import List
-from unittest.mock import Mock
-from pytz import timezone
 from datetime import datetime
+from typing import Any, List
+from unittest.mock import Mock
 
 from asynctest import CoroutineMock
-from tests.fixtures._constants import VELOCLOUD_API_TIMEZONE
-from tests.fixtures._constants import BRUIN_API_TIMEZONE
+from pytz import timezone
+from tests.fixtures._constants import BRUIN_API_TIMEZONE, VELOCLOUD_API_TIMEZONE
 
 
 def wrap_all_methods(instance: Any, *, excluded_methods: List[str] = None):
@@ -24,7 +21,7 @@ def wrap_all_methods(instance: Any, *, excluded_methods: List[str] = None):
     wrappable_methods = [
         method
         for method in dir(instance)
-        if not method.startswith('__')
+        if not method.startswith("__")
         if method not in excluded_methods
         if type(getattr(instance, method)) in [types.MethodType, types.FunctionType]
     ]
@@ -49,10 +46,10 @@ def bruinize_date(dt: datetime) -> str:
     date = dt.astimezone(timezone(BRUIN_API_TIMEZONE))
 
     date_str = date.isoformat()
-    fragments = date_str.split('-')
+    fragments = date_str.split("-")
     fragments[-2] = fragments[-2][:-3]  # Keep 3 out of 6 millisecond digits
 
-    return '-'.join(fragments)
+    return "-".join(fragments)
 
 
 def velocloudize_date(dt: datetime) -> str:
@@ -64,4 +61,4 @@ def velocloudize_date(dt: datetime) -> str:
     The result should look similar to this: 2020-09-08T19:40:12.000Z
     """
     date = dt.astimezone(timezone(VELOCLOUD_API_TIMEZONE))
-    return date.strftime('%Y-%m-%dT%H:%M:%S.000Z')
+    return date.strftime("%Y-%m-%dT%H:%M:%S.000Z")

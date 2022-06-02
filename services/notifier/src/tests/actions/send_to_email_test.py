@@ -1,13 +1,13 @@
+import json
 from unittest.mock import Mock
+
+import pytest
 from application.actions.send_to_email import SendToEmail
 from asynctest import CoroutineMock
 from config import testconfig as config
-import pytest
-import json
 
 
 class TestEmailNotifier:
-
     def instantiation_test(self):
         test_bus = Mock()
         mock_email_repository = Mock()
@@ -44,8 +44,7 @@ class TestEmailNotifier:
 
         test_actions._email_repository.send_to_email.assert_called_once_with(msg_body)
         test_actions._event_bus.publish_message.assert_awaited_once_with(
-            response_topic,
-            {'request_id': request_id, 'status': msg_delivery_status}
+            response_topic, {"request_id": request_id, "status": msg_delivery_status}
         )
 
     @pytest.mark.asyncio
@@ -71,6 +70,5 @@ class TestEmailNotifier:
 
         test_actions._email_repository.send_to_email.assert_not_called()
         test_actions._event_bus.publish_message.assert_awaited_once_with(
-            response_topic,
-            {'request_id': request_id, 'status': 500}
+            response_topic, {"request_id": request_id, "status": 500}
         )

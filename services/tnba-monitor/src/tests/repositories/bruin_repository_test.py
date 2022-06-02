@@ -1,19 +1,16 @@
 from datetime import datetime
-from unittest.mock import Mock
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
-
-from asynctest import CoroutineMock
-from shortuuid import uuid
-
 from application.repositories import bruin_repository as bruin_repository_module
 from application.repositories import nats_error_response
 from application.repositories.bruin_repository import BruinRepository
+from asynctest import CoroutineMock
 from config import testconfig
+from shortuuid import uuid
 
 uuid_ = uuid()
-uuid_mock = patch.object(bruin_repository_module, 'uuid', return_value=uuid_)
+uuid_mock = patch.object(bruin_repository_module, "uuid", return_value=uuid_)
 
 
 class TestBruinRepository:
@@ -26,7 +23,7 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def get_tickets_test(self, bruin_repository, make_rpc_request, make_rpc_response, open_affecting_ticket):
         bruin_client_id = 12345
-        ticket_statuses = ['New', 'InProgress', 'Draft']
+        ticket_statuses = ["New", "InProgress", "Draft"]
         ticket_topic = "VAS"
 
         request = make_rpc_request(
@@ -51,7 +48,7 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def get_tickets_with_rpc_request_failing_test(self, bruin_repository, make_rpc_request):
         bruin_client_id = 12345
-        ticket_statuses = ['New', 'InProgress', 'Draft']
+        ticket_statuses = ["New", "InProgress", "Draft"]
         ticket_topic = "VAS"
 
         request = make_rpc_request(
@@ -76,10 +73,11 @@ class TestBruinRepository:
         assert result == nats_error_response
 
     @pytest.mark.asyncio
-    async def get_tickets_with_rpc_request_returning_non_2xx_status_test(self, bruin_repository, make_rpc_request,
-                                                                         make_rpc_response):
+    async def get_tickets_with_rpc_request_returning_non_2xx_status_test(
+        self, bruin_repository, make_rpc_request, make_rpc_response
+    ):
         bruin_client_id = 12345
-        ticket_statuses = ['New', 'InProgress', 'Draft']
+        ticket_statuses = ["New", "InProgress", "Draft"]
         ticket_topic = "VAS"
 
         request = make_rpc_request(
@@ -91,7 +89,7 @@ class TestBruinRepository:
         )
         response = make_rpc_response(
             request_id=uuid_,
-            body='Got internal error from Bruin',
+            body="Got internal error from Bruin",
             status=500,
         )
 
@@ -109,8 +107,15 @@ class TestBruinRepository:
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_ticket_details_test(self, bruin_repository, make_rpc_request, make_rpc_response,
-                                      make_in_progress_ticket_detail, make_ticket_note, serial_number_1):
+    async def get_ticket_details_test(
+        self,
+        bruin_repository,
+        make_rpc_request,
+        make_rpc_response,
+        make_in_progress_ticket_detail,
+        make_ticket_note,
+        serial_number_1,
+    ):
         ticket_id = 11111
 
         request = make_rpc_request(request_id=uuid_, ticket_id=ticket_id)
@@ -120,10 +125,7 @@ class TestBruinRepository:
         ticket_note_2 = make_ticket_note(serial_number=serial_number_1)
         response = make_rpc_response(
             request_id=uuid_,
-            body={
-                'ticketDetails': [ticket_detail_1],
-                'ticketNotes': [ticket_note_1, ticket_note_2]
-            },
+            body={"ticketDetails": [ticket_detail_1], "ticketNotes": [ticket_note_1, ticket_note_2]},
             status=200,
         )
 
@@ -156,14 +158,15 @@ class TestBruinRepository:
         assert result == nats_error_response
 
     @pytest.mark.asyncio
-    async def get_ticket_details_with_rpc_request_returning_non_2xx_status_test(self, bruin_repository,
-                                                                                make_rpc_request, make_rpc_response):
+    async def get_ticket_details_with_rpc_request_returning_non_2xx_status_test(
+        self, bruin_repository, make_rpc_request, make_rpc_response
+    ):
         ticket_id = 11111
 
         request = make_rpc_request(request_id=uuid_, ticket_id=ticket_id)
         response = make_rpc_response(
             request_id=uuid_,
-            body='Got internal error from Bruin',
+            body="Got internal error from Bruin",
             status=500,
         )
 
@@ -181,8 +184,16 @@ class TestBruinRepository:
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_ticket_task_history_test(self, bruin_repository, make_task_history_item, make_task_history,
-                                           make_rpc_request, make_rpc_response, serial_number_1, serial_number_2):
+    async def get_ticket_task_history_test(
+        self,
+        bruin_repository,
+        make_task_history_item,
+        make_task_history,
+        make_rpc_request,
+        make_rpc_response,
+        serial_number_1,
+        serial_number_2,
+    ):
         ticket_id = 11111
 
         request = make_rpc_request(request_id=uuid_, ticket_id=ticket_id)
@@ -225,15 +236,15 @@ class TestBruinRepository:
         assert result == nats_error_response
 
     @pytest.mark.asyncio
-    async def get_ticket_task_history_with_rpc_request_returning_non_2xx_status_test(self, bruin_repository,
-                                                                                     make_rpc_request,
-                                                                                     make_rpc_response):
+    async def get_ticket_task_history_with_rpc_request_returning_non_2xx_status_test(
+        self, bruin_repository, make_rpc_request, make_rpc_response
+    ):
         ticket_id = 11111
 
         request = make_rpc_request(request_id=uuid_, ticket_id=ticket_id)
         response = make_rpc_response(
             request_id=uuid_,
-            body='Got internal error from Bruin',
+            body="Got internal error from Bruin",
             status=500,
         )
 
@@ -251,20 +262,24 @@ class TestBruinRepository:
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_next_results_for_ticket_detail_test(self, bruin_repository, make_rpc_request, make_rpc_response,
-                                                      make_next_result_item, make_next_results, serial_number_1):
+    async def get_next_results_for_ticket_detail_test(
+        self,
+        bruin_repository,
+        make_rpc_request,
+        make_rpc_response,
+        make_next_result_item,
+        make_next_results,
+        serial_number_1,
+    ):
         ticket_id = 12345
         detail_id = 67890
 
         request = make_rpc_request(
-            request_id=uuid_,
-            ticket_id=ticket_id,
-            detail_id=detail_id,
-            service_number=serial_number_1
+            request_id=uuid_, ticket_id=ticket_id, detail_id=detail_id, service_number=serial_number_1
         )
 
-        next_result_1 = make_next_result_item(result_name='Holmdel NOC Investigate')
-        next_result_2 = make_next_result_item(result_name='No Trouble Found')
+        next_result_1 = make_next_result_item(result_name="Holmdel NOC Investigate")
+        next_result_2 = make_next_result_item(result_name="No Trouble Found")
         next_results = make_next_results(next_result_1, next_result_2)
         response = make_rpc_response(request_id=uuid_, body=next_results, status=200)
 
@@ -279,16 +294,14 @@ class TestBruinRepository:
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_next_results_for_ticket_detail_with_rpc_request_failing_test(self, bruin_repository, make_rpc_request,
-                                                                               serial_number_1):
+    async def get_next_results_for_ticket_detail_with_rpc_request_failing_test(
+        self, bruin_repository, make_rpc_request, serial_number_1
+    ):
         ticket_id = 12345
         detail_id = 67890
 
         request = make_rpc_request(
-            request_id=uuid_,
-            ticket_id=ticket_id,
-            detail_id=detail_id,
-            service_number=serial_number_1
+            request_id=uuid_, ticket_id=ticket_id, detail_id=detail_id, service_number=serial_number_1
         )
 
         bruin_repository._event_bus.rpc_request.side_effect = Exception
@@ -305,22 +318,18 @@ class TestBruinRepository:
         assert result == nats_error_response
 
     @pytest.mark.asyncio
-    async def get_next_results_for_ticket_detail_with_rpc_request_returning_non_2xx_status_test(self, bruin_repository,
-                                                                                                make_rpc_request,
-                                                                                                make_rpc_response,
-                                                                                                serial_number_1):
+    async def get_next_results_for_ticket_detail_with_rpc_request_returning_non_2xx_status_test(
+        self, bruin_repository, make_rpc_request, make_rpc_response, serial_number_1
+    ):
         ticket_id = 12345
         detail_id = 67890
 
         request = make_rpc_request(
-            request_id=uuid_,
-            ticket_id=ticket_id,
-            detail_id=detail_id,
-            service_number=serial_number_1
+            request_id=uuid_, ticket_id=ticket_id, detail_id=detail_id, service_number=serial_number_1
         )
         response = make_rpc_response(
             request_id=uuid_,
-            body='Got internal error from Bruin',
+            body="Got internal error from Bruin",
             status=500,
         )
 
@@ -338,13 +347,14 @@ class TestBruinRepository:
         assert result == response
 
     @pytest.mark.asyncio
-    async def append_multiple_notes_to_ticket_test(self, bruin_repository, make_rpc_request, make_rpc_response,
-                                                   make_payload_for_note_append, serial_number_1):
+    async def append_multiple_notes_to_ticket_test(
+        self, bruin_repository, make_rpc_request, make_rpc_response, make_payload_for_note_append, serial_number_1
+    ):
         ticket_id = 12345
-        note_1 = make_payload_for_note_append(text='This is ticket note 1', detail_id=123)
-        note_2 = make_payload_for_note_append(text='This is ticket note 1', serial_number=serial_number_1)
+        note_1 = make_payload_for_note_append(text="This is ticket note 1", detail_id=123)
+        note_2 = make_payload_for_note_append(text="This is ticket note 1", serial_number=serial_number_1)
         note_3 = make_payload_for_note_append(
-            text='This is ticket note 1', detail_id=123, serial_number=serial_number_1
+            text="This is ticket note 1", detail_id=123, serial_number=serial_number_1
         )
         notes = [
             note_1,
@@ -353,7 +363,7 @@ class TestBruinRepository:
         ]
 
         request = make_rpc_request(request_id=uuid_, ticket_id=ticket_id, notes=notes)
-        response = make_rpc_response(request_id=uuid_, body={'ticketNotes': notes}, status=200)
+        response = make_rpc_response(request_id=uuid_, body={"ticketNotes": notes}, status=200)
 
         bruin_repository._event_bus.rpc_request.return_value = response
 
@@ -366,14 +376,14 @@ class TestBruinRepository:
         assert result == response
 
     @pytest.mark.asyncio
-    async def append_multiple_notes_to_ticket_with_rpc_request_failing_test(self, bruin_repository, make_rpc_request,
-                                                                            make_payload_for_note_append,
-                                                                            serial_number_1):
+    async def append_multiple_notes_to_ticket_with_rpc_request_failing_test(
+        self, bruin_repository, make_rpc_request, make_payload_for_note_append, serial_number_1
+    ):
         ticket_id = 12345
-        note_1 = make_payload_for_note_append(text='This is ticket note 1', detail_id=123)
-        note_2 = make_payload_for_note_append(text='This is ticket note 1', serial_number=serial_number_1)
+        note_1 = make_payload_for_note_append(text="This is ticket note 1", detail_id=123)
+        note_2 = make_payload_for_note_append(text="This is ticket note 1", serial_number=serial_number_1)
         note_3 = make_payload_for_note_append(
-            text='This is ticket note 1', detail_id=123, serial_number=serial_number_1
+            text="This is ticket note 1", detail_id=123, serial_number=serial_number_1
         )
         notes = [
             note_1,
@@ -398,12 +408,13 @@ class TestBruinRepository:
 
     @pytest.mark.asyncio
     async def append_multiple_notes_to_ticket_with_rpc_request_returning_non_2xx_status_test(
-            self, bruin_repository, make_rpc_request, make_rpc_response, make_payload_for_note_append, serial_number_1):
+        self, bruin_repository, make_rpc_request, make_rpc_response, make_payload_for_note_append, serial_number_1
+    ):
         ticket_id = 12345
-        note_1 = make_payload_for_note_append(text='This is ticket note 1', detail_id=123)
-        note_2 = make_payload_for_note_append(text='This is ticket note 1', serial_number=serial_number_1)
+        note_1 = make_payload_for_note_append(text="This is ticket note 1", detail_id=123)
+        note_2 = make_payload_for_note_append(text="This is ticket note 1", serial_number=serial_number_1)
         note_3 = make_payload_for_note_append(
-            text='This is ticket note 1', detail_id=123, serial_number=serial_number_1
+            text="This is ticket note 1", detail_id=123, serial_number=serial_number_1
         )
         notes = [
             note_1,
@@ -414,7 +425,7 @@ class TestBruinRepository:
         request = make_rpc_request(request_id=uuid_, ticket_id=ticket_id, notes=notes)
         response = make_rpc_response(
             request_id=uuid_,
-            body='Got internal error from Bruin',
+            body="Got internal error from Bruin",
             status=500,
         )
 
@@ -437,7 +448,7 @@ class TestBruinRepository:
         detail_id = 67890
 
         request = make_rpc_request(request_id=uuid_, ticket_id=ticket_id, detail_id=detail_id)
-        response = make_rpc_response(request_id=uuid_, body='ok', status=200)
+        response = make_rpc_response(request_id=uuid_, body="ok", status=200)
 
         bruin_repository._event_bus.rpc_request.return_value = response
 
@@ -470,15 +481,16 @@ class TestBruinRepository:
         assert result == nats_error_response
 
     @pytest.mark.asyncio
-    async def resolve_ticket_detail_with_rpc_request_returning_non_2xx_status_test(self, bruin_repository,
-                                                                                   make_rpc_request, make_rpc_response):
+    async def resolve_ticket_detail_with_rpc_request_returning_non_2xx_status_test(
+        self, bruin_repository, make_rpc_request, make_rpc_response
+    ):
         ticket_id = 12345
         detail_id = 67890
 
         request = make_rpc_request(request_id=uuid_, ticket_id=ticket_id, detail_id=detail_id)
         response = make_rpc_response(
             request_id=uuid_,
-            body='Got internal error from Bruin',
+            body="Got internal error from Bruin",
             status=500,
         )
 
@@ -496,8 +508,9 @@ class TestBruinRepository:
         assert result == response
 
     @pytest.mark.asyncio
-    async def unpause_ticket_detail_with_only_detail_id_specified_test(self, bruin_repository, make_rpc_request,
-                                                                       make_rpc_response):
+    async def unpause_ticket_detail_with_only_detail_id_specified_test(
+        self, bruin_repository, make_rpc_request, make_rpc_response
+    ):
         ticket_id = 12345
         detail_id = 67890
 
@@ -506,7 +519,7 @@ class TestBruinRepository:
             ticket_id=ticket_id,
             detail_id=detail_id,
         )
-        response = make_rpc_response(request_id=uuid_, body='ok', status=200)
+        response = make_rpc_response(request_id=uuid_, body="ok", status=200)
 
         bruin_repository._event_bus.rpc_request.return_value = response
 
@@ -517,17 +530,18 @@ class TestBruinRepository:
         assert result == response
 
     @pytest.mark.asyncio
-    async def unpause_ticket_detail_with_only_service_number_specified_test(self, bruin_repository, make_rpc_request,
-                                                                            make_rpc_response):
+    async def unpause_ticket_detail_with_only_service_number_specified_test(
+        self, bruin_repository, make_rpc_request, make_rpc_response
+    ):
         ticket_id = 12345
-        service_number = 'VC1234567'
+        service_number = "VC1234567"
 
         request = make_rpc_request(
             request_id=uuid_,
             ticket_id=ticket_id,
             service_number=service_number,
         )
-        response = make_rpc_response(request_id=uuid_, body='ok', status=200)
+        response = make_rpc_response(request_id=uuid_, body="ok", status=200)
 
         bruin_repository._event_bus.rpc_request.return_value = response
 
@@ -538,12 +552,12 @@ class TestBruinRepository:
         assert result == response
 
     @pytest.mark.asyncio
-    async def unpause_ticket_detail_with_detail_id_and_service_number_specified_test(self, bruin_repository,
-                                                                                     make_rpc_request,
-                                                                                     make_rpc_response):
+    async def unpause_ticket_detail_with_detail_id_and_service_number_specified_test(
+        self, bruin_repository, make_rpc_request, make_rpc_response
+    ):
         ticket_id = 12345
         detail_id = 67890
-        service_number = 'VC1234567'
+        service_number = "VC1234567"
 
         request = make_rpc_request(
             request_id=uuid_,
@@ -551,7 +565,7 @@ class TestBruinRepository:
             detail_id=detail_id,
             service_number=service_number,
         )
-        response = make_rpc_response(request_id=uuid_, body='ok', status=200)
+        response = make_rpc_response(request_id=uuid_, body="ok", status=200)
 
         bruin_repository._event_bus.rpc_request.return_value = response
 
@@ -586,9 +600,9 @@ class TestBruinRepository:
         assert result == nats_error_response
 
     @pytest.mark.asyncio
-    async def unpause_ticket_detail_with_rpc_request_returning_non_2xx_status_test(self, bruin_repository,
-                                                                                   make_rpc_request,
-                                                                                   make_rpc_response):
+    async def unpause_ticket_detail_with_rpc_request_returning_non_2xx_status_test(
+        self, bruin_repository, make_rpc_request, make_rpc_response
+    ):
         ticket_id = 12345
         detail_id = 67890
 
@@ -599,7 +613,7 @@ class TestBruinRepository:
         )
         response = make_rpc_response(
             request_id=uuid_,
-            body='Got internal error from Bruin',
+            body="Got internal error from Bruin",
             status=500,
         )
 
@@ -617,7 +631,7 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def get_outage_tickets_test(self, bruin_repository):
         bruin_client_id = 12345
-        ticket_statuses = ['New', 'InProgress', 'Draft']
+        ticket_statuses = ["New", "InProgress", "Draft"]
         ticket_topic = "VOO"
 
         bruin_repository.get_tickets = CoroutineMock()
@@ -629,7 +643,7 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def get_open_outage_tickets_test(self, bruin_repository):
         bruin_client_id = 12345
-        ticket_statuses = ['New', 'InProgress', 'Draft']
+        ticket_statuses = ["New", "InProgress", "Draft"]
         ticket_topic = "VOO"
 
         bruin_repository.get_tickets = CoroutineMock()
@@ -641,7 +655,7 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def get_affecting_tickets_test(self, bruin_repository):
         bruin_client_id = 12345
-        ticket_statuses = ['New', 'InProgress', 'Draft']
+        ticket_statuses = ["New", "InProgress", "Draft"]
         ticket_topic = "VAS"
 
         bruin_repository.get_tickets = CoroutineMock()
@@ -653,7 +667,7 @@ class TestBruinRepository:
     @pytest.mark.asyncio
     async def get_open_affecting_tickets_test(self, bruin_repository):
         bruin_client_id = 12345
-        ticket_statuses = ['New', 'InProgress', 'Draft']
+        ticket_statuses = ["New", "InProgress", "Draft"]
         ticket_topic = "VAS"
 
         bruin_repository.get_tickets = CoroutineMock()

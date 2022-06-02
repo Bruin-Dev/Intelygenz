@@ -1,13 +1,11 @@
 import json
-from unittest.mock import Mock, MagicMock
+from unittest.mock import MagicMock, Mock
 
 from application.repositories.storage_repository import StorageRepository
-
 from config import testconfig as config
 
 
 class TestStorageRepository:
-
     def instance_test(self, logger, redis):
         storage_repo = StorageRepository(config, logger, redis)
 

@@ -1,13 +1,12 @@
-from datetime import datetime
-from unittest.mock import patch, Mock, call
-
 import asyncio
-import pytest
-from asynctest import CoroutineMock
-from shortuuid import uuid
+from datetime import datetime
+from unittest.mock import Mock, call, patch
 
+import pytest
 from application.repositories.bruin_repository import BruinRepository
+from asynctest import CoroutineMock
 from config import testconfig as config
+from shortuuid import uuid
 
 uuid_ = uuid()
 

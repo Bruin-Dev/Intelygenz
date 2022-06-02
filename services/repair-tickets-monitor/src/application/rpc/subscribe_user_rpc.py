@@ -1,9 +1,8 @@
 from http import HTTPStatus
 
+from application.rpc import Rpc, RpcFailedError
 from dataclasses import dataclass, field
 from pydantic import BaseModel, Field
-
-from application.rpc import Rpc, RpcFailedError
 
 NATS_TOPIC = "bruin.subscribe.user"
 SUBSCRIPTION_TYPE = "NotesAndMilestones"

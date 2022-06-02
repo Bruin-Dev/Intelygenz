@@ -6,7 +6,6 @@ from asynctest import CoroutineMock
 
 
 class TestPostOutageTicket:
-
     def instance_test(self):
         logger = Mock()
         event_bus = Mock()
@@ -28,9 +27,7 @@ class TestPostOutageTicket:
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
 
-        parameters = {
-            "service_number": "VC05400009999"
-        }
+        parameters = {"service_number": "VC05400009999"}
         response_topic = "some.topic"
         event_bus_request = {"request_id": 123, "response_topic": response_topic, "body": parameters}
 
@@ -115,10 +112,7 @@ class TestPostOutageTicket:
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
 
-        parameters = {
-            "client_id": None,
-            "service_number": "VC05400009999"
-        }
+        parameters = {"client_id": None, "service_number": "VC05400009999"}
         response_topic = "some.topic"
         event_bus_request = {"request_id": 123, "response_topic": response_topic, "body": parameters}
 
@@ -146,10 +140,7 @@ class TestPostOutageTicket:
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
 
-        parameters = {
-            "client_id": 9994,
-            "service_number": None
-        }
+        parameters = {"client_id": 9994, "service_number": None}
         response_topic = "some.topic"
         event_bus_request = {"request_id": 123, "response_topic": response_topic, "body": parameters}
 
@@ -176,8 +167,8 @@ class TestPostOutageTicket:
         response_status_code = 200
 
         repository_response = {
-            'body': outage_ticket_id,
-            'status': response_status_code,
+            "body": outage_ticket_id,
+            "status": response_status_code,
         }
 
         logger = Mock()
@@ -188,10 +179,7 @@ class TestPostOutageTicket:
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
 
-        parameters = {
-            "client_id": client_id,
-            "service_number": service_number
-        }
+        parameters = {"client_id": client_id, "service_number": service_number}
         response_topic = "some.topic"
         event_bus_request = {"request_id": 123, "response_topic": response_topic, "body": parameters}
 
@@ -211,17 +199,15 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_successful_with_contact_info_test(self):
         client_id = 9994
-        ticket_contact = {
-            "email": "test@test.com"
-        }
+        ticket_contact = {"email": "test@test.com"}
         service_number = "VC05400002265"
 
         outage_ticket_id = 123456
         response_status_code = 200
 
         repository_response = {
-            'body': outage_ticket_id,
-            'status': response_status_code,
+            "body": outage_ticket_id,
+            "status": response_status_code,
         }
 
         logger = Mock()
@@ -232,11 +218,7 @@ class TestPostOutageTicket:
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
 
-        parameters = {
-            "client_id": client_id,
-            "service_number": service_number,
-            "ticket_contact": ticket_contact
-        }
+        parameters = {"client_id": client_id, "service_number": service_number, "ticket_contact": ticket_contact}
         response_topic = "some.topic"
         event_bus_request = {"request_id": 123, "response_topic": response_topic, "body": parameters}
 
@@ -244,8 +226,9 @@ class TestPostOutageTicket:
 
         await post_outage_ticket.post_outage_ticket(event_bus_request)
 
-        bruin_repository.post_outage_ticket.assert_awaited_once_with(client_id, service_number,
-                                                                     ticket_contact=ticket_contact)
+        bruin_repository.post_outage_ticket.assert_awaited_once_with(
+            client_id, service_number, ticket_contact=ticket_contact
+        )
         event_bus.publish_message.assert_awaited_once_with(
             "some.topic",
             {

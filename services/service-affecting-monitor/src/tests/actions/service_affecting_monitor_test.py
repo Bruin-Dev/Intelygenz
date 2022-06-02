@@ -1,30 +1,37 @@
 import os
 from datetime import datetime, timedelta
-from unittest.mock import Mock, call
-from unittest.mock import patch
+from unittest.mock import Mock, call, patch
 
 import pytest
+from application import REMINDER_NOTE_REGEX, AffectingTroubles
+from application.actions import service_affecting_monitor as service_affecting_monitor_module
+from application.repositories import utils_repository as utils_repository_module
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
+from config import testconfig
 from shortuuid import uuid
 from tests.fixtures._constants import CURRENT_DATETIME
 
-from application import AffectingTroubles
-from application import REMINDER_NOTE_REGEX
-from application.actions import service_affecting_monitor as service_affecting_monitor_module
-from application.repositories import utils_repository as utils_repository_module
-from config import testconfig
-
 uuid_ = uuid()
-uuid_mock = patch.object(service_affecting_monitor_module, 'uuid', return_value=uuid_)
+uuid_mock = patch.object(service_affecting_monitor_module, "uuid", return_value=uuid_)
 
 
 class TestServiceAffectingMonitor:
-
-    def instance_test(self, service_affecting_monitor, logger, scheduler, customer_cache_repository, bruin_repository,
-                      velocloud_repository, notifications_repository, ticket_repository, trouble_repository,
-                      metrics_repository, utils_repository):
+    def instance_test(
+        self,
+        service_affecting_monitor,
+        logger,
+        scheduler,
+        customer_cache_repository,
+        bruin_repository,
+        velocloud_repository,
+        notifications_repository,
+        ticket_repository,
+        trouble_repository,
+        metrics_repository,
+        utils_repository,
+    ):
         assert service_affecting_monitor._logger is logger
         assert service_affecting_monitor._scheduler is scheduler
         assert service_affecting_monitor._config is testconfig
@@ -46,11 +53,12 @@ class TestServiceAffectingMonitor:
             await service_affecting_monitor.start_service_affecting_monitor(exec_on_start=True)
 
         service_affecting_monitor._scheduler.add_job.assert_called_once_with(
-            service_affecting_monitor._service_affecting_monitor_process, 'interval',
+            service_affecting_monitor._service_affecting_monitor_process,
+            "interval",
             minutes=testconfig.MONITOR_CONFIG["monitoring_minutes_interval"],
             next_run_time=next_run_time,
             replace_existing=False,
-            id='_service_affecting_monitor_process',
+            id="_service_affecting_monitor_process",
         )
 
     @pytest.mark.asyncio
@@ -58,16 +66,17 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor.start_service_affecting_monitor(exec_on_start=False)
 
         service_affecting_monitor._scheduler.add_job.assert_called_once_with(
-            service_affecting_monitor._service_affecting_monitor_process, 'interval',
+            service_affecting_monitor._service_affecting_monitor_process,
+            "interval",
             minutes=testconfig.MONITOR_CONFIG["monitoring_minutes_interval"],
             next_run_time=undefined,
             replace_existing=False,
-            id='_service_affecting_monitor_process',
+            id="_service_affecting_monitor_process",
         )
 
     @pytest.mark.asyncio
     async def start_service_affecting_monitor_job__job_already_executing_test(self, service_affecting_monitor):
-        job_id = 'some-duplicated-id'
+        job_id = "some-duplicated-id"
         exception_instance = ConflictingIdError(job_id)
 
         service_affecting_monitor._scheduler.add_job = Mock(side_effect=exception_instance)
@@ -76,9 +85,11 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def service_affecting_monitor_process__get_cache_request_has_202_status_test(
-            self, service_affecting_monitor, get_customer_cache_202_response):
-        service_affecting_monitor._customer_cache_repository.get_cache_for_affecting_monitoring.return_value = \
+        self, service_affecting_monitor, get_customer_cache_202_response
+    ):
+        service_affecting_monitor._customer_cache_repository.get_cache_for_affecting_monitoring.return_value = (
             get_customer_cache_202_response
+        )
 
         await service_affecting_monitor._service_affecting_monitor_process()
 
@@ -92,9 +103,11 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def service_affecting_monitor_process__get_cache_request_has_2xx_status_different_from_202_test(
-            self, service_affecting_monitor, get_customer_cache_404_response):
-        service_affecting_monitor._customer_cache_repository.get_cache_for_affecting_monitoring.return_value = \
+        self, service_affecting_monitor, get_customer_cache_404_response
+    ):
+        service_affecting_monitor._customer_cache_repository.get_cache_for_affecting_monitoring.return_value = (
             get_customer_cache_404_response
+        )
 
         await service_affecting_monitor._service_affecting_monitor_process()
 
@@ -108,9 +121,11 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def service_affecting_monitor_process__get_cache_request_returns_empty_list_of_edges_test(
-            self, service_affecting_monitor, get_customer_cache_empty_response):
-        service_affecting_monitor._customer_cache_repository.get_cache_for_affecting_monitoring.return_value = \
+        self, service_affecting_monitor, get_customer_cache_empty_response
+    ):
+        service_affecting_monitor._customer_cache_repository.get_cache_for_affecting_monitoring.return_value = (
             get_customer_cache_empty_response
+        )
 
         await service_affecting_monitor._service_affecting_monitor_process()
 
@@ -123,9 +138,15 @@ class TestServiceAffectingMonitor:
         assert service_affecting_monitor._customer_cache == []
 
     @pytest.mark.asyncio
-    async def service_affecting_monitor_process__ok_test(self, service_affecting_monitor, make_customer_cache,
-                                                         make_cached_edge, make_bruin_client_info, make_contact_info,
-                                                         make_rpc_response):
+    async def service_affecting_monitor_process__ok_test(
+        self,
+        service_affecting_monitor,
+        make_customer_cache,
+        make_cached_edge,
+        make_bruin_client_info,
+        make_contact_info,
+        make_rpc_response,
+    ):
         client_1_id = 83109
         client_2_id = 88480
 
@@ -141,11 +162,12 @@ class TestServiceAffectingMonitor:
             status=200,
         )
 
-        service_affecting_monitor._customer_cache_repository.get_cache_for_affecting_monitoring.return_value = \
+        service_affecting_monitor._customer_cache_repository.get_cache_for_affecting_monitoring.return_value = (
             get_cache_response
+        )
 
         custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
-        custom_monitor_config['contact_by_host_and_client_id'] = {
+        custom_monitor_config["contact_by_host_and_client_id"] = {
             "test-host": {
                 client_1_id: make_contact_info(),
                 client_2_id: make_contact_info(),
@@ -162,17 +184,26 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._run_autoresolve_process.assert_awaited_once()
         assert service_affecting_monitor._customer_cache == customer_cache
 
-    def structure_links_metrics__ok_test(self, service_affecting_monitor, make_edge, make_link, make_metrics,
-                                         make_link_with_edge_info, make_link_with_metrics, make_metrics_for_link,
-                                         make_list_of_links_with_metrics, make_structured_metrics_object,
-                                         make_list_of_structured_metrics_objects):
+    def structure_links_metrics__ok_test(
+        self,
+        service_affecting_monitor,
+        make_edge,
+        make_link,
+        make_metrics,
+        make_link_with_edge_info,
+        make_link_with_metrics,
+        make_metrics_for_link,
+        make_list_of_links_with_metrics,
+        make_structured_metrics_object,
+        make_list_of_structured_metrics_objects,
+    ):
         link_1_id = 1
         link_2_id = 2
 
         metric_set_1 = make_metrics()
         metric_set_2 = make_metrics()
 
-        edge = make_edge(edge_state='CONNECTED')
+        edge = make_edge(edge_state="CONNECTED")
         link_1 = make_link(id_=link_1_id)
         link_2 = make_link(id_=link_2_id)
         metric_set_1_with_link_1_info = make_metrics_for_link(link_id=link_1, metrics=metric_set_1)
@@ -181,10 +212,12 @@ class TestServiceAffectingMonitor:
         link_1_with_edge_info = make_link_with_edge_info(link_info=link_1, edge_info=edge)
         link_2_with_edge_info = make_link_with_edge_info(link_info=link_2, edge_info=edge)
         link_1_info_with_metrics = make_link_with_metrics(
-            link_info=link_1_with_edge_info, metrics=metric_set_1_with_link_1_info,
+            link_info=link_1_with_edge_info,
+            metrics=metric_set_1_with_link_1_info,
         )
         link_2_info_with_metrics = make_link_with_metrics(
-            link_info=link_2_with_edge_info, metrics=metric_set_2_with_link_2_info,
+            link_info=link_2_with_edge_info,
+            metrics=metric_set_2_with_link_2_info,
         )
         links_info_with_metrics = make_list_of_links_with_metrics(link_1_info_with_metrics, link_2_info_with_metrics)
 
@@ -195,9 +228,17 @@ class TestServiceAffectingMonitor:
         expected = make_list_of_structured_metrics_objects(structured_metrics_1, structured_metrics_2)
         assert result == expected
 
-    def structure_links_metrics__invalid_edge_state_test(self, service_affecting_monitor, make_edge, make_link,
-                                                         make_metrics, make_link_with_edge_info, make_link_with_metrics,
-                                                         make_metrics_for_link, make_list_of_links_with_metrics):
+    def structure_links_metrics__invalid_edge_state_test(
+        self,
+        service_affecting_monitor,
+        make_edge,
+        make_link,
+        make_metrics,
+        make_link_with_edge_info,
+        make_link_with_metrics,
+        make_metrics_for_link,
+        make_list_of_links_with_metrics,
+    ):
         link_1_id = 1
         link_2_id = 2
 
@@ -213,10 +254,12 @@ class TestServiceAffectingMonitor:
         link_1_with_edge_info = make_link_with_edge_info(link_info=link_1, edge_info=edge)
         link_2_with_edge_info = make_link_with_edge_info(link_info=link_2, edge_info=edge)
         link_1_info_with_metrics = make_link_with_metrics(
-            link_info=link_1_with_edge_info, metrics=metric_set_1_with_link_1_info,
+            link_info=link_1_with_edge_info,
+            metrics=metric_set_1_with_link_1_info,
         )
         link_2_info_with_metrics = make_link_with_metrics(
-            link_info=link_2_with_edge_info, metrics=metric_set_2_with_link_2_info,
+            link_info=link_2_with_edge_info,
+            metrics=metric_set_2_with_link_2_info,
         )
         links_info_with_metrics = make_list_of_links_with_metrics(link_1_info_with_metrics, link_2_info_with_metrics)
 
@@ -225,17 +268,24 @@ class TestServiceAffectingMonitor:
         expected = []
         assert result == expected
 
-    def structure_links_metrics__edge_not_activated_yet_test(self, service_affecting_monitor, make_edge, make_link,
-                                                             make_metrics, make_link_with_edge_info,
-                                                             make_link_with_metrics, make_metrics_for_link,
-                                                             make_list_of_links_with_metrics):
+    def structure_links_metrics__edge_not_activated_yet_test(
+        self,
+        service_affecting_monitor,
+        make_edge,
+        make_link,
+        make_metrics,
+        make_link_with_edge_info,
+        make_link_with_metrics,
+        make_metrics_for_link,
+        make_list_of_links_with_metrics,
+    ):
         link_1_id = 1
         link_2_id = 2
 
         metric_set_1 = make_metrics()
         metric_set_2 = make_metrics()
 
-        edge = make_edge(edge_state='NEVER_ACTIVATED')
+        edge = make_edge(edge_state="NEVER_ACTIVATED")
         link_1 = make_link(id_=link_1_id)
         link_2 = make_link(id_=link_2_id)
         metric_set_1_with_link_1_info = make_metrics_for_link(link_id=link_1, metrics=metric_set_1)
@@ -244,10 +294,12 @@ class TestServiceAffectingMonitor:
         link_1_with_edge_info = make_link_with_edge_info(link_info=link_1, edge_info=edge)
         link_2_with_edge_info = make_link_with_edge_info(link_info=link_2, edge_info=edge)
         link_1_info_with_metrics = make_link_with_metrics(
-            link_info=link_1_with_edge_info, metrics=metric_set_1_with_link_1_info,
+            link_info=link_1_with_edge_info,
+            metrics=metric_set_1_with_link_1_info,
         )
         link_2_info_with_metrics = make_link_with_metrics(
-            link_info=link_2_with_edge_info, metrics=metric_set_2_with_link_2_info,
+            link_info=link_2_with_edge_info,
+            metrics=metric_set_2_with_link_2_info,
         )
         links_info_with_metrics = make_list_of_links_with_metrics(link_1_info_with_metrics, link_2_info_with_metrics)
 
@@ -258,11 +310,17 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def map_cached_edges_with_links_metrics_and_contact_info__specific_site_contacts_test(
-            self, service_affecting_monitor, make_cached_edge, make_customer_cache, make_edge,
-            make_structured_metrics_object, make_list_of_structured_metrics_objects,
-            make_structured_metrics_object_with_cache_and_contact_info,
-            make_list_of_structured_metrics_objects_with_cache_and_contact_info,
-            make_contact_info, make_site_details,
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_customer_cache,
+        make_edge,
+        make_structured_metrics_object,
+        make_list_of_structured_metrics_objects,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_list_of_structured_metrics_objects_with_cache_and_contact_info,
+        make_contact_info,
+        make_site_details,
     ):
         site_detail_email = "test@email.com"
         site_detail_phone = "510-111-111"
@@ -273,19 +331,15 @@ class TestServiceAffectingMonitor:
             contact_email=site_detail_email,
         )
 
-        edge_contact_info = make_contact_info(email=site_detail_email,
-                                              phone=site_detail_phone,
-                                              name=site_detail_name)
+        edge_contact_info = make_contact_info(email=site_detail_email, phone=site_detail_phone, name=site_detail_name)
 
-        edge_1_serial_number = 'VCO123'
+        edge_1_serial_number = "VCO123"
 
         edge_1_cache_info = make_cached_edge(serial_number=edge_1_serial_number, site_details=site_details)
         edge_1 = make_edge(serial_number=edge_1_serial_number)
 
         edge_1_structured_metrics = make_structured_metrics_object(edge_info=edge_1)
-        structured_metrics = make_list_of_structured_metrics_objects(
-            edge_1_structured_metrics
-        )
+        structured_metrics = make_list_of_structured_metrics_objects(edge_1_structured_metrics)
 
         customer_cache = make_customer_cache(edge_1_cache_info)
         service_affecting_monitor._customer_cache = customer_cache
@@ -294,7 +348,8 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         result = await service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(
-            structured_metrics)
+            structured_metrics
+        )
 
         edge_1_complete_info = make_structured_metrics_object_with_cache_and_contact_info(
             metrics_object=edge_1_structured_metrics,
@@ -302,20 +357,25 @@ class TestServiceAffectingMonitor:
             contact_info=edge_contact_info,
         )
 
-        expected = make_list_of_structured_metrics_objects_with_cache_and_contact_info(
-            edge_1_complete_info
-        )
+        expected = make_list_of_structured_metrics_objects_with_cache_and_contact_info(edge_1_complete_info)
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.assert_called_once_with(site_details)
 
         assert result == expected
 
     @pytest.mark.asyncio
     async def map_cached_edges_with_links_metrics_and_contact_info__default_contacts_test(
-            self, service_affecting_monitor, make_cached_edge, make_customer_cache, make_edge,
-            make_structured_metrics_object, make_list_of_structured_metrics_objects,
-            make_structured_metrics_object_with_cache_and_contact_info,
-            make_list_of_structured_metrics_objects_with_cache_and_contact_info,
-            make_contact_info, make_site_details, make_bruin_client_info,
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_customer_cache,
+        make_edge,
+        make_structured_metrics_object,
+        make_list_of_structured_metrics_objects,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_list_of_structured_metrics_objects_with_cache_and_contact_info,
+        make_contact_info,
+        make_site_details,
+        make_bruin_client_info,
     ):
         site_detail_email = None
         site_detail_phone = None
@@ -326,13 +386,13 @@ class TestServiceAffectingMonitor:
             contact_email=site_detail_email,
         )
 
-        edge_1_serial_number = 'VCO123'
+        edge_1_serial_number = "VCO123"
 
         client_id = 12345
         default_contact_info = make_contact_info(
-            email='some-email',
-            phone='some-phone',
-            name='some-name',
+            email="some-email",
+            phone="some-phone",
+            name="some-name",
         )
 
         bruin_client_info = make_bruin_client_info(client_id=client_id)
@@ -344,9 +404,7 @@ class TestServiceAffectingMonitor:
         edge_1 = make_edge(serial_number=edge_1_serial_number)
 
         edge_1_structured_metrics = make_structured_metrics_object(edge_info=edge_1)
-        structured_metrics = make_list_of_structured_metrics_objects(
-            edge_1_structured_metrics
-        )
+        structured_metrics = make_list_of_structured_metrics_objects(edge_1_structured_metrics)
 
         customer_cache = make_customer_cache(edge_1_cache_info)
         service_affecting_monitor._customer_cache = customer_cache
@@ -357,7 +415,8 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         result = await service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(
-            structured_metrics)
+            structured_metrics
+        )
 
         edge_1_complete_info = make_structured_metrics_object_with_cache_and_contact_info(
             metrics_object=edge_1_structured_metrics,
@@ -365,20 +424,26 @@ class TestServiceAffectingMonitor:
             contact_info=default_contact_info,
         )
 
-        expected = make_list_of_structured_metrics_objects_with_cache_and_contact_info(
-            edge_1_complete_info
-        )
+        expected = make_list_of_structured_metrics_objects_with_cache_and_contact_info(edge_1_complete_info)
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.assert_called_once_with(site_details)
 
         assert result == expected
 
     @pytest.mark.asyncio
     async def map_cached_edges_with_links_metrics_and_contact_info__force_default_contacts_test(
-            self, service_affecting_monitor, make_cached_edge, make_customer_cache, make_edge,
-            make_structured_metrics_object, make_list_of_structured_metrics_objects,
-            make_structured_metrics_object_with_cache_and_contact_info,
-            make_list_of_structured_metrics_objects_with_cache_and_contact_info,
-            make_contact_info, make_site_details, make_bruin_client_info, make_edge_full_id,
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_customer_cache,
+        make_edge,
+        make_structured_metrics_object,
+        make_list_of_structured_metrics_objects,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_list_of_structured_metrics_objects_with_cache_and_contact_info,
+        make_contact_info,
+        make_site_details,
+        make_bruin_client_info,
+        make_edge_full_id,
     ):
         site_detail_email = None
         site_detail_phone = None
@@ -389,15 +454,15 @@ class TestServiceAffectingMonitor:
             contact_email=site_detail_email,
         )
 
-        edge_1_serial_number = 'VCO123'
-        edge_2_serial_number = 'VC4567'
+        edge_1_serial_number = "VCO123"
+        edge_2_serial_number = "VC4567"
 
         client_id_1 = 1234
         client_id_2 = 5678
         default_contact_info = make_contact_info(
-            email='some-email',
-            phone='some-phone',
-            name='some-name',
+            email="some-email",
+            phone="some-phone",
+            name="some-name",
         )
 
         bruin_client_info_1 = make_bruin_client_info(client_id=client_id_1)
@@ -407,7 +472,7 @@ class TestServiceAffectingMonitor:
             bruin_client_info=bruin_client_info_1,
             site_details=site_details,
         )
-        full_id = make_edge_full_id(host='metvco04.mettel.net')
+        full_id = make_edge_full_id(host="metvco04.mettel.net")
         edge_2_cache_info = make_cached_edge(
             full_id=full_id,
             serial_number=edge_2_serial_number,
@@ -434,7 +499,8 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         result = await service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(
-            structured_metrics)
+            structured_metrics
+        )
 
         edge_1_complete_info = make_structured_metrics_object_with_cache_and_contact_info(
             metrics_object=edge_1_structured_metrics,
@@ -457,9 +523,17 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def map_cached_edges_with_links_metrics_and_contact_info__no_cached_edge_test(
-            self, service_affecting_monitor, make_edge, make_link, make_metrics,
-            make_structured_metrics_object, make_list_of_structured_metrics_objects,
-            make_cached_edge, make_customer_cache, make_site_details):
+        self,
+        service_affecting_monitor,
+        make_edge,
+        make_link,
+        make_metrics,
+        make_structured_metrics_object,
+        make_list_of_structured_metrics_objects,
+        make_cached_edge,
+        make_customer_cache,
+        make_site_details,
+    ):
         site_detail_email = "test@email.com"
         site_detail_phone = "510-111-111"
         site_detail_name = "Help Desk"
@@ -469,8 +543,8 @@ class TestServiceAffectingMonitor:
             contact_email=site_detail_email,
         )
 
-        edge_1_serial_number = 'VCO123'
-        edge_2_serial_number = 'VCO1234'
+        edge_1_serial_number = "VCO123"
+        edge_2_serial_number = "VCO1234"
 
         edge = make_edge(serial_number=edge_1_serial_number)
         link_1 = make_link()
@@ -478,7 +552,9 @@ class TestServiceAffectingMonitor:
         link_1_metric_set = make_metrics()
 
         structured_metrics_1 = make_structured_metrics_object(
-            edge_info=edge, link_info=link_1, metrics=link_1_metric_set,
+            edge_info=edge,
+            link_info=link_1,
+            metrics=link_1_metric_set,
         )
         structured_metrics = make_list_of_structured_metrics_objects(structured_metrics_1)
 
@@ -498,15 +574,17 @@ class TestServiceAffectingMonitor:
         assert result == expected
 
     @pytest.mark.asyncio
-    async def latency_check__no_metrics_found_test(self, service_affecting_monitor, make_list_of_link_metrics,
-                                                   make_rpc_response):
+    async def latency_check__no_metrics_found_test(
+        self, service_affecting_monitor, make_list_of_link_metrics, make_rpc_response
+    ):
         links_metrics = make_list_of_link_metrics()
 
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_latency_checks.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_latency_checks.return_value = (
             make_rpc_response(
                 body=links_metrics,
                 status=200,
             )
+        )
 
         await service_affecting_monitor._latency_check()
 
@@ -516,9 +594,15 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def latency_check__empty_dataset_after_structuring_and_crossing_info_test(
-            self, service_affecting_monitor, make_edge, make_link_with_edge_info, make_metrics_for_link,
-            make_list_of_link_metrics, make_list_of_structured_metrics_objects_with_cache_and_contact_info,
-            make_rpc_response):
+        self,
+        service_affecting_monitor,
+        make_edge,
+        make_link_with_edge_info,
+        make_metrics_for_link,
+        make_list_of_link_metrics,
+        make_list_of_structured_metrics_objects_with_cache_and_contact_info,
+        make_rpc_response,
+    ):
         edge = make_edge(edge_state=None)  # Make it an invalid edge so crossing data produces an empty dataset
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info)
@@ -526,11 +610,12 @@ class TestServiceAffectingMonitor:
 
         links_complete_info = make_list_of_structured_metrics_objects_with_cache_and_contact_info()
 
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_latency_checks.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_latency_checks.return_value = (
             make_rpc_response(
                 body=links_metric_sets,
                 status=200,
             )
+        )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
@@ -544,14 +629,24 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def latency_check__all_metrics_within_thresholds_test(
-            self, service_affecting_monitor, make_cached_edge, make_customer_cache,
-            make_edge, make_metrics, make_link_with_edge_info, make_metrics_for_link, make_list_of_link_metrics,
-            make_structured_metrics_object, make_list_of_structured_metrics_objects,
-            make_rpc_response, make_contact_info):
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_customer_cache,
+        make_edge,
+        make_metrics,
+        make_link_with_edge_info,
+        make_metrics_for_link,
+        make_list_of_link_metrics,
+        make_structured_metrics_object,
+        make_list_of_structured_metrics_objects,
+        make_rpc_response,
+        make_contact_info,
+    ):
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
-        edge_serial_number = 'VCO123'
+        edge_serial_number = "VCO123"
 
         edge = make_edge(serial_number=edge_serial_number)
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
@@ -566,11 +661,12 @@ class TestServiceAffectingMonitor:
         customer_cache = make_customer_cache(edge_cache_info)
 
         service_affecting_monitor._customer_cache = customer_cache
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_latency_checks.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_latency_checks.return_value = (
             make_rpc_response(
                 body=links_metric_sets,
                 status=200,
             )
+        )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
@@ -584,14 +680,24 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def latency_check__trouble_detected_test(
-            self, service_affecting_monitor, make_cached_edge, make_customer_cache,
-            make_edge, make_metrics, make_link_with_edge_info, make_metrics_for_link, make_list_of_link_metrics,
-            make_structured_metrics_object, make_list_of_structured_metrics_objects,
-            make_structured_metrics_object_with_cache_and_contact_info,
-            make_rpc_response, make_contact_info):
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_customer_cache,
+        make_edge,
+        make_metrics,
+        make_link_with_edge_info,
+        make_metrics_for_link,
+        make_list_of_link_metrics,
+        make_structured_metrics_object,
+        make_list_of_structured_metrics_objects,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_rpc_response,
+        make_contact_info,
+    ):
         edge_contact_info = make_contact_info()
 
-        edge_serial_number = 'VCO123'
+        edge_serial_number = "VCO123"
 
         edge = make_edge(serial_number=edge_serial_number)
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
@@ -612,11 +718,12 @@ class TestServiceAffectingMonitor:
         )
 
         service_affecting_monitor._customer_cache = customer_cache
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_latency_checks.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_latency_checks.return_value = (
             make_rpc_response(
                 body=links_metric_sets,
                 status=200,
             )
+        )
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
@@ -630,15 +737,17 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._process_latency_trouble.assert_awaited_once_with(link_complete_info)
 
     @pytest.mark.asyncio
-    async def packet_loss_check__no_metrics_found_test(self, service_affecting_monitor, make_list_of_link_metrics,
-                                                       make_rpc_response):
+    async def packet_loss_check__no_metrics_found_test(
+        self, service_affecting_monitor, make_list_of_link_metrics, make_rpc_response
+    ):
         links_metrics = make_list_of_link_metrics()
 
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_packet_loss_checks.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_packet_loss_checks.return_value = (
             make_rpc_response(
                 body=links_metrics,
                 status=200,
             )
+        )
 
         await service_affecting_monitor._packet_loss_check()
 
@@ -648,9 +757,15 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def packet_loss_check__empty_dataset_after_structuring_and_crossing_info_test(
-            self, service_affecting_monitor, make_edge, make_link_with_edge_info, make_metrics_for_link,
-            make_list_of_link_metrics, make_list_of_structured_metrics_objects_with_cache_and_contact_info,
-            make_rpc_response):
+        self,
+        service_affecting_monitor,
+        make_edge,
+        make_link_with_edge_info,
+        make_metrics_for_link,
+        make_list_of_link_metrics,
+        make_list_of_structured_metrics_objects_with_cache_and_contact_info,
+        make_rpc_response,
+    ):
         edge = make_edge(edge_state=None)  # Make it an invalid edge so crossing data produces an empty dataset
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info)
@@ -658,11 +773,12 @@ class TestServiceAffectingMonitor:
 
         links_complete_info = make_list_of_structured_metrics_objects_with_cache_and_contact_info()
 
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_packet_loss_checks.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_packet_loss_checks.return_value = (
             make_rpc_response(
                 body=links_metric_sets,
                 status=200,
             )
+        )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
@@ -676,14 +792,24 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def packet_loss_check__all_metrics_within_thresholds_test(
-            self, service_affecting_monitor, make_cached_edge, make_customer_cache,
-            make_edge, make_metrics, make_link_with_edge_info, make_metrics_for_link, make_list_of_link_metrics,
-            make_structured_metrics_object, make_list_of_structured_metrics_objects,
-            make_rpc_response, make_contact_info):
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_customer_cache,
+        make_edge,
+        make_metrics,
+        make_link_with_edge_info,
+        make_metrics_for_link,
+        make_list_of_link_metrics,
+        make_structured_metrics_object,
+        make_list_of_structured_metrics_objects,
+        make_rpc_response,
+        make_contact_info,
+    ):
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
-        edge_serial_number = 'VCO123'
+        edge_serial_number = "VCO123"
 
         edge = make_edge(serial_number=edge_serial_number)
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
@@ -698,11 +824,12 @@ class TestServiceAffectingMonitor:
         customer_cache = make_customer_cache(edge_cache_info)
 
         service_affecting_monitor._customer_cache = customer_cache
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_packet_loss_checks.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_packet_loss_checks.return_value = (
             make_rpc_response(
                 body=links_metric_sets,
                 status=200,
             )
+        )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
@@ -716,15 +843,25 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def packet_loss_check__trouble_detected_test(
-            self, service_affecting_monitor, make_cached_edge, make_customer_cache,
-            make_edge, make_metrics, make_link_with_edge_info, make_metrics_for_link, make_list_of_link_metrics,
-            make_structured_metrics_object, make_list_of_structured_metrics_objects,
-            make_structured_metrics_object_with_cache_and_contact_info,
-            make_rpc_response, make_contact_info):
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_customer_cache,
+        make_edge,
+        make_metrics,
+        make_link_with_edge_info,
+        make_metrics_for_link,
+        make_list_of_link_metrics,
+        make_structured_metrics_object,
+        make_list_of_structured_metrics_objects,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_rpc_response,
+        make_contact_info,
+    ):
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
-        edge_serial_number = 'VCO123'
+        edge_serial_number = "VCO123"
 
         edge = make_edge(serial_number=edge_serial_number)
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
@@ -745,11 +882,12 @@ class TestServiceAffectingMonitor:
         )
 
         service_affecting_monitor._customer_cache = customer_cache
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_packet_loss_checks.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_packet_loss_checks.return_value = (
             make_rpc_response(
                 body=links_metric_sets,
                 status=200,
             )
+        )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
@@ -762,15 +900,17 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._process_packet_loss_trouble.assert_awaited_once_with(link_complete_info)
 
     @pytest.mark.asyncio
-    async def jitter_check__no_metrics_found_test(self, service_affecting_monitor, make_list_of_link_metrics,
-                                                  make_rpc_response):
+    async def jitter_check__no_metrics_found_test(
+        self, service_affecting_monitor, make_list_of_link_metrics, make_rpc_response
+    ):
         links_metrics = make_list_of_link_metrics()
 
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_jitter_checks.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_jitter_checks.return_value = (
             make_rpc_response(
                 body=links_metrics,
                 status=200,
             )
+        )
 
         await service_affecting_monitor._jitter_check()
 
@@ -780,9 +920,15 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def jitter_check__empty_dataset_after_structuring_and_crossing_info_test(
-            self, service_affecting_monitor, make_edge, make_link_with_edge_info, make_metrics_for_link,
-            make_list_of_link_metrics, make_list_of_structured_metrics_objects_with_cache_and_contact_info,
-            make_rpc_response):
+        self,
+        service_affecting_monitor,
+        make_edge,
+        make_link_with_edge_info,
+        make_metrics_for_link,
+        make_list_of_link_metrics,
+        make_list_of_structured_metrics_objects_with_cache_and_contact_info,
+        make_rpc_response,
+    ):
         edge = make_edge(edge_state=None)  # Make it an invalid edge so crossing data produces an empty dataset
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info)
@@ -790,11 +936,12 @@ class TestServiceAffectingMonitor:
 
         links_complete_info = make_list_of_structured_metrics_objects_with_cache_and_contact_info()
 
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_jitter_checks.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_jitter_checks.return_value = (
             make_rpc_response(
                 body=links_metric_sets,
                 status=200,
             )
+        )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
@@ -808,14 +955,24 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def jitter_check__all_metrics_within_thresholds_test(
-            self, service_affecting_monitor, make_cached_edge, make_customer_cache,
-            make_edge, make_metrics, make_link_with_edge_info, make_metrics_for_link, make_list_of_link_metrics,
-            make_structured_metrics_object, make_list_of_structured_metrics_objects,
-            make_rpc_response, make_contact_info):
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_customer_cache,
+        make_edge,
+        make_metrics,
+        make_link_with_edge_info,
+        make_metrics_for_link,
+        make_list_of_link_metrics,
+        make_structured_metrics_object,
+        make_list_of_structured_metrics_objects,
+        make_rpc_response,
+        make_contact_info,
+    ):
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
-        edge_serial_number = 'VCO123'
+        edge_serial_number = "VCO123"
 
         edge = make_edge(serial_number=edge_serial_number)
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
@@ -830,11 +987,12 @@ class TestServiceAffectingMonitor:
         customer_cache = make_customer_cache(edge_cache_info)
 
         service_affecting_monitor._customer_cache = customer_cache
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_jitter_checks.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_jitter_checks.return_value = (
             make_rpc_response(
                 body=links_metric_sets,
                 status=200,
             )
+        )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
@@ -848,15 +1006,25 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def jitter_check__trouble_detected_test(
-            self, service_affecting_monitor, make_cached_edge, make_customer_cache,
-            make_edge, make_metrics, make_link_with_edge_info, make_metrics_for_link, make_list_of_link_metrics,
-            make_structured_metrics_object, make_list_of_structured_metrics_objects,
-            make_structured_metrics_object_with_cache_and_contact_info,
-            make_rpc_response, make_contact_info):
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_customer_cache,
+        make_edge,
+        make_metrics,
+        make_link_with_edge_info,
+        make_metrics_for_link,
+        make_list_of_link_metrics,
+        make_structured_metrics_object,
+        make_list_of_structured_metrics_objects,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_rpc_response,
+        make_contact_info,
+    ):
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
-        edge_serial_number = 'VCO123'
+        edge_serial_number = "VCO123"
 
         edge = make_edge(serial_number=edge_serial_number)
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
@@ -877,11 +1045,12 @@ class TestServiceAffectingMonitor:
         )
 
         service_affecting_monitor._customer_cache = customer_cache
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_jitter_checks.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_jitter_checks.return_value = (
             make_rpc_response(
                 body=links_metric_sets,
                 status=200,
             )
+        )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
@@ -894,15 +1063,17 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._process_jitter_trouble.assert_awaited_once_with(link_complete_info)
 
     @pytest.mark.asyncio
-    async def bandwidth_check__no_metrics_found_test(self, service_affecting_monitor, make_list_of_link_metrics,
-                                                     make_rpc_response):
+    async def bandwidth_check__no_metrics_found_test(
+        self, service_affecting_monitor, make_list_of_link_metrics, make_rpc_response
+    ):
         links_metrics = make_list_of_link_metrics()
 
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bandwidth_checks.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bandwidth_checks.return_value = (
             make_rpc_response(
                 body=links_metrics,
                 status=200,
             )
+        )
 
         await service_affecting_monitor._bandwidth_check()
 
@@ -912,8 +1083,15 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def bandwidth_check__empty_dataset_after_structuring_and_crossing_info_test(
-            self, service_affecting_monitor, make_edge, make_link_with_edge_info, make_metrics_for_link,
-            make_list_of_link_metrics, make_list_of_structured_metrics_objects, make_rpc_response):
+        self,
+        service_affecting_monitor,
+        make_edge,
+        make_link_with_edge_info,
+        make_metrics_for_link,
+        make_list_of_link_metrics,
+        make_list_of_structured_metrics_objects,
+        make_rpc_response,
+    ):
         edge = make_edge(edge_state=None)  # Make it an invalid edge so crossing data produces an empty dataset
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info)
@@ -921,11 +1099,12 @@ class TestServiceAffectingMonitor:
 
         links_structured_metrics = make_list_of_structured_metrics_objects()
 
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bandwidth_checks.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bandwidth_checks.return_value = (
             make_rpc_response(
                 body=links_metric_sets,
                 status=200,
             )
+        )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
@@ -939,21 +1118,33 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def bandwidth_check__unmonitorized_bruin_clients_test(
-            self, service_affecting_monitor, make_cached_edge, make_bruin_client_info,
-            make_customer_cache, make_edge, make_metrics, make_link_with_edge_info,
-            make_metrics_for_link, make_list_of_link_metrics, make_structured_metrics_object,
-            make_list_of_structured_metrics_objects, make_rpc_response, make_contact_info):
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_bruin_client_info,
+        make_customer_cache,
+        make_edge,
+        make_metrics,
+        make_link_with_edge_info,
+        make_metrics_for_link,
+        make_list_of_link_metrics,
+        make_structured_metrics_object,
+        make_list_of_structured_metrics_objects,
+        make_rpc_response,
+        make_contact_info,
+    ):
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
-        edge_serial_number = 'VCO123'
+        edge_serial_number = "VCO123"
         client_id = 1234
 
         edge = make_edge(serial_number=edge_serial_number)
         edge_link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         edge_link_metrics = make_metrics()
         edge_link_metric_set = make_metrics_for_link(
-            link_with_edge_info=edge_link_with_edge_info, metrics=edge_link_metrics,
+            link_with_edge_info=edge_link_with_edge_info,
+            metrics=edge_link_metrics,
         )
 
         links_metric_sets = make_list_of_link_metrics(edge_link_metric_set)
@@ -966,16 +1157,17 @@ class TestServiceAffectingMonitor:
         customer_cache = make_customer_cache(edge_cache_info)
 
         service_affecting_monitor._customer_cache = customer_cache
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bandwidth_checks.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bandwidth_checks.return_value = (
             make_rpc_response(
                 body=links_metric_sets,
                 status=200,
             )
+        )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
-        custom_monitor_config['customers_with_bandwidth_enabled'] = []
+        custom_monitor_config["customers_with_bandwidth_enabled"] = []
         with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
             await service_affecting_monitor._bandwidth_check()
 
@@ -987,21 +1179,33 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def bandwidth_check__invalid_tx_and_rx_bandwidth_metrics_test(
-            self, service_affecting_monitor, make_cached_edge, make_bruin_client_info,
-            make_customer_cache, make_edge, make_metrics, make_link_with_edge_info,
-            make_metrics_for_link, make_list_of_link_metrics, make_structured_metrics_object,
-            make_list_of_structured_metrics_objects, make_rpc_response, make_contact_info):
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_bruin_client_info,
+        make_customer_cache,
+        make_edge,
+        make_metrics,
+        make_link_with_edge_info,
+        make_metrics_for_link,
+        make_list_of_link_metrics,
+        make_structured_metrics_object,
+        make_list_of_structured_metrics_objects,
+        make_rpc_response,
+        make_contact_info,
+    ):
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
-        edge_serial_number = 'VCO123'
+        edge_serial_number = "VCO123"
         client_id = 1234
 
         edge = make_edge(serial_number=edge_serial_number)
         edge_link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         edge_link_metrics = make_metrics(bps_of_best_path_tx=0, bps_of_best_path_rx=0)
         edge_link_metric_set = make_metrics_for_link(
-            link_with_edge_info=edge_link_with_edge_info, metrics=edge_link_metrics,
+            link_with_edge_info=edge_link_with_edge_info,
+            metrics=edge_link_metrics,
         )
 
         links_metric_sets = make_list_of_link_metrics(edge_link_metric_set)
@@ -1014,16 +1218,17 @@ class TestServiceAffectingMonitor:
         customer_cache = make_customer_cache(edge_cache_info)
 
         service_affecting_monitor._customer_cache = customer_cache
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bandwidth_checks.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bandwidth_checks.return_value = (
             make_rpc_response(
                 body=links_metric_sets,
                 status=200,
             )
+        )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
-        custom_monitor_config['customers_with_bandwidth_enabled'] = [client_id]
+        custom_monitor_config["customers_with_bandwidth_enabled"] = [client_id]
         with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
             await service_affecting_monitor._bandwidth_check()
 
@@ -1035,27 +1240,40 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def bandwidth_check__all_metrics_within_thresholds_test(
-            self, service_affecting_monitor, make_cached_edge, make_bruin_client_info,
-            make_customer_cache, make_edge, make_metrics, make_link_with_edge_info,
-            make_metrics_for_link, make_list_of_link_metrics, make_structured_metrics_object,
-            make_list_of_structured_metrics_objects, make_rpc_response, make_contact_info):
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_bruin_client_info,
+        make_customer_cache,
+        make_edge,
+        make_metrics,
+        make_link_with_edge_info,
+        make_metrics_for_link,
+        make_list_of_link_metrics,
+        make_structured_metrics_object,
+        make_list_of_structured_metrics_objects,
+        make_rpc_response,
+        make_contact_info,
+    ):
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
-        edge_serial_number = 'VCO123'
+        edge_serial_number = "VCO123"
         client_id = 1234
 
         edge = make_edge(serial_number=edge_serial_number)
         edge_link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         edge_link_metrics = make_metrics(bps_of_best_path_tx=100, bps_of_best_path_rx=100)
         edge_link_metric_set = make_metrics_for_link(
-            link_with_edge_info=edge_link_with_edge_info, metrics=edge_link_metrics,
+            link_with_edge_info=edge_link_with_edge_info,
+            metrics=edge_link_metrics,
         )
 
         links_metric_sets = make_list_of_link_metrics(edge_link_metric_set)
 
         structured_metrics_object = make_structured_metrics_object(
-            edge_info=edge, metrics=edge_link_metrics,
+            edge_info=edge,
+            metrics=edge_link_metrics,
         )
         structured_metrics_objects = make_list_of_structured_metrics_objects(structured_metrics_object)
 
@@ -1064,16 +1282,17 @@ class TestServiceAffectingMonitor:
         customer_cache = make_customer_cache(edge_cache_info)
 
         service_affecting_monitor._customer_cache = customer_cache
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bandwidth_checks.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bandwidth_checks.return_value = (
             make_rpc_response(
                 body=links_metric_sets,
                 status=200,
             )
+        )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
-        custom_monitor_config['customers_with_bandwidth_enabled'] = [client_id]
+        custom_monitor_config["customers_with_bandwidth_enabled"] = [client_id]
         with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
             await service_affecting_monitor._bandwidth_check()
 
@@ -1085,31 +1304,46 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def bandwidth_check__trouble_detected_test(
-            self, service_affecting_monitor, make_cached_edge, make_bruin_client_info,
-            make_customer_cache, make_edge, make_metrics, make_link_with_edge_info,
-            make_metrics_for_link, make_list_of_link_metrics, make_structured_metrics_object,
-            make_list_of_structured_metrics_objects, make_structured_metrics_object_with_cache_and_contact_info,
-            make_rpc_response, make_contact_info):
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_bruin_client_info,
+        make_customer_cache,
+        make_edge,
+        make_metrics,
+        make_link_with_edge_info,
+        make_metrics_for_link,
+        make_list_of_link_metrics,
+        make_structured_metrics_object,
+        make_list_of_structured_metrics_objects,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_rpc_response,
+        make_contact_info,
+    ):
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
-        edge_serial_number = 'VCO123'
+        edge_serial_number = "VCO123"
         client_id = 12345
 
         edge = make_edge(serial_number=edge_serial_number)
         edge_link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         edge_link_metrics = make_metrics(
-            bytes_tx=999999, bytes_rx=999999,
-            bps_of_best_path_tx=100, bps_of_best_path_rx=100,
+            bytes_tx=999999,
+            bytes_rx=999999,
+            bps_of_best_path_tx=100,
+            bps_of_best_path_rx=100,
         )
         edge_link_metric_set = make_metrics_for_link(
-            link_with_edge_info=edge_link_with_edge_info, metrics=edge_link_metrics,
+            link_with_edge_info=edge_link_with_edge_info,
+            metrics=edge_link_metrics,
         )
 
         links_metric_sets = make_list_of_link_metrics(edge_link_metric_set)
 
         structured_metrics_object = make_structured_metrics_object(
-            edge_info=edge, metrics=edge_link_metrics,
+            edge_info=edge,
+            metrics=edge_link_metrics,
         )
         structured_metrics_objects = make_list_of_structured_metrics_objects(structured_metrics_object)
 
@@ -1124,16 +1358,17 @@ class TestServiceAffectingMonitor:
         )
 
         service_affecting_monitor._customer_cache = customer_cache
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bandwidth_checks.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bandwidth_checks.return_value = (
             make_rpc_response(
                 body=links_metric_sets,
                 status=200,
             )
+        )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
-        custom_monitor_config['customers_with_bandwidth_enabled'] = [client_id]
+        custom_monitor_config["customers_with_bandwidth_enabled"] = [client_id]
         with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
             await service_affecting_monitor._bandwidth_check()
 
@@ -1144,15 +1379,17 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._process_bandwidth_trouble.assert_awaited_once_with(link_complete_info)
 
     @pytest.mark.asyncio
-    async def bouncing_check__no_metrics_found_test(self, service_affecting_monitor, make_list_of_link_metrics,
-                                                    make_rpc_response):
+    async def bouncing_check__no_metrics_found_test(
+        self, service_affecting_monitor, make_list_of_link_metrics, make_rpc_response
+    ):
         links_metrics = make_list_of_link_metrics()
 
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bouncing_checks.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bouncing_checks.return_value = (
             make_rpc_response(
                 body=links_metrics,
                 status=200,
             )
+        )
 
         await service_affecting_monitor._bouncing_check()
 
@@ -1163,9 +1400,16 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def bouncing_check__empty_dataset_after_structuring_and_crossing_info_test(
-            self, service_affecting_monitor, make_edge, make_link_with_edge_info, make_metrics_for_link,
-            make_list_of_link_metrics, make_list_of_structured_metrics_objects_with_cache_and_contact_info,
-            make_events_by_serial_and_interface, make_rpc_response):
+        self,
+        service_affecting_monitor,
+        make_edge,
+        make_link_with_edge_info,
+        make_metrics_for_link,
+        make_list_of_link_metrics,
+        make_list_of_structured_metrics_objects_with_cache_and_contact_info,
+        make_events_by_serial_and_interface,
+        make_rpc_response,
+    ):
         edge = make_edge(edge_state=None)  # Make it an invalid edge so crossing data produces an empty dataset
         link_with_edge_info = make_link_with_edge_info(edge_info=edge)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info)
@@ -1174,18 +1418,20 @@ class TestServiceAffectingMonitor:
 
         links_complete_info = make_list_of_structured_metrics_objects_with_cache_and_contact_info()
 
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bouncing_checks.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bouncing_checks.return_value = (
             make_rpc_response(
                 body=links_metric_sets,
                 status=200,
             )
+        )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         await service_affecting_monitor._bouncing_check()
 
-        service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets,
-                                                                                   events_by_serial_and_interface)
+        service_affecting_monitor._structure_links_metrics.assert_called_once_with(
+            links_metric_sets, events_by_serial_and_interface
+        )
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
             links_complete_info,
         )
@@ -1193,17 +1439,29 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def bouncing_check__events_within_threshold_test(
-            self, service_affecting_monitor, make_cached_edge, make_customer_cache, make_edge, make_link,
-            make_link_with_edge_info, make_metrics_for_link, make_list_of_link_metrics, make_event,
-            make_events_by_serial_and_interface, make_structured_metrics_object_with_events,
-            make_list_of_structured_metrics_objects, make_rpc_response, make_contact_info):
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_customer_cache,
+        make_edge,
+        make_link,
+        make_link_with_edge_info,
+        make_metrics_for_link,
+        make_list_of_link_metrics,
+        make_event,
+        make_events_by_serial_and_interface,
+        make_structured_metrics_object_with_events,
+        make_list_of_structured_metrics_objects,
+        make_rpc_response,
+        make_contact_info,
+    ):
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
-        edge_serial_number = 'VCO123'
-        interface = 'GE1'
+        edge_serial_number = "VCO123"
+        interface = "GE1"
 
-        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
+        edge = make_edge(serial_number=edge_serial_number, edge_state="CONNECTED")
         link = make_link(interface=interface)
         link_with_edge_info = make_link_with_edge_info(edge_info=edge, link_info=link)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info)
@@ -1213,28 +1471,32 @@ class TestServiceAffectingMonitor:
         events = [event]
         events_by_serial_and_interface = make_events_by_serial_and_interface()
         events_by_serial_and_interface[edge_serial_number][interface] = events
-        structured_metrics_object = make_structured_metrics_object_with_events(edge_info=edge, link_info=link,
-                                                                               events=events)
+        structured_metrics_object = make_structured_metrics_object_with_events(
+            edge_info=edge, link_info=link, events=events
+        )
         structured_metrics_objects = make_list_of_structured_metrics_objects(structured_metrics_object)
 
         edge_cache_info = make_cached_edge(serial_number=edge_serial_number)
         customer_cache = make_customer_cache(edge_cache_info)
 
         service_affecting_monitor._customer_cache = customer_cache
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bouncing_checks.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bouncing_checks.return_value = (
             make_rpc_response(
                 body=links_metric_sets,
                 status=200,
             )
-        service_affecting_monitor._velocloud_repository.get_events_by_serial_and_interface.return_value = \
+        )
+        service_affecting_monitor._velocloud_repository.get_events_by_serial_and_interface.return_value = (
             events_by_serial_and_interface
+        )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         await service_affecting_monitor._bouncing_check()
 
-        service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets,
-                                                                                   events_by_serial_and_interface)
+        service_affecting_monitor._structure_links_metrics.assert_called_once_with(
+            links_metric_sets, events_by_serial_and_interface
+        )
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
             structured_metrics_objects,
         )
@@ -1242,18 +1504,30 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def bouncing_check__trouble_detected_test(
-            self, service_affecting_monitor, make_cached_edge, make_customer_cache, make_edge, make_link,
-            make_link_with_edge_info, make_metrics_for_link, make_list_of_link_metrics, make_event,
-            make_events_by_serial_and_interface, make_structured_metrics_object_with_events,
-            make_list_of_structured_metrics_objects, make_structured_metrics_object_with_cache_and_contact_info,
-            make_rpc_response, make_contact_info):
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_customer_cache,
+        make_edge,
+        make_link,
+        make_link_with_edge_info,
+        make_metrics_for_link,
+        make_list_of_link_metrics,
+        make_event,
+        make_events_by_serial_and_interface,
+        make_structured_metrics_object_with_events,
+        make_list_of_structured_metrics_objects,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_rpc_response,
+        make_contact_info,
+    ):
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
-        edge_serial_number = 'VCO123'
-        interface = 'GE1'
+        edge_serial_number = "VCO123"
+        interface = "GE1"
 
-        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
+        edge = make_edge(serial_number=edge_serial_number, edge_state="CONNECTED")
         link = make_link(interface=interface)
         link_with_edge_info = make_link_with_edge_info(edge_info=edge, link_info=link)
         link_metric_set = make_metrics_for_link(link_with_edge_info=link_with_edge_info)
@@ -1261,11 +1535,13 @@ class TestServiceAffectingMonitor:
 
         event = make_event()
         events = [event] * 10
-        events_by_serial_and_interface = make_events_by_serial_and_interface(serials=[edge_serial_number],
-                                                                             interfaces=[interface])
+        events_by_serial_and_interface = make_events_by_serial_and_interface(
+            serials=[edge_serial_number], interfaces=[interface]
+        )
         events_by_serial_and_interface[edge_serial_number][interface] = events
-        structured_metrics_object = make_structured_metrics_object_with_events(edge_info=edge, link_info=link,
-                                                                               events=events)
+        structured_metrics_object = make_structured_metrics_object_with_events(
+            edge_info=edge, link_info=link, events=events
+        )
         structured_metrics_objects = make_list_of_structured_metrics_objects(structured_metrics_object)
 
         edge_cache_info = make_cached_edge(serial_number=edge_serial_number)
@@ -1278,20 +1554,23 @@ class TestServiceAffectingMonitor:
         )
 
         service_affecting_monitor._customer_cache = customer_cache
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bouncing_checks.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bouncing_checks.return_value = (
             make_rpc_response(
                 body=links_metric_sets,
                 status=200,
             )
-        service_affecting_monitor._velocloud_repository.get_events_by_serial_and_interface.return_value = \
+        )
+        service_affecting_monitor._velocloud_repository.get_events_by_serial_and_interface.return_value = (
             events_by_serial_and_interface
+        )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
         await service_affecting_monitor._bouncing_check()
 
-        service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets,
-                                                                                   events_by_serial_and_interface)
+        service_affecting_monitor._structure_links_metrics.assert_called_once_with(
+            links_metric_sets, events_by_serial_and_interface
+        )
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
             structured_metrics_objects,
         )
@@ -1299,7 +1578,8 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def process_latency_trouble_test(
-            self, service_affecting_monitor, make_structured_metrics_object_with_cache_and_contact_info):
+        self, service_affecting_monitor, make_structured_metrics_object_with_cache_and_contact_info
+    ):
         trouble = AffectingTroubles.LATENCY
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
 
@@ -1309,7 +1589,8 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def process_jitter_trouble_test(
-            self, service_affecting_monitor, make_structured_metrics_object_with_cache_and_contact_info):
+        self, service_affecting_monitor, make_structured_metrics_object_with_cache_and_contact_info
+    ):
         trouble = AffectingTroubles.JITTER
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
 
@@ -1319,7 +1600,8 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def process_packet_loss_trouble_test(
-            self, service_affecting_monitor, make_structured_metrics_object_with_cache_and_contact_info):
+        self, service_affecting_monitor, make_structured_metrics_object_with_cache_and_contact_info
+    ):
         trouble = AffectingTroubles.PACKET_LOSS
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
 
@@ -1329,7 +1611,8 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def process_bandwidth_trouble_test(
-            self, service_affecting_monitor, make_structured_metrics_object_with_cache_and_contact_info):
+        self, service_affecting_monitor, make_structured_metrics_object_with_cache_and_contact_info
+    ):
         trouble = AffectingTroubles.BANDWIDTH_OVER_UTILIZATION
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
 
@@ -1339,7 +1622,8 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def process_bouncing_trouble_test(
-            self, service_affecting_monitor, make_structured_metrics_object_with_cache_and_contact_info):
+        self, service_affecting_monitor, make_structured_metrics_object_with_cache_and_contact_info
+    ):
         trouble = AffectingTroubles.BOUNCING
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
 
@@ -1350,10 +1634,14 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def process_affecting_trouble__get_open_affecting_tickets_request_has_not_2xx_status_test(
-            self, service_affecting_monitor, make_bruin_client_info, make_cached_edge,
-            make_structured_metrics_object_with_cache_and_contact_info,
-            bruin_500_response):
-        service_number = 'VC1234567'
+        self,
+        service_affecting_monitor,
+        make_bruin_client_info,
+        make_cached_edge,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        bruin_500_response,
+    ):
+        service_number = "VC1234567"
         client_id = 12345
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
@@ -1366,7 +1654,8 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._process_affecting_trouble(link_info, trouble)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
-            client_id, service_number=service_number,
+            client_id,
+            service_number=service_number,
         )
         service_affecting_monitor._bruin_repository.get_resolved_affecting_tickets.assert_not_awaited()
         service_affecting_monitor._should_always_stay_in_ipa_queue.assert_not_called()
@@ -1377,11 +1666,18 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def process_affecting_trouble__open_ticket_found_with_resolved_detail_for_serial_test(
-            self, service_affecting_monitor, make_bruin_client_info, make_cached_edge,
-            make_structured_metrics_object_with_cache_and_contact_info,
-            make_ticket, make_list_of_tickets, make_detail_item, make_detail_item_with_notes_and_ticket_info,
-            make_rpc_response):
-        service_number = 'VC1234567'
+        self,
+        service_affecting_monitor,
+        make_bruin_client_info,
+        make_cached_edge,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_ticket,
+        make_list_of_tickets,
+        make_detail_item,
+        make_detail_item_with_notes_and_ticket_info,
+        make_rpc_response,
+    ):
+        service_number = "VC1234567"
         client_id = 12345
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
@@ -1392,7 +1688,7 @@ class TestServiceAffectingMonitor:
         ticket = make_ticket()
         open_affecting_tickets = make_list_of_tickets(ticket)
 
-        detail_item = make_detail_item(status='R')  # Resolved
+        detail_item = make_detail_item(status="R")  # Resolved
         detail_object = make_detail_item_with_notes_and_ticket_info(detail_item=detail_item, ticket_info=ticket)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.return_value = make_rpc_response(
@@ -1404,24 +1700,34 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._process_affecting_trouble(link_info, trouble)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
-            client_id, service_number=service_number,
+            client_id,
+            service_number=service_number,
         )
         service_affecting_monitor._bruin_repository.get_resolved_affecting_tickets.assert_not_awaited()
         service_affecting_monitor._append_latest_trouble_to_ticket.assert_not_awaited()
         service_affecting_monitor._should_always_stay_in_ipa_queue.assert_not_called()
         service_affecting_monitor._send_reminder.assert_not_awaited()
         service_affecting_monitor._unresolve_task_for_affecting_ticket.assert_awaited_once_with(
-            detail_object, trouble, link_info,
+            detail_object,
+            trouble,
+            link_info,
         )
         service_affecting_monitor._create_affecting_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def process_affecting_trouble__open_ticket_found_with_in_progress_detail_for_serial_test(
-            self, service_affecting_monitor, make_bruin_client_info, make_cached_edge,
-            make_structured_metrics_object_with_cache_and_contact_info,
-            make_ticket, make_list_of_tickets, make_detail_item, make_detail_item_with_notes_and_ticket_info,
-            make_rpc_response):
-        service_number = 'VC1234567'
+        self,
+        service_affecting_monitor,
+        make_bruin_client_info,
+        make_cached_edge,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_ticket,
+        make_list_of_tickets,
+        make_detail_item,
+        make_detail_item_with_notes_and_ticket_info,
+        make_rpc_response,
+    ):
+        service_number = "VC1234567"
         client_id = 12345
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
@@ -1432,7 +1738,7 @@ class TestServiceAffectingMonitor:
         ticket = make_ticket()
         open_affecting_tickets = make_list_of_tickets(ticket)
 
-        detail_item = make_detail_item(status='I')  # In progress
+        detail_item = make_detail_item(status="I")  # In progress
         detail_object = make_detail_item_with_notes_and_ticket_info(detail_item=detail_item, ticket_info=ticket)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.return_value = make_rpc_response(
@@ -1444,24 +1750,34 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._process_affecting_trouble(link_info, trouble)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
-            client_id, service_number=service_number,
+            client_id,
+            service_number=service_number,
         )
         service_affecting_monitor._bruin_repository.get_resolved_affecting_tickets.assert_not_awaited()
         service_affecting_monitor._should_always_stay_in_ipa_queue.assert_called()
         service_affecting_monitor._send_reminder.assert_not_awaited()
         service_affecting_monitor._append_latest_trouble_to_ticket.assert_awaited_once_with(
-            detail_object, trouble, link_info,
+            detail_object,
+            trouble,
+            link_info,
         )
         service_affecting_monitor._unresolve_task_for_affecting_ticket.assert_not_awaited()
         service_affecting_monitor._create_affecting_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def process_affecting_trouble__open_ticket_found_with_in_progress_detail_for_serial_send_reminder_test(
-            self, service_affecting_monitor, make_bruin_client_info, make_cached_edge,
-            make_structured_metrics_object_with_cache_and_contact_info,
-            make_ticket, make_list_of_tickets, make_detail_item, make_detail_item_with_notes_and_ticket_info,
-            make_rpc_response):
-        service_number = 'VC1234567'
+        self,
+        service_affecting_monitor,
+        make_bruin_client_info,
+        make_cached_edge,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_ticket,
+        make_list_of_tickets,
+        make_detail_item,
+        make_detail_item_with_notes_and_ticket_info,
+        make_rpc_response,
+    ):
+        service_number = "VC1234567"
         client_id = 12345
         ticket_id = 123
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
@@ -1470,7 +1786,7 @@ class TestServiceAffectingMonitor:
         link_info = make_structured_metrics_object_with_cache_and_contact_info(cache_info=edge_cache_info)
         ticket = make_ticket(ticket_id=ticket_id)
         open_affecting_tickets = make_list_of_tickets(ticket)
-        detail_item = make_detail_item(status='I')
+        detail_item = make_detail_item(status="I")
         detail_object = make_detail_item_with_notes_and_ticket_info(detail_item=detail_item, ticket_info=ticket)
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.return_value = make_rpc_response(
             body=open_affecting_tickets,
@@ -1482,25 +1798,32 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._process_affecting_trouble(link_info, trouble)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
-            client_id, service_number=service_number,
+            client_id,
+            service_number=service_number,
         )
         service_affecting_monitor._bruin_repository.get_resolved_affecting_tickets.assert_not_awaited()
         service_affecting_monitor._append_latest_trouble_to_ticket.assert_awaited_once_with(
-            detail_object, trouble, link_info,
+            detail_object,
+            trouble,
+            link_info,
         )
         service_affecting_monitor._should_always_stay_in_ipa_queue.assert_called()
-        service_affecting_monitor._send_reminder.assert_awaited_once_with(
-            detail_object
-        )
+        service_affecting_monitor._send_reminder.assert_awaited_once_with(detail_object)
         service_affecting_monitor._unresolve_task_for_affecting_ticket.assert_not_awaited()
         service_affecting_monitor._create_affecting_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def process_affecting_trouble__get_resolved_affecting_tickets_request_has_not_2xx_status_test(
-            self, service_affecting_monitor, make_bruin_client_info, make_cached_edge,
-            make_structured_metrics_object_with_cache_and_contact_info,
-            make_list_of_tickets, make_rpc_response, bruin_500_response):
-        service_number = 'VC1234567'
+        self,
+        service_affecting_monitor,
+        make_bruin_client_info,
+        make_cached_edge,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_list_of_tickets,
+        make_rpc_response,
+        bruin_500_response,
+    ):
+        service_number = "VC1234567"
         client_id = 12345
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
@@ -1515,16 +1838,19 @@ class TestServiceAffectingMonitor:
             status=200,
         )
         service_affecting_monitor._bruin_repository.get_resolved_affecting_tickets.return_value = bruin_500_response
-        service_affecting_monitor._get_oldest_affecting_ticket_for_serial_number.return_value = \
+        service_affecting_monitor._get_oldest_affecting_ticket_for_serial_number.return_value = (
             None  # No Open ticket was found
+        )
 
         await service_affecting_monitor._process_affecting_trouble(link_info, trouble)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
-            client_id, service_number=service_number,
+            client_id,
+            service_number=service_number,
         )
         service_affecting_monitor._bruin_repository.get_resolved_affecting_tickets.assert_awaited_once_with(
-            client_id, service_number=service_number,
+            client_id,
+            service_number=service_number,
         )
         service_affecting_monitor._append_latest_trouble_to_ticket.assert_not_awaited()
         service_affecting_monitor._should_always_stay_in_ipa_queue.assert_not_called()
@@ -1534,11 +1860,18 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def process_affecting_trouble__resolved_ticket_found_test(
-            self, service_affecting_monitor, make_bruin_client_info, make_cached_edge,
-            make_structured_metrics_object_with_cache_and_contact_info,
-            make_ticket, make_list_of_tickets, make_detail_item, make_detail_item_with_notes_and_ticket_info,
-            make_rpc_response):
-        service_number = 'VC1234567'
+        self,
+        service_affecting_monitor,
+        make_bruin_client_info,
+        make_cached_edge,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_ticket,
+        make_list_of_tickets,
+        make_detail_item,
+        make_detail_item_with_notes_and_ticket_info,
+        make_rpc_response,
+    ):
+        service_number = "VC1234567"
         client_id = 12345
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
@@ -1569,25 +1902,34 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._process_affecting_trouble(link_info, trouble)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
-            client_id, service_number=service_number,
+            client_id,
+            service_number=service_number,
         )
         service_affecting_monitor._bruin_repository.get_resolved_affecting_tickets.assert_awaited_once_with(
-            client_id, service_number=service_number,
+            client_id,
+            service_number=service_number,
         )
         service_affecting_monitor._append_latest_trouble_to_ticket.assert_not_awaited()
         service_affecting_monitor._should_always_stay_in_ipa_queue.assert_not_called()
         service_affecting_monitor._send_reminder.assert_not_awaited()
         service_affecting_monitor._unresolve_task_for_affecting_ticket.assert_awaited_once_with(
-            detail_object, trouble, link_info,
+            detail_object,
+            trouble,
+            link_info,
         )
         service_affecting_monitor._create_affecting_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def process_affecting_trouble__no_open_or_resolved_ticket_found_test(
-            self, service_affecting_monitor, make_bruin_client_info, make_cached_edge,
-            make_structured_metrics_object_with_cache_and_contact_info,
-            make_list_of_tickets, make_rpc_response):
-        service_number = 'VC1234567'
+        self,
+        service_affecting_monitor,
+        make_bruin_client_info,
+        make_cached_edge,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_list_of_tickets,
+        make_rpc_response,
+    ):
+        service_number = "VC1234567"
         client_id = 12345
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
@@ -1606,16 +1948,19 @@ class TestServiceAffectingMonitor:
             body=resolved_affecting_tickets,
             status=200,
         )
-        service_affecting_monitor._get_oldest_affecting_ticket_for_serial_number.return_value = \
+        service_affecting_monitor._get_oldest_affecting_ticket_for_serial_number.return_value = (
             None  # No Open or Resolved tickets found
+        )
 
         await service_affecting_monitor._process_affecting_trouble(link_info, trouble)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
-            client_id, service_number=service_number,
+            client_id,
+            service_number=service_number,
         )
         service_affecting_monitor._bruin_repository.get_resolved_affecting_tickets.assert_awaited_once_with(
-            client_id, service_number=service_number,
+            client_id,
+            service_number=service_number,
         )
         service_affecting_monitor._append_latest_trouble_to_ticket.assert_not_awaited()
         service_affecting_monitor._should_always_stay_in_ipa_queue.assert_not_called()
@@ -1625,22 +1970,25 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def get_oldest_affecting_ticket_for_serial_number__empty_list_of_tickets_test(
-            self, service_affecting_monitor, make_ticket, make_list_of_tickets, bruin_500_response):
-        service_number = 'VC1234567'
+        self, service_affecting_monitor, make_ticket, make_list_of_tickets, bruin_500_response
+    ):
+        service_number = "VC1234567"
 
         tickets = make_list_of_tickets()
 
         service_affecting_monitor._bruin_repository.get_ticket_details.return_value = bruin_500_response
 
         result = await service_affecting_monitor._get_oldest_affecting_ticket_for_serial_number(
-            tickets, service_number,
+            tickets,
+            service_number,
         )
         assert result is None
 
     @pytest.mark.asyncio
     async def get_oldest_affecting_ticket_for_serial_number__get_details_request_has_not_2xx_status_test(
-            self, service_affecting_monitor, make_ticket, make_list_of_tickets, bruin_500_response):
-        service_number = 'VC1234567'
+        self, service_affecting_monitor, make_ticket, make_list_of_tickets, bruin_500_response
+    ):
+        service_number = "VC1234567"
 
         ticket = make_ticket()
         tickets = make_list_of_tickets(ticket)
@@ -1648,17 +1996,26 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.get_ticket_details.return_value = bruin_500_response
 
         result = await service_affecting_monitor._get_oldest_affecting_ticket_for_serial_number(
-            tickets, service_number,
+            tickets,
+            service_number,
         )
         assert result is None
 
     @pytest.mark.asyncio
     async def get_oldest_affecting_ticket_for_serial_number__no_notes_found_for_serial_number_test(
-            self, service_affecting_monitor, make_ticket, make_list_of_tickets, make_detail_item,
-            make_list_of_detail_items, make_ticket_note, make_list_of_ticket_notes, make_ticket_details,
-            make_rpc_response):
-        service_number = 'VC1234567'
-        fake_service_number = 'VC0000000'
+        self,
+        service_affecting_monitor,
+        make_ticket,
+        make_list_of_tickets,
+        make_detail_item,
+        make_list_of_detail_items,
+        make_ticket_note,
+        make_list_of_ticket_notes,
+        make_ticket_details,
+        make_rpc_response,
+    ):
+        service_number = "VC1234567"
+        fake_service_number = "VC0000000"
 
         ticket = make_ticket()
         tickets = make_list_of_tickets(ticket)
@@ -1678,17 +2035,26 @@ class TestServiceAffectingMonitor:
         )
 
         result = await service_affecting_monitor._get_oldest_affecting_ticket_for_serial_number(
-            tickets, service_number,
+            tickets,
+            service_number,
         )
 
         assert result is None
 
     @pytest.mark.asyncio
     async def get_oldest_affecting_ticket_for_serial_number__invalid_notes_found_for_serial_number_test(
-            self, service_affecting_monitor, make_ticket, make_list_of_tickets, make_detail_item,
-            make_list_of_detail_items, make_ticket_note, make_list_of_ticket_notes, make_ticket_details,
-            make_rpc_response):
-        service_number = 'VC1234567'
+        self,
+        service_affecting_monitor,
+        make_ticket,
+        make_list_of_tickets,
+        make_detail_item,
+        make_list_of_detail_items,
+        make_ticket_note,
+        make_list_of_ticket_notes,
+        make_ticket_details,
+        make_rpc_response,
+    ):
+        service_number = "VC1234567"
 
         ticket = make_ticket()
         tickets = make_list_of_tickets(ticket)
@@ -1708,17 +2074,26 @@ class TestServiceAffectingMonitor:
         )
 
         result = await service_affecting_monitor._get_oldest_affecting_ticket_for_serial_number(
-            tickets, service_number,
+            tickets,
+            service_number,
         )
 
         assert result is None
 
     @pytest.mark.asyncio
     async def get_oldest_affecting_ticket_for_serial_number__unrelated_notes_found_for_serial_number_test(
-            self, service_affecting_monitor, make_ticket, make_list_of_tickets, make_detail_item,
-            make_list_of_detail_items, make_ticket_note, make_list_of_ticket_notes, make_ticket_details,
-            make_rpc_response):
-        service_number = 'VC1234567'
+        self,
+        service_affecting_monitor,
+        make_ticket,
+        make_list_of_tickets,
+        make_detail_item,
+        make_list_of_detail_items,
+        make_ticket_note,
+        make_list_of_ticket_notes,
+        make_ticket_details,
+        make_rpc_response,
+    ):
+        service_number = "VC1234567"
 
         ticket = make_ticket()
         tickets = make_list_of_tickets(ticket)
@@ -1738,17 +2113,27 @@ class TestServiceAffectingMonitor:
         )
 
         result = await service_affecting_monitor._get_oldest_affecting_ticket_for_serial_number(
-            tickets, service_number,
+            tickets,
+            service_number,
         )
 
         assert result is None
 
     @pytest.mark.asyncio
     async def get_oldest_affecting_ticket_for_serial_number__valid_notes_found_for_serial_number_test(
-            self, service_affecting_monitor, make_ticket, make_list_of_tickets, make_detail_item,
-            make_list_of_detail_items, make_ticket_note, make_list_of_ticket_notes, make_ticket_details,
-            make_detail_item_with_notes_and_ticket_info, make_rpc_response):
-        service_number = 'VC1234567'
+        self,
+        service_affecting_monitor,
+        make_ticket,
+        make_list_of_tickets,
+        make_detail_item,
+        make_list_of_detail_items,
+        make_ticket_note,
+        make_list_of_ticket_notes,
+        make_ticket_details,
+        make_detail_item_with_notes_and_ticket_info,
+        make_rpc_response,
+    ):
+        service_number = "VC1234567"
 
         ticket = make_ticket()
         tickets = make_list_of_tickets(ticket)
@@ -1768,18 +2153,26 @@ class TestServiceAffectingMonitor:
         )
 
         result = await service_affecting_monitor._get_oldest_affecting_ticket_for_serial_number(
-            tickets, service_number,
+            tickets,
+            service_number,
         )
 
         expected = make_detail_item_with_notes_and_ticket_info(
-            detail_item=detail_item, notes=ticket_notes, ticket_info=ticket,
+            detail_item=detail_item,
+            notes=ticket_notes,
+            ticket_info=ticket,
         )
         assert result == expected
 
     @pytest.mark.asyncio
     async def append_latest_trouble_to_ticket__trouble_note_already_appended_after_ticket_creation_test(
-            self, service_affecting_monitor, make_ticket_note, make_list_of_ticket_notes,
-            make_detail_item_with_notes_and_ticket_info, make_structured_metrics_object_with_cache_and_contact_info):
+        self,
+        service_affecting_monitor,
+        make_ticket_note,
+        make_list_of_ticket_notes,
+        make_detail_item_with_notes_and_ticket_info,
+        make_structured_metrics_object_with_cache_and_contact_info,
+    ):
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
         note_1 = make_ticket_note(text=f"#*MetTel's IPA*#\nTrouble: {trouble.value}")
@@ -1795,8 +2188,13 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def append_latest_trouble_to_ticket__trouble_note_already_appended_after_latest_reopen_test(
-            self, service_affecting_monitor, make_ticket_note, make_list_of_ticket_notes,
-            make_detail_item_with_notes_and_ticket_info, make_structured_metrics_object_with_cache_and_contact_info):
+        self,
+        service_affecting_monitor,
+        make_ticket_note,
+        make_list_of_ticket_notes,
+        make_detail_item_with_notes_and_ticket_info,
+        make_structured_metrics_object_with_cache_and_contact_info,
+    ):
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
         note_1 = make_ticket_note(text=f"#*MetTel's IPA*#\nRe-opening ticket.\nTrouble: {trouble.value}")
@@ -1812,8 +2210,13 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def append_latest_trouble_to_ticket__current_env_is_not_production_test(
-            self, service_affecting_monitor, make_ticket_note, make_list_of_ticket_notes,
-            make_detail_item_with_notes_and_ticket_info, make_structured_metrics_object_with_cache_and_contact_info):
+        self,
+        service_affecting_monitor,
+        make_ticket_note,
+        make_list_of_ticket_notes,
+        make_detail_item_with_notes_and_ticket_info,
+        make_structured_metrics_object_with_cache_and_contact_info,
+    ):
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
         note_1 = make_ticket_note(text=f"#*MetTel's IPA*#\nTrouble: Packet Loss")
@@ -1822,7 +2225,7 @@ class TestServiceAffectingMonitor:
 
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'dev'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "dev"):
             await service_affecting_monitor._append_latest_trouble_to_ticket(detail_info, trouble, link_info)
 
         service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_not_awaited()
@@ -1830,9 +2233,14 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def append_latest_trouble_to_ticket__append_note_request_has_not_2xx_status_test(
-            self, service_affecting_monitor, make_ticket_note, make_list_of_ticket_notes,
-            make_detail_item_with_notes_and_ticket_info, make_structured_metrics_object_with_cache_and_contact_info,
-            bruin_500_response):
+        self,
+        service_affecting_monitor,
+        make_ticket_note,
+        make_list_of_ticket_notes,
+        make_detail_item_with_notes_and_ticket_info,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        bruin_500_response,
+    ):
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
         note_1 = make_ticket_note(text=f"#*MetTel's IPA*#\nTrouble: Packet Loss")
@@ -1843,7 +2251,7 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_500_response
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._append_latest_trouble_to_ticket(detail_info, trouble, link_info)
 
         service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once()
@@ -1851,9 +2259,14 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def append_latest_trouble_to_ticket__trouble_note_appended_to_ticket_test(
-            self, service_affecting_monitor, make_ticket_note, make_list_of_ticket_notes,
-            make_detail_item_with_notes_and_ticket_info, make_structured_metrics_object_with_cache_and_contact_info,
-            bruin_generic_200_response):
+        self,
+        service_affecting_monitor,
+        make_ticket_note,
+        make_list_of_ticket_notes,
+        make_detail_item_with_notes_and_ticket_info,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        bruin_generic_200_response,
+    ):
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
         note_1 = make_ticket_note(text=f"#*MetTel's IPA*#\nTrouble: Packet Loss")
@@ -1864,7 +2277,7 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._append_latest_trouble_to_ticket(detail_info, trouble, link_info)
 
         service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once()
@@ -1872,13 +2285,16 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def unresolve_task_for_affecting_ticket__current_env_is_not_production_test(
-            self, service_affecting_monitor, make_detail_item_with_notes_and_ticket_info,
-            make_structured_metrics_object_with_cache_and_contact_info):
+        self,
+        service_affecting_monitor,
+        make_detail_item_with_notes_and_ticket_info,
+        make_structured_metrics_object_with_cache_and_contact_info,
+    ):
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
         detail_info = make_detail_item_with_notes_and_ticket_info()
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'dev'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "dev"):
             await service_affecting_monitor._unresolve_task_for_affecting_ticket(detail_info, trouble, link_info)
 
         service_affecting_monitor._bruin_repository.open_ticket.assert_not_awaited()
@@ -1888,15 +2304,19 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def unresolve_task_for_affecting_ticket__reopen_request_has_not_2xx_status_test(
-            self, service_affecting_monitor, make_detail_item_with_notes_and_ticket_info,
-            make_structured_metrics_object_with_cache_and_contact_info, bruin_500_response):
+        self,
+        service_affecting_monitor,
+        make_detail_item_with_notes_and_ticket_info,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        bruin_500_response,
+    ):
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
         detail_info = make_detail_item_with_notes_and_ticket_info()
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
 
         service_affecting_monitor._bruin_repository.open_ticket.return_value = bruin_500_response
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._unresolve_task_for_affecting_ticket(detail_info, trouble, link_info)
 
         service_affecting_monitor._bruin_repository.open_ticket.assert_awaited_once()
@@ -1906,8 +2326,12 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def unresolve_task_for_affecting_ticket__dont_schedule_forward_to_hnoc_test(
-            self, service_affecting_monitor, make_detail_item_with_notes_and_ticket_info,
-            make_structured_metrics_object_with_cache_and_contact_info, bruin_generic_200_response):
+        self,
+        service_affecting_monitor,
+        make_detail_item_with_notes_and_ticket_info,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        bruin_generic_200_response,
+    ):
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
         detail_info = make_detail_item_with_notes_and_ticket_info()
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
@@ -1919,7 +2343,7 @@ class TestServiceAffectingMonitor:
         )
         service_affecting_monitor._should_always_stay_in_ipa_queue.return_value = True
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._unresolve_task_for_affecting_ticket(detail_info, trouble, link_info)
 
         service_affecting_monitor._bruin_repository.open_ticket.assert_awaited_once()
@@ -1931,14 +2355,17 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def unresolve_task_for_affecting_ticket__send_initial_reminder_email_fails_test(
-            self, service_affecting_monitor, make_detail_item_with_notes_and_ticket_info,
-            make_structured_metrics_object_with_cache_and_contact_info, bruin_generic_200_response,
-            bruin_500_response
+        self,
+        service_affecting_monitor,
+        make_detail_item_with_notes_and_ticket_info,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        bruin_generic_200_response,
+        bruin_500_response,
     ):
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
         detail_info = make_detail_item_with_notes_and_ticket_info()
-        ticket_id = detail_info['ticket_overview']['ticketID']
-        serial_number = detail_info['ticket_task']['detailID']
+        ticket_id = detail_info["ticket_overview"]["ticketID"]
+        serial_number = detail_info["ticket_task"]["detailID"]
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
 
         service_affecting_monitor._bruin_repository.open_ticket.return_value = bruin_generic_200_response
@@ -1948,7 +2375,7 @@ class TestServiceAffectingMonitor:
         )
         service_affecting_monitor._should_always_stay_in_ipa_queue.return_value = True
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._unresolve_task_for_affecting_ticket(detail_info, trouble, link_info)
 
         service_affecting_monitor._bruin_repository.open_ticket.assert_awaited_once()
@@ -1960,8 +2387,12 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def unresolve_task_for_affecting_ticket__ticket_task_reopened_test(
-            self, service_affecting_monitor, make_detail_item_with_notes_and_ticket_info,
-            make_structured_metrics_object_with_cache_and_contact_info, bruin_generic_200_response):
+        self,
+        service_affecting_monitor,
+        make_detail_item_with_notes_and_ticket_info,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        bruin_generic_200_response,
+    ):
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
         detail_info = make_detail_item_with_notes_and_ticket_info()
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
@@ -1970,7 +2401,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
         service_affecting_monitor._should_always_stay_in_ipa_queue.return_value = False
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._unresolve_task_for_affecting_ticket(detail_info, trouble, link_info)
 
         service_affecting_monitor._bruin_repository.open_ticket.assert_awaited_once()
@@ -1983,11 +2414,12 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def create_affecting_ticket__current_env_is_not_production_test(
-            self, service_affecting_monitor, make_structured_metrics_object_with_cache_and_contact_info):
+        self, service_affecting_monitor, make_structured_metrics_object_with_cache_and_contact_info
+    ):
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'dev'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "dev"):
             await service_affecting_monitor._create_affecting_ticket(trouble, link_info)
 
         service_affecting_monitor._bruin_repository.create_affecting_ticket.assert_not_awaited()
@@ -1997,14 +2429,14 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def create_affecting_ticket__create_ticket_request_has_not_2xx_status_test(
-            self, service_affecting_monitor, make_structured_metrics_object_with_cache_and_contact_info,
-            bruin_500_response):
+        self, service_affecting_monitor, make_structured_metrics_object_with_cache_and_contact_info, bruin_500_response
+    ):
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
 
         service_affecting_monitor._bruin_repository.create_affecting_ticket.return_value = bruin_500_response
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._create_affecting_ticket(trouble, link_info)
 
         service_affecting_monitor._bruin_repository.create_affecting_ticket.assert_awaited_once()
@@ -2014,16 +2446,21 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def create_affecting_ticket__ticket_created_bouncing_trouble_test(
-            self, service_affecting_monitor, make_structured_metrics_object_with_cache_with_events_and_contact_info,
-            bruin_generic_200_response, make_create_ticket_200_response):
+        self,
+        service_affecting_monitor,
+        make_structured_metrics_object_with_cache_with_events_and_contact_info,
+        bruin_generic_200_response,
+        make_create_ticket_200_response,
+    ):
         trouble = AffectingTroubles.BOUNCING
         link_info = make_structured_metrics_object_with_cache_with_events_and_contact_info()
 
-        service_affecting_monitor._bruin_repository.create_affecting_ticket.return_value = \
+        service_affecting_monitor._bruin_repository.create_affecting_ticket.return_value = (
             make_create_ticket_200_response()
+        )
         service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._create_affecting_ticket(trouble, link_info)
 
         service_affecting_monitor._bruin_repository.create_affecting_ticket.assert_awaited_once()
@@ -2033,20 +2470,25 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def create_affecting_ticket__ticket_created_dont_forward_to_hnoc_test(
-            self, service_affecting_monitor, make_structured_metrics_object_with_cache_and_contact_info,
-            bruin_generic_200_response, make_create_ticket_200_response):
+        self,
+        service_affecting_monitor,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        bruin_generic_200_response,
+        make_create_ticket_200_response,
+    ):
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
 
-        service_affecting_monitor._bruin_repository.create_affecting_ticket.return_value = \
+        service_affecting_monitor._bruin_repository.create_affecting_ticket.return_value = (
             make_create_ticket_200_response()
+        )
         service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = (
             bruin_generic_200_response
         )
         service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
         service_affecting_monitor._should_always_stay_in_ipa_queue.return_value = True
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._create_affecting_ticket(trouble, link_info)
 
         service_affecting_monitor._bruin_repository.create_affecting_ticket.assert_awaited_once()
@@ -2058,19 +2500,24 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def create_affecting_ticket__send_initial_reminder_email_fails_test(
-            self, service_affecting_monitor, make_structured_metrics_object_with_cache_and_contact_info,
-            make_create_ticket_200_response, bruin_500_response):
+        self,
+        service_affecting_monitor,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_create_ticket_200_response,
+        bruin_500_response,
+    ):
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
 
-        service_affecting_monitor._bruin_repository.create_affecting_ticket.return_value = \
+        service_affecting_monitor._bruin_repository.create_affecting_ticket.return_value = (
             make_create_ticket_200_response()
+        )
         service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = (
             bruin_500_response
         )
         service_affecting_monitor._should_always_stay_in_ipa_queue.return_value = True
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._create_affecting_ticket(trouble, link_info)
 
         service_affecting_monitor._bruin_repository.create_affecting_ticket.assert_awaited_once()
@@ -2082,17 +2529,22 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def create_affecting_ticket__ticket_created_test(
-            self, service_affecting_monitor, make_structured_metrics_object_with_cache_and_contact_info,
-            bruin_generic_200_response, make_create_ticket_200_response):
+        self,
+        service_affecting_monitor,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        bruin_generic_200_response,
+        make_create_ticket_200_response,
+    ):
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
 
-        service_affecting_monitor._bruin_repository.create_affecting_ticket.return_value = \
+        service_affecting_monitor._bruin_repository.create_affecting_ticket.return_value = (
             make_create_ticket_200_response()
+        )
         service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
         service_affecting_monitor._should_always_stay_in_ipa_queue.return_value = False
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._create_affecting_ticket(trouble, link_info)
 
         service_affecting_monitor._bruin_repository.create_affecting_ticket.assert_awaited_once()
@@ -2105,45 +2557,47 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_called_once()
 
     def should_always_stay_in_ipa_queue_non_byob_return_true_test(
-            self, service_affecting_monitor, make_link, make_structured_metrics_object):
-        link_data = make_link(display_name='Test')
+        self, service_affecting_monitor, make_link, make_structured_metrics_object
+    ):
+        link_data = make_link(display_name="Test")
         link_metric_object = make_structured_metrics_object(link_info=link_data)
-        link_label = link_metric_object['link_status']['displayName']
+        link_label = link_metric_object["link_status"]["displayName"]
 
-        should_schedule_hnoc = not service_affecting_monitor._should_always_stay_in_ipa_queue(
-            link_label
-        )
+        should_schedule_hnoc = not service_affecting_monitor._should_always_stay_in_ipa_queue(link_label)
         assert should_schedule_hnoc is True
 
     def should_always_stay_in_ipa_queue_byob_link_display_name_return_false_test(
-            self, service_affecting_monitor, make_link, make_structured_metrics_object):
-        link_data = make_link(display_name='BYOB Test')
+        self, service_affecting_monitor, make_link, make_structured_metrics_object
+    ):
+        link_data = make_link(display_name="BYOB Test")
         link_metric_object = make_structured_metrics_object(link_info=link_data)
-        link_label = link_metric_object['link_status']['displayName']
+        link_label = link_metric_object["link_status"]["displayName"]
 
         should_schedule_hnoc = not service_affecting_monitor._should_always_stay_in_ipa_queue(link_label)
         assert should_schedule_hnoc is False
 
     def should_always_stay_in_ipa_queue_byob_link_display_name_host_metvco4_return_true_test(
-            self, service_affecting_monitor, make_link, make_structured_metrics_object):
-        link_data = make_link(display_name='BYOB Test')
+        self, service_affecting_monitor, make_link, make_structured_metrics_object
+    ):
+        link_data = make_link(display_name="BYOB Test")
         link_metric_object = make_structured_metrics_object(link_info=link_data)
-        link_label = link_metric_object['link_status']['displayName']
+        link_label = link_metric_object["link_status"]["displayName"]
 
-        with patch.object(service_affecting_monitor._config, 'VELOCLOUD_HOST', 'metvco04.mettel.net'):
+        with patch.object(service_affecting_monitor._config, "VELOCLOUD_HOST", "metvco04.mettel.net"):
             should_schedule_hnoc = not service_affecting_monitor._should_always_stay_in_ipa_queue(link_label)
         assert should_schedule_hnoc is True
 
-    def schedule_forward_to_hnoc_queue_test(self, service_affecting_monitor, frozen_datetime,
-                                            make_structured_metrics_object_with_cache_and_contact_info):
+    def schedule_forward_to_hnoc_queue_test(
+        self, service_affecting_monitor, frozen_datetime, make_structured_metrics_object_with_cache_and_contact_info
+    ):
         ticket_id = 12345
-        serial_number = 'VC1234567'
+        serial_number = "VC1234567"
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
         current_datetime = frozen_datetime.now()
-        autoresolve_config = service_affecting_monitor._config.MONITOR_CONFIG['autoresolve']
-        wait_seconds_until_forward = autoresolve_config['last_affecting_trouble_seconds']['day']
+        autoresolve_config = service_affecting_monitor._config.MONITOR_CONFIG["autoresolve"]
+        wait_seconds_until_forward = autoresolve_config["last_affecting_trouble_seconds"]["day"]
         forward_task_run_date = current_datetime + timedelta(seconds=wait_seconds_until_forward)
 
         service_affecting_monitor._get_max_seconds_since_last_trouble.return_value = wait_seconds_until_forward
@@ -2154,28 +2608,30 @@ class TestServiceAffectingMonitor:
             )
 
         service_affecting_monitor._scheduler.add_job.assert_called_once_with(
-            service_affecting_monitor._forward_ticket_to_hnoc_queue, 'date',
-            kwargs={'ticket_id': ticket_id, 'serial_number': serial_number, 'link_data': link_info, 'trouble': trouble},
+            service_affecting_monitor._forward_ticket_to_hnoc_queue,
+            "date",
+            kwargs={"ticket_id": ticket_id, "serial_number": serial_number, "link_data": link_info, "trouble": trouble},
             run_date=forward_task_run_date,
             replace_existing=False,
             misfire_grace_time=9999,
             coalesce=True,
-            id=f'_forward_ticket_{ticket_id}_{serial_number}_to_hnoc',
+            id=f"_forward_ticket_{ticket_id}_{serial_number}_to_hnoc",
         )
 
     @pytest.mark.asyncio
     async def forward_ticket_to_hnoc_queue__ticket_detail_has_not_2xx_status_test(
-            self, service_affecting_monitor, bruin_500_response,
-            make_structured_metrics_object_with_cache_and_contact_info):
+        self, service_affecting_monitor, bruin_500_response, make_structured_metrics_object_with_cache_and_contact_info
+    ):
         ticket_id = 12345
-        serial_number = 'VC1234567'
+        serial_number = "VC1234567"
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
         service_affecting_monitor._bruin_repository.get_ticket_details.return_value = bruin_500_response
 
-        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
-                                                                      link_data=link_info, trouble=trouble)
+        await service_affecting_monitor._forward_ticket_to_hnoc_queue(
+            ticket_id=ticket_id, serial_number=serial_number, link_data=link_info, trouble=trouble
+        )
 
         service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         service_affecting_monitor._append_reminder_note.assert_not_awaited()
@@ -2185,14 +2641,19 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def forward_ticket_to_hnoc_queue__resolved_ticket_test(
-            self, service_affecting_monitor, make_detail_item, make_ticket_details,
-            make_rpc_response, make_structured_metrics_object_with_cache_and_contact_info):
+        self,
+        service_affecting_monitor,
+        make_detail_item,
+        make_ticket_details,
+        make_rpc_response,
+        make_structured_metrics_object_with_cache_and_contact_info,
+    ):
         ticket_id = 12345
-        serial_number = 'VC1234567'
+        serial_number = "VC1234567"
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
-        detail_item = make_detail_item(value=serial_number, status='R')
+        detail_item = make_detail_item(value=serial_number, status="R")
         ticket_details = make_ticket_details(detail_items=[detail_item])
 
         service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
@@ -2200,8 +2661,9 @@ class TestServiceAffectingMonitor:
             status=200,
         )
 
-        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
-                                                                      link_data=link_info, trouble=trouble)
+        await service_affecting_monitor._forward_ticket_to_hnoc_queue(
+            ticket_id=ticket_id, serial_number=serial_number, link_data=link_info, trouble=trouble
+        )
 
         service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         service_affecting_monitor._append_reminder_note.assert_not_awaited()
@@ -2211,10 +2673,16 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def forward_ticket_to_hnoc_queue__change_work_queue_request_has_not_2xx_status_test(
-            self, service_affecting_monitor, bruin_500_response, make_detail_item, make_ticket_details,
-            make_rpc_response, make_structured_metrics_object_with_cache_and_contact_info):
+        self,
+        service_affecting_monitor,
+        bruin_500_response,
+        make_detail_item,
+        make_ticket_details,
+        make_rpc_response,
+        make_structured_metrics_object_with_cache_and_contact_info,
+    ):
         ticket_id = 12345
-        serial_number = 'VC1234567'
+        serial_number = "VC1234567"
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
@@ -2226,30 +2694,37 @@ class TestServiceAffectingMonitor:
             status=200,
         )
 
-        service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.return_value = \
-            bruin_500_response
+        service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.return_value = bruin_500_response
 
-        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
-                                                                      link_data=link_info, trouble=trouble)
+        await service_affecting_monitor._forward_ticket_to_hnoc_queue(
+            ticket_id=ticket_id, serial_number=serial_number, link_data=link_info, trouble=trouble
+        )
 
         service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         service_affecting_monitor._append_reminder_note.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_awaited_once_with(
-            ticket_id=ticket_id, service_number=serial_number,
+            ticket_id=ticket_id,
+            service_number=serial_number,
         )
         service_affecting_monitor._notifications_repository.notify_successful_ticket_forward.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def forward_ticket_to_hnoc_queue__ticket_forwarded_to_queue_test(
-            self, service_affecting_monitor, bruin_generic_200_response, make_detail_item, make_ticket_details,
-            make_rpc_response, make_structured_metrics_object_with_cache_and_contact_info):
+        self,
+        service_affecting_monitor,
+        bruin_generic_200_response,
+        make_detail_item,
+        make_ticket_details,
+        make_rpc_response,
+        make_structured_metrics_object_with_cache_and_contact_info,
+    ):
         ticket_id = 12345
-        serial_number = 'VC1234567'
+        serial_number = "VC1234567"
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
-        detail_item = make_detail_item(value=serial_number, status='O')
+        detail_item = make_detail_item(value=serial_number, status="O")
         ticket_details = make_ticket_details(detail_items=[detail_item])
 
         service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
@@ -2257,35 +2732,41 @@ class TestServiceAffectingMonitor:
             status=200,
         )
 
-        service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.return_value = \
+        service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.return_value = (
             bruin_generic_200_response
+        )
 
-        await service_affecting_monitor._forward_ticket_to_hnoc_queue(ticket_id=ticket_id, serial_number=serial_number,
-                                                                      link_data=link_info, trouble=trouble)
+        await service_affecting_monitor._forward_ticket_to_hnoc_queue(
+            ticket_id=ticket_id, serial_number=serial_number, link_data=link_info, trouble=trouble
+        )
 
         service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         service_affecting_monitor._append_reminder_note.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_awaited_once_with(
-            ticket_id=ticket_id, service_number=serial_number,
+            ticket_id=ticket_id,
+            service_number=serial_number,
         )
         service_affecting_monitor._notifications_repository.notify_successful_ticket_forward.assert_awaited_once_with(
-            ticket_id=ticket_id, serial_number=serial_number,
+            ticket_id=ticket_id,
+            serial_number=serial_number,
         )
 
     @pytest.mark.asyncio
     async def run_autoresolve_process__no_metrics_found_test(
-            self, service_affecting_monitor, make_list_of_link_metrics, make_rpc_response, make_contact_info):
+        self, service_affecting_monitor, make_list_of_link_metrics, make_rpc_response, make_contact_info
+    ):
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
         links_metrics = make_list_of_link_metrics()
 
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_autoresolve.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_autoresolve.return_value = (
             make_rpc_response(
                 body=links_metrics,
                 status=200,
             )
+        )
 
         await service_affecting_monitor._run_autoresolve_process()
 
@@ -2296,9 +2777,18 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def run_autoresolve_process__empty_dataset_after_structuring_and_crossing_info_and_grouping_by_edge_test(
-            self, service_affecting_monitor, make_edge, make_link_with_edge_info, make_metrics_for_link,
-            make_list_of_link_metrics, make_list_of_structured_metrics_objects, make_events_by_serial_and_interface,
-            make_list_of_structured_metrics_objects_with_cache_and_contact_info, make_rpc_response, make_contact_info):
+        self,
+        service_affecting_monitor,
+        make_edge,
+        make_link_with_edge_info,
+        make_metrics_for_link,
+        make_list_of_link_metrics,
+        make_list_of_structured_metrics_objects,
+        make_events_by_serial_and_interface,
+        make_list_of_structured_metrics_objects_with_cache_and_contact_info,
+        make_rpc_response,
+        make_contact_info,
+    ):
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
@@ -2311,11 +2801,12 @@ class TestServiceAffectingMonitor:
         events = make_events_by_serial_and_interface()
         links_complete_info = make_list_of_structured_metrics_objects_with_cache_and_contact_info()
 
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_autoresolve.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_autoresolve.return_value = (
             make_rpc_response(
                 body=links_metric_sets,
                 status=200,
             )
+        )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
@@ -2330,43 +2821,60 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def run_autoresolve_process__autoresolve_triggers_test(
-            self, service_affecting_monitor, make_cached_edge,
-            make_customer_cache, make_edge, make_link, make_metrics, make_link_with_edge_info,
-            make_metrics_for_link, make_list_of_link_metrics, make_structured_metrics_object_with_events,
-            make_list_of_structured_metrics_objects, make_structured_metrics_object_with_cache_and_contact_info,
-            make_list_of_structured_metrics_objects_with_cache_and_contact_info, make_events_by_serial_and_interface,
-            make_rpc_response, make_contact_info):
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_customer_cache,
+        make_edge,
+        make_link,
+        make_metrics,
+        make_link_with_edge_info,
+        make_metrics_for_link,
+        make_list_of_link_metrics,
+        make_structured_metrics_object_with_events,
+        make_list_of_structured_metrics_objects,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_list_of_structured_metrics_objects_with_cache_and_contact_info,
+        make_events_by_serial_and_interface,
+        make_rpc_response,
+        make_contact_info,
+    ):
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
-        edge_serial_number = 'VCO123'
+        edge_serial_number = "VCO123"
 
-        edge = make_edge(serial_number=edge_serial_number, edge_state='CONNECTED')
-        link_1 = make_link(interface='GE1')
+        edge = make_edge(serial_number=edge_serial_number, edge_state="CONNECTED")
+        link_1 = make_link(interface="GE1")
         edge_link_1_with_edge_info = make_link_with_edge_info(edge_info=edge, link_info=link_1)
         edge_link_1_metrics = make_metrics()
         edge_link_1_metric_set = make_metrics_for_link(
-            link_with_edge_info=edge_link_1_with_edge_info, metrics=edge_link_1_metrics,
+            link_with_edge_info=edge_link_1_with_edge_info,
+            metrics=edge_link_1_metrics,
         )
-        link_2 = make_link(interface='GE2')
+        link_2 = make_link(interface="GE2")
         edge_link_2_with_edge_info = make_link_with_edge_info(edge_info=edge, link_info=link_2)
         edge_link_2_metrics = make_metrics()
         edge_link_2_metric_set = make_metrics_for_link(
-            link_with_edge_info=edge_link_2_with_edge_info, metrics=edge_link_2_metrics,
+            link_with_edge_info=edge_link_2_with_edge_info,
+            metrics=edge_link_2_metrics,
         )
 
         links_metric_sets = make_list_of_link_metrics(edge_link_1_metric_set, edge_link_2_metric_set)
         events = make_events_by_serial_and_interface(
             serials=[edge_serial_number],
-            interfaces=[link_1['interface'], link_2['interface']],
+            interfaces=[link_1["interface"], link_2["interface"]],
         )
 
-        link_1_structured_metrics_object = make_structured_metrics_object_with_events(edge_info=edge, link_info=link_1,
-                                                                                      metrics=edge_link_1_metrics)
-        link_2_structured_metrics_object = make_structured_metrics_object_with_events(edge_info=edge, link_info=link_2,
-                                                                                      metrics=edge_link_2_metrics)
+        link_1_structured_metrics_object = make_structured_metrics_object_with_events(
+            edge_info=edge, link_info=link_1, metrics=edge_link_1_metrics
+        )
+        link_2_structured_metrics_object = make_structured_metrics_object_with_events(
+            edge_info=edge, link_info=link_2, metrics=edge_link_2_metrics
+        )
         links_structured_metrics_objects = make_list_of_structured_metrics_objects(
-            link_1_structured_metrics_object, link_2_structured_metrics_object,
+            link_1_structured_metrics_object,
+            link_2_structured_metrics_object,
         )
 
         edge_cache_info = make_cached_edge(serial_number=edge_serial_number)
@@ -2383,15 +2891,17 @@ class TestServiceAffectingMonitor:
             contact_info=edge_contact_info,
         )
         links_complete_info = make_list_of_structured_metrics_objects_with_cache_and_contact_info(
-            link_1_complete_info, link_2_complete_info,
+            link_1_complete_info,
+            link_2_complete_info,
         )
 
         service_affecting_monitor._customer_cache = customer_cache
-        service_affecting_monitor._velocloud_repository.get_links_metrics_for_autoresolve.return_value = \
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_autoresolve.return_value = (
             make_rpc_response(
                 body=links_metric_sets,
                 status=200,
             )
+        )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
 
@@ -2405,16 +2915,25 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._run_autoresolve_for_edge.assert_awaited_once()
 
     def group_links_by_edge_test(
-            self, service_affecting_monitor, make_cached_edge,
-            make_edge, make_link, make_metrics, make_structured_metrics_object_with_events,
-            make_structured_metrics_object_with_cache_and_contact_info,
-            make_list_of_structured_metrics_objects_with_cache_and_contact_info,
-            make_list_of_link_status_and_metrics_objects, make_link_status_and_metrics_object_with_events,
-            make_links_by_edge_object, make_list_of_links_by_edge_objects, make_contact_info):
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_edge,
+        make_link,
+        make_metrics,
+        make_structured_metrics_object_with_events,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_list_of_structured_metrics_objects_with_cache_and_contact_info,
+        make_list_of_link_status_and_metrics_objects,
+        make_link_status_and_metrics_object_with_events,
+        make_links_by_edge_object,
+        make_list_of_links_by_edge_objects,
+        make_contact_info,
+    ):
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
-        edge_serial_number = 'VCO123'
+        edge_serial_number = "VCO123"
 
         edge = make_edge(serial_number=edge_serial_number)
         link_1 = make_link()
@@ -2423,10 +2942,12 @@ class TestServiceAffectingMonitor:
         edge_link_1_metrics = make_metrics()
         edge_link_2_metrics = make_metrics()
 
-        link_1_structured_metrics_object = make_structured_metrics_object_with_events(edge_info=edge, link_info=link_1,
-                                                                                      metrics=edge_link_1_metrics)
-        link_2_structured_metrics_object = make_structured_metrics_object_with_events(edge_info=edge, link_info=link_2,
-                                                                                      metrics=edge_link_2_metrics)
+        link_1_structured_metrics_object = make_structured_metrics_object_with_events(
+            edge_info=edge, link_info=link_1, metrics=edge_link_1_metrics
+        )
+        link_2_structured_metrics_object = make_structured_metrics_object_with_events(
+            edge_info=edge, link_info=link_2, metrics=edge_link_2_metrics
+        )
 
         edge_cache_info = make_cached_edge(serial_number=edge_serial_number)
 
@@ -2441,15 +2962,18 @@ class TestServiceAffectingMonitor:
             contact_info=edge_contact_info,
         )
         links_complete_info = make_list_of_structured_metrics_objects_with_cache_and_contact_info(
-            link_1_complete_info, link_2_complete_info,
+            link_1_complete_info,
+            link_2_complete_info,
         )
 
         result = service_affecting_monitor._group_links_by_edge(links_complete_info)
 
-        link_1_status_and_metrics = make_link_status_and_metrics_object_with_events(link_info=link_1,
-                                                                                    metrics=edge_link_1_metrics)
-        link_2_status_and_metrics = make_link_status_and_metrics_object_with_events(link_info=link_2,
-                                                                                    metrics=edge_link_2_metrics)
+        link_1_status_and_metrics = make_link_status_and_metrics_object_with_events(
+            link_info=link_1, metrics=edge_link_1_metrics
+        )
+        link_2_status_and_metrics = make_link_status_and_metrics_object_with_events(
+            link_info=link_2, metrics=edge_link_2_metrics
+        )
         links_status_and_metrics = make_list_of_link_status_and_metrics_objects(
             link_1_status_and_metrics, link_2_status_and_metrics
         )
@@ -2464,8 +2988,13 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def run_autoresolve_for_edge__not_all_metrics_within_thresholds_test(
-            self, service_affecting_monitor, make_metrics, make_link_status_and_metrics_object_with_events,
-            make_list_of_link_status_and_metrics_objects, make_links_by_edge_object):
+        self,
+        service_affecting_monitor,
+        make_metrics,
+        make_link_status_and_metrics_object_with_events,
+        make_list_of_link_status_and_metrics_objects,
+        make_links_by_edge_object,
+    ):
         link_metrics = make_metrics(best_latency_ms_tx=9999, best_latency_ms_rx=0)
         link_status_and_metrics = make_link_status_and_metrics_object_with_events(metrics=link_metrics)
         links_status_and_metrics = make_list_of_link_status_and_metrics_objects(link_status_and_metrics)
@@ -2481,26 +3010,39 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def run_autoresolve_for_edge__get_open_tickets_request_has_not_2xx_status_test(
-            self, service_affecting_monitor, make_cached_edge, make_bruin_client_info,
-            make_metrics, make_link_status_and_metrics_object_with_events, make_list_of_link_status_and_metrics_objects,
-            make_links_by_edge_object, bruin_500_response):
-        serial_number = 'VC1234567'
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_bruin_client_info,
+        make_metrics,
+        make_link_status_and_metrics_object_with_events,
+        make_list_of_link_status_and_metrics_objects,
+        make_links_by_edge_object,
+        bruin_500_response,
+    ):
+        serial_number = "VC1234567"
         client_id = 12345
 
         bruin_client_info = make_bruin_client_info(client_id=client_id)
         edge_cache_info = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
 
         link_metrics = make_metrics(
-            best_latency_ms_tx=0, best_latency_ms_rx=0,
-            best_packet_loss_tx=0, best_packet_loss_rx=0,
-            best_jitter_ms_tx=0, best_jitter_ms_rx=0,
-            bytes_tx=1, bytes_rx=1,
-            bps_of_best_path_tx=100, bps_of_best_path_rx=100,
+            best_latency_ms_tx=0,
+            best_latency_ms_rx=0,
+            best_packet_loss_tx=0,
+            best_packet_loss_rx=0,
+            best_jitter_ms_tx=0,
+            best_jitter_ms_rx=0,
+            bytes_tx=1,
+            bytes_rx=1,
+            bps_of_best_path_tx=100,
+            bps_of_best_path_rx=100,
         )
         link_status_and_metrics = make_link_status_and_metrics_object_with_events(metrics=link_metrics)
         links_status_and_metrics = make_list_of_link_status_and_metrics_objects(link_status_and_metrics)
         links_grouped_by_edge_obj = make_links_by_edge_object(
-            cache_info=edge_cache_info, links=links_status_and_metrics,
+            cache_info=edge_cache_info,
+            links=links_status_and_metrics,
         )
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.return_value = bruin_500_response
@@ -2508,7 +3050,8 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
-            client_id, service_number=serial_number,
+            client_id,
+            service_number=serial_number,
         )
         service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_not_awaited()
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
@@ -2517,26 +3060,40 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def run_autoresolve_for_edge__empty_list_of_tickets_test(
-            self, service_affecting_monitor, make_cached_edge, make_bruin_client_info,
-            make_metrics, make_link_status_and_metrics_object_with_events, make_list_of_link_status_and_metrics_objects,
-            make_links_by_edge_object, make_list_of_tickets, make_rpc_response):
-        serial_number = 'VC1234567'
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_bruin_client_info,
+        make_metrics,
+        make_link_status_and_metrics_object_with_events,
+        make_list_of_link_status_and_metrics_objects,
+        make_links_by_edge_object,
+        make_list_of_tickets,
+        make_rpc_response,
+    ):
+        serial_number = "VC1234567"
         client_id = 12345
 
         bruin_client_info = make_bruin_client_info(client_id=client_id)
         edge_cache_info = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
 
         link_metrics = make_metrics(
-            best_latency_ms_tx=0, best_latency_ms_rx=0,
-            best_packet_loss_tx=0, best_packet_loss_rx=0,
-            best_jitter_ms_tx=0, best_jitter_ms_rx=0,
-            bytes_tx=1, bytes_rx=1,
-            bps_of_best_path_tx=100, bps_of_best_path_rx=100,
+            best_latency_ms_tx=0,
+            best_latency_ms_rx=0,
+            best_packet_loss_tx=0,
+            best_packet_loss_rx=0,
+            best_jitter_ms_tx=0,
+            best_jitter_ms_rx=0,
+            bytes_tx=1,
+            bytes_rx=1,
+            bps_of_best_path_tx=100,
+            bps_of_best_path_rx=100,
         )
         link_status_and_metrics = make_link_status_and_metrics_object_with_events(metrics=link_metrics)
         links_status_and_metrics = make_list_of_link_status_and_metrics_objects(link_status_and_metrics)
         links_grouped_by_edge_obj = make_links_by_edge_object(
-            cache_info=edge_cache_info, links=links_status_and_metrics,
+            cache_info=edge_cache_info,
+            links=links_status_and_metrics,
         )
 
         open_affecting_tickets = make_list_of_tickets()
@@ -2549,7 +3106,8 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
-            client_id, service_number=serial_number,
+            client_id,
+            service_number=serial_number,
         )
         service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_not_awaited()
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
@@ -2558,29 +3116,44 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def run_autoresolve_for_edge__ticket_not_created_by_automation_engine_test(
-            self, service_affecting_monitor, make_cached_edge, make_bruin_client_info,
-            make_metrics, make_link_status_and_metrics_object_with_events, make_list_of_link_status_and_metrics_objects,
-            make_links_by_edge_object, make_ticket, make_list_of_tickets, make_rpc_response):
-        serial_number = 'VC1234567'
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_bruin_client_info,
+        make_metrics,
+        make_link_status_and_metrics_object_with_events,
+        make_list_of_link_status_and_metrics_objects,
+        make_links_by_edge_object,
+        make_ticket,
+        make_list_of_tickets,
+        make_rpc_response,
+    ):
+        serial_number = "VC1234567"
         client_id = 12345
 
         bruin_client_info = make_bruin_client_info(client_id=client_id)
         edge_cache_info = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
 
         link_metrics = make_metrics(
-            best_latency_ms_tx=0, best_latency_ms_rx=0,
-            best_packet_loss_tx=0, best_packet_loss_rx=0,
-            best_jitter_ms_tx=0, best_jitter_ms_rx=0,
-            bytes_tx=1, bytes_rx=1,
-            bps_of_best_path_tx=100, bps_of_best_path_rx=100,
+            best_latency_ms_tx=0,
+            best_latency_ms_rx=0,
+            best_packet_loss_tx=0,
+            best_packet_loss_rx=0,
+            best_jitter_ms_tx=0,
+            best_jitter_ms_rx=0,
+            bytes_tx=1,
+            bytes_rx=1,
+            bps_of_best_path_tx=100,
+            bps_of_best_path_rx=100,
         )
         link_status_and_metrics = make_link_status_and_metrics_object_with_events(metrics=link_metrics)
         links_status_and_metrics = make_list_of_link_status_and_metrics_objects(link_status_and_metrics)
         links_grouped_by_edge_obj = make_links_by_edge_object(
-            cache_info=edge_cache_info, links=links_status_and_metrics,
+            cache_info=edge_cache_info,
+            links=links_status_and_metrics,
         )
 
-        ticket = make_ticket(created_by='Travis Touchdown')
+        ticket = make_ticket(created_by="Travis Touchdown")
         open_affecting_tickets = make_list_of_tickets(ticket)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.return_value = make_rpc_response(
@@ -2591,7 +3164,8 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
-            client_id, service_number=serial_number,
+            client_id,
+            service_number=serial_number,
         )
         service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_not_awaited()
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
@@ -2600,30 +3174,45 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def run_autoresolve_for_edge__get_ticket_details_request_has_not_2xx_status_test(
-            self, service_affecting_monitor, make_cached_edge, make_bruin_client_info,
-            make_metrics, make_link_status_and_metrics_object_with_events, make_list_of_link_status_and_metrics_objects,
-            make_links_by_edge_object, make_ticket, make_list_of_tickets, make_rpc_response,
-            bruin_500_response):
-        serial_number = 'VC1234567'
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_bruin_client_info,
+        make_metrics,
+        make_link_status_and_metrics_object_with_events,
+        make_list_of_link_status_and_metrics_objects,
+        make_links_by_edge_object,
+        make_ticket,
+        make_list_of_tickets,
+        make_rpc_response,
+        bruin_500_response,
+    ):
+        serial_number = "VC1234567"
         client_id = 12345
 
         bruin_client_info = make_bruin_client_info(client_id=client_id)
         edge_cache_info = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
 
         link_metrics = make_metrics(
-            best_latency_ms_tx=0, best_latency_ms_rx=0,
-            best_packet_loss_tx=0, best_packet_loss_rx=0,
-            best_jitter_ms_tx=0, best_jitter_ms_rx=0,
-            bytes_tx=1, bytes_rx=1,
-            bps_of_best_path_tx=100, bps_of_best_path_rx=100,
+            best_latency_ms_tx=0,
+            best_latency_ms_rx=0,
+            best_packet_loss_tx=0,
+            best_packet_loss_rx=0,
+            best_jitter_ms_tx=0,
+            best_jitter_ms_rx=0,
+            bytes_tx=1,
+            bytes_rx=1,
+            bps_of_best_path_tx=100,
+            bps_of_best_path_rx=100,
         )
         link_status_and_metrics = make_link_status_and_metrics_object_with_events(metrics=link_metrics)
         links_status_and_metrics = make_list_of_link_status_and_metrics_objects(link_status_and_metrics)
         links_grouped_by_edge_obj = make_links_by_edge_object(
-            cache_info=edge_cache_info, links=links_status_and_metrics,
+            cache_info=edge_cache_info,
+            links=links_status_and_metrics,
         )
 
-        ticket = make_ticket(created_by='Intelygenz Ai')
+        ticket = make_ticket(created_by="Intelygenz Ai")
         open_affecting_tickets = make_list_of_tickets(ticket)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.return_value = make_rpc_response(
@@ -2635,7 +3224,8 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
-            client_id, service_number=serial_number,
+            client_id,
+            service_number=serial_number,
         )
         service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_not_awaited()
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
@@ -2644,30 +3234,48 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def run_autoresolve_for_edge__last_trouble_documented_on_ticket_creation_and_detected_long_ago_test(
-            self, service_affecting_monitor, make_cached_edge, make_bruin_client_info,
-            make_metrics, make_link_status_and_metrics_object_with_events, make_list_of_link_status_and_metrics_objects,
-            make_links_by_edge_object, make_ticket, make_list_of_tickets, make_detail_item, make_list_of_detail_items,
-            make_list_of_ticket_notes, make_ticket_details, make_rpc_response):
-        serial_number = 'VC1234567'
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_bruin_client_info,
+        make_metrics,
+        make_link_status_and_metrics_object_with_events,
+        make_list_of_link_status_and_metrics_objects,
+        make_links_by_edge_object,
+        make_ticket,
+        make_list_of_tickets,
+        make_detail_item,
+        make_list_of_detail_items,
+        make_list_of_ticket_notes,
+        make_ticket_details,
+        make_rpc_response,
+    ):
+        serial_number = "VC1234567"
         client_id = 12345
-        ticket_id = '432532'
+        ticket_id = "432532"
         bruin_client_info = make_bruin_client_info(client_id=client_id)
         edge_cache_info = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
         link_metrics = make_metrics(
-            best_latency_ms_tx=0, best_latency_ms_rx=0,
-            best_packet_loss_tx=0, best_packet_loss_rx=0,
-            best_jitter_ms_tx=0, best_jitter_ms_rx=0,
-            bytes_tx=1, bytes_rx=1,
-            bps_of_best_path_tx=100, bps_of_best_path_rx=100,
+            best_latency_ms_tx=0,
+            best_latency_ms_rx=0,
+            best_packet_loss_tx=0,
+            best_packet_loss_rx=0,
+            best_jitter_ms_tx=0,
+            best_jitter_ms_rx=0,
+            bytes_tx=1,
+            bytes_rx=1,
+            bps_of_best_path_tx=100,
+            bps_of_best_path_rx=100,
         )
         link_status_and_metrics = make_link_status_and_metrics_object_with_events(metrics=link_metrics)
         links_status_and_metrics = make_list_of_link_status_and_metrics_objects(link_status_and_metrics)
         links_grouped_by_edge_obj = make_links_by_edge_object(
-            cache_info=edge_cache_info, links=links_status_and_metrics,
+            cache_info=edge_cache_info,
+            links=links_status_and_metrics,
         )
         ticket = make_ticket(
             ticket_id=ticket_id,
-            created_by='Intelygenz Ai',
+            created_by="Intelygenz Ai",
             create_date=str(CURRENT_DATETIME - timedelta(days=30)),
         )
         open_affecting_tickets = make_list_of_tickets(ticket)
@@ -2687,13 +3295,17 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
-            client_id, service_number=serial_number,
+            client_id,
+            service_number=serial_number,
         )
-        assert call(
-            f'Task for serial {serial_number} in ticket {ticket_id} is in the IPA Investigate'
-            f' queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last'
-            f' documented trouble...'
-        ) not in service_affecting_monitor._bruin_repository._logger.info.mock_calls
+        assert (
+            call(
+                f"Task for serial {serial_number} in ticket {ticket_id} is in the IPA Investigate"
+                f" queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last"
+                f" documented trouble..."
+            )
+            not in service_affecting_monitor._bruin_repository._logger.info.mock_calls
+        )
         service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_not_awaited()
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
         service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_not_awaited()
@@ -2701,28 +3313,47 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def run_autoresolve_for_edge__last_trouble_documented_after_reopen_and_detected_long_ago_test(
-            self, service_affecting_monitor, make_cached_edge, make_bruin_client_info,
-            make_metrics, make_link_status_and_metrics_object_with_events, make_list_of_link_status_and_metrics_objects,
-            make_links_by_edge_object, make_ticket, make_list_of_tickets, make_detail_item, make_list_of_detail_items,
-            make_ticket_note, make_list_of_ticket_notes, make_ticket_details, make_rpc_response):
-        serial_number = 'VC1234567'
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_bruin_client_info,
+        make_metrics,
+        make_link_status_and_metrics_object_with_events,
+        make_list_of_link_status_and_metrics_objects,
+        make_links_by_edge_object,
+        make_ticket,
+        make_list_of_tickets,
+        make_detail_item,
+        make_list_of_detail_items,
+        make_ticket_note,
+        make_list_of_ticket_notes,
+        make_ticket_details,
+        make_rpc_response,
+    ):
+        serial_number = "VC1234567"
         client_id = 12345
-        ticket_id = '432532'
+        ticket_id = "432532"
         bruin_client_info = make_bruin_client_info(client_id=client_id)
         edge_cache_info = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
         link_metrics = make_metrics(
-            best_latency_ms_tx=0, best_latency_ms_rx=0,
-            best_packet_loss_tx=0, best_packet_loss_rx=0,
-            best_jitter_ms_tx=0, best_jitter_ms_rx=0,
-            bytes_tx=1, bytes_rx=1,
-            bps_of_best_path_tx=100, bps_of_best_path_rx=100,
+            best_latency_ms_tx=0,
+            best_latency_ms_rx=0,
+            best_packet_loss_tx=0,
+            best_packet_loss_rx=0,
+            best_jitter_ms_tx=0,
+            best_jitter_ms_rx=0,
+            bytes_tx=1,
+            bytes_rx=1,
+            bps_of_best_path_tx=100,
+            bps_of_best_path_rx=100,
         )
         link_status_and_metrics = make_link_status_and_metrics_object_with_events(metrics=link_metrics)
         links_status_and_metrics = make_list_of_link_status_and_metrics_objects(link_status_and_metrics)
         links_grouped_by_edge_obj = make_links_by_edge_object(
-            cache_info=edge_cache_info, links=links_status_and_metrics,
+            cache_info=edge_cache_info,
+            links=links_status_and_metrics,
         )
-        ticket = make_ticket(ticket_id=ticket_id, created_by='Intelygenz Ai')
+        ticket = make_ticket(ticket_id=ticket_id, created_by="Intelygenz Ai")
         open_affecting_tickets = make_list_of_tickets(ticket)
         detail_item = make_detail_item(value=serial_number)
         detail_items = make_list_of_detail_items(detail_item)
@@ -2745,13 +3376,17 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
-            client_id, service_number=serial_number,
+            client_id,
+            service_number=serial_number,
         )
-        assert call(
-            f'Task for serial {serial_number} in ticket {ticket_id} is in the IPA Investigate'
-            f' queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last'
-            f' documented trouble...'
-        ) not in service_affecting_monitor._bruin_repository._logger.info.mock_calls
+        assert (
+            call(
+                f"Task for serial {serial_number} in ticket {ticket_id} is in the IPA Investigate"
+                f" queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last"
+                f" documented trouble..."
+            )
+            not in service_affecting_monitor._bruin_repository._logger.info.mock_calls
+        )
         service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_not_awaited()
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
         service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_not_awaited()
@@ -2759,28 +3394,47 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def run_autoresolve_for_edge__maximum_number_of_autoresolves_reached_test(
-            self, service_affecting_monitor, make_cached_edge, make_bruin_client_info,
-            make_metrics, make_link_status_and_metrics_object_with_events, make_list_of_link_status_and_metrics_objects,
-            make_links_by_edge_object, make_ticket, make_list_of_tickets, make_detail_item, make_list_of_detail_items,
-            make_ticket_note, make_list_of_ticket_notes, make_ticket_details, make_rpc_response):
-        ticket_id = '432532'
-        serial_number = 'VC1234567'
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_bruin_client_info,
+        make_metrics,
+        make_link_status_and_metrics_object_with_events,
+        make_list_of_link_status_and_metrics_objects,
+        make_links_by_edge_object,
+        make_ticket,
+        make_list_of_tickets,
+        make_detail_item,
+        make_list_of_detail_items,
+        make_ticket_note,
+        make_list_of_ticket_notes,
+        make_ticket_details,
+        make_rpc_response,
+    ):
+        ticket_id = "432532"
+        serial_number = "VC1234567"
         client_id = 12345
         bruin_client_info = make_bruin_client_info(client_id=client_id)
         edge_cache_info = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
         link_metrics = make_metrics(
-            best_latency_ms_tx=0, best_latency_ms_rx=0,
-            best_packet_loss_tx=0, best_packet_loss_rx=0,
-            best_jitter_ms_tx=0, best_jitter_ms_rx=0,
-            bytes_tx=1, bytes_rx=1,
-            bps_of_best_path_tx=100, bps_of_best_path_rx=100,
+            best_latency_ms_tx=0,
+            best_latency_ms_rx=0,
+            best_packet_loss_tx=0,
+            best_packet_loss_rx=0,
+            best_jitter_ms_tx=0,
+            best_jitter_ms_rx=0,
+            bytes_tx=1,
+            bytes_rx=1,
+            bps_of_best_path_tx=100,
+            bps_of_best_path_rx=100,
         )
         link_status_and_metrics = make_link_status_and_metrics_object_with_events(metrics=link_metrics)
         links_status_and_metrics = make_list_of_link_status_and_metrics_objects(link_status_and_metrics)
         links_grouped_by_edge_obj = make_links_by_edge_object(
-            cache_info=edge_cache_info, links=links_status_and_metrics,
+            cache_info=edge_cache_info,
+            links=links_status_and_metrics,
         )
-        ticket = make_ticket(ticket_id=ticket_id, created_by='Intelygenz Ai', create_date=str(CURRENT_DATETIME))
+        ticket = make_ticket(ticket_id=ticket_id, created_by="Intelygenz Ai", create_date=str(CURRENT_DATETIME))
         open_affecting_tickets = make_list_of_tickets(ticket)
         detail_item = make_detail_item(value=serial_number)
         detail_items = make_list_of_detail_items(detail_item)
@@ -2810,13 +3464,17 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
-            client_id, service_number=serial_number,
+            client_id,
+            service_number=serial_number,
         )
-        assert call(
-            f'Task for serial {serial_number} in ticket {ticket_id} is in the IPA Investigate'
-            f' queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last'
-            f' documented trouble...'
-        ) not in service_affecting_monitor._bruin_repository._logger.info.mock_calls
+        assert (
+            call(
+                f"Task for serial {serial_number} in ticket {ticket_id} is in the IPA Investigate"
+                f" queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last"
+                f" documented trouble..."
+            )
+            not in service_affecting_monitor._bruin_repository._logger.info.mock_calls
+        )
         service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_not_awaited()
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
         service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_not_awaited()
@@ -2824,31 +3482,50 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def run_autoresolve_for_edge__last_trouble_documented_on_ticket_creation_and_detected_long_ago_ipa_queue_test(
-            self, bruin_generic_200_response, service_affecting_monitor, make_cached_edge, make_bruin_client_info,
-            make_metrics, make_link_status_and_metrics_object_with_events, make_list_of_link_status_and_metrics_objects,
-            make_links_by_edge_object, make_ticket, make_list_of_tickets, make_detail_item, make_list_of_detail_items,
-            make_list_of_ticket_notes, make_ticket_details, make_rpc_response):
-        ticket_id = '432532'
-        serial_number = 'VC1234567'
+        self,
+        bruin_generic_200_response,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_bruin_client_info,
+        make_metrics,
+        make_link_status_and_metrics_object_with_events,
+        make_list_of_link_status_and_metrics_objects,
+        make_links_by_edge_object,
+        make_ticket,
+        make_list_of_tickets,
+        make_detail_item,
+        make_list_of_detail_items,
+        make_list_of_ticket_notes,
+        make_ticket_details,
+        make_rpc_response,
+    ):
+        ticket_id = "432532"
+        serial_number = "VC1234567"
         client_id = 12345
-        current_task_name = 'IPA Investigate'
+        current_task_name = "IPA Investigate"
         bruin_client_info = make_bruin_client_info(client_id=client_id)
         edge_cache_info = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
         link_metrics = make_metrics(
-            best_latency_ms_tx=0, best_latency_ms_rx=0,
-            best_packet_loss_tx=0, best_packet_loss_rx=0,
-            best_jitter_ms_tx=0, best_jitter_ms_rx=0,
-            bytes_tx=1, bytes_rx=1,
-            bps_of_best_path_tx=100, bps_of_best_path_rx=100,
+            best_latency_ms_tx=0,
+            best_latency_ms_rx=0,
+            best_packet_loss_tx=0,
+            best_packet_loss_rx=0,
+            best_jitter_ms_tx=0,
+            best_jitter_ms_rx=0,
+            bytes_tx=1,
+            bytes_rx=1,
+            bps_of_best_path_tx=100,
+            bps_of_best_path_rx=100,
         )
         link_status_and_metrics = make_link_status_and_metrics_object_with_events(metrics=link_metrics)
         links_status_and_metrics = make_list_of_link_status_and_metrics_objects(link_status_and_metrics)
         links_grouped_by_edge_obj = make_links_by_edge_object(
-            cache_info=edge_cache_info, links=links_status_and_metrics,
+            cache_info=edge_cache_info,
+            links=links_status_and_metrics,
         )
         ticket = make_ticket(
             ticket_id=ticket_id,
-            created_by='Intelygenz Ai',
+            created_by="Intelygenz Ai",
             create_date=str(CURRENT_DATETIME - timedelta(days=30)),
         )
         open_affecting_tickets = make_list_of_tickets(ticket)
@@ -2866,18 +3543,22 @@ class TestServiceAffectingMonitor:
         )
         service_affecting_monitor._bruin_repository.resolve_ticket.return_value = bruin_generic_200_response
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
-            client_id, service_number=serial_number,
+            client_id,
+            service_number=serial_number,
         )
         service_affecting_monitor._ticket_repository.is_ticket_task_in_ipa_queue.assert_called_with(detail_item)
-        assert call(
-            f'Task for serial {serial_number} in ticket {ticket_id} is in the IPA Investigate'
-            f' queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last'
-            f' documented trouble...'
-        ) in service_affecting_monitor._bruin_repository._logger.info.mock_calls
+        assert (
+            call(
+                f"Task for serial {serial_number} in ticket {ticket_id} is in the IPA Investigate"
+                f" queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last"
+                f" documented trouble..."
+            )
+            in service_affecting_monitor._bruin_repository._logger.info.mock_calls
+        )
         service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_awaited()
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_awaited()
         service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_awaited()
@@ -2885,29 +3566,49 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def run_autoresolve_for_edge__last_trouble_documented_after_reopen_and_detected_long_ago_ipa_queue_test(
-            self, bruin_generic_200_response, service_affecting_monitor, make_cached_edge, make_bruin_client_info,
-            make_metrics, make_link_status_and_metrics_object_with_events, make_list_of_link_status_and_metrics_objects,
-            make_links_by_edge_object, make_ticket, make_list_of_tickets, make_detail_item, make_list_of_detail_items,
-            make_ticket_note, make_list_of_ticket_notes, make_ticket_details, make_rpc_response):
-        ticket_id = '432532'
-        serial_number = 'VC1234567'
+        self,
+        bruin_generic_200_response,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_bruin_client_info,
+        make_metrics,
+        make_link_status_and_metrics_object_with_events,
+        make_list_of_link_status_and_metrics_objects,
+        make_links_by_edge_object,
+        make_ticket,
+        make_list_of_tickets,
+        make_detail_item,
+        make_list_of_detail_items,
+        make_ticket_note,
+        make_list_of_ticket_notes,
+        make_ticket_details,
+        make_rpc_response,
+    ):
+        ticket_id = "432532"
+        serial_number = "VC1234567"
         client_id = 12345
-        current_task_name = 'IPA Investigate'
+        current_task_name = "IPA Investigate"
         bruin_client_info = make_bruin_client_info(client_id=client_id)
         edge_cache_info = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
         link_metrics = make_metrics(
-            best_latency_ms_tx=0, best_latency_ms_rx=0,
-            best_packet_loss_tx=0, best_packet_loss_rx=0,
-            best_jitter_ms_tx=0, best_jitter_ms_rx=0,
-            bytes_tx=1, bytes_rx=1,
-            bps_of_best_path_tx=100, bps_of_best_path_rx=100,
+            best_latency_ms_tx=0,
+            best_latency_ms_rx=0,
+            best_packet_loss_tx=0,
+            best_packet_loss_rx=0,
+            best_jitter_ms_tx=0,
+            best_jitter_ms_rx=0,
+            bytes_tx=1,
+            bytes_rx=1,
+            bps_of_best_path_tx=100,
+            bps_of_best_path_rx=100,
         )
         link_status_and_metrics = make_link_status_and_metrics_object_with_events(metrics=link_metrics)
         links_status_and_metrics = make_list_of_link_status_and_metrics_objects(link_status_and_metrics)
         links_grouped_by_edge_obj = make_links_by_edge_object(
-            cache_info=edge_cache_info, links=links_status_and_metrics,
+            cache_info=edge_cache_info,
+            links=links_status_and_metrics,
         )
-        ticket = make_ticket(ticket_id=ticket_id, created_by='Intelygenz Ai')
+        ticket = make_ticket(ticket_id=ticket_id, created_by="Intelygenz Ai")
         open_affecting_tickets = make_list_of_tickets(ticket)
         detail_item = make_detail_item(id_=ticket_id, value=serial_number, current_task_name=current_task_name)
         detail_items = make_list_of_detail_items(detail_item)
@@ -2928,18 +3629,22 @@ class TestServiceAffectingMonitor:
         )
         service_affecting_monitor._bruin_repository.resolve_ticket.return_value = bruin_generic_200_response
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
-            client_id, service_number=serial_number,
+            client_id,
+            service_number=serial_number,
         )
         service_affecting_monitor._ticket_repository.is_ticket_task_in_ipa_queue.assert_called_with(detail_item)
-        assert call(
-            f'Task for serial {serial_number} in ticket {ticket_id} is in the IPA Investigate'
-            f' queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last'
-            f' documented trouble...'
-        ) in service_affecting_monitor._bruin_repository._logger.info.mock_calls
+        assert (
+            call(
+                f"Task for serial {serial_number} in ticket {ticket_id} is in the IPA Investigate"
+                f" queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last"
+                f" documented trouble..."
+            )
+            in service_affecting_monitor._bruin_repository._logger.info.mock_calls
+        )
         service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_awaited()
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_awaited()
         service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_awaited()
@@ -2947,29 +3652,49 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def run_autoresolve_for_edge__maximum_number_of_autoresolves_reached_in_ipa_queue_test(
-            self, bruin_generic_200_response, service_affecting_monitor, make_cached_edge, make_bruin_client_info,
-            make_metrics, make_link_status_and_metrics_object_with_events, make_list_of_link_status_and_metrics_objects,
-            make_links_by_edge_object, make_ticket, make_list_of_tickets, make_detail_item, make_list_of_detail_items,
-            make_ticket_note, make_list_of_ticket_notes, make_ticket_details, make_rpc_response):
-        ticket_id = '432532'
-        serial_number = 'VC1234567'
+        self,
+        bruin_generic_200_response,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_bruin_client_info,
+        make_metrics,
+        make_link_status_and_metrics_object_with_events,
+        make_list_of_link_status_and_metrics_objects,
+        make_links_by_edge_object,
+        make_ticket,
+        make_list_of_tickets,
+        make_detail_item,
+        make_list_of_detail_items,
+        make_ticket_note,
+        make_list_of_ticket_notes,
+        make_ticket_details,
+        make_rpc_response,
+    ):
+        ticket_id = "432532"
+        serial_number = "VC1234567"
         client_id = 12345
-        current_task_name = 'IPA Investigate'
+        current_task_name = "IPA Investigate"
         bruin_client_info = make_bruin_client_info(client_id=client_id)
         edge_cache_info = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
         link_metrics = make_metrics(
-            best_latency_ms_tx=0, best_latency_ms_rx=0,
-            best_packet_loss_tx=0, best_packet_loss_rx=0,
-            best_jitter_ms_tx=0, best_jitter_ms_rx=0,
-            bytes_tx=1, bytes_rx=1,
-            bps_of_best_path_tx=100, bps_of_best_path_rx=100,
+            best_latency_ms_tx=0,
+            best_latency_ms_rx=0,
+            best_packet_loss_tx=0,
+            best_packet_loss_rx=0,
+            best_jitter_ms_tx=0,
+            best_jitter_ms_rx=0,
+            bytes_tx=1,
+            bytes_rx=1,
+            bps_of_best_path_tx=100,
+            bps_of_best_path_rx=100,
         )
         link_status_and_metrics = make_link_status_and_metrics_object_with_events(metrics=link_metrics)
         links_status_and_metrics = make_list_of_link_status_and_metrics_objects(link_status_and_metrics)
         links_grouped_by_edge_obj = make_links_by_edge_object(
-            cache_info=edge_cache_info, links=links_status_and_metrics,
+            cache_info=edge_cache_info,
+            links=links_status_and_metrics,
         )
-        ticket = make_ticket(ticket_id=ticket_id, created_by='Intelygenz Ai', create_date=str(CURRENT_DATETIME))
+        ticket = make_ticket(ticket_id=ticket_id, created_by="Intelygenz Ai", create_date=str(CURRENT_DATETIME))
         open_affecting_tickets = make_list_of_tickets(ticket)
         detail_item = make_detail_item(id_=ticket_id, value=serial_number, current_task_name=current_task_name)
         detail_items = make_list_of_detail_items(detail_item)
@@ -2997,18 +3722,22 @@ class TestServiceAffectingMonitor:
         )
         service_affecting_monitor._bruin_repository.resolve_ticket.return_value = bruin_generic_200_response
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
-            client_id, service_number=serial_number,
+            client_id,
+            service_number=serial_number,
         )
         service_affecting_monitor._ticket_repository.is_ticket_task_in_ipa_queue.assert_called_with(detail_item)
-        assert call(
-            f'Task for serial {serial_number} in ticket {ticket_id} is in the IPA Investigate'
-            f' queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last'
-            f' documented trouble...'
-        ) in service_affecting_monitor._bruin_repository._logger.info.mock_calls
+        assert (
+            call(
+                f"Task for serial {serial_number} in ticket {ticket_id} is in the IPA Investigate"
+                f" queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last"
+                f" documented trouble..."
+            )
+            in service_affecting_monitor._bruin_repository._logger.info.mock_calls
+        )
         service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_awaited()
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_awaited()
         service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_awaited()
@@ -3016,33 +3745,51 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def run_autoresolve_for_edge__task_for_serial_already_resolved_test(
-            self, service_affecting_monitor, make_cached_edge, make_bruin_client_info,
-            make_metrics, make_link_status_and_metrics_object_with_events, make_list_of_link_status_and_metrics_objects,
-            make_links_by_edge_object, make_ticket, make_list_of_tickets, make_detail_item, make_list_of_detail_items,
-            make_list_of_ticket_notes, make_ticket_details, make_rpc_response):
-        serial_number = 'VC1234567'
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_bruin_client_info,
+        make_metrics,
+        make_link_status_and_metrics_object_with_events,
+        make_list_of_link_status_and_metrics_objects,
+        make_links_by_edge_object,
+        make_ticket,
+        make_list_of_tickets,
+        make_detail_item,
+        make_list_of_detail_items,
+        make_list_of_ticket_notes,
+        make_ticket_details,
+        make_rpc_response,
+    ):
+        serial_number = "VC1234567"
         client_id = 12345
 
         bruin_client_info = make_bruin_client_info(client_id=client_id)
         edge_cache_info = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
 
         link_metrics = make_metrics(
-            best_latency_ms_tx=0, best_latency_ms_rx=0,
-            best_packet_loss_tx=0, best_packet_loss_rx=0,
-            best_jitter_ms_tx=0, best_jitter_ms_rx=0,
-            bytes_tx=1, bytes_rx=1,
-            bps_of_best_path_tx=100, bps_of_best_path_rx=100,
+            best_latency_ms_tx=0,
+            best_latency_ms_rx=0,
+            best_packet_loss_tx=0,
+            best_packet_loss_rx=0,
+            best_jitter_ms_tx=0,
+            best_jitter_ms_rx=0,
+            bytes_tx=1,
+            bytes_rx=1,
+            bps_of_best_path_tx=100,
+            bps_of_best_path_rx=100,
         )
         link_status_and_metrics = make_link_status_and_metrics_object_with_events(metrics=link_metrics)
         links_status_and_metrics = make_list_of_link_status_and_metrics_objects(link_status_and_metrics)
         links_grouped_by_edge_obj = make_links_by_edge_object(
-            cache_info=edge_cache_info, links=links_status_and_metrics,
+            cache_info=edge_cache_info,
+            links=links_status_and_metrics,
         )
 
-        ticket = make_ticket(created_by='Intelygenz Ai', create_date=str(CURRENT_DATETIME))
+        ticket = make_ticket(created_by="Intelygenz Ai", create_date=str(CURRENT_DATETIME))
         open_affecting_tickets = make_list_of_tickets(ticket)
 
-        detail_item = make_detail_item(value=serial_number, status='R')
+        detail_item = make_detail_item(value=serial_number, status="R")
         detail_items = make_list_of_detail_items(detail_item)
         notes = make_list_of_ticket_notes()
         ticket_details = make_ticket_details(detail_items=detail_items, notes=notes)
@@ -3059,7 +3806,8 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
-            client_id, service_number=serial_number,
+            client_id,
+            service_number=serial_number,
         )
         service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_not_awaited()
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
@@ -3068,30 +3816,48 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def run_autoresolve_for_edge__current_env_is_not_production_test(
-            self, service_affecting_monitor, make_cached_edge, make_bruin_client_info,
-            make_metrics, make_link_status_and_metrics_object_with_events, make_list_of_link_status_and_metrics_objects,
-            make_links_by_edge_object, make_ticket, make_list_of_tickets, make_detail_item, make_list_of_detail_items,
-            make_list_of_ticket_notes, make_ticket_details, make_rpc_response):
-        serial_number = 'VC1234567'
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_bruin_client_info,
+        make_metrics,
+        make_link_status_and_metrics_object_with_events,
+        make_list_of_link_status_and_metrics_objects,
+        make_links_by_edge_object,
+        make_ticket,
+        make_list_of_tickets,
+        make_detail_item,
+        make_list_of_detail_items,
+        make_list_of_ticket_notes,
+        make_ticket_details,
+        make_rpc_response,
+    ):
+        serial_number = "VC1234567"
         client_id = 12345
 
         bruin_client_info = make_bruin_client_info(client_id=client_id)
         edge_cache_info = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
 
         link_metrics = make_metrics(
-            best_latency_ms_tx=0, best_latency_ms_rx=0,
-            best_packet_loss_tx=0, best_packet_loss_rx=0,
-            best_jitter_ms_tx=0, best_jitter_ms_rx=0,
-            bytes_tx=1, bytes_rx=1,
-            bps_of_best_path_tx=100, bps_of_best_path_rx=100,
+            best_latency_ms_tx=0,
+            best_latency_ms_rx=0,
+            best_packet_loss_tx=0,
+            best_packet_loss_rx=0,
+            best_jitter_ms_tx=0,
+            best_jitter_ms_rx=0,
+            bytes_tx=1,
+            bytes_rx=1,
+            bps_of_best_path_tx=100,
+            bps_of_best_path_rx=100,
         )
         link_status_and_metrics = make_link_status_and_metrics_object_with_events(metrics=link_metrics)
         links_status_and_metrics = make_list_of_link_status_and_metrics_objects(link_status_and_metrics)
         links_grouped_by_edge_obj = make_links_by_edge_object(
-            cache_info=edge_cache_info, links=links_status_and_metrics,
+            cache_info=edge_cache_info,
+            links=links_status_and_metrics,
         )
 
-        ticket = make_ticket(created_by='Intelygenz Ai', create_date=str(CURRENT_DATETIME))
+        ticket = make_ticket(created_by="Intelygenz Ai", create_date=str(CURRENT_DATETIME))
         open_affecting_tickets = make_list_of_tickets(ticket)
 
         detail_item = make_detail_item(value=serial_number)
@@ -3108,11 +3874,12 @@ class TestServiceAffectingMonitor:
             status=200,
         )
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'dev'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "dev"):
             await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
-            client_id, service_number=serial_number,
+            client_id,
+            service_number=serial_number,
         )
         service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_not_awaited()
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
@@ -3121,11 +3888,24 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def run_autoresolve_for_edge__resolve_ticket_detail_request_has_not_2xx_status_test(
-            self, service_affecting_monitor, make_cached_edge, make_bruin_client_info,
-            make_metrics, make_link_status_and_metrics_object_with_events, make_list_of_link_status_and_metrics_objects,
-            make_links_by_edge_object, make_ticket, make_list_of_tickets, make_detail_item, make_list_of_detail_items,
-            make_list_of_ticket_notes, make_ticket_details, make_rpc_response, bruin_500_response):
-        serial_number = 'VC1234567'
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_bruin_client_info,
+        make_metrics,
+        make_link_status_and_metrics_object_with_events,
+        make_list_of_link_status_and_metrics_objects,
+        make_links_by_edge_object,
+        make_ticket,
+        make_list_of_tickets,
+        make_detail_item,
+        make_list_of_detail_items,
+        make_list_of_ticket_notes,
+        make_ticket_details,
+        make_rpc_response,
+        bruin_500_response,
+    ):
+        serial_number = "VC1234567"
         client_id = 12345
         ticket_id = 123
         ticket_detail_id = 456
@@ -3134,19 +3914,25 @@ class TestServiceAffectingMonitor:
         edge_cache_info = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
 
         link_metrics = make_metrics(
-            best_latency_ms_tx=0, best_latency_ms_rx=0,
-            best_packet_loss_tx=0, best_packet_loss_rx=0,
-            best_jitter_ms_tx=0, best_jitter_ms_rx=0,
-            bytes_tx=1, bytes_rx=1,
-            bps_of_best_path_tx=100, bps_of_best_path_rx=100,
+            best_latency_ms_tx=0,
+            best_latency_ms_rx=0,
+            best_packet_loss_tx=0,
+            best_packet_loss_rx=0,
+            best_jitter_ms_tx=0,
+            best_jitter_ms_rx=0,
+            bytes_tx=1,
+            bytes_rx=1,
+            bps_of_best_path_tx=100,
+            bps_of_best_path_rx=100,
         )
         link_status_and_metrics = make_link_status_and_metrics_object_with_events(metrics=link_metrics)
         links_status_and_metrics = make_list_of_link_status_and_metrics_objects(link_status_and_metrics)
         links_grouped_by_edge_obj = make_links_by_edge_object(
-            cache_info=edge_cache_info, links=links_status_and_metrics,
+            cache_info=edge_cache_info,
+            links=links_status_and_metrics,
         )
 
-        ticket = make_ticket(ticket_id=ticket_id, created_by='Intelygenz Ai', create_date=str(CURRENT_DATETIME))
+        ticket = make_ticket(ticket_id=ticket_id, created_by="Intelygenz Ai", create_date=str(CURRENT_DATETIME))
         open_affecting_tickets = make_list_of_tickets(ticket)
 
         detail_item = make_detail_item(id_=ticket_detail_id, value=serial_number)
@@ -3164,28 +3950,44 @@ class TestServiceAffectingMonitor:
         )
         service_affecting_monitor._bruin_repository.resolve_ticket.return_value = bruin_500_response
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
-            client_id, service_number=serial_number,
+            client_id,
+            service_number=serial_number,
         )
         service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_awaited_once_with(
-            ticket_id, serial_number,
+            ticket_id,
+            serial_number,
         )
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_awaited_once_with(
-            ticket_id, ticket_detail_id,
+            ticket_id,
+            ticket_detail_id,
         )
         service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_not_awaited()
         service_affecting_monitor._notifications_repository.notify_successful_autoresolve.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def run_autoresolve_for_edge__ticket_task_autoresolved_test(
-            self, service_affecting_monitor, make_cached_edge, make_bruin_client_info,
-            make_metrics, make_link_status_and_metrics_object_with_events, make_list_of_link_status_and_metrics_objects,
-            make_links_by_edge_object, make_ticket, make_list_of_tickets, make_detail_item, make_list_of_detail_items,
-            make_list_of_ticket_notes, make_ticket_details, make_rpc_response, bruin_generic_200_response):
-        serial_number = 'VC1234567'
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_bruin_client_info,
+        make_metrics,
+        make_link_status_and_metrics_object_with_events,
+        make_list_of_link_status_and_metrics_objects,
+        make_links_by_edge_object,
+        make_ticket,
+        make_list_of_tickets,
+        make_detail_item,
+        make_list_of_detail_items,
+        make_list_of_ticket_notes,
+        make_ticket_details,
+        make_rpc_response,
+        bruin_generic_200_response,
+    ):
+        serial_number = "VC1234567"
         client_id = 12345
         ticket_id = 123
         ticket_detail_id = 456
@@ -3194,19 +3996,25 @@ class TestServiceAffectingMonitor:
         edge_cache_info = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
 
         link_metrics = make_metrics(
-            best_latency_ms_tx=0, best_latency_ms_rx=0,
-            best_packet_loss_tx=0, best_packet_loss_rx=0,
-            best_jitter_ms_tx=0, best_jitter_ms_rx=0,
-            bytes_tx=1, bytes_rx=1,
-            bps_of_best_path_tx=100, bps_of_best_path_rx=100,
+            best_latency_ms_tx=0,
+            best_latency_ms_rx=0,
+            best_packet_loss_tx=0,
+            best_packet_loss_rx=0,
+            best_jitter_ms_tx=0,
+            best_jitter_ms_rx=0,
+            bytes_tx=1,
+            bytes_rx=1,
+            bps_of_best_path_tx=100,
+            bps_of_best_path_rx=100,
         )
         link_status_and_metrics = make_link_status_and_metrics_object_with_events(metrics=link_metrics)
         links_status_and_metrics = make_list_of_link_status_and_metrics_objects(link_status_and_metrics)
         links_grouped_by_edge_obj = make_links_by_edge_object(
-            cache_info=edge_cache_info, links=links_status_and_metrics,
+            cache_info=edge_cache_info,
+            links=links_status_and_metrics,
         )
 
-        ticket = make_ticket(ticket_id=ticket_id, created_by='Intelygenz Ai', create_date=str(CURRENT_DATETIME))
+        ticket = make_ticket(ticket_id=ticket_id, created_by="Intelygenz Ai", create_date=str(CURRENT_DATETIME))
         open_affecting_tickets = make_list_of_tickets(ticket)
 
         detail_item = make_detail_item(id_=ticket_detail_id, value=serial_number)
@@ -3228,42 +4036,56 @@ class TestServiceAffectingMonitor:
         )
         service_affecting_monitor._bruin_repository.resolve_ticket.return_value = bruin_generic_200_response
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
-            client_id, service_number=serial_number,
+            client_id,
+            service_number=serial_number,
         )
         service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_awaited_once_with(
-            ticket_id, serial_number,
+            ticket_id,
+            serial_number,
         )
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_awaited_once_with(
-            ticket_id, ticket_detail_id,
+            ticket_id,
+            ticket_detail_id,
         )
         service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_awaited_once_with(
-            ticket_id, serial_number,
+            ticket_id,
+            serial_number,
         )
         service_affecting_monitor._notifications_repository.notify_successful_autoresolve.assert_awaited_once_with(
-            ticket_id, serial_number,
+            ticket_id,
+            serial_number,
         )
 
     @pytest.mark.asyncio
     async def attempt_forward_to_asr_test(
-            self, service_affecting_monitor, make_link, make_links_configuration, make_cached_edge,
-            make_structured_metrics_object, make_structured_metrics_object_with_cache_and_contact_info,
-            make_detail_item, make_ticket_details, make_rpc_response):
+        self,
+        service_affecting_monitor,
+        make_link,
+        make_links_configuration,
+        make_cached_edge,
+        make_structured_metrics_object,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_detail_item,
+        make_ticket_details,
+        make_rpc_response,
+    ):
         ticket_id = 12345
-        serial = 'VC1234567'
-        task_result = 'No Trouble Found - Carrier Issue'
+        serial = "VC1234567"
+        task_result = "No Trouble Found - Carrier Issue"
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
-        link = make_link(interface='GE1')
-        link_configuration = make_links_configuration(type_='WIRED', interfaces=['GE1'])
+        link = make_link(interface="GE1")
+        link_configuration = make_links_configuration(type_="WIRED", interfaces=["GE1"])
 
         cache_info = make_cached_edge(serial_number=serial, links_configuration=[link_configuration])
         structured_metrics_object = make_structured_metrics_object(link_info=link)
-        link_data = make_structured_metrics_object_with_cache_and_contact_info(cache_info=cache_info,
-                                                                               metrics_object=structured_metrics_object)
+        link_data = make_structured_metrics_object_with_cache_and_contact_info(
+            cache_info=cache_info, metrics_object=structured_metrics_object
+        )
 
         detail_item = make_detail_item(value=serial)
         ticket_details = make_ticket_details(detail_items=[detail_item])
@@ -3288,30 +4110,39 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue.assert_awaited_once_with(
-            ticket_id, task_result, service_number=serial, detail_id=detail_item['detailID']
+            ticket_id, task_result, service_number=serial, detail_id=detail_item["detailID"]
         )
         service_affecting_monitor._bruin_repository.append_asr_forwarding_note.assert_awaited_once_with(
-            ticket_id, link_data['link_status'], serial
+            ticket_id, link_data["link_status"], serial
         )
         service_affecting_monitor._notifications_repository.send_slack_message.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def attempt_forward_to_asr_no_link_interface_found_test(
-            self, service_affecting_monitor, make_link, make_links_configuration, make_cached_edge,
-            make_structured_metrics_object, make_structured_metrics_object_with_cache_and_contact_info,
-            make_detail_item, make_ticket_details, make_rpc_response):
+        self,
+        service_affecting_monitor,
+        make_link,
+        make_links_configuration,
+        make_cached_edge,
+        make_structured_metrics_object,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_detail_item,
+        make_ticket_details,
+        make_rpc_response,
+    ):
         ticket_id = 12345
-        serial = 'VC1234567'
-        task_result = 'No Trouble Found - Carrier Issue'
+        serial = "VC1234567"
+        task_result = "No Trouble Found - Carrier Issue"
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
-        link = make_link(interface='GE2')
-        link_configuration = make_links_configuration(type_='WIRED', interfaces=['GE1'])
+        link = make_link(interface="GE2")
+        link_configuration = make_links_configuration(type_="WIRED", interfaces=["GE1"])
 
         cache_info = make_cached_edge(serial_number=serial, links_configuration=[link_configuration])
         structured_metrics_object = make_structured_metrics_object(link_info=link)
-        link_data = make_structured_metrics_object_with_cache_and_contact_info(cache_info=cache_info,
-                                                                               metrics_object=structured_metrics_object)
+        link_data = make_structured_metrics_object_with_cache_and_contact_info(
+            cache_info=cache_info, metrics_object=structured_metrics_object
+        )
 
         detail_item = make_detail_item(value=serial)
         ticket_details = make_ticket_details(detail_items=[detail_item])
@@ -3333,8 +4164,9 @@ class TestServiceAffectingMonitor:
 
         await service_affecting_monitor._attempt_forward_to_asr(link_data, trouble, ticket_id)
 
-        service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_awaited_once_with(ticket_id, serial, link_data,
-                                                                                         trouble)
+        service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_awaited_once_with(
+            ticket_id, serial, link_data, trouble
+        )
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_not_awaited()
         service_affecting_monitor._bruin_repository.change_detail_work_queue.assert_not_awaited()
         service_affecting_monitor._bruin_repository.append_asr_forwarding_note.assert_not_awaited()
@@ -3342,21 +4174,30 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def attempt_forward_to_asr_not_wired_test(
-            self, service_affecting_monitor, make_link, make_links_configuration, make_cached_edge,
-            make_structured_metrics_object, make_structured_metrics_object_with_cache_and_contact_info,
-            make_detail_item, make_ticket_details, make_rpc_response):
+        self,
+        service_affecting_monitor,
+        make_link,
+        make_links_configuration,
+        make_cached_edge,
+        make_structured_metrics_object,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_detail_item,
+        make_ticket_details,
+        make_rpc_response,
+    ):
         ticket_id = 12345
-        serial = 'VC1234567'
-        task_result = 'No Trouble Found - Carrier Issue'
+        serial = "VC1234567"
+        task_result = "No Trouble Found - Carrier Issue"
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
-        link = make_link(interface='GE1')
-        link_configuration = make_links_configuration(type_='WIRELESS', interfaces=['GE1'])
+        link = make_link(interface="GE1")
+        link_configuration = make_links_configuration(type_="WIRELESS", interfaces=["GE1"])
 
         cache_info = make_cached_edge(serial_number=serial, links_configuration=[link_configuration])
         structured_metrics_object = make_structured_metrics_object(link_info=link)
-        link_data = make_structured_metrics_object_with_cache_and_contact_info(cache_info=cache_info,
-                                                                               metrics_object=structured_metrics_object)
+        link_data = make_structured_metrics_object_with_cache_and_contact_info(
+            cache_info=cache_info, metrics_object=structured_metrics_object
+        )
 
         detail_item = make_detail_item(value=serial)
         ticket_details = make_ticket_details(detail_items=[detail_item])
@@ -3378,8 +4219,9 @@ class TestServiceAffectingMonitor:
 
         await service_affecting_monitor._attempt_forward_to_asr(link_data, trouble, ticket_id)
 
-        service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_awaited_once_with(ticket_id, serial, link_data,
-                                                                                         trouble)
+        service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_awaited_once_with(
+            ticket_id, serial, link_data, trouble
+        )
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_not_awaited()
         service_affecting_monitor._bruin_repository.change_detail_work_queue.assert_not_awaited()
         service_affecting_monitor._bruin_repository.append_asr_forwarding_note.assert_not_awaited()
@@ -3387,21 +4229,30 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def attempt_forward_to_asr_should_not_be_forwarded_test(
-            self, service_affecting_monitor, make_link, make_links_configuration, make_cached_edge,
-            make_structured_metrics_object, make_structured_metrics_object_with_cache_and_contact_info,
-            make_detail_item, make_ticket_details, make_rpc_response):
+        self,
+        service_affecting_monitor,
+        make_link,
+        make_links_configuration,
+        make_cached_edge,
+        make_structured_metrics_object,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_detail_item,
+        make_ticket_details,
+        make_rpc_response,
+    ):
         ticket_id = 12345
-        serial = 'VC1234567'
-        task_result = 'No Trouble Found - Carrier Issue'
+        serial = "VC1234567"
+        task_result = "No Trouble Found - Carrier Issue"
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
-        link = make_link(interface='GE1', display_name='BYOB')
-        link_configuration = make_links_configuration(type_='WIRED', interfaces=['GE1'])
+        link = make_link(interface="GE1", display_name="BYOB")
+        link_configuration = make_links_configuration(type_="WIRED", interfaces=["GE1"])
 
         cache_info = make_cached_edge(serial_number=serial, links_configuration=[link_configuration])
         structured_metrics_object = make_structured_metrics_object(link_info=link)
-        link_data = make_structured_metrics_object_with_cache_and_contact_info(cache_info=cache_info,
-                                                                               metrics_object=structured_metrics_object)
+        link_data = make_structured_metrics_object_with_cache_and_contact_info(
+            cache_info=cache_info, metrics_object=structured_metrics_object
+        )
 
         detail_item = make_detail_item(value=serial)
         ticket_details = make_ticket_details(detail_items=[detail_item])
@@ -3431,21 +4282,29 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def attempt_forward_to_asr_non_2xx_ticket_details_test(
-            self, service_affecting_monitor, make_link, make_links_configuration, make_cached_edge,
-            make_structured_metrics_object, make_structured_metrics_object_with_cache_and_contact_info,
-            make_rpc_response, bruin_500_response):
+        self,
+        service_affecting_monitor,
+        make_link,
+        make_links_configuration,
+        make_cached_edge,
+        make_structured_metrics_object,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_rpc_response,
+        bruin_500_response,
+    ):
         ticket_id = 12345
-        serial = 'VC1234567'
-        task_result = 'No Trouble Found - Carrier Issue'
+        serial = "VC1234567"
+        task_result = "No Trouble Found - Carrier Issue"
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
-        link = make_link(interface='GE1')
-        link_configuration = make_links_configuration(type_='WIRED', interfaces=['GE1'])
+        link = make_link(interface="GE1")
+        link_configuration = make_links_configuration(type_="WIRED", interfaces=["GE1"])
 
         cache_info = make_cached_edge(serial_number=serial, links_configuration=[link_configuration])
         structured_metrics_object = make_structured_metrics_object(link_info=link)
-        link_data = make_structured_metrics_object_with_cache_and_contact_info(cache_info=cache_info,
-                                                                               metrics_object=structured_metrics_object)
+        link_data = make_structured_metrics_object_with_cache_and_contact_info(
+            cache_info=cache_info, metrics_object=structured_metrics_object
+        )
 
         service_affecting_monitor._bruin_repository.get_ticket_details.return_value = bruin_500_response
 
@@ -3469,21 +4328,31 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def attempt_forward_to_asr_other_troubles_test(
-            self, service_affecting_monitor, make_link, make_links_configuration, make_cached_edge,
-            make_structured_metrics_object, make_structured_metrics_object_with_cache_and_contact_info,
-            make_detail_item, make_ticket_details, make_rpc_response, make_ticket_note):
+        self,
+        service_affecting_monitor,
+        make_link,
+        make_links_configuration,
+        make_cached_edge,
+        make_structured_metrics_object,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_detail_item,
+        make_ticket_details,
+        make_rpc_response,
+        make_ticket_note,
+    ):
         ticket_id = 12345
-        serial = 'VC1234567'
-        task_result = 'No Trouble Found - Carrier Issue'
+        serial = "VC1234567"
+        task_result = "No Trouble Found - Carrier Issue"
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
-        link = make_link(interface='GE1')
-        link_configuration = make_links_configuration(type_='WIRED', interfaces=['GE1'])
+        link = make_link(interface="GE1")
+        link_configuration = make_links_configuration(type_="WIRED", interfaces=["GE1"])
 
         cache_info = make_cached_edge(serial_number=serial, links_configuration=[link_configuration])
         structured_metrics_object = make_structured_metrics_object(link_info=link)
-        link_data = make_structured_metrics_object_with_cache_and_contact_info(cache_info=cache_info,
-                                                                               metrics_object=structured_metrics_object)
+        link_data = make_structured_metrics_object_with_cache_and_contact_info(
+            cache_info=cache_info, metrics_object=structured_metrics_object
+        )
 
         note = make_ticket_note(text=f"#*MetTel's IPA*#\nTrouble: Latency", service_numbers=[serial])
         detail_item = make_detail_item(value=serial)
@@ -3514,21 +4383,31 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def attempt_forward_to_asr_already_forwarded_test(
-            self, service_affecting_monitor, make_link, make_links_configuration, make_cached_edge,
-            make_structured_metrics_object, make_structured_metrics_object_with_cache_and_contact_info,
-            make_detail_item, make_ticket_details, make_rpc_response, make_ticket_note):
+        self,
+        service_affecting_monitor,
+        make_link,
+        make_links_configuration,
+        make_cached_edge,
+        make_structured_metrics_object,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_detail_item,
+        make_ticket_details,
+        make_rpc_response,
+        make_ticket_note,
+    ):
         ticket_id = 12345
-        serial = 'VC1234567'
-        task_result = 'No Trouble Found - Carrier Issue'
+        serial = "VC1234567"
+        task_result = "No Trouble Found - Carrier Issue"
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
-        link = make_link(interface='GE1')
-        link_configuration = make_links_configuration(type_='WIRED', interfaces=['GE1'])
+        link = make_link(interface="GE1")
+        link_configuration = make_links_configuration(type_="WIRED", interfaces=["GE1"])
 
         cache_info = make_cached_edge(serial_number=serial, links_configuration=[link_configuration])
         structured_metrics_object = make_structured_metrics_object(link_info=link)
-        link_data = make_structured_metrics_object_with_cache_and_contact_info(cache_info=cache_info,
-                                                                               metrics_object=structured_metrics_object)
+        link_data = make_structured_metrics_object_with_cache_and_contact_info(
+            cache_info=cache_info, metrics_object=structured_metrics_object
+        )
 
         note = make_ticket_note(text=f"#*MetTel's IPA*#\nMoving task to: ASR Investigate", service_numbers=[serial])
         detail_item = make_detail_item(value=serial)
@@ -3559,21 +4438,31 @@ class TestServiceAffectingMonitor:
 
     @pytest.mark.asyncio
     async def attempt_forward_to_asr_non_2xx__change_work_queue_test(
-            self, service_affecting_monitor, make_link, make_links_configuration, make_cached_edge,
-            make_structured_metrics_object, make_structured_metrics_object_with_cache_and_contact_info,
-            make_detail_item, make_ticket_details, make_rpc_response, bruin_500_response):
+        self,
+        service_affecting_monitor,
+        make_link,
+        make_links_configuration,
+        make_cached_edge,
+        make_structured_metrics_object,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        make_detail_item,
+        make_ticket_details,
+        make_rpc_response,
+        bruin_500_response,
+    ):
         ticket_id = 12345
-        serial = 'VC1234567'
-        task_result = 'No Trouble Found - Carrier Issue'
+        serial = "VC1234567"
+        task_result = "No Trouble Found - Carrier Issue"
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
 
-        link = make_link(interface='GE1')
-        link_configuration = make_links_configuration(type_='WIRED', interfaces=['GE1'])
+        link = make_link(interface="GE1")
+        link_configuration = make_links_configuration(type_="WIRED", interfaces=["GE1"])
 
         cache_info = make_cached_edge(serial_number=serial, links_configuration=[link_configuration])
         structured_metrics_object = make_structured_metrics_object(link_info=link)
-        link_data = make_structured_metrics_object_with_cache_and_contact_info(cache_info=cache_info,
-                                                                               metrics_object=structured_metrics_object)
+        link_data = make_structured_metrics_object_with_cache_and_contact_info(
+            cache_info=cache_info, metrics_object=structured_metrics_object
+        )
 
         detail_item = make_detail_item(value=serial)
         ticket_details = make_ticket_details(detail_items=[detail_item])
@@ -3595,84 +4484,78 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._forward_ticket_to_hnoc_queue.assert_not_awaited()
         service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue.assert_awaited_once_with(
-            ticket_id, task_result, service_number=serial, detail_id=detail_item['detailID']
+            ticket_id, task_result, service_number=serial, detail_id=detail_item["detailID"]
         )
         service_affecting_monitor._bruin_repository.append_asr_forwarding_note.assert_not_awaited()
         service_affecting_monitor._notifications_repository.send_slack_message.assert_not_awaited()
 
     def should_be_forwarded_to_asr_test(self, service_affecting_monitor, make_link, make_structured_metrics_object):
-        link = make_link(display_name='Test link')
+        link = make_link(display_name="Test link")
         link_data = make_structured_metrics_object(link_info=link)
         result = service_affecting_monitor._should_be_forwarded_to_asr(link_data)
         assert result is True
 
-        link = make_link(display_name='BYOB')
+        link = make_link(display_name="BYOB")
         link_data = make_structured_metrics_object(link_info=link)
         result = service_affecting_monitor._should_be_forwarded_to_asr(link_data)
         assert result is False
 
-        link = make_link(display_name='127.0.0.1')
+        link = make_link(display_name="127.0.0.1")
         link_data = make_structured_metrics_object(link_info=link)
         result = service_affecting_monitor._should_be_forwarded_to_asr(link_data)
         assert result is False
 
     def is_link_label_blacklisted_test(self, service_affecting_monitor):
-        result = service_affecting_monitor._is_link_label_blacklisted('Test link')
+        result = service_affecting_monitor._is_link_label_blacklisted("Test link")
         assert result is False
 
-        result = service_affecting_monitor._is_link_label_blacklisted('BYOB')
+        result = service_affecting_monitor._is_link_label_blacklisted("BYOB")
         assert result is True
 
     def get_max_seconds_since_last_trouble_test(self, service_affecting_monitor, make_links_by_edge_object):
         edge = make_links_by_edge_object()
 
-        day_schedule = testconfig.MONITOR_CONFIG['autoresolve']['day_schedule']
-        last_affecting_trouble_seconds = testconfig.MONITOR_CONFIG['autoresolve']['last_affecting_trouble_seconds']
+        day_schedule = testconfig.MONITOR_CONFIG["autoresolve"]["day_schedule"]
+        last_affecting_trouble_seconds = testconfig.MONITOR_CONFIG["autoresolve"]["last_affecting_trouble_seconds"]
 
         current_datetime = datetime.now().replace(hour=10)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
 
-        with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
+        with patch.object(service_affecting_monitor_module, "datetime", new=datetime_mock):
             with patch.dict(day_schedule, start_hour=6, end_hour=22):
                 result = service_affecting_monitor._get_max_seconds_since_last_trouble(edge)
-                assert result == last_affecting_trouble_seconds['day']
+                assert result == last_affecting_trouble_seconds["day"]
 
             with patch.dict(day_schedule, start_hour=8, end_hour=0):
                 result = service_affecting_monitor._get_max_seconds_since_last_trouble(edge)
-                assert result == last_affecting_trouble_seconds['day']
+                assert result == last_affecting_trouble_seconds["day"]
 
             with patch.dict(day_schedule, start_hour=10, end_hour=2):
                 result = service_affecting_monitor._get_max_seconds_since_last_trouble(edge)
-                assert result == last_affecting_trouble_seconds['day']
+                assert result == last_affecting_trouble_seconds["day"]
 
             with patch.dict(day_schedule, start_hour=12, end_hour=4):
                 result = service_affecting_monitor._get_max_seconds_since_last_trouble(edge)
-                assert result == last_affecting_trouble_seconds['night']
+                assert result == last_affecting_trouble_seconds["night"]
 
             with patch.dict(day_schedule, start_hour=2, end_hour=8):
                 result = service_affecting_monitor._get_max_seconds_since_last_trouble(edge)
-                assert result == last_affecting_trouble_seconds['night']
+                assert result == last_affecting_trouble_seconds["night"]
 
     def was_last_reminder_sent_recently_with_previous_reminder_test(
-            self,
-            service_affecting_monitor,
-            make_ticket_note,
-            make_list_of_ticket_notes
+        self, service_affecting_monitor, make_ticket_note, make_list_of_ticket_notes
     ):
         ticket_creation_date = str(CURRENT_DATETIME)
         wait_time_before_sending_new_milestone_reminder = service_affecting_monitor._config.MONITOR_CONFIG[
-            'wait_time_before_sending_new_milestone_reminder'
+            "wait_time_before_sending_new_milestone_reminder"
         ]
         datetime_mock = Mock()
         note_1 = make_ticket_note(
-            text='Dummy note',
+            text="Dummy note",
             creation_date=str(CURRENT_DATETIME - timedelta(seconds=10)),
         )
-        reminder_note = os.linesep.join([
-            "#*MetTel's IPA*#",
-            'Client Reminder'
-        ])
+        reminder_note = os.linesep.join(["#*MetTel's IPA*#", "Client Reminder"])
         note_2 = make_ticket_note(
             text=reminder_note,
             creation_date=str(CURRENT_DATETIME + timedelta(hours=42)),
@@ -3681,11 +4564,9 @@ class TestServiceAffectingMonitor:
 
         now = CURRENT_DATETIME + timedelta(hours=42)
         datetime_mock.now = Mock(return_value=now)
-        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(utils_repository_module, "datetime", new=datetime_mock):
             result = service_affecting_monitor._was_last_reminder_sent_recently(
-                notes,
-                ticket_creation_date,
-                wait_time_before_sending_new_milestone_reminder
+                notes, ticket_creation_date, wait_time_before_sending_new_milestone_reminder
             )
 
             assert result is True
@@ -3698,111 +4579,94 @@ class TestServiceAffectingMonitor:
             creation_date=str(CURRENT_DATETIME - timedelta(hours=24)),
         )
         notes = make_list_of_ticket_notes(note_1, note_2)
-        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(utils_repository_module, "datetime", new=datetime_mock):
             result = service_affecting_monitor._was_last_reminder_sent_recently(
-                notes,
-                ticket_creation_date,
-                wait_time_before_sending_new_milestone_reminder
+                notes, ticket_creation_date, wait_time_before_sending_new_milestone_reminder
             )
 
             assert result is False
 
         service_affecting_monitor._utils_repository.has_last_event_happened_recently.assert_called_with(
-            notes,
-            ticket_creation_date,
-            max_seconds_since_last_event=86400.0,
-            regex=REMINDER_NOTE_REGEX
+            notes, ticket_creation_date, max_seconds_since_last_event=86400.0, regex=REMINDER_NOTE_REGEX
         )
         service_affecting_monitor._logger.error.assert_not_called()
 
     def was_last_reminder_sent_recently_without_previous_reminder_test(
-            self,
-            service_affecting_monitor,
-            make_ticket_note,
-            make_list_of_ticket_notes
+        self, service_affecting_monitor, make_ticket_note, make_list_of_ticket_notes
     ):
         ticket_creation_date = str(CURRENT_DATETIME)
         wait_time_before_sending_new_milestone_reminder = service_affecting_monitor._config.MONITOR_CONFIG[
-            'wait_time_before_sending_new_milestone_reminder'
+            "wait_time_before_sending_new_milestone_reminder"
         ]
         datetime_mock = Mock()
         note_1 = make_ticket_note(
-            text='Dummy note',
+            text="Dummy note",
             creation_date=str(CURRENT_DATETIME - timedelta(seconds=10)),
         )
         note_2 = make_ticket_note(
-            text='This email is not a reminder',
+            text="This email is not a reminder",
             creation_date=str(CURRENT_DATETIME),
         )
         notes = make_list_of_ticket_notes(note_1, note_2)
 
         datetime_mock.now = Mock(return_value=CURRENT_DATETIME)
-        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(utils_repository_module, "datetime", new=datetime_mock):
             result = service_affecting_monitor._was_last_reminder_sent_recently(
-                notes,
-                ticket_creation_date,
-                wait_time_before_sending_new_milestone_reminder
+                notes, ticket_creation_date, wait_time_before_sending_new_milestone_reminder
             )
 
             assert result is True
 
         now = CURRENT_DATETIME + timedelta(hours=42)
         datetime_mock.now = Mock(return_value=now)
-        with patch.object(utils_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(utils_repository_module, "datetime", new=datetime_mock):
             result = service_affecting_monitor._was_last_reminder_sent_recently(
-                notes,
-                ticket_creation_date,
-                wait_time_before_sending_new_milestone_reminder
+                notes, ticket_creation_date, wait_time_before_sending_new_milestone_reminder
             )
 
             assert result is False
 
         service_affecting_monitor._utils_repository.has_last_event_happened_recently.assert_called_with(
-            notes,
-            ticket_creation_date,
-            max_seconds_since_last_event=86400.0,
-            regex=REMINDER_NOTE_REGEX
+            notes, ticket_creation_date, max_seconds_since_last_event=86400.0, regex=REMINDER_NOTE_REGEX
         )
         service_affecting_monitor._logger.error.assert_not_called()
 
     @pytest.mark.asyncio
     async def send_reminder__last_trouble_documented_on_ticket_creation_and_detected_one_day_ago_test(
-            self, service_affecting_monitor, make_ticket, make_detail_item, make_detail_item_with_notes_and_ticket_info,
-            bruin_generic_200_response
+        self,
+        service_affecting_monitor,
+        make_ticket,
+        make_detail_item,
+        make_detail_item_with_notes_and_ticket_info,
+        bruin_generic_200_response,
     ):
-        serial_number = 'VC1234567'
+        serial_number = "VC1234567"
         ticket = make_ticket(
-            created_by='Intelygenz Ai',
+            created_by="Intelygenz Ai",
             create_date=str(CURRENT_DATETIME - timedelta(hours=24)),
         )
-        ticket_id = ticket['ticketID']
-        last_documentation_cycle_start_date = ticket['createDate']
-        detail_item = make_detail_item(status='I', value=serial_number)
+        ticket_id = ticket["ticketID"]
+        last_documentation_cycle_start_date = ticket["createDate"]
+        detail_item = make_detail_item(status="I", value=serial_number)
         detail_object = make_detail_item_with_notes_and_ticket_info(
             detail_item=detail_item,
             ticket_info=ticket,
         )
         wait_time_before_sending_new_milestone_reminder = service_affecting_monitor._config.MONITOR_CONFIG[
-            'wait_time_before_sending_new_milestone_reminder'
+            "wait_time_before_sending_new_milestone_reminder"
         ]
-        reminder_note = os.linesep.join([
-            "#*MetTel's IPA*#",
-            'Client Reminder'
-        ])
+        reminder_note = os.linesep.join(["#*MetTel's IPA*#", "Client Reminder"])
         service_affecting_monitor._bruin_repository._event_bus.rpc_request.return_value = bruin_generic_200_response
         service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._send_reminder(detail_object)
 
         service_affecting_monitor._was_last_reminder_sent_recently.assert_called_once_with(
-            [],
-            last_documentation_cycle_start_date,
-            wait_time_before_sending_new_milestone_reminder
+            [], last_documentation_cycle_start_date, wait_time_before_sending_new_milestone_reminder
         )
         service_affecting_monitor._bruin_repository.send_reminder_email_milestone_notification.assert_awaited_once_with(
-            ticket_id,
-            serial_number
+            ticket_id, serial_number
         )
         service_affecting_monitor._append_reminder_note.assert_awaited_once_with(
             ticket_id,
@@ -3814,42 +4678,39 @@ class TestServiceAffectingMonitor:
             service_numbers=[serial_number],
         )
         service_affecting_monitor._notifications_repository.notify_successful_reminder_note_append.assert_awaited_with(
-            ticket_id,
-            serial_number
+            ticket_id, serial_number
         )
         service_affecting_monitor._logger.error.assert_not_called()
         service_affecting_monitor._logger.info.assert_called_with(
-            f'Reminder note of edge {serial_number} was successfully appended to ticket'
-            f' {ticket_id}!'
+            f"Reminder note of edge {serial_number} was successfully appended to ticket" f" {ticket_id}!"
         )
 
     @pytest.mark.asyncio
     async def send_reminder__creation_date_less_than_24_hours_test(
-            self, service_affecting_monitor, make_ticket, make_detail_item, make_detail_item_with_notes_and_ticket_info,
+        self,
+        service_affecting_monitor,
+        make_ticket,
+        make_detail_item,
+        make_detail_item_with_notes_and_ticket_info,
     ):
-        serial_number = 'VC1234567'
+        serial_number = "VC1234567"
         ticket = make_ticket(
-            created_by='Intelygenz Ai',
+            created_by="Intelygenz Ai",
             create_date=str(CURRENT_DATETIME - timedelta(hours=1)),
         )
-        ticket_id = ticket['ticketID']
-        last_documentation_cycle_start_date = ticket['createDate']
-        detail_item = make_detail_item(status='I', value=serial_number)
-        detail_object = make_detail_item_with_notes_and_ticket_info(
-            detail_item=detail_item,
-            ticket_info=ticket
-        )
+        ticket_id = ticket["ticketID"]
+        last_documentation_cycle_start_date = ticket["createDate"]
+        detail_item = make_detail_item(status="I", value=serial_number)
+        detail_object = make_detail_item_with_notes_and_ticket_info(detail_item=detail_item, ticket_info=ticket)
         wait_time_before_sending_new_milestone_reminder = service_affecting_monitor._config.MONITOR_CONFIG[
-            'wait_time_before_sending_new_milestone_reminder'
+            "wait_time_before_sending_new_milestone_reminder"
         ]
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._send_reminder(detail_object)
 
         service_affecting_monitor._was_last_reminder_sent_recently.assert_called_once_with(
-            [],
-            last_documentation_cycle_start_date,
-            wait_time_before_sending_new_milestone_reminder
+            [], last_documentation_cycle_start_date, wait_time_before_sending_new_milestone_reminder
         )
         service_affecting_monitor._bruin_repository.send_reminder_email_milestone_notification.assert_not_awaited()
         service_affecting_monitor._append_reminder_note.assert_not_awaited()
@@ -3857,49 +4718,46 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._notifications_repository.notify_successful_reminder_note_append.assert_not_awaited()
         service_affecting_monitor._logger.error.assert_not_called()
         service_affecting_monitor._logger.info.assert_called_with(
-            f'No Reminder note will be appended for service number {serial_number} to ticket {ticket_id},'
-            f' since either the last documentation cycle started or the last reminder'
-            f' was sent too recently'
+            f"No Reminder note will be appended for service number {serial_number} to ticket {ticket_id},"
+            f" since either the last documentation cycle started or the last reminder"
+            f" was sent too recently"
         )
 
     @pytest.mark.asyncio
     async def send_reminder__last_note_less_than_24_hours_test(
-            self, service_affecting_monitor, make_ticket, make_detail_item, make_detail_item_with_notes_and_ticket_info,
-            make_ticket_note
+        self,
+        service_affecting_monitor,
+        make_ticket,
+        make_detail_item,
+        make_detail_item_with_notes_and_ticket_info,
+        make_ticket_note,
     ):
-        serial_number = 'VC1234567'
+        serial_number = "VC1234567"
         ticket = make_ticket(
-            created_by='Intelygenz Ai',
+            created_by="Intelygenz Ai",
             create_date=str(CURRENT_DATETIME - timedelta(hours=48)),
         )
-        reminder_note = os.linesep.join([
-            "#*MetTel's IPA*#",
-            'Client Reminder'
-        ])
+        reminder_note = os.linesep.join(["#*MetTel's IPA*#", "Client Reminder"])
         last_note_date = str(CURRENT_DATETIME)
         note = make_ticket_note(
             text=reminder_note,
             creation_date=last_note_date,
         )
-        ticket_id = ticket['ticketID']
+        ticket_id = ticket["ticketID"]
         last_documentation_cycle_start_date = last_note_date
-        detail_item = make_detail_item(status='I', value=serial_number)
+        detail_item = make_detail_item(status="I", value=serial_number)
         detail_object = make_detail_item_with_notes_and_ticket_info(
-            detail_item=detail_item,
-            ticket_info=ticket,
-            notes=[note]
+            detail_item=detail_item, ticket_info=ticket, notes=[note]
         )
         wait_time_before_sending_new_milestone_reminder = service_affecting_monitor._config.MONITOR_CONFIG[
-            'wait_time_before_sending_new_milestone_reminder'
+            "wait_time_before_sending_new_milestone_reminder"
         ]
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._send_reminder(detail_object)
 
         service_affecting_monitor._was_last_reminder_sent_recently.assert_called_once_with(
-            [note],
-            last_documentation_cycle_start_date,
-            wait_time_before_sending_new_milestone_reminder
+            [note], last_documentation_cycle_start_date, wait_time_before_sending_new_milestone_reminder
         )
         service_affecting_monitor._bruin_repository.send_reminder_email_milestone_notification.assert_not_awaited()
         service_affecting_monitor._append_reminder_note.assert_not_awaited()
@@ -3907,93 +4765,94 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._notifications_repository.notify_successful_reminder_note_append.assert_not_awaited()
         service_affecting_monitor._logger.error.assert_not_called()
         service_affecting_monitor._logger.info.assert_called_with(
-            f'No Reminder note will be appended for service number {serial_number} to ticket {ticket_id},'
-            f' since either the last documentation cycle started or the last reminder'
-            f' was sent too recently'
+            f"No Reminder note will be appended for service number {serial_number} to ticket {ticket_id},"
+            f" since either the last documentation cycle started or the last reminder"
+            f" was sent too recently"
         )
 
     @pytest.mark.asyncio
     async def send_reminder__failed_to_send_email_test(
-            self, service_affecting_monitor, make_ticket, make_detail_item, make_detail_item_with_notes_and_ticket_info,
-            bruin_generic_200_response, bruin_500_response
+        self,
+        service_affecting_monitor,
+        make_ticket,
+        make_detail_item,
+        make_detail_item_with_notes_and_ticket_info,
+        bruin_generic_200_response,
+        bruin_500_response,
     ):
-        serial_number = 'VC1234567'
+        serial_number = "VC1234567"
         ticket = make_ticket(
-            created_by='Intelygenz Ai',
+            created_by="Intelygenz Ai",
             create_date=str(CURRENT_DATETIME - timedelta(hours=48)),
         )
-        ticket_id = ticket['ticketID']
-        last_documentation_cycle_start_date = ticket['createDate']
-        detail_item = make_detail_item(status='I', value=serial_number)
+        ticket_id = ticket["ticketID"]
+        last_documentation_cycle_start_date = ticket["createDate"]
+        detail_item = make_detail_item(status="I", value=serial_number)
         detail_object = make_detail_item_with_notes_and_ticket_info(
             detail_item=detail_item,
             ticket_info=ticket,
         )
         wait_time_before_sending_new_milestone_reminder = service_affecting_monitor._config.MONITOR_CONFIG[
-            'wait_time_before_sending_new_milestone_reminder'
+            "wait_time_before_sending_new_milestone_reminder"
         ]
         service_affecting_monitor._bruin_repository._event_bus.rpc_request.return_value = bruin_generic_200_response
         service_affecting_monitor._bruin_repository.send_reminder_email_milestone_notification.return_value = (
             bruin_500_response
         )
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._send_reminder(detail_object)
 
         service_affecting_monitor._was_last_reminder_sent_recently.assert_called_once_with(
-            [],
-            last_documentation_cycle_start_date,
-            wait_time_before_sending_new_milestone_reminder
+            [], last_documentation_cycle_start_date, wait_time_before_sending_new_milestone_reminder
         )
         service_affecting_monitor._bruin_repository.send_reminder_email_milestone_notification.assert_awaited_once_with(
-            ticket_id,
-            serial_number
+            ticket_id, serial_number
         )
         service_affecting_monitor._append_reminder_note.assert_not_awaited()
         service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_not_awaited()
         service_affecting_monitor._notifications_repository.notify_successful_reminder_note_append.assert_not_awaited()
         service_affecting_monitor._logger.error.assert_called_once_with(
-            f'Reminder email of edge {serial_number} could not be sent for ticket {ticket_id}!'
+            f"Reminder email of edge {serial_number} could not be sent for ticket {ticket_id}!"
         )
 
     @pytest.mark.asyncio
     async def send_reminder__failed_to_append_note_test(
-            self, service_affecting_monitor, make_ticket, make_detail_item, make_detail_item_with_notes_and_ticket_info,
-            bruin_generic_200_response, bruin_500_response
+        self,
+        service_affecting_monitor,
+        make_ticket,
+        make_detail_item,
+        make_detail_item_with_notes_and_ticket_info,
+        bruin_generic_200_response,
+        bruin_500_response,
     ):
-        serial_number = 'VC1234567'
+        serial_number = "VC1234567"
         ticket = make_ticket(
-            created_by='Intelygenz Ai',
+            created_by="Intelygenz Ai",
             create_date=str(CURRENT_DATETIME - timedelta(hours=48)),
         )
-        ticket_id = ticket['ticketID']
-        last_documentation_cycle_start_date = ticket['createDate']
-        detail_item = make_detail_item(status='I', value=serial_number)
+        ticket_id = ticket["ticketID"]
+        last_documentation_cycle_start_date = ticket["createDate"]
+        detail_item = make_detail_item(status="I", value=serial_number)
         detail_object = make_detail_item_with_notes_and_ticket_info(
             detail_item=detail_item,
             ticket_info=ticket,
         )
-        reminder_note = os.linesep.join([
-            "#*MetTel's IPA*#",
-            'Client Reminder'
-        ])
+        reminder_note = os.linesep.join(["#*MetTel's IPA*#", "Client Reminder"])
         wait_time_before_sending_new_milestone_reminder = service_affecting_monitor._config.MONITOR_CONFIG[
-            'wait_time_before_sending_new_milestone_reminder'
+            "wait_time_before_sending_new_milestone_reminder"
         ]
         service_affecting_monitor._bruin_repository._event_bus.rpc_request.return_value = bruin_generic_200_response
         service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_500_response
 
-        with patch.object(service_affecting_monitor._config, 'CURRENT_ENVIRONMENT', 'production'):
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._send_reminder(detail_object)
 
         service_affecting_monitor._was_last_reminder_sent_recently.assert_called_once_with(
-            [],
-            last_documentation_cycle_start_date,
-            wait_time_before_sending_new_milestone_reminder
+            [], last_documentation_cycle_start_date, wait_time_before_sending_new_milestone_reminder
         )
         service_affecting_monitor._bruin_repository.send_reminder_email_milestone_notification.assert_awaited_once_with(
-            ticket_id,
-            serial_number
+            ticket_id, serial_number
         )
         service_affecting_monitor._append_reminder_note.assert_awaited_once_with(
             ticket_id,
@@ -4006,6 +4865,5 @@ class TestServiceAffectingMonitor:
         )
         service_affecting_monitor._notifications_repository.notify_successful_reminder_note_append.assert_not_awaited()
         service_affecting_monitor._logger.error.assert_called_once_with(
-            f'Reminder note of edge {serial_number} could not be appended to ticket'
-            f' {ticket_id}!'
+            f"Reminder note of edge {serial_number} could not be appended to ticket" f" {ticket_id}!"
         )

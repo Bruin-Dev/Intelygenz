@@ -14,7 +14,7 @@ class HostnameFilter(logging.Filter):
 class TimeZoneNaiveFormatter(logging.Formatter):
     def formatTime(self, record, datefmt=None):
         now = datetime.utcnow()
-        return now.strftime('%Y-%m-%d %H:%M:%S')
+        return now.strftime("%Y-%m-%d %H:%M:%S")
 
 
 class LoggerClient:
@@ -23,11 +23,11 @@ class LoggerClient:
         self._environment_name = config.ENVIRONMENT_NAME
 
     def get_logger(self):
-        logger = logging.getLogger(self._config['name'])
+        logger = logging.getLogger(self._config["name"])
         logger.propagate = False
-        logger.setLevel(self._config['level'])
-        log_handler = self._config['stream_handler']
-        formatter = TimeZoneNaiveFormatter(self._config['format'])
+        logger.setLevel(self._config["level"])
+        log_handler = self._config["stream_handler"]
+        formatter = TimeZoneNaiveFormatter(self._config["format"])
         log_handler.setFormatter(formatter)
         logger.addFilter(HostnameFilter())
         logger.addHandler(log_handler)

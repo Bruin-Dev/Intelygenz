@@ -5,7 +5,6 @@ from config import testconfig as config
 
 
 class TestNewTaggedEmailsRepository:
-
     def instance_test(self, logger, notifications_repository, storage_repository):
         new_tagged_emails_repository = NewTaggedEmailsRepository(
             logger,
@@ -27,7 +26,7 @@ class TestNewTaggedEmailsRepository:
     def get_email_details_test(self, new_tagged_emails_repository):
         email_id = 1234
         key = f"archived_email_{email_id}"
-        expected_result = {'email_id': email_id, 'tag': 1234}
+        expected_result = {"email_id": email_id, "tag": 1234}
 
         storage_repository = Mock()
         new_tagged_emails_repository._storage_repository = storage_repository

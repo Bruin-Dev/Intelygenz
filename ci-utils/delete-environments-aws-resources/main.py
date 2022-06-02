@@ -1,32 +1,41 @@
 #!/bin/python
 
 
-import sys
 import getopt
-import re
 import logging
+import re
+import sys
 
-import ecs as ecs_module
-import redis as redis_module
 import alb as alb_module
-import security_groups as security_groups_module
-import metrics as metrics_module
-import s3 as s3_module
-import route53 as route53_module
 import cloud_formation as cloud_formation_module
-
+import ecs as ecs_module
+import metrics as metrics_module
+import redis as redis_module
+import route53 as route53_module
+import s3 as s3_module
+import security_groups as security_groups_module
 
 logging.basicConfig(level=logging.INFO)
 
 
 def _print_usage():
-    print('main.py -e <environment> [-a] | [-c] [-d] [-r] [-l] [-s] [-m] [-z] [-f] [-b]')
+    print("main.py -e <environment> [-a] | [-c] [-d] [-r] [-l] [-s] [-m] [-z] [-f] [-b]")
 
 
-def _delete_all(environment, ecs_instance, redis_instance, alb_instance, security_groups_instance,
-                metrics_instance, s3_instance, route53_instance, cloudformation_instance):
-    logging.info("There are going to be deleted all AWS resources associated with the environment {}"
-                 .format(environment))
+def _delete_all(
+    environment,
+    ecs_instance,
+    redis_instance,
+    alb_instance,
+    security_groups_instance,
+    metrics_instance,
+    s3_instance,
+    route53_instance,
+    cloudformation_instance,
+):
+    logging.info(
+        "There are going to be deleted all AWS resources associated with the environment {}".format(environment)
+    )
     ecs_instance.delete_ecs_cluster(environment)
     redis_instance.delete_redis_resources(environment)
     alb_instance.delete_alb(environment)
@@ -41,10 +50,23 @@ if __name__ == "__main__":
     argv = sys.argv[1:]
 
     try:
-        opts, args = getopt.getopt(argv, "he:acdrlsmbzf",
-                                   ["environment=", "all", "ecs-cluster", "servicediscovery", "redis-cluster",
-                                    "application-load-balancer",
-                                    "security-groups", "metrics", "buckets", "hosted-zones", "cloud-formation"])
+        opts, args = getopt.getopt(
+            argv,
+            "he:acdrlsmbzf",
+            [
+                "environment=",
+                "all",
+                "ecs-cluster",
+                "servicediscovery",
+                "redis-cluster",
+                "application-load-balancer",
+                "security-groups",
+                "metrics",
+                "buckets",
+                "hosted-zones",
+                "cloud-formation",
+            ],
+        )
     except getopt.GetoptError:
         _print_usage()
         sys.exit(2)
@@ -67,12 +89,21 @@ if __name__ == "__main__":
 
     _, environment = opts.pop(0)
     if delete_all:
-        _delete_all(environment, ecs_instance, redis_instance, alb_instance, security_groups_instance, metrics_instance,
-                    s3_instance, route53_instance, cloud_formation_instance)
+        _delete_all(
+            environment,
+            ecs_instance,
+            redis_instance,
+            alb_instance,
+            security_groups_instance,
+            metrics_instance,
+            s3_instance,
+            route53_instance,
+            cloud_formation_instance,
+        )
         sys.exit(0)
 
     for opt, _ in opts:
-        if opt == '-h':
+        if opt == "-h":
             _print_usage()
             sys.exit()
         elif opt in ("-d", "--service-discovery"):

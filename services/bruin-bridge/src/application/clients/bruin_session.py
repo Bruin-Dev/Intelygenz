@@ -1,6 +1,6 @@
 from http import HTTPStatus
 from logging import Logger
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 import aiohttp
 import humps
@@ -20,6 +20,7 @@ class BruinSession:
     """
     Manages the Bruin http session.
     """
+
     session: ClientSession
     base_url: str
     logger: Logger
@@ -29,7 +30,7 @@ class BruinSession:
     def __post_init__(self):
         self.logger.info(f"Started Bruin session")
 
-    async def get(self, request: 'BruinGetRequest') -> 'BruinResponse':
+    async def get(self, request: "BruinGetRequest") -> "BruinResponse":
         self.logger.debug(f"get(request={request})")
 
         url = f"{self.base_url}{request.path}"
@@ -53,7 +54,7 @@ class BruinSession:
             self.logger.error(f"get(request={request}) => UnexpectedError: {e}")
             return BruinResponse(body=f"Unexpected error: {e}", status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
-    async def post(self, request: 'BruinPostRequest') -> 'BruinResponse':
+    async def post(self, request: "BruinPostRequest") -> "BruinResponse":
         self.logger.debug(f"post(request={request}")
 
         url = f"{self.base_url}{request.path}"
@@ -61,10 +62,7 @@ class BruinSession:
 
         try:
             client_response = await self.session.post(
-                url,
-                headers=headers,
-                json=request.body.dict(by_alias=True),
-                ssl=False
+                url, headers=headers, json=request.body.dict(by_alias=True), ssl=False
             )
             response = await BruinResponse.from_client_response(client_response)
 
@@ -82,10 +80,7 @@ class BruinSession:
             return BruinResponse(body=f"Unexpected error: {e}", status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
     def bruin_headers(self) -> Dict[str, str]:
-        return {
-            "authorization": f"Bearer {self.access_token}",
-            **COMMON_HEADERS
-        }
+        return {"authorization": f"Bearer {self.access_token}", **COMMON_HEADERS}
 
 
 class BruinResponse(BaseModel):
@@ -114,7 +109,7 @@ class BruinGetRequest(BruinRequest):
 
 
 class BruinPostRequest(BruinRequest):
-    body: 'BruinPostBody'
+    body: "BruinPostBody"
 
 
 class BruinPostBody(BaseModel):

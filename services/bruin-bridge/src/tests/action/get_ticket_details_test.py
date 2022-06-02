@@ -7,7 +7,6 @@ from asynctest import CoroutineMock
 
 
 class TestGetTicketDetails:
-
     def instance_test(self):
         logger = Mock()
         event_bus = Mock()
@@ -25,14 +24,14 @@ class TestGetTicketDetails:
         request_id = "123"
         response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
         msg = {
-            'request_id': request_id,
-            'response_topic': response_topic,
+            "request_id": request_id,
+            "response_topic": response_topic,
         }
-        ticket_details = {"body": {'ticket_details': 'Some ticket details'}, "status": 400}
+        ticket_details = {"body": {"ticket_details": "Some ticket details"}, "status": 400}
         send_details_response = {
-            'request_id': request_id,
-            'body': 'Must include "body" in request',
-            'status': 400,
+            "request_id": request_id,
+            "body": 'Must include "body" in request',
+            "status": 400,
         }
 
         event_bus = Mock()
@@ -45,9 +44,7 @@ class TestGetTicketDetails:
         await ticket_details.send_ticket_details(msg)
 
         ticket_details._bruin_repository.get_ticket_details.assert_not_awaited()
-        ticket_details._event_bus.publish_message.assert_awaited_once_with(
-            response_topic, send_details_response
-        )
+        ticket_details._event_bus.publish_message.assert_awaited_once_with(response_topic, send_details_response)
 
     @pytest.mark.asyncio
     async def send_ticket_details_no_ticket_id_test(self):
@@ -55,15 +52,15 @@ class TestGetTicketDetails:
         request_id = "123"
         response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
         msg = {
-            'request_id': request_id,
-            'body': {},
-            'response_topic': response_topic,
+            "request_id": request_id,
+            "body": {},
+            "response_topic": response_topic,
         }
-        ticket_details = {"body": {'ticket_details': 'Some ticket details'}, "status": 400}
+        ticket_details = {"body": {"ticket_details": "Some ticket details"}, "status": 400}
         send_details_response = {
-            'request_id': request_id,
-            'body': 'You must include ticket_id in the request',
-            'status': 400,
+            "request_id": request_id,
+            "body": "You must include ticket_id in the request",
+            "status": 400,
         }
 
         event_bus = Mock()
@@ -76,9 +73,7 @@ class TestGetTicketDetails:
         await ticket_details.send_ticket_details(msg)
 
         ticket_details._bruin_repository.get_ticket_details.assert_not_awaited()
-        ticket_details._event_bus.publish_message.assert_awaited_once_with(
-            response_topic, send_details_response
-        )
+        ticket_details._event_bus.publish_message.assert_awaited_once_with(response_topic, send_details_response)
 
     @pytest.mark.asyncio
     async def send_ticket_details_200_test(self):
@@ -87,17 +82,15 @@ class TestGetTicketDetails:
         response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
         ticket_id = 123
         msg = {
-            'request_id': request_id,
-            'response_topic': response_topic,
-            'body': {
-                    'ticket_id': ticket_id
-            },
+            "request_id": request_id,
+            "response_topic": response_topic,
+            "body": {"ticket_id": ticket_id},
         }
-        ticket_details = {"body": {'ticket_details': 'Some ticket details'}, "status": 200}
+        ticket_details = {"body": {"ticket_details": "Some ticket details"}, "status": 200}
         send_details_response = {
-            'request_id': request_id,
-            'body': ticket_details["body"],
-            'status': 200,
+            "request_id": request_id,
+            "body": ticket_details["body"],
+            "status": 200,
         }
 
         event_bus = Mock()
@@ -110,6 +103,4 @@ class TestGetTicketDetails:
         await ticket_details.send_ticket_details(msg)
 
         ticket_details._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        ticket_details._event_bus.publish_message.assert_awaited_once_with(
-            response_topic, send_details_response
-        )
+        ticket_details._event_bus.publish_message.assert_awaited_once_with(response_topic, send_details_response)

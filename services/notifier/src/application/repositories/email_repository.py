@@ -1,5 +1,4 @@
 class EmailRepository:
-
     def __init__(self, config, email_client, logger):
         self._config = config
         self._email_client = email_client

@@ -3,14 +3,9 @@ from config import testconfig as config
 
 
 class TestNewCreatedTicketsRepository:
-
     def instance_test(self, logger, storage_repository):
 
-        new_created_tickets_repository = NewCreatedTicketsRepository(
-            logger,
-            config,
-            storage_repository
-        )
+        new_created_tickets_repository = NewCreatedTicketsRepository(logger, config, storage_repository)
 
         assert new_created_tickets_repository._logger is logger
         assert new_created_tickets_repository._config is config

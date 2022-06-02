@@ -1,8 +1,8 @@
-import sys
-import requests
-import hmac
 import hashlib
+import hmac
+import sys
 
+import requests
 
 SIGNATURE_SECRET_KEY = "dev-shared-secret-body-signature"
 EMAIL_WEBHOOK_URL = "http://localhost:5055/api/email-tagger-webhook/ticket"

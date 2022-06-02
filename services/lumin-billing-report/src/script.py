@@ -2,18 +2,16 @@ import asyncio
 import base64
 import logging
 import pathlib
-
 from unittest.mock import Mock
 
 from application.actions.billing_report import BillingReport
 from application.clients.lumin_client import LuminBillingClient
-from application.repositories.template_renderer import TemplateRenderer
 from application.repositories.lumin_repository import LuminBillingRepository
+from application.repositories.template_renderer import TemplateRenderer
 from config import config
 
 
 class ScriptContainer:
-
     def __init__(self):
         self._logger = logging.getLogger(__name__)
         # init clients
@@ -30,7 +28,7 @@ class ScriptContainer:
             template_renderer=self._template_renderer,
             scheduler=Mock(),
             logger=self._logger,
-            config=config.BILLING_REPORT_CONFIG
+            config=config.BILLING_REPORT_CONFIG,
         )
 
     async def run_report(self):

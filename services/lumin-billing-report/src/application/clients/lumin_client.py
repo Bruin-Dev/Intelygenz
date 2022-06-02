@@ -1,10 +1,9 @@
-from datetime import datetime
 import logging
+from datetime import datetime
 from typing import List
 
 import aiohttp
-from tenacity import retry, after_log, stop_after_delay, wait_exponential
-from tenacity import RetryError
+from tenacity import RetryError, after_log, retry, stop_after_delay, wait_exponential
 
 
 class LuminClientError(Exception):
@@ -27,11 +26,11 @@ class LuminBillingClient:
         self.headers.setdefault("Content-Type", "application/json")
 
     async def get_billing_data_for_period(
-            self,
-            billing_types: List[str],
-            start: datetime,
-            end: datetime,
-            start_token: str = "",
+        self,
+        billing_types: List[str],
+        start: datetime,
+        end: datetime,
+        start_token: str = "",
     ) -> dict:
         """
         Retrieve billing data for given billing_types, start date and end date
@@ -45,18 +44,15 @@ class LuminBillingClient:
 
         @retry(
             after=after_log(self.logger, logging.WARNING),
-            wait=wait_exponential(multiplier=config['multiplier'], min=config['min']),
-            stop=stop_after_delay(config['stop_delay']))
+            wait=wait_exponential(multiplier=config["multiplier"], min=config["min"]),
+            stop=stop_after_delay(config["stop_delay"]),
+        )
         async def do_request(session, data):
             async with session.post(config["uri"], json=data, raise_for_status=True) as r:
                 # raise for status to ensure retries
                 return await r.json()
 
-        d = {
-            "type": ",".join(billing_types),
-            "start": str(start),
-            "end": str(end)
-        }
+        d = {"type": ",".join(billing_types), "start": str(start), "end": str(end)}
 
         if start_token:
             d["start_token"] = start_token
@@ -66,11 +62,7 @@ class LuminBillingClient:
                 return await do_request(s, d)
             except RetryError as exc:
                 # raise as custom error
-                msg = "Could not connect to {} with headers {}, body {}".format(
-                    self.config["uri"],
-                    self.headers,
-                    d
-                )
+                msg = "Could not connect to {} with headers {}, body {}".format(self.config["uri"], self.headers, d)
 
                 self.logger.exception(msg)
                 raise LuminClientError(msg) from exc

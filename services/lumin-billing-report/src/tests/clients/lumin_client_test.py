@@ -1,10 +1,8 @@
 from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock
 
-from aioresponses import aioresponses
-
 import pytest
-
+from aioresponses import aioresponses
 from application.clients.lumin_client import LuminBillingClient, LuminClientError
 from config.testconfig import LUMIN_CONFIG as testconfig
 
@@ -26,7 +24,7 @@ def mock_response():
                 "host_id": "default",
                 "id": "MDAwMDAwMDAwMDAwMDAwMDYyODQwNTU1NDQ4NTY1NzY=",
                 "timestamp": "2019-02-24T21:29:36.798081+00:00",
-                "type": "billing.scheduled"
+                "type": "billing.scheduled",
             },
             {
                 "conversation_id": "5711381785477120",
@@ -34,15 +32,14 @@ def mock_response():
                 "host_id": "default",
                 "id": "MDAwMDAwMDAwMDAwMDAwMDYzMDY4ODc1OTEwMDIxMTI=",
                 "timestamp": "2019-02-24T21:36:01.295808+00:00",
-                "type": "billing.scheduled"
-            }
-        ]
+                "type": "billing.scheduled",
+            },
+        ],
     }
 
 
 @pytest.mark.asyncio
 class TestLuminBillingClient:
-
     def instance_test(self, test_config):
         logger = Mock()
         client = LuminBillingClient(test_config, logger=logger)
@@ -54,8 +51,8 @@ class TestLuminBillingClient:
         client = LuminBillingClient(test_config, logger=logger)
 
         assert isinstance(client.headers, dict)
-        assert 'Bearer' in client.headers["Authorization"]
-        assert 'foobarbaz' in client.headers["Authorization"]
+        assert "Bearer" in client.headers["Authorization"]
+        assert "foobarbaz" in client.headers["Authorization"]
 
     async def get_billing_data_for_period_test(self, test_config, mock_response):
         with aioresponses() as m:

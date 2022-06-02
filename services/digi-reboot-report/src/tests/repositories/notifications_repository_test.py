@@ -1,20 +1,15 @@
 from datetime import datetime, timedelta
-from unittest.mock import Mock
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
-
-from asynctest import CoroutineMock
-from shortuuid import uuid
-
 from application.repositories import notifications_repository as notifications_repository_module
 from application.repositories.notifications_repository import NotificationsRepository
-
+from asynctest import CoroutineMock
 from config import testconfig
-
+from shortuuid import uuid
 
 uuid_ = uuid()
-uuid_mock = patch.object(notifications_repository_module, 'uuid', return_value=uuid_)
+uuid_mock = patch.object(notifications_repository_module, "uuid", return_value=uuid_)
 
 
 class TestNotificationsRepository:
@@ -43,8 +38,8 @@ class TestNotificationsRepository:
         event_bus.rpc_request.assert_awaited_once_with(
             "notification.slack.request",
             {
-                'request_id': uuid_,
-                'message': f"[{notifications_repository._config.LOG_CONFIG['name']}]: {message}",
+                "request_id": uuid_,
+                "message": f"[{notifications_repository._config.LOG_CONFIG['name']}]: {message}",
             },
             timeout=10,
         )
@@ -75,10 +70,10 @@ class TestNotificationsRepository:
         notifications_repository = NotificationsRepository(event_bus, config)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=datetime_now)
-        with patch.object(notifications_repository_module, 'datetime', new=datetime_mock):
+        with patch.object(notifications_repository_module, "datetime", new=datetime_mock):
             with uuid_mock:
                 await notifications_repository.send_email("test.csv")
 
         assert event_bus.rpc_request.call_args[0][0] == "notification.email.request"
-        assert event_bus.rpc_request.call_args[0][1]['email_data']['html'] == html
-        assert event_bus.rpc_request.call_args[0][1]['email_data']['attachments'][0]['name'] == 'digi_reboot_report.csv'
+        assert event_bus.rpc_request.call_args[0][1]["email_data"]["html"] == html
+        assert event_bus.rpc_request.call_args[0][1]["email_data"]["attachments"][0]["name"] == "digi_reboot_report.csv"

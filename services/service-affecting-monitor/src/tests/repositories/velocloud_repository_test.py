@@ -1,17 +1,16 @@
-import pytest
-
 from datetime import datetime, timedelta
 from unittest.mock import patch
-from shortuuid import uuid
-from asynctest import CoroutineMock
 
+import pytest
 from application import AffectingTroubles
-from application.repositories import velocloud_repository as velocloud_repository_module
 from application.repositories import nats_error_response
+from application.repositories import velocloud_repository as velocloud_repository_module
+from asynctest import CoroutineMock
 from config import testconfig
+from shortuuid import uuid
 
 uuid_ = uuid()
-uuid_mock = patch.object(velocloud_repository_module, 'uuid', return_value=uuid_)
+uuid_mock = patch.object(velocloud_repository_module, "uuid", return_value=uuid_)
 
 
 class TestVelocloudRepository:
@@ -23,12 +22,17 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_links_metrics_by_host__metrics_retrieved_test(
-            self, velocloud_repository, make_get_links_metrics_request, make_metrics_for_link,
-            make_list_of_link_metrics, make_rpc_response):
-        velocloud_host = 'mettel.velocloud.net'
+        self,
+        velocloud_repository,
+        make_get_links_metrics_request,
+        make_metrics_for_link,
+        make_list_of_link_metrics,
+        make_rpc_response,
+    ):
+        velocloud_host = "mettel.velocloud.net"
         interval = {
-            'start': datetime.now() - timedelta(minutes=30),
-            'end': datetime.now(),
+            "start": datetime.now() - timedelta(minutes=30),
+            "end": datetime.now(),
         }
 
         link_1_metrics = make_metrics_for_link(link_id=1)
@@ -58,11 +62,12 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_links_metrics_by_host__rpc_request_failing_test(
-            self, velocloud_repository, make_get_links_metrics_request):
-        velocloud_host = 'mettel.velocloud.net'
+        self, velocloud_repository, make_get_links_metrics_request
+    ):
+        velocloud_host = "mettel.velocloud.net"
         interval = {
-            'start': datetime.now() - timedelta(minutes=30),
-            'end': datetime.now(),
+            "start": datetime.now() - timedelta(minutes=30),
+            "end": datetime.now(),
         }
 
         request = make_get_links_metrics_request(
@@ -86,11 +91,12 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_links_metrics_by_host__rpc_request_has_not_2xx_status_test(
-            self, velocloud_repository, make_get_links_metrics_request, velocloud_500_response):
-        velocloud_host = 'mettel.velocloud.net'
+        self, velocloud_repository, make_get_links_metrics_request, velocloud_500_response
+    ):
+        velocloud_host = "mettel.velocloud.net"
         interval = {
-            'start': datetime.now() - timedelta(minutes=30),
-            'end': datetime.now(),
+            "start": datetime.now() - timedelta(minutes=30),
+            "end": datetime.now(),
         }
 
         request = make_get_links_metrics_request(
@@ -114,7 +120,8 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_all_links_metrics__all_rpc_requests_have_not_2xx_status_test(
-            self, velocloud_repository, make_list_of_link_metrics, make_rpc_response, velocloud_500_response):
+        self, velocloud_repository, make_list_of_link_metrics, make_rpc_response, velocloud_500_response
+    ):
         velocloud_host_1 = "mettel.velocloud.net"
         velocloud_host_2 = "metvco03.mettel.net"
         velocloud_host_1_enterprise_1_id = 100
@@ -123,12 +130,12 @@ class TestVelocloudRepository:
 
         velo_filter_mock = {
             velocloud_host_1: [velocloud_host_1_enterprise_1_id, velocloud_host_2_enterprise_1_id],
-            velocloud_host_2: [velocloud_host_1_enterprise_2_id]
+            velocloud_host_2: [velocloud_host_1_enterprise_2_id],
         }
 
         interval = {
-            'start': datetime.now() - timedelta(minutes=30),
-            'end': datetime.now(),
+            "start": datetime.now() - timedelta(minutes=30),
+            "end": datetime.now(),
         }
 
         links_metrics = make_list_of_link_metrics()
@@ -141,7 +148,7 @@ class TestVelocloudRepository:
         velocloud_repository.get_links_metrics_by_host.return_value = velocloud_500_response
 
         custom_monitor_config = velocloud_repository._config.MONITOR_CONFIG.copy()
-        custom_monitor_config['velo_filter'] = velo_filter_mock
+        custom_monitor_config["velo_filter"] = velo_filter_mock
         with patch.dict(velocloud_repository._config.MONITOR_CONFIG, custom_monitor_config):
             with uuid_mock:
                 result = await velocloud_repository.get_all_links_metrics(interval)
@@ -152,7 +159,8 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_all_links_metrics__all_rpc_requests_succeed_test(
-            self, velocloud_repository, make_metrics_for_link, make_list_of_link_metrics, make_rpc_response):
+        self, velocloud_repository, make_metrics_for_link, make_list_of_link_metrics, make_rpc_response
+    ):
         velocloud_host_1 = "mettel.velocloud.net"
         velocloud_host_2 = "metvco02.mettel.net"
         velocloud_host_3 = "metvco03.mettel.net"
@@ -169,8 +177,8 @@ class TestVelocloudRepository:
         }
 
         interval = {
-            'start': datetime.now() - timedelta(minutes=30),
-            'end': datetime.now(),
+            "start": datetime.now() - timedelta(minutes=30),
+            "end": datetime.now(),
         }
 
         link_1_metrics = make_metrics_for_link(link_id=1)
@@ -220,7 +228,7 @@ class TestVelocloudRepository:
         ]
 
         custom_monitor_config = velocloud_repository._config.MONITOR_CONFIG.copy()
-        custom_monitor_config['velo_filter'] = velo_filter_mock
+        custom_monitor_config["velo_filter"] = velo_filter_mock
         with patch.dict(velocloud_repository._config.MONITOR_CONFIG, custom_monitor_config):
             with uuid_mock:
                 result = await velocloud_repository.get_all_links_metrics(interval)
@@ -236,13 +244,13 @@ class TestVelocloudRepository:
         trouble = AffectingTroubles.LATENCY
         current_datetime = frozen_datetime.now()
 
-        lookup_interval = velocloud_repository._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble]
+        lookup_interval = velocloud_repository._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
         interval = {
-            'start': current_datetime - timedelta(minutes=lookup_interval),
-            'end': current_datetime,
+            "start": current_datetime - timedelta(minutes=lookup_interval),
+            "end": current_datetime,
         }
 
-        with patch.object(velocloud_repository_module, 'datetime', new=frozen_datetime):
+        with patch.object(velocloud_repository_module, "datetime", new=frozen_datetime):
             await velocloud_repository.get_links_metrics_for_latency_checks()
 
         velocloud_repository.get_all_links_metrics.assert_awaited_once_with(interval=interval)
@@ -252,13 +260,13 @@ class TestVelocloudRepository:
         trouble = AffectingTroubles.PACKET_LOSS
         current_datetime = frozen_datetime.now()
 
-        lookup_interval = velocloud_repository._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble]
+        lookup_interval = velocloud_repository._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
         interval = {
-            'start': current_datetime - timedelta(minutes=lookup_interval),
-            'end': current_datetime,
+            "start": current_datetime - timedelta(minutes=lookup_interval),
+            "end": current_datetime,
         }
 
-        with patch.object(velocloud_repository_module, 'datetime', new=frozen_datetime):
+        with patch.object(velocloud_repository_module, "datetime", new=frozen_datetime):
             await velocloud_repository.get_links_metrics_for_packet_loss_checks()
 
         velocloud_repository.get_all_links_metrics.assert_awaited_once_with(interval=interval)
@@ -268,13 +276,13 @@ class TestVelocloudRepository:
         trouble = AffectingTroubles.JITTER
         current_datetime = frozen_datetime.now()
 
-        lookup_interval = velocloud_repository._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble]
+        lookup_interval = velocloud_repository._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
         interval = {
-            'start': current_datetime - timedelta(minutes=lookup_interval),
-            'end': current_datetime,
+            "start": current_datetime - timedelta(minutes=lookup_interval),
+            "end": current_datetime,
         }
 
-        with patch.object(velocloud_repository_module, 'datetime', new=frozen_datetime):
+        with patch.object(velocloud_repository_module, "datetime", new=frozen_datetime):
             await velocloud_repository.get_links_metrics_for_jitter_checks()
 
         velocloud_repository.get_all_links_metrics.assert_awaited_once_with(interval=interval)
@@ -284,13 +292,13 @@ class TestVelocloudRepository:
         trouble = AffectingTroubles.BANDWIDTH_OVER_UTILIZATION
         current_datetime = frozen_datetime.now()
 
-        lookup_interval = velocloud_repository._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble]
+        lookup_interval = velocloud_repository._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
         interval = {
-            'start': current_datetime - timedelta(minutes=lookup_interval),
-            'end': current_datetime,
+            "start": current_datetime - timedelta(minutes=lookup_interval),
+            "end": current_datetime,
         }
 
-        with patch.object(velocloud_repository_module, 'datetime', new=frozen_datetime):
+        with patch.object(velocloud_repository_module, "datetime", new=frozen_datetime):
             await velocloud_repository.get_links_metrics_for_bandwidth_checks()
 
         velocloud_repository.get_all_links_metrics.assert_awaited_once_with(interval=interval)
@@ -300,13 +308,13 @@ class TestVelocloudRepository:
         trouble = AffectingTroubles.BOUNCING
         current_datetime = frozen_datetime.now()
 
-        lookup_interval = velocloud_repository._config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][trouble]
+        lookup_interval = velocloud_repository._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
         interval = {
-            'start': current_datetime - timedelta(minutes=lookup_interval),
-            'end': current_datetime,
+            "start": current_datetime - timedelta(minutes=lookup_interval),
+            "end": current_datetime,
         }
 
-        with patch.object(velocloud_repository_module, 'datetime', new=frozen_datetime):
+        with patch.object(velocloud_repository_module, "datetime", new=frozen_datetime):
             await velocloud_repository.get_links_metrics_for_bouncing_checks()
 
         velocloud_repository.get_all_links_metrics.assert_awaited_once_with(interval=interval)
@@ -315,13 +323,13 @@ class TestVelocloudRepository:
     async def get_links_metrics_for_autoresolve_test(self, velocloud_repository, frozen_datetime):
         current_datetime = frozen_datetime.now()
 
-        lookup_interval = velocloud_repository._config.MONITOR_CONFIG['autoresolve']['metrics_lookup_interval_minutes']
+        lookup_interval = velocloud_repository._config.MONITOR_CONFIG["autoresolve"]["metrics_lookup_interval_minutes"]
         interval = {
-            'start': current_datetime - timedelta(minutes=lookup_interval),
-            'end': current_datetime,
+            "start": current_datetime - timedelta(minutes=lookup_interval),
+            "end": current_datetime,
         }
 
-        with patch.object(velocloud_repository_module, 'datetime', new=frozen_datetime):
+        with patch.object(velocloud_repository_module, "datetime", new=frozen_datetime):
             await velocloud_repository.get_links_metrics_for_autoresolve()
 
         velocloud_repository.get_all_links_metrics.assert_awaited_once_with(interval=interval)
@@ -330,28 +338,29 @@ class TestVelocloudRepository:
     async def get_links_metrics_for_bandwidth_reports_test(self, velocloud_repository, frozen_datetime):
         current_datetime = frozen_datetime.now()
 
-        lookup_interval = velocloud_repository._config.BANDWIDTH_REPORT_CONFIG['lookup_interval_hours']
+        lookup_interval = velocloud_repository._config.BANDWIDTH_REPORT_CONFIG["lookup_interval_hours"]
         interval = {
-            'start': current_datetime - timedelta(hours=lookup_interval),
-            'end': current_datetime,
+            "start": current_datetime - timedelta(hours=lookup_interval),
+            "end": current_datetime,
         }
 
-        with patch.object(velocloud_repository_module, 'datetime', new=frozen_datetime):
+        with patch.object(velocloud_repository_module, "datetime", new=frozen_datetime):
             await velocloud_repository.get_links_metrics_for_bandwidth_reports()
 
         velocloud_repository.get_all_links_metrics.assert_awaited_once_with(interval=interval)
 
     @pytest.mark.asyncio
-    async def get_enterprise_events__events_retrieved_test(self, velocloud_repository, frozen_datetime,
-                                                           make_get_enterprise_events_request, make_rpc_response):
-        host = 'mettel.velocloud.net'
+    async def get_enterprise_events__events_retrieved_test(
+        self, velocloud_repository, frozen_datetime, make_get_enterprise_events_request, make_rpc_response
+    ):
+        host = "mettel.velocloud.net"
         enterprise_id = 1
-        event_types = ['LINK_DEAD']
+        event_types = ["LINK_DEAD"]
         events = []
 
         config = velocloud_repository._config
         now = frozen_datetime.now()
-        minutes = config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][AffectingTroubles.BOUNCING]
+        minutes = config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][AffectingTroubles.BOUNCING]
         past_moment = now - timedelta(minutes=minutes)
 
         request = make_get_enterprise_events_request(
@@ -371,7 +380,7 @@ class TestVelocloudRepository:
         velocloud_repository._event_bus.rpc_request.return_value = response
 
         with uuid_mock:
-            with patch.object(velocloud_repository_module, 'datetime', new=frozen_datetime):
+            with patch.object(velocloud_repository_module, "datetime", new=frozen_datetime):
                 result = await velocloud_repository.get_enterprise_events(host, enterprise_id)
 
         velocloud_repository._event_bus.rpc_request.assert_awaited_once_with(
@@ -380,15 +389,16 @@ class TestVelocloudRepository:
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_enterprise_events__rpc_request_failing_test(self, velocloud_repository, frozen_datetime,
-                                                              make_get_enterprise_events_request):
-        host = 'mettel.velocloud.net'
+    async def get_enterprise_events__rpc_request_failing_test(
+        self, velocloud_repository, frozen_datetime, make_get_enterprise_events_request
+    ):
+        host = "mettel.velocloud.net"
         enterprise_id = 1
-        event_types = ['LINK_DEAD']
+        event_types = ["LINK_DEAD"]
 
         now = frozen_datetime.now()
         config = velocloud_repository._config
-        minutes = config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][AffectingTroubles.BOUNCING]
+        minutes = config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][AffectingTroubles.BOUNCING]
         past_moment = now - timedelta(minutes=minutes)
 
         request = make_get_enterprise_events_request(
@@ -404,7 +414,7 @@ class TestVelocloudRepository:
         velocloud_repository._notifications_repository.send_slack_message = CoroutineMock()
 
         with uuid_mock:
-            with patch.object(velocloud_repository_module, 'datetime', new=frozen_datetime):
+            with patch.object(velocloud_repository_module, "datetime", new=frozen_datetime):
                 result = await velocloud_repository.get_enterprise_events(host, enterprise_id)
 
         velocloud_repository._event_bus.rpc_request.assert_awaited_once_with(
@@ -415,16 +425,16 @@ class TestVelocloudRepository:
         assert result == nats_error_response
 
     @pytest.mark.asyncio
-    async def get_enterprise_events__rpc_request_has_not_2xx_status_test(self, velocloud_repository, frozen_datetime,
-                                                                         make_get_enterprise_events_request,
-                                                                         velocloud_500_response):
-        host = 'mettel.velocloud.net'
+    async def get_enterprise_events__rpc_request_has_not_2xx_status_test(
+        self, velocloud_repository, frozen_datetime, make_get_enterprise_events_request, velocloud_500_response
+    ):
+        host = "mettel.velocloud.net"
         enterprise_id = 1
-        event_types = ['LINK_DEAD']
+        event_types = ["LINK_DEAD"]
 
         now = frozen_datetime.now()
         config = velocloud_repository._config
-        minutes = config.MONITOR_CONFIG['monitoring_minutes_per_trouble'][AffectingTroubles.BOUNCING]
+        minutes = config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][AffectingTroubles.BOUNCING]
         past_moment = now - timedelta(minutes=minutes)
 
         request = make_get_enterprise_events_request(
@@ -440,7 +450,7 @@ class TestVelocloudRepository:
         velocloud_repository._notifications_repository.send_slack_message = CoroutineMock()
 
         with uuid_mock:
-            with patch.object(velocloud_repository_module, 'datetime', new=frozen_datetime):
+            with patch.object(velocloud_repository_module, "datetime", new=frozen_datetime):
                 result = await velocloud_repository.get_enterprise_events(host, enterprise_id)
 
         velocloud_repository._event_bus.rpc_request.assert_awaited_once_with(
@@ -451,13 +461,11 @@ class TestVelocloudRepository:
         assert result == velocloud_500_response
 
     @pytest.mark.asyncio
-    async def get_events_by_serial_and_interface__all_rpc_requests_have_not_2xx_status_test(self, velocloud_repository,
-                                                                                            make_edge_full_id,
-                                                                                            make_cached_edge,
-                                                                                            make_customer_cache,
-                                                                                            velocloud_500_response):
-        host_1 = 'mettel.velocloud.net'
-        host_2 = 'metvco03.mettel.net'
+    async def get_events_by_serial_and_interface__all_rpc_requests_have_not_2xx_status_test(
+        self, velocloud_repository, make_edge_full_id, make_cached_edge, make_customer_cache, velocloud_500_response
+    ):
+        host_1 = "mettel.velocloud.net"
+        host_2 = "metvco03.mettel.net"
 
         enterprise_id_1 = 1
         enterprise_id_2 = 2
@@ -486,17 +494,23 @@ class TestVelocloudRepository:
         assert result == expected
 
     @pytest.mark.asyncio
-    async def get_events_by_serial_and_interface__all_rpc_requests_succeed_test(self, velocloud_repository, make_event,
-                                                                                make_edge_full_id, make_cached_edge,
-                                                                                make_customer_cache, make_rpc_response):
-        edge_name_1 = 'Edge 1'
-        edge_name_2 = 'Edge 2'
+    async def get_events_by_serial_and_interface__all_rpc_requests_succeed_test(
+        self,
+        velocloud_repository,
+        make_event,
+        make_edge_full_id,
+        make_cached_edge,
+        make_customer_cache,
+        make_rpc_response,
+    ):
+        edge_name_1 = "Edge 1"
+        edge_name_2 = "Edge 2"
 
-        event_1 = make_event(edge_name=edge_name_1, message='Link GE1 is now DEAD')
+        event_1 = make_event(edge_name=edge_name_1, message="Link GE1 is now DEAD")
         event_2 = make_event(edge_name=edge_name_2)
 
-        host_1 = 'mettel.velocloud.net'
-        host_2 = 'metvco03.mettel.net'
+        host_1 = "mettel.velocloud.net"
+        host_2 = "metvco03.mettel.net"
 
         enterprise_id_1 = 1
         enterprise_id_2 = 2
@@ -505,9 +519,9 @@ class TestVelocloudRepository:
         edge_2_full_id = make_edge_full_id(host=host_1, enterprise_id=enterprise_id_2)
         edge_3_full_id = make_edge_full_id(host=host_2, enterprise_id=enterprise_id_1)
 
-        edge_1_serial = 'VC1111111'
-        edge_2_serial = 'VC2222222'
-        edge_3_serial = 'VC3333333'
+        edge_1_serial = "VC1111111"
+        edge_2_serial = "VC2222222"
+        edge_3_serial = "VC3333333"
 
         edge_1 = make_cached_edge(full_id=edge_1_full_id, serial_number=edge_1_serial, name=edge_name_1)
         edge_2 = make_cached_edge(full_id=edge_2_full_id, serial_number=edge_2_serial)
@@ -533,19 +547,18 @@ class TestVelocloudRepository:
         velocloud_repository.get_enterprise_events.assert_any_await(host_2, enterprise_id_1)
 
         expected = {
-            edge_1_serial: {
-                'GE1': [event_1]
-            },
+            edge_1_serial: {"GE1": [event_1]},
         }
 
         assert result == expected
 
-    def structure_edges_by_host_and_enterprise_test(self, velocloud_repository, make_edge_full_id, make_cached_edge,
-                                                    make_customer_cache):
-        edge_1_full_id = make_edge_full_id(host='mettel.velocloud.net', enterprise_id=1)
-        edge_2_full_id = make_edge_full_id(host='mettel.velocloud.net', enterprise_id=2)
-        edge_3_full_id = make_edge_full_id(host='metvco03.mettel.net', enterprise_id=1)
-        edge_4_full_id = make_edge_full_id(host='metvco03.mettel.net', enterprise_id=1)
+    def structure_edges_by_host_and_enterprise_test(
+        self, velocloud_repository, make_edge_full_id, make_cached_edge, make_customer_cache
+    ):
+        edge_1_full_id = make_edge_full_id(host="mettel.velocloud.net", enterprise_id=1)
+        edge_2_full_id = make_edge_full_id(host="mettel.velocloud.net", enterprise_id=2)
+        edge_3_full_id = make_edge_full_id(host="metvco03.mettel.net", enterprise_id=1)
+        edge_4_full_id = make_edge_full_id(host="metvco03.mettel.net", enterprise_id=1)
 
         edge_1 = make_cached_edge(full_id=edge_1_full_id)
         edge_2 = make_cached_edge(full_id=edge_2_full_id)
@@ -556,21 +569,28 @@ class TestVelocloudRepository:
         result = velocloud_repository._structure_edges_by_host_and_enterprise(customer_cache)
 
         expected = {
-            'mettel.velocloud.net': {
+            "mettel.velocloud.net": {
                 1: [edge_1],
                 2: [edge_2],
             },
-            'metvco03.mettel.net': {
+            "metvco03.mettel.net": {
                 1: [edge_3, edge_4],
             },
         }
 
         assert result == expected
 
-    def filter_links_metrics_by_client_test(self, velocloud_repository, make_edge, make_metrics_for_link,
-                                            make_edge_full_id, make_bruin_client_info, make_cached_edge,
-                                            make_customer_cache):
-        host = 'mettel.velocloud.net'
+    def filter_links_metrics_by_client_test(
+        self,
+        velocloud_repository,
+        make_edge,
+        make_metrics_for_link,
+        make_edge_full_id,
+        make_bruin_client_info,
+        make_cached_edge,
+        make_customer_cache,
+    ):
+        host = "mettel.velocloud.net"
         enterprise_id = 123
         edge_id = 456
         client_id = 789

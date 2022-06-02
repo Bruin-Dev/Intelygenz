@@ -17,15 +17,15 @@ class UtilsRepository:
     @staticmethod
     def humanize_bps(bps: int) -> str:
         if 1000 <= bps < 1000000:
-            return f'{round((bps / 1000), 3)} Kbps'
+            return f"{round((bps / 1000), 3)} Kbps"
         if 1000000 <= bps < 1000000000:
-            return f'{round((bps / 1000000), 3)} Mbps'
+            return f"{round((bps / 1000000), 3)} Mbps"
         if bps >= 1000000000:
-            return f'{round((bps / 1000000000), 3)} Gbps'
+            return f"{round((bps / 1000000000), 3)} Gbps"
 
-        return f'{round(bps, 3)} bps'
+        return f"{round(bps, 3)} bps"
 
     @staticmethod
     def get_interface_from_event(event):
-        match = EVENT_INTERFACE_REGEX.match(event['message'])
-        return match.group('interface') or match.group('link_interface')
+        match = EVENT_INTERFACE_REGEX.match(event["message"])
+        return match.group("interface") or match.group("link_interface")

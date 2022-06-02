@@ -1,13 +1,13 @@
-import pytest
-from unittest.mock import Mock
-from asynctest import CoroutineMock
-from application.actions.edge_events_for_alert import EventEdgesForAlert
-from igz.packages.eventbus.eventbus import EventBus
 import json
+from unittest.mock import Mock
+
+import pytest
+from application.actions.edge_events_for_alert import EventEdgesForAlert
+from asynctest import CoroutineMock
+from igz.packages.eventbus.eventbus import EventBus
 
 
 class TestEventEdgesForAlert:
-
     def instance_test(self):
         mock_logger = Mock()
         storage_manager = Mock()
@@ -37,8 +37,8 @@ class TestEventEdgesForAlert:
                 "start_date": "2019-07-26 14:19:45.334427",
                 "end_date": "now",
                 "limit": 200,
-                "filter": ['EDGE_UP']
-            }
+                "filter": ["EDGE_UP"],
+            },
         }
         await edges_for_alert.report_edge_event(edge_msg)
         assert velocloud_repo.get_all_edge_events.called
@@ -50,9 +50,11 @@ class TestEventEdgesForAlert:
         assert velocloud_repo.get_all_edge_events.call_args[0][4] == edge_msg["body"]["filter"]
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == edge_msg["response_topic"]
-        assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
-                                                            "body": "Some edge event info",
-                                                            "status": 200}
+        assert test_bus.publish_message.call_args[0][1] == {
+            "request_id": "123",
+            "body": "Some edge event info",
+            "status": 200,
+        }
         assert edges_for_alert._logger.info.called
 
     @pytest.mark.asyncio
@@ -72,8 +74,8 @@ class TestEventEdgesForAlert:
             "body": {
                 "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"},
                 "start_date": "2019-07-26 14:19:45.334427",
-                "end_date": "now"
-            }
+                "end_date": "now",
+            },
         }
         await edges_for_alert.report_edge_event(edge_msg)
         assert velocloud_repo.get_all_edge_events.called
@@ -85,9 +87,11 @@ class TestEventEdgesForAlert:
         assert velocloud_repo.get_all_edge_events.call_args[0][4] is None
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == edge_msg["response_topic"]
-        assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
-                                                            "body": "Some edge event info",
-                                                            "status": 200}
+        assert test_bus.publish_message.call_args[0][1] == {
+            "request_id": "123",
+            "body": "Some edge event info",
+            "status": 200,
+        }
         assert edges_for_alert._logger.info.called
 
     @pytest.mark.asyncio
@@ -104,19 +108,17 @@ class TestEventEdgesForAlert:
         edge_msg = {
             "request_id": "123",
             "response_topic": "alert.request.event.edge.response.123",
-            "body": {
-                "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"},
-                "end_date": "now"
-            }
+            "body": {"edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"}, "end_date": "now"},
         }
         await edges_for_alert.report_edge_event(edge_msg)
         assert not velocloud_repo.get_all_edge_events.called
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == edge_msg["response_topic"]
-        assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
-                                                            "body": 'Must include "edge", "start_date",'
-                                                                    ' "end_date" in request',
-                                                            "status": 400}
+        assert test_bus.publish_message.call_args[0][1] == {
+            "request_id": "123",
+            "body": 'Must include "edge", "start_date",' ' "end_date" in request',
+            "status": 400,
+        }
 
     @pytest.mark.asyncio
     async def report_edge_event_no_body_test(self):
@@ -137,9 +139,11 @@ class TestEventEdgesForAlert:
         assert not velocloud_repo.get_all_edge_events.called
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == edge_msg["response_topic"]
-        assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
-                                                            "body": 'Must include "body" in request',
-                                                            "status": 400}
+        assert test_bus.publish_message.call_args[0][1] == {
+            "request_id": "123",
+            "body": 'Must include "body" in request',
+            "status": 400,
+        }
 
     @pytest.mark.asyncio
     async def report_edge_event_empty_ko_test(self):
@@ -158,13 +162,11 @@ class TestEventEdgesForAlert:
             "body": {
                 "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"},
                 "start_date": "2019-07-26 14:19:45.334427",
-                "end_date": "now"
-            }
+                "end_date": "now",
+            },
         }
         await edges_for_alert.report_edge_event(edge_msg)
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == edge_msg["response_topic"]
-        assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
-                                                            "body": None,
-                                                            "status": 500}
+        assert test_bus.publish_message.call_args[0][1] == {"request_id": "123", "body": None, "status": 500}
         assert edges_for_alert._logger.info.called
