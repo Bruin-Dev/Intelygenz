@@ -120,6 +120,7 @@ INTERMAPPER_OUTAGE_MONITOR__WHITELISTED_PRODUCT_CATEGORIES_FOR_AUTORESOLVE = jso
 INTERMAPPER_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_DAY_TIME = parameters["common"]["intermapper-outage-monitor"]["grace-period-to-autoresolve-after-last-documented-outage-day-time"]
 INTERMAPPER_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_NIGHT_TIME = parameters["common"]["intermapper-outage-monitor"]["grace-period-to-autoresolve-after-last-documented-outage-night-time"]
 INTERMAPPER_OUTAGE_MONITOR__DRI_PARAMETERS_FOR_PIAB_NOTES = json.dumps(json.loads(parameters["common"]["intermapper-outage-monitor"]["dri-parameters-for-piab-notes"]))
+INTERMAPPER_OUTAGE_MONITOR__EVENTS_LOOKUP_DAYS = parameters["common"]["intermapper-outage-monitor"]["events-lookup-days"]
 
 # Last Contact Report variables
 LAST_CONTACT_REPORT__MONITORED_VELOCLOUD_HOSTS = parameters["dev"]["last-contact-report"]["monitored-velocloud-hosts"]
@@ -506,6 +507,7 @@ env_dict = {
         f"GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_DAY_TIME={INTERMAPPER_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_DAY_TIME}",
         f"GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_NIGHT_TIME={INTERMAPPER_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_NIGHT_TIME}",
         f"DRI_PARAMETERS_FOR_PIAB_NOTES={INTERMAPPER_OUTAGE_MONITOR__DRI_PARAMETERS_FOR_PIAB_NOTES}",
+        f"EVENTS_LOOKUP_DAYS={INTERMAPPER_OUTAGE_MONITOR__EVENTS_LOOKUP_DAYS}",
     ],
     os.path.join("services", "last-contact-report", "src", "config", "env"): [
         f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",

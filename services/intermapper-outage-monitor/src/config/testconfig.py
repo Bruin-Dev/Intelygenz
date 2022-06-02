@@ -54,6 +54,7 @@ INTERMAPPER_CONFIG = {
         "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei",
         "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress",
     ],
+    "events_lookup_days": 1,
     "stop_after_attempt": 0,
     "wait_multiplier": 0,
     "wait_min": 0,

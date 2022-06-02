@@ -58,6 +58,7 @@ class TestNotificationsRepository:
             "body": {
                 "email_account": config.INTERMAPPER_CONFIG["inbox_email"],
                 "email_filter": config.INTERMAPPER_CONFIG["sender_emails_list"],
+                "lookup_days": config.INTERMAPPER_CONFIG["events_lookup_days"],
             },
         }
 
@@ -99,6 +100,7 @@ class TestNotificationsRepository:
             "body": {
                 "email_account": config.INTERMAPPER_CONFIG["inbox_email"],
                 "email_filter": config.INTERMAPPER_CONFIG["sender_emails_list"],
+                "lookup_days": config.INTERMAPPER_CONFIG["events_lookup_days"],
             },
         }
 
@@ -126,6 +128,7 @@ class TestNotificationsRepository:
             "body": {
                 "email_account": config.INTERMAPPER_CONFIG["inbox_email"],
                 "email_filter": config.INTERMAPPER_CONFIG["sender_emails_list"],
+                "lookup_days": config.INTERMAPPER_CONFIG["events_lookup_days"],
             },
         }
         return_body = {"body": "Failed", "status": 400}

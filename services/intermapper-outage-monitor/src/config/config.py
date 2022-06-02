@@ -40,6 +40,7 @@ INTERMAPPER_CONFIG = {
         "product_category_list": json.loads(os.environ["WHITELISTED_PRODUCT_CATEGORIES_FOR_AUTORESOLVE"]),
     },
     "dri_parameters": json.loads(os.environ["DRI_PARAMETERS_FOR_PIAB_NOTES"]),
+    "events_lookup_days": int(os.environ["EVENTS_LOOKUP_DAYS"]),
     "stop_after_attempt": 5,
     "wait_multiplier": 1,
     "wait_min": 4,
