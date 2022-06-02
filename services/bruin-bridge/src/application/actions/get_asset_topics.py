@@ -38,9 +38,10 @@ class GetAssetTopics:
             await self._event_bus.publish_message(msg["response_topic"], response)
             return
 
-        client_id = payload.get("client_id")
-        if type(client_id) is not int:
-            self._logger.error(f"body.client_id {client_id} should be an int.")
+        try:
+            client_id = int(payload.get("client_id"))
+        except ValueError:
+            self._logger.error(f"body.client_id {payload.get('client_id')} should be an int.")
             response["body"] = WRONG_CLIENT_ID_MSG
             response["status"] = HTTPStatus.BAD_REQUEST
             await self._event_bus.publish_message(msg["response_topic"], response)
