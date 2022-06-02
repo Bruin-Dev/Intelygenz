@@ -26,7 +26,7 @@ class MetricsRepository:
         else:
             return 'Other'
 
-    def increment_tasks_autoresolved(self, client, severity='', **labels):
+    def increment_tasks_autoresolved(self, client, **labels):
         client = self._get_client_label(client)
-        labels = {'client': client, 'severity': severity, **labels, **self._STATIC_LABELS}
+        labels = {'client': client, **labels, **self._STATIC_LABELS}
         self._tasks_autoresolved.labels(**labels).inc()

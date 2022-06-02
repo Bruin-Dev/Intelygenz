@@ -36,15 +36,11 @@ class MetricsRepository:
     @staticmethod
     def _get_link_types_label(link_types):
         if not link_types:
-            return ''
+            return None
         elif len(link_types) == 1:
             return link_types[0].title()
         else:
             return 'Both'
-
-    @staticmethod
-    def _get_outage_type_label(outage_type):
-        return outage_type or 'Unknown'
 
     def increment_tasks_created(self, client, link_types, **labels):
         client = self._get_client_label(client)
@@ -64,8 +60,7 @@ class MetricsRepository:
         labels = {'client': client, 'link_types': link_types, **labels, **self._STATIC_LABELS}
         self._tasks_forwarded.labels(**labels).inc()
 
-    def increment_tasks_autoresolved(self, client, outage_type, **labels):
+    def increment_tasks_autoresolved(self, client, **labels):
         client = self._get_client_label(client)
-        outage_type = self._get_outage_type_label(outage_type)
-        labels = {'client': client, 'outage_type': outage_type, **labels, **self._STATIC_LABELS}
+        labels = {'client': client, **labels, **self._STATIC_LABELS}
         self._tasks_autoresolved.labels(**labels).inc()

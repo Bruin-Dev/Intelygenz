@@ -34,7 +34,7 @@ class MetricsRepository:
     @staticmethod
     def _get_outage_type_label(outage_types):
         if not outage_types:
-            return ''
+            return None
         elif len(outage_types) == 1:
             return outage_types[0].value
         else:
