@@ -132,9 +132,7 @@ def repair_tickets_monitor(
         new_tagged_emails_repository,
         repair_ticket_kre_repository,
         CoroutineMock(),
-        CoroutineMock(),
-        CoroutineMock(),
-        CoroutineMock(),
+        CoroutineMock()
     )
 
 

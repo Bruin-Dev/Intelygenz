@@ -20,8 +20,6 @@ from application.repositories.repair_ticket_kre_repository import RepairTicketKr
 from application.repositories.storage_repository import StorageRepository
 from application.rpc.append_note_to_ticket_rpc import AppendNoteToTicketRpc
 from application.rpc.get_asset_topics_rpc import GetAssetTopicsRpc
-from application.rpc.subscribe_user_rpc import SubscribeUserRpc
-from application.rpc.upsert_outage_ticket_rpc import UpsertOutageTicketRpc
 from config import config
 
 
@@ -81,16 +79,6 @@ class Container:
             logger=self._logger,
             timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"],
         )
-        upsert_outage_ticket_rpc = UpsertOutageTicketRpc(
-            event_bus=self._event_bus,
-            logger=self._logger,
-            timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"],
-        )
-        subscribe_user_rpc = SubscribeUserRpc(
-            event_bus=self._event_bus,
-            logger=self._logger,
-            timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"],
-        )
 
         # ACTIONS
         self._new_created_tickets_feedback = NewCreatedTicketsFeedback(
@@ -119,9 +107,7 @@ class Container:
             self._new_tagged_emails_repository,
             self._repair_ticket_repository,
             append_note_to_ticket_rpc,
-            get_asset_topics_rpc,
-            upsert_outage_ticket_rpc,
-            subscribe_user_rpc
+            get_asset_topics_rpc
         )
 
     async def start_server(self):

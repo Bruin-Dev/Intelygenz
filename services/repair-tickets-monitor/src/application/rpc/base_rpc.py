@@ -1,6 +1,6 @@
 from http import HTTPStatus
 from logging import Logger, LoggerAdapter
-from typing import Any, Optional
+from typing import Any
 
 from dataclasses import dataclass
 from igz.packages.eventbus.eventbus import EventBus
@@ -26,33 +26,14 @@ class Rpc:
         request_id = uuid()
         return RpcRequest(request_id=request_id), RpcLogger(request_id=request_id, logger=self.logger)
 
-    async def send(self, rpc_request: 'RpcRequest') -> 'RpcResponse':
+    async def send(self, request: 'RpcRequest') -> 'RpcResponse':
         """
         Send the request message and return a parsed response.
-        Responses other than OK will raise an RpcFailedError.
-        Any other raised error will be wrapped into an RpcError.
-        :raise RpcFailedError: any response that is not OK
-        :raise RpcError: if the request fails by any other means.
-        :param rpc_request: the request being sent
-        :return: a parsed response
+        :param request:
+        :return:
         """
-        logger = RpcLogger(request_id=rpc_request.request_id, logger=self.logger)
-        logger.debug(f"send(rpc_request={rpc_request})")
-
-        try:
-            request = rpc_request.dict()
-            response = await self.event_bus.rpc_request(self.topic, request, timeout=self.timeout)
-            rpc_response = RpcResponse.parse_obj(response)
-        except Exception as error:
-            raise RpcError from error
-
-        if rpc_response.is_ok():
-            logger.debug(f"event_bus.rpc_request(topic={self.topic}, request={request}) [OK]")
-        else:
-            raise RpcFailedError(request=rpc_request, response=rpc_response)
-
-        logger.debug(f"send() [OK]")
-        return rpc_response
+        response = await self.event_bus.rpc_request(self.topic, request.dict(), timeout=self.timeout)
+        return RpcResponse.parse_obj(response)
 
 
 class RpcRequest(BaseModel):
@@ -89,13 +70,3 @@ class RpcLogger(LoggerAdapter):
 
 class RpcError(Exception):
     pass
-
-
-@dataclass
-class RpcFailedError(RpcError):
-    request: RpcRequest
-    response: RpcResponse
-    message: Optional[str] = None
-
-    def __str__(self):
-        return self.__repr__()

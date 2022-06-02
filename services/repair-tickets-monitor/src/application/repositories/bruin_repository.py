@@ -321,6 +321,51 @@ class BruinRepository:
 
         return response
 
+    async def create_outage_ticket(self, client_id: int, service_numbers: List[str], contact_address: str):
+        err_msg = None
+
+        request = {
+            "request_id": uuid(),
+            "body": {
+                "client_id": client_id,
+                "service_number": service_numbers,
+                "ticket_contact": {"email": contact_address},
+            },
+        }
+
+        try:
+            self._logger.info(
+                f"Creating outage ticket for device {service_numbers} that belongs to client {client_id}..."
+            )
+            response = await self._event_bus.rpc_request("bruin.ticket.creation.outage.request", request, timeout=30)
+        except Exception as e:
+            err_msg = (
+                f"An error occurred when creating outage ticket for device {service_numbers} belong to client"
+                f"{client_id} -> {e}"
+            )
+            response = nats_error_response
+        else:
+            response_body = response["body"]
+            response_status = response["status"]
+
+            is_bruin_custom_status = response_status in (409, 471, 472, 473)
+            if response_status in range(200, 300) or is_bruin_custom_status:
+                self._logger.info(
+                    f"Outage ticket for devices {service_numbers} that belongs to client {client_id} created!"
+                )
+            else:
+                err_msg = (
+                    f"Error while creating outage ticket for devices {service_numbers} that belongs to client "
+                    f"{client_id} in {self._config.ENVIRONMENT_NAME.upper()} environment: "
+                    f"Error {response_status} - {response_body}"
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
     async def append_notes_to_ticket(self, ticket_id: int, notes: List[Dict]) -> Dict[str, int]:
         # Preparing the request to bruin-bridge
         rpc_request = {
