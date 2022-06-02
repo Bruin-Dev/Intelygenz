@@ -1,3 +1,4 @@
+import json
 from http import HTTPStatus
 from logging import Logger, LoggerAdapter
 from typing import Any, Optional
@@ -40,14 +41,14 @@ class Rpc:
         logger.debug(f"send(rpc_request={rpc_request})")
 
         try:
-            request = rpc_request.dict()
-            response = await self.event_bus.rpc_request(self.topic, request, timeout=self.timeout)
+            message = json.loads(rpc_request.json())
+            response = await self.event_bus.rpc_request(topic=self.topic, message=message, timeout=self.timeout)
             rpc_response = RpcResponse.parse_obj(response)
         except Exception as error:
             raise RpcError from error
 
         if rpc_response.is_ok():
-            logger.debug(f"event_bus.rpc_request(topic={self.topic}, request={request}) [OK]")
+            logger.debug(f"event_bus.rpc_request(topic={self.topic}, message={message}) [OK]")
         else:
             raise RpcFailedError(request=rpc_request, response=rpc_response)
 
