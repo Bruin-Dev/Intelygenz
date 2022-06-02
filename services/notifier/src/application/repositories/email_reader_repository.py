@@ -1,15 +1,21 @@
+from typing import Any, Dict, List
+
+
 class EmailReaderRepository:
     def __init__(self, config, email_reader_client, logger):
         self._config = config
         self._email_reader_client = email_reader_client
         self._logger = logger
 
-    async def get_unread_emails(self, email_account, email_filter):
+    async def get_unread_emails(self, email_account: str, email_filter: List[str], lookup_days: int) -> Dict[str, Any]:
         status = 500
         if email_account in self._config.MONITORABLE_EMAIL_ACCOUNTS.keys():
             email_password = self._config.MONITORABLE_EMAIL_ACCOUNTS[email_account]
             unread_emails = await self._email_reader_client.get_unread_messages(
-                email_account, email_password, email_filter
+                email_account,
+                email_password,
+                email_filter,
+                lookup_days,
             )
 
             if len(unread_emails) == 0:

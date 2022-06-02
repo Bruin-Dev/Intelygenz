@@ -4,6 +4,7 @@ import email.header
 import imaplib
 from datetime import datetime, timedelta
 from email.header import decode_header, make_header
+from typing import Dict, List
 
 
 class EmailReaderClient:
@@ -51,7 +52,9 @@ class EmailReaderClient:
 
         self._logger.info(f"Logged out from Gmail!")
 
-    async def get_unread_messages(self, email_account, email_password, email_filter):
+    async def get_unread_messages(
+        self, email_account: str, email_password: str, email_filter: List[str], lookup_days: int
+    ) -> List[Dict[str, str]]:
         email_server = self._login(email_account, email_password)
         if email_server is None:
             self._logger.error(
@@ -62,7 +65,7 @@ class EmailReaderClient:
         unread_messages = []
         messages = []
         for sender_email in email_filter:
-            messages += await self._search_messages(sender_email, email_server)
+            messages += await self._search_messages(sender_email, email_server, lookup_days)
 
         if messages:
             msgs = ",".join(m.decode("utf-8") for m in messages)
@@ -87,12 +90,14 @@ class EmailReaderClient:
         self._logout(email_server)
         return unread_messages
 
-    async def _search_messages(self, sender_email, email_server):
+    async def _search_messages(
+        self, sender_email: str, email_server: imaplib.IMAP4_SSL, lookup_days: int
+    ) -> List[bytes]:
 
         try:
-            todays_date = (datetime.now() - timedelta(hours=24)).strftime("%d-%b-%Y")
+            lookup_date = (datetime.now() - timedelta(days=lookup_days)).strftime("%d-%b-%Y")
             search_resp_code, messages = email_server.search(
-                None, "(UNSEEN)", f'(SINCE "{todays_date}")', f'(FROM "{sender_email}")'
+                None, "(UNSEEN)", f'(SINCE "{lookup_date}")', f'(FROM "{sender_email}")'
             )
             await asyncio.sleep(0)
             messages = messages[0].split()

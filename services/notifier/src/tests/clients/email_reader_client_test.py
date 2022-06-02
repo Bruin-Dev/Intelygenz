@@ -157,6 +157,7 @@ class TestEmailReaderClient:
         email = "fake@email.com"
         password = "123"
         email_filter = ["filter@gmail.com"]
+        lookup_days = hash("any_days")
         message_object = MessageObject()
         msg_bytes = Mock()
         msg_part = [msg_bytes, b"some_data"]
@@ -171,11 +172,11 @@ class TestEmailReaderClient:
                 email_reader_client._login = Mock(return_value=email_server)
                 email_reader_client._search_messages = CoroutineMock(return_value=[b"1234"])
                 email_reader_client._get_body = Mock(return_value=MESSAGE_1["body"])
-                unread_messages = await email_reader_client.get_unread_messages(email, password, email_filter)
+                unread_messages = await email_reader_client.get_unread_messages(email, password, email_filter, lookup_days)
 
                 email_reader_client._login.assert_called_once_with(email, password)
                 email_reader_client._logout.assert_called_once_with(email_server)
-                email_reader_client._search_messages.assert_awaited_once_with(email_filter[0], email_server)
+                email_reader_client._search_messages.assert_awaited_once_with(email_filter[0], email_server, lookup_days)
                 email_reader_client._get_body.assert_called_once_with(message_object)
                 message_1_copy = MESSAGE_1.copy()
                 message_1_copy["message"] = str(MESSAGE_1["message"])
@@ -186,6 +187,7 @@ class TestEmailReaderClient:
         email = "fake@email.com"
         password = "123"
         email_filter = ["filter@gmail.com"]
+        lookup_days = hash("any_days")
         message_object = MessageObject()
         msg_bytes = Mock()
         msg_part = [msg_bytes, b"some_data"]
@@ -200,11 +202,11 @@ class TestEmailReaderClient:
                 email_reader_client._login = Mock(return_value=email_server)
                 email_reader_client._search_messages = CoroutineMock(return_value=[])
                 email_reader_client._get_body = Mock(return_value=MESSAGE_1["body"])
-                unread_messages = await email_reader_client.get_unread_messages(email, password, email_filter)
+                unread_messages = await email_reader_client.get_unread_messages(email, password, email_filter, lookup_days)
 
                 email_reader_client._login.assert_called_once_with(email, password)
                 email_reader_client._logout.assert_called_once_with(email_server)
-                email_reader_client._search_messages.assert_awaited_once_with(email_filter[0], email_server)
+                email_reader_client._search_messages.assert_awaited_once_with(email_filter[0], email_server, lookup_days)
                 email_reader_client._get_body.assert_not_called()
                 assert unread_messages == []
 
@@ -213,6 +215,7 @@ class TestEmailReaderClient:
         email = "fake@email.com"
         password = "123"
         email_filter = ["filter@gmail.com"]
+        lookup_days = hash("any_days")
         message_object = MessageObject()
         msg_bytes = Mock()
         msg_part = [msg_bytes, b"some_data"]
@@ -227,11 +230,11 @@ class TestEmailReaderClient:
                 email_reader_client._login = Mock(return_value=email_server)
                 email_reader_client._search_messages = CoroutineMock(return_value=[b"1234"])
                 email_reader_client._get_body = Mock(return_value=MESSAGE_1["body"])
-                unread_messages = await email_reader_client.get_unread_messages(email, password, email_filter)
+                unread_messages = await email_reader_client.get_unread_messages(email, password, email_filter, lookup_days)
 
                 email_reader_client._login.assert_called_once_with(email, password)
                 email_reader_client._logout.assert_called_once_with(email_server)
-                email_reader_client._search_messages.assert_awaited_once_with(email_filter[0], email_server)
+                email_reader_client._search_messages.assert_awaited_once_with(email_filter[0], email_server, lookup_days)
                 email_reader_client._get_body.assert_not_called()
                 assert unread_messages == []
 
@@ -240,6 +243,7 @@ class TestEmailReaderClient:
         email = "fake@email.com"
         password = "123"
         email_filter = ["filter@gmail.com"]
+        lookup_days = hash("any_days")
         message_object = MessageObject()
         msg_bytes = Mock()
         msg_part = [msg_bytes, b"some_data"]
@@ -253,7 +257,7 @@ class TestEmailReaderClient:
                 email_reader_client._login = Mock(return_value=None)
                 email_reader_client._search_messages = CoroutineMock(return_value=[b"1234"])
                 email_reader_client._get_body = Mock(return_value=MESSAGE_1["body"])
-                unread_messages = await email_reader_client.get_unread_messages(email, password, email_filter)
+                unread_messages = await email_reader_client.get_unread_messages(email, password, email_filter, lookup_days)
 
                 email_reader_client._login.assert_called_once_with(email, password)
                 email_reader_client._logout.assert_not_called()
@@ -263,21 +267,23 @@ class TestEmailReaderClient:
 
     @pytest.mark.asyncio
     async def search_messages_OK_test(self, email_reader_client):
+        lookup_days = 1  # Reasonable value required, otherwise datetime::timedelta crashes
         sender_email = "filter@gmail.com"
 
         with patch.object(email_reader_client_module.imaplib.IMAP4_SSL, "search", return_value=["OK", ["mail1 mail2"]]):
             email_server = email_reader_client._create_connection()
-            data = await email_reader_client._search_messages(sender_email, email_server)
+            data = await email_reader_client._search_messages(sender_email, email_server, lookup_days)
 
             assert data == ["mail1", "mail2"]
 
     @pytest.mark.asyncio
     async def search_messages_KO_test(self, email_reader_client):
+        lookup_days = 1  # Reasonable value required, otherwise datetime::timedelta crashes
         sender_email = "filter@gmail.com"
 
         with patch.object(email_reader_client_module.imaplib.IMAP4_SSL, "search", return_value=["KO", "some data"]):
             email_server = email_reader_client._create_connection()
-            data = await email_reader_client._search_messages(sender_email, email_server)
+            data = await email_reader_client._search_messages(sender_email, email_server, lookup_days)
 
             assert data == []
 
@@ -288,10 +294,11 @@ class TestEmailReaderClient:
         response_mock.side_effect = Exception(exception_error)
         logging_message_1 = f"Unable to access the unread mails due to {exception_error}"
         sender_email = "filter@gmail.com"
+        lookup_days = 1  # Reasonable value required, otherwise datetime::timedelta crashes
 
         with patch.object(email_reader_client_module.imaplib.IMAP4_SSL, "search", side_effect=response_mock):
             email_server = email_reader_client._create_connection()
-            data = await email_reader_client._search_messages(sender_email, email_server)
+            data = await email_reader_client._search_messages(sender_email, email_server, lookup_days)
 
             email_reader_client._logger.error.assert_called_with(logging_message_1)
             assert data == []
