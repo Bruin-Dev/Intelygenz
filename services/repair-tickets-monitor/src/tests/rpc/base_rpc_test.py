@@ -1,14 +1,19 @@
 import logging
 from http import HTTPStatus
 from logging import Logger
-from typing import Callable
+from typing import Callable, Set
 from unittest.mock import Mock, ANY
 
 from asynctest import CoroutineMock
 from igz.packages.eventbus.eventbus import EventBus
+from pydantic import BaseModel
 from pytest import fixture, mark, raises
 
 from application.rpc import Rpc, RpcLogger, RpcRequest, RpcResponse, RpcFailedError, RpcError
+
+
+class SetRpcBody(BaseModel):
+    set: Set[str]
 
 
 class TestRpc:
@@ -20,6 +25,19 @@ class TestRpc:
         assert subject_request is not None
         assert subject_request == RpcRequest.construct(request_id=ANY)
         assert subject_logger.extra.get("request_id") == subject_request.request_id
+
+    @mark.asyncio
+    async def sets_are_properly_serialized_test(self, make_rpc):
+        rpc = make_rpc()
+        rpc.event_bus.rpc_request = CoroutineMock(return_value={"status": HTTPStatus.OK})
+        rpc_request = RpcRequest(request_id="any", body=SetRpcBody(set={"any_value"}))
+
+        await rpc.send(rpc_request)
+
+        rpc.event_bus.rpc_request.assert_awaited_once_with(
+            topic=ANY,
+            message={"request_id": "any", "body": {"set": ["any_value"]}},
+            timeout=ANY)
 
     @mark.asyncio
     async def responses_are_properly_parsed_test(self, make_rpc, any_rpc_request):
