@@ -9,7 +9,7 @@ from igz.packages.eventbus.eventbus import EventBus
 from pytest import mark, fixture, raises
 
 from application.rpc import RpcLogger, RpcResponse, RpcRequest, RpcFailedError
-from application.rpc.subscribe_user_rpc import SubscribeUserRpc, RequestBody
+from application.rpc.subscribe_user_rpc import SubscribeUserRpc, RequestBody, SUBSCRIPTION_TYPE
 
 
 class TestSubscribeUserRpc:
@@ -27,7 +27,7 @@ class TestSubscribeUserRpc:
         # then
         rpc.send.assert_awaited_once_with(RpcRequest.construct(
             request_id=ANY,
-            body=RequestBody(ticket_id=ticket_id, user_email=user_email)
+            body=RequestBody(ticket_id=ticket_id, user_email=user_email, subscription_type=SUBSCRIPTION_TYPE)
         ))
 
     @mark.asyncio

@@ -585,7 +585,7 @@ class RepairTicketsMonitor:
             try:
                 await self.subscribe_user_rpc(ticket_id=result.ticket_id, user_email=email_from_address)
             except RpcError:
-                self._logger.exception("email_id=%s Error while subscribing user to ticket %s", result.ticket_id)
+                self._logger.exception(f"email_id={email_id} Error while subscribing user to ticket {result.ticket_id}")
 
         return create_tickets_output
 

@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 from application.rpc import Rpc, RpcFailedError
 
 NATS_TOPIC = "bruin.subscribe.user"
+SUBSCRIPTION_TYPE = "NotesAndMilestones"
 
 
 @dataclass
@@ -46,3 +47,4 @@ class SubscribeUserRpc(Rpc):
 class RequestBody(BaseModel):
     ticket_id: str
     user_email: str = Field(repr=False)
+    subscription_type: str = SUBSCRIPTION_TYPE
