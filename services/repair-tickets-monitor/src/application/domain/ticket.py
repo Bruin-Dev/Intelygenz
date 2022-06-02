@@ -5,8 +5,8 @@ from dataclasses import dataclass
 
 @dataclass
 class Ticket:
-    id: int
-    site_id: int = None
+    id: str
+    site_id: str = None
     status: 'TicketStatus' = None
     call_type: str = None
     category: str = None

@@ -1,14 +1,15 @@
+from http import HTTPStatus
 from typing import List
 from unittest.mock import Mock, ANY
 
 from asynctest import CoroutineMock
-from dataclasses import asdict
 from pytest import mark, fixture
 
 from application.actions.repair_tickets_monitor import RepairTicketsMonitor
 from application.domain.asset import AssetId
+from application.rpc import RpcFailedError, RpcRequest, RpcResponse
 from config import testconfig as config
-from tests.actions.repair_tickets_monitor_scenarios import RepairTicketsMonitorScenario, PostResponse, \
+from tests.actions.repair_tickets_monitor_scenarios import RepairTicketsMonitorScenario, \
     make_repair_tickets_monitor_scenarios
 
 scenarios = make_repair_tickets_monitor_scenarios()
@@ -27,8 +28,17 @@ async def repair_tickets_monitor_scenarios_test(
     def append_note_to_ticket_rpc(asset_id: AssetId):
         return scenario.asset_topics.get(asset_id.service_number, [])
 
+    def upsert_outage_ticket_rpc(asset_ids: List[AssetId], contact_email: str):
+        service_numbers = ",".join([asset_id.service_number for asset_id in asset_ids])
+        upsert_result = scenario.upserted_tickets.get(service_numbers)
+        if upsert_result:
+            return upsert_result
+        else:
+            raise RpcFailedError(request=RpcRequest.construct(), response=RpcResponse(status=HTTPStatus.BAD_REQUEST))
+
     repair_tickets_monitor.append_note_to_ticket_rpc = CoroutineMock(side_effect=scenario.append_note_to_ticket_effect)
     repair_tickets_monitor.get_asset_topics_rpc = CoroutineMock(side_effect=append_note_to_ticket_rpc)
+    repair_tickets_monitor.upsert_outage_ticket_rpc = CoroutineMock(side_effect=upsert_outage_ticket_rpc)
     repair_ticket_kre_repository.get_email_inference = CoroutineMock(return_value=inference_data_for(scenario))
     mock_bruin_repository(bruin_repository, scenario)
 
@@ -95,7 +105,9 @@ def repair_tickets_monitor(
         new_tagged_emails_repository,
         repair_ticket_kre_repository,
         CoroutineMock(),
-        CoroutineMock()
+        CoroutineMock(),
+        CoroutineMock(),
+        CoroutineMock(),
     )
 
 
@@ -103,11 +115,7 @@ def mock_bruin_repository(bruin_repository, scenario: RepairTicketsMonitorScenar
     def verify_service_number_information(_, potential_service_number: str):
         return {"status": 200, "body": {"site_id": scenario.assets.get(potential_service_number, 0)}}
 
-    def create_outage_ticket(_, service_numbers: List[str], __):
-        default_response = PostResponse(404, hash("created_ticket_id"))
-        return asdict(scenario.post_responses.get(",".join(service_numbers), default_response))
-
-    def get_single_ticket_basic_info(ticket_id: int):
+    def get_single_ticket_basic_info(ticket_id: str):
         ticket_map = dict((ticket.id, ticket) for ticket in scenario.tickets)
         ticket = ticket_map.get(ticket_id)
         if ticket:
@@ -125,9 +133,6 @@ def mock_bruin_repository(bruin_repository, scenario: RepairTicketsMonitorScenar
 
     bruin_repository.verify_service_number_information = CoroutineMock(
         side_effect=verify_service_number_information
-    )
-    bruin_repository.create_outage_ticket = CoroutineMock(
-        side_effect=create_outage_ticket
     )
     bruin_repository.get_single_ticket_basic_info = CoroutineMock(
         side_effect=get_single_ticket_basic_info

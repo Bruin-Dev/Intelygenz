@@ -1,3 +1,4 @@
+import logging
 from http import HTTPStatus
 from logging import Logger
 from typing import Callable
@@ -5,10 +6,9 @@ from unittest.mock import Mock, ANY
 
 from asynctest import CoroutineMock
 from igz.packages.eventbus.eventbus import EventBus
-from pydantic import ValidationError
 from pytest import fixture, mark, raises
 
-from application.rpc import Rpc, RpcLogger, RpcRequest, RpcResponse
+from application.rpc import Rpc, RpcLogger, RpcRequest, RpcResponse, RpcFailedError, RpcError
 
 
 class TestRpc:
@@ -24,8 +24,8 @@ class TestRpc:
     @mark.asyncio
     async def responses_are_properly_parsed_test(self, make_rpc, any_rpc_request):
         # given
-        status = hash("any_status")
-        body = "any_body"
+        status = HTTPStatus.OK
+        body = "any"
 
         rpc = make_rpc()
         rpc.event_bus.rpc_request = CoroutineMock(return_value={"status": status, "body": body})
@@ -39,7 +39,7 @@ class TestRpc:
     @mark.asyncio
     async def no_body_responses_are_properly_parsed_test(self, make_rpc, any_rpc_request):
         # given
-        status = hash("any_status")
+        status = HTTPStatus.OK
 
         rpc = make_rpc()
         rpc.event_bus.rpc_request = CoroutineMock(return_value={"status": status})
@@ -51,35 +51,43 @@ class TestRpc:
         assert subject == RpcResponse(status=status)
 
     @mark.asyncio
-    async def non_dict_responses_raise_an_error_test(self, make_rpc, any_rpc_request):
-        rpc = make_rpc()
-        rpc.event_bus.rpc_request = CoroutineMock(return_value=None)
-
-        with raises(ValidationError):
-            await rpc.send(any_rpc_request)
-
-    @mark.asyncio
-    async def non_status_responses_raise_an_error_test(self, make_rpc, any_rpc_request):
-        rpc = make_rpc()
-        rpc.event_bus.rpc_request = CoroutineMock(return_value={"body": {}})
-
-        with raises(ValidationError):
-            await rpc.send(any_rpc_request)
-
-    @mark.asyncio
-    async def non_numeric_status_responses_raise_an_error_test(self, make_rpc, any_rpc_request):
+    async def failing_requests_raise_a_proper_error_test(self, make_rpc, any_rpc_request):
         base_rpc = make_rpc()
-        base_rpc.event_bus.rpc_request = CoroutineMock({"status": "non_numeric_status", "body": {}})
+        base_rpc.event_bus.rpc_request = CoroutineMock(side_effect=Exception)
 
-        with raises(ValidationError):
+        with raises(RpcError):
             await base_rpc.send(any_rpc_request)
 
     @mark.asyncio
-    async def non_dict_bodies_raise_an_error_test(self, make_rpc, any_rpc_request):
-        base_rpc = make_rpc()
-        base_rpc.event_bus.rpc_request = CoroutineMock({"status": HTTPStatus.OK, "body": None})
+    async def none_responses_raise_a_proper_error_test(self, make_rpc, any_rpc_request):
+        rpc = make_rpc()
+        rpc.event_bus.rpc_request = CoroutineMock(return_value=None)
 
-        with raises(ValidationError):
+        with raises(RpcError):
+            await rpc.send(any_rpc_request)
+
+    @mark.asyncio
+    async def non_parseable_responses_raise_a_proper_error_test(self, make_rpc, any_rpc_request):
+        base_rpc = make_rpc()
+        base_rpc.event_bus.rpc_request = CoroutineMock(return_value={"status": "non_numeric_status", "body": {}})
+
+        with raises(RpcError):
+            await base_rpc.send(any_rpc_request)
+
+    @mark.asyncio
+    async def non_status_responses_raise_a_proper_error_test(self, make_rpc, any_rpc_request):
+        rpc = make_rpc()
+        rpc.event_bus.rpc_request = CoroutineMock(return_value={"body": {}})
+
+        with raises(RpcError):
+            await rpc.send(any_rpc_request)
+
+    @mark.asyncio
+    async def non_ok_responses_raise_a_proper_error_test(self, make_rpc, any_rpc_request):
+        base_rpc = make_rpc()
+        base_rpc.event_bus.rpc_request = CoroutineMock(return_value={"status": HTTPStatus.BAD_REQUEST})
+
+        with raises(RpcFailedError):
             await base_rpc.send(any_rpc_request)
 
 
@@ -108,7 +116,7 @@ def any_rpc_request() -> RpcRequest:
 
 @fixture
 def make_rpc_logger() -> Callable[..., RpcLogger]:
-    def builder(logger: Logger = Mock(Logger), request_id: str = "any_request_id"):
+    def builder(logger: Logger = logging.getLogger(), request_id: str = "any_request_id"):
         return RpcLogger(logger, request_id)
 
     return builder
@@ -118,7 +126,7 @@ def make_rpc_logger() -> Callable[..., RpcLogger]:
 def make_rpc() -> Callable[..., Rpc]:
     def builder(
         event_bus: EventBus = Mock(EventBus),
-        logger: Logger = Mock(Logger),
+        logger: Logger = logging.getLogger(),
         topic: str = "any_topic",
         timeout: int = hash("any_timeout")
     ):

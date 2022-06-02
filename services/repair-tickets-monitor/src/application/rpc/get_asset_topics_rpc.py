@@ -4,7 +4,7 @@ from dataclasses import field, dataclass
 from pydantic import BaseModel, Field, ValidationError, validator
 
 from application.domain.asset import AssetId, Topic
-from application.rpc import Rpc, RpcError
+from application.rpc import Rpc, RpcFailedError
 
 NATS_TOPIC = "bruin.get.asset.topics"
 
@@ -16,49 +16,32 @@ class GetAssetTopicsRpc(Rpc):
     async def __call__(self, asset_id: AssetId) -> List[Topic]:
         """
         Get the recommended Ticket Call Type and Category for the provided Asset.
-        Communication errors will be raised up.
-        Unexpected responses will return an empty list.
+        Proxied service: GET /api/Ticket/topics
+        :raise RpcFailedError: if the response cannot be parsed correctly.
         :param asset_id: an Asset Id
         :return: a list of recommended Topics
         """
         request, logger = self.start()
         logger.debug(f"__call__(asset_id={asset_id})")
 
+        request.body = RequestBody(client_id=asset_id.client_id, service_number=asset_id.service_number)
+        response = await self.send(request)
+
         try:
-            request.body = RequestBody.from_asset_id(asset_id)
-            response = await self.send(request)
+            body = ResponseBody.parse_obj(response.body)
+            topics = [Topic(call_type=item.call_type, category=item.category)
+                      for item in body.call_types]
 
-            if response.is_ok():
-                try:
-                    body = ResponseBody.parse_obj(response.body)
-                    topics = [Topic(call_type=item.call_type, category=item.category)
-                              for item in body.call_types]
+            logger.debug(f"__call__(): topics={topics}, response={response.body}")
+            return topics
 
-                    logger.debug(f"__call__(): [OK] topics={topics}, response={response.body}")
-                    return topics
-
-                except ValidationError as e:
-                    logger.warning(f"__call__(): [KO] response={response}, validation_error={e}")
-                    return []
-
-            else:
-                logger.warning(f"__call__(): [KO] response={response}")
-                return []
-
-        except Exception as e:
-            raise RpcError from e
+        except ValidationError as error:
+            raise RpcFailedError(request=request, response=response) from error
 
 
 class RequestBody(BaseModel):
-    client_id: int
+    client_id: str
     service_number: str
-
-    @classmethod
-    def from_asset_id(cls, asset_id: AssetId):
-        return cls(
-            client_id=asset_id.client_id,
-            service_number=asset_id.service_number
-        )
 
 
 class ResponseBody(BaseModel):
