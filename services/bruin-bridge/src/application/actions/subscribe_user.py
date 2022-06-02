@@ -38,7 +38,7 @@ class SubscribeUser:
                         user=PostBodyUser(email=message_body.user_email))
         post_request = BruinPostRequest(path=path, body=body)
 
-        self.logger.info(f"Subscribing user: request={body}")
+        self.logger.info(f"Subscribing user: post_request={post_request}")
         response = await self.bruin_client._bruin_session.post(post_request)
 
         if response.status == HTTPStatus.UNAUTHORIZED:
