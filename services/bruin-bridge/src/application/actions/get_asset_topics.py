@@ -47,8 +47,8 @@ class GetAssetTopics:
             await self._event_bus.publish_message(msg["response_topic"], response)
             return
 
-        # service_number = payload.get("service_number")
-        service_number = "VC05200011984"
+        payload["service_number"] = "VC05200011984"
+        service_number = payload.get("service_number")
         if not service_number:
             self._logger.error(f"body.service_number can't be empty")
             response["body"] = EMPTY_SERVICE_NUMBER_MSG
