@@ -38,6 +38,14 @@ NOTE_REGEX_BY_TROUBLE = {
     for trouble in AffectingTroubles
 }
 
+LINK_INFO_REGEX = re.compile(
+    rf'Edge Name: (?P<edge_name>.+)\n'
+    rf'Name: (?P<label>.+)\n'
+    rf'Interface: (?P<interface>.+)\n'
+    rf'IP Address: (?P<ip>.+)\n'
+    rf'Link Type: (Unknown|(?P<mode>Public|Private) (?P<type>Wired|Wireless))\n'
+)
+
 EVENT_INTERFACE_REGEX = re.compile(
     r'(^Interface (?P<interface>[a-zA-Z0-9]+) is (up|down)$)|'
     r'(^Link (?P<link_interface>[a-zA-Z0-9]+) is (no longer|now) DEAD$)'

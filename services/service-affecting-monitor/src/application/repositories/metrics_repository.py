@@ -1,6 +1,6 @@
 from prometheus_client import Counter
 
-COMMON_LABELS = ['feature', 'system', 'topic', 'severity', 'client', 'host']
+COMMON_LABELS = ['feature', 'system', 'topic', 'severity', 'client', 'host', 'has_byob', 'link_types']
 CREATE_LABELS = ['trouble']
 REOPEN_LABELS = ['trouble']
 FORWARD_LABELS = ['trouble', 'target_queue']
@@ -21,7 +21,7 @@ class MetricsRepository:
             'system': 'VeloCloud',
             'topic': 'VAS',
             'severity': 3,
-            'host': self._config.VELOCLOUD_HOST
+            'host': self._config.VELOCLOUD_HOST,
         }
 
     def _get_client_label(self, client):

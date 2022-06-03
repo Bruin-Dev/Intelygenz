@@ -13,7 +13,7 @@ from pytz import timezone
 from tenacity import retry, wait_exponential, stop_after_delay
 
 from application import AffectingTroubles, ForwardQueues
-from application import REMINDER_NOTE_REGEX
+from application import REMINDER_NOTE_REGEX, LINK_INFO_REGEX
 
 
 class ServiceAffectingMonitor:
@@ -386,6 +386,13 @@ class ServiceAffectingMonitor:
                     )
                     continue
 
+                last_cycle_notes = self._ticket_repository.get_notes_appended_since_latest_reopen_or_ticket_creation(
+                    relevant_notes
+                )
+                affecting_trouble_note = self._ticket_repository.get_affecting_trouble_note(last_cycle_notes)
+                is_byob = self._get_is_byob_from_affecting_trouble_note(affecting_trouble_note)
+                link_type = self._get_link_type_from_affecting_trouble_note(affecting_trouble_note)
+
                 self._logger.info(
                     f'Autoresolving detail of ticket {affecting_ticket_id} related to serial number {serial_number}...'
                 )
@@ -396,7 +403,9 @@ class ServiceAffectingMonitor:
                 if resolve_ticket_response['status'] not in range(200, 300):
                     continue
 
-                self._metrics_repository.increment_tasks_autoresolved(client=client_name)
+                self._metrics_repository.increment_tasks_autoresolved(
+                    client=client_name, has_byob=is_byob, link_types=link_type
+                )
                 await self._bruin_repository.append_autoresolve_note_to_ticket(affecting_ticket_id, serial_number)
                 await self._notifications_repository.notify_successful_autoresolve(affecting_ticket_id, serial_number)
 
@@ -831,6 +840,11 @@ class ServiceAffectingMonitor:
         serial_number = link_data['cached_info']['serial_number']
         interface = link_data['link_status']['interface']
         client_name = link_data['cached_info']['bruin_client_info']['client_name']
+        link_label = link_data['link_status']['displayName']
+        links_configuration = link_data['cached_info']['links_configuration']
+
+        is_byob = self._is_link_label_blacklisted_for_HNOC(link_label)
+        link_type = self._get_link_type(interface, links_configuration)
 
         self._logger.info(
             f'Unresolving task related to edge {serial_number} of Service Affecting ticket {ticket_id} due to a '
@@ -858,7 +872,9 @@ class ServiceAffectingMonitor:
             f'unresolved! The cause was a {trouble.value} trouble detected in interface {interface}'
         )
 
-        self._metrics_repository.increment_tasks_reopened(client=client_name, trouble=trouble.value)
+        self._metrics_repository.increment_tasks_reopened(
+            client=client_name, trouble=trouble.value, has_byob=is_byob, link_types=link_type
+        )
         await self._notifications_repository.notify_successful_reopen(ticket_id, serial_number, trouble)
 
         build_note_fn = self._ticket_repository.get_build_note_fn_by_trouble(trouble)
@@ -910,6 +926,11 @@ class ServiceAffectingMonitor:
         client_id = link_data['cached_info']['bruin_client_info']['client_id']
         contact_info = link_data['contact_info']
         client_name = link_data['cached_info']['bruin_client_info']['client_name']
+        link_label = link_data['link_status']['displayName']
+        links_configuration = link_data['cached_info']['links_configuration']
+
+        is_byob = self._is_link_label_blacklisted_for_HNOC(link_label)
+        link_type = self._get_link_type(interface, links_configuration)
 
         self._logger.info(
             f'Creating Service Affecting ticket to report a {trouble.value} trouble detected in interface {interface} '
@@ -937,7 +958,9 @@ class ServiceAffectingMonitor:
             f'of edge {serial_number} was successfully created! Ticket ID is {ticket_id}'
         )
 
-        self._metrics_repository.increment_tasks_created(client=client_name, trouble=trouble.value)
+        self._metrics_repository.increment_tasks_created(
+            client=client_name, trouble=trouble.value, has_byob=is_byob, link_types=link_type
+        )
         await self._notifications_repository.notify_successful_ticket_creation(ticket_id, serial_number, trouble)
 
         build_note_fn = self._ticket_repository.get_build_note_fn_by_trouble(trouble)
@@ -1013,7 +1036,13 @@ class ServiceAffectingMonitor:
                stop=stop_after_delay(self._config.NATS_CONFIG['stop_delay']))
         async def forward_ticket_to_hnoc_queue():
             target_queue = ForwardQueues.HNOC.value
+            interface = link_data['link_status']['interface']
             client_name = link_data['cached_info']['bruin_client_info']['client_name']
+            link_label = link_data['link_status']['displayName']
+            links_configuration = link_data['cached_info']['links_configuration']
+
+            is_byob = self._is_link_label_blacklisted_for_HNOC(link_label)
+            link_type = self._get_link_type(interface, links_configuration)
 
             self._logger.info(f'Checking if ticket_id {ticket_id} for serial {serial_number} is resolved before '
                               f'attempting to forward to HNOC...')
@@ -1043,8 +1072,10 @@ class ServiceAffectingMonitor:
                                    f'returning {change_work_queue_response} when attempting to forward to HNOC.')
                 return
 
-            self._metrics_repository.increment_tasks_forwarded(client=client_name, trouble=trouble.value,
-                                                               target_queue=target_queue)
+            self._metrics_repository.increment_tasks_forwarded(
+                client=client_name, trouble=trouble.value, has_byob=is_byob, link_types=link_type,
+                target_queue=target_queue
+            )
 
             await self._notifications_repository.notify_successful_ticket_forward(
                 ticket_id=ticket_id, serial_number=serial_number
@@ -1070,7 +1101,11 @@ class ServiceAffectingMonitor:
         interface = link_data['link_status']['interface']
         links_configuration = link_data['cached_info']['links_configuration']
         client_name = link_data['cached_info']['bruin_client_info']['client_name']
+        link_label = link_data['link_status']['displayName']
         link_interface_type = ''
+
+        is_byob = self._is_link_label_blacklisted_for_HNOC(link_label)
+        link_type = self._get_link_type(interface, links_configuration)
 
         for link_configuration in links_configuration:
             if interface in link_configuration['interfaces']:
@@ -1141,8 +1176,10 @@ class ServiceAffectingMonitor:
         change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
             ticket_id, task_result, service_number=serial_number, detail_id=ticket_detail_id)
         if change_detail_work_queue_response['status'] in range(200, 300):
-            self._metrics_repository.increment_tasks_forwarded(client=client_name, trouble=trouble.value,
-                                                               target_queue=target_queue)
+            self._metrics_repository.increment_tasks_forwarded(
+                client=client_name, trouble=trouble.value, has_byob=is_byob, link_types=link_type,
+                target_queue=target_queue
+            )
             await self._bruin_repository.append_asr_forwarding_note(ticket_id, link_data['link_status'], serial_number)
             slack_message = (
                 f'Detail of Circuit Instability ticket {ticket_id} related to serial {serial_number} '
@@ -1164,6 +1201,33 @@ class ServiceAffectingMonitor:
         link_label = link_label.lower()
         blacklisted_link_labels = self._config.MONITOR_CONFIG['link_labels__hnoc_blacklist']
         return any(label for label in blacklisted_link_labels if label.lower() in link_label)
+
+    @staticmethod
+    def _get_link_type(interface: str, links_configuration: List[dict]) -> str:
+        for link_configuration in links_configuration:
+            if interface in link_configuration['interfaces']:
+                return link_configuration['type']
+
+    def _get_is_byob_from_affecting_trouble_note(self, affecting_trouble_note: Optional[dict]) -> Optional[bool]:
+        if not affecting_trouble_note:
+            return None
+
+        match = LINK_INFO_REGEX.search(affecting_trouble_note['noteValue'])
+
+        if match:
+            link_label = match.group('label')
+            return self._is_link_label_blacklisted_for_HNOC(link_label)
+
+    @staticmethod
+    def _get_link_type_from_affecting_trouble_note(affecting_trouble_note: Optional[dict]) -> Optional[str]:
+        if not affecting_trouble_note:
+            return None
+
+        match = LINK_INFO_REGEX.search(affecting_trouble_note['noteValue'])
+
+        if match:
+            link_type = match.group('type')
+            return link_type
 
     def _get_max_seconds_since_last_trouble(self, edge: dict) -> int:
         from datetime import timezone

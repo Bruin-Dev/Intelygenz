@@ -1,7 +1,6 @@
 import os
 from datetime import datetime
-from typing import Callable
-from typing import List
+from typing import List, Callable, Optional
 
 from pytz import timezone
 
@@ -46,6 +45,12 @@ class TicketRepository:
         latest_reopen_position = ticket_notes.index(latest_reopen)
         return ticket_notes[latest_reopen_position:]
 
+    def get_affecting_trouble_note(self, ticket_notes: List[dict]) -> Optional[dict]:
+        return self._utils_repository.get_first_element_matching(
+            ticket_notes,
+            lambda note: AFFECTING_NOTE_REGEX.match(note['noteValue'])
+        )
+
     def find_task_by_serial_number(self, ticket_tasks: List[dict], serial_number: str) -> dict:
         return self._utils_repository.get_first_element_matching(
             ticket_tasks,
@@ -53,10 +58,7 @@ class TicketRepository:
         )
 
     def is_ticket_used_for_reoccurring_affecting_troubles(self, ticket_notes: List[dict]) -> bool:
-        affecting_trouble_note = self._utils_repository.get_first_element_matching(
-            ticket_notes,
-            lambda note: AFFECTING_NOTE_REGEX.search(note['noteValue'])
-        )
+        affecting_trouble_note = self.get_affecting_trouble_note(ticket_notes)
         return affecting_trouble_note is not None
 
     def is_there_any_note_for_trouble(self, ticket_notes: List[dict], trouble: AffectingTroubles) -> bool:
