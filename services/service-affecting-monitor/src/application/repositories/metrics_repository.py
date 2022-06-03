@@ -38,6 +38,13 @@ class MetricsRepository:
             return 'Other'
 
     @staticmethod
+    def _get_link_type_label(link_type: Optional[str]) -> Optional[str]:
+        if not link_type:
+            return None
+        else:
+            return link_type.capitalize()
+
+    @staticmethod
     def _get_trouble_label(troubles: List[AffectingTroubles]) -> Optional[str]:
         if not troubles:
             return None
@@ -46,23 +53,27 @@ class MetricsRepository:
         else:
             return 'Multiple'
 
-    def increment_tasks_created(self, client, **labels):
+    def increment_tasks_created(self, client, link_type, **labels):
         client = self._get_client_label(client)
-        labels = {'client': client, **labels, **self._STATIC_LABELS}
+        link_type = self._get_link_type_label(link_type)
+        labels = {'client': client, 'link_type': link_type, **labels, **self._STATIC_LABELS}
         self._tasks_created.labels(**labels).inc()
 
-    def increment_tasks_reopened(self, client, **labels):
+    def increment_tasks_reopened(self, client, link_type, **labels):
         client = self._get_client_label(client)
-        labels = {'client': client, **labels, **self._STATIC_LABELS}
+        link_type = self._get_link_type_label(link_type)
+        labels = {'client': client, 'link_type': link_type, **labels, **self._STATIC_LABELS}
         self._tasks_reopened.labels(**labels).inc()
 
-    def increment_tasks_forwarded(self, client, **labels):
+    def increment_tasks_forwarded(self, client, link_type, **labels):
         client = self._get_client_label(client)
-        labels = {'client': client, **labels, **self._STATIC_LABELS}
+        link_type = self._get_link_type_label(link_type)
+        labels = {'client': client, 'link_type': link_type, **labels, **self._STATIC_LABELS}
         self._tasks_forwarded.labels(**labels).inc()
 
-    def increment_tasks_autoresolved(self, client, troubles, **labels):
+    def increment_tasks_autoresolved(self, client, link_type, troubles, **labels):
         client = self._get_client_label(client)
+        link_type = self._get_link_type_label(link_type)
         trouble = self._get_trouble_label(troubles)
-        labels = {'client': client, 'trouble': trouble, **labels, **self._STATIC_LABELS}
+        labels = {'client': client, 'link_type': link_type, 'trouble': trouble, **labels, **self._STATIC_LABELS}
         self._tasks_autoresolved.labels(**labels).inc()
