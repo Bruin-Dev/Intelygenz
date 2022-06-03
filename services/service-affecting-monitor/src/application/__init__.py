@@ -18,7 +18,7 @@ class ForwardQueues(Enum):
 TROUBLES_DISJUNCTION_FOR_REGEX = '|'.join(trouble.value for trouble in AffectingTroubles)
 
 AFFECTING_NOTE_REGEX = re.compile(
-    rf"^#\*(Automation Engine|MetTel's IPA)\*#\n.*Trouble: ({TROUBLES_DISJUNCTION_FOR_REGEX})",
+    rf"^#\*(Automation Engine|MetTel's IPA)\*#\n.*Trouble: (?P<trouble>{TROUBLES_DISJUNCTION_FOR_REGEX})",
     re.DOTALL | re.MULTILINE,
 )
 REOPEN_NOTE_REGEX = re.compile(

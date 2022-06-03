@@ -1,9 +1,9 @@
 from prometheus_client import Counter
 
-COMMON_LABELS = ['feature', 'system', 'topic', 'severity', 'client', 'host', 'has_byob', 'link_types']
-CREATE_LABELS = ['trouble']
-REOPEN_LABELS = ['trouble']
-FORWARD_LABELS = ['trouble', 'target_queue']
+COMMON_LABELS = ['feature', 'system', 'topic', 'severity', 'client', 'host', 'trouble', 'has_byob', 'link_types']
+CREATE_LABELS = []
+REOPEN_LABELS = []
+FORWARD_LABELS = ['target_queue']
 AUTORESOLVE_LABELS = []
 
 
@@ -34,6 +34,15 @@ class MetricsRepository:
         else:
             return 'Other'
 
+    @staticmethod
+    def _get_trouble_label(troubles):
+        if not troubles:
+            return None
+        elif len(troubles) == 1:
+            return troubles[0].value
+        else:
+            return 'Multiple'
+
     def increment_tasks_created(self, client, **labels):
         client = self._get_client_label(client)
         labels = {'client': client, **labels, **self._STATIC_LABELS}
@@ -49,7 +58,8 @@ class MetricsRepository:
         labels = {'client': client, **labels, **self._STATIC_LABELS}
         self._tasks_forwarded.labels(**labels).inc()
 
-    def increment_tasks_autoresolved(self, client, **labels):
+    def increment_tasks_autoresolved(self, client, troubles, **labels):
         client = self._get_client_label(client)
-        labels = {'client': client, **labels, **self._STATIC_LABELS}
+        trouble = self._get_trouble_label(troubles)
+        labels = {'client': client, 'trouble': trouble, **labels, **self._STATIC_LABELS}
         self._tasks_autoresolved.labels(**labels).inc()

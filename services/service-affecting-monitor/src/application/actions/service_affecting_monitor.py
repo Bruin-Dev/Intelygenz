@@ -13,7 +13,7 @@ from pytz import timezone
 from tenacity import retry, wait_exponential, stop_after_delay
 
 from application import AffectingTroubles, ForwardQueues
-from application import REMINDER_NOTE_REGEX, LINK_INFO_REGEX
+from application import AFFECTING_NOTE_REGEX, REMINDER_NOTE_REGEX, LINK_INFO_REGEX
 
 
 class ServiceAffectingMonitor:
@@ -390,6 +390,7 @@ class ServiceAffectingMonitor:
                     relevant_notes
                 )
                 affecting_trouble_note = self._ticket_repository.get_affecting_trouble_note(last_cycle_notes)
+                troubles = self._get_troubles_from_ticket_notes(last_cycle_notes)
                 is_byob = self._get_is_byob_from_affecting_trouble_note(affecting_trouble_note)
                 link_type = self._get_link_type_from_affecting_trouble_note(affecting_trouble_note)
 
@@ -404,7 +405,7 @@ class ServiceAffectingMonitor:
                     continue
 
                 self._metrics_repository.increment_tasks_autoresolved(
-                    client=client_name, has_byob=is_byob, link_types=link_type
+                    client=client_name, troubles=troubles, has_byob=is_byob, link_types=link_type
                 )
                 await self._bruin_repository.append_autoresolve_note_to_ticket(affecting_ticket_id, serial_number)
                 await self._notifications_repository.notify_successful_autoresolve(affecting_ticket_id, serial_number)
@@ -1207,6 +1208,19 @@ class ServiceAffectingMonitor:
         for link_configuration in links_configuration:
             if interface in link_configuration['interfaces']:
                 return link_configuration['type']
+
+    @staticmethod
+    def _get_troubles_from_ticket_notes(ticket_notes: List[dict]) -> List[AffectingTroubles]:
+        troubles = set()
+
+        for note in ticket_notes:
+            match = AFFECTING_NOTE_REGEX.search(note['noteValue'])
+
+            if match:
+                trouble = match.group('trouble')
+                troubles.add(AffectingTroubles(trouble))
+
+        return list(troubles)
 
     def _get_is_byob_from_affecting_trouble_note(self, affecting_trouble_note: Optional[dict]) -> Optional[bool]:
         if not affecting_trouble_note:
