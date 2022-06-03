@@ -571,10 +571,13 @@ class OutageMonitor:
 
     @staticmethod
     def _get_outage_types_from_ticket_notes(ticket_notes: List[dict]) -> List[Outages]:
+        outage_types = set()
+
         for note in ticket_notes:
-            outage_types = OUTAGE_TYPE_REGEX.findall(note['noteValue'])
+            matches = OUTAGE_TYPE_REGEX.finditer(note['noteValue'])
 
-            if outage_types:
-                return [Outages(outage_type) for outage_type in outage_types]
+            for match in matches:
+                outage_type = match.group('outage_type')
+                outage_types.add(Outages(outage_type))
 
-        return []
+        return list(outage_types)
