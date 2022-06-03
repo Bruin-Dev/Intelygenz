@@ -1,4 +1,7 @@
 from prometheus_client import Counter
+from typing import List, Optional
+
+from application import Outages
 
 COMMON_LABELS = ['feature', 'system', 'topic', 'client', 'outage_type', 'severity']
 CREATE_LABELS = []
@@ -21,7 +24,7 @@ class MetricsRepository:
             'severity': 2,
         }
 
-    def _get_client_label(self, client):
+    def _get_client_label(self, client: str) -> str:
         relevant_clients = self._config.METRICS_RELEVANT_CLIENTS
 
         if client.startswith('FIS-'):
@@ -32,7 +35,7 @@ class MetricsRepository:
             return 'Other'
 
     @staticmethod
-    def _get_outage_type_label(outage_types):
+    def _get_outage_type_label(outage_types: List[Outages]) -> Optional[str]:
         if not outage_types:
             return None
         elif len(outage_types) == 1:

@@ -1,4 +1,7 @@
 from prometheus_client import Counter
+from typing import List, Optional
+
+from application import AffectingTroubles
 
 COMMON_LABELS = ['feature', 'system', 'topic', 'severity', 'client', 'host', 'trouble', 'has_byob', 'link_types']
 CREATE_LABELS = []
@@ -24,7 +27,7 @@ class MetricsRepository:
             'host': self._config.VELOCLOUD_HOST,
         }
 
-    def _get_client_label(self, client):
+    def _get_client_label(self, client: str) -> str:
         relevant_clients = self._config.METRICS_RELEVANT_CLIENTS
 
         if client.startswith('FIS-'):
@@ -35,7 +38,7 @@ class MetricsRepository:
             return 'Other'
 
     @staticmethod
-    def _get_trouble_label(troubles):
+    def _get_trouble_label(troubles: List[AffectingTroubles]) -> Optional[str]:
         if not troubles:
             return None
         elif len(troubles) == 1:

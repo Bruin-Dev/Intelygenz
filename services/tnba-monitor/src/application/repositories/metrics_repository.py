@@ -16,7 +16,7 @@ class MetricsRepository:
             'host': self._config.VELOCLOUD_HOST,
         }
 
-    def _get_client_label(self, client):
+    def _get_client_label(self, client: str) -> str:
         relevant_clients = self._config.METRICS_RELEVANT_CLIENTS
 
         if client.startswith('FIS-'):
