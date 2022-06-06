@@ -190,14 +190,10 @@ kubeprometheusstack:
     ## name of dashboard without extension
     grafanaDashboards:
       - bruin-api-usage
-      - business-metrics
       - datahighway-kafka
-      - mettel-affecting-monitor
       - mettel-current-sdwan-status
-      - mettel-outage-monitors
-      - mettel-triage
       - nats-statistics
-      
+
     grafana.ini:
       server:
         # The full public facing url you use in browser, used for redirects and emails
