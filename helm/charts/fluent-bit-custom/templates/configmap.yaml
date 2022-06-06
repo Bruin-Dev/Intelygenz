@@ -332,6 +332,13 @@ data:
         Time_Key time
         Time_Format %d/%b/%Y:%H:%M:%S %z
     [PARSER]
+        Name   mettel_parser_logs_rta
+        Format regex
+        Regex  ^(?<time_stamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}): (?<environment>.*?): (?<hostname>.*?): (?<module>.*?)::(?<line>\d+) (?<log_level>[A-Z]+): (?<message>[a-zA-Z0-9 _.,:()'"!¡]*)$
+        Time_Key time
+        Time_Format %d/%b/%Y:%H:%M:%S %z
+        Decode_Field json log
+    [PARSER]
         Name   mettel_parser_json
         Format regex
         Regex  ^(?<time_stamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}): (?<environment>.*?): (?<hostname>.*?): (?<module>.*?)::(?<line>\d+) (?<log_level>[A-Z]+): (?<message>[^{]*)(?<message_additional>{.*)$

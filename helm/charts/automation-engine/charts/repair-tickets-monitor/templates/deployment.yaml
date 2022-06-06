@@ -20,7 +20,7 @@ spec:
       labels:
         {{- include "repair-tickets-monitor.selectorLabels" . | nindent 8 }}
       annotations:
-        fluentbit.io/parser: mettel_parser_logs
+        fluentbit.io/parser: mettel_parser_logs_rta
     spec:
       priorityClassName: medium-priority
       initContainers:
