@@ -1,5 +1,9 @@
+import logging
+import socket
+
 import asyncio
 import redis
+import sys
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.eventbus import EventBus
@@ -23,6 +27,27 @@ from application.rpc.get_asset_topics_rpc import GetAssetTopicsRpc
 from application.rpc.subscribe_user_rpc import SubscribeUserRpc
 from application.rpc.upsert_outage_ticket_rpc import UpsertOutageTicketRpc
 from config import config
+from config.configuration import config as conf
+from middleware.logging import JsonFormatter, ContextFilter
+
+json_formatter = JsonFormatter(fields={
+    "timestamp": "asctime",
+    "name": "name",
+    "module": "module",
+    "line": "lineno",
+    "log_level": "levelname",
+    "message": "message",
+}, always_extra={
+    "environment": conf.environment,
+    "hostname": socket.gethostname()
+})
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setFormatter(json_formatter)
+console_handler.addFilter(ContextFilter())
+
+logger = logging.getLogger('middleware')
+logger.addHandler(console_handler)
+logger.setLevel(conf.logging.level)
 
 
 class Container:

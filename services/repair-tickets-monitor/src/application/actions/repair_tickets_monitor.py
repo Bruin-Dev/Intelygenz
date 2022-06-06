@@ -1,10 +1,11 @@
+import asyncio
+import logging
 import os
 from collections import defaultdict
 from datetime import datetime
 from logging import Logger
 from typing import Any, DefaultDict, Dict, List, Set, Tuple
 
-import asyncio
 import html2text
 import time
 from apscheduler.jobstores.base import ConflictingIdError
@@ -21,6 +22,9 @@ from application.rpc.append_note_to_ticket_rpc import AppendNoteToTicketRpc
 from application.rpc.get_asset_topics_rpc import GetAssetTopicsRpc
 from application.rpc.subscribe_user_rpc import SubscribeUserRpc
 from application.rpc.upsert_outage_ticket_rpc import UpsertOutageTicketRpc, UpsertedStatus
+from middleware.logging import set_logging_context
+
+log = logging.getLogger('middleware')
 
 
 def get_feedback_not_created_due_cancellations(map_with_cancellations: Dict[str, str]) -> List[TicketOutput]:
@@ -242,6 +246,9 @@ class RepairTicketsMonitor:
         and save the result of this operations into KRE.
         """
         email_id = email_tag_info["email_id"]
+        set_logging_context(email_id=email_id)
+        log.debug("This is a DEBUG message")
+
         self._logger.info("email_id=%s Running Repair Email Process", email_id)
         email_data = self._new_tagged_emails_repository.get_email_details(email_id).get("email")
         email_data["tag"] = email_tag_info
