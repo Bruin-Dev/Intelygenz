@@ -116,13 +116,12 @@ class OutageRepository:
         return any_link_down and is_edge_up and is_ha_enabled and is_ha_partner_up
 
     def is_ha_soft_down_outage(self, edge_status: dict) -> bool:
-        # Soft Down (HA enabled): all links are UP and only the current edge is DOWN in the HA pair
+        # Soft Down (HA enabled): only the current edge is DOWN in the HA pair
         is_edge_down = self.is_faulty_edge(edge_status['edgeState'])
         is_ha_enabled = self._ha_repository.is_ha_enabled(edge_status)
         is_ha_partner_up = not self.is_faulty_edge(edge_status['edgeHAState'])
-        all_links_up = not self.is_any_link_disconnected(edge_status['links'])
 
-        return is_edge_down and is_ha_enabled and is_ha_partner_up and all_links_up
+        return is_edge_down and is_ha_enabled and is_ha_partner_up
 
     def is_hard_down_outage(self, edge_status: dict) -> bool:
         # Hard Down (HA disabled): current edge is DOWN

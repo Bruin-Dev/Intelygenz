@@ -1153,12 +1153,6 @@ class TestOutageRepository:
             'edgeHASerialNumber': 'VC9999999',
             'edgeHAState': 'OFFLINE',
             'edgeIsHAPrimary': True,
-            'links': [
-                {
-                    'interface': 'RAY',
-                    'linkState': 'STABLE',
-                },
-            ],
         }
         ha_repository.is_ha_enabled = Mock(return_value=True)
         result = outage_repository.is_ha_soft_down_outage(edge_status)
@@ -1174,12 +1168,6 @@ class TestOutageRepository:
             'edgeHASerialNumber': 'VC1234567',
             'edgeHAState': 'CONNECTED',
             'edgeIsHAPrimary': True,
-            'links': [
-                {
-                    'interface': 'RAY',
-                    'linkState': 'STABLE',
-                },
-            ],
         }
         ha_repository.is_ha_enabled = Mock(return_value=True)
         result = outage_repository.is_ha_soft_down_outage(edge_status)
