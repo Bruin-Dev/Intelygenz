@@ -405,7 +405,7 @@ class ServiceAffectingMonitor:
                     continue
 
                 self._metrics_repository.increment_tasks_autoresolved(
-                    client=client_name, troubles=troubles, has_byob=is_byob, link_types=link_type
+                    client=client_name, troubles=troubles, has_byob=is_byob, link_type=link_type
                 )
                 await self._bruin_repository.append_autoresolve_note_to_ticket(affecting_ticket_id, serial_number)
                 await self._notifications_repository.notify_successful_autoresolve(affecting_ticket_id, serial_number)
@@ -874,7 +874,7 @@ class ServiceAffectingMonitor:
         )
 
         self._metrics_repository.increment_tasks_reopened(
-            client=client_name, trouble=trouble.value, has_byob=is_byob, link_types=link_type
+            client=client_name, trouble=trouble.value, has_byob=is_byob, link_type=link_type
         )
         await self._notifications_repository.notify_successful_reopen(ticket_id, serial_number, trouble)
 
@@ -960,7 +960,7 @@ class ServiceAffectingMonitor:
         )
 
         self._metrics_repository.increment_tasks_created(
-            client=client_name, trouble=trouble.value, has_byob=is_byob, link_types=link_type
+            client=client_name, trouble=trouble.value, has_byob=is_byob, link_type=link_type
         )
         await self._notifications_repository.notify_successful_ticket_creation(ticket_id, serial_number, trouble)
 
@@ -1074,7 +1074,7 @@ class ServiceAffectingMonitor:
                 return
 
             self._metrics_repository.increment_tasks_forwarded(
-                client=client_name, trouble=trouble.value, has_byob=is_byob, link_types=link_type,
+                client=client_name, trouble=trouble.value, has_byob=is_byob, link_type=link_type,
                 target_queue=target_queue
             )
 
@@ -1178,7 +1178,7 @@ class ServiceAffectingMonitor:
             ticket_id, task_result, service_number=serial_number, detail_id=ticket_detail_id)
         if change_detail_work_queue_response['status'] in range(200, 300):
             self._metrics_repository.increment_tasks_forwarded(
-                client=client_name, trouble=trouble.value, has_byob=is_byob, link_types=link_type,
+                client=client_name, trouble=trouble.value, has_byob=is_byob, link_type=link_type,
                 target_queue=target_queue
             )
             await self._bruin_repository.append_asr_forwarding_note(ticket_id, link_data['link_status'], serial_number)
