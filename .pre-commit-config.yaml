@@ -5,6 +5,7 @@ repos:
     - id: black
       language_version: python3.6
       args: [--config=./pyproject.toml]
+      exclude: environment_files_generator.py
 
   - repo: https://github.com/timothycrosley/isort
     rev: 5.10.1
