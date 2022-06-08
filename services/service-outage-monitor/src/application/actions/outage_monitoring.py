@@ -11,6 +11,7 @@ from typing import List, Optional, Pattern
 
 from application import (
     DIGI_NOTE_REGEX,
+    FORWARD_TICKET_TO_HNOC_JOB_ID,
     LINK_INFO_REGEX,
     OUTAGE_TYPE_REGEX,
     REMINDER_NOTE_REGEX,
@@ -491,6 +492,14 @@ class OutageMonitor:
                 f"edge {serial_number} was autoresolved!"
             )
 
+            job_id = FORWARD_TICKET_TO_HNOC_JOB_ID.format(ticket_id=outage_ticket_id, serial_number=serial_number)
+            if self._scheduler.get_job(job_id):
+                self._logger.info(
+                    f"Found job to forward to HNOC scheduled for autoresolved ticket {outage_ticket_id}"
+                    f" related to serial number {serial_number}! Removing..."
+                )
+                self._scheduler.remove_job(job_id)
+
     def _was_ticket_created_by_automation_engine(self, ticket: dict) -> bool:
         return ticket["createdBy"] == self._config.IPA_SYSTEM_USERNAME_IN_BRUIN
 
@@ -631,6 +640,7 @@ class OutageMonitor:
             f" to happen at timestamp: {forward_task_run_date}"
         )
 
+        job_id = FORWARD_TICKET_TO_HNOC_JOB_ID.format(ticket_id=ticket_id, serial_number=serial_number)
         self._scheduler.add_job(
             self.forward_ticket_to_hnoc_queue,
             "date",
@@ -645,10 +655,10 @@ class OutageMonitor:
                 "faulty_link_types": faulty_link_types,
             },
             run_date=forward_task_run_date,
-            replace_existing=True,
+            replace_existing=False,
             misfire_grace_time=9999,
             coalesce=True,
-            id=f"_forward_ticket_{ticket_id}_{serial_number}_to_hnoc",
+            id=job_id,
         )
 
     async def forward_ticket_to_hnoc_queue(
@@ -672,29 +682,6 @@ class OutageMonitor:
             self._logger.info(
                 f"Checking if ticket_id {ticket_id} for serial {serial_number} is resolved before "
                 f"attempting to forward to HNOC..."
-            )
-            ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
-
-            if ticket_details_response["status"] not in range(200, 300):
-                self._logger.error(
-                    f"Getting ticket details of ticket_id {ticket_id} and serial {serial_number} "
-                    f"from Bruin failed: {ticket_details_response}. "
-                    f"Retrying forward to HNOC..."
-                )
-                raise Exception
-
-            ticket_details = ticket_details_response["body"]["ticketDetails"]
-            most_recent_detail = self._utils_repository.get_first_element_matching(
-                ticket_details,
-                lambda detail: detail["detailValue"] == serial_number,
-            )
-            if self._is_detail_resolved(most_recent_detail):
-                self._logger.info(
-                    f"Ticket id {ticket_id} for serial {serial_number} is resolved. " f"Skipping forward to HNOC..."
-                )
-                return
-            self._logger.info(
-                f"Ticket id {ticket_id} for serial {serial_number} is not resolved. " f"Forwarding to HNOC..."
             )
 
             await self.change_detail_work_queue_to_hnoc(
