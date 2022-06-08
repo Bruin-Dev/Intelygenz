@@ -3,7 +3,7 @@ import os
 import re
 import time
 from datetime import datetime, timedelta
-from typing import Callable, List
+from typing import Callable, List, Optional
 
 from application import Outages
 from apscheduler.jobstores.base import ConflictingIdError
@@ -203,7 +203,8 @@ class OutageMonitor:
                 return
 
             last_cycle_notes = self._get_notes_appended_since_latest_reopen_or_ticket_creation(relevant_notes)
-            outage_types = self._get_outage_types_from_ticket_notes(last_cycle_notes)
+            triage_note = self._get_triage_note(last_cycle_notes)
+            outage_types = self._get_outage_types_from_triage_note(triage_note)
 
             self._logger.info(
                 f"Autoresolving detail {ticket_detail_id} (serial: {serial_number}) of ticket {outage_ticket_id}..."
@@ -436,8 +437,9 @@ class OutageMonitor:
         relevant_notes = [
             note for note in ticket_notes if note["serviceNumber"] is not None if serial_number in note["serviceNumber"]
         ]
+        triage_note = self._get_triage_note(relevant_notes)
 
-        if self._triage_note_exists(relevant_notes):
+        if triage_note:
             self._logger.info(
                 f"Triage note already exists in ticket {ticket_id} for serial {serial_number}, so no triage "
                 f"note will be appended."
@@ -451,9 +453,8 @@ class OutageMonitor:
         await self._bruin_repository.append_triage_note_to_ticket(ticket_id, serial_number, triage_note)
         self._logger.info(f"Triage note for device {serial_number} appended to ticket {ticket_id}!")
 
-    def _triage_note_exists(self, ticket_notes: list) -> bool:
-        triage_note = self._get_first_element_matching(ticket_notes, lambda note: self.__is_triage_note(note))
-        return bool(triage_note)
+    def _get_triage_note(self, ticket_notes: List[dict]) -> Optional[dict]:
+        return self._get_first_element_matching(ticket_notes, lambda note: self.__is_triage_note(note))
 
     @staticmethod
     def __is_triage_note(note: dict) -> bool:
@@ -581,14 +582,9 @@ class OutageMonitor:
         return ticket_notes[latest_reopen_position:]
 
     @staticmethod
-    def _get_outage_types_from_ticket_notes(ticket_notes: List[dict]) -> List[Outages]:
-        outage_types = set()
+    def _get_outage_types_from_triage_note(triage_note: Optional[dict]) -> Optional[List[Outages]]:
+        if not triage_note:
+            return None
 
-        for note in ticket_notes:
-            matches = OUTAGE_TYPE_REGEX.finditer(note["noteValue"])
-
-            for match in matches:
-                outage_type = match.group("outage_type")
-                outage_types.add(Outages(outage_type))
-
-        return list(outage_types)
+        outage_types = OUTAGE_TYPE_REGEX.findall(triage_note["noteValue"])
+        return [Outages(outage_type) for outage_type in outage_types]

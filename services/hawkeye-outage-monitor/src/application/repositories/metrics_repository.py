@@ -35,9 +35,11 @@ class MetricsRepository:
             return "Other"
 
     @staticmethod
-    def _get_outage_type_label(outage_types: List[Outages]) -> Optional[str]:
-        if not outage_types:
-            return None
+    def _get_outage_type_label(outage_types: Optional[List[Outages]]) -> str:
+        if outage_types is None:
+            return "Unknown"
+        elif len(outage_types) == 0:
+            return "None"
         elif len(outage_types) == 1:
             return outage_types[0].value
         else:

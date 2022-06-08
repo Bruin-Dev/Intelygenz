@@ -38,16 +38,16 @@ class MetricsRepository:
             return "Other"
 
     @staticmethod
-    def _get_link_type_label(link_type: Optional[str]) -> Optional[str]:
+    def _get_link_type_label(link_type: Optional[str]) -> str:
         if not link_type:
-            return None
+            return "Unknown"
         else:
             return link_type.capitalize()
 
     @staticmethod
-    def _get_trouble_label(troubles: List[AffectingTroubles]) -> Optional[str]:
+    def _get_trouble_label(troubles: List[AffectingTroubles]) -> str:
         if not troubles:
-            return None
+            return "Unknown"
         elif len(troubles) == 1:
             return troubles[0].value
         else:

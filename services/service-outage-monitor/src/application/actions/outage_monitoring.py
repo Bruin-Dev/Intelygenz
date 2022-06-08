@@ -1294,9 +1294,9 @@ class OutageMonitor:
 
         return False
 
-    def _get_faulty_link_types_from_triage_note(self, triage_note: Optional[dict]) -> List[str]:
+    def _get_faulty_link_types_from_triage_note(self, triage_note: Optional[dict]) -> Optional[List[str]]:
         if not triage_note:
-            return []
+            return None
 
         link_types = set()
         matches = LINK_INFO_REGEX.finditer(triage_note["noteValue"])

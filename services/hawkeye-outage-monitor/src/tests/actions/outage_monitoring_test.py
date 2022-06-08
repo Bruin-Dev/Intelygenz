@@ -3219,12 +3219,12 @@ class TestServiceOutageMonitor:
             utils_repository,
         )
         outage_monitor._build_triage_note = Mock()
-        outage_monitor._triage_note_exists = Mock()
+        outage_monitor._get_triage_note = Mock()
 
         await outage_monitor._append_triage_note_if_needed(ticket_id, device_info)
 
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        outage_monitor._triage_note_exists.assert_not_called()
+        outage_monitor._get_triage_note.assert_not_called()
         outage_monitor._build_triage_note.assert_not_called()
         bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
 
@@ -3325,12 +3325,12 @@ class TestServiceOutageMonitor:
             utils_repository,
         )
         outage_monitor._build_triage_note = Mock()
-        outage_monitor._triage_note_exists = Mock(return_value=True)
+        outage_monitor._get_triage_note = Mock(return_value={"noteValue": "Some irrelevant note"})
 
         await outage_monitor._append_triage_note_if_needed(ticket_id, device_info)
 
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        outage_monitor._triage_note_exists.assert_called_once_with(ticket_notes)
+        outage_monitor._get_triage_note.assert_called_once_with(ticket_notes)
         outage_monitor._build_triage_note.assert_not_called()
         bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
 
@@ -3424,16 +3424,16 @@ class TestServiceOutageMonitor:
             utils_repository,
         )
         outage_monitor._build_triage_note = Mock(return_value=triage_note)
-        outage_monitor._triage_note_exists = Mock(return_value=False)
+        outage_monitor._get_triage_note = Mock(return_value=None)
 
         await outage_monitor._append_triage_note_if_needed(ticket_id, device_info)
 
         bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        outage_monitor._triage_note_exists.assert_called_once_with(ticket_notes)
+        outage_monitor._get_triage_note.assert_called_once_with(ticket_notes)
         outage_monitor._build_triage_note.assert_called_once_with(device_info)
         bruin_repository.append_triage_note_to_ticket.assert_awaited_once_with(ticket_id, serial_number, triage_note)
 
-    def triage_note_exists_test(self):
+    def get_triage_note_test(self):
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -3459,8 +3459,8 @@ class TestServiceOutageMonitor:
         )
 
         ticket_notes = []
-        triage_note_exists = outage_monitor._triage_note_exists(ticket_notes)
-        assert triage_note_exists is False
+        triage_note = outage_monitor._get_triage_note(ticket_notes)
+        assert triage_note is None
 
         ticket_notes = [
             {
@@ -3472,8 +3472,8 @@ class TestServiceOutageMonitor:
                 ],
             },
         ]
-        triage_note_exists = outage_monitor._triage_note_exists(ticket_notes)
-        assert triage_note_exists is False
+        triage_note = outage_monitor._get_triage_note(ticket_notes)
+        assert triage_note is None
 
         ticket_notes = [
             {
@@ -3485,8 +3485,8 @@ class TestServiceOutageMonitor:
                 ],
             },
         ]
-        triage_note_exists = outage_monitor._triage_note_exists(ticket_notes)
-        assert triage_note_exists is True
+        triage_note = outage_monitor._get_triage_note(ticket_notes)
+        assert triage_note is ticket_notes[0]
 
         ticket_notes = [
             {
@@ -3498,8 +3498,8 @@ class TestServiceOutageMonitor:
                 ],
             },
         ]
-        triage_note_exists = outage_monitor._triage_note_exists(ticket_notes)
-        assert triage_note_exists is True
+        triage_note = outage_monitor._get_triage_note(ticket_notes)
+        assert triage_note is ticket_notes[0]
 
     def build_triage_note_test(self):
         device_info = {
