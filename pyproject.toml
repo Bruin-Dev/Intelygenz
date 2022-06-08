@@ -27,6 +27,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.black]
 target-version = ["py36"]
 line-length = 120
+exclude = "environment_files_generator.py"
 
 [tool.isort]
 py_version=36
