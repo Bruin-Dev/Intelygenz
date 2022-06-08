@@ -54,3 +54,5 @@ REMINDER_NOTE_REGEX = re.compile(
     r"^#\*MetTel's IPA\*#\nClient Reminder",
     re.DOTALL | re.MULTILINE,
 )
+
+FORWARD_TICKET_TO_HNOC_JOB_ID = "_forward_ticket_{ticket_id}_{serial_number}_to_hnoc"

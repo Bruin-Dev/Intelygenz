@@ -2619,81 +2619,16 @@ class TestServiceAffectingMonitor:
         )
 
     @pytest.mark.asyncio
-    async def forward_ticket_to_hnoc_queue__ticket_detail_has_not_2xx_status_test(
-        self, service_affecting_monitor, bruin_500_response, make_structured_metrics_object_with_cache_and_contact_info
-    ):
-        ticket_id = 12345
-        serial_number = "VC1234567"
-        link_info = make_structured_metrics_object_with_cache_and_contact_info()
-        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
-
-        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = bruin_500_response
-
-        await service_affecting_monitor._forward_ticket_to_hnoc_queue(
-            ticket_id=ticket_id, serial_number=serial_number, link_data=link_info, trouble=trouble
-        )
-
-        service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
-        service_affecting_monitor._append_reminder_note.assert_not_awaited()
-        service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_not_awaited()
-        service_affecting_monitor._notifications_repository.notify_successful_ticket_forward.assert_not_awaited()
-
-    @pytest.mark.asyncio
-    async def forward_ticket_to_hnoc_queue__resolved_ticket_test(
-        self,
-        service_affecting_monitor,
-        make_detail_item,
-        make_ticket_details,
-        make_rpc_response,
-        make_structured_metrics_object_with_cache_and_contact_info,
-    ):
-        ticket_id = 12345
-        serial_number = "VC1234567"
-        link_info = make_structured_metrics_object_with_cache_and_contact_info()
-        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
-
-        detail_item = make_detail_item(value=serial_number, status="R")
-        ticket_details = make_ticket_details(detail_items=[detail_item])
-
-        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
-            body=ticket_details,
-            status=200,
-        )
-
-        await service_affecting_monitor._forward_ticket_to_hnoc_queue(
-            ticket_id=ticket_id, serial_number=serial_number, link_data=link_info, trouble=trouble
-        )
-
-        service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
-        service_affecting_monitor._append_reminder_note.assert_not_awaited()
-        service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_not_awaited()
-        service_affecting_monitor._notifications_repository.notify_successful_ticket_forward.assert_not_awaited()
-
-    @pytest.mark.asyncio
     async def forward_ticket_to_hnoc_queue__change_work_queue_request_has_not_2xx_status_test(
         self,
         service_affecting_monitor,
         bruin_500_response,
-        make_detail_item,
-        make_ticket_details,
-        make_rpc_response,
         make_structured_metrics_object_with_cache_and_contact_info,
     ):
         ticket_id = 12345
         serial_number = "VC1234567"
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
-
-        detail_item = make_detail_item(value=serial_number)
-        ticket_details = make_ticket_details(detail_items=[detail_item])
-
-        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
-            body=ticket_details,
-            status=200,
-        )
-
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.return_value = bruin_500_response
 
         await service_affecting_monitor._forward_ticket_to_hnoc_queue(
@@ -2702,36 +2637,25 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         service_affecting_monitor._append_reminder_note.assert_not_awaited()
-        service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_awaited_once_with(
             ticket_id=ticket_id,
             service_number=serial_number,
         )
         service_affecting_monitor._notifications_repository.notify_successful_ticket_forward.assert_not_awaited()
+        service_affecting_monitor._scheduler.get_job.assert_not_called()
+        service_affecting_monitor._scheduler.remove_job.assert_not_called()
 
     @pytest.mark.asyncio
     async def forward_ticket_to_hnoc_queue__ticket_forwarded_to_queue_test(
         self,
         service_affecting_monitor,
         bruin_generic_200_response,
-        make_detail_item,
-        make_ticket_details,
-        make_rpc_response,
         make_structured_metrics_object_with_cache_and_contact_info,
     ):
         ticket_id = 12345
         serial_number = "VC1234567"
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
-
-        detail_item = make_detail_item(value=serial_number, status="O")
-        ticket_details = make_ticket_details(detail_items=[detail_item])
-
-        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
-            body=ticket_details,
-            status=200,
-        )
-
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.return_value = (
             bruin_generic_200_response
         )
@@ -2742,7 +2666,6 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         service_affecting_monitor._append_reminder_note.assert_not_awaited()
-        service_affecting_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         service_affecting_monitor._bruin_repository.change_detail_work_queue_to_hnoc.assert_awaited_once_with(
             ticket_id=ticket_id,
             service_number=serial_number,
@@ -2758,9 +2681,7 @@ class TestServiceAffectingMonitor:
     ):
         edge_contact_info = make_contact_info()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
-
         links_metrics = make_list_of_link_metrics()
-
         service_affecting_monitor._velocloud_repository.get_links_metrics_for_autoresolve.return_value = (
             make_rpc_response(
                 body=links_metrics,
@@ -3542,6 +3463,8 @@ class TestServiceAffectingMonitor:
             status=200,
         )
         service_affecting_monitor._bruin_repository.resolve_ticket.return_value = bruin_generic_200_response
+        job_id = f"_forward_ticket_{ticket_id}_{serial_number}_to_hnoc"
+        service_affecting_monitor._scheduler.get_job.return_value = None
 
         with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
@@ -3563,6 +3486,8 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_awaited()
         service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_awaited()
         service_affecting_monitor._notifications_repository.notify_successful_autoresolve.assert_awaited()
+        service_affecting_monitor._scheduler.get_job.assert_called_with(job_id=job_id)
+        service_affecting_monitor._scheduler.remove_job.assert_not_called()
 
     @pytest.mark.asyncio
     async def run_autoresolve_for_edge__last_trouble_documented_after_reopen_and_detected_long_ago_ipa_queue_test(
@@ -3628,6 +3553,8 @@ class TestServiceAffectingMonitor:
             status=200,
         )
         service_affecting_monitor._bruin_repository.resolve_ticket.return_value = bruin_generic_200_response
+        job_id = f"_forward_ticket_{ticket_id}_{serial_number}_to_hnoc"
+        service_affecting_monitor._scheduler.get_job.return_value = None
 
         with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
@@ -3649,6 +3576,8 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_awaited()
         service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_awaited()
         service_affecting_monitor._notifications_repository.notify_successful_autoresolve.assert_awaited()
+        service_affecting_monitor._scheduler.get_job.assert_called_with(job_id=job_id)
+        service_affecting_monitor._scheduler.remove_job.assert_not_called()
 
     @pytest.mark.asyncio
     async def run_autoresolve_for_edge__maximum_number_of_autoresolves_reached_in_ipa_queue_test(
@@ -3721,6 +3650,8 @@ class TestServiceAffectingMonitor:
             status=200,
         )
         service_affecting_monitor._bruin_repository.resolve_ticket.return_value = bruin_generic_200_response
+        job_id = f"_forward_ticket_{ticket_id}_{serial_number}_to_hnoc"
+        service_affecting_monitor._scheduler.get_job.return_value = None
 
         with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
@@ -3742,6 +3673,8 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_awaited()
         service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_awaited()
         service_affecting_monitor._notifications_repository.notify_successful_autoresolve.assert_awaited()
+        service_affecting_monitor._scheduler.get_job.assert_called_with(job_id=job_id)
+        service_affecting_monitor._scheduler.remove_job.assert_not_called()
 
     @pytest.mark.asyncio
     async def run_autoresolve_for_edge__task_for_serial_already_resolved_test(
@@ -3991,10 +3924,8 @@ class TestServiceAffectingMonitor:
         client_id = 12345
         ticket_id = 123
         ticket_detail_id = 456
-
         bruin_client_info = make_bruin_client_info(client_id=client_id)
         edge_cache_info = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
-
         link_metrics = make_metrics(
             best_latency_ms_tx=0,
             best_latency_ms_rx=0,
@@ -4013,15 +3944,12 @@ class TestServiceAffectingMonitor:
             cache_info=edge_cache_info,
             links=links_status_and_metrics,
         )
-
         ticket = make_ticket(ticket_id=ticket_id, created_by="Intelygenz Ai", create_date=str(CURRENT_DATETIME))
         open_affecting_tickets = make_list_of_tickets(ticket)
-
         detail_item = make_detail_item(id_=ticket_detail_id, value=serial_number)
         detail_items = make_list_of_detail_items(detail_item)
         notes = make_list_of_ticket_notes()
         ticket_details = make_ticket_details(detail_items=detail_items, notes=notes)
-
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.return_value = make_rpc_response(
             body=open_affecting_tickets,
             status=200,
@@ -4035,6 +3963,8 @@ class TestServiceAffectingMonitor:
             status=200,
         )
         service_affecting_monitor._bruin_repository.resolve_ticket.return_value = bruin_generic_200_response
+        job_id = f"_forward_ticket_{ticket_id}_{serial_number}_to_hnoc"
+        service_affecting_monitor._scheduler.get_job.return_value = None
 
         with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
@@ -4059,6 +3989,100 @@ class TestServiceAffectingMonitor:
             ticket_id,
             serial_number,
         )
+        service_affecting_monitor._scheduler.get_job.assert_called_with(job_id=job_id)
+        service_affecting_monitor._scheduler.remove_job.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def run_autoresolve_for_edge__ticket_task_autoresolved_duplicated_job_test(
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_bruin_client_info,
+        make_metrics,
+        make_link_status_and_metrics_object_with_events,
+        make_list_of_link_status_and_metrics_objects,
+        make_links_by_edge_object,
+        make_ticket,
+        make_list_of_tickets,
+        make_detail_item,
+        make_list_of_detail_items,
+        make_list_of_ticket_notes,
+        make_ticket_details,
+        make_rpc_response,
+        bruin_generic_200_response,
+    ):
+        serial_number = "VC1234567"
+        client_id = 12345
+        ticket_id = 123
+        ticket_detail_id = 456
+        bruin_client_info = make_bruin_client_info(client_id=client_id)
+        edge_cache_info = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
+        link_metrics = make_metrics(
+            best_latency_ms_tx=0,
+            best_latency_ms_rx=0,
+            best_packet_loss_tx=0,
+            best_packet_loss_rx=0,
+            best_jitter_ms_tx=0,
+            best_jitter_ms_rx=0,
+            bytes_tx=1,
+            bytes_rx=1,
+            bps_of_best_path_tx=100,
+            bps_of_best_path_rx=100,
+        )
+        link_status_and_metrics = make_link_status_and_metrics_object_with_events(metrics=link_metrics)
+        links_status_and_metrics = make_list_of_link_status_and_metrics_objects(link_status_and_metrics)
+        links_grouped_by_edge_obj = make_links_by_edge_object(
+            cache_info=edge_cache_info,
+            links=links_status_and_metrics,
+        )
+        ticket = make_ticket(ticket_id=ticket_id, created_by="Intelygenz Ai", create_date=str(CURRENT_DATETIME))
+        open_affecting_tickets = make_list_of_tickets(ticket)
+        detail_item = make_detail_item(id_=ticket_detail_id, value=serial_number)
+        detail_items = make_list_of_detail_items(detail_item)
+        notes = make_list_of_ticket_notes()
+        ticket_details = make_ticket_details(detail_items=detail_items, notes=notes)
+        service_affecting_monitor._bruin_repository.get_open_affecting_tickets.return_value = make_rpc_response(
+            body=open_affecting_tickets,
+            status=200,
+        )
+        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
+            body=ticket_details,
+            status=200,
+        )
+        service_affecting_monitor._bruin_repository.get_ticket_details.return_value = make_rpc_response(
+            body=ticket_details,
+            status=200,
+        )
+        service_affecting_monitor._bruin_repository.resolve_ticket.return_value = bruin_generic_200_response
+        job_id = f"_forward_ticket_{ticket_id}_{serial_number}_to_hnoc"
+        service_affecting_monitor._scheduler.get_job.return_value = Mock(return_value=job_id)
+        service_affecting_monitor._scheduler.remove_job.return_value = Mock(return_value=True)
+
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
+            await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
+
+        service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
+            client_id,
+            service_number=serial_number,
+        )
+        service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_awaited_once_with(
+            ticket_id,
+            serial_number,
+        )
+        service_affecting_monitor._bruin_repository.resolve_ticket.assert_awaited_once_with(
+            ticket_id,
+            ticket_detail_id,
+        )
+        service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_awaited_once_with(
+            ticket_id,
+            serial_number,
+        )
+        service_affecting_monitor._notifications_repository.notify_successful_autoresolve.assert_awaited_once_with(
+            ticket_id,
+            serial_number,
+        )
+        service_affecting_monitor._scheduler.get_job.assert_called_with(job_id=job_id)
+        service_affecting_monitor._scheduler.remove_job.assert_called_with(job_id=job_id)
 
     @pytest.mark.asyncio
     async def attempt_forward_to_asr_test(

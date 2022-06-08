@@ -7,7 +7,7 @@ repos:
       args: [--config=./pyproject.toml]
       exclude: environment_files_generator.py
 
-  - repo: https://github.com/timothycrosley/isort
+  - repo: https://github.com/PyCQA/isort
     rev: 5.10.1
     hooks:
       - id: isort
