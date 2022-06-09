@@ -114,6 +114,8 @@ global:
     enabled: true
     # -- Environment path to reference parameter store secrets
     envPath: "/automation-engine/${CURRENT_ENVIRONMENT_SHORT}"
+    # -- Common path to reference parameter store secrets
+    commonPath: "/automation-engine/common"
     # -- secretStorage configuration for create additional k8s resources to allow sync parameters from aws
     secretStorage:
       # -- Custom serviceAccount to assign AWS permissions
