@@ -179,6 +179,7 @@ kubeprometheusstack:
     grafanaDashboards:
       - bruin-api-usage
       - business-metrics-intermapper
+      - business-metrics-service-outage
       - datahighway-kafka
       - mettel-current-sdwan-status
       - nats-statistics
