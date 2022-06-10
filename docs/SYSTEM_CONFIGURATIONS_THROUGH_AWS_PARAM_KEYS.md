@@ -34,7 +34,7 @@ Any new configuration published to Parameter Store must match the following patt
 ```
 
 where:
-* **environment** refers to the Kubernetes context whose namespaces will take this parameter. Allowed values are `dev` and `pro`.
+* **environment** refers to the Kubernetes context whose namespaces will take this parameter. Allowed values are `dev`, `pro` and `common`.
 * **service-name** refers to the name of the service this parameter will be loaded to. Examples of allowed values would be `bruin-bridge`,
   `tnba-monitor`, `repair-tickets-monitor`, and so on.
 * **parameter** refers to the name of the parameter that will be loaded to the service through an environment variable.
@@ -157,9 +157,9 @@ Adding new configurations to Parameter Store is pretty straightforward. The proc
 
 ## About the different environments
 
-When creating a new parameter in Parameter Store, please do make sure to create two parameters out of it: one
-for `dev` environments, and another one for `pro`. In general, `dev` and `pro` versions of the same parameter will share the same value,
-unless there is a strong reason to keep them different.
+When creating a new parameter in the Parameter Store, please decide if it will be different on `dev` and `pro` or if it will be same in both environments.
+If they're different, you should create a parameter for each environment. Otherwise, just create one under `common`.
+In general, most parameters will share the same value, unless there is a strong reason to keep them different.
 
 For example, parameters used to point to third party systems may differ if their app has not only a Production system,
 but also a Development / Test one. In that case, the `pro` version of the parameter should aim at the third party's Production system,
@@ -329,11 +329,11 @@ metadata:
 spec:
   data:
   - remoteRef:
-      key: /automation-engine/pro/some-fancy-bridge/third-party-api-username
-    secretKey: THIRD_PARTY_API_USERNAME
+      key: /automation-engine/pro/some-fancy-bridge/some-common-value
+    secretKey: SOME_COMMON_VALUE
   - remoteRef:
-      key: /automation-engine/pro/some-fancy-bridge/third-party-api-password
-    secretKey: THIRD_PARTY_API_PASSWORD
+      key: /automation-engine/pro/some-fancy-bridge/some-env-specific-value
+    secretKey: SOME_ENV_SPECIFIC_VALUE
 status:
   conditions:
   - lastTransitionTime: "2022-03-08T18:11:10Z"
@@ -376,16 +376,16 @@ spec:
   {{- if eq .Values.global.current_environment "dev" }}
   refreshInterval: "0"
   {{ else }}
-  refreshInterval: "5m"  
+  refreshInterval: "5m"
   {{- end }}
   data:
     {{- with .Values.global.externalSecrets.envPath }}
     - remoteRef:
-        key: {{ . }}/some-fancy-bridge/third-party-api-username
-      secretKey: THIRD_PARTY_API_USERNAME
+        key: {{ .commonPath }}/some-fancy-bridge/some-common-value
+      secretKey: SOME_COMMON_VALUE
     - remoteRef:
-        key: {{ . }}/some-fancy-bridge/third-party-api-password
-      secretKey: THIRD_PARTY_API_PASSWORD
+        key: {{ .envPath }}/some-fancy-bridge/some-env-specific-value
+      secretKey: SOME_ENV_SPECIFIC_VALUE
     {{- end }}
 {{- end }}
 ```
