@@ -862,28 +862,6 @@ lumin-billing-report:
   # -- Number of replicas of lumin-billing-report module
   replicaCount: 1
   config:
-    # -- NATS cluster endpoint
-    nats_server: ""
-    # -- Redis Hostname used to store heavy NATS messages (>1MB)
-    redis_hostname: ""
-    # -- Indicates if the logs will be sent to papertrail or not.
-    papertrail_active: ""
-    # -- Papertrail host to which the logs will be sent
-    papertrail_host: ""
-    # -- Papertrail port to which the logs will be sent
-    papertrail_port: ""
-    # -- Timezone used for periodic jobs, timestamps...
-    timezone: ""
-    # -- URI of Lumin API
-    lumin_uri: ""
-    # -- Token credentials for Lumin API
-    lumin_token: ""
-    # -- Name of customer to generate lumin-billing-report
-    customer_name: ""
-    # -- Email address to send lumin-billing-report
-    billing_recipient: ""
-    # -- Email account password
-    email_acc_pwd: ""
     metrics:
       # -- Indicates whether the microservice will expose metrics through prometheus.
       enabled: true
