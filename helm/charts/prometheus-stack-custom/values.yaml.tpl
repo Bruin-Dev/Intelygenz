@@ -179,6 +179,7 @@ kubeprometheusstack:
     grafanaDashboards:
       - bruin-api-usage
       - business-metrics-intermapper
+      - business-metrics-ipa-triage
       - business-metrics-sd-wan
       - business-metrics-service-affecting
       - business-metrics-service-outage
