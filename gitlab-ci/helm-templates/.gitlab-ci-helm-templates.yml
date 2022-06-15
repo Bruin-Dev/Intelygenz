@@ -50,6 +50,9 @@
         envsubst "$(env | awk -F= '{print "$"$1" "}' | grep -i BUILD_NUMBER | tr -d '\n')" < ${HELM_CHART_DIR}/values.yaml.tpl > ${HELM_CHART_DIR}/values.yaml
         sed -i -E 's/ \$\{.*\}/ ""/g' ${HELM_CHART_DIR}/values.yaml
         sed -i -E 's/ \"\$\{.*\}/ "/g' ${HELM_CHART_DIR}/values.yaml
+        sed -i -E 's/-\$\{.*\}//g' ${HELM_CHART_DIR}/values.yaml
+        sed -i -E 's/\/\$\{.*\}//g' ${HELM_CHART_DIR}/values.yaml
+        sed -i -E 's/"ref+awsssm.*"/""/g' ${HELM_CHART_DIR}/values.yaml
         helm repo add mettel https://chartmuseum.mettel-automation.net --username="${CHARTMUSEUM_USER}" --password="${CHARTMUSEUM_PASSWORD}"
         export AUTOMATION_TAG=$(git tag | sort --version-sort | grep "^automation-engine" | tail -n -1| cut -d "@" -f2)
         helm dependency update ${HELM_CHART_DIR}/ 
