@@ -197,7 +197,6 @@ SERVICE_OUTAGE__MONITOR__QUARANTINE_FOR_EDGES_IN_HARD_DOWN_OUTAGE = parameters["
 SERVICE_OUTAGE__MONITOR__QUARANTINE_FOR_EDGES_IN_HA_LINK_DOWN_OUTAGE = parameters["common"]["service-outage"]["monitor"]["quarantine-for-edges-in-ha-link-down-outage"]
 SERVICE_OUTAGE__MONITOR__QUARANTINE_FOR_EDGES_IN_HA_SOFT_DOWN_OUTAGE = parameters["common"]["service-outage"]["monitor"]["quarantine-for-edges-in-ha-soft-down-outage"]
 SERVICE_OUTAGE__MONITOR__QUARANTINE_FOR_EDGES_IN_HA_HARD_DOWN_OUTAGE = parameters["common"]["service-outage"]["monitor"]["quarantine-for-edges-in-ha-hard-down-outage"]
-SERVICE_OUTAGE__MONITOR__MISSING_EDGES_FROM_CACHE_REPORT_RECIPIENT = parameters["common"]["service-outage"]["monitor"]["missing-edges-from-cache-report-recipient"]
 SERVICE_OUTAGE__MONITOR__LINK_LABELS_BLACKLISTED_IN_ASR_FORWARDS = json.dumps(json.loads(parameters["common"]["service-outage"]["monitor"]["link-labels-blacklisted-in-asr-forwards"]))
 SERVICE_OUTAGE__MONITOR__LINK_LABELS_BLACKLISTED_IN_HNOC_FORWARDS = json.dumps(json.loads(parameters["common"]["service-outage"]["monitor"]["link-labels-blacklisted-in-hnoc-forwards"]))
 SERVICE_OUTAGE__MONITOR__BLACKLISTED_EDGES = json.dumps(json.loads(parameters["dev"]["service-outage"]["monitor"]["blacklisted-edges"]))
@@ -753,7 +752,6 @@ for host in SERVICE_OUTAGE__MONITOR__MONITORED_VELOCLOUD_HOSTS:
         f"MONITORING__SEVERITY_FOR_EDGE_DOWN_OUTAGES={SERVICE_OUTAGE__MONITOR__SEVERITY_FOR_EDGE_DOWN_OUTAGES}",
         f"MONITORING__SEVERITY_FOR_LINK_DOWN_OUTAGES={SERVICE_OUTAGE__MONITOR__SEVERITY_FOR_LINK_DOWN_OUTAGES}",
         f"MONITORING__VELOCLOUD_HOST={host}",
-        f"MONITORING__MISSING_EDGES_FROM_CACHE_REPORT_RECIPIENT={SERVICE_OUTAGE__MONITOR__MISSING_EDGES_FROM_CACHE_REPORT_RECIPIENT}",
         f"MONITORING__LINK_LABELS_BLACKLISTED_IN_ASR_FORWARDS={SERVICE_OUTAGE__MONITOR__LINK_LABELS_BLACKLISTED_IN_ASR_FORWARDS}",
         f"MONITORING__LINK_LABELS_BLACKLISTED_IN_HNOC_FORWARDS={SERVICE_OUTAGE__MONITOR__LINK_LABELS_BLACKLISTED_IN_HNOC_FORWARDS}",
         f"MONITORING__BLACKLISTED_EDGES={SERVICE_OUTAGE__MONITOR__BLACKLISTED_EDGES}",

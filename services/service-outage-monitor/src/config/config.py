@@ -47,7 +47,6 @@ else:
         "multiplier": 5,
         "min": 5,
         "stop_delay": 300,
-        "recipient": os.environ["MONITORING__MISSING_EDGES_FROM_CACHE_REPORT_RECIPIENT"],
         "jobs_intervals": {
             "outage_monitor": int(os.environ["MONITORING__MONITORING_JOB_INTERVAL"]),
             "forward_to_hnoc_edge_down": 1,
