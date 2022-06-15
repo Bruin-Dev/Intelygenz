@@ -24,9 +24,9 @@
   "license": "ISC",
   "dependencies": {
     "lerna": "4.0.0",
-    "multi-semantic-release": "2.8.5",
-    "semantic-release": "17.4.7",
-    "@semantic-release/gitlab": "6.2.2"
+    "multi-semantic-release": "2.13.0",
+    "semantic-release": "^17.4.7",
+    "@semantic-release/gitlab": "10.0.1"
   },
   "resolutions": {
     "react": "^16.13.1",
