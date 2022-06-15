@@ -30,9 +30,9 @@ LOG_CONFIG = {
 }
 
 KRE_CONFIG = {
-    "base_url": os.environ["KRE_BASE_URL"],
+    "base_url": "integration-tests:5001",
     # NOTE: Set to False for local development or manual tests
-    "grpc_secure_mode": True,
+    "grpc_secure_mode": False
 }
 
 QUART_CONFIG = {"title": "email-tagger-kre-bridge", "port": 5000}
