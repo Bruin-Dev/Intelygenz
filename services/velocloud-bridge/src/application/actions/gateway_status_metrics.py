@@ -1,50 +1,53 @@
-from http import HTTPStatus
-from logging import Logger
-from typing import List
-
-from application.repositories.velocloud_repository import VelocloudRepository
+import json
+import logging
 from dataclasses import dataclass
-from igz.packages.eventbus.eventbus import EventBus
+from http import HTTPStatus
+
+from nats.aio.msg import Msg
 from pydantic import BaseModel, ValidationError
+
+from ..repositories.velocloud_repository import VelocloudRepository
+
+logger = logging.getLogger(__name__)
 
 
 class GatewayStatusMetricsMessageBody(BaseModel):
     host: str
     gateway_id: int
     interval: dict
-    metrics: List[str]
+    metrics: list[str]
 
 
 @dataclass
 class GatewayStatusMetrics:
-    _event_bus: EventBus
     _velocloud_repository: VelocloudRepository
-    _logger: Logger
 
-    async def get_gateway_status_metrics(self, msg: dict):
+    async def __call__(self, msg: Msg):
+        payload = json.loads(msg.data)
+
+        response = {"body": None, "status": None}
+
         try:
-            message_body = GatewayStatusMetricsMessageBody.parse_obj(msg.get("body"))
+            request_body = GatewayStatusMetricsMessageBody.parse_obj(payload.get("body"))
         except ValidationError as e:
-            self._logger.warning(f"Wrong request message: msg={msg}, validation_error={e}")
-            await self._event_bus.publish_message(
-                msg["response_topic"],
-                {"request_id": msg["request_id"], "status": HTTPStatus.BAD_REQUEST, "body": e.errors()},
-            )
+            logger.warning(f"Wrong request message: msg={msg}, validation_error={e}")
+            response["body"] = e.errors()
+            response["status"] = HTTPStatus.BAD_REQUEST
+            await msg.respond(json.dumps(response).encode())
             return
 
-        gateway_status_metrics_response = {"request_id": msg["request_id"], "body": None, "status": None}
+        host = request_body.host
+        gateway_id = request_body.gateway_id
+        interval = request_body.interval
+        metrics = request_body.metrics
 
-        host = message_body.host
-        gateway_id = message_body.gateway_id
-        interval = message_body.interval
-        metrics = message_body.metrics
-
-        self._logger.info("Getting gateway status metrics")
+        logger.info(f"Getting gateway status metrics for gateway {gateway_id} on host {host} in interval {interval}...")
         gateway_status_metrics = await self._velocloud_repository.get_gateway_status_metrics(
-            host, gateway_id, interval, metrics
+            host=host, gateway_id=gateway_id, interval=interval, metrics=metrics
         )
-        gateway_status_metrics_response["body"] = gateway_status_metrics["body"]
-        gateway_status_metrics_response["status"] = gateway_status_metrics["status"]
 
-        await self._event_bus.publish_message(msg["response_topic"], gateway_status_metrics_response)
-        self._logger.info(f"Sent network gateway metrics for gateway {gateway_id} on host {host}")
+        response = {
+            **gateway_status_metrics,
+        }
+        await msg.respond(json.dumps(response).encode())
+        logger.info(f"Sent gateway status metrics for gateway {gateway_id} on host {host} in interval {interval}")

@@ -1,8 +1,7 @@
 from typing import Any, List
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
-from asynctest import CoroutineMock
 
 
 @pytest.fixture(scope="session")
@@ -11,7 +10,7 @@ def make_http_response():
 
     def _inner(*, status: int, body: Any) -> Mock:
         response.status = status
-        response.json = CoroutineMock(return_value=body)
+        response.json = AsyncMock(return_value=body)
         return response
 
     return _inner

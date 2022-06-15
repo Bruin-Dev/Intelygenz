@@ -1,107 +1,100 @@
-from unittest.mock import Mock
+import json
+from unittest.mock import AsyncMock, Mock
 
 import pytest
-from application.actions.enterprise_edge_list import EnterpriseEdgeList
-from asynctest import CoroutineMock
-from shortuuid import uuid
+from nats.aio.msg import Msg
 
-uuid_ = uuid()
+from ...application.actions.enterprise_edge_list import EnterpriseEdgeList
+from ...application.repositories.velocloud_repository import VelocloudRepository
 
 
-class TestEnterpriseEdgeList:
-    def instance_test(self):
-        event_bus = Mock()
-        velocloud_repo = Mock()
-        logger = Mock()
+@pytest.fixture(scope="function")
+def velocloud_repository():
+    return Mock(spec_set=VelocloudRepository)
 
-        enterprise_edge_list = EnterpriseEdgeList(event_bus, velocloud_repo, logger)
 
-        assert enterprise_edge_list._event_bus == event_bus
-        assert enterprise_edge_list._velocloud_repository == velocloud_repo
-        assert enterprise_edge_list._logger == logger
+@pytest.fixture(scope="function")
+def action(velocloud_repository):
+    return EnterpriseEdgeList(velocloud_repository=velocloud_repository)
 
-    @pytest.mark.asyncio
-    async def enterprise_edge_list_test(self):
-        velocloud_host = "mettel.velocloud.net"
-        enterprise_id = 115
-        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
 
-        request = {
-            "request_id": uuid_,
-            "response_topic": response_topic,
-            "body": {
-                "host": velocloud_host,
-                "enterprise_id": enterprise_id,
-            },
-        }
-        enterprise_edge_list_results = {"body": ["List of Enterprise Edges"], "status": 200}
-        response = {
-            "request_id": uuid_,
-            **enterprise_edge_list_results,
-        }
+@pytest.fixture(scope="function")
+def any_msg():
+    return Mock(spec_set=Msg)
 
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
 
-        velocloud_repo = Mock()
-        velocloud_repo.get_enterprise_edges = CoroutineMock(return_value=enterprise_edge_list_results)
-        logger = Mock()
+@pytest.fixture(scope="function")
+def any_payload():
+    payload = {"body": {"host": "any_host", "enterprise_id": hash("any_id")}}
+    return json.dumps(payload).encode()
 
-        enterprise_edge_list = EnterpriseEdgeList(event_bus, velocloud_repo, logger)
 
-        await enterprise_edge_list.enterprise_edge_list(request)
-        velocloud_repo.get_enterprise_edges.assert_awaited_once_with(velocloud_host, enterprise_id)
-        event_bus.publish_message.assert_awaited_once_with(response_topic, response)
+@pytest.fixture(scope="function")
+def any_response():
+    return {
+        "body": [],
+        "status": hash("any_status"),
+    }
 
-    @pytest.mark.asyncio
-    async def enterprise_edge_list_no_body_test(self):
-        velocloud_host = "mettel.velocloud.net"
-        enterprise_id = 115
-        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
 
-        request = {
-            "request_id": uuid_,
-            "response_topic": response_topic,
-        }
+@pytest.fixture(scope="function")
+def no_body_response():
+    return {
+        "body": 'Must include "body" in request',
+        "status": 400,
+    }
 
-        response = {"request_id": uuid_, "body": 'Must include "body" in request', "status": 400}
 
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+@pytest.fixture(scope="function")
+def missing_filters_response():
+    return {
+        "body": 'Must include "host" and "enterprise_id" in request "body"',
+        "status": 400,
+    }
 
-        velocloud_repo = Mock()
-        velocloud_repo.get_enterprise_edges = CoroutineMock()
-        logger = Mock()
 
-        enterprise_edge_list = EnterpriseEdgeList(event_bus, velocloud_repo, logger)
+async def ok_test(action, any_msg, any_payload, any_response):
+    # Given
+    action._velocloud_repository.get_enterprise_edges = AsyncMock(return_value=any_response)
 
-        await enterprise_edge_list.enterprise_edge_list(request)
-        velocloud_repo.get_enterprise_edges.assert_not_awaited()
-        event_bus.publish_message.assert_awaited_once_with(response_topic, response)
+    any_msg.data = any_payload
 
-    @pytest.mark.asyncio
-    async def enterprise_edge_list_missing_body_keys_test(self):
-        velocloud_host = "mettel.velocloud.net"
-        enterprise_id = 115
-        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
+    payload_json = json.loads(any_payload)
 
-        request = {"request_id": uuid_, "response_topic": response_topic, "body": {}}
+    # When
+    await action(any_msg)
 
-        response = {
-            "request_id": uuid_,
-            "body": 'Must include "host" and "enterprise_id" in request "body"',
-            "status": 400,
-        }
+    # Then
+    action._velocloud_repository.get_enterprise_edges.assert_awaited_once_with(
+        host=payload_json["body"]["host"],
+        enterprise_id=payload_json["body"]["enterprise_id"],
+    )
+    any_msg.respond.assert_awaited_once_with(json.dumps(any_response).encode())
 
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
 
-        velocloud_repo = Mock()
-        velocloud_repo.get_enterprise_edges = CoroutineMock()
-        logger = Mock()
+async def ko_body_missing_in_request_test(action, any_msg, no_body_response):
+    # Given
+    action._velocloud_repository.get_enterprise_edges = AsyncMock()
 
-        enterprise_edge_list = EnterpriseEdgeList(event_bus, velocloud_repo, logger)
+    any_msg.data = b"{}"
 
-        await enterprise_edge_list.enterprise_edge_list(request)
-        velocloud_repo.get_enterprise_edges.assert_not_awaited()
-        event_bus.publish_message.assert_awaited_once_with(response_topic, response)
+    # When
+    await action(any_msg)
+
+    # Then
+    action._velocloud_repository.get_enterprise_edges.assert_not_awaited()
+    any_msg.respond.assert_awaited_once_with(json.dumps(no_body_response).encode())
+
+
+async def ko_filters_missing_in_request_test(action, any_msg, missing_filters_response):
+    # Given
+    action._velocloud_repository.get_enterprise_edges = AsyncMock()
+
+    any_msg.data = b'{"body": {}}'
+
+    # When
+    await action(any_msg)
+
+    # Then
+    action._velocloud_repository.get_enterprise_edges.assert_not_awaited()
+    any_msg.respond.assert_awaited_once_with(json.dumps(missing_filters_response).encode())

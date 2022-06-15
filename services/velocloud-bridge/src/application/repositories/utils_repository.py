@@ -6,8 +6,8 @@ from pydantic import BaseModel
 
 
 class GenericResponse(BaseModel):
-    status: int
     body: Any
+    status: int
 
     @classmethod
     async def from_client_response(cls, client_response: ClientResponse):

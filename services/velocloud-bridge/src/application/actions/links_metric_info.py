@@ -1,54 +1,56 @@
+import json
+import logging
+
+from nats.aio.msg import Msg
+
+from ..repositories.velocloud_repository import VelocloudRepository
+
+logger = logging.getLogger(__name__)
+
 missing = object()
 
 
 class LinksMetricInfo:
-    def __init__(self, event_bus, logger, velocloud_repository):
-        self._event_bus = event_bus
-        self._logger = logger
+    def __init__(self, velocloud_repository: VelocloudRepository):
         self._velocloud_repository = velocloud_repository
 
-    async def get_links_metric_info(self, request: dict):
-        request_id = request["request_id"]
-        response_topic = request["response_topic"]
+    async def __call__(self, msg: Msg):
+        payload = json.loads(msg.data)
 
-        response = {
-            "request_id": request_id,
-            "body": None,
-            "status": None,
-        }
+        response = {"body": None, "status": None}
 
-        request_body: dict = request.get("body", missing)
+        request_body: dict = payload.get("body", missing)
         if request_body is missing:
-            self._logger.error(f'Cannot get links metric info: "body" is missing in the request')
+            logger.error(f'Cannot get links metric info: "body" is missing in the request')
             response["body"] = 'Must include "body" in the request'
             response["status"] = 400
-            await self._event_bus.publish_message(response_topic, response)
+            await msg.respond(json.dumps(response).encode())
             return
 
         velocloud_host: str = request_body.get("host", missing)
         if velocloud_host is missing:
-            self._logger.error(f'Cannot get links metric info: "host" is missing in the body of the request')
+            logger.error(f'Cannot get links metric info: "host" is missing in the body of the request')
             response["body"] = 'Must include "host" and "interval" in the body of the request'
             response["status"] = 400
-            await self._event_bus.publish_message(response_topic, response)
+            await msg.respond(json.dumps(response).encode())
             return
 
-        interval: str = request_body.get("interval", missing)
+        interval: dict = request_body.get("interval", missing)
         if interval is missing:
-            self._logger.error(f'Cannot get links metric info: "interval" is missing in the body of the request')
+            logger.error(f'Cannot get links metric info: "interval" is missing in the body of the request')
             response["body"] = 'Must include "host" and "interval" in the body of the request'
             response["status"] = 400
-            await self._event_bus.publish_message(response_topic, response)
+            await msg.respond(json.dumps(response).encode())
             return
 
-        self._logger.info(f'Getting links metric info from Velocloud host "{velocloud_host}"...')
+        logger.info(f'Getting links metric info from Velocloud host "{velocloud_host}"...')
         links_metric_info_response: dict = await self._velocloud_repository.get_links_metric_info(
-            velocloud_host, interval
+            velocloud_host=velocloud_host,
+            interval=interval,
         )
 
         response = {
-            "request_id": request_id,
             **links_metric_info_response,
         }
-        await self._event_bus.publish_message(response_topic, response)
-        self._logger.info(f"Published links metric info in the event bus for request {request}")
+        await msg.respond(json.dumps(response).encode())
+        logger.info(f"Published links metric info for request {payload}")

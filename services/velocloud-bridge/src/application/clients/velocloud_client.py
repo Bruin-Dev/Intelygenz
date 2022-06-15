@@ -1,18 +1,25 @@
 import asyncio
+import logging
 from datetime import datetime
+from http import HTTPStatus
 from typing import Any, Dict, List
 
 import aiohttp
 from apscheduler.jobstores.base import ConflictingIdError
 from pytz import timezone
 
+from ..repositories.utils_repository import GenericResponse
+
+logger = logging.getLogger(__name__)
+
 
 class VelocloudClient:
-    def __init__(self, config, logger, scheduler):
+    def __init__(self, config, scheduler):
         self._config = config
         self._clients = list()
-        self._logger = logger
         self._scheduler = scheduler
+
+    async def create_session(self):
         self._session = aiohttp.ClientSession()
 
     def __del__(self):
@@ -25,7 +32,7 @@ class VelocloudClient:
         ]
 
     async def _start_relogin_job(self, host):
-        self._logger.info(f"Scheduling relogin job for host {host}...")
+        logger.info(f"Scheduling relogin job for host {host}...")
 
         tz = timezone(self._config.TIMEZONE)
         run_date = datetime.now(tz)
@@ -43,10 +50,10 @@ class VelocloudClient:
                 id=f"_relogin_client{host}",
                 kwargs=params,
             )
-            self._logger.info(f"Relogin job for host {host} has been scheduled")
+            logger.info(f"Relogin job for host {host} has been scheduled")
 
         except ConflictingIdError as conflict:
-            self._logger.info(f"Skipping start of relogin job for host {host}. Reason: {conflict}")
+            logger.info(f"Skipping start of relogin job for host {host}. Reason: {conflict}")
 
     def _get_cred_block(self, host):
         for cred_block in self._config.VELOCLOUD_CONFIG["servers"]:
@@ -54,7 +61,7 @@ class VelocloudClient:
                 return cred_block
 
     async def _relogin_client(self, host):
-        self._logger.info(f"Relogging in host: {host} to velocloud")
+        logger.info(f"Relogging in host: {host} to velocloud")
 
         creds = self._get_cred_block(host)
 
@@ -66,17 +73,17 @@ class VelocloudClient:
                 break
 
     async def _create_and_connect_client(self, host, user, password):
-        self._logger.info(f"Logging in host: {host} to velocloud")
+        logger.info(f"Logging in host: {host} to velocloud")
 
         client = dict()
         client["host"] = host
         headers = await self._create_headers_by_host(host, user, password)
         if headers["status"] in range(200, 300):
-            self._logger.info("Connection successful")
+            logger.info("Connection successful")
             client["headers"] = headers["body"]
         else:
-            self._logger.info(f"Connection wasn't possible, error {headers['status']}")
-            self._logger.info(headers["body"])
+            logger.info(f"Connection wasn't possible, error {headers['status']}")
+            logger.info(headers["body"])
             client["headers"] = {}
         return client
 
@@ -91,7 +98,7 @@ class VelocloudClient:
             response = await self._session.post(f"https://{host}/portal/rest/login/operatorLogin", **post)
             return_response = dict.fromkeys(["body", "status"])
             if response.status in range(200, 300):
-                self._logger.info(f"Host: {host} logged in")
+                logger.info(f"Host: {host} logged in")
                 session_index = response.headers["Set-Cookie"].find("velocloud.session")
                 session_end = response.headers["Set-Cookie"].find(";", session_index)
 
@@ -103,7 +110,7 @@ class VelocloudClient:
                 return_response["body"] = headers
                 return_response["status"] = response.status
             if response.status == 302:
-                self._logger.error(f"Got 302 from velocloud")
+                logger.error(f"Got 302 from velocloud")
                 return_response["body"] = f"Got an error trying to login"
                 return_response["status"] = 302
 
@@ -114,9 +121,9 @@ class VelocloudClient:
     def _get_header_by_host(self, host):
         host_client = [client for client in self._clients if host == client["host"]]
         if len(host_client) > 0:
-            self._logger.info(f"Found host: {host} in client array")
+            logger.info(f"Found host: {host} in client array")
             return host_client[0]
-        self._logger.info(f"Host: {host} not found in client array")
+        logger.info(f"Host: {host} not found in client array")
         return None
 
     async def get_all_events(self, host, body):
@@ -125,7 +132,7 @@ class VelocloudClient:
             target_host_client = self._get_header_by_host(host)
 
             if target_host_client is None:
-                self._logger.error(f"Cannot find a client to connect to {host}")
+                logger.error(f"Cannot find a client to connect to {host}")
                 return_response["body"] = f"Cannot find a client to connect to {host}"
                 return_response["status"] = 404
                 await self._start_relogin_job(host)
@@ -147,9 +154,9 @@ class VelocloudClient:
                 response_json = await response.json()
                 return_response["body"] = response_json
                 return_response["status"] = response.status
-                self._logger.error(f"Got error from Velocloud {response_json}")
+                logger.error(f"Got error from Velocloud {response_json}")
             if response.status in range(500, 513):
-                self._logger.error(f"Got {response.status}")
+                logger.error(f"Got {response.status}")
                 return_response["body"] = f"Got internal error from Velocloud"
                 return_response["status"] = 500
 
@@ -176,9 +183,9 @@ class VelocloudClient:
                 response_json = await response.json()
                 return_response["body"] = response_json
                 return_response["status"] = response.status
-                self._logger.error(f"Got error from Velocloud {response_json}")
+                logger.error(f"Got error from Velocloud {response_json}")
             if response.status in range(500, 513):
-                self._logger.error(f"Got {response.status}")
+                logger.error(f"Got {response.status}")
                 return_response["body"] = f"Got internal error from Velocloud"
                 return_response["status"] = 500
 
@@ -192,7 +199,7 @@ class VelocloudClient:
         for client in self._clients:
             res = await self.get_monitoring_aggregates(client)
             if res["status"] not in range(200, 300):
-                self._logger.error(
+                logger.error(
                     f"Function [get_all_enterprise_names] Error: \n"
                     f"Status : {res['status']}, \n"
                     f"Error Message: {res['body']}"
@@ -209,10 +216,10 @@ class VelocloudClient:
         if isinstance(response, dict):
             if "error" in response.keys():
                 if "tokenError" in response["error"]["message"]:
-                    self._logger.info(f"Response returned: {response}. Attempting to relogin")
+                    logger.info(f"Response returned: {response}. Attempting to relogin")
                     await self._start_relogin_job(host)
                 else:
-                    self._logger.error(f"Error response returned: {response}")
+                    logger.error(f"Error response returned: {response}")
         return response
 
     async def get_links_with_edge_info(self, velocloud_host: str):
@@ -231,7 +238,7 @@ class VelocloudClient:
             return result
 
         try:
-            self._logger.info(f'Getting links with edge info from Velocloud host "{velocloud_host}"...')
+            logger.info(f'Getting links with edge info from Velocloud host "{velocloud_host}"...')
 
             response = await self._session.post(
                 f"https://{velocloud_host}/portal/rest/monitoring/getEnterpriseEdgeLinkStatus",
@@ -253,7 +260,7 @@ class VelocloudClient:
 
         await self.__schedule_relogin_job_if_needed(velocloud_host, response)
 
-        self._logger.info(
+        logger.info(
             f"Got HTTP {response.status} from Velocloud after claiming links with edge info for host {velocloud_host}"
         )
 
@@ -282,7 +289,7 @@ class VelocloudClient:
             return result
 
         try:
-            self._logger.info(f'Getting links metric info from Velocloud host "{velocloud_host}"...')
+            logger.info(f'Getting links metric info from Velocloud host "{velocloud_host}"...')
 
             response = await self._session.post(
                 f"https://{velocloud_host}/portal/rest/monitoring/getAggregateEdgeLinkMetrics",
@@ -304,7 +311,7 @@ class VelocloudClient:
 
         await self.__schedule_relogin_job_if_needed(velocloud_host, response)
 
-        self._logger.info(
+        logger.info(
             f"Got HTTP {response.status} from Velocloud after claiming links metric info for host {velocloud_host}"
         )
 
@@ -318,7 +325,7 @@ class VelocloudClient:
     async def get_edge_links_series(self, velocloud_host: str, payload):
         target_host_client = self._get_header_by_host(velocloud_host)
         result = dict.fromkeys(["body", "status"])
-        self._logger.info(
+        logger.info(
             f"Trying to get edge links series for payload {payload} and" f' from Velocloud host "{velocloud_host}"...'
         )
         if target_host_client is None:
@@ -351,7 +358,7 @@ class VelocloudClient:
 
         await self.__schedule_relogin_job_if_needed(velocloud_host, response)
 
-        self._logger.info(
+        logger.info(
             f"Got HTTP {response.status} from Velocloud after edge link series for {payload}"
             f"and host {velocloud_host}"
         )
@@ -379,7 +386,7 @@ class VelocloudClient:
             return result
 
         try:
-            self._logger.info(
+            logger.info(
                 f"Getting all enterprise edges from enterprise ID {enterprise_id} and"
                 f' from Velocloud host "{velocloud_host}"...'
             )
@@ -404,7 +411,7 @@ class VelocloudClient:
 
         await self.__schedule_relogin_job_if_needed(velocloud_host, response)
 
-        self._logger.info(
+        logger.info(
             f"Got HTTP {response.status} from Velocloud after getting enterpise edges for enterprise {enterprise_id}"
             f"and host {velocloud_host}"
         )
@@ -438,7 +445,7 @@ class VelocloudClient:
             return result
 
         try:
-            self._logger.info(f"Getting edge configuration modules for edge {edge}...")
+            logger.info(f"Getting edge configuration modules for edge {edge}...")
 
             response = await self._session.post(
                 f"https://{velocloud_host}/portal/rest/edge/getEdgeConfigurationModules",
@@ -466,7 +473,7 @@ class VelocloudClient:
 
         await self.__schedule_relogin_job_if_needed(velocloud_host, response)
 
-        self._logger.info(
+        logger.info(
             f"Got HTTP {response.status} from Velocloud after claiming edge configuration modules for edge {edge}"
         )
         result["body"] = await response.json()
@@ -476,13 +483,13 @@ class VelocloudClient:
 
         return result
 
-    async def get_network_enterprises(self, velocloud_host: str, enterprise_ids: List[int]) -> Dict[str, Any]:
+    async def get_network_enterprises(self, velocloud_host: str, enterprise_ids: list[int]) -> dict[str, Any]:
         result = dict.fromkeys(["body", "status"])
         request_body = {"enterprises": enterprise_ids, "with": ["edges"]}
 
         target_host_client = self._get_header_by_host(velocloud_host)
         try:
-            self._logger.info(f"Getting network enterprise ids for {enterprise_ids}...")
+            logger.info(f"Getting network enterprise ids for {enterprise_ids}...")
 
             response = await self._session.post(
                 f"https://{velocloud_host}/portal/rest/network/getNetworkEnterprises",
@@ -505,9 +512,7 @@ class VelocloudClient:
                 result["status"] = 400
             else:
                 await self.__schedule_relogin_job_if_needed(velocloud_host, response)
-                self._logger.info(
-                    f"Got HTTP {response.status} from Velocloud after getting enterprise ids: {enterprise_ids}"
-                )
+                logger.info(f"Got HTTP {response.status} from Velocloud after getting enterprise ids: {enterprise_ids}")
                 result["body"] = await response.json()
                 result["status"] = response.status
 
@@ -529,7 +534,7 @@ class VelocloudClient:
             return result
 
         try:
-            self._logger.info(f"Getting network gateways for host {velocloud_host}...")
+            logger.info(f"Getting network gateways for host {velocloud_host}...")
 
             response = await self._session.post(
                 url=f"https://{velocloud_host}/portal/rest/network/getNetworkGateways",
@@ -557,7 +562,7 @@ class VelocloudClient:
 
         await self.__schedule_relogin_job_if_needed(velocloud_host, response)
 
-        self._logger.info(
+        logger.info(
             f"Got HTTP {response.status} from Velocloud after getting network gateways for host {velocloud_host}"
         )
 
@@ -588,7 +593,7 @@ class VelocloudClient:
             return result
 
         try:
-            self._logger.info(f"Getting gateway status metrics for gateway {gateway_id} and host {velocloud_host}...")
+            logger.info(f"Getting gateway status metrics for gateway {gateway_id} and host {velocloud_host}...")
 
             response = await self._session.post(
                 url=f"https://{velocloud_host}/portal/rest/metrics/getGatewayStatusMetrics",
@@ -619,7 +624,7 @@ class VelocloudClient:
 
         await self.__schedule_relogin_job_if_needed(velocloud_host, response)
 
-        self._logger.info(
+        logger.info(
             f"Got HTTP {response.status} from Velocloud after getting gateway status metrics for gateway {gateway_id} "
             f"and host {velocloud_host}"
         )
@@ -633,7 +638,7 @@ class VelocloudClient:
 
     async def __schedule_relogin_job_if_needed(self, velocloud_host: str, response: aiohttp.client.ClientResponse):
         if self.__token_expired(response):
-            self._logger.info(f"Auth token expired for host {velocloud_host}. Scheduling re-login job...")
+            logger.info(f"Auth token expired for host {velocloud_host}. Scheduling re-login job...")
             await self._start_relogin_job(velocloud_host)
 
             response._body = f"Auth token expired for host {velocloud_host}"
@@ -646,8 +651,8 @@ class VelocloudClient:
     def __log_result(self, result: dict):
         body, status = result["body"], result["status"]
         if status == 400:
-            self._logger.error(f"Got error from Velocloud -> {body}")
+            logger.error(f"Got error from Velocloud -> {body}")
         if status == 401:
-            self._logger.error(f"Authentication error -> {body}")
+            logger.error(f"Authentication error -> {body}")
         if status in range(500, 513):
-            self._logger.error(f"Got {status} from Velocloud")
+            logger.error(f"Got {status} from Velocloud")

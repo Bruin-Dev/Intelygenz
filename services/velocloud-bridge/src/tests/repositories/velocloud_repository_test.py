@@ -1,24 +1,36 @@
 from datetime import datetime, timedelta
-from unittest.mock import Mock
+from http import HTTPStatus
+from unittest.mock import AsyncMock, Mock
 
 import pytest
-from application.repositories.velocloud_repository import VelocloudRepository
-from asynctest import CoroutineMock
-from config import testconfig as config
+
+from ...application.clients.velocloud_client import VelocloudClient
+from ...application.repositories.utils_repository import GenericResponse
+from ...application.repositories.velocloud_repository import VelocloudRepository
+from ...config import testconfig as config
+
+
+@pytest.fixture(scope="function")
+def velocloud_client():
+    return Mock(spec_set=VelocloudClient)
+
+
+@pytest.fixture(scope="function")
+def velocloud_repository(velocloud_client):
+    return VelocloudRepository(config=config, velocloud_client=velocloud_client)
 
 
 class TestVelocloudRepository:
     @pytest.mark.asyncio
     async def get_all_edge_events_filter_test(self):
-        mock_logger = Mock()
         test_velocloud_client = Mock()
-        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        vr = VelocloudRepository(config=config, velocloud_client=test_velocloud_client)
 
         events_response = {"body": {"data": [{"event": "EDGE_UP"}]}, "status": 200}
         edge_events_response = {"body": [{"event": "EDGE_UP"}], "status": 200}
         filter_events_status_list = ["EDGE_UP", "EDGE_DOWN", "LINK_ALIVE", "LINK_DEAD"]
 
-        test_velocloud_client.get_all_events = CoroutineMock(return_value=events_response)
+        test_velocloud_client.get_all_events = AsyncMock(return_value=events_response)
         edge = {"host": vr._config.VELOCLOUD_CONFIG["servers"][0]["url"], "enterprise_id": 19, "edge_id": 99}
         start = datetime.now() - timedelta(hours=24)
         end = datetime.now()
@@ -35,15 +47,14 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_all_edge_events_none_filter_test(self):
-        mock_logger = Mock()
         test_velocloud_client = Mock()
-        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        vr = VelocloudRepository(config=config, velocloud_client=test_velocloud_client)
 
         events_response = {"body": {"data": [{"event": "EDGE_UP"}, {"event": "EDGE_GONE"}]}, "status": 200}
         edge_events_response = {"body": [{"event": "EDGE_UP"}, {"event": "EDGE_GONE"}], "status": 200}
         filter_events_status_list = None
 
-        test_velocloud_client.get_all_events = CoroutineMock(return_value=events_response)
+        test_velocloud_client.get_all_events = AsyncMock(return_value=events_response)
         edge = {"host": vr._config.VELOCLOUD_CONFIG["servers"][0]["url"], "enterprise_id": 19, "edge_id": 99}
         start = datetime.now() - timedelta(hours=24)
         end = datetime.now()
@@ -62,14 +73,13 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_all_edge_events_non_2xx_status_test(self):
-        mock_logger = Mock()
         test_velocloud_client = Mock()
-        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        vr = VelocloudRepository(config=config, velocloud_client=test_velocloud_client)
 
         events_response = {"body": "Failed", "status": 400}
         filter_events_status_list = None
 
-        test_velocloud_client.get_all_events = CoroutineMock(return_value=events_response)
+        test_velocloud_client.get_all_events = AsyncMock(return_value=events_response)
         edge = {"host": vr._config.VELOCLOUD_CONFIG["servers"][0]["url"], "enterprise_id": 19, "edge_id": 99}
         start = datetime.now() - timedelta(hours=24)
         end = datetime.now()
@@ -88,15 +98,14 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_all_enterprise_events_filter_test(self):
-        mock_logger = Mock()
         test_velocloud_client = Mock()
-        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        vr = VelocloudRepository(config=config, velocloud_client=test_velocloud_client)
 
         events_response = {"body": {"data": [{"event": "EDGE_UP"}]}, "status": 200}
         enterprise_events_response = {"body": [{"event": "EDGE_UP"}], "status": 200}
         filter_events_status_list = ["EDGE_UP", "EDGE_DOWN", "LINK_ALIVE", "LINK_DEAD"]
 
-        test_velocloud_client.get_all_events = CoroutineMock(return_value=events_response)
+        test_velocloud_client.get_all_events = AsyncMock(return_value=events_response)
         host = vr._config.VELOCLOUD_CONFIG["servers"][0]["url"]
         enterprise_id = 19
         start = datetime.now() - timedelta(hours=24)
@@ -115,15 +124,14 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_all_enterprise_events_no_filter_test(self):
-        mock_logger = Mock()
         test_velocloud_client = Mock()
-        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        vr = VelocloudRepository(config=config, velocloud_client=test_velocloud_client)
 
         events_response = {"body": {"data": [{"event": "EDGE_UP"}, {"event": "EDGE_GONE"}]}, "status": 200}
         enterprise_events_response = {"body": [{"event": "EDGE_UP"}, {"event": "EDGE_GONE"}], "status": 200}
         filter_events_status_list = None
 
-        test_velocloud_client.get_all_events = CoroutineMock(return_value=events_response)
+        test_velocloud_client.get_all_events = AsyncMock(return_value=events_response)
         host = vr._config.VELOCLOUD_CONFIG["servers"][0]["url"]
         enterprise_id = 19
         start = datetime.now() - timedelta(hours=24)
@@ -144,15 +152,14 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_all_enterprise_events_non_2xx_status_test(self):
-        mock_logger = Mock()
         test_velocloud_client = Mock()
-        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        vr = VelocloudRepository(config=config, velocloud_client=test_velocloud_client)
 
         events_response = {"body": "Failed", "status": 400}
 
         filter_events_status_list = None
 
-        test_velocloud_client.get_all_events = CoroutineMock(return_value=events_response)
+        test_velocloud_client.get_all_events = AsyncMock(return_value=events_response)
         host = vr._config.VELOCLOUD_CONFIG["servers"][0]["url"]
         enterprise_id = 19
         start = datetime.now() - timedelta(hours=24)
@@ -173,21 +180,19 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def connect_to_all_servers_test(self):
-        mock_logger = Mock()
         test_velocloud_client = Mock()
-        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
-        test_velocloud_client.instantiate_and_connect_clients = CoroutineMock()
+        vr = VelocloudRepository(config=config, velocloud_client=test_velocloud_client)
+        test_velocloud_client.instantiate_and_connect_clients = AsyncMock()
         await vr.connect_to_all_servers()
         assert test_velocloud_client.instantiate_and_connect_clients.called
 
     @pytest.mark.asyncio
     async def get_all_enterprise_names_with_filter_test(self):
-        mock_logger = Mock()
         test_velocloud_client = Mock()
-        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        vr = VelocloudRepository(config=config, velocloud_client=test_velocloud_client)
         enterprises = {"body": [{"enterprise_name": "The Name"}], "status": 200}
         msg = {"request_id": "123", "filter": ["The Name"]}
-        test_velocloud_client.get_all_enterprise_names = CoroutineMock(return_value=enterprises)
+        test_velocloud_client.get_all_enterprise_names = AsyncMock(return_value=enterprises)
         enterprise_names = await vr.get_all_enterprise_names(msg)
 
         assert test_velocloud_client.get_all_enterprise_names.called
@@ -195,24 +200,22 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_all_enterprise_names_none_test(self):
-        mock_logger = Mock()
         test_velocloud_client = Mock()
-        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        vr = VelocloudRepository(config=config, velocloud_client=test_velocloud_client)
         enterprises = {"body": None, "status": 500}
         msg = {"request_id": "123", "filter": []}
-        test_velocloud_client.get_all_enterprise_names = CoroutineMock(return_value=enterprises)
+        test_velocloud_client.get_all_enterprise_names = AsyncMock(return_value=enterprises)
         enterprise_names = await vr.get_all_enterprise_names(msg)
 
         assert enterprise_names == {"body": None, "status": 500}
 
     @pytest.mark.asyncio
     async def get_all_enterprise_names_without_filter_test(self):
-        mock_logger = Mock()
         test_velocloud_client = Mock()
-        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        vr = VelocloudRepository(config=config, velocloud_client=test_velocloud_client)
         enterprises = {"body": [{"enterprise_name": "The Name"}], "status": 200}
         msg = {"request_id": "123", "filter": []}
-        test_velocloud_client.get_all_enterprise_names = CoroutineMock(return_value=enterprises)
+        test_velocloud_client.get_all_enterprise_names = AsyncMock(return_value=enterprises)
         enterprise_names = await vr.get_all_enterprise_names(msg)
 
         assert test_velocloud_client.get_all_enterprise_names.called
@@ -266,9 +269,9 @@ class TestVelocloudRepository:
         logger = Mock()
 
         velocloud_client = Mock()
-        velocloud_client.get_links_with_edge_info = CoroutineMock(return_value=client_result)
+        velocloud_client.get_links_with_edge_info = AsyncMock(return_value=client_result)
 
-        velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
+        velocloud_repository = VelocloudRepository(config=config, velocloud_client=velocloud_client)
 
         result = await velocloud_repository.get_links_with_edge_info(velocloud_host)
 
@@ -287,9 +290,9 @@ class TestVelocloudRepository:
         logger = Mock()
 
         velocloud_client = Mock()
-        velocloud_client.get_links_with_edge_info = CoroutineMock(return_value=client_result)
+        velocloud_client.get_links_with_edge_info = AsyncMock(return_value=client_result)
 
-        velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
+        velocloud_repository = VelocloudRepository(config=config, velocloud_client=velocloud_client)
 
         result = await velocloud_repository.get_links_with_edge_info(velocloud_host)
 
@@ -387,9 +390,9 @@ class TestVelocloudRepository:
         logger = Mock()
 
         velocloud_client = Mock()
-        velocloud_client.get_links_metric_info = CoroutineMock(return_value=client_result)
+        velocloud_client.get_links_metric_info = AsyncMock(return_value=client_result)
 
-        velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
+        velocloud_repository = VelocloudRepository(config=config, velocloud_client=velocloud_client)
 
         result = await velocloud_repository.get_links_metric_info(velocloud_host, interval)
 
@@ -412,9 +415,9 @@ class TestVelocloudRepository:
         logger = Mock()
 
         velocloud_client = Mock()
-        velocloud_client.get_links_metric_info = CoroutineMock(return_value=client_result)
+        velocloud_client.get_links_metric_info = AsyncMock(return_value=client_result)
 
-        velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
+        velocloud_repository = VelocloudRepository(config=config, velocloud_client=velocloud_client)
 
         result = await velocloud_repository.get_links_metric_info(velocloud_host, interval)
 
@@ -431,9 +434,9 @@ class TestVelocloudRepository:
         logger = Mock()
 
         velocloud_client = Mock()
-        velocloud_client.get_enterprise_edges = CoroutineMock(return_value=enterprise_list)
+        velocloud_client.get_enterprise_edges = AsyncMock(return_value=enterprise_list)
 
-        velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
+        velocloud_repository = VelocloudRepository(config=config, velocloud_client=velocloud_client)
 
         results = await velocloud_repository.get_enterprise_edges(host, enterprise_id)
 
@@ -480,9 +483,9 @@ class TestVelocloudRepository:
         logger = Mock()
 
         velocloud_client = Mock()
-        velocloud_client.get_edge_configuration_modules = CoroutineMock(return_value=config_stack_response)
+        velocloud_client.get_edge_configuration_modules = AsyncMock(return_value=config_stack_response)
 
-        velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
+        velocloud_repository = VelocloudRepository(config=config, velocloud_client=velocloud_client)
 
         response = await velocloud_repository.get_links_configuration(edge_full_id)
 
@@ -510,9 +513,9 @@ class TestVelocloudRepository:
         logger = Mock()
 
         velocloud_client = Mock()
-        velocloud_client.get_edge_configuration_modules = CoroutineMock(return_value=config_modules_response)
+        velocloud_client.get_edge_configuration_modules = AsyncMock(return_value=config_modules_response)
 
-        velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
+        velocloud_repository = VelocloudRepository(config=config, velocloud_client=velocloud_client)
 
         response = await velocloud_repository.get_links_configuration(edge_full_id)
 
@@ -556,9 +559,9 @@ class TestVelocloudRepository:
         logger = Mock()
 
         velocloud_client = Mock()
-        velocloud_client.get_edge_configuration_modules = CoroutineMock(return_value=config_modules_response)
+        velocloud_client.get_edge_configuration_modules = AsyncMock(return_value=config_modules_response)
 
-        velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
+        velocloud_repository = VelocloudRepository(config=config, velocloud_client=velocloud_client)
 
         response = await velocloud_repository.get_links_configuration(edge_full_id)
 
@@ -593,9 +596,9 @@ class TestVelocloudRepository:
         logger = Mock()
 
         velocloud_client = Mock()
-        velocloud_client.get_edge_configuration_modules = CoroutineMock(return_value=config_modules_response)
+        velocloud_client.get_edge_configuration_modules = AsyncMock(return_value=config_modules_response)
 
-        velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
+        velocloud_repository = VelocloudRepository(config=config, velocloud_client=velocloud_client)
 
         response = await velocloud_repository.get_links_configuration(edge_full_id)
 
@@ -612,7 +615,7 @@ class TestVelocloudRepository:
         velocloud_host = "test.velocloud.com"
         payload = {}
 
-        velocloud_repository._velocloud_client.get_edge_links_series = CoroutineMock()
+        velocloud_repository._velocloud_client.get_edge_links_series = AsyncMock()
         await velocloud_repository.get_edge_links_series(velocloud_host, payload)
         velocloud_repository._velocloud_client.get_edge_links_series.assert_awaited_once_with(velocloud_host, payload)
 
@@ -624,7 +627,7 @@ class TestVelocloudRepository:
         client_response_body = make_network_enterprises_body(enterprise_ids=enterprise_ids, n_edges=2)
         client_response = {"body": client_response_body, "status": 200}
 
-        get_network_enterprises_mock = CoroutineMock(return_value=client_response)
+        get_network_enterprises_mock = AsyncMock(return_value=client_response)
         velocloud_repository._velocloud_client.get_network_enterprises = get_network_enterprises_mock
 
         response = await velocloud_repository.get_network_enterprise_edges(velocloud_host, enterprise_ids)
@@ -651,7 +654,7 @@ class TestVelocloudRepository:
             "status": 500,
         }
 
-        get_network_enterprises_mock = CoroutineMock(return_value=client_error_response)
+        get_network_enterprises_mock = AsyncMock(return_value=client_error_response)
         velocloud_repository._velocloud_client.get_network_enterprises = get_network_enterprises_mock
 
         response = await velocloud_repository.get_network_enterprise_edges(velocloud_host, enterprise_ids)
@@ -667,7 +670,7 @@ class TestVelocloudRepository:
         client_response_body = make_network_enterprises_body(enterprise_ids=enterprise_ids, n_edges=0)
         client_no_edges_response = {"body": client_response_body, "status": 200}
 
-        get_network_enterprises_mock = CoroutineMock(return_value=client_no_edges_response)
+        get_network_enterprises_mock = AsyncMock(return_value=client_no_edges_response)
         velocloud_repository._velocloud_client.get_network_enterprises = get_network_enterprises_mock
 
         response = await velocloud_repository.get_network_enterprise_edges(velocloud_host, enterprise_ids)
@@ -687,7 +690,7 @@ class TestVelocloudRepository:
         response_body = make_network_gateways_body(host=velocloud_host)
         response = {"body": response_body, "status": 200}
 
-        velocloud_repository._velocloud_client.get_network_gateways = CoroutineMock(return_value=response)
+        velocloud_repository._velocloud_client.get_network_gateways = AsyncMock(return_value=response)
         await velocloud_repository.get_network_gateways(velocloud_host)
         velocloud_repository._velocloud_client.get_network_gateways.assert_awaited_once_with(velocloud_host)
 
@@ -698,7 +701,7 @@ class TestVelocloudRepository:
         interval = {"start": "2022-01-01T11:00:00Z", "end": "2022-01-01T12:00:00Z"}
         metrics = []
 
-        velocloud_repository._velocloud_client.get_gateway_status_metrics = CoroutineMock()
+        velocloud_repository._velocloud_client.get_gateway_status_metrics = AsyncMock()
         await velocloud_repository.get_gateway_status_metrics(velocloud_host, gateway_id, interval, metrics)
         velocloud_repository._velocloud_client.get_gateway_status_metrics.assert_awaited_once_with(
             velocloud_host, gateway_id, interval, metrics

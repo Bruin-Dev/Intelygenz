@@ -1,69 +1,126 @@
-from unittest.mock import Mock
+import json
+from unittest.mock import AsyncMock, Mock
 
 import pytest
-from application.actions.gateway_status_metrics import GatewayStatusMetrics
-from asynctest import CoroutineMock
-from shortuuid import uuid
+from nats.aio.msg import Msg
 
-uuid_ = uuid()
-response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
+from ...application.actions.gateway_status_metrics import GatewayStatusMetrics
+from ...application.repositories.velocloud_repository import VelocloudRepository
 
 
-class TestGatewayStatusMetrics:
-    def instance_test(self):
-        logger = Mock()
-        event_bus = Mock()
-        velocloud_repository = Mock()
+@pytest.fixture(scope="function")
+def velocloud_repository():
+    return Mock(spec_set=VelocloudRepository)
 
-        action = GatewayStatusMetrics(event_bus, velocloud_repository, logger)
 
-        assert action._event_bus is event_bus
-        assert action._logger is logger
-        assert action._velocloud_repository is velocloud_repository
+@pytest.fixture(scope="function")
+def action(velocloud_repository):
+    return GatewayStatusMetrics(_velocloud_repository=velocloud_repository)
 
-    @pytest.mark.asyncio
-    async def get_gateway_status_metrics_ok_test(self, gateway_status_metrics_action):
-        velocloud_host = "mettel.velocloud.net"
-        gateway_id = 1
-        interval = {}
-        metrics = []
 
-        request = {
-            "request_id": uuid_,
-            "response_topic": response_topic,
-            "body": {
-                "host": velocloud_host,
-                "gateway_id": gateway_id,
-                "interval": interval,
-                "metrics": metrics,
+@pytest.fixture(scope="function")
+def any_msg():
+    return Mock(spec_set=Msg)
+
+
+@pytest.fixture(scope="function")
+def any_payload():
+    payload = {
+        "body": {
+            "host": "any_host",
+            "gateway_id": hash("any_id"),
+            "interval": {
+                "start": "any_timestamp",
+                "end": "any_timestamp",
             },
+            "metrics": ["any_metric"],
         }
+    }
+    return json.dumps(payload).encode()
 
-        response = {
-            "request_id": uuid_,
-            "body": {},
-            "status": 200,
-        }
 
-        gateway_status_metrics_action._velocloud_repository.get_gateway_status_metrics = CoroutineMock(
-            return_value=response
-        )
+@pytest.fixture(scope="function")
+async def any_response():
+    return {
+        "body": {
+            "total": hash("any_total"),
+            "tunnelCount": {"min": hash("any_min"), "max": hash("any_max"), "average": hash("any_avg")},
+        },
+        "status": 200,
+    }
 
-        await gateway_status_metrics_action.get_gateway_status_metrics(request)
 
-        gateway_status_metrics_action._velocloud_repository.get_gateway_status_metrics.assert_awaited_once_with(
-            velocloud_host, gateway_id, interval, metrics
-        )
-        gateway_status_metrics_action._event_bus.publish_message.assert_awaited_once_with(response_topic, response)
+@pytest.fixture(scope="function")
+def no_body_response():
+    return {
+        "body": [
+            {
+                "loc": ("__root__",),
+                "msg": "GatewayStatusMetricsMessageBody expected dict not NoneType",
+                "type": "type_error",
+            },
+        ],
+        "status": 400,
+    }
 
-    @pytest.mark.asyncio
-    async def get_gateway_status_metrics_with_missing_body_in_request_test(self, gateway_status_metrics_action):
-        request = {
-            "request_id": uuid_,
-            "response_topic": response_topic,
-        }
 
-        await gateway_status_metrics_action.get_gateway_status_metrics(request)
+@pytest.fixture(scope="function")
+def missing_filters_response():
+    return {
+        "body": [
+            {"loc": ("host",), "msg": "field required", "type": "value_error.missing"},
+            {"loc": ("gateway_id",), "msg": "field required", "type": "value_error.missing"},
+            {"loc": ("interval",), "msg": "field required", "type": "value_error.missing"},
+            {"loc": ("metrics",), "msg": "field required", "type": "value_error.missing"},
+        ],
+        "status": 400,
+    }
 
-        gateway_status_metrics_action._velocloud_repository.get_gateway_status_metrics.assert_not_awaited()
-        gateway_status_metrics_action._event_bus.publish_message.assert_awaited_once()
+
+async def ok_test(action, any_msg, any_payload, any_response):
+    # Given
+    action._velocloud_repository.get_gateway_status_metrics = AsyncMock(return_value=any_response)
+
+    any_msg.data = any_payload
+
+    payload_json = json.loads(any_payload)
+
+    # When
+    await action(any_msg)
+
+    # Then
+    action._velocloud_repository.get_gateway_status_metrics.assert_awaited_once_with(
+        host=payload_json["body"]["host"],
+        gateway_id=payload_json["body"]["gateway_id"],
+        interval=payload_json["body"]["interval"],
+        metrics=payload_json["body"]["metrics"],
+    )
+    any_msg.respond.assert_awaited_once_with(json.dumps(any_response).encode())
+
+
+async def ko_body_missing_in_request_test(action, any_msg, no_body_response):
+    # Given
+    action._velocloud_repository.get_gateway_status_metrics = AsyncMock()
+
+    any_msg.data = b"{}"
+
+    # When
+    await action(any_msg)
+
+    # Then
+    action._velocloud_repository.get_gateway_status_metrics.assert_not_awaited()
+    any_msg.respond.assert_awaited_once_with(json.dumps(no_body_response).encode())
+
+
+async def ko_filters_missing_in_request_test(action, any_msg, missing_filters_response):
+    # Given
+    action._velocloud_repository.get_gateway_status_metrics = AsyncMock()
+
+    any_msg.data = b'{"body": {}}'
+
+    # When
+    await action(any_msg)
+
+    # Then
+    action._velocloud_repository.get_gateway_status_metrics.assert_not_awaited()
+    any_msg.respond.assert_awaited_once_with(json.dumps(missing_filters_response).encode())

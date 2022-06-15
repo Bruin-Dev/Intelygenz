@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 from nats.aio.msg import Msg
 
-from ...application.actions.links_configuration import LinksConfiguration
+from ...application.actions.get_edge_links_series import PAYLOAD_MODEL, REQUEST_MODEL, GetEdgeLinksSeries
 from ...application.repositories.velocloud_repository import VelocloudRepository
 
 
@@ -15,7 +15,7 @@ def velocloud_repository():
 
 @pytest.fixture(scope="function")
 def action(velocloud_repository):
-    return LinksConfiguration(velocloud_repository=velocloud_repository)
+    return GetEdgeLinksSeries(velocloud_repository=velocloud_repository)
 
 
 @pytest.fixture(scope="function")
@@ -28,8 +28,15 @@ def any_payload():
     payload = {
         "body": {
             "host": "any_host",
-            "enterprise_id": hash("any_id"),
-            "edge_id": hash("any_id"),
+            "payload": {
+                "enterpriseId": hash("any_id"),
+                "edgeId": hash("any_id"),
+                "interval": {
+                    "start": hash("any_timestamp_millis"),
+                    "end": hash("any_timestamp_millis"),
+                },
+                "metrics": ["any_metric"],
+            },
         }
     }
     return json.dumps(payload).encode()
@@ -54,14 +61,22 @@ def no_body_response():
 @pytest.fixture(scope="function")
 def missing_filters_response():
     return {
-        "body": 'You must specify {..."body": {"host", "enterprise_id", "edge_id"}...} in the request',
+        "body": f"Request's should look like {REQUEST_MODEL}",
+        "status": 400,
+    }
+
+
+@pytest.fixture(scope="function")
+def missing_payload_filters_response():
+    return {
+        "body": f"Request's payload should look like {PAYLOAD_MODEL}",
         "status": 400,
     }
 
 
 async def ok_test(action, any_msg, any_payload, any_response):
     # Given
-    action._velocloud_repository.get_links_configuration = AsyncMock(return_value=any_response)
+    action._velocloud_repository.get_edge_links_series = AsyncMock(return_value=any_response)
 
     any_msg.data = any_payload
 
@@ -71,15 +86,16 @@ async def ok_test(action, any_msg, any_payload, any_response):
     await action(any_msg)
 
     # Then
-    action._velocloud_repository.get_links_configuration.assert_awaited_once_with(
-        edge_full_id=payload_json["body"],
+    action._velocloud_repository.get_edge_links_series.assert_awaited_once_with(
+        host=payload_json["body"]["host"],
+        payload=payload_json["body"]["payload"],
     )
     any_msg.respond.assert_awaited_once_with(json.dumps(any_response).encode())
 
 
 async def ko_body_missing_in_request_test(action, any_msg, no_body_response):
     # Given
-    action._velocloud_repository.get_links_configuration = AsyncMock()
+    action._velocloud_repository.get_edge_links_series = AsyncMock()
 
     any_msg.data = b"{}"
 
@@ -87,13 +103,13 @@ async def ko_body_missing_in_request_test(action, any_msg, no_body_response):
     await action(any_msg)
 
     # Then
-    action._velocloud_repository.get_links_configuration.assert_not_awaited()
+    action._velocloud_repository.get_edge_links_series.assert_not_awaited()
     any_msg.respond.assert_awaited_once_with(json.dumps(no_body_response).encode())
 
 
 async def ko_filters_missing_in_request_test(action, any_msg, missing_filters_response):
     # Given
-    action._velocloud_repository.get_links_configuration = AsyncMock()
+    action._velocloud_repository.get_edge_links_series = AsyncMock()
 
     any_msg.data = b'{"body": {}}'
 
@@ -101,5 +117,19 @@ async def ko_filters_missing_in_request_test(action, any_msg, missing_filters_re
     await action(any_msg)
 
     # Then
-    action._velocloud_repository.get_links_configuration.assert_not_awaited()
+    action._velocloud_repository.get_edge_links_series.assert_not_awaited()
     any_msg.respond.assert_awaited_once_with(json.dumps(missing_filters_response).encode())
+
+
+async def ko_payload_filters_missing_in_request_test(action, any_msg, missing_payload_filters_response):
+    # Given
+    action._velocloud_repository.get_edge_links_series = AsyncMock()
+
+    any_msg.data = b'{"body": {"host": "any_host", "payload": {}}}'
+
+    # When
+    await action(any_msg)
+
+    # Then
+    action._velocloud_repository.get_edge_links_series.assert_not_awaited()
+    any_msg.respond.assert_awaited_once_with(json.dumps(missing_payload_filters_response).encode())

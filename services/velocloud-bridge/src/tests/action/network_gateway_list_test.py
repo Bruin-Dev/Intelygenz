@@ -1,59 +1,107 @@
-from unittest.mock import Mock
+import json
+from unittest.mock import AsyncMock, Mock
 
 import pytest
-from application.actions.network_gateway_list import NetworkGatewayList
-from asynctest import CoroutineMock
-from shortuuid import uuid
+from nats.aio.msg import Msg
 
-uuid_ = uuid()
-response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
+from ...application.actions.network_gateway_list import NetworkGatewayList
+from ...application.repositories.velocloud_repository import VelocloudRepository
 
 
-class TestNetworkGatewayList:
-    def instance_test(self):
-        logger = Mock()
-        event_bus = Mock()
-        velocloud_repository = Mock()
+@pytest.fixture(scope="function")
+def velocloud_repository():
+    return Mock(spec_set=VelocloudRepository)
 
-        action = NetworkGatewayList(event_bus, velocloud_repository, logger)
 
-        assert action._event_bus is event_bus
-        assert action._logger is logger
-        assert action._velocloud_repository is velocloud_repository
+@pytest.fixture(scope="function")
+def action(velocloud_repository):
+    return NetworkGatewayList(_velocloud_repository=velocloud_repository)
 
-    @pytest.mark.asyncio
-    async def get_network_gateway_list_ok_test(self, network_gateway_list_action):
-        velocloud_host = "mettel.velocloud.net"
 
-        request = {
-            "request_id": uuid_,
-            "response_topic": response_topic,
-            "body": {
-                "host": velocloud_host,
-            },
+@pytest.fixture(scope="function")
+def any_msg():
+    return Mock(spec_set=Msg)
+
+
+@pytest.fixture(scope="function")
+def any_payload():
+    payload = {
+        "body": {
+            "host": "any_host",
         }
+    }
+    return json.dumps(payload).encode()
 
-        response = {
-            "request_id": uuid_,
-            "body": [],
-            "status": 200,
-        }
 
-        network_gateway_list_action._velocloud_repository.get_network_gateways = CoroutineMock(return_value=response)
+@pytest.fixture(scope="function")
+async def any_response():
+    return {
+        "body": [{"host": "any_host", "id": hash("any_id"), "name": "any_name"}],
+        "status": 200,
+    }
 
-        await network_gateway_list_action.get_network_gateway_list(request)
 
-        network_gateway_list_action._velocloud_repository.get_network_gateways.assert_awaited_once_with(velocloud_host)
-        network_gateway_list_action._event_bus.publish_message.assert_awaited_once_with(response_topic, response)
+@pytest.fixture(scope="function")
+def no_body_response():
+    return {
+        "body": [
+            {"loc": ("__root__",), "msg": "GatewayMessageBody expected dict not NoneType", "type": "type_error"},
+        ],
+        "status": 400,
+    }
 
-    @pytest.mark.asyncio
-    async def get_network_gateway_list_with_missing_body_in_request_test(self, network_gateway_list_action):
-        request = {
-            "request_id": uuid_,
-            "response_topic": response_topic,
-        }
 
-        await network_gateway_list_action.get_network_gateway_list(request)
+@pytest.fixture(scope="function")
+def missing_filters_response():
+    return {
+        "body": [
+            {"loc": ("host",), "msg": "field required", "type": "value_error.missing"},
+        ],
+        "status": 400,
+    }
 
-        network_gateway_list_action._velocloud_repository.get_network_gateways.assert_not_awaited()
-        network_gateway_list_action._event_bus.publish_message.assert_awaited_once()
+
+async def ok_test(action, any_msg, any_payload, any_response):
+    # Given
+    action._velocloud_repository.get_network_gateways = AsyncMock(return_value=any_response)
+
+    any_msg.data = any_payload
+
+    payload_json = json.loads(any_payload)
+
+    # When
+    await action(any_msg)
+
+    # Then
+    action._velocloud_repository.get_network_gateways.assert_awaited_once_with(
+        host=payload_json["body"]["host"],
+    )
+    any_msg.respond.assert_awaited_once_with(json.dumps(any_response).encode())
+
+
+async def ko_body_missing_in_request_test(action, any_msg, no_body_response):
+    # Given
+    action._velocloud_repository.get_network_gateways = AsyncMock()
+
+    any_msg.data = b"{}"
+
+    # When
+    await action(any_msg)
+
+    # Then
+    action._velocloud_repository.get_network_gateways.assert_not_awaited()
+    any_msg.respond.assert_awaited_once_with(json.dumps(no_body_response).encode())
+
+
+async def ko_filters_missing_in_request_test(action, any_msg, missing_filters_response):
+    # Given
+    action._velocloud_repository.get_network_gateways = AsyncMock()
+
+    any_msg.data = b'{"body": {}}'
+
+    # When
+    await action(any_msg)
+
+    # Then
+    action._velocloud_repository.get_network_gateways.assert_not_awaited()
+    any_msg.respond.assert_awaited_once_with(json.dumps(missing_filters_response).encode())

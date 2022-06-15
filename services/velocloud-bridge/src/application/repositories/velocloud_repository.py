@@ -1,23 +1,20 @@
-from typing import Any, Dict, List
+import logging
+from typing import Any
+
+logger = logging.getLogger(__name__)
 
 
 class VelocloudRepository:
-    _config = None
-    _clients = None
-    _velocloud_client = None
-    _logger = None
-
-    def __init__(self, config, logger, velocloud_client):
+    def __init__(self, config, velocloud_client):
         self._config = config
-        self._logger = logger
         self._velocloud_client = velocloud_client
 
     async def connect_to_all_servers(self):
-        self._logger.info("Instantiating and connecting clients in velocloud bridge")
+        logger.info("Instantiating and connecting clients in velocloud bridge")
         await self._velocloud_client.instantiate_and_connect_clients()
 
     async def get_all_edge_events(self, edge, start, end, limit, filter_events_status_list):
-        self._logger.info(f'Getting events from edge:{edge["edge_id"]} from time:{start} to time:{end}')
+        logger.info(f'Getting events from edge:{edge["edge_id"]} from time:{start} to time:{end}')
         body = {
             "enterpriseId": edge["enterprise_id"],
             "interval": {"start": start, "end": end},
@@ -27,7 +24,7 @@ class VelocloudRepository:
         return await self._get_all_events(edge["host"], body, filter_events_status_list)
 
     async def get_all_enterprise_events(self, enterprise, host, start, end, limit, filter_events_status_list):
-        self._logger.info(f"Getting events from enterprise:{enterprise} from time:{start} to time:{end}")
+        logger.info(f"Getting events from enterprise:{enterprise} from time:{start} to time:{end}")
 
         body = {"enterpriseId": enterprise, "interval": {"start": start, "end": end}, "filter": {"limit": limit}}
 
@@ -47,11 +44,11 @@ class VelocloudRepository:
         return response
 
     async def get_all_enterprise_names(self, msg):
-        self._logger.info("Getting all enterprise names")
+        logger.info("Getting all enterprise names")
         enterprises = await self._velocloud_client.get_all_enterprise_names()
 
         if enterprises["status"] not in range(200, 300):
-            self._logger.error(f"Error {enterprises['status']}, error: {enterprises['body']}")
+            logger.error(f"Error {enterprises['status']}, error: {enterprises['body']}")
             return {"body": enterprises["body"], "status": enterprises["status"]}
 
         enterprise_names = [e["enterprise_name"] for e in enterprises["body"]]
@@ -120,7 +117,7 @@ class VelocloudRepository:
     async def get_edge_links_series(self, host, payload):
         return await self._velocloud_client.get_edge_links_series(host, payload)
 
-    async def get_network_enterprise_edges(self, host: str, enterprise_ids: List[int]) -> Dict[str, Any]:
+    async def get_network_enterprise_edges(self, host: str, enterprise_ids: list[int]) -> dict[str, Any]:
         response = await self._velocloud_client.get_network_enterprises(host, enterprise_ids)
         enterprise_edges_response = dict.fromkeys(["body", "status"])
 
@@ -163,5 +160,5 @@ class VelocloudRepository:
 
         return response
 
-    async def get_gateway_status_metrics(self, host: str, gateway_id: int, interval: dict, metrics: List[str]):
+    async def get_gateway_status_metrics(self, host: str, gateway_id: int, interval: dict, metrics: list[str]):
         return await self._velocloud_client.get_gateway_status_metrics(host, gateway_id, interval, metrics)

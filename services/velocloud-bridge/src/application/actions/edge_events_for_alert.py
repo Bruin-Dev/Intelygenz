@@ -1,44 +1,58 @@
 import json
+import logging
 
-from igz.packages.eventbus.eventbus import EventBus
+from nats.aio.msg import Msg
+
+from ..repositories.velocloud_repository import VelocloudRepository
+
+logger = logging.getLogger(__name__)
 
 
 class EventEdgesForAlert:
-    def __init__(self, event_bus: EventBus, velocloud_repository, logger):
-        self._event_bus = event_bus
+    def __init__(self, velocloud_repository: VelocloudRepository):
         self._velocloud_repository = velocloud_repository
-        self._logger = logger
 
-    async def report_edge_event(self, msg: dict):
-        edge_event_response = {"request_id": msg["request_id"], "body": None, "status": None}
-        if msg.get("body") is None:
-            edge_event_response["status"] = 400
-            edge_event_response["body"] = 'Must include "body" in request'
-            await self._event_bus.publish_message(msg["response_topic"], edge_event_response)
+    async def __call__(self, msg: Msg):
+        payload = json.loads(msg.data)
+
+        response = {"body": None, "status": None}
+
+        if payload.get("body") is None:
+            response["status"] = 400
+            response["body"] = 'Must include "body" in request'
+            await msg.respond(json.dumps(response).encode())
             return
-        if all(key in msg["body"].keys() for key in ("edge", "start_date", "end_date")):
-            edgeids = msg["body"]["edge"]
-            start = msg["body"]["start_date"]
-            end = msg["body"]["end_date"]
-            limit = None
-            filter = None
 
-            if "filter" in msg["body"].keys():
-                filter = msg["body"]["filter"]
+        if not all(key in payload["body"].keys() for key in ("edge", "start_date", "end_date")):
+            response["status"] = 400
+            response["body"] = 'Must include "edge", "start_date", "end_date" in request body'
+            await msg.respond(json.dumps(response).encode())
+            return
 
-            if "limit" in msg["body"].keys():
-                limit = msg["body"]["limit"]
+        edgeids = payload["body"]["edge"]
+        start = payload["body"]["start_date"]
+        end = payload["body"]["end_date"]
+        limit = None
+        filter_ = None
 
-            self._logger.info(f"Sending events for edge with data {edgeids} for alerts")
-            events_by_edge = await self._velocloud_repository.get_all_edge_events(edgeids, start, end, limit, filter)
-            edge_event_response["body"] = events_by_edge["body"]
-            edge_event_response["status"] = events_by_edge["status"]
+        if "filter" in payload["body"].keys():
+            filter_ = payload["body"]["filter"]
 
-            self._logger.info(
-                f"Edge events for alerts published in event bus for request {json.dumps(msg)}. "
-                f"Message published was {edge_event_response}"
-            )
-        else:
-            edge_event_response["status"] = 400
-            edge_event_response["body"] = 'Must include "edge", "start_date", "end_date" in request'
-        await self._event_bus.publish_message(msg["response_topic"], edge_event_response)
+        if "limit" in payload["body"].keys():
+            limit = payload["body"]["limit"]
+
+        logger.info(f"Sending events for edge with data {edgeids} for alerts")
+        events_by_edge = await self._velocloud_repository.get_all_edge_events(
+            edge=edgeids,
+            start=start,
+            end=end,
+            filter_events_status_list=filter_,
+            limit=limit,
+        )
+        response["body"] = events_by_edge["body"]
+        response["status"] = events_by_edge["status"]
+
+        await msg.respond(json.dumps(response).encode())
+        logger.info(
+            f"Edge events for alerts published for request {json.dumps(payload)}. Message published was {response}"
+        )
