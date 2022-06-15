@@ -1,13 +1,14 @@
 from http import HTTPStatus
+
+from asynctest import CoroutineMock
+from pytest import fixture, mark
 from typing import List
 from unittest.mock import ANY, Mock
 
 from application.actions.repair_tickets_monitor import RepairTicketsMonitor
 from application.domain.asset import AssetId
 from application.rpc import RpcFailedError, RpcRequest, RpcResponse
-from asynctest import CoroutineMock
 from config import testconfig as config
-from pytest import fixture, mark
 from tests.actions.repair_tickets_monitor_scenarios import (
     RepairTicketsMonitorScenario,
     make_repair_tickets_monitor_scenarios,
@@ -69,14 +70,17 @@ async def repair_tickets_monitor_scenarios_test(
 
 
 @fixture
-def inference_data_for(make_inference_data):
+def inference_data_for(make_inference_data, make_filter_flags):
     def builder(scenario: RepairTicketsMonitorScenario):
         return {
             "status": 200,
             "body": make_inference_data(
                 potential_service_numbers=list(scenario.assets.keys()),
                 potential_tickets_numbers=[ticket.id for ticket in scenario.tickets],
-                predicted_class="" if scenario.email_actionable else "Other",
+                predicted_class="" if scenario.assets_actionable else "Other",
+                filter_flags=make_filter_flags(
+                    is_filtered=False if scenario.tickets_actionable else True,
+                ),
             ),
         }
 

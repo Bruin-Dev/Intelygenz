@@ -260,6 +260,7 @@ class RepairTicketsMonitor:
                 return
 
             is_actionable = self._is_inference_actionable(inference_data)
+            is_ticket_actionable = self._is_ticket_actionable(inference_data)
 
             potential_service_numbers = inference_data.get("potential_service_numbers")
             if potential_service_numbers is None:
@@ -394,7 +395,7 @@ class RepairTicketsMonitor:
             ]
 
             if not allowed_service_number_site_map:
-                if is_actionable:
+                if is_ticket_actionable:
                     for ticket in operable_tickets:
                         ticket_updated = await self._update_ticket(ticket, email_id, email_data)
                         if ticket_updated:
@@ -683,6 +684,19 @@ class RepairTicketsMonitor:
                 tagger_below_threshold,
                 is_other,
                 rta_model1_is_below_threshold,
+            ]
+        )
+
+    @staticmethod
+    def _is_ticket_actionable(inference_data: Dict[str, Any]) -> bool:
+        """Check if the inference can be used to create/update a ticket reference"""
+        filtered = inference_data["filter_flags"]["is_filtered"]
+        tagger_below_threshold = inference_data["filter_flags"]["tagger_is_below_threshold"]
+
+        return not any(
+            [
+                filtered,
+                tagger_below_threshold,
             ]
         )
 

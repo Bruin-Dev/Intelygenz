@@ -1,3 +1,4 @@
+from dataclasses import dataclass, field
 from typing import Any, Dict, List
 
 from application.domain.asset import Topic
@@ -5,7 +6,6 @@ from application.domain.repair_email_output import RepairEmailOutput, TicketOutp
 from application.domain.ticket import Category, Ticket, TicketStatus
 from application.rpc import RpcError
 from application.rpc.upsert_outage_ticket_rpc import UpsertedStatus, UpsertedTicket
-from dataclasses import dataclass, field
 
 
 @dataclass
@@ -17,7 +17,8 @@ class RepairTicketsMonitorScenario:
     tickets: List["Ticket"] = field(default_factory=list)
 
     # Integration behavior
-    email_actionable: bool = True
+    assets_actionable: bool = True
+    tickets_actionable: bool = True
     # Bruin POST api/Ticket/repair responses
     upserted_tickets: Dict[str, UpsertedTicket] = field(default_factory=dict)
     # Bruin GET api/Ticket/topics mocks
@@ -68,7 +69,6 @@ def make_repair_tickets_monitor_scenarios():
         assets={"asset_1": "site_1"},
         upserted_tickets={"asset_1": CreatedTicket(ticket_id="site_1_ticket")},
         asset_topics={"asset_1": [voo_topic]},
-        email_processed=True,
         note_added_to=["site_1_ticket"],
         email_linked_to=["site_1_ticket"],
         expected_output=RepairEmailOutput(
@@ -81,7 +81,6 @@ def make_repair_tickets_monitor_scenarios():
         assets={"asset_1": "site_1"},
         upserted_tickets={"asset_1": UpdatedTicket(ticket_id="site_1_ticket")},
         asset_topics={"asset_1": [voo_topic]},
-        email_processed=True,
         note_added_to=["site_1_ticket"],
         email_linked_to=["site_1_ticket"],
         expected_output=RepairEmailOutput(
@@ -97,11 +96,24 @@ def make_repair_tickets_monitor_scenarios():
             ],
         ),
     )
+    email_not_actionable_and_single_reported_asset = RepairTicketsMonitorScenario(
+        assets={"asset_1": "site_1"},
+        upserted_tickets={"asset_1": UpdatedTicket(ticket_id="site_1_ticket")},
+        asset_topics={"asset_1": [voo_topic]},
+        assets_actionable=False,
+        email_processed=False,
+        expected_output=RepairEmailOutput(
+            email_id=0,
+            service_numbers_sites_map={"asset_1": "site_1"},
+            tickets_cannot_be_created=[
+                TicketOutput(site_id="site_1", service_numbers=["asset_1"], reason="predicted class is Other")
+            ],
+        ),
+    )
     several_related_unreported_assets = RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1", "asset_2": "site_1"},
         upserted_tickets={"asset_1,asset_2": CreatedTicket(ticket_id="site_1_ticket")},
         asset_topics={"asset_1": [voo_topic], "asset_2": [voo_topic]},
-        email_processed=True,
         note_added_to=["site_1_ticket"],
         email_linked_to=["site_1_ticket"],
         expected_output=RepairEmailOutput(
@@ -116,7 +128,6 @@ def make_repair_tickets_monitor_scenarios():
         assets={"asset_1": "site_1", "asset_2": "site_1"},
         upserted_tickets={"asset_1,asset_2": UpdatedTicket(ticket_id="site_1_ticket")},
         asset_topics={"asset_1": [voo_topic], "asset_2": [voo_topic]},
-        email_processed=True,
         note_added_to=["site_1_ticket"],
         email_linked_to=["site_1_ticket"],
         expected_output=RepairEmailOutput(
@@ -139,7 +150,6 @@ def make_repair_tickets_monitor_scenarios():
             "asset_2": CreatedTicket(ticket_id="site_2_ticket"),
         },
         asset_topics={"asset_1": [voo_topic], "asset_2": [voo_topic]},
-        email_processed=True,
         note_added_to=["site_1_ticket", "site_2_ticket"],
         email_linked_to=["site_1_ticket", "site_2_ticket"],
         expected_output=RepairEmailOutput(
@@ -158,7 +168,6 @@ def make_repair_tickets_monitor_scenarios():
             "asset_2": UpdatedTicket(ticket_id="site_2_ticket"),
         },
         asset_topics={"asset_1": [voo_topic], "asset_2": [voo_topic]},
-        email_processed=True,
         note_added_to=["site_1_ticket", "site_2_ticket"],
         email_linked_to=["site_1_ticket", "site_2_ticket"],
         expected_output=RepairEmailOutput(
@@ -428,7 +437,7 @@ def make_repair_tickets_monitor_scenarios():
     )
     email_not_actionable_and_single_operable_ticket = RepairTicketsMonitorScenario(
         tickets=[Ticket("ticket_1", status=TicketStatus.NEW, call_type="REP", category="VOO")],
-        email_actionable=False,
+        tickets_actionable=False,
         email_processed=False,
         expected_output=RepairEmailOutput(
             email_id=0,
@@ -441,7 +450,6 @@ def make_repair_tickets_monitor_scenarios():
         tickets=[Ticket("ticket_1", status=TicketStatus.NEW, call_type="REP", category="VOO")],
         upserted_tickets={"asset_1": CreatedTicket(ticket_id="site_1_ticket")},
         asset_topics={"asset_1": [voo_topic]},
-        email_processed=True,
         note_added_to=["site_1_ticket"],
         email_linked_to=["site_1_ticket"],
         global_note_added_to=[],
@@ -473,6 +481,7 @@ def make_repair_tickets_monitor_scenarios():
         "no_assets_and_no_tickets": no_assets_and_no_tickets,
         "single_unreported_asset": single_unreported_asset,
         "single_reported_asset": single_reported_asset,
+        "email_not_actionable_and_single_reported_asset": email_not_actionable_and_single_reported_asset,
         "several_related_unreported_assets": several_related_unreported_assets,
         "several_related_reported_assets": several_related_reported_assets,
         "several_unrelated_unreported_assets": several_unrelated_unreported_assets,
