@@ -72,6 +72,7 @@ class NewEmailsMonitor:
             # Get tag from KRE
             response = await self._email_tagger_repository.get_prediction(email_data)
             prediction = response.get("body")
+            self._logger.info("email_id=%s - response=%s", email_id, response)
             self._logger.info("email_id=%s - Got prediction %s", email_id, prediction)
             if response["status"] not in range(200, 300):
                 return

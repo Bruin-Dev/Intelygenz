@@ -29,6 +29,7 @@ class EmailTaggerRepository:
                 response = await self._event_bus.rpc_request(
                     "email_tagger.prediction.request", request_msg, timeout=self._timeout
                 )
+                self._logger.info(f"get_prefiction(): email_id={email_id}, response={response}")
 
             except Exception as e:
                 err_msg = f"An error occurred when sending emails to Email Tagger for email_id '{email_id}' -> {e}"
