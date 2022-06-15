@@ -155,7 +155,7 @@ services:
     ports:
       - 5024:5000
       - 9890:9090
-      
+
   hawkeye-affecting-monitor:
     build:
       # Context must be the root of the monorepo
@@ -364,6 +364,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/repair-tickets-monitor/src/config/env
+    volumes:
+      - ./services/repair-tickets-monitor:/service/app
     depends_on:
       - "nats-server"
       - repair-tickets-kre-bridge
@@ -373,8 +375,6 @@ services:
     ports:
       - 5057:5000
       - 9096:9090
-    volumes:
-      - ./services/repair-tickets-monitor:/service/app:z
     stdin_open: true # for debug
     tty: true # for debug
 
@@ -401,61 +401,61 @@ services:
     stdin_open: true # for debug
     tty: true # for debug
 
-# service-affecting-monitor instances vary depending on the environment you want to test, so their configuration
-# can't be hardcoded in this docker-compose file
-#
-# Use the following template if you need to spin up such instances:
-# -------------------------------------------------------------------------------------
-#  service-affecting-monitor-<id>:
-#    build:
-#      # Context must be the root of the monorepo
-#      context: .
-#      dockerfile: services/service-affecting-monitor/Dockerfile
-#      args:
-#        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-#        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-#    env_file:
-#      - services/service-affecting-monitor/src/config/<env_filename>
-#    depends_on:
-#      - "nats-server"
-#      - redis
-#    ports:
-#      - <port_mapped_to_quartz>:5000
-#      - <port_mapped_to_metrics_server>:9090
-# -------------------------------------------------------------------------------------
-# where:
-#  - <id> is an identifier for the service
-#  - <env_filename> is the filename of the env file you want to use for the configuration of the service
-#  - <port_mapped_to_quartz> is the port of the host machine mapped to Quartz's
-#  - <port_mapped_to_metrics_server> is the port of the host machine mapped to the metric server's
+  # service-affecting-monitor instances vary depending on the environment you want to test, so their configuration
+  # can't be hardcoded in this docker-compose file
+  #
+  # Use the following template if you need to spin up such instances:
+  # -------------------------------------------------------------------------------------
+  #  service-affecting-monitor-<id>:
+  #    build:
+  #      # Context must be the root of the monorepo
+  #      context: .
+  #      dockerfile: services/service-affecting-monitor/Dockerfile
+  #      args:
+  #        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+  #        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+  #    env_file:
+  #      - services/service-affecting-monitor/src/config/<env_filename>
+  #    depends_on:
+  #      - "nats-server"
+  #      - redis
+  #    ports:
+  #      - <port_mapped_to_quartz>:5000
+  #      - <port_mapped_to_metrics_server>:9090
+  # -------------------------------------------------------------------------------------
+  # where:
+  #  - <id> is an identifier for the service
+  #  - <env_filename> is the filename of the env file you want to use for the configuration of the service
+  #  - <port_mapped_to_quartz> is the port of the host machine mapped to Quartz's
+  #  - <port_mapped_to_metrics_server> is the port of the host machine mapped to the metric server's
 
-# service-outage-monitor instances vary depending on the environment you want to test, so their configuration
-# can't be hardcoded in this docker-compose file
-#
-# Use the following template if you need to spin up such instances:
-# -------------------------------------------------------------------------------------
-#  service-outage-monitor-<id>:
-#    build:
-#      # Context must be the root of the monorepo
-#      context: .
-#      dockerfile: services/service-outage-monitor/Dockerfile
-#      args:
-#        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-#        DOCKER_BASE_IMAGE_VERSION: 2.2.0
-#    env_file:
-#      - services/service-outage-monitor/src/config/<env_filename>
-#    depends_on:
-#      - "nats-server"
-#      - redis
-#    ports:
-#      - <port_mapped_to_quartz>:5000
-#      - <port_mapped_to_metrics_server>:9090
-# -------------------------------------------------------------------------------------
-# where:
-#  - <id> is an identifier for the service
-#  - <env_filename> is the filename of the env file you want to use for the configuration of the service
-#  - <port_mapped_to_quartz> is the port of the host machine mapped to Quartz's
-#  - <port_mapped_to_metrics_server> is the port of the host machine mapped to the metric server's
+  # service-outage-monitor instances vary depending on the environment you want to test, so their configuration
+  # can't be hardcoded in this docker-compose file
+  #
+  # Use the following template if you need to spin up such instances:
+  # -------------------------------------------------------------------------------------
+  #  service-outage-monitor-<id>:
+  #    build:
+  #      # Context must be the root of the monorepo
+  #      context: .
+  #      dockerfile: services/service-outage-monitor/Dockerfile
+  #      args:
+  #        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
+  #        DOCKER_BASE_IMAGE_VERSION: 2.2.0
+  #    env_file:
+  #      - services/service-outage-monitor/src/config/<env_filename>
+  #    depends_on:
+  #      - "nats-server"
+  #      - redis
+  #    ports:
+  #      - <port_mapped_to_quartz>:5000
+  #      - <port_mapped_to_metrics_server>:9090
+  # -------------------------------------------------------------------------------------
+  # where:
+  #  - <id> is an identifier for the service
+  #  - <env_filename> is the filename of the env file you want to use for the configuration of the service
+  #  - <port_mapped_to_quartz> is the port of the host machine mapped to Quartz's
+  #  - <port_mapped_to_metrics_server> is the port of the host machine mapped to the metric server's
 
   service-outage-monitor-triage:
     build:
@@ -522,7 +522,7 @@ services:
     depends_on:
       - mongo
     volumes:
-    - ./services/ticket-collector:/service/app
+      - ./services/ticket-collector:/service/app
     ports:
       - 5617:5000
       - 9194:9000
@@ -542,7 +542,7 @@ services:
       - mongo
       - redis
     volumes:
-    - ./services/ticket-statistics:/service/app
+      - ./services/ticket-statistics:/service/app
     ports:
       - 3000:3000
       - 9195:9000
@@ -592,7 +592,7 @@ services:
 #  - <env_filename> is the filename of the env file you want to use for the configuration of the service
 #  - <port_mapped_to_quartz> is the port of the host machine mapped to Quartz's
 #  - <port_mapped_to_metrics_server> is the port of the host machine mapped to the metric server's
-      
+
   velocloud-bridge:
     build:
       # Context must be the root of the monorepo
@@ -714,7 +714,7 @@ services:
     image: mongo:latest
     restart: always
     ports:
-    - 27017:27017
+      - 27017:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
@@ -737,17 +737,29 @@ services:
 
   # Mongo Express Web-based MongoDB admin interface
   mongo-express:
-      image: mongo-express
-      container_name: 'mongo-express'
-      environment:
-        - ME_CONFIG_OPTIONS_EDITORTHEME=ambiance
-        # Change mongodb server to another mongo instance name in docker compose to inspect it
-        - ME_CONFIG_MONGODB_SERVER=mongo-links-metrics
-        - ME_CONFIG_MONGODB_PORT=27017
-        - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
-        - ME_CONFIG_MONGODB_AUTH_DATABASE=admin
-        - ME_CONFIG_MONGODB_ADMINUSERNAME=root
-        - ME_CONFIG_MONGODB_ADMINPASSWORD=example
-      ports:
-          - '8081:8081'
-      restart: always
+    image: mongo-express
+    container_name: 'mongo-express'
+    environment:
+      - ME_CONFIG_OPTIONS_EDITORTHEME=ambiance
+      # Change mongodb server to another mongo instance name in docker compose to inspect it
+      - ME_CONFIG_MONGODB_SERVER=mongo-links-metrics
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+      - ME_CONFIG_MONGODB_AUTH_DATABASE=admin
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=example
+    ports:
+      - '8081:8081'
+    restart: always
+
+  integration-tests:
+    build:
+      # Context must be the root of the monorepo since we need to copy custompackages
+      context: .
+      dockerfile: integration-tests/Dockerfile
+    ports:
+      - 8001:8001
+      - 8002:8002
+      - 5001:5001
+    volumes:
+      - ./integration-tests:/service/app

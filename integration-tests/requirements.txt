@@ -1,0 +1,10 @@
+fastapi
+aiohttp
+pydantic
+requests
+asynctest
+shortuuid
+hypercorn
+starlette
+grpcio
+grpcio-tools
