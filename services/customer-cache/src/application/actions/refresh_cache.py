@@ -306,7 +306,7 @@ class RefreshCache:
                 "recipient": self._config.REFRESH_CONFIG["email_recipient"],
                 "text": "this is the accessible text for the email",
                 "html": f"In this email you will see attached 2 CSV files: the prior and current status of the "
-                f"customer cache for the host {host}. If the environment is not 'production' disregard this."
+                f"customer cache for the host {host}."
                 f"Please note that timestamps in the files and in the subject are in UTC.",
                 "images": [],
                 "attachments": [
