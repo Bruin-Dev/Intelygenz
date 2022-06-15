@@ -9,6 +9,6 @@ class SlackRepository:
         self._slack_client = slack_client
         self._logger = logger
 
-    def send_to_slack(self, msg):
+    async def send_to_slack(self, msg):
         slack_msg = {"text": str(msg)}
-        return self._slack_client.send_to_slack(slack_msg)
+        return await self._slack_client.send_to_slack(slack_msg)

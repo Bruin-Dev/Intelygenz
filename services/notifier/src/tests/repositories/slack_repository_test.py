@@ -1,28 +1,22 @@
 from unittest.mock import Mock
 
-from application.repositories.slack_repository import SlackRepository
+import pytest
+from asynctest import CoroutineMock
 from config import testconfig as config
 
 
 class TestSlackRepository:
-    def instantiation_test(self):
-        mock_client = Mock()
-        mock_logger = Mock()
+    def instantiation_test(self, slack_repository, logger, slack_client):
+        assert slack_repository._config is config
+        assert slack_repository._slack_client is slack_client
+        assert slack_repository._logger is logger
 
-        test_repo = SlackRepository(config, mock_client, mock_logger)
-
-        assert test_repo._config is config
-        assert test_repo._slack_client is mock_client
-        assert test_repo._logger is mock_logger
-
-    def send_to_slack_test(self):
-        mock_client = Mock()
-        mock_logger = Mock()
+    @pytest.mark.asyncio
+    async def send_to_slack_test(self, slack_repository):
         test_msg = "This is a dummy message"
 
-        test_repo = SlackRepository(config, mock_client, mock_logger)
-        test_repo._slack_client.send_to_slack = Mock()
+        slack_repository._slack_client.send_to_slack = CoroutineMock()
 
-        test_repo.send_to_slack(test_msg)
+        await slack_repository.send_to_slack(test_msg)
 
-        test_repo._slack_client.send_to_slack.assert_called_once_with({"text": test_msg})
+        slack_repository._slack_client.send_to_slack.assert_called_once_with({"text": test_msg})

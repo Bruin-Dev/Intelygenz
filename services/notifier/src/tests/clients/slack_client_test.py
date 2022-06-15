@@ -1,69 +1,73 @@
-import json
-from unittest.mock import Mock, patch
+from http import HTTPStatus
+from unittest.mock import patch
 
-import requests
-from application.clients import slack_client
-from application.clients.slack_client import SlackClient
+import aiohttp
+import pytest
+from application.clients.slack_client import SlackResponse
+from asynctest import CoroutineMock
 from config import testconfig as config
+
+COMMON_HEADERS = {
+    "Content-Type": "application/json",
+}
 
 
 class TestSlackClient:
-    def instantiation_test(self):
-        mock_logger = Mock()
+    @pytest.mark.asyncio
+    async def instantiation_test(self, slack_client, logger):
+        assert slack_client.config is config.SLACK_CONFIG
+        assert slack_client.url == config.SLACK_CONFIG["webhook"]
+        assert slack_client.logger is logger
 
-        test_client = SlackClient(config, mock_logger)
-
-        assert test_client._config is config.SLACK_CONFIG
-        assert test_client._url == config.SLACK_CONFIG["webhook"]
-        assert test_client._logger is mock_logger
-
-    def send_to_slack_test(self):
-        mock_logger = Mock()
+    @pytest.mark.asyncio
+    async def send_to_slack_test(self, slack_client, client_response):
         test_msg = {"text": "This is a dummy message"}
-        msg_delivery_status = 200
-        test_response = (
-            f"Request with message {str(test_msg)} " f"returned a response with status code {msg_delivery_status}"
-        )
+        response_status = HTTPStatus.OK
+        response_body = "any_response_body"
+        slack_response = client_response(body=response_body, status=response_status)
 
-        test_client = SlackClient(config, mock_logger)
-        test_client._logger.info = Mock()
+        with patch.object(slack_client.session, "post", new=CoroutineMock(return_value=slack_response)) as post_mock:
+            response = await slack_client.send_to_slack(test_msg)
 
-        with patch.object(slack_client.requests, "post") as post_mock:
-            post_mock.return_value.status_code = msg_delivery_status
+            post_mock.assert_awaited_once_with(slack_client.url, headers={**COMMON_HEADERS}, json=test_msg, ssl=False)
+            slack_client.logger.info.assert_called_once_with(SlackResponse(status=response_status, body=response_body))
+            assert response == SlackResponse(status=response_status, body=response_body)
 
-            response = test_client.send_to_slack(test_msg)
-
-            post_mock.assert_called_once_with(test_client._url, json=test_msg)
-            test_client._logger.info.assert_called_once()
-            assert response == test_response
-
-    def send_to_slack_with_bad_status_code_test(self):
-        mock_logger = Mock()
+    @pytest.mark.asyncio
+    async def send_to_slack_with_bad_status_code_test(self, slack_client, client_response):
         test_msg = {"text": "This is a dummy message"}
-        msg_delivery_status = 404
-        test_response = f"ERROR - Request returned HTTP {msg_delivery_status}"
+        response_status = HTTPStatus.BAD_REQUEST
+        response_body = "any_response_body"
+        slack_response = client_response(body=response_body, status=response_status)
 
-        test_client = SlackClient(config, mock_logger)
-        test_client._logger.error = Mock()
+        with patch.object(slack_client.session, "post", new=CoroutineMock(return_value=slack_response)) as post_mock:
+            response = await slack_client.send_to_slack(test_msg)
 
-        with patch.object(slack_client.requests, "post") as post_mock:
-            post_mock.return_value.status_code = msg_delivery_status
+            post_mock.assert_called_once_with(slack_client.url, headers={**COMMON_HEADERS}, json=test_msg, ssl=False)
+            slack_client.logger.warning.assert_called_once_with(
+                f"post(send_to_slack) => response={SlackResponse(status=response_status, body=response_body)}"
+            )
+            assert response == SlackResponse(status=response_status, body=response_body)
 
-            response = test_client.send_to_slack(test_msg)
+    @pytest.mark.asyncio
+    async def client_connection_error_test(self, slack_client):
+        test_msg = {"text": "This is a dummy message"}
+        slack_response = CoroutineMock(side_effect=aiohttp.ClientConnectionError("client error"))
 
-            post_mock.assert_called_once_with(test_client._url, json=test_msg)
-            test_client._logger.error.assert_called_once()
-            assert response == test_response
+        with patch.object(slack_client.session, "post", new=slack_response):
+            response = await slack_client.send_to_slack(test_msg)
 
-    def send_to_slack_with_insecure_url_test(self):
-        mock_logger = Mock()
+            assert response == SlackResponse(
+                status=HTTPStatus.INTERNAL_SERVER_ERROR, body="ClientConnectionError: client error"
+            )
+
+    @pytest.mark.asyncio
+    async def client_exception_test(self, slack_client):
         test_msg = {"text": "This is a dummy message"}
 
-        test_client = SlackClient(config, mock_logger)
-        test_client._url = "http://slack.com"
-        test_client._logger.error = Mock()
+        with pytest.raises(Exception) as random_exception:
+            await slack_client.send_to_slack(test_msg)
 
-        response = test_client.send_to_slack(test_msg)
-
-        test_client._logger.error.assert_called_once()
-        assert response is None
+            assert random_exception == SlackResponse(
+                status=HTTPStatus.INTERNAL_SERVER_ERROR, body="ClientConnectionError: client error"
+            )

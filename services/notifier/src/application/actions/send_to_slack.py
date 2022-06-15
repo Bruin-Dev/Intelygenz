@@ -9,6 +9,6 @@ class SendToSlack:
         self._logger = logger
 
     async def send_to_slack(self, msg: dict):
-        status = self._slack_repository.send_to_slack(msg["message"])
-        notification_response = {"request_id": msg["request_id"], "status": status}
+        slack_response = await self._slack_repository.send_to_slack(msg["message"])
+        notification_response = {"request_id": msg["request_id"], "status": slack_response.status}
         await self._event_bus.publish_message(msg["response_topic"], notification_response)

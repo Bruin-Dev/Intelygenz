@@ -44,7 +44,7 @@ class Container:
         self._email_client = EmailClient(config, self._logger)
         self._email_repo = EmailRepository(config, self._email_client, self._logger)
 
-        self._slack_client = SlackClient(config, self._logger)
+        self._slack_client = SlackClient(config.SLACK_CONFIG, self._logger)
         self._slack_repo = SlackRepository(config, self._slack_client, self._logger)
 
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
