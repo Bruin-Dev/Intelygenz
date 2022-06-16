@@ -324,7 +324,7 @@ class ServiceAffectingMonitor:
                     metrics, scan_interval
                 )
             elif is_tx_bandwidth_valid and not is_rx_bandwidth_valid:
-                within_threshold = self._trouble_repository.is_tx_bandwidth_within_threshold(metrics, scan_interval)
+                within_threshold = self._trouble_repository.is_bandwidth_tx_within_threshold(metrics, scan_interval)
             elif is_rx_bandwidth_valid and not is_tx_bandwidth_valid:
                 within_threshold = self._trouble_repository.is_bandwidth_rx_within_threshold(metrics, scan_interval)
             else:
