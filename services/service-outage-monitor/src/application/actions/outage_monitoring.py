@@ -605,10 +605,10 @@ class OutageMonitor:
         else:
             return self._config.MONITOR_CONFIG["jobs_intervals"]["forward_to_hnoc_edge_down"]
 
-    def _should_always_stay_in_ipa_queue(self, link_data: list) -> bool:
+    def _should_forward_to_hnoc(self, link_data: list) -> bool:
         if self._config.VELOCLOUD_HOST == "metvco04.mettel.net":
-            return False
-        return self._has_faulty_blacklisted_link(link_data)
+            return True
+        return not self._has_faulty_blacklisted_link(link_data)
 
     def schedule_forward_to_hnoc_queue(
         self,
@@ -1055,26 +1055,31 @@ class OutageMonitor:
             )
             await self._notifications_repository.send_slack_message(slack_message)
 
-    def _is_link_label_an_ip(self, link_label: str):
+    @staticmethod
+    def _is_link_label_an_ip(link_label: str):
         try:
             return bool(ip_address(link_label))
         except ValueError:
             return False
 
-    def _is_link_label_black_listed(self, link_label: str):
-        blacklisted_link_labels = self._config.MONITOR_CONFIG["blacklisted_link_labels_for_asr_forwards"]
-        return any(label for label in blacklisted_link_labels if label in link_label)
+    @staticmethod
+    def _is_link_label_blacklisted(link_label: str, blacklisted_link_labels: List[str]) -> bool:
+        return any(label for label in blacklisted_link_labels if label.lower() in link_label.lower())
 
-    def _is_link_label_black_listed_from_hnoc(self, link_label: str):
+    def _is_link_label_blacklisted_from_asr(self, link_label: str):
+        blacklisted_link_labels = self._config.MONITOR_CONFIG["blacklisted_link_labels_for_asr_forwards"]
+        return self._is_link_label_blacklisted(link_label, blacklisted_link_labels)
+
+    def _is_link_label_blacklisted_from_hnoc(self, link_label: str):
         blacklisted_link_labels = self._config.MONITOR_CONFIG["blacklisted_link_labels_for_hnoc_forwards"]
-        return any(label for label in blacklisted_link_labels if label.lower() in link_label)
+        return self._is_link_label_blacklisted(link_label, blacklisted_link_labels)
 
     def _find_whitelisted_links_for_asr_forward(self, links: list) -> list:
         return [
             link
             for link in links
-            if self._is_link_label_black_listed(link["displayName"]) is False
-            if self._is_link_label_an_ip(link["displayName"]) is False
+            if not self._is_link_label_blacklisted_from_asr(link["displayName"])
+            if not self._is_link_label_an_ip(link["displayName"])
         ]
 
     def _has_faulty_digi_link(self, links: List[dict], logical_id_list: List[dict]) -> bool:
@@ -1092,7 +1097,7 @@ class OutageMonitor:
         return any(
             link
             for link in links
-            if link["displayName"] and self._is_link_label_black_listed_from_hnoc(link["displayName"].lower())
+            if link["displayName"] and self._is_link_label_blacklisted_from_hnoc(link["displayName"])
             if self._outage_repository.is_faulty_link(link["linkState"])
         )
 
@@ -1289,7 +1294,7 @@ class OutageMonitor:
             link_status = match.group("status")
 
             if self._outage_repository.is_faulty_link(link_status):
-                if self._is_link_label_black_listed_from_hnoc(link_label):
+                if self._is_link_label_blacklisted_from_hnoc(link_label):
                     return True
 
         return False
@@ -1437,10 +1442,8 @@ class OutageMonitor:
                     check_ticket_tasks=False,
                 )
 
-                should_schedule_hnoc_forwarding = not self._should_always_stay_in_ipa_queue(edge_links)
-                forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, edge)
-
-                if should_schedule_hnoc_forwarding:
+                if self._should_forward_to_hnoc(edge_links):
+                    forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, edge)
                     self.schedule_forward_to_hnoc_queue(
                         forward_time,
                         ticket_id,
@@ -1492,10 +1495,8 @@ class OutageMonitor:
                     check_ticket_tasks=True,
                 )
 
-                should_schedule_hnoc_forwarding = not self._should_always_stay_in_ipa_queue(edge_links)
-
                 if change_severity_result is not ChangeTicketSeverityStatus.NOT_CHANGED:
-                    if should_schedule_hnoc_forwarding:
+                    if self._should_forward_to_hnoc(edge_links):
                         forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, edge)
                         self.schedule_forward_to_hnoc_queue(
                             forward_time,
@@ -1565,10 +1566,8 @@ class OutageMonitor:
                     check_ticket_tasks=True,
                 )
 
-                should_schedule_hnoc_forwarding = not self._should_always_stay_in_ipa_queue(edge_links)
-                forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, edge)
-
-                if should_schedule_hnoc_forwarding:
+                if self._should_forward_to_hnoc(edge_links):
+                    forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, edge)
                     self.schedule_forward_to_hnoc_queue(
                         forward_time,
                         ticket_id,
@@ -1636,10 +1635,8 @@ class OutageMonitor:
                     check_ticket_tasks=True,
                 )
 
-                should_schedule_hnoc_forwarding = not self._should_always_stay_in_ipa_queue(edge_links)
-                forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, edge)
-
-                if should_schedule_hnoc_forwarding:
+                if self._should_forward_to_hnoc(edge_links):
+                    forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, edge)
                     self.schedule_forward_to_hnoc_queue(
                         forward_time,
                         ticket_id,
@@ -1701,10 +1698,8 @@ class OutageMonitor:
                     check_ticket_tasks=False,
                 )
 
-                should_schedule_hnoc_forwarding = not self._should_always_stay_in_ipa_queue(edge_links)
-                forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, edge)
-
-                if should_schedule_hnoc_forwarding:
+                if self._should_forward_to_hnoc(edge_links):
+                    forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, edge)
                     self.schedule_forward_to_hnoc_queue(
                         forward_time,
                         ticket_id,

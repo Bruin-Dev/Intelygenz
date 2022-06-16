@@ -5,7 +5,6 @@ from unittest.mock import Mock, call, patch
 import pytest
 from application import REMINDER_NOTE_REGEX, REOPEN_NOTE_REGEX, TRIAGE_NOTE_REGEX, ChangeTicketSeverityStatus, Outages
 from application.actions import outage_monitoring as outage_monitoring_module
-from application.repositories import utils_repository as utils_repository_module
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
@@ -5540,7 +5539,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._check_for_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=False)
+        outage_monitor._should_forward_to_hnoc = Mock(return_value=True)
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
@@ -5778,7 +5777,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._check_for_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=True)
+        outage_monitor._should_forward_to_hnoc = Mock(return_value=False)
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
@@ -6004,7 +6003,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._check_for_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=True)
+        outage_monitor._should_forward_to_hnoc = Mock(return_value=False)
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
@@ -6234,7 +6233,7 @@ class TestServiceOutageMonitor:
         outage_monitor._change_ticket_severity = CoroutineMock(
             return_value=ChangeTicketSeverityStatus.CHANGED_TO_LINK_DOWN_SEVERITY
         )
-        outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=False)
+        outage_monitor._should_forward_to_hnoc = Mock(return_value=True)
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
@@ -6484,7 +6483,7 @@ class TestServiceOutageMonitor:
         outage_monitor._change_ticket_severity = CoroutineMock(
             return_value=ChangeTicketSeverityStatus.CHANGED_TO_LINK_DOWN_SEVERITY
         )
-        outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=True)
+        outage_monitor._should_forward_to_hnoc = Mock(return_value=False)
         outage_monitor._send_reminder = CoroutineMock()
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
@@ -6722,7 +6721,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._check_for_failed_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock(return_value=ChangeTicketSeverityStatus.NOT_CHANGED)
-        outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=False)
+        outage_monitor._should_forward_to_hnoc = Mock(return_value=True)
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
@@ -6959,7 +6958,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._check_for_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=False)
+        outage_monitor._should_forward_to_hnoc = Mock(return_value=True)
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
@@ -7192,7 +7191,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._check_for_digi_reboot = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=True)
+        outage_monitor._should_forward_to_hnoc = Mock(return_value=False)
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
@@ -7416,7 +7415,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=False)
+        outage_monitor._should_forward_to_hnoc = Mock(return_value=True)
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
@@ -7648,7 +7647,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=True)
+        outage_monitor._should_forward_to_hnoc = Mock(return_value=False)
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
@@ -7868,7 +7867,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=False)
+        outage_monitor._should_forward_to_hnoc = Mock(return_value=True)
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
@@ -8099,7 +8098,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._append_triage_note = CoroutineMock()
         outage_monitor._change_ticket_severity = CoroutineMock()
-        outage_monitor._should_always_stay_in_ipa_queue = Mock(return_value=True)
+        outage_monitor._should_forward_to_hnoc = Mock(return_value=False)
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
@@ -8127,7 +8126,7 @@ class TestServiceOutageMonitor:
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
-    def _should_always_stay_in_ipa_queue_metvco4_host_byob_link_display_test(self, outage_monitor):
+    def should_forward_to_hnoc_metvco4_host_byob_link_display_test(self, outage_monitor):
         link_data = [
             {
                 # Some fields omitted for simplicity
@@ -8139,11 +8138,10 @@ class TestServiceOutageMonitor:
         ]
 
         with patch.object(outage_monitor._config, "VELOCLOUD_HOST", "metvco04.mettel.net"):
-            should_stay_in_ipa_queue = outage_monitor._should_always_stay_in_ipa_queue(link_data)
+            result = outage_monitor._should_forward_to_hnoc(link_data)
+        assert result is True
 
-            assert should_stay_in_ipa_queue is False
-
-    def _should_always_stay_in_ipa_queue_non_byob_and_not_faulty_display_name_test(self, outage_monitor):
+    def should_forward_to_hnoc_non_byob_and_not_faulty_display_name_test(self, outage_monitor):
         link_data = [
             {
                 # Some fields omitted for simplicity
@@ -8155,11 +8153,10 @@ class TestServiceOutageMonitor:
         ]
         outage_monitor._outage_repository.is_faulty_link = Mock(return_value=False)
 
-        should_stay_in_ipa_queue = outage_monitor._should_always_stay_in_ipa_queue(link_data)
+        result = outage_monitor._should_forward_to_hnoc(link_data)
+        assert result is True
 
-        assert should_stay_in_ipa_queue is False
-
-    def _should_always_stay_in_ipa_queue_byob_and_not_faulty_display_name_test(self, outage_monitor):
+    def should_forward_to_hnoc_byob_and_not_faulty_display_name_test(self, outage_monitor):
         link_data = [
             {
                 # Some fields omitted for simplicity
@@ -8177,11 +8174,10 @@ class TestServiceOutageMonitor:
             },
         ]
 
-        should_stay_in_ipa_queue = outage_monitor._should_always_stay_in_ipa_queue(link_data)
+        result = outage_monitor._should_forward_to_hnoc(link_data)
+        assert result is True
 
-        assert should_stay_in_ipa_queue is False
-
-    def _should_always_stay_in_ipa_queue_byob_link_display_name_test(self, outage_monitor):
+    def should_forward_to_hnoc_byob_link_display_name_test(self, outage_monitor):
         link_data = [
             {
                 # Some fields omitted for simplicity
@@ -8200,9 +8196,8 @@ class TestServiceOutageMonitor:
         ]
         outage_monitor._outage_repository.is_faulty_link = Mock(return_value=True)
 
-        should_stay_in_ipa_queue = outage_monitor._should_always_stay_in_ipa_queue(link_data)
-
-        assert should_stay_in_ipa_queue is True
+        result = outage_monitor._should_forward_to_hnoc(link_data)
+        assert result is False
 
     @pytest.mark.asyncio
     async def append_triage_note_with_retrieval_of_edge_events_returning_non_2xx_status_test(self, outage_monitor):
@@ -11148,7 +11143,7 @@ class TestServiceOutageMonitor:
                     "linkIpAddress": "70.59.5.185",
                 },
                 {
-                    "displayName": "customer owned 70.59.5.185",
+                    "displayName": "BYOB 70.59.5.185",
                     "isp": None,
                     "interface": "GE1",
                     "internalId": "00000001-ac48-47a0-81a7-80c8c320f486",
@@ -11159,7 +11154,7 @@ class TestServiceOutageMonitor:
                     "linkIpAddress": "70.59.5.185",
                 },
                 {
-                    "displayName": "Customer Owned 70.59.5.185",
+                    "displayName": "BYOB 70.59.5.185",
                     "isp": None,
                     "interface": "GE1",
                     "internalId": "00000001-ac48-47a0-81a7-80c8c320f486",
@@ -11170,7 +11165,7 @@ class TestServiceOutageMonitor:
                     "linkIpAddress": "70.59.5.185",
                 },
                 {
-                    "displayName": "PIAB - 70.59.5.185",
+                    "displayName": "BYOB 70.59.5.185",
                     "isp": None,
                     "interface": "GE1",
                     "internalId": "00000001-ac48-47a0-81a7-80c8c320f486",
