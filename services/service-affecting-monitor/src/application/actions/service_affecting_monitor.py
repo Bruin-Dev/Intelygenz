@@ -726,8 +726,7 @@ class ServiceAffectingMonitor:
                 trouble_processed = True
 
                 link_label = link_data["link_status"]["displayName"]
-                should_stay_in_ipa_queue = self._should_always_stay_in_ipa_queue(link_label)
-                if should_stay_in_ipa_queue:
+                if not self._should_forward_to_hnoc(link_label):
                     await self._send_reminder(open_affecting_ticket)
         else:
             self._logger.info(f"No open Service Affecting ticket was found for edge {serial_number}")
@@ -862,7 +861,7 @@ class ServiceAffectingMonitor:
         link_label = link_data["link_status"]["displayName"]
         links_configuration = link_data["cached_info"]["links_configuration"]
 
-        is_byob = self._is_link_label_blacklisted_for_HNOC(link_label)
+        is_byob = self._is_link_label_blacklisted_from_hnoc(link_label)
         link_type = self._get_link_type(interface, links_configuration)
 
         self._logger.info(
@@ -905,8 +904,7 @@ class ServiceAffectingMonitor:
         )
 
         link_label = link_data["link_status"]["displayName"]
-        should_schedule_hnoc_forwarding = not self._should_always_stay_in_ipa_queue(link_label)
-        if should_schedule_hnoc_forwarding:
+        if self._should_forward_to_hnoc(link_label):
             self._logger.info(
                 f"Forwarding reopened task for serial {serial_number} of ticket {ticket_id} to the HNOC queue..."
             )
@@ -949,7 +947,7 @@ class ServiceAffectingMonitor:
         link_label = link_data["link_status"]["displayName"]
         links_configuration = link_data["cached_info"]["links_configuration"]
 
-        is_byob = self._is_link_label_blacklisted_for_HNOC(link_label)
+        is_byob = self._is_link_label_blacklisted_from_hnoc(link_label)
         link_type = self._get_link_type(interface, links_configuration)
 
         self._logger.info(
@@ -993,9 +991,8 @@ class ServiceAffectingMonitor:
         )
 
         link_label = link_data["link_status"]["displayName"]
-        should_schedule_hnoc_forwarding = not self._should_always_stay_in_ipa_queue(link_label)
         if trouble is not AffectingTroubles.BOUNCING:
-            if should_schedule_hnoc_forwarding:
+            if self._should_forward_to_hnoc(link_label):
                 self._schedule_forward_to_hnoc_queue(ticket_id, serial_number, link_data, trouble)
             else:
                 self._logger.info(
@@ -1026,10 +1023,10 @@ class ServiceAffectingMonitor:
 
         return ticket_id
 
-    def _should_always_stay_in_ipa_queue(self, link_label: str) -> bool:
+    def _should_forward_to_hnoc(self, link_label: str) -> bool:
         if self._config.VELOCLOUD_HOST == "metvco04.mettel.net":
-            return False
-        return self._is_link_label_blacklisted_for_HNOC(link_label)
+            return True
+        return not self._is_link_label_blacklisted_from_hnoc(link_label)
 
     def _schedule_forward_to_hnoc_queue(self, ticket_id, serial_number, link_data, trouble):
         tz = timezone(self._config.TIMEZONE)
@@ -1067,7 +1064,7 @@ class ServiceAffectingMonitor:
             link_label = link_data["link_status"]["displayName"]
             links_configuration = link_data["cached_info"]["links_configuration"]
 
-            is_byob = self._is_link_label_blacklisted_for_HNOC(link_label)
+            is_byob = self._is_link_label_blacklisted_from_hnoc(link_label)
             link_type = self._get_link_type(interface, links_configuration)
 
             self._logger.info(
@@ -1142,7 +1139,7 @@ class ServiceAffectingMonitor:
         link_label = link_data["link_status"]["displayName"]
         link_interface_type = ""
 
-        is_byob = self._is_link_label_blacklisted_for_HNOC(link_label)
+        is_byob = self._is_link_label_blacklisted_from_hnoc(link_label)
         link_type = self._get_link_type(interface, links_configuration)
 
         for link_configuration in links_configuration:
@@ -1157,13 +1154,11 @@ class ServiceAffectingMonitor:
             return
 
         self._logger.info(
-            f"Filtering out any of the wired links of serial {serial_number} that contains any of the "
-            f"following: "
-            f'{self._config.ASR_CONFIG["link_labels_blacklist"]} '
-            f"in the link label"
+            f"Filtering out any of the wired links of serial {serial_number} that contains any of the following: "
+            f"{self._config.MONITOR_CONFIG['blacklisted_link_labels_for_asr_forwards']} in the link label"
         )
 
-        if not self._should_be_forwarded_to_asr(link_data):
+        if not self._should_forward_to_asr(link_data):
             self._logger.info(
                 f"No links with whitelisted labels were found for serial {serial_number}. "
                 f"Related detail of ticket {ticket_id} will not be forwarded to {target_queue}."
@@ -1233,20 +1228,23 @@ class ServiceAffectingMonitor:
             )
             await self._notifications_repository.send_slack_message(slack_message)
 
-    def _should_be_forwarded_to_asr(self, link_data: dict) -> bool:
+    def _should_forward_to_asr(self, link_data: dict) -> bool:
         link_label = link_data["link_status"]["displayName"]
-        is_blacklisted = self._is_link_label_blacklisted(link_label)
+        is_blacklisted = self._is_link_label_blacklisted_from_asr(link_label)
         is_ip_address = self._utils_repository.is_ip_address(link_label)
         return not is_blacklisted and not is_ip_address
 
-    def _is_link_label_blacklisted(self, link_label: str) -> bool:
-        blacklisted_link_labels = self._config.ASR_CONFIG["link_labels_blacklist"]
-        return any(label for label in blacklisted_link_labels if label in link_label)
+    @staticmethod
+    def _is_link_label_blacklisted(link_label: str, blacklisted_link_labels: List[str]) -> bool:
+        return any(label for label in blacklisted_link_labels if label.lower() in link_label.lower())
 
-    def _is_link_label_blacklisted_for_HNOC(self, link_label: str) -> bool:
-        link_label = link_label.lower()
-        blacklisted_link_labels = self._config.MONITOR_CONFIG["link_labels__hnoc_blacklist"]
-        return any(label for label in blacklisted_link_labels if label.lower() in link_label)
+    def _is_link_label_blacklisted_from_asr(self, link_label: str):
+        blacklisted_link_labels = self._config.MONITOR_CONFIG["blacklisted_link_labels_for_asr_forwards"]
+        return self._is_link_label_blacklisted(link_label, blacklisted_link_labels)
+
+    def _is_link_label_blacklisted_from_hnoc(self, link_label: str):
+        blacklisted_link_labels = self._config.MONITOR_CONFIG["blacklisted_link_labels_for_hnoc_forwards"]
+        return self._is_link_label_blacklisted(link_label, blacklisted_link_labels)
 
     @staticmethod
     def _get_link_type(interface: str, links_configuration: List[dict]) -> str:
@@ -1275,7 +1273,7 @@ class ServiceAffectingMonitor:
 
         if match:
             link_label = match.group("label")
-            return self._is_link_label_blacklisted_for_HNOC(link_label)
+            return self._is_link_label_blacklisted_from_hnoc(link_label)
 
     @staticmethod
     def _get_link_type_from_affecting_trouble_note(affecting_trouble_note: Optional[dict]) -> Optional[str]:

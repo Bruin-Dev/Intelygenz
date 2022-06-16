@@ -69,7 +69,12 @@ MONITOR_CONFIG = {
         // 60,
         AffectingTroubles.BOUNCING: int(os.environ["MONITORING__CIRCUIT_INSTABILITY_MONITORING_LOOKUP_INTERVAL"]) // 60,
     },
-    "link_labels__hnoc_blacklist": json.loads(os.environ["MONITORING__LINK_LABELS_BLACKLISTED_IN_HNOC_FORWARDS"]),
+    "blacklisted_link_labels_for_asr_forwards": json.loads(
+        os.environ["MONITORING__LINK_LABELS_BLACKLISTED_IN_ASR_FORWARDS"]
+    ),
+    "blacklisted_link_labels_for_hnoc_forwards": json.loads(
+        os.environ["MONITORING__LINK_LABELS_BLACKLISTED_IN_HNOC_FORWARDS"]
+    ),
     "autoresolve": {
         "semaphore": 3,
         "metrics_lookup_interval_minutes": int(os.environ["MONITORING__AUTORESOLVE_LOOKUP_INTERVAL"]) // 60,
@@ -149,7 +154,3 @@ QUART_CONFIG = {"title": "service-affecting-monitor", "port": 5000}
 REDIS = {"host": os.environ["REDIS_HOSTNAME"]}
 
 METRICS_SERVER_CONFIG = {"port": 9090}
-
-ASR_CONFIG = {
-    "link_labels_blacklist": json.loads(os.environ["MONITORING__LINK_LABELS_BLACKLISTED_IN_ASR_FORWARDS"]),
-}

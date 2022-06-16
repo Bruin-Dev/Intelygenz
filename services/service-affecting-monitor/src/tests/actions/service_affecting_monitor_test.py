@@ -1658,7 +1658,7 @@ class TestServiceAffectingMonitor:
             service_number=service_number,
         )
         service_affecting_monitor._bruin_repository.get_resolved_affecting_tickets.assert_not_awaited()
-        service_affecting_monitor._should_always_stay_in_ipa_queue.assert_not_called()
+        service_affecting_monitor._should_forward_to_hnoc.assert_not_called()
         service_affecting_monitor._send_reminder.assert_not_awaited()
         service_affecting_monitor._append_latest_trouble_to_ticket.assert_not_awaited()
         service_affecting_monitor._unresolve_task_for_affecting_ticket.assert_not_awaited()
@@ -1705,7 +1705,7 @@ class TestServiceAffectingMonitor:
         )
         service_affecting_monitor._bruin_repository.get_resolved_affecting_tickets.assert_not_awaited()
         service_affecting_monitor._append_latest_trouble_to_ticket.assert_not_awaited()
-        service_affecting_monitor._should_always_stay_in_ipa_queue.assert_not_called()
+        service_affecting_monitor._should_forward_to_hnoc.assert_not_called()
         service_affecting_monitor._send_reminder.assert_not_awaited()
         service_affecting_monitor._unresolve_task_for_affecting_ticket.assert_awaited_once_with(
             detail_object,
@@ -1754,7 +1754,7 @@ class TestServiceAffectingMonitor:
             service_number=service_number,
         )
         service_affecting_monitor._bruin_repository.get_resolved_affecting_tickets.assert_not_awaited()
-        service_affecting_monitor._should_always_stay_in_ipa_queue.assert_called()
+        service_affecting_monitor._should_forward_to_hnoc.assert_called()
         service_affecting_monitor._send_reminder.assert_not_awaited()
         service_affecting_monitor._append_latest_trouble_to_ticket.assert_awaited_once_with(
             detail_object,
@@ -1793,7 +1793,7 @@ class TestServiceAffectingMonitor:
             status=200,
         )
         service_affecting_monitor._get_oldest_affecting_ticket_for_serial_number.return_value = detail_object
-        service_affecting_monitor._should_always_stay_in_ipa_queue.return_value = True
+        service_affecting_monitor._should_forward_to_hnoc.return_value = False
 
         await service_affecting_monitor._process_affecting_trouble(link_info, trouble)
 
@@ -1807,7 +1807,7 @@ class TestServiceAffectingMonitor:
             trouble,
             link_info,
         )
-        service_affecting_monitor._should_always_stay_in_ipa_queue.assert_called()
+        service_affecting_monitor._should_forward_to_hnoc.assert_called()
         service_affecting_monitor._send_reminder.assert_awaited_once_with(detail_object)
         service_affecting_monitor._unresolve_task_for_affecting_ticket.assert_not_awaited()
         service_affecting_monitor._create_affecting_ticket.assert_not_awaited()
@@ -1853,7 +1853,7 @@ class TestServiceAffectingMonitor:
             service_number=service_number,
         )
         service_affecting_monitor._append_latest_trouble_to_ticket.assert_not_awaited()
-        service_affecting_monitor._should_always_stay_in_ipa_queue.assert_not_called()
+        service_affecting_monitor._should_forward_to_hnoc.assert_not_called()
         service_affecting_monitor._send_reminder.assert_not_awaited()
         service_affecting_monitor._unresolve_task_for_affecting_ticket.assert_not_awaited()
         service_affecting_monitor._create_affecting_ticket.assert_not_awaited()
@@ -1910,7 +1910,7 @@ class TestServiceAffectingMonitor:
             service_number=service_number,
         )
         service_affecting_monitor._append_latest_trouble_to_ticket.assert_not_awaited()
-        service_affecting_monitor._should_always_stay_in_ipa_queue.assert_not_called()
+        service_affecting_monitor._should_forward_to_hnoc.assert_not_called()
         service_affecting_monitor._send_reminder.assert_not_awaited()
         service_affecting_monitor._unresolve_task_for_affecting_ticket.assert_awaited_once_with(
             detail_object,
@@ -1963,7 +1963,7 @@ class TestServiceAffectingMonitor:
             service_number=service_number,
         )
         service_affecting_monitor._append_latest_trouble_to_ticket.assert_not_awaited()
-        service_affecting_monitor._should_always_stay_in_ipa_queue.assert_not_called()
+        service_affecting_monitor._should_forward_to_hnoc.assert_not_called()
         service_affecting_monitor._send_reminder.assert_not_awaited()
         service_affecting_monitor._unresolve_task_for_affecting_ticket.assert_not_awaited()
         service_affecting_monitor._create_affecting_ticket.assert_awaited_once_with(trouble, link_info)
@@ -2341,7 +2341,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = (
             bruin_generic_200_response
         )
-        service_affecting_monitor._should_always_stay_in_ipa_queue.return_value = True
+        service_affecting_monitor._should_forward_to_hnoc.return_value = False
 
         with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._unresolve_task_for_affecting_ticket(detail_info, trouble, link_info)
@@ -2373,7 +2373,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = (
             bruin_500_response
         )
-        service_affecting_monitor._should_always_stay_in_ipa_queue.return_value = True
+        service_affecting_monitor._should_forward_to_hnoc.return_value = False
 
         with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._unresolve_task_for_affecting_ticket(detail_info, trouble, link_info)
@@ -2399,7 +2399,7 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._bruin_repository.open_ticket.return_value = bruin_generic_200_response
         service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
-        service_affecting_monitor._should_always_stay_in_ipa_queue.return_value = False
+        service_affecting_monitor._should_forward_to_hnoc.return_value = True
 
         with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._unresolve_task_for_affecting_ticket(detail_info, trouble, link_info)
@@ -2408,7 +2408,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once()
         service_affecting_monitor._notifications_repository.notify_successful_reopen.assert_awaited_once()
         service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
-        service_affecting_monitor._should_always_stay_in_ipa_queue.assert_called()
+        service_affecting_monitor._should_forward_to_hnoc.assert_called()
         service_affecting_monitor._append_reminder_note.assert_not_awaited()
         service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_called_once()
 
@@ -2486,7 +2486,7 @@ class TestServiceAffectingMonitor:
             bruin_generic_200_response
         )
         service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
-        service_affecting_monitor._should_always_stay_in_ipa_queue.return_value = True
+        service_affecting_monitor._should_forward_to_hnoc.return_value = False
 
         with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._create_affecting_ticket(trouble, link_info)
@@ -2515,7 +2515,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = (
             bruin_500_response
         )
-        service_affecting_monitor._should_always_stay_in_ipa_queue.return_value = True
+        service_affecting_monitor._should_forward_to_hnoc.return_value = False
 
         with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._create_affecting_ticket(trouble, link_info)
@@ -2542,13 +2542,13 @@ class TestServiceAffectingMonitor:
             make_create_ticket_200_response()
         )
         service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
-        service_affecting_monitor._should_always_stay_in_ipa_queue.return_value = False
+        service_affecting_monitor._should_forward_to_hnoc.return_value = True
 
         with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await service_affecting_monitor._create_affecting_ticket(trouble, link_info)
 
         service_affecting_monitor._bruin_repository.create_affecting_ticket.assert_awaited_once()
-        service_affecting_monitor._should_always_stay_in_ipa_queue.assert_called()
+        service_affecting_monitor._should_forward_to_hnoc.assert_called()
         service_affecting_monitor._send_reminder.assert_not_awaited()
         service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once()
         service_affecting_monitor._notifications_repository.notify_successful_ticket_creation.assert_awaited_once()
@@ -2556,27 +2556,27 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._append_reminder_note.assert_not_awaited()
         service_affecting_monitor._schedule_forward_to_hnoc_queue.assert_called_once()
 
-    def should_always_stay_in_ipa_queue_non_byob_return_true_test(
+    def should_forward_to_hnoc_non_byob_return_true_test(
         self, service_affecting_monitor, make_link, make_structured_metrics_object
     ):
         link_data = make_link(display_name="Test")
         link_metric_object = make_structured_metrics_object(link_info=link_data)
         link_label = link_metric_object["link_status"]["displayName"]
 
-        should_schedule_hnoc = not service_affecting_monitor._should_always_stay_in_ipa_queue(link_label)
-        assert should_schedule_hnoc is True
+        result = service_affecting_monitor._should_forward_to_hnoc(link_label)
+        assert result is True
 
-    def should_always_stay_in_ipa_queue_byob_link_display_name_return_false_test(
+    def should_forward_to_hnoc_byob_link_display_name_return_false_test(
         self, service_affecting_monitor, make_link, make_structured_metrics_object
     ):
         link_data = make_link(display_name="BYOB Test")
         link_metric_object = make_structured_metrics_object(link_info=link_data)
         link_label = link_metric_object["link_status"]["displayName"]
 
-        should_schedule_hnoc = not service_affecting_monitor._should_always_stay_in_ipa_queue(link_label)
-        assert should_schedule_hnoc is False
+        result = service_affecting_monitor._should_forward_to_hnoc(link_label)
+        assert result is False
 
-    def should_always_stay_in_ipa_queue_byob_link_display_name_host_metvco4_return_true_test(
+    def should_forward_to_hnoc_byob_link_display_name_host_metvco4_return_true_test(
         self, service_affecting_monitor, make_link, make_structured_metrics_object
     ):
         link_data = make_link(display_name="BYOB Test")
@@ -2584,8 +2584,8 @@ class TestServiceAffectingMonitor:
         link_label = link_metric_object["link_status"]["displayName"]
 
         with patch.object(service_affecting_monitor._config, "VELOCLOUD_HOST", "metvco04.mettel.net"):
-            should_schedule_hnoc = not service_affecting_monitor._should_always_stay_in_ipa_queue(link_label)
-        assert should_schedule_hnoc is True
+            result = service_affecting_monitor._should_forward_to_hnoc(link_label)
+        assert result is True
 
     def schedule_forward_to_hnoc_queue_test(
         self, service_affecting_monitor, frozen_datetime, make_structured_metrics_object_with_cache_and_contact_info
@@ -4489,27 +4489,27 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.append_asr_forwarding_note.assert_not_awaited()
         service_affecting_monitor._notifications_repository.send_slack_message.assert_not_awaited()
 
-    def should_be_forwarded_to_asr_test(self, service_affecting_monitor, make_link, make_structured_metrics_object):
+    def should_forward_to_asr_test(self, service_affecting_monitor, make_link, make_structured_metrics_object):
         link = make_link(display_name="Test link")
         link_data = make_structured_metrics_object(link_info=link)
-        result = service_affecting_monitor._should_be_forwarded_to_asr(link_data)
+        result = service_affecting_monitor._should_forward_to_asr(link_data)
         assert result is True
 
         link = make_link(display_name="BYOB")
         link_data = make_structured_metrics_object(link_info=link)
-        result = service_affecting_monitor._should_be_forwarded_to_asr(link_data)
+        result = service_affecting_monitor._should_forward_to_asr(link_data)
         assert result is False
 
         link = make_link(display_name="127.0.0.1")
         link_data = make_structured_metrics_object(link_info=link)
-        result = service_affecting_monitor._should_be_forwarded_to_asr(link_data)
+        result = service_affecting_monitor._should_forward_to_asr(link_data)
         assert result is False
 
-    def is_link_label_blacklisted_test(self, service_affecting_monitor):
-        result = service_affecting_monitor._is_link_label_blacklisted("Test link")
+    def is_link_label_blacklisted_from_asr_test(self, service_affecting_monitor):
+        result = service_affecting_monitor._is_link_label_blacklisted_from_asr("Test link")
         assert result is False
 
-        result = service_affecting_monitor._is_link_label_blacklisted("BYOB")
+        result = service_affecting_monitor._is_link_label_blacklisted_from_asr("BYOB")
         assert result is True
 
     def get_max_seconds_since_last_trouble_test(self, service_affecting_monitor, make_links_by_edge_object):

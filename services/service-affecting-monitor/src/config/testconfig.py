@@ -59,7 +59,8 @@ MONITOR_CONFIG = {
         AffectingTroubles.BANDWIDTH_OVER_UTILIZATION: 30,
         AffectingTroubles.BOUNCING: 60,
     },
-    "link_labels__hnoc_blacklist": ["byob"],
+    "blacklisted_link_labels_for_asr_forwards": ["byob"],
+    "blacklisted_link_labels_for_hnoc_forwards": ["byob"],
     "autoresolve": {
         "semaphore": 3,
         "metrics_lookup_interval_minutes": 30,
@@ -115,7 +116,5 @@ LOG_CONFIG = {
 }
 
 QUART_CONFIG = {"title": "service-affecting-monitor", "port": 5000}
-
-ASR_CONFIG = {"link_labels_blacklist": ["BYOB", "Customer Owned", "customer owned"]}
 
 METRICS_SERVER_CONFIG = {"port": 9090}
