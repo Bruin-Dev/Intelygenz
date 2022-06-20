@@ -11,8 +11,9 @@ velocloud-bridge-linter:
         - services/velocloud-bridge/src/config/**/*
         - services/velocloud-bridge/src/app.py
         - services/velocloud-bridge/Dockerfile
-        - services/velocloud-bridge/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/velocloud-bridge/pyproject.toml
+        - services/velocloud-bridge/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
@@ -29,10 +30,11 @@ velocloud-bridge-test:
         - services/velocloud-bridge/src/config/**/*
         - services/velocloud-bridge/src/app.py
         - services/velocloud-bridge/Dockerfile
-        - services/velocloud-bridge/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/velocloud-bridge/pyproject.toml
+        - services/velocloud-bridge/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
-  extends: .unittest_module_python_36_alpine
+  extends: .unittest_module_python_310
   needs: ["velocloud-bridge-linter"]
 
 # ==============================================
@@ -50,8 +52,9 @@ velocloud-bridge-build:
         - services/velocloud-bridge/src/config/**/*
         - services/velocloud-bridge/src/app.py
         - services/velocloud-bridge/Dockerfile
-        - services/velocloud-bridge/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/velocloud-bridge/pyproject.toml
+        - services/velocloud-bridge/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $VELOCLOUD_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:
