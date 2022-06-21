@@ -71,6 +71,7 @@ class Triage:
 
         customer_cache_response = await self._customer_cache_repository.get_cache_for_triage_monitoring()
         if customer_cache_response["status"] not in range(200, 300) or customer_cache_response["status"] == 202:
+            self._logger.warning(f"Bad status calling to get cache for triage. Skipping run tickets polling ...")
             return
 
         self._customer_cache = customer_cache_response["body"]
@@ -130,6 +131,7 @@ class Triage:
         open_tickets_response_status = open_tickets_response["status"]
 
         if open_tickets_response_status not in range(200, 300):
+            self._logger.warning(f"Bad status calling to open tickets. Return an empty list ...")
             return []
 
         filtered_ticket_list = [
@@ -162,6 +164,10 @@ class Triage:
                 ticket_details_response_status = ticket_details_response["status"]
 
                 if ticket_details_response_status not in range(200, 300):
+                    self._logger.warning(
+                        f"Bad status calling get ticket details for ticket id: {ticket_id}. "
+                        f"Skipping get open ticket ..."
+                    )
                     return
 
                 ticket_details_list = ticket_details_response_body["ticketDetails"]
@@ -369,6 +375,10 @@ class Triage:
         recent_events_response_status = recent_events_response["status"]
 
         if recent_events_response_status not in range(200, 300):
+            self._logger.warning(
+                f"Bad status calling get last edge events for edge: {edge_full_id}. "
+                f"Skipping append triage notes based in recent events ..."
+            )
             return
 
         if not recent_events_response_body:
@@ -390,6 +400,7 @@ class Triage:
                 )
 
                 if response["status"] not in range(200, 300):
+                    self._logger.warning(f"Bad status apeending note to ticket: {ticket_id}. Skipping append note ...")
                     continue
 
                 self._logger.info(f"Triage appended to detail {ticket_detail_id} of ticket {ticket_id}!")
@@ -474,6 +485,10 @@ class Triage:
                 )
 
                 if recent_events_response["status"] not in range(200, 300):
+                    self._logger.warning(
+                        f"Bad status calling to get last edge events. "
+                        f"Skipping process details without details for edge: {edge_full_id} ..."
+                    )
                     continue
 
                 recent_events = recent_events_response["body"]

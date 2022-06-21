@@ -91,7 +91,7 @@ class OutageMonitor:
                 id="_service_outage_monitor_process",
             )
         except ConflictingIdError as conflict:
-            self._logger.info(f"Skipping start of Service Outage Monitoring job. Reason: {conflict}")
+            self._logger.error(f"Skipping start of Service Outage Monitoring job. Reason: {conflict}")
 
     async def _outage_monitoring_process(self):
         self.__reset_state()
@@ -101,6 +101,7 @@ class OutageMonitor:
 
         customer_cache_response = await self._customer_cache_repository.get_cache_for_outage_monitoring()
         if customer_cache_response["status"] not in range(200, 300) or customer_cache_response["status"] == 202:
+            self._logger.warning("Not found cache for service outage. " "Skipping the outage monitoring process ...")
             return
 
         self._logger.info("[outage_monitoring_process] Ignoring blacklisted edges...")
@@ -143,10 +144,16 @@ class OutageMonitor:
 
         links_with_edge_info_response = await self._velocloud_repository.get_links_with_edge_info(velocloud_host=host)
         if links_with_edge_info_response["status"] not in range(200, 300):
+            self._logger.warning(
+                f"Not found links with edge info for host: {host}. " f"Skipping process velocloud host ..."
+            )
             return
 
         network_enterprises_response = await self._velocloud_repository.get_network_enterprises(velocloud_host=host)
         if network_enterprises_response["status"] not in range(200, 300):
+            self._logger.warning(
+                f"Not found network enterprises for host: {host}. " f"Skipping process velocloud host ..."
+            )
             return
 
         links_with_edge_info: list = links_with_edge_info_response["body"]
@@ -365,6 +372,10 @@ class OutageMonitor:
             outage_ticket_response_body = outage_ticket_response["body"]
             outage_ticket_response_status = outage_ticket_response["status"]
             if outage_ticket_response_status not in range(200, 300):
+                self._logger.warning(
+                    f"Bad status calling for outage tickets for client id: {client_id} and serial: {serial_number}. "
+                    f"Skipping autoresolve ..."
+                )
                 return
 
             if not outage_ticket_response_body:
@@ -388,6 +399,10 @@ class OutageMonitor:
             ticket_details_response_body = ticket_details_response["body"]
             ticket_details_response_status = ticket_details_response["status"]
             if ticket_details_response_status not in range(200, 300):
+                self._logger.warning(
+                    f"Bad status calling get ticket details for outage ticket: {outage_ticket_id}. "
+                    f"Skipping autoresolve ..."
+                )
                 return
 
             details_from_ticket = ticket_details_response_body["ticketDetails"]
@@ -474,6 +489,10 @@ class OutageMonitor:
             )
             resolve_ticket_response = await self._bruin_repository.resolve_ticket(outage_ticket_id, ticket_detail_id)
             if resolve_ticket_response["status"] not in range(200, 300):
+                self._logger.warning(
+                    f"Bad status calling resolve ticket for outage ticket_id: {outage_ticket_id} and"
+                    f"ticket detail: {ticket_detail_id}. Skipping autoresolve ..."
+                )
                 return
 
             await self._bruin_repository.append_autoresolve_note_to_ticket(outage_ticket_id, serial_number)
@@ -526,10 +545,16 @@ class OutageMonitor:
 
         links_with_edge_info_response = await self._velocloud_repository.get_links_with_edge_info(velocloud_host=host)
         if links_with_edge_info_response["status"] not in range(200, 300):
+            self._logger.warning(
+                f"Bad status calling to get links with edge info for host: {host}. Skipping recheck ..."
+            )
             return
 
         network_enterprises_response = await self._velocloud_repository.get_network_enterprises(velocloud_host=host)
         if network_enterprises_response["status"] not in range(200, 300):
+            self._logger.warning(
+                f"Bad status calling to get network enterprises info for host: {host}. Skipping recheck ..."
+            )
             return
 
         self._logger.info(
@@ -757,6 +782,9 @@ class OutageMonitor:
         )
 
         if recent_events_response["status"] not in range(200, 300):
+            self._logger.warning(
+                f"Couldn't find last edge events for edge id: {edge_full_id}. Skipping append triage note ..."
+            )
             return
 
         recent_events = recent_events_response["body"]
@@ -764,6 +792,9 @@ class OutageMonitor:
 
         ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
         if ticket_details_response["status"] not in range(200, 300):
+            self._logger.warning(
+                f"Couldn't find ticket details for ticket id: {ticket_id}. Skipping append triage note ..."
+            )
             return
 
         ticket_detail: dict = ticket_details_response["body"]["ticketDetails"][0]
@@ -790,6 +821,7 @@ class OutageMonitor:
         ticket_details_response_body = ticket_details_response["body"]
         ticket_details_response_status = ticket_details_response["status"]
         if ticket_details_response_status not in range(200, 300):
+            self._logger.info(f"Bad status calling to get ticket details. Skipping reopen ticket ...")
             return
 
         ticket_detail_for_reopen = self._utils_repository.get_first_element_matching(
@@ -829,9 +861,11 @@ class OutageMonitor:
                         f'Attempting DiGi reboot of link with MAC address of {digi_link["logical_id"]}'
                         f"in edge {serial_number}"
                     )
-                    await self._bruin_repository.append_digi_reboot_note(
+                    append_digi_reboot_note_response = await self._bruin_repository.append_digi_reboot_note(
                         ticket_id, serial_number, digi_link["interface_name"]
                     )
+                    if append_digi_reboot_note_response not in range(200, 300):
+                        self._logger.warning(f" Bad status calling to append digi reboot note. Can't append the note")
                     slack_message = (
                         f"DiGi reboot started for faulty edge {serial_number}. Ticket "
                         f"details at https://app.bruin.com/t/{ticket_id}."
@@ -866,6 +900,9 @@ class OutageMonitor:
                 ticket_details_response_body = ticket_details_response["body"]
                 ticket_details_response_status = ticket_details_response["status"]
                 if ticket_details_response_status not in range(200, 300):
+                    self._logger.info(
+                        f"Bad status calling to get ticket details checking failed digi reboot. Skipping link ..."
+                    )
                     return
 
                 details_from_ticket = ticket_details_response_body["ticketDetails"]
@@ -992,6 +1029,7 @@ class OutageMonitor:
         ticket_details_response_body = ticket_details_response["body"]
         ticket_details_response_status = ticket_details_response["status"]
         if ticket_details_response_status not in range(200, 300):
+            self._logger.info(f"Bad status calling get ticket details. Skipping forward asr ...")
             return
 
         details_from_ticket = ticket_details_response_body["ticketDetails"]
@@ -1137,6 +1175,10 @@ class OutageMonitor:
             if check_ticket_tasks:
                 ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
                 if ticket_details_response["status"] not in range(200, 300):
+                    self._logger.warning(
+                        f"Bad response calling get ticket details for ticket id: {ticket_id}. "
+                        f"The ticket severity won't change"
+                    )
                     return ChangeTicketSeverityStatus.NOT_CHANGED
 
                 ticket_tasks = ticket_details_response["body"]["ticketDetails"]
@@ -1162,6 +1204,9 @@ class OutageMonitor:
 
         get_ticket_response = await self._bruin_repository.get_ticket(ticket_id)
         if not get_ticket_response["status"] in range(200, 300):
+            self._logger.warning(
+                f"Bad response calling get ticket for ticket id: {ticket_id}. The ticket severity won't change!"
+            )
             change_severity_task.close()
             return ChangeTicketSeverityStatus.NOT_CHANGED
 
@@ -1176,6 +1221,7 @@ class OutageMonitor:
 
         result = await change_severity_task
         if result["status"] not in range(200, 300):
+            self._logger.warning(f"Bad response for change severity task. The ticket severity don't change")
             return ChangeTicketSeverityStatus.NOT_CHANGED
 
         if target_severity == self._config.MONITOR_CONFIG["severity_by_outage_type"]["link_down"]:
