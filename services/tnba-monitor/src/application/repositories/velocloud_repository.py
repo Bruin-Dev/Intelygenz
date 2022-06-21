@@ -204,6 +204,10 @@ class VelocloudRepository:
                 enterprise_events = enterprise_events_response["body"]
 
                 if enterprise_events_response["status"] not in range(200, 300):
+                    self._logger.warning(
+                        f" Bad status calling get enterprise events for host: {host} and enterprise"
+                        f"{enterprise_id}. Skipping enterprise events ..."
+                    )
                     continue
 
                 for event in enterprise_events:

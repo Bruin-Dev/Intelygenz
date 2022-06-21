@@ -92,6 +92,7 @@ class TNBAMonitor:
 
         customer_cache_response = await self._customer_cache_repository.get_cache_for_tnba_monitoring()
         if customer_cache_response["status"] not in range(200, 300) or customer_cache_response["status"] == 202:
+            self._logger.warning(f"Bad status calling to get cache. Skipping run ticket polling ...")
             return
 
         edges_statuses = await self._velocloud_repository.get_edges_for_tnba_monitoring()
@@ -219,12 +220,14 @@ class TNBAMonitor:
                 open_outage_tickets_response_body = open_outage_tickets_response["body"]
                 open_outage_tickets_response_status = open_outage_tickets_response["status"]
                 if open_outage_tickets_response_status not in range(200, 300):
+                    self._logger.warning(f"Bad status calling to get outage tickets. Return empty list ...")
                     open_outage_tickets_response_body = []
 
                 open_affecting_tickets_response = await self._bruin_repository.get_open_affecting_tickets(client_id)
                 open_affecting_tickets_response_body = open_affecting_tickets_response["body"]
                 open_affecting_tickets_response_status = open_affecting_tickets_response["status"]
                 if open_affecting_tickets_response_status not in range(200, 300):
+                    self._logger.warning(f"Bad status calling to get affecting tickets. Return empty list ...")
                     open_affecting_tickets_response_body = []
 
                 all_open_tickets: list = open_outage_tickets_response_body + open_affecting_tickets_response_body
@@ -243,6 +246,9 @@ class TNBAMonitor:
                     ticket_details_response_status = ticket_details_response["status"]
 
                     if ticket_details_response_status not in range(200, 300):
+                        self._logger.warning(
+                            f"Bad status calling to get tickets details with id: {ticket_id}. Skipping ticket ..."
+                        )
                         continue
 
                     ticket_details_list = ticket_details_response_body["ticketDetails"]
@@ -291,6 +297,7 @@ class TNBAMonitor:
             ]
 
             if not relevant_details:
+                self._logger.warning(f"Don't found relevant tickets. Skipping ticket ...")
                 # Having no relevant details means the ticket is not relevant either
                 continue
 
@@ -343,6 +350,9 @@ class TNBAMonitor:
 
             task_history_response = await self._bruin_repository.get_ticket_task_history(ticket_id)
             if task_history_response["status"] not in range(200, 300):
+                self._logger.warning(
+                    f"Bad status calling to get ticket history. Skipping for ticket id: {ticket_id} ..."
+                )
                 continue
 
             task_history: list = task_history_response["body"]
@@ -357,6 +367,9 @@ class TNBAMonitor:
                 ticket_id, task_history, assets_to_predict
             )
             if t7_prediction_response["status"] not in range(200, 300):
+                self._logger.warning(
+                    f"Bad status calling to t7 predictions. Skipping predictions for ticket id: {ticket_id}"
+                )
                 continue
 
             ticket_predictions: list = t7_prediction_response["body"]
@@ -549,6 +562,11 @@ class TNBAMonitor:
             next_results_response_body = next_results_response["body"]
             next_results_response_status = next_results_response["status"]
             if next_results_response_status not in range(200, 300):
+                self._logger.warning(
+                    f"Bad status calling get next result for ticket details."
+                    f"Skipping process ticket details for ticket id: {ticket_id} and"
+                    f"ticket detail id: {ticket_detail_id}"
+                )
                 return
 
             self._logger.info(
@@ -714,6 +732,10 @@ class TNBAMonitor:
         if resolve_detail_response["status"] in range(200, 300):
             return self.AutoresolveTicketDetailStatus.SUCCESS
         else:
+            self._logger.warning(
+                f"Bad status calling resolve ticket detail for ticket id: {ticket_id} "
+                f"and ticket detail id: {ticket_detail_id} . Skipping resolve ticket detail"
+            )
             return self.AutoresolveTicketDetailStatus.SKIPPED
 
     async def _append_tnba_notes(self):
@@ -740,6 +762,9 @@ class TNBAMonitor:
             append_notes_response = await self._bruin_repository.append_multiple_notes_to_ticket(ticket_id, notes)
             append_notes_response_status = append_notes_response["status"]
             if append_notes_response_status not in range(200, 300):
+                self._logger.warning(
+                    f"Bad status calling append multiple notes to ticket id: {ticket_id}. Skipping ..."
+                )
                 continue
 
             slack_message = TNBA_NOTE_APPENDED_SUCCESS_MSG.format(notes_count=len(notes), ticket_id=ticket_id)
