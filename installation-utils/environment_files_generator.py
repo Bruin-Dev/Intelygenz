@@ -52,7 +52,7 @@ BRUIN_BASE_URL = parameters["pro"]["bruin-bridge"]["base-url"]
 
 # Customer Cache variables
 CUSTOMER_CACHE__VELOCLOUD_HOSTS = parameters["dev"]["customer-cache"]["velocloud-hosts"]
-CUSTOMER_CACHE__DUPLICATE_INVENTORIES_RECIPIENT = parameters["common"]["customer-cache"]["duplicate-inventories-recipient"]
+CUSTOMER_CACHE__DUPLICATE_INVENTORIES_RECIPIENT = parameters["dev"]["customer-cache"]["duplicate-inventories-recipient"]
 CUSTOMER_CACHE__REFRESH_JOB_INTERVAL = parameters["common"]["customer-cache"]["refresh-job-interval"]
 CUSTOMER_CACHE__REFRESH_CHECK_INTERVAL = parameters["common"]["customer-cache"]["refresh-check-interval"]
 CUSTOMER_CACHE__BLACKLISTED_EDGES = parameters["dev"]["customer-cache"]["blacklisted-edges"]
@@ -97,7 +97,7 @@ HAWKEYE_BRIDGE__CLIENT_PASSWORD = parameters["common"]["hawkeye-bridge"]["client
 HAWKEYE_BRIDGE__BASE_URL = parameters["common"]["hawkeye-bridge"]["base-url"]
 
 # Hawkeye Customer Cache variables
-HAWKEYE_CUSTOMER_CACHE__DUPLICATE_INVENTORIES_RECIPIENT = parameters["common"]["hawkeye-customer-cache"]["duplicate-inventories-recipient"]
+HAWKEYE_CUSTOMER_CACHE__DUPLICATE_INVENTORIES_RECIPIENT = parameters["dev"]["hawkeye-customer-cache"]["duplicate-inventories-recipient"]
 HAWKEYE_CUSTOMER_CACHE__REFRESH_JOB_INTERVAL = parameters["common"]["hawkeye-customer-cache"]["refresh-job-interval"]
 HAWKEYE_CUSTOMER_CACHE__WHITELISTED_MANAGEMENT_STATUSES = parameters["common"]["hawkeye-customer-cache"]["whitelisted-management-statuses"]
 
