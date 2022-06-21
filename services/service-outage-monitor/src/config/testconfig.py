@@ -81,6 +81,7 @@ QUART_CONFIG = {"title": "service-outage-monitor", "port": 5000}
 
 TRIAGE_CONFIG = {
     "polling_minutes": 10,
+    "last_note_minutes": 30,
     "event_limit": 15,
     "velo_filter": {"mettel.velocloud.net": []},
     "velo_hosts": ["mettel.velocloud.net", "metvco02.mettel.net", "metvco03.mettel.net", "metvco04.mettel.net"],

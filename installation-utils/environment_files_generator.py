@@ -211,6 +211,7 @@ SERVICE_OUTAGE__MONITOR__BUSINESS_GRADE_LINK_LABELS = json.dumps(json.loads(para
 
 # Service Outage Monitor - Triage variables
 SERVICE_OUTAGE__TRIAGE__MONITORING_JOB_INTERVAL = parameters["common"]["service-outage"]["triage"]["monitoring-job-interval"]
+SERVICE_OUTAGE__TRIAGE__LAST_NOTE_INTERVAL = parameters["common"]["service-outage"]["triage"]["last-note-interval"]
 SERVICE_OUTAGE__TRIAGE__MONITORED_VELOCLOUD_HOSTS = json.dumps(json.loads(parameters["dev"]["service-outage"]["triage"]["monitored-velocloud-hosts"]))
 SERVICE_OUTAGE__TRIAGE__MAX_EVENTS_PER_EVENT_NOTE = parameters["common"]["service-outage"]["triage"]["max-events-per-event-note"]
 
@@ -615,6 +616,7 @@ env_dict = {
         f"TIMEZONE={TIMEZONE}",
         f"MONITORED_PRODUCT_CATEGORY={SERVICE_OUTAGE__MONITORED_PRODUCT_CATEGORY}",
         f"TRIAGE__MONITORING_JOB_INTERVAL={SERVICE_OUTAGE__TRIAGE__MONITORING_JOB_INTERVAL}",
+        f"TRIAGE__LAST_NOTE_INTERVAL={SERVICE_OUTAGE__TRIAGE__LAST_NOTE_INTERVAL}",
         f"TRIAGE__MONITORED_VELOCLOUD_HOSTS={SERVICE_OUTAGE__TRIAGE__MONITORED_VELOCLOUD_HOSTS}",
         f"TRIAGE__MAX_EVENTS_PER_EVENT_NOTE={SERVICE_OUTAGE__TRIAGE__MAX_EVENTS_PER_EVENT_NOTE}",
     ],

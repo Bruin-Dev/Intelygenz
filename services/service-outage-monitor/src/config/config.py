@@ -29,6 +29,7 @@ ENABLE_TRIAGE_MONITORING = bool(int(os.environ["ENABLE_TRIAGE_MONITORING"]))
 if ENABLE_TRIAGE_MONITORING:
     TRIAGE_CONFIG = {
         "polling_minutes": int(os.environ["TRIAGE__MONITORING_JOB_INTERVAL"]) // 60,
+        "last_note_minutes": int(os.environ["TRIAGE__LAST_NOTE_INTERVAL"]) // 60,
         "event_limit": int(os.environ["TRIAGE__MAX_EVENTS_PER_EVENT_NOTE"]),
         "velo_filter": {},
         "velo_hosts": json.loads(os.environ["TRIAGE__MONITORED_VELOCLOUD_HOSTS"]),

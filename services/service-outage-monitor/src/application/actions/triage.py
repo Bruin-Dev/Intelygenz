@@ -340,12 +340,12 @@ class Triage:
         sorted_notes = sorted(ticket_detail["ticket_notes"], key=lambda note: note["createdDate"])
         return sorted_notes[-1]
 
-    @staticmethod
-    def _was_ticket_note_appended_recently(ticket_note):
+    def _was_ticket_note_appended_recently(self, ticket_note):
         current_datetime = datetime.now(utc)
         ticket_note_creation_datetime = parse(ticket_note["createdDate"]).astimezone(utc)
+        last_note_minutes = self._config.TRIAGE_CONFIG["last_note_minutes"]
 
-        return (current_datetime - ticket_note_creation_datetime) <= timedelta(minutes=30)
+        return (current_datetime - ticket_note_creation_datetime) <= timedelta(minutes=last_note_minutes)
 
     async def _append_new_triage_notes_based_on_recent_events(
         self, ticket_detail, events_lookup_timestamp: str, edge_full_id
