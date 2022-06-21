@@ -77,6 +77,7 @@ class FraudMonitor:
         unread_emails_status = unread_emails_response["status"]
 
         if unread_emails_status not in range(200, 300):
+            self._logger.warning(f"Bad status calling to get unread emails. Skipping fraud monitor process")
             return
 
         for email in unread_emails_body:
@@ -138,6 +139,10 @@ class FraudMonitor:
 
         open_fraud_tickets_response = await self._bruin_repository.get_open_fraud_tickets(client_id, service_number)
         if open_fraud_tickets_response["status"] not in range(200, 300):
+            self._logger.warning(
+                f"Bad status calling to get open fraud tickets for client id: {client_id} and "
+                f"service number: {service_number}. Process fraud FALSE ..."
+            )
             return False
 
         # Get oldest open ticket related to Fraud Monitor
@@ -165,6 +170,10 @@ class FraudMonitor:
                 client_id, service_number
             )
             if resolved_fraud_tickets_response["status"] not in range(200, 300):
+                self._logger.warning(
+                    f"bad status calling to get resolved fraud tickets for client id: {client_id} "
+                    f"and service number: {service_number}. Skipping process fraud ..."
+                )
                 return False
 
             resolved_fraud_tickets = resolved_fraud_tickets_response["body"]
@@ -190,6 +199,10 @@ class FraudMonitor:
             ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
 
             if ticket_details_response["status"] not in range(200, 300):
+                self._logger.warning(
+                    f"Bad status calling to get ticket details for ticket id: {ticket_id}."
+                    f"Skipping get oldest fraud ticket ..."
+                )
                 return
 
             ticket_notes = ticket_details_response["body"]["ticketNotes"]
@@ -241,6 +254,9 @@ class FraudMonitor:
             ticket_id, service_number, email_body, msg_uid
         )
         if append_note_response["status"] not in range(200, 300):
+            self._logger.warning(
+                f"Bad status calling to append note to ticket id: {ticket_id}. Skipping append note ..."
+            )
             return False
 
         self._logger.info(f"Fraud note was successfully appended to ticket {ticket_id}!")
@@ -264,6 +280,10 @@ class FraudMonitor:
 
         unresolve_task_response = await self._bruin_repository.open_ticket(ticket_id, task_id)
         if unresolve_task_response["status"] not in range(200, 300):
+            self._logger.warning(
+                f"Bad status calling to open ticket with ticket id: {ticket_id}. "
+                f"Unresolve task for ticket return FALSE"
+            )
             return False
 
         self._logger.info(f"Task related to {service_number} of Fraud ticket {ticket_id} was successfully unresolved!")
@@ -274,6 +294,10 @@ class FraudMonitor:
             ticket_id, service_number, email_body, msg_uid, reopening=True
         )
         if append_note_response["status"] not in range(200, 300):
+            self._logger.warning(
+                f"Bad status calling to append note to ticket id: {ticket_id} and service number:"
+                f"{service_number}. Unresolve task for ticket return FALSE"
+            )
             return False
 
         self._logger.info(f"Fraud note was successfully appended to ticket {ticket_id}!")
@@ -288,6 +312,7 @@ class FraudMonitor:
         contacts = await self._get_contacts(client_id, service_number)
 
         if not contacts:
+            self._logger.warning(f"Not found contacts to create the fraud ticket")
             return False
 
         if self._config.CURRENT_ENVIRONMENT != "production":
@@ -298,6 +323,10 @@ class FraudMonitor:
             client_id, service_number, contacts
         )
         if create_fraud_ticket_response["status"] not in range(200, 300):
+            self._logger.warning(
+                f"Bad status calling to create fraud ticket with client id: {client_id} and"
+                f"service number: {service_number}. Create fraud ticket return FALSE ..."
+            )
             return False
 
         ticket_id = create_fraud_ticket_response["body"]["ticketIds"][0]
@@ -309,6 +338,10 @@ class FraudMonitor:
             ticket_id, service_number, email_body, msg_uid
         )
         if append_note_response["status"] not in range(200, 300):
+            self._logger.warning(
+                f"Bad status calling to append note to ticket id: {ticket_id} and service number:"
+                f"{service_number}. Create fraud ticket return FALSE ..."
+            )
             return False
 
         self._logger.info(f"Fraud note was successfully appended to ticket {ticket_id}!")
@@ -333,7 +366,7 @@ class FraudMonitor:
         client_info_response = await self._bruin_repository.get_client_info(service_number)
         if client_info_response["status"] not in range(200, 300) or not client_info_response["body"]:
             self._logger.warning(
-                f"Failed to get client info for service number {service_number}, " f"using default contacts"
+                f"Failed to get client info for service number {service_number}, using default contacts"
             )
             return default_contacts
 
@@ -341,7 +374,7 @@ class FraudMonitor:
         site_details_response = await self._bruin_repository.get_site_details(client_id, site_id)
         if site_details_response["status"] not in range(200, 300):
             self._logger.warning(
-                f"Failed to get site details for client {client_id} and site {site_id}, " f"using default contacts"
+                f"Failed to get site details for client {client_id} and site {site_id}, using default contacts"
             )
             return default_contacts
 
