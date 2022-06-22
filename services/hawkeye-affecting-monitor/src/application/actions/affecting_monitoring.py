@@ -77,6 +77,7 @@ class AffectingMonitor:
 
         customer_cache_response = await self._customer_cache_repository.get_cache_for_affecting_monitoring()
         if customer_cache_response["status"] not in range(200, 300) or customer_cache_response["status"] == 202:
+            self._logger.warning(f"Bad status calling to get cache. Skipping hawkeye affecting monitor process ...")
             return
 
         customer_cache: list = customer_cache_response["body"]
@@ -86,6 +87,10 @@ class AffectingMonitor:
             probe_uids=probe_uids
         )
         if test_results_response["status"] not in range(200, 300):
+            self._logger.warning(
+                f"Bad request get test results for affecting monitor for probe uids: {probe_uids}."
+                f"Skipping hawkeye affecting monitor ..."
+            )
             return
 
         tests_results_by_device: dict = test_results_response["body"]
@@ -151,6 +156,10 @@ class AffectingMonitor:
             )
 
             if affecting_tickets_response["status"] not in range(200, 300):
+                self._logger.warning(
+                    f"Bad status calling to get open affecting ticket to serial number "
+                    f"{serial_number}. Skipping add device to ticket mapping ..."
+                )
                 return
 
             affecting_tickets: list = affecting_tickets_response["body"]
@@ -170,6 +179,10 @@ class AffectingMonitor:
 
             ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
             if ticket_details_response["status"] not in range(200, 300):
+                self._logger.warning(
+                    f"Bad status calling to get ticket details to ticket id: {ticket_id}."
+                    f"Skipping add devices to ticket mapping ..."
+                )
                 return
 
             ticket_details: dict = ticket_details_response["body"]
@@ -388,6 +401,10 @@ class AffectingMonitor:
                 client_id=bruin_client_id, service_number=serial_number
             )
             if ticket_creation_response["status"] not in range(200, 300):
+                self._logger.warning(
+                    f"Bad status calling create affecting ticket to serial: {serial_number}."
+                    f"Skipping process test failed ..."
+                )
                 return
 
             ticket_id: int = ticket_creation_response["body"]["ticketIds"][0]
