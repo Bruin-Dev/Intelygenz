@@ -1486,3 +1486,45 @@ velocloud-bridge:
     maxReplicas: 3
     targetCPUUtilizationPercentage: 80
     targetMemoryUtilizationPercentage: 80
+
+
+# -- velocloud-gateway-monitor subchart specific configuration
+velocloud-gateway-monitor:
+  # -- Field to indicate if the velocloud-gateway-monitor module is going to be deployed
+  enabled: true
+  # -- Number of replicas of velocloud-gateway-monitor module
+  replicaCount: 2
+  config:
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/velocloud-gateway-monitor
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  # -- velocloud-gateway-monitor autoscaling configuration
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80

@@ -3,6 +3,7 @@ from http import HTTPStatus
 from unittest.mock import Mock
 
 import pytest
+from application.dataclasses import Gateway, GatewayList
 from application.repositories.utils_repository import GenericResponse
 from application.repositories.velocloud_repository import VelocloudRepository
 from asynctest import CoroutineMock
@@ -691,9 +692,14 @@ class TestVelocloudRepository:
             return_value=velocloud_response
         )
         expected_response = GenericResponse(body=response_body, status=response_status)
-        expected_response.body = expected_response.body["data"]
-        for gw in expected_response.body:
-            gw["host"] = velocloud_host
+        gateways = []
+        for gw in expected_response.body["data"]:
+            gateways.append(Gateway(
+                velocloud_host,
+                gw["gatewayId"],
+                gw["tunnelCount"]
+            ))
+        expected_response.body = GatewayList(*gateways)
 
         result = await velocloud_repository.get_network_gateway_status(velocloud_host, since=since, metrics=metrics)
 

@@ -92,6 +92,10 @@ prometheus-nats-exporter:
     # will be created in the microservice deployment that will wait until the
     # velocloud-bridge service responds correctly to healthcheck calls.
     velocloud_bridge: ${VELOCLOUD_BRIDGE_ENABLED}
+    # -- Indicate if velocloud-gateway-monitor is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # velocloud-gateway-monitor service responds correctly to healthcheck calls.
+    velocloud_gateway_monitor: ${VELOCLOUD_GATEWAY_MONITOR_ENABLED}
 
 
 # -- Global configuration for all subcharts
@@ -1372,6 +1376,45 @@ velocloud-bridge:
   autoscaling:
     enabled: ${VELOCLOUD_BRIDGE_ENABLED}
     minReplicas: ${VELOCLOUD_BRIDGE_DESIRED_TASKS}
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+
+
+# -- velocloud-gateway-monitor subchart specific configuration
+velocloud-gateway-monitor:
+  enabled: ${VELOCLOUD_GATEWAY_MONITOR_ENABLED}
+  replicaCount: ${VELOCLOUD_GATEWAY_MONITOR_DESIRED_TASKS}
+  config:
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/velocloud-gateway-monitor
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ${VELOCLOUD_GATEWAY_MONITOR_BUILD_NUMBER}
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  autoscaling:
+    enabled: ${VELOCLOUD_GATEWAY_MONITOR_ENABLED}
+    minReplicas: ${VELOCLOUD_GATEWAY_MONITOR_DESIRED_TASKS}
     maxReplicas: 3
     targetCPUUtilizationPercentage: 80
     targetMemoryUtilizationPercentage: 80

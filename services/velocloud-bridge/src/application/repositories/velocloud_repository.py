@@ -1,5 +1,6 @@
 from typing import Any, Dict, List
 
+from application.dataclasses import Gateway, GatewayList
 from application.repositories.utils_repository import GenericResponse
 
 
@@ -146,15 +147,19 @@ class VelocloudRepository:
 
         return enterprise_edges_response
 
-    async def get_network_gateway_status(self, host: str, since: str, metrics: List[str]) -> GenericResponse:
+    async def get_network_gateway_status(self, host: str, since: str, metrics: List[str]) -> GatewayList:
         network_gateway_status_response = await self._velocloud_client.get_network_gateway_status(host, since, metrics)
 
         if network_gateway_status_response.status != 200:
             return network_gateway_status_response
 
-        network_gateway_status_response.body = network_gateway_status_response.body["data"]
-
-        for gw in network_gateway_status_response.body:
-            gw["host"] = host
+        gateways = []
+        for gw in network_gateway_status_response.body["data"]:
+            gateways.append(Gateway(
+                host,
+                gw["gatewayId"],
+                gw["tunnelCount"]
+            ))
+        network_gateway_status_response.body = GatewayList(*gateways)
 
         return network_gateway_status_response

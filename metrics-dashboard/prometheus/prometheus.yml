@@ -64,6 +64,12 @@ scrape_configs:
     static_configs:
       - targets: ['fraud-monitor:9090']
 
+  - job_name: 'gateway-monitor'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['gateway-monitor:9090']
+
   - job_name: 'hawkeye-affecting-monitor'
 
     scrape_interval: 5s

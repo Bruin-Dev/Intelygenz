@@ -243,6 +243,13 @@ TNBA_MONITOR__GRACE_PERIOD_BEFORE_APPENDING_NEW_TNBA_NOTES = parameters["common"
 TNBA_MONITOR__GRACE_PERIOD_BEFORE_MONITORING_TICKETS_BASED_ON_LAST_DOCUMENTED_OUTAGE = parameters["common"]["tnba-monitor"]["grace-period-before-monitoring-tickets-based-on-last-documented-outage"]
 TNBA_MONITOR__MIN_REQUIRED_CONFIDENCE_FOR_REQUEST_AND_REPAIR_COMPLETED_PREDICTIONS = parameters["common"]["tnba-monitor"]["min-required-confidence-for-request-and-repair-completed-predictions"]
 
+# Velocloud Gateway Monitor
+VELOCLOUD_GATEWAY_MONITOR__MONITORED_VELOCLOUD_HOSTS = json.dumps(json.loads(parameters["dev"]["velocloud-gateway-monitor"]["monitored-velocloud-hosts"]))
+VELOCLOUD_GATEWAY_MONITOR__MONITORING_JOB_INTERVAL = parameters["common"]["velocloud-gateway-monitor"]["monitoring-job-interval"]
+VELOCLOUD_GATEWAY_MONITOR__FIRST_GATEWAY_LOOKUP_INTERVAL = parameters["common"]["velocloud-gateway-monitor"]["first-gateway-lookup-interval"]
+VELOCLOUD_GATEWAY_MONITOR__SECOND_GATEWAY_LOOKUP_INTERVAL = parameters["common"]["velocloud-gateway-monitor"]["second-gateway-lookup-interval"]
+VELOCLOUD_GATEWAY_MONITOR__TUNNEL_COUNT_THRESHOLD = parameters["common"]["velocloud-gateway-monitor"]["tunnel-count-threshold"]
+
 # Lumin Billing Report variables
 LUMIN_URI = parameters["common"]["lumin-billing-report"]["lumin-billing-api-base-url"]
 LUMIN_TOKEN = parameters["common"]["lumin-billing-report"]["access-token"]
@@ -677,6 +684,21 @@ env_dict = {
         f"PAPERTRAIL_HOST={PAPERTRAIL_HOST}",
         f"PAPERTRAIL_PORT={PAPERTRAIL_PORT}",
     ],
+    os.path.join("services", "velocloud-gateway-monitor", "src", "config", "env"): [
+        f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",
+        f"NATS_SERVER1={NATS_SERVER1}",
+        f"NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}",
+        f"REDIS_HOSTNAME={REDIS_HOSTNAME}",
+        f"TIMEZONE={TIMEZONE}",
+        f"PAPERTRAIL_ACTIVE={PAPERTRAIL_ACTIVE}",
+        f"PAPERTRAIL_HOST={PAPERTRAIL_HOST}",
+        f"PAPERTRAIL_PORT={PAPERTRAIL_PORT}",
+        f"MONITORED_VELOCLOUD_HOSTS={VELOCLOUD_GATEWAY_MONITOR__MONITORED_VELOCLOUD_HOSTS}",
+        f"MONITORING_JOB_INTERVAL={VELOCLOUD_GATEWAY_MONITOR__MONITORING_JOB_INTERVAL}",
+        f"FIRST_GATEWAY_LOOKUP_INTERVAL={VELOCLOUD_GATEWAY_MONITOR__FIRST_GATEWAY_LOOKUP_INTERVAL}",
+        f"SECOND_GATEWAY_LOOKUP_INTERVAL={VELOCLOUD_GATEWAY_MONITOR__SECOND_GATEWAY_LOOKUP_INTERVAL}",
+        f"TUNNEL_COUNT_THRESHOLD={VELOCLOUD_GATEWAY_MONITOR__TUNNEL_COUNT_THRESHOLD}",
+    ],
     os.path.join("services", "ticket-collector", "src", "config", "env"): [
         f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",
         f"CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}",
@@ -869,7 +891,6 @@ for host in TNBA_MONITOR__MONITORED_VELOCLOUD_HOSTS:
         f"SERVICE_AFFECTING__PACKET_LOSS_MONITORING_THRESHOLD={SERVICE_AFFECTING__MONITOR__PACKET_LOSS_MONITORING_THRESHOLD}",
         f"SERVICE_AFFECTING__JITTER_MONITORING_THRESHOLD={SERVICE_AFFECTING__MONITOR__JITTER_MONITORING_THRESHOLD}",
     ]
-
 
 project_path = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 

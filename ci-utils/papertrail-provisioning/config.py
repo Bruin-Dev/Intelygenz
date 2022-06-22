@@ -239,6 +239,11 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "velocloud-bridge",
                 },
                 {
+                    "query": f"velocloud-gateway-monitor AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[velocloud-gateway-monitor] - logs",
+                    "repository": "velocloud-gateway-monitor",
+                },
+                {
                     "query": f"{ENVIRONMENT_NAME}",
                     "search_name": f"[all modules] - logs",
                 },
@@ -338,6 +343,10 @@ PAPERTRAIL_PROVISIONING = {
                     "query": f"intermapper-outage-monitor AND {ENVIRONMENT_NAME} AND "
                     f'"Received the following from the gmail account mettel.automation@intelygenz.com: []"',
                     "search_name": f"[intermapper-outage-monitor] - Not receiving emails",
+                },
+                {
+                    "query": f"velocloud-gateway-monitor AND {ENVIRONMENT_NAME} AND " f'"ERROR:"',
+                    "search_name": f"[velocloud-gateway-monitor] - ERROR messages",
                 },
             ],
         },

@@ -59,6 +59,9 @@ dependencies:
   - name: fraud-monitor
     version: '*.*.*'
     condition: fraud-monitor.enabled
+  - name: gateway-monitor
+    version: '*.*.*'
+    condition: gateway-monitor.enabled
   - name: hawkeye-affecting-monitor
     version: '*.*.*'
     condition: hawkeye-affecting-monitor.enabled

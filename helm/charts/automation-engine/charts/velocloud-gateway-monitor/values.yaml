@@ -1,0 +1,93 @@
+# Default values for velocloud-gateway-monitor (VGM).
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+enabled: true
+
+# -- Global configuration for all subcharts
+global:
+  # -- Name of environment for EKS cluster and network resources
+  current_environment: "dev"
+  # -- Name of environment for helm charts
+  environment: "automation-test"
+  # -- Redis Hostname used to store heavy NATS messages (>1MB)
+  redis_hostname: "redis"
+  externalSecrets:
+    # -- Enable/disable external-secrets
+    enabled: true
+    # -- Environment path to reference parameter store secrets
+    envPath: "/automation-engine/test"
+    # -- Common path to reference parameter store secrets
+    commonPath: "/automation-engine/common"
+    # -- secretStorage configuration for create additional k8s resources to allow sync parameters from aws
+    secretStorage:
+      # -- Custom serviceAccount to assign AWS permissions
+      serviceAccount:
+        # -- AWS IAM role that have access to get parameter's from AWS
+        # (needs secret-manager and ssm IAM permission, if use encryption also kms permissions)
+        roleARN: ""
+  # -- Indicates if the helm chart will be displayed in an aws or local environment,
+  # in case it is local, a specific imagePullSecret will be used to access the images stored in ECR.
+  mode: "aws"
+  ecr_registry:
+    # -- Name of the imagePullSecret created to access the images stored in ECR.
+    name: "ecr-registry"
+
+config:
+  metrics:
+    # -- Indicates whether the microservice will expose metrics through prometheus.
+    enabled: true
+    svc:
+      port: 9090
+      name: metrics
+    ## Additional labels for the service monitor
+    ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+    labels: { }
+    #labels:
+    #  servicediscovery: true
+  capabilities_enabled:
+    # -- Indicate if notifier is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # notifier service responds correctly to healthcheck calls.
+    notifier: true
+    # -- Indicate if velocloud-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # velocloud-bridge service responds correctly to healthcheck calls.
+    velocloud_bridge: true
+    # -- Indicate if servicenow-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # servicenow-bridge service responds correctly to healthcheck calls.
+    servicenow_bridge: true
+
+image:
+  repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/velocloud-gateway-monitor
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+service:
+  type: ClusterIP
+  port: 5000
+
+resources:
+  limits:
+    cpu: 300m
+    memory: 384Mi
+  requests:
+    cpu: 150m
+    memory: 192Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
