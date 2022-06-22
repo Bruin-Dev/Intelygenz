@@ -72,12 +72,14 @@ class OutageMonitor:
 
         customer_cache_response = await self._customer_cache_repository.get_cache_for_outage_monitoring()
         if customer_cache_response["status"] not in range(200, 300) or customer_cache_response["status"] == 202:
+            self._logger.warning(f"Bad status calling to get cache. Skipping hawkeyey outage monitoring process ...")
             return
 
         customer_cache: list = customer_cache_response["body"]
 
         probes_response = await self._hawkeye_repository.get_probes()
         if probes_response["status"] not in range(200, 300):
+            self._logger.warning(f"Bad status calling to get probes. Skipping hawkeye outage monitoring process ...")
             return
 
         probes: list = probes_response["body"]
@@ -131,12 +133,13 @@ class OutageMonitor:
             outage_ticket_response_body = outage_ticket_response["body"]
             outage_ticket_response_status = outage_ticket_response["status"]
             if outage_ticket_response_status not in range(200, 300):
+                self._logger.warning(
+                    f"Bad status calling to get open outage tickets. Skipping run ticket autoresolve ..."
+                )
                 return
 
             if not outage_ticket_response_body:
-                self._logger.info(
-                    f"No open outage ticket found for device {serial_number}. " f"Skipping autoresolve..."
-                )
+                self._logger.info(f"No open outage ticket found for device {serial_number}. Skipping autoresolve...")
                 return
 
             outage_ticket: dict = outage_ticket_response_body[0]
@@ -153,6 +156,7 @@ class OutageMonitor:
             ticket_details_response_body = ticket_details_response["body"]
             ticket_details_response_status = ticket_details_response["status"]
             if ticket_details_response_status not in range(200, 300):
+                self._logger.warning(f"Bad status calling to get ticket details. Skipping run ticket autoresolve ...")
                 return
 
             notes_from_outage_ticket = ticket_details_response_body["ticketNotes"]
@@ -214,6 +218,7 @@ class OutageMonitor:
             )
             resolve_ticket_response = await self._bruin_repository.resolve_ticket(outage_ticket_id, ticket_detail_id)
             if resolve_ticket_response["status"] not in range(200, 300):
+                self._logger.warning(f"Bad status calling resolve ticket. Skipping autoresolve ...")
                 return
 
             self._metrics_repository.increment_tasks_autoresolved(client=client_name, outage_types=outage_types)
@@ -316,6 +321,7 @@ class OutageMonitor:
 
         probes_response = await self._hawkeye_repository.get_probes()
         if probes_response["status"] not in range(200, 300):
+            self._logger.warning(f"Bad status calling to get probes. Skipping hawkeye recheck devices process ...")
             return
 
         probes: list = probes_response["body"]
@@ -431,6 +437,7 @@ class OutageMonitor:
 
         ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
         if ticket_details_response["status"] not in range(200, 300):
+            self._logger.warning(f"Bad status calling to get ticket details. Skipping append triage note ...")
             return
 
         ticket_notes = ticket_details_response["body"]["ticketNotes"]
@@ -474,6 +481,7 @@ class OutageMonitor:
         ticket_details_response_body = ticket_details_response["body"]
         ticket_details_response_status = ticket_details_response["status"]
         if ticket_details_response_status not in range(200, 300):
+            self._logger.warning(f"Bad status calling get ticket details. Skipping reopen outage ticket ...")
             return
 
         ticket_detail_for_reopen = self._get_first_element_matching(
