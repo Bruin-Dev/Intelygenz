@@ -1,7 +1,7 @@
 from typing import List, Optional, Type
 
 from dataclasses import dataclass
-from framework.repositories.redis.redis_repository import RedisRepository
+from framework.storage.model.model_storage import ModelStorage
 from pydantic import BaseModel
 
 
@@ -21,19 +21,19 @@ class Email(BaseModel):
     send_cc: List[str]
     parent_id: Optional[int]
     previous_id: Optional[int]
-    tag: EmailTag
+    email_redis: EmailTag
 
 
 @dataclass
-class EmailRepository(RedisRepository[Email]):
-    model_type: Type = Email
+class EmailStorage(ModelStorage[Email]):
+    data_type: Type = Email
 
 
 @dataclass
-class RepairParentEmailRepository(EmailRepository):
-    model_name: str = "parent-email:repair"
+class RepairParentEmailStorage(EmailStorage):
+    data_name: str = "parent-email:repair"
 
 
 @dataclass
-class RepairReplyEmailRepository(EmailRepository):
-    model_name: str = "reply-email:repair"
+class RepairReplyEmailStorage(EmailStorage):
+    data_name: str = "reply-email:repair"
