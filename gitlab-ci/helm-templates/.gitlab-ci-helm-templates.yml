@@ -9,6 +9,16 @@
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   script:
+    # define banner
+    - >
+      banner()
+      {
+        echo "+----------------------------------------------------------------------------------+"
+        printf "| %-80s |\n" "`date`"
+        printf "\e[1m| %-80s |\e[0m\n%s" "$@"
+        echo "+----------------------------------------------------------------------------------+"
+      }
+    - banner "Getting requirements"
     # GnuPG KEYS IMPORT TO CHECK CHART INTEGRITY
     - aws s3 sync s3://mettel-automation-keys/ . --exclude "*" --include "automation-engine-chart-gpg*"
     - gpg --import automation-engine-chart-gpg-public.key
@@ -38,34 +48,41 @@
         export LINKS_METRICS_COLLECTOR_ENABLED=false
       fi
     # PRINT PIPELINE ENVIRONMENT VARIABLES (FOR DEBUG)
-    - echo "the ENVIRONMENT_SLUG is $ENVIRONMENT_SLUG"
-    - echo "the CURRENT_ENVIRONMENT is $CURRENT_ENVIRONMENT"
-    - echo "the CURRENT_ENVIRONMENT_SHORT is $CURRENT_ENVIRONMENT_SHORT"
-    - echo "the EKS_CLUSTER_NAME is $EKS_CLUSTER_NAME"
-    - echo "the ENVIRONMENT_NAME is $ENVIRONMENT_NAME"
-    - echo "SOM hosts are $SERVICE_OUTAGE__MONITOR__MONITORED_VELOCLOUD_HOSTS"
+    - >
+      echo "the ENVIRONMENT_SLUG is $ENVIRONMENT_SLUG"
+      echo "the CURRENT_ENVIRONMENT is $CURRENT_ENVIRONMENT"
+      echo "the CURRENT_ENVIRONMENT_SHORT is $CURRENT_ENVIRONMENT_SHORT"
+      echo "the EKS_CLUSTER_NAME is $EKS_CLUSTER_NAME"
+      echo "the ENVIRONMENT_NAME is $ENVIRONMENT_NAME"
+      echo "SOM hosts are $SERVICE_OUTAGE__MONITOR__MONITORED_VELOCLOUD_HOSTS"
     # CREATE CHART RELEASE AND DEPLOY
     - >
       if [ "$CURRENT_ENVIRONMENT" == "production" ]; then
+        export AUTOMATION_TAG=$(git tag | sort --version-sort | grep "^automation-engine" | tail -n -1| cut -d "@" -f2)
+        banner "Building ${HELM_CHART_RELEASE_NAME} chart version ${AUTOMATION_TAG}"
         envsubst "$(env | awk -F= '{print "$"$1" "}' | grep -i BUILD_NUMBER | tr -d '\n')" < ${HELM_CHART_DIR}/values.yaml.tpl > ${HELM_CHART_DIR}/values.yaml
         sed -i -E 's/ \$\{.*\}/ ""/g' ${HELM_CHART_DIR}/values.yaml
         sed -i -E 's/ \"\$\{.*\}/ "/g' ${HELM_CHART_DIR}/values.yaml
         sed -i -E 's/-\$\{.*\}//g' ${HELM_CHART_DIR}/values.yaml
         sed -i -E 's/\/\$\{.*\}//g' ${HELM_CHART_DIR}/values.yaml
         sed -i -E 's/"ref\+awsssm.*"/""/g' ${HELM_CHART_DIR}/values.yaml
-        sed -i -E 's/ref\+awsssm.*/\[\]/g' ${HELM_CHART_DIR}/values.yaml
+        sed -i -E 's/ref\+awsssm.*/\["vhost1"\]/g' ${HELM_CHART_DIR}/values.yaml
+        sed -i -E 's/enabled: ""/enabled: true/g' ${HELM_CHART_DIR}/values.yaml
         helm repo add mettel https://chartmuseum.mettel-automation.net --username="${CHARTMUSEUM_USER}" --password="${CHARTMUSEUM_PASSWORD}"
-        export AUTOMATION_TAG=$(git tag | sort --version-sort | grep "^automation-engine" | tail -n -1| cut -d "@" -f2)
         helm dependency update ${HELM_CHART_DIR}/ 
         helm template ${HELM_CHART_DIR}/ &> /dev/null
         helm package --version="${AUTOMATION_TAG}" --app-version="v${AUTOMATION_TAG}" --sign --key "${HELM_CHART_RELEASE_NAME}" --keyring ~/.gnupg/secring.gpg --passphrase-file passphrase.txt ${HELM_CHART_DIR}/
+        banner "Uploading chart to repository. Number of images for this version: $(helm template ./${HELM_CHART_DIR} | yq '..|.image? | select(.)' | sort | uniq | grep 'amazonaws.com' | wc -l)"
         curl -F "chart=@${HELM_CHART_RELEASE_NAME}-${AUTOMATION_TAG}.tgz" -F "prov=@${HELM_CHART_RELEASE_NAME}-${AUTOMATION_TAG}.tgz.prov" -u "${CHARTMUSEUM_USER}:${CHARTMUSEUM_PASSWORD}" https://chartmuseum.mettel-automation.net/api/charts
         envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml.vals
         cat values.yaml.vals | vals eval -f - | sed "s/'//g" | tee values.yaml &> /dev/null
         helm repo update
+        banner "Verifying ${HELM_CHART_RELEASE_NAME} chart integrity and provenance"
         helm pull mettel/${HELM_CHART_RELEASE_NAME} --version ${AUTOMATION_TAG} --verify --debug
+        banner "Installing ${HELM_CHART_RELEASE_NAME} chart in kubernetes cluster"
         helm upgrade --wait --install --verify ${HELM_CHART_RELEASE_NAME} mettel/${HELM_CHART_RELEASE_NAME} --version ${AUTOMATION_TAG} -f values.yaml -n ${NAMESPACE}
       else
+        banner "Installing ${HELM_CHART_RELEASE_NAME} DEV chart in kubernetes cluster"
         envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml.vals
         cat values.yaml.vals | vals eval -f - | sed "s/'//g" | tee values.yaml &> /dev/null
         helm upgrade --wait --install ${HELM_CHART_RELEASE_NAME} ./${HELM_CHART_DIR} -f values.yaml -n ${NAMESPACE}
