@@ -4,7 +4,8 @@ eks_developer_users = [
     "daniel.montilla",
     "joseluis.vega",
     "gabriel.palacios",
-    "alberto.rubiales"
+    "alberto.rubiales",
+    "david.fuentes"
 ]
 
 eks_devops_users = [

@@ -15,5 +15,6 @@ eks_ops_users = [
     "brandon.samudio",
     "daniel.montilla",
     "joseluis.vega",
-    "alberto.rubiales"
+    "alberto.rubiales",
+    "david.fuentes"
 ]
