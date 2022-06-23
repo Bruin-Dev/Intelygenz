@@ -72,7 +72,7 @@
         helm dependency update ${HELM_CHART_DIR}/ 
         helm template ${HELM_CHART_DIR}/ &> /dev/null
         helm package --version="${AUTOMATION_TAG}" --app-version="v${AUTOMATION_TAG}" --sign --key "${HELM_CHART_RELEASE_NAME}" --keyring ~/.gnupg/secring.gpg --passphrase-file passphrase.txt ${HELM_CHART_DIR}/
-        banner "Uploading chart to repository. Number of images for this version: $(helm template ./${HELM_CHART_DIR} | yq '..|.image? | select(.)' | sort | uniq | grep 'amazonaws.com' | wc -l)"
+        banner "Uploading chart to repository"
         curl -F "chart=@${HELM_CHART_RELEASE_NAME}-${AUTOMATION_TAG}.tgz" -F "prov=@${HELM_CHART_RELEASE_NAME}-${AUTOMATION_TAG}.tgz.prov" -u "${CHARTMUSEUM_USER}:${CHARTMUSEUM_PASSWORD}" https://chartmuseum.mettel-automation.net/api/charts
         envsubst < ${HELM_CHART_DIR}/values.yaml.tpl > values.yaml.vals
         cat values.yaml.vals | vals eval -f - | sed "s/'//g" | tee values.yaml &> /dev/null
