@@ -77,6 +77,8 @@ class InterMapperMonitor:
         unread_emails_status = unread_emails_response["status"]
 
         if unread_emails_status not in range(200, 300):
+            self._logger.warning(f"Bad status calling to get unread emails. "
+                                 f"Skipping intermapper monitoring process ...")
             return
 
         emails_by_asset_id = self._group_emails_by_asset_id(unread_emails_body)
@@ -237,6 +239,8 @@ class InterMapperMonitor:
         tickets_body = tickets_response["body"]
         tickets_status = tickets_response["status"]
         if tickets_status not in range(200, 300):
+            self._logger.warning(f"Bad status calling to get ticket basic info for client id:  {client_id}."
+                                 f"Skipping autoresolve ticket ...")
             return False
         self._logger.info(f"Found {len(tickets_body)} tickets for circuit ID {circuit_id} from bruin:")
         self._logger.info(tickets_body)
@@ -253,12 +257,16 @@ class InterMapperMonitor:
                 ticket_id, circuit_id, parsed_email_dict, is_piab
             )
             if up_note_response["status"] not in range(200, 300):
+                self._logger.warning(f"Bad status calling to append intermapper note to ticket id: {ticket_id}."
+                                     f"Skipping autoresolve ticket ....")
                 return False
 
             product_category_response = await self._bruin_repository.get_tickets(client_id, ticket_id)
             product_category_response_body = product_category_response["body"]
             product_category_response_status = product_category_response["status"]
             if product_category_response_status not in range(200, 300):
+                self._logger.warning(f"Bad status calling to get ticket for client id: {client_id} and "
+                                     f"ticket id: {ticket_id}. Skipping autoresolve ticket ...")
                 return False
 
             if not product_category_response_body:
@@ -284,6 +292,8 @@ class InterMapperMonitor:
             ticket_details_body = ticket_details_response["body"]
             ticket_details_status = ticket_details_response["status"]
             if ticket_details_status not in range(200, 300):
+                self._logger.warning(f"Bad status calling get ticket details to ticket id: {ticket_id}."
+                                     f"Skipping autoresolve ...")
                 return False
 
             details_from_ticket = ticket_details_body["ticketDetails"]
@@ -346,6 +356,7 @@ class InterMapperMonitor:
 
             resolve_ticket_response = await self._bruin_repository.resolve_ticket(ticket_id, ticket_detail_id)
             if resolve_ticket_response["status"] not in range(200, 300):
+                self._logger.warning(f"Bad status calling to resolve ticket: {ticket_id}. Skipping autoresolve ...")
                 return False
 
             self._logger.info(
@@ -420,6 +431,7 @@ class InterMapperMonitor:
                 outage_ticket_body, dri_parameters, parsed_email_dict
             )
             if append_dri_note_response["status"] not in range(200, 300):
+                self._logger.warning(f"Bad status calling append dri note. Skipping create outage ticket ...")
                 return False
             return True
         self._logger.info(f"Appending InterMapper note to ticket id {outage_ticket_body}")
@@ -427,6 +439,7 @@ class InterMapperMonitor:
             outage_ticket_body, parsed_email_dict, self._is_piab_device(parsed_email_dict)
         )
         if append_intermapper_note_response["status"] not in range(200, 300):
+            self._logger.warning(f"Bad status calling append intermapper note. Skipping create outage ticket ...")
             return False
         return True
 
