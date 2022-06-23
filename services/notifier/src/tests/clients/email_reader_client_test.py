@@ -172,11 +172,15 @@ class TestEmailReaderClient:
                 email_reader_client._login = Mock(return_value=email_server)
                 email_reader_client._search_messages = CoroutineMock(return_value=[b"1234"])
                 email_reader_client._get_body = Mock(return_value=MESSAGE_1["body"])
-                unread_messages = await email_reader_client.get_unread_messages(email, password, email_filter, lookup_days)
+                unread_messages = await email_reader_client.get_unread_messages(
+                    email, password, email_filter, lookup_days
+                )
 
                 email_reader_client._login.assert_called_once_with(email, password)
                 email_reader_client._logout.assert_called_once_with(email_server)
-                email_reader_client._search_messages.assert_awaited_once_with(email_filter[0], email_server, lookup_days)
+                email_reader_client._search_messages.assert_awaited_once_with(
+                    email_filter[0], email_server, lookup_days
+                )
                 email_reader_client._get_body.assert_called_once_with(message_object)
                 message_1_copy = MESSAGE_1.copy()
                 message_1_copy["message"] = str(MESSAGE_1["message"])
@@ -202,11 +206,15 @@ class TestEmailReaderClient:
                 email_reader_client._login = Mock(return_value=email_server)
                 email_reader_client._search_messages = CoroutineMock(return_value=[])
                 email_reader_client._get_body = Mock(return_value=MESSAGE_1["body"])
-                unread_messages = await email_reader_client.get_unread_messages(email, password, email_filter, lookup_days)
+                unread_messages = await email_reader_client.get_unread_messages(
+                    email, password, email_filter, lookup_days
+                )
 
                 email_reader_client._login.assert_called_once_with(email, password)
                 email_reader_client._logout.assert_called_once_with(email_server)
-                email_reader_client._search_messages.assert_awaited_once_with(email_filter[0], email_server, lookup_days)
+                email_reader_client._search_messages.assert_awaited_once_with(
+                    email_filter[0], email_server, lookup_days
+                )
                 email_reader_client._get_body.assert_not_called()
                 assert unread_messages == []
 
@@ -230,11 +238,15 @@ class TestEmailReaderClient:
                 email_reader_client._login = Mock(return_value=email_server)
                 email_reader_client._search_messages = CoroutineMock(return_value=[b"1234"])
                 email_reader_client._get_body = Mock(return_value=MESSAGE_1["body"])
-                unread_messages = await email_reader_client.get_unread_messages(email, password, email_filter, lookup_days)
+                unread_messages = await email_reader_client.get_unread_messages(
+                    email, password, email_filter, lookup_days
+                )
 
                 email_reader_client._login.assert_called_once_with(email, password)
                 email_reader_client._logout.assert_called_once_with(email_server)
-                email_reader_client._search_messages.assert_awaited_once_with(email_filter[0], email_server, lookup_days)
+                email_reader_client._search_messages.assert_awaited_once_with(
+                    email_filter[0], email_server, lookup_days
+                )
                 email_reader_client._get_body.assert_not_called()
                 assert unread_messages == []
 
@@ -257,7 +269,9 @@ class TestEmailReaderClient:
                 email_reader_client._login = Mock(return_value=None)
                 email_reader_client._search_messages = CoroutineMock(return_value=[b"1234"])
                 email_reader_client._get_body = Mock(return_value=MESSAGE_1["body"])
-                unread_messages = await email_reader_client.get_unread_messages(email, password, email_filter, lookup_days)
+                unread_messages = await email_reader_client.get_unread_messages(
+                    email, password, email_filter, lookup_days
+                )
 
                 email_reader_client._login.assert_called_once_with(email, password)
                 email_reader_client._logout.assert_not_called()

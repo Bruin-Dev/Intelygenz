@@ -37,7 +37,9 @@ class TestGetEmails:
 
         await get_emails_action.get_unread_emails(msg_dict)
 
-        get_emails_action._email_reader_repository.get_unread_emails.assert_awaited_once_with(email, email_filter, lookup_days)
+        get_emails_action._email_reader_repository.get_unread_emails.assert_awaited_once_with(
+            email, email_filter, lookup_days
+        )
         get_emails_action._event_bus.publish_message.assert_awaited_once_with(response_topic, event_bus_response)
 
     @pytest.mark.asyncio
