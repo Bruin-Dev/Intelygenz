@@ -2,6 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 from application.actions.network_enterprise_edge_list import NetworkEnterpriseEdgeList
+from application.actions.network_gateway_status_list import NetworkGatewayStatusList
 from application.clients.velocloud_client import VelocloudClient
 from application.repositories.velocloud_repository import VelocloudRepository
 from asynctest import CoroutineMock
@@ -27,19 +28,28 @@ def scheduler() -> Mock:
 
 
 @pytest.fixture(scope="function")
-def velocloud_client(logger, scheduler) -> VelocloudClient:
-    client = VelocloudClient(testconfig, logger, scheduler)
-    wrap_all_methods(client)
-    return client
+async def velocloud_client(logger, scheduler) -> VelocloudClient:
+    instance = VelocloudClient(testconfig, logger, scheduler)
+    wrap_all_methods(instance)
+    return instance
 
 
 @pytest.fixture(scope="function")
-def velocloud_repository(logger) -> VelocloudRepository:
-    velocloud_client = Mock()
-    return VelocloudRepository(testconfig, logger, velocloud_client)
+def velocloud_repository(logger, velocloud_client) -> VelocloudRepository:
+    instance = VelocloudRepository(testconfig, logger, velocloud_client)
+    wrap_all_methods(instance)
+    return instance
 
 
 @pytest.fixture(scope="function")
-def network_enterprise_edge_list_action(event_bus, logger) -> NetworkEnterpriseEdgeList:
-    velocloud_repository = Mock()
-    return NetworkEnterpriseEdgeList(event_bus, logger, velocloud_repository)
+def network_enterprise_edge_list_action(event_bus, velocloud_repository, logger) -> NetworkEnterpriseEdgeList:
+    instance = NetworkEnterpriseEdgeList(event_bus, velocloud_repository, logger)
+    wrap_all_methods(instance)
+    return instance
+
+
+@pytest.fixture(scope="function")
+def network_gateway_status_list_action(event_bus, velocloud_repository, logger) -> NetworkGatewayStatusList:
+    instance = NetworkGatewayStatusList(event_bus, velocloud_repository, logger)
+    wrap_all_methods(instance)
+    return instance

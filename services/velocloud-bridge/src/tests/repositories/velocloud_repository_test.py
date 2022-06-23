@@ -1,7 +1,9 @@
 from datetime import datetime, timedelta
+from http import HTTPStatus
 from unittest.mock import Mock
 
 import pytest
+from application.repositories.utils_repository import GenericResponse
 from application.repositories.velocloud_repository import VelocloudRepository
 from asynctest import CoroutineMock
 from config import testconfig as config
@@ -671,3 +673,31 @@ class TestVelocloudRepository:
         }
 
         assert response == expected
+
+    @pytest.mark.asyncio
+    async def get_network_gateway_status_repo_test(
+        self, velocloud_repository, make_network_gateway_status_body, client_response
+    ):
+        velocloud_host = "mettel.velocloud.net"
+        metrics = ["tunnelCount"]
+        since = (datetime.now() - timedelta(minutes=5)).strftime("%m/%d/%Y, %H:%M:%S")
+        gateway_ids = [3]
+        response_status = HTTPStatus.OK
+        response_body = make_network_gateway_status_body(gateway_ids=gateway_ids)
+        velocloud_response = GenericResponse.from_client_response(
+            client_response(body=response_body, status=response_status)
+        )
+        velocloud_repository._velocloud_client.get_network_gateway_status = CoroutineMock(
+            return_value=velocloud_response
+        )
+        expected_response = GenericResponse(body=response_body, status=response_status)
+        expected_response.body = expected_response.body["data"]
+        for gw in expected_response.body:
+            gw["host"] = velocloud_host
+
+        result = await velocloud_repository.get_network_gateway_status(velocloud_host, since=since, metrics=metrics)
+
+        velocloud_repository._velocloud_client.get_network_gateway_status.assert_awaited_once_with(
+            velocloud_host, since, metrics
+        )
+        assert result == expected_response

@@ -1,14 +1,13 @@
 from http import HTTPStatus
-
-from asynctest import CoroutineMock
-from pytest import fixture, mark
 from typing import List
 from unittest.mock import ANY, Mock
 
 from application.actions.repair_tickets_monitor import RepairTicketsMonitor
 from application.domain.asset import AssetId
 from application.rpc import RpcFailedError, RpcRequest, RpcResponse
+from asynctest import CoroutineMock
 from config import testconfig as config
+from pytest import fixture, mark
 from tests.actions.repair_tickets_monitor_scenarios import (
     RepairTicketsMonitorScenario,
     make_repair_tickets_monitor_scenarios,

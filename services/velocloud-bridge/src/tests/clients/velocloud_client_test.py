@@ -1,10 +1,13 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+from http import HTTPStatus
 from unittest.mock import Mock, patch
 
+import aiohttp
 import pytest
 from aiohttp import ClientConnectionError
 from application.clients import velocloud_client as velocloud_client_module
 from application.clients.velocloud_client import VelocloudClient
+from application.repositories.utils_repository import GenericResponse
 from apscheduler.jobstores.base import ConflictingIdError
 from asynctest import CoroutineMock
 from config import testconfig
@@ -1498,3 +1501,108 @@ class TestVelocloudClient:
             result = await velocloud_client.get_network_enterprises(velocloud_host, enterprise_ids)
 
         assert result == expected_result
+
+    @pytest.mark.asyncio
+    async def get_network_gateway_status_test(
+        self, velocloud_client, client_response, make_network_gateway_status_body
+    ):
+        velocloud_host = "mettel.velocloud.net"
+        velocloud_headers = {
+            "some": "header",
+        }
+        metrics = ["tunnelCount"]
+        since = (datetime.now() - timedelta(minutes=5)).strftime("%m/%d/%Y, %H:%M:%S")
+        gateway_ids = [3, 1, 3]
+        response_status = HTTPStatus.OK
+        response_body = make_network_gateway_status_body(gateway_ids=gateway_ids)
+        post_response = client_response(body=response_body, status=response_status)
+        request_body = {"metrics": metrics, "time": since}
+        clients_by_host = [{"host": velocloud_host, "headers": velocloud_headers}]
+        velocloud_client._clients = clients_by_host
+        url = f"https://{velocloud_host}/portal/rest/monitoring/getNetworkGatewayStatus"
+
+        with patch.object(
+            velocloud_client._session, "post", new=CoroutineMock(return_value=post_response)
+        ) as post_mock:
+            response = await velocloud_client.get_network_gateway_status(velocloud_host, since=since, metrics=metrics)
+
+            post_mock.assert_awaited_once_with(
+                url=url,
+                json=request_body,
+                headers=velocloud_headers,
+                ssl=velocloud_client._config.VELOCLOUD_CONFIG["verify_ssl"],
+            )
+            velocloud_client._logger.info.assert_called_with(
+                GenericResponse(status=response_status, body=response_body)
+            )
+            assert response == GenericResponse(status=response_status, body=response_body)
+
+    @pytest.mark.asyncio
+    async def get_network_gateway_status_with_bad_status_code_test(self, velocloud_client, client_response):
+        velocloud_host = "mettel.velocloud.net"
+        velocloud_headers = {
+            "some": "header",
+        }
+        metrics = ["tunnelCount"]
+        since = (datetime.now() - timedelta(minutes=5)).strftime("%m/%d/%Y, %H:%M:%S")
+        response_status = HTTPStatus.BAD_REQUEST
+        response_body = "bad request error"
+        post_response = client_response(body=response_body, status=response_status)
+        request_body = {"metrics": metrics, "time": since}
+        clients_by_host = [{"host": velocloud_host, "headers": velocloud_headers}]
+        velocloud_client._clients = clients_by_host
+        url = f"https://{velocloud_host}/portal/rest/monitoring/getNetworkGatewayStatus"
+
+        with patch.object(
+            velocloud_client._session, "post", new=CoroutineMock(return_value=post_response)
+        ) as post_mock:
+            response = await velocloud_client.get_network_gateway_status(velocloud_host, since=since, metrics=metrics)
+
+            post_mock.assert_awaited_once_with(
+                url=url,
+                json=request_body,
+                headers=velocloud_headers,
+                ssl=velocloud_client._config.VELOCLOUD_CONFIG["verify_ssl"],
+            )
+            expected_response = GenericResponse(status=response_status, body=response_body)
+            velocloud_client._logger.warning.assert_called_once_with(
+                f"post(get_network_gateway_status) => response={expected_response}"
+            )
+            assert response == GenericResponse(status=response_status, body=response_body)
+
+    @pytest.mark.asyncio
+    async def get_network_gateway_status_client_connection_error_test(self, velocloud_client):
+        velocloud_host = "mettel.velocloud.net"
+        velocloud_headers = {
+            "some": "header",
+        }
+        metrics = ["tunnelCount"]
+        since = (datetime.now() - timedelta(minutes=5)).strftime("%m/%d/%Y, %H:%M:%S")
+        post_response = CoroutineMock(side_effect=aiohttp.ClientConnectionError("client error"))
+        clients_by_host = [{"host": velocloud_host, "headers": velocloud_headers}]
+        velocloud_client._clients = clients_by_host
+
+        with patch.object(velocloud_client._session, "post", new=post_response):
+            response = await velocloud_client.get_network_gateway_status(velocloud_host, since=since, metrics=metrics)
+
+            assert response == GenericResponse(
+                status=HTTPStatus.INTERNAL_SERVER_ERROR, body="ClientConnectionError: client error"
+            )
+
+    @pytest.mark.asyncio
+    async def get_network_gateway_status_client_exception_test(self, velocloud_client):
+        velocloud_host = "mettel.velocloud.net"
+        velocloud_headers = {
+            "some": "header",
+        }
+        metrics = ["tunnelCount"]
+        since = (datetime.now() - timedelta(minutes=5)).strftime("%m/%d/%Y, %H:%M:%S")
+        clients_by_host = [{"host": velocloud_host, "headers": velocloud_headers}]
+        velocloud_client._clients = clients_by_host
+
+        with pytest.raises(Exception) as random_exception:
+            await velocloud_client.get_network_gateway_status(velocloud_host, since=since, metrics=metrics)
+
+            assert random_exception == GenericResponse(
+                status=HTTPStatus.INTERNAL_SERVER_ERROR, body="ClientConnectionError: client error"
+            )

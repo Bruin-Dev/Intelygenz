@@ -15,3 +15,15 @@ def make_rpc_request():
         return request
 
     return _inner
+
+
+@pytest.fixture(scope="session")
+def make_rpc_response():
+    def _inner(*, request_id: str = None, body: Any, status: int):
+        return {
+            "request_id": request_id,
+            "body": body,
+            "status": status,
+        }
+
+    return _inner
