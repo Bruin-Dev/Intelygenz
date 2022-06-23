@@ -49,7 +49,7 @@
       fi
     # PRINT PIPELINE ENVIRONMENT VARIABLES (FOR DEBUG)
     - >
-      if [ "$CURRENT_ENVIRONMENT" == "dev" || "$CURRENT_ENVIRONMENT" == "production" ]; then
+      if [ "$CURRENT_ENVIRONMENT" == "dev" ] || [ "$CURRENT_ENVIRONMENT" == "production" ]; then
         echo "the ENVIRONMENT_SLUG is $ENVIRONMENT_SLUG"
         echo "the CURRENT_ENVIRONMENT is $CURRENT_ENVIRONMENT"
         echo "the CURRENT_ENVIRONMENT_SHORT is $CURRENT_ENVIRONMENT_SHORT"
