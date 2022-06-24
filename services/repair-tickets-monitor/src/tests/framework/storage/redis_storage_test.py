@@ -12,7 +12,14 @@ def existing_keys_are_properly_found_test():
     storage = any_redis_storage()
     storage.redis.exists = given(ANY).returns(1)
 
-    assert storage.exists("any_id")
+    assert storage.exists("any_id") == 1
+
+
+def multiple_existing_keys_are_properly_found_test():
+    storage = any_redis_storage()
+    storage.redis.exists = given(ANY, ANY).returns(2)
+
+    assert storage.exists("any_id", "any_other_id")
 
 
 def existing_records_are_properly_found_test():
@@ -28,14 +35,6 @@ def missing_records_are_properly_returned_test():
     storage.redis.get = given(ANY).returns(None)
 
     assert storage.find("any_id") is None
-
-
-# def badly_serialized_models_are_properly_returned_test():
-#     storage = any_redis_storage()
-#     storage.redis.exists = given(ANY).returns(1)
-#     storage.redis.get = given(ANY).returns("badly_serialized_model")
-#
-#     assert storage.find("any_id") is None
 
 
 def all_existing_records_are_properly_found_test():
@@ -72,7 +71,14 @@ def records_are_properly_deleted_test():
     storage = any_redis_storage()
     storage.redis.delete = given(ANY).returns(1)
 
-    assert storage.delete("any_id")
+    assert storage.delete("any_id") == 1
+
+
+def multiple_records_are_properly_deleted_test():
+    storage = any_redis_storage()
+    storage.redis.delete = given(ANY, ANY).returns(2)
+
+    assert storage.delete("any_id", "any_other_id") == 2
 
 
 class AnyModel(BaseModel):

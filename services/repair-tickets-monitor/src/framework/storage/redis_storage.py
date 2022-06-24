@@ -30,21 +30,22 @@ class RedisStorage(Generic[T], ABC):
             f"data_type={self.data_type})"
         )
 
-    def exists(self, id: str) -> bool:
+    def exists(self, *ids: str) -> int:
         """
-        Checks if a given record exists
-        :param id: a record ID
-        :return: True if it exists, False otherwise
+        Checks if any records are currently stored.
+        :param ids: the record IDs to be checked
+        :return: the number of existing records found
         """
-        log.debug(f"exists(id={id})")
-        redis_signal = self.redis.exists(self._key(id))
-        log.debug(f"exists(): redis.exists()={redis_signal}")
+        log.debug(f"exists(ids={ids})")
+        keys = [self._key(id) for id in ids]
+        existing_records = self.redis.exists(*keys)
+        log.debug(f"exists(): redis.exists()={existing_records}")
 
-        return redis_signal == 1
+        return existing_records
 
     def find(self, id: str) -> Optional[T]:
         """
-        Find a record given its ID
+        Find a record given its ID.
         :param id: a record ID
         :return: the record if it was found, None otherwise
         """
@@ -54,7 +55,7 @@ class RedisStorage(Generic[T], ABC):
 
     def find_all(self) -> Iterator[T]:
         """
-        :return: All existing records
+        :return: all existing data_name records
         """
         log.debug(f"find_all()")
         pattern = self._key("*")
@@ -62,7 +63,7 @@ class RedisStorage(Generic[T], ABC):
 
     def set(self, id: str, data: T, stl: Optional[int] = None) -> bool:
         """
-        Stores a record
+        Stores a record.
         :param id: a record ID
         :param data: the record data
         :param stl: seconds to live if needed
@@ -73,27 +74,27 @@ class RedisStorage(Generic[T], ABC):
         result = self.redis.set(key, self._serialize(data), ex=stl)
         log.debug(f"set(): redis.set()={result}")
 
-        return result
+        return bool(result)
 
-    def delete(self, *ids) -> bool:
+    def delete(self, *ids: str) -> int:
         """
-        Removes several records given its ids
+        Removes several records given its ids.
         :param ids: ids of the records to be removed
-        :return: Ture if the records were successfully removed, False otherwise
+        :return: the number of records that were removed
         """
         log.debug(f"delete(ids={ids})")
         keys = [self._key(key) for key in ids]
-        redis_signal = self.redis.delete(*keys)
-        log.debug(f"delete(): redis.delete()={redis_signal}")
+        deleted_records = self.redis.delete(*keys)
+        log.debug(f"delete(): redis.delete()={deleted_records}")
 
-        return redis_signal == 1
+        return deleted_records
 
     def _get(self, key: str) -> Optional[T]:
         """
         Internal method to get a record given its key.
-        The record data will get deserialized
+        The record data will get deserialized.
         :param key: a key record
-        :return:
+        :return: a record
         """
         log.debug(f"_get(key={key})")
         raw_data = self.redis.get(key)
@@ -102,7 +103,7 @@ class RedisStorage(Generic[T], ABC):
 
     def _key(self, id: str) -> str:
         """
-        Internal method to build the key of a record given its ID
+        Internal method to build the key of a record given its ID.
         :param id: id of the record
         :return: key of the record
         """
@@ -112,7 +113,7 @@ class RedisStorage(Generic[T], ABC):
     @abstractmethod
     def _serialize(self, data: T) -> str:
         """
-        Serializes a storage data_type to str
+        Serializes a storage data_type to str.
         :param data: data to be serialized
         :return: serialized str
         """
@@ -121,7 +122,7 @@ class RedisStorage(Generic[T], ABC):
     @abstractmethod
     def _deserialize(self, data: Optional[str]) -> Optional[T]:
         """
-        Deserializes a str to the storage data_type
+        Deserializes a str to the storage data_type.
         :param data: str to be deserialized
         :return: deserialized data_type
         """

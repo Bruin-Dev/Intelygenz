@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 @dataclass
 class ModelStorage(RedisStorage[M]):
     """
-    RedisStorage implementation to work with pytandic objects
+    RedisStorage implementation to work with pydantic objects
     """
 
     def _serialize(self, data: M) -> str:
