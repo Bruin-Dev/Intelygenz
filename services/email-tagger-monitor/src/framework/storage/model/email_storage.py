@@ -1,13 +1,8 @@
-from datetime import datetime, timezone
 from typing import List, Optional, Type
 
 from dataclasses import dataclass
 from framework.storage.model.model_storage import ModelStorage
-from pydantic import BaseModel, Field
-
-
-class EmailMetadata(BaseModel):
-    utc_creation_datetime: datetime = Field(default_factory=lambda: datetime.utcnow)
+from pydantic import BaseModel
 
 
 class EmailTag(BaseModel):
@@ -26,8 +21,7 @@ class Email(BaseModel):
     send_cc: List[str]
     parent_id: Optional[int]
     previous_id: Optional[int]
-    tag: Optional[EmailTag]
-    metadata: EmailMetadata = Field(default_factory=EmailMetadata)
+    tag: EmailTag
 
 
 @dataclass
