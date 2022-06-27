@@ -16,6 +16,8 @@ class NewEmailsMonitor:
         config,
         predicted_tag_repository,
         new_emails_repository,
+        repair_parent_email_storage,
+        repair_reply_email_storage,
         email_tagger_repository,
         bruin_repository,
     ):
@@ -24,6 +26,8 @@ class NewEmailsMonitor:
         self._scheduler = scheduler
         self._config = config
         self._new_emails_repository = new_emails_repository
+        self._repair_parent_email_storage = repair_parent_email_storage
+        self._repair_reply_email_storage = repair_reply_email_storage
         self._predicted_tag_repository = predicted_tag_repository
         self._email_tagger_repository = email_tagger_repository
         self._bruin_repository = bruin_repository
@@ -67,6 +71,18 @@ class NewEmailsMonitor:
     async def _process_new_email(self, email_data: dict):
         email_id = email_data["email"]["email_id"]
         parent_id = email_data["email"].get("parent_id", None)
+
+        # Checks if the current email is a reply, and saves it to the reply storage in that case
+        if parent_id is not None:
+            # Check if the given parent_id exists on the current parent email storage
+            email_parent_exists = self._repair_parent_email_storage.exists(parent_id) > 0
+
+            if email_parent_exists:
+                # Save email as a reply email
+                self._repair_reply_email_storage.set(email_id, email_data, 3600)
+                # Remove from email tagger namespace
+                self._new_emails_repository.mark_complete(email_id)
+                return
 
         async with self._semaphore:
             # Get tag from KRE
