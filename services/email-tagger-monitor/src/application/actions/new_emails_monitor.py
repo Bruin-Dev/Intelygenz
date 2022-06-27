@@ -4,22 +4,23 @@ from datetime import datetime
 
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
+from framework.storage.model.email_storage import Email
 from pytz import timezone
 
 
 class NewEmailsMonitor:
     def __init__(
-        self,
-        event_bus,
-        logger,
-        scheduler,
-        config,
-        predicted_tag_repository,
-        new_emails_repository,
-        repair_parent_email_storage,
-        repair_reply_email_storage,
-        email_tagger_repository,
-        bruin_repository,
+            self,
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            predicted_tag_repository,
+            new_emails_repository,
+            repair_parent_email_storage,
+            repair_reply_email_storage,
+            email_tagger_repository,
+            bruin_repository,
     ):
         self._event_bus = event_bus
         self._logger = logger
@@ -72,19 +73,33 @@ class NewEmailsMonitor:
         email_id = email_data["email"]["email_id"]
         parent_id = email_data["email"].get("parent_id", None)
 
-        # Checks if the current email is a reply, and saves it to the reply storage in that case
-        if parent_id is not None:
-            # Check if the given parent_id exists on the current parent email storage
-            email_parent_exists = self._repair_parent_email_storage.exists(parent_id) > 0
-
-            if email_parent_exists:
-                # Save email as a reply email
-                self._repair_reply_email_storage.set(email_id, email_data, 3600)
-                # Remove from email tagger namespace
-                self._new_emails_repository.mark_complete(email_id)
-                return
-
         async with self._semaphore:
+            # Checks if the current email is a reply, and saves it to the reply storage in that case
+            if parent_id is not None:
+                # Check if the given parent_id exists on the current parent email storage
+                email_parent_exists = self._repair_parent_email_storage.exists(parent_id) > 0
+
+                if email_parent_exists:
+                    # Save email as a reply email
+                    email = Email(
+                        email_id=email_data["email"]["email_id"],
+                        client_id=email_data["email"]["client_id"],
+                        date=email_data["email"]["date"],
+                        subject=email_data["email"]["subject"],
+                        body=email_data["email"]["body"],
+                        from_address=email_data["email"]["from_address"],
+                        to_address=email_data["email"]["to_address"],
+                        send_cc=email_data["email"].get("send_cc", []),
+                        parent_id=email_data["email"].get("parent_id", None),
+                        previous_id=email_data["email"].get("previous_id", None)
+                    )
+
+                    # TODO move the ttl to a external variable
+                    self._repair_reply_email_storage.set(id=email_id, data=email, ttl_seconds=3600)
+                    # Remove from email tagger namespace
+                    self._new_emails_repository.mark_complete(email_id)
+                    return
+
             # Get tag from KRE
             response = await self._email_tagger_repository.get_prediction(email_data)
             prediction = response.get("body")
