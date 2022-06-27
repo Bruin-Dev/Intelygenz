@@ -4,7 +4,7 @@ from unittest.mock import Mock, call, patch
 import pytest
 from application.actions import new_emails_monitor as new_emails_monitor_module
 from application.actions.new_emails_monitor import NewEmailsMonitor
-from framework.storage.model.email_storage import RepairParentEmailStorage
+from framework.storage.model.email_storage import Email
 from asynctest import CoroutineMock
 from config import testconfig
 from shortuuid import uuid
@@ -282,11 +282,28 @@ class TestNewEmailsMonitor:
             "email": {
                 "email_id": email_id,
                 "parent_id": parent_id,
+                "previous_id": "123455",
+                "client_id": "123123",
                 "subject": "the title",
                 "body": "the issue here",
                 "date": "2021-01-01T08:00:00.001Z",
+                "from_address": "mettel@intelygenz.com",
+                "to_address": ["a@mettel.com", "b@mettel.com"]
             }
         }
+
+        email_model = Email(
+            email_id=email_data["email"]["email_id"],
+            client_id=email_data["email"]["client_id"],
+            date=email_data["email"]["date"],
+            subject=email_data["email"]["subject"],
+            body=email_data["email"]["body"],
+            from_address=email_data["email"]["from_address"],
+            to_address=email_data["email"]["to_address"],
+            send_cc=email_data["email"].get("send_cc", []),
+            parent_id=email_data["email"].get("parent_id", None),
+            previous_id=email_data["email"].get("previous_id", None)
+        )
 
         new_emails_monitor._repair_parent_email_storage.exists.return_value = 1
         new_emails_monitor._repair_reply_email_storage.set = Mock()
@@ -296,7 +313,8 @@ class TestNewEmailsMonitor:
         await new_emails_monitor._process_new_email(email_data)
 
         new_emails_monitor._repair_parent_email_storage.exists.assert_called_once_with(parent_id)
-        new_emails_monitor._repair_reply_email_storage.set.assert_called_once_with(email_id, email_data, 3600)
+        new_emails_monitor._repair_reply_email_storage.set.assert_called_once_with(id=email_id, data=email_model,
+                                                                                   ttl_seconds=3600)
         new_emails_monitor._new_emails_repository.mark_complete.assert_called_once_with(email_id)
         new_emails_monitor._email_tagger_repository.get_prediction.assert_not_called()
 
