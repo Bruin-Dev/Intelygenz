@@ -91,7 +91,8 @@ class NewEmailsMonitor:
                         to_address=email_data["email"]["to_address"],
                         send_cc=email_data["email"].get("send_cc", []),
                         parent_id=email_data["email"].get("parent_id", None),
-                        previous_id=email_data["email"].get("previous_id", None),
+                        previous_id=email_data["email"].get("previous_email_id", None),
+                        tag=email_data["email"].get("tag", None),
                     )
 
                     # TODO move the ttl to a external variable
