@@ -21,7 +21,7 @@ class Email(BaseModel):
     send_cc: List[str]
     parent_id: Optional[int]
     previous_id: Optional[int]
-    tag: EmailTag
+    tag: Optional[EmailTag]
 
 
 @dataclass
