@@ -282,7 +282,7 @@ class TestNewEmailsMonitor:
             "email": {
                 "email_id": email_id,
                 "parent_id": parent_id,
-                "previous_id": "123455",
+                "previous_email_id": "123455",
                 "client_id": "123123",
                 "subject": "the title",
                 "body": "the issue here",
@@ -302,7 +302,8 @@ class TestNewEmailsMonitor:
             to_address=email_data["email"]["to_address"],
             send_cc=email_data["email"].get("send_cc", []),
             parent_id=email_data["email"].get("parent_id", None),
-            previous_id=email_data["email"].get("previous_id", None),
+            previous_id=email_data["email"].get("previous_email_id", None),
+            tag=email_data["email"].get("tag", None),
         )
 
         new_emails_monitor._repair_parent_email_storage.exists.return_value = 1

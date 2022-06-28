@@ -21,10 +21,7 @@ class Email(BaseModel):
     send_cc: List[str]
     parent_id: Optional[int]
     previous_id: Optional[int]
-
-
-class TaggedEmail(Email):
-    tag: EmailTag
+    tag: Optional[EmailTag]
 
 
 @dataclass
@@ -33,12 +30,7 @@ class EmailStorage(ModelStorage[Email]):
 
 
 @dataclass
-class TaggedEmailStorage(ModelStorage[TaggedEmail]):
-    data_type: Type = Email
-
-
-@dataclass
-class RepairParentEmailStorage(TaggedEmailStorage):
+class RepairParentEmailStorage(EmailStorage):
     data_name: str = "parent-email:repair"
 
 
