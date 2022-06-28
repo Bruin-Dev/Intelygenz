@@ -169,7 +169,6 @@ class APIServer:
         start_time = time.time()
 
         notification_data = await request.get_json()
-        self._logger.info(f"[EmailWebhook] new email received: {notification_data}")
         email_data = notification_data.get("Notification", {}).get("Body")
 
         try:
