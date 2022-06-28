@@ -266,7 +266,7 @@ class BruinRepository:
 
         return response
 
-    async def link_email_to_ticket(self, ticket_id: int, email_id: int):
+    async def link_email_to_ticket(self, ticket_id: str, email_id: str):
         request = {
             "request_id": uuid(),
             "body": {
@@ -295,7 +295,7 @@ class BruinRepository:
         log.info("email_id=%s, linked to ticket %s", email_id, ticket_id)
         return response
 
-    async def mark_email_as_done(self, email_id: int):
+    async def mark_email_as_done(self, email_id: str):
         err_msg = None
 
         request = {
@@ -332,7 +332,7 @@ class BruinRepository:
 
         return response
 
-    async def append_notes_to_ticket(self, ticket_id: int, notes: List[Dict]) -> Dict[str, int]:
+    async def append_notes_to_ticket(self, ticket_id: str, notes: List[Dict]) -> Dict[str, int]:
         # Preparing the request to bruin-bridge
         rpc_request = {
             "_topic": "bruin.ticket.multiple.notes.append.request",

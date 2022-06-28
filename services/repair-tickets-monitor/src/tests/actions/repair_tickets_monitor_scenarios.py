@@ -57,7 +57,7 @@ def make_repair_tickets_monitor_scenarios():
         tickets=[],
         email_processed=False,
         expected_output=RepairEmailOutput(
-            email_id=0, tickets_cannot_be_created=[TicketOutput(reason="No validated service numbers")]
+            email_id="0", tickets_cannot_be_created=[TicketOutput(reason="No validated service numbers")]
         ),
     )
 
@@ -72,7 +72,7 @@ def make_repair_tickets_monitor_scenarios():
         note_added_to=["site_1_ticket"],
         email_linked_to=["site_1_ticket"],
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             service_numbers_sites_map={"asset_1": "site_1"},
             tickets_created=[TicketOutput(ticket_id="site_1_ticket", site_id="site_1", service_numbers=["asset_1"])],
         ),
@@ -84,7 +84,7 @@ def make_repair_tickets_monitor_scenarios():
         note_added_to=["site_1_ticket"],
         email_linked_to=["site_1_ticket"],
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             service_numbers_sites_map={"asset_1": "site_1"},
             tickets_updated=[
                 TicketOutput(
@@ -103,7 +103,7 @@ def make_repair_tickets_monitor_scenarios():
         assets_actionable=False,
         email_processed=False,
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             service_numbers_sites_map={"asset_1": "site_1"},
             tickets_cannot_be_created=[
                 TicketOutput(site_id="site_1", service_numbers=["asset_1"], reason="predicted class is Other")
@@ -117,7 +117,7 @@ def make_repair_tickets_monitor_scenarios():
         note_added_to=["site_1_ticket"],
         email_linked_to=["site_1_ticket"],
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             service_numbers_sites_map={"asset_1": "site_1", "asset_2": "site_1"},
             tickets_created=[
                 TicketOutput(ticket_id="site_1_ticket", site_id="site_1", service_numbers=["asset_1", "asset_2"])
@@ -131,7 +131,7 @@ def make_repair_tickets_monitor_scenarios():
         note_added_to=["site_1_ticket"],
         email_linked_to=["site_1_ticket"],
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             service_numbers_sites_map={"asset_1": "site_1", "asset_2": "site_1"},
             tickets_updated=[
                 TicketOutput(
@@ -153,7 +153,7 @@ def make_repair_tickets_monitor_scenarios():
         note_added_to=["site_1_ticket", "site_2_ticket"],
         email_linked_to=["site_1_ticket", "site_2_ticket"],
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             service_numbers_sites_map={"asset_1": "site_1", "asset_2": "site_2"},
             tickets_created=[
                 TicketOutput(ticket_id="site_1_ticket", site_id="site_1", service_numbers=["asset_1"]),
@@ -171,7 +171,7 @@ def make_repair_tickets_monitor_scenarios():
         note_added_to=["site_1_ticket", "site_2_ticket"],
         email_linked_to=["site_1_ticket", "site_2_ticket"],
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             service_numbers_sites_map={"asset_1": "site_1", "asset_2": "site_2"},
             tickets_updated=[
                 TicketOutput(
@@ -199,7 +199,7 @@ def make_repair_tickets_monitor_scenarios():
         asset_topics={"asset_1": []},
         email_processed=False,
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             service_numbers_sites_map={"asset_1": "site_1"},
             tickets_cannot_be_created=[TicketOutput(reason="no_topics_detected")],
         ),
@@ -209,7 +209,7 @@ def make_repair_tickets_monitor_scenarios():
         asset_topics={"asset_1": [wireless_topic]},
         email_processed=False,
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             service_numbers_sites_map={"asset_1": "site_1"},
             tickets_cannot_be_created=[TicketOutput(reason="contains_wireless_assets")],
         ),
@@ -219,7 +219,7 @@ def make_repair_tickets_monitor_scenarios():
         asset_topics={"asset_1": [other_category_topic]},
         email_processed=False,
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             service_numbers_sites_map={"asset_1": "site_1"},
             tickets_cannot_be_created=[TicketOutput(reason="contains_other_assets")],
         ),
@@ -229,7 +229,7 @@ def make_repair_tickets_monitor_scenarios():
         asset_topics={"asset_1": [wireless_topic], "asset_2": [wireless_topic]},
         email_processed=False,
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             service_numbers_sites_map={"asset_1": "site_1", "asset_2": "site_1"},
             tickets_cannot_be_created=[TicketOutput(reason="contains_wireless_assets")],
         ),
@@ -239,7 +239,7 @@ def make_repair_tickets_monitor_scenarios():
         asset_topics={"asset_1": [other_category_topic], "asset_2": [other_category_topic]},
         email_processed=False,
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             service_numbers_sites_map={"asset_1": "site_1", "asset_2": "site_1"},
             tickets_cannot_be_created=[TicketOutput(reason="contains_other_assets")],
         ),
@@ -249,7 +249,7 @@ def make_repair_tickets_monitor_scenarios():
         asset_topics={"asset_1": [wireless_topic], "asset_2": []},
         email_processed=False,
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             service_numbers_sites_map={"asset_1": "site_1", "asset_2": "site_1"},
             tickets_cannot_be_created=[TicketOutput(reason="contains_wireless_assets")],
         ),
@@ -259,7 +259,7 @@ def make_repair_tickets_monitor_scenarios():
         asset_topics={"asset_1": [wireless_topic], "asset_2": [other_category_topic]},
         email_processed=False,
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             service_numbers_sites_map={"asset_1": "site_1", "asset_2": "site_1"},
             tickets_cannot_be_created=[TicketOutput(reason="contains_wireless_assets")],
         ),
@@ -272,7 +272,7 @@ def make_repair_tickets_monitor_scenarios():
         note_added_to=["site_1_ticket"],
         email_linked_to=["site_1_ticket"],
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             service_numbers_sites_map={"asset_1": "site_1", "asset_2": "site_1"},
             tickets_created=[TicketOutput(ticket_id="site_1_ticket", site_id="site_1", service_numbers=["asset_1"])],
             tickets_cannot_be_created=[TicketOutput(reason="contains_wireless_assets")],
@@ -286,7 +286,7 @@ def make_repair_tickets_monitor_scenarios():
         note_added_to=["site_1_ticket"],
         email_linked_to=["site_1_ticket"],
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             service_numbers_sites_map={"asset_1": "site_1", "asset_2": "site_1"},
             tickets_created=[TicketOutput(ticket_id="site_1_ticket", site_id="site_1", service_numbers=["asset_1"])],
             tickets_cannot_be_created=[TicketOutput(reason="contains_other_assets")],
@@ -300,7 +300,7 @@ def make_repair_tickets_monitor_scenarios():
         note_added_to=["site_1_ticket"],
         email_linked_to=["site_1_ticket"],
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             service_numbers_sites_map={"asset_1": "site_1", "asset_2": "site_1", "asset_3": "site_1"},
             tickets_updated=[
                 TicketOutput(
@@ -321,7 +321,7 @@ def make_repair_tickets_monitor_scenarios():
         note_added_to=["site_2_ticket"],
         email_linked_to=["site_2_ticket"],
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             service_numbers_sites_map={"asset_1": "site_1", "asset_2": "site_2", "asset_3": "site_2"},
             tickets_created=[TicketOutput(ticket_id="site_2_ticket", site_id="site_2", service_numbers=["asset_3"])],
             tickets_cannot_be_created=[TicketOutput(reason="contains_wireless_assets")],
@@ -337,7 +337,7 @@ def make_repair_tickets_monitor_scenarios():
         global_note_added_to=["ticket_1"],
         email_linked_to=["ticket_1"],
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             validated_tickets=[Ticket("ticket_1", status=TicketStatus.NEW, call_type="REP", category="VOO")],
             tickets_updated=[TicketOutput(ticket_id="ticket_1", reason="update_with_ticket_found")],
         ),
@@ -346,7 +346,7 @@ def make_repair_tickets_monitor_scenarios():
         tickets=[Ticket("ticket_1", status=TicketStatus.DRAFT)],
         email_processed=False,
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             validated_tickets=[Ticket("ticket_1", status=TicketStatus.DRAFT)],
             tickets_cannot_be_created=[TicketOutput(reason="No validated service numbers")],
         ),
@@ -359,7 +359,7 @@ def make_repair_tickets_monitor_scenarios():
         global_note_added_to=["ticket_1", "ticket_2"],
         email_linked_to=["ticket_1", "ticket_2"],
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             validated_tickets=[
                 Ticket("ticket_1", status=TicketStatus.NEW, category="VOO"),
                 Ticket("ticket_2", status=TicketStatus.IN_PROGRESS, category="VAS"),
@@ -377,7 +377,7 @@ def make_repair_tickets_monitor_scenarios():
         ],
         email_processed=False,
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             validated_tickets=[
                 Ticket("ticket_1", status=TicketStatus.NEW, category="019"),
                 Ticket("ticket_2", status=TicketStatus.DRAFT, category="VOO"),
@@ -393,7 +393,7 @@ def make_repair_tickets_monitor_scenarios():
         global_note_added_to=["ticket_1"],
         email_linked_to=["ticket_1"],
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             validated_tickets=[
                 Ticket("ticket_1", status=TicketStatus.NEW, call_type="REP", category="VOO"),
                 Ticket("ticket_2", status=TicketStatus.DRAFT),
@@ -407,7 +407,7 @@ def make_repair_tickets_monitor_scenarios():
         global_note_added_to=["ticket_1"],
         append_note_to_ticket_effect=lambda x, y: False,
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             validated_tickets=[Ticket("ticket_1", status=TicketStatus.NEW, category="VOO")],
             tickets_cannot_be_created=[TicketOutput(reason="No validated service numbers")],
         ),
@@ -418,7 +418,7 @@ def make_repair_tickets_monitor_scenarios():
         global_note_added_to=["ticket_1"],
         append_note_to_ticket_effect=RpcError,
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             validated_tickets=[Ticket("ticket_1", status=TicketStatus.NEW, category="VOO")],
             tickets_cannot_be_created=[TicketOutput(reason="No validated service numbers")],
         ),
@@ -430,7 +430,7 @@ def make_repair_tickets_monitor_scenarios():
         global_note_added_to=["ticket_1"],
         email_linked_to=["ticket_1"],
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             validated_tickets=[Ticket("ticket_1", status=TicketStatus.NEW, category="VOO")],
             tickets_cannot_be_created=[TicketOutput(reason="No validated service numbers")],
         ),
@@ -440,7 +440,7 @@ def make_repair_tickets_monitor_scenarios():
         tickets_actionable=False,
         email_processed=False,
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             validated_tickets=[Ticket("ticket_1", status=TicketStatus.NEW, call_type="REP", category="VOO")],
             tickets_could_be_updated=[TicketOutput(ticket_id="ticket_1")],
         ),
@@ -454,7 +454,7 @@ def make_repair_tickets_monitor_scenarios():
         email_linked_to=["site_1_ticket"],
         global_note_added_to=[],
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             service_numbers_sites_map={"asset_1": "site_1"},
             validated_tickets=[Ticket("ticket_1", status=TicketStatus.NEW, call_type="REP", category="VOO")],
             tickets_created=[TicketOutput(ticket_id="site_1_ticket", site_id="site_1", service_numbers=["asset_1"])],
@@ -468,7 +468,7 @@ def make_repair_tickets_monitor_scenarios():
         email_linked_to=["site_1_ticket"],
         global_note_added_to=["site_1_ticket"],
         expected_output=RepairEmailOutput(
-            email_id=0,
+            email_id="0",
             service_numbers_sites_map={"asset_1": "site_1"},
             validated_tickets=[Ticket("site_1_ticket", status=TicketStatus.NEW, call_type="REP", category="VOO")],
             tickets_updated=[TicketOutput(ticket_id="site_1_ticket", reason="update_with_ticket_found")],

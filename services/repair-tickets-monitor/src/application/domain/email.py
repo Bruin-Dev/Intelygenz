@@ -5,20 +5,23 @@ from dataclasses import dataclass, field
 
 @dataclass
 class EmailTag:
-    type: int
+    type: str
     probability: float
 
 
 @dataclass
 class Email:
-    email_id: int
-    client_id: int
+    id: str
+    client_id: str
     date: str
     subject: str
     body: str
     tag: EmailTag
-    from_address: str
-    to_address: List[str] = field(default_factory=list)
-    send_cc: List[str] = field(default_factory=list)
-    parent_id: Optional[int] = None
-    previous_id: Optional[int] = None
+    sender_address: str
+    recipient_addresses: List[str] = field(default_factory=list)
+    cc_addresses: List[str] = field(default_factory=list)
+    parent_id: Optional[str] = None
+    previous_id: Optional[str] = None
+
+    def comma_separated_cc_addresses(self) -> str:
+        return ", ".join(self.cc_addresses) if self.cc_addresses else ""
