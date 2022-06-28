@@ -288,7 +288,7 @@ class TestNewEmailsMonitor:
                 "body": "the issue here",
                 "date": "2021-01-01T08:00:00.001Z",
                 "from_address": "mettel@intelygenz.com",
-                "to_address": ["a@mettel.com", "b@mettel.com"]
+                "to_address": ["a@mettel.com", "b@mettel.com"],
             }
         }
 
@@ -302,7 +302,7 @@ class TestNewEmailsMonitor:
             to_address=email_data["email"]["to_address"],
             send_cc=email_data["email"].get("send_cc", []),
             parent_id=email_data["email"].get("parent_id", None),
-            previous_id=email_data["email"].get("previous_id", None)
+            previous_id=email_data["email"].get("previous_id", None),
         )
 
         new_emails_monitor._repair_parent_email_storage.exists.return_value = 1
@@ -313,8 +313,9 @@ class TestNewEmailsMonitor:
         await new_emails_monitor._process_new_email(email_data)
 
         new_emails_monitor._repair_parent_email_storage.exists.assert_called_once_with(parent_id)
-        new_emails_monitor._repair_reply_email_storage.set.assert_called_once_with(id=email_id, data=email_model,
-                                                                                   ttl_seconds=3600)
+        new_emails_monitor._repair_reply_email_storage.set.assert_called_once_with(
+            id=email_id, data=email_model, ttl_seconds=3600
+        )
         new_emails_monitor._new_emails_repository.mark_complete.assert_called_once_with(email_id)
         new_emails_monitor._email_tagger_repository.get_prediction.assert_not_called()
 

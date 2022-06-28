@@ -10,17 +10,17 @@ from pytz import timezone
 
 class NewEmailsMonitor:
     def __init__(
-            self,
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            predicted_tag_repository,
-            new_emails_repository,
-            repair_parent_email_storage,
-            repair_reply_email_storage,
-            email_tagger_repository,
-            bruin_repository,
+        self,
+        event_bus,
+        logger,
+        scheduler,
+        config,
+        predicted_tag_repository,
+        new_emails_repository,
+        repair_parent_email_storage,
+        repair_reply_email_storage,
+        email_tagger_repository,
+        bruin_repository,
     ):
         self._event_bus = event_bus
         self._logger = logger
@@ -91,7 +91,7 @@ class NewEmailsMonitor:
                         to_address=email_data["email"]["to_address"],
                         send_cc=email_data["email"].get("send_cc", []),
                         parent_id=email_data["email"].get("parent_id", None),
-                        previous_id=email_data["email"].get("previous_id", None)
+                        previous_id=email_data["email"].get("previous_id", None),
                     )
 
                     # TODO move the ttl to a external variable
