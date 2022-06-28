@@ -91,7 +91,7 @@
         echo "Setting to \"None\" externalsecrets creationPolicy"
         for i in $(kubectl get externalsecret -n ${NAMESPACE} -o json | jq '.items[] | .metadata.name' | tr -d '\"'); do
           (
-          kubectl patch externalsecret ${i} -n ${NAMESPACE} --type='json' -p='[{"op": "replace", "path": "/spec/target/creationPolicy", "value":"None"}]' &> /dev/null
+          kubectl patch externalsecret ${i} -n ${NAMESPACE} --type='json' -p='[{"op":"replace", "path":"/spec/target/creationPolicy", "value":"None"}]' &> /dev/null
           )
         done
         echo "Done." 

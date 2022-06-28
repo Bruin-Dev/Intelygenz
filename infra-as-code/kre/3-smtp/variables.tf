@@ -1,23 +1,3 @@
-# IGZ user for create email accounts
-variable "igz_users_email" {
-  type = list
-  default = [
-    "alberto.iglesias@intelygenz.com",
-    "angel.costales@intelygenz.com",
-    "angel.sanchez@intelygenz.com",
-    "angelluis.piquero@intelygenz.com",
-    "brandon.samudio@intelygenz.com",
-    "daniel.fernandez@intelygenz.com",
-    "gustavo.marin@intelygenz.com",
-    "jonas.dacruz@intelygenz.com",
-    "joseluis.vega@intelygenz.com",
-    "alejandro.aceituna@intelygenz.com",
-    "julia.hossu@intelygenz.com",
-    "mettel@intelygenz.com",
-    "marc.vivancos@intelygenz.com"
-  ]
-}
-
 variable "subdomain_name_prefix" {
   type = string
   default = "intelygenz"

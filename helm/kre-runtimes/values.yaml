@@ -13,6 +13,7 @@ config:
     # IMPORTANT: userEmail is used as the system admin user.
     # Use this for first login and create new users.
     userEmail: "mettel@intelygenz.com"
+  # SMTP config is setting with gitlab variable: KRE_RUNTIME_SMTP_VALUES_CONFIG
 
 mongodb:
   persistentVolume:
