@@ -59,12 +59,12 @@ def records_are_properly_stored_test():
     assert storage.set("any_id", data)
 
 
-def records_are_properly_stored_with_stl_test():
-    stl = hash("any_stl")
+def records_are_properly_stored_with_ttl_test():
+    ttl_seconds = hash("any_ttl_seconds")
     storage = any_redis_storage()
-    storage.redis.set = given(ANY, ANY, ex=stl).returns(1)
+    storage.redis.set = given(ANY, ANY, ex=ttl_seconds).returns(1)
 
-    assert storage.set("any_id", "any_data", stl=stl)
+    assert storage.set("any_id", "any_data", ttl_seconds=ttl_seconds)
 
 
 def records_are_properly_deleted_test():

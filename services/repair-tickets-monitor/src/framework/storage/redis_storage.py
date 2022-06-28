@@ -61,17 +61,17 @@ class RedisStorage(Generic[T], ABC):
         pattern = self._key("*")
         return [self._get(key) for key in self.redis.scan_iter(pattern)]
 
-    def set(self, id: str, data: T, stl: Optional[int] = None) -> bool:
+    def set(self, id: str, data: T, ttl_seconds: Optional[int] = None) -> bool:
         """
         Stores a record.
         :param id: a record ID
         :param data: the record data
-        :param stl: seconds to live if needed
+        :param ttl_seconds: record time to live in secods
         :return: True if the record was successfully stored, False otherwise
         """
-        log.debug(f"set(id={id}, data={data}, stl={stl})")
+        log.debug(f"set(id={id}, data={data}, ttl_seconds={ttl_seconds})")
         key = self._key(id)
-        result = self.redis.set(key, self._serialize(data), ex=stl)
+        result = self.redis.set(key, self._serialize(data), ex=ttl_seconds)
         log.debug(f"set(): redis.set()={result}")
 
         return bool(result)
