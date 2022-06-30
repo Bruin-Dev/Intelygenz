@@ -1,33 +1,17 @@
 # Table of contents
   * [Description](#description)
-  * [Gateway monitoring](#gateway-monitoring)
+  * [Overview](#overview)
   * [Capabilities used](#capabilities-used) 
   * [Running in docker-compose](#running-in-docker-compose)
 
 # Description
-The objective of `gateway-monitoring` is to monitor gateways status and make decisions according to the metric `tunnelCount`.
+The goal of the `gateway-monitoring` service is to monitor the status of gateways and document detected issues on ServiceNow.
+A gateway is considered to be having issues if the tunnel count drops by a significant amount within a short period of time.
 
-This microservice is in charge of running one process:
-* Gateway monitoring. This one is in charge of monitoring gateways status and checking service now endpoint if a gateway `tunnelCount` threshold 
-is less than 20%. It takes one hour and five minutes as samples for checking it.
-
-# Gateway monitoring
-
-### Overview
-The objective of the gateway monitoring process is to detect gateways which have a drop in `tunnelCount` in an hour interval and 
-check with service now if a ticket exists, or it should create a new one. If it exists it should update it in some way.
-All this ticket behaviour is managed automatically by the endpoint once we call it with the `gatewayId`.
-
-### Work Flow
-
-This is the algorithm implemented to carry out the monitoring of gateways status:
-
-#### Checking gateways
-1. Get the list of gateways status from the Velocloud host specified in the config for the last hour and the last 5 minutes
-2. Check the two data samples are well-formed
-3. Distinguish gateways in unhealthy state from healthy gateways
-4. For every unhealthy edge:
-   1. Attempt to check with service now the status of the ticket and what it should be done
+# Overview
+Every few minutes we get two snapshots of the status of all gateways from each VeloCloud host for two different time intervals.
+A gateway is considered to be having issues if its tunnel count on the second snapshot is significantly lower than on the first one.
+For each unhealthy gateway we call a ServiceNow endpoint that automatically creates, re-opens and/or adds a note to a ticket.
 
 # Capabilities used
 - [Velocloud bridge](../velocloud-bridge/README.md)
@@ -35,5 +19,4 @@ This is the algorithm implemented to carry out the monitoring of gateways status
 - [Notifier](../notifier/README.md)
 
 # Running in docker-compose
-
 `docker-compose up --build nats-server redis velocloud-bridge servicenow-bridge notifier gateway-monitor`
