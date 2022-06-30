@@ -34,16 +34,19 @@ class Container:
         self._notifications_repository = NotificationsRepository(event_bus=self._event_bus)
         self._velocloud_repository = VelocloudRepository(
             event_bus=self._event_bus,
+            logger=self._logger,
             config=config,
             notifications_repository=self._notifications_repository,
         )
         self._servicenow_repository = ServiceNowRepository(
             event_bus=self._event_bus,
+            logger=self._logger,
             config=config,
             notifications_repository=self._notifications_repository,
         )
         self._monitor = GatewayMonitor(
             self._event_bus,
+            self._logger,
             self._scheduler,
             config,
             self._servicenow_repository,

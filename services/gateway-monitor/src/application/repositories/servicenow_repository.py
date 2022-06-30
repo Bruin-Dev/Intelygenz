@@ -1,16 +1,14 @@
-import logging
 from typing import Dict
 
 from application.actions.monitoring import GatewayPair
 from application.dataclasses import Gateway
 from shortuuid import uuid
 
-logger = logging.getLogger(__name__)
-
 
 class ServiceNowRepository:
-    def __init__(self, event_bus, config, notifications_repository):
+    def __init__(self, event_bus, logger, config, notifications_repository):
         self._event_bus = event_bus
+        self._logger = logger
         self._config = config
         self._notifications_repository = notifications_repository
 
@@ -26,7 +24,9 @@ class ServiceNowRepository:
         }
 
         try:
-            logger.info(f"Getting active incident tickets info from ServiceNow for host {unhealthy_gateway.host}...")
+            self._logger.info(
+                f"Getting active incident tickets info from ServiceNow for host {unhealthy_gateway.host}..."
+            )
             response = await self._event_bus.rpc_request("", request, timeout=30)
         except Exception as e:
             err_msg = f"An error occurred when requesting active incident tickets from ServiceNow -> {e}"
@@ -36,7 +36,9 @@ class ServiceNowRepository:
             response_status = response["status"]
 
             if response_status in range(200, 300):
-                logger.info(f"Got active incident tickets info from ServiceNow for host {unhealthy_gateway.host}!")
+                self._logger.info(
+                    f"Got active incident tickets info from ServiceNow for host {unhealthy_gateway.host}!"
+                )
             else:
                 environment = self._config.ENVIRONMENT_NAME.upper()
                 err_msg = (
@@ -45,7 +47,7 @@ class ServiceNowRepository:
                 )
 
         if err_msg:
-            logger.error(err_msg)
+            self._logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response
