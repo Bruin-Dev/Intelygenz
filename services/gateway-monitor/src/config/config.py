@@ -43,8 +43,8 @@ MONITOR_CONFIG = {
     "monitoring_job_interval": int(os.environ["MONITORING_JOB_INTERVAL"]),
     "monitored_velocloud_hosts": json.loads(os.environ["MONITORED_VELOCLOUD_HOSTS"]),
     "gateway_lookup_intervals": {
-        "first_lookup": int(os.environ["FIRST_GATEWAY_LOOKUP_INTERVAL"]),
-        "second_lookup": int(os.environ["SECOND_GATEWAY_LOOKUP_INTERVAL"]),
+        "first": int(os.environ["FIRST_GATEWAY_LOOKUP_INTERVAL"]),
+        "second": int(os.environ["SECOND_GATEWAY_LOOKUP_INTERVAL"]),
     },
     "thresholds": {
         "tunnel_count": int(os.environ["TUNNEL_COUNT_THRESHOLD"]),

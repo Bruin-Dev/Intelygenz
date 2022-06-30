@@ -687,8 +687,8 @@ env_dict = {
     os.path.join("services", "gateway-monitor", "src", "config", "env"): [
         f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",
         f"NATS_SERVER1={NATS_SERVER1}",
-        f"NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}",
         f"REDIS_HOSTNAME={REDIS_HOSTNAME}",
+        f"CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}",
         f"TIMEZONE={TIMEZONE}",
         f"PAPERTRAIL_ACTIVE={PAPERTRAIL_ACTIVE}",
         f"PAPERTRAIL_HOST={PAPERTRAIL_HOST}",

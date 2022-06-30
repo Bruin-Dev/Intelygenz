@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import List
 
 from shortuuid import uuid
 
@@ -10,9 +10,7 @@ class VelocloudRepository:
         self._config = config
         self._notifications_repository = notifications_repository
 
-    async def get_network_gateway_status_list(
-        self, velocloud_host: str, since: str, metrics: List[str]
-    ) -> Dict[str, int]:
+    async def get_network_gateway_status_list(self, velocloud_host: str, since: str, metrics: List[str]) -> dict:
         err_msg = None
 
         request = {

@@ -1,4 +1,4 @@
-apiVersion: v1
+apiVersion: v2
 name: gateway-monitor
 description: A Helm chart for Kubernetes to deploy microservice gateway-monitor to monitor network gateway status in all VeloCloud hosts
 
