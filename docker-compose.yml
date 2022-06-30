@@ -31,6 +31,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/bruin-bridge/src/config/env
+    volumes:
+      - ./services/bruin-bridge:/service/app
     depends_on:
       - "nats-server"
       - redis
@@ -48,6 +50,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/customer-cache/src/config/env
+    volumes:
+      - ./services/customer-cache:/service/app
     depends_on:
       - "nats-server"
       - redis
@@ -66,6 +70,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/digi-bridge/src/config/env
+    volumes:
+      - ./services/digi-bridge:/service/app
     depends_on:
       - "nats-server"
       - redis
@@ -83,6 +89,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/digi-reboot-report/src/config/env
+    volumes:
+      - ./services/digi-reboot-report:/service/app
     ports:
       - 5016:5000
       - 9590:9090
@@ -97,6 +105,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/dri-bridge/src/config/env
+    volumes:
+      - ./services/dri-bridge:/service/app
     ports:
       - 5020:5000
       - 9290:9090
@@ -111,6 +121,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/email-tagger-kre-bridge/src/config/env
+    volumes:
+      - ./services/email-tagger-kre-bridge:/service/app
     depends_on:
       - "nats-server"
       - redis
@@ -131,6 +143,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/email-tagger-monitor/src/config/env
+    volumes:
+      - ./services/email-tagger-monitor:/service/app
     depends_on:
       - "nats-server"
       - redis
@@ -149,6 +163,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/fraud-monitor/src/config/env
+    volumes:
+      - ./services/fraud-monitor:/service/app
     depends_on:
       - "nats-server"
       - redis
@@ -166,6 +182,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/hawkeye-affecting-monitor/src/config/env
+    volumes:
+      - ./services/hawkeye-affecting-monitor:/service/app
     depends_on:
       - "nats-server"
       - redis
@@ -183,6 +201,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/hawkeye-bridge/src/config/env
+    volumes:
+      - ./services/hawkeye-bridge:/service/app
     depends_on:
       - "nats-server"
       - redis
@@ -200,6 +220,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/hawkeye-customer-cache/src/config/env
+    volumes:
+      - ./services/hawkeye-customer-cache:/service/app
     depends_on:
       - "nats-server"
       - redis
@@ -218,6 +240,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/hawkeye-outage-monitor/src/config/env
+    volumes:
+      - ./services/hawkeye-outage-monitor:/service/app
     depends_on:
       - "nats-server"
       - redis
@@ -235,6 +259,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/intermapper-outage-monitor/src/config/env
+    volumes:
+      - ./services/intermapper-outage-monitor:/service/app
     depends_on:
       - "nats-server"
       - redis
@@ -252,6 +278,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/last-contact-report/src/config/env
+    volumes:
+      - ./services/last-contact-report:/service/app
     depends_on:
       - "nats-server"
       - redis
@@ -269,6 +297,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/links-metrics-api/src/config/env
+    volumes:
+      - ./services/links-metrics-api:/service/app
     depends_on:
       - "nats-server"
       - redis
@@ -286,6 +316,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/links-metrics-collector/src/config/env
+    volumes:
+      - ./services/links-metrics-collector:/service/app
     depends_on:
       - "nats-server"
       - redis
@@ -303,6 +335,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/lumin-billing-report/src/config/env
+    volumes:
+      - ./services/lumin-billing-report:/service/app
     ports:
       - 5099:5000
       - 9094:9090
@@ -347,6 +381,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/notifier/src/config/env
+    volumes:
+      - ./services/notifier:/service/app
     depends_on:
       - "nats-server"
       - redis
@@ -364,6 +400,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/repair-tickets-monitor/src/config/env
+    volumes:
+      - ./services/repair-tickets-monitor:/service/app
     depends_on:
       - "nats-server"
       - repair-tickets-kre-bridge
@@ -373,8 +411,6 @@ services:
     ports:
       - 5057:5000
       - 9096:9090
-    volumes:
-      - ./services/repair-tickets-monitor:/service/app:z
     stdin_open: true # for debug
     tty: true # for debug
 
@@ -388,6 +424,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/repair-tickets-kre-bridge/src/config/env
+    volumes:
+      - ./services/repair-tickets-kre-bridge:/service/app
     depends_on:
       - "nats-server"
       - redis
@@ -396,8 +434,6 @@ services:
       - 9010:9000
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    volumes:
-      - ./services/repair-tickets-kre-bridge:/service/app:z
     stdin_open: true # for debug
     tty: true # for debug
 
@@ -467,6 +503,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/service-outage-monitor/src/config/env-triage
+    volumes:
+      - ./services/service-outage-monitor:/service/app
     depends_on:
       - "nats-server"
       - redis
@@ -484,6 +522,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/sites-monitor/src/config/env
+    volumes:
+      - ./services/sites-monitor:/service/app
     depends_on:
       - "nats-server"
       - redis
@@ -501,6 +541,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/t7-bridge/src/config/env
+    volumes:
+      - ./services/t7-bridge:/service/app
     depends_on:
       - "nats-server"
       - redis
@@ -519,10 +561,10 @@ services:
         IGZ_PACKAGES_VERSION: 2.0.4
     env_file:
       - services/ticket-collector/src/config/env
+    volumes:
+      - ./services/ticket-collector:/service/app
     depends_on:
       - mongo
-    volumes:
-    - ./services/ticket-collector:/service/app
     ports:
       - 5617:5000
       - 9194:9000
@@ -538,11 +580,11 @@ services:
         IGZ_PACKAGES_VERSION: 2.0.4
     env_file:
       - services/ticket-statistics/src/config/env
+    volumes:
+      - ./services/ticket-statistics:/service/app
     depends_on:
       - mongo
       - redis
-    volumes:
-    - ./services/ticket-statistics:/service/app
     ports:
       - 3000:3000
       - 9195:9000
@@ -557,6 +599,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/tnba-feedback/src/config/env
+    volumes:
+      - ./services/tnba-feedback:/service/app
     depends_on:
       - "nats-server"
       - redis
@@ -603,6 +647,8 @@ services:
         DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/velocloud-bridge/src/config/env
+    volumes:
+      - ./services/velocloud-bridge:/service/app
     depends_on:
       - "nats-server"
       - redis
