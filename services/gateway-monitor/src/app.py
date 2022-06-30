@@ -4,6 +4,7 @@ import redis
 from application.actions.monitoring import Monitor as GatewayMonitor
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.servicenow_repository import ServiceNowRepository
+from application.repositories.utils_repository import UtilsRepository
 from application.repositories.velocloud_repository import VelocloudRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import config
@@ -31,6 +32,7 @@ class Container:
         self._scheduler = AsyncIOScheduler(timezone=config.TIMEZONE)
         self._server = QuartServer(config)
 
+        self._utils_repository = UtilsRepository()
         self._notifications_repository = NotificationsRepository(event_bus=self._event_bus)
         self._velocloud_repository = VelocloudRepository(
             event_bus=self._event_bus,
@@ -52,6 +54,7 @@ class Container:
             self._servicenow_repository,
             self._velocloud_repository,
             self._notifications_repository,
+            self._utils_repository,
         )
 
     async def start(self):

@@ -19,6 +19,7 @@ class Monitor:
         servicenow_repository,
         velocloud_repository,
         notifications_repository,
+        utils_repository,
     ):
         self._event_bus = event_bus
         self._logger = logger
@@ -27,6 +28,7 @@ class Monitor:
         self._servicenow_repository = servicenow_repository
         self._velocloud_repository = velocloud_repository
         self._notifications_repository = notifications_repository
+        self._utils_repository = utils_repository
 
     async def start_monitoring(self, exec_on_start: bool):
         self._logger.info("Scheduling Gateway Monitor job...")
