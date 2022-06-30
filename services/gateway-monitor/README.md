@@ -1,20 +1,20 @@
 # Table of contents
   * [Description](#description)
-  * [Velocloud Gateway monitoring](#velocloud-gateway-monitoring)
+  * [Gateway monitoring](#gateway-monitoring)
   * [Capabilities used](#capabilities-used) 
   * [Running in docker-compose](#running-in-docker-compose)
 
 # Description
-The objective of `velocloud-gateway-monitoring` is to monitor gateways status and make decisions according to the metric `tunnelCount`.
+The objective of `gateway-monitoring` is to monitor gateways status and make decisions according to the metric `tunnelCount`.
 
 This microservice is in charge of running one process:
-* Velocloud Gateway monitoing. This one is in charge of monitoring gateways status and checking service now endpoint if a gateway `tunnelCount` threshold 
+* Gateway monitoring. This one is in charge of monitoring gateways status and checking service now endpoint if a gateway `tunnelCount` threshold 
 is less than 20%. It takes one hour and five minutes as samples for checking it.
 
-# Velocloud Gateway monitoring
+# Gateway monitoring
 
 ### Overview
-The objective of the velocloud gateway monitoring process is to detect gateways which have a drop in `tunnelCount` in an hour interval and 
+The objective of the gateway monitoring process is to detect gateways which have a drop in `tunnelCount` in an hour interval and 
 check with service now if a ticket exists, or it should create a new one. If it exists it should update it in some way.
 All this ticket behaviour is managed automatically by the endpoint once we call it with the `gatewayId`.
 
@@ -36,4 +36,4 @@ This is the algorithm implemented to carry out the monitoring of gateways status
 
 # Running in docker-compose
 
-`docker-compose up --build nats-server redis velocloud-bridge servicenow-bridge notifier velocloud-gateway-monitor`
+`docker-compose up --build nats-server redis velocloud-bridge servicenow-bridge notifier gateway-monitor`

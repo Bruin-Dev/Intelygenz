@@ -3,15 +3,15 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: "{{ include "velocloud-gateway-monitor.fullname" . }}-{{ .host | replace "." "-" }}"
+  name: "{{ include "gateway-monitor.fullname" . }}-{{ .host | replace "." "-" }}"
   labels:
-    {{- include "velocloud-gateway-monitor.labels" . | nindent 4 }}
+    {{- include "gateway-monitor.labels" . | nindent 4 }}
 {{ with .Values.config.metrics.labels }}{{ toYaml . | indent 4 }}{{ end }}
 spec:
   endpoints:
   - port: {{ .Values.config.metrics.svc.name }}
   selector:
     matchLabels:
-      {{- include "velocloud-gateway-monitor.selectorLabels" . | nindent 6 }}
+      {{- include "gateway-monitor.selectorLabels" . | nindent 6 }}
       velocloud_host: {{ .host | quote }}
 {{- end }}

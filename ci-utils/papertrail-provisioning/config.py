@@ -74,6 +74,11 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "fraud-monitor",
                 },
                 {
+                    "query": f"gateway-monitor AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[gateway-monitor] - logs",
+                    "repository": "gateway-monitor",
+                },
+                {
                     "query": f"hawkeye-affecting-monitor AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[hawkeye-affecting-monitor] - logs",
                     "repository": "hawkeye-affecting-monitor",
@@ -239,11 +244,6 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "velocloud-bridge",
                 },
                 {
-                    "query": f"velocloud-gateway-monitor AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                    "search_name": f"[velocloud-gateway-monitor] - logs",
-                    "repository": "velocloud-gateway-monitor",
-                },
-                {
                     "query": f"{ENVIRONMENT_NAME}",
                     "search_name": f"[all modules] - logs",
                 },
@@ -287,6 +287,10 @@ PAPERTRAIL_PROVISIONING = {
                     "query": f"email-tagger-monitor AND {ENVIRONMENT_ID} AND "
                     f'"An error occurred when sending emails to Email Tagger"',
                     "search_name": "[email-tagger-monitor] KRE communication error",
+                },
+                {
+                    "query": f"gateway-monitor AND {ENVIRONMENT_NAME} AND " f'"ERROR:"',
+                    "search_name": f"[gateway-monitor] - ERROR messages",
                 },
                 {
                     "query": f"tnba-feedback AND {ENVIRONMENT_ID} AND " f'"An error occurred when posting metrics"',
@@ -343,10 +347,6 @@ PAPERTRAIL_PROVISIONING = {
                     "query": f"intermapper-outage-monitor AND {ENVIRONMENT_NAME} AND "
                     f'"Received the following from the gmail account mettel.automation@intelygenz.com: []"',
                     "search_name": f"[intermapper-outage-monitor] - Not receiving emails",
-                },
-                {
-                    "query": f"velocloud-gateway-monitor AND {ENVIRONMENT_NAME} AND " f'"ERROR:"',
-                    "search_name": f"[velocloud-gateway-monitor] - ERROR messages",
                 },
             ],
         },

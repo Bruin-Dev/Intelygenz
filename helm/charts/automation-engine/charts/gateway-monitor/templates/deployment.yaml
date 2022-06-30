@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "velocloud-gateway-monitor.fullname" . }}
+  name: {{ include "gateway-monitor.fullname" . }}
   labels:
-    {{- include "velocloud-gateway-monitor.labels" . | nindent 4 }}
+    {{- include "gateway-monitor.labels" . | nindent 4 }}
   annotations:
     reloader.stakater.com/search: "true"
 spec:
@@ -12,13 +12,13 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "velocloud-gateway-monitor.selectorLabels" . | nindent 6 }}
+      {{- include "gateway-monitor.selectorLabels" . | nindent 6 }}
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        {{- include "velocloud-gateway-monitor.selectorLabels" . | nindent 8 }}
+        {{- include "gateway-monitor.selectorLabels" . | nindent 8 }}
       annotations:
         fluentbit.io/parser: mettel_parser_logs
     spec:
@@ -45,9 +45,9 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:
             - configMapRef:
-                name: {{ include "velocloud-gateway-monitor.configmapName" . }}
+                name: {{ include "gateway-monitor.configmapName" . }}
             - secretRef:
-                name: {{ include "velocloud-gateway-monitor.secretName" . }}
+                name: {{ include "gateway-monitor.secretName" . }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

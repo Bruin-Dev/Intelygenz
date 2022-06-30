@@ -9,19 +9,19 @@ CURRENT_ENVIRONMENT = os.environ["CURRENT_ENVIRONMENT"]
 TIMEZONE = os.environ["TIMEZONE"]
 
 LOG_CONFIG = {
-    "name": "velocloud-gateway-monitor",
+    "name": "gateway-monitor",
     "level": logging.DEBUG,
     "stream_handler": logging.StreamHandler(sys.stdout),
     "format": f"%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s",
     "papertrail": {
         "active": os.environ["PAPERTRAIL_ACTIVE"] == "true",
-        "prefix": os.getenv("PAPERTRAIL_PREFIX", f"{ENVIRONMENT_NAME}-velocloud-gateway-monitor"),
+        "prefix": os.getenv("PAPERTRAIL_PREFIX", f"{ENVIRONMENT_NAME}-gateway-monitor"),
         "host": os.environ["PAPERTRAIL_HOST"],
         "port": int(os.environ["PAPERTRAIL_PORT"]),
     },
 }
 
-QUART_CONFIG = {"title": "velocloud-gateway-monitor", "port": 5000}
+QUART_CONFIG = {"title": "gateway-monitor", "port": 5000}
 
 REDIS = {"host": os.environ["REDIS_HOSTNAME"]}
 

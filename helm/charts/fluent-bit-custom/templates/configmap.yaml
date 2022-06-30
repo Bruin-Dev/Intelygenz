@@ -325,10 +325,10 @@ data:
         auto_create_group   true
     [OUTPUT]
         Name                cloudwatch
-        Match               kube.var.log.containers.velocloud-gateway-monitor*
+        Match               kube.var.log.containers.gateway-monitor*
         region              {{ .Values.config.region }}
         log_group_name      {{ .Values.config.logGroupName }}
-        log_stream_name     velocloud-gateway-monitor
+        log_stream_name     gateway-monitor
         auto_create_group   true
 
 

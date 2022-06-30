@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "velocloud-gateway-monitor.configmapName" . }}
+  name: {{ include "gateway-monitor.configmapName" . }}
   labels:
-    {{- include "velocloud-gateway-monitor.labels" . | nindent 4 }}
+    {{- include "gateway-monitor.labels" . | nindent 4 }}
   annotations:
     reloader.stakater.com/match: "true"
 data:
   CURRENT_ENVIRONMENT: {{ .Values.global.current_environment | quote }}
   ENVIRONMENT_NAME: {{ .Values.global.environment | quote }}
-  PAPERTRAIL_PREFIX: "{{ include "velocloud-gateway-monitor.fullname" . }}-{{ .Values.image.tag }}"
+  PAPERTRAIL_PREFIX: "{{ include "gateway-monitor.fullname" . }}-{{ .Values.image.tag }}"

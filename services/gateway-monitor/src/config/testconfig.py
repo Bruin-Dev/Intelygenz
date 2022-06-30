@@ -14,7 +14,7 @@ LOG_CONFIG = {
     "format": "%(asctime)s: %(module)s: %(levelname)s: %(message)s",
 }
 
-QUART_CONFIG = {"title": "velocloud-gateway-monitor", "port": 5000}
+QUART_CONFIG = {"title": "gateway-monitor", "port": 5000}
 
 METRICS_SERVER_CONFIG = {"port": 9090}
 

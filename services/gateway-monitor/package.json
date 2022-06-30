@@ -1,5 +1,5 @@
 {
-    "name": "velocloud-gateway-monitor",
+    "name": "gateway-monitor",
     "version": "0.0.1",
     "dependencies": {},
     "devDependencies": {}

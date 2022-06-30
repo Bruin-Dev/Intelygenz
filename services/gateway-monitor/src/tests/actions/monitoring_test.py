@@ -146,9 +146,7 @@ class TestMonitor:
             Gateway("mettel.velocloud.net", 1, 100),
         )
         gateway_pairs = monitor._build_pair_statuses(gateway_status_first_interval, gateway_status_second_interval)
-        expected_result = GatewayList(
-            Gateway("mettel.velocloud.net", 2, 323)
-        )
+        expected_result = GatewayList(Gateway("mettel.velocloud.net", 2, 323))
 
         unhealthy_gateways = monitor._check_average_tunnel_count(gateway_pairs)
 

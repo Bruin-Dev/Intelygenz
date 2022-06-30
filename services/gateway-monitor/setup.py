@@ -4,9 +4,9 @@
 from setuptools import find_packages, setup
 
 setup(
-    name="velocloud-gateway-monitor",
+    name="gateway-monitor",
     version="1.0.0",
-    description="MetTel's monitor for Velocloud Gateway",
+    description="MetTel's automation gateway monitor",
     packages=find_packages(exclude=["*tests"]),
     include_package_data=True,
     setup_requires=[

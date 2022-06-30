@@ -3,7 +3,7 @@ ARG REPOSITORY_URL
 ARG DOCKER_BASE_IMAGE_VERSION
 FROM ${REPOSITORY_URL}/python-3.6-alpine:${DOCKER_BASE_IMAGE_VERSION}
 
-COPY services/velocloud-gateway-monitor/ /service/app
+COPY services/gateway-monitor/ /service/app
 
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
