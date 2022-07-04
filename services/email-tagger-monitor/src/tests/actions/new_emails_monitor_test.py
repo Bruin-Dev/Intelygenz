@@ -316,7 +316,7 @@ class TestNewEmailsMonitor:
 
         new_emails_monitor._repair_parent_email_storage.exists.assert_called_once_with(parent_id)
         new_emails_monitor._repair_reply_email_storage.set.assert_called_once_with(
-            id=email_id, data=email_model
+            id=email_id, data=email_model, ttl_seconds=300
         )
         new_emails_monitor._new_emails_repository.mark_complete.assert_called_once_with(email_id)
         new_emails_monitor._email_tagger_repository.get_prediction.assert_not_called()
