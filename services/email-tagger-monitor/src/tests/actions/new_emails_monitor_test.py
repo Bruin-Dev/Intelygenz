@@ -1,10 +1,10 @@
 from datetime import datetime
-from unittest.mock import Mock, call, patch
+from unittest.mock import Mock, call, patch, ANY
 
 import pytest
 from application.actions import new_emails_monitor as new_emails_monitor_module
 from application.actions.new_emails_monitor import NewEmailsMonitor
-from framework.storage.model.email_storage import Email
+from framework.storage.model.email_storage import Email, EmailMetadata
 from asynctest import CoroutineMock
 from config import testconfig
 from shortuuid import uuid
@@ -304,6 +304,7 @@ class TestNewEmailsMonitor:
             parent_id=email_data["email"].get("parent_id", None),
             previous_id=email_data["email"].get("previous_email_id", None),
             tag=email_data["email"].get("tag", None),
+            metadata=EmailMetadata()
         )
 
         new_emails_monitor._repair_parent_email_storage.exists.return_value = 1
@@ -315,7 +316,7 @@ class TestNewEmailsMonitor:
 
         new_emails_monitor._repair_parent_email_storage.exists.assert_called_once_with(parent_id)
         new_emails_monitor._repair_reply_email_storage.set.assert_called_once_with(
-            id=email_id, data=email_model, ttl_seconds=3600
+            id=email_id, data=email_model
         )
         new_emails_monitor._new_emails_repository.mark_complete.assert_called_once_with(email_id)
         new_emails_monitor._email_tagger_repository.get_prediction.assert_not_called()
