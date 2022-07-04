@@ -1,11 +1,11 @@
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 
 
 @pytest.fixture(scope="session")
 def make_rpc_request():
-    def _inner(*, request_id: str, body: Dict[str, int]):
+    def _inner(*, request_id: str, body: Any):
         request = {
             "request_id": request_id,
             "body": body,
@@ -17,7 +17,7 @@ def make_rpc_request():
 
 @pytest.fixture(scope="session")
 def make_rpc_response():
-    def _inner(*, request_id: str, body: Dict[str, int], status: int):
+    def _inner(*, request_id: str, body: Any, status: int):
         return {
             "request_id": request_id,
             "body": body,

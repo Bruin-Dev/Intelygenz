@@ -241,3 +241,25 @@ __request.enterprises.names response schema__
     "status": 200
 }
 ```
+__request.network.gateway.status schema__
+```
+{
+    "request_id": 123, 
+    "body": {
+                "host": "some.host",
+                "since": "2020-10-19T15:22:03.345Z",
+                "metrics": "some_metric",
+            }
+}
+```
+__request.network.gateway.status response schema__
+```
+{
+    "request_id": 123, 
+    "body": [
+            {"id": 2, "tunnelCount": 423},
+            {"id": 1, "tunnelCount": 100},
+    ]
+    "status": 200
+}
+```

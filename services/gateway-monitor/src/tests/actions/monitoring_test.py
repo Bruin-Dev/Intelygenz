@@ -4,8 +4,6 @@ from unittest.mock import Mock, patch
 
 import pytest
 from application.actions import monitoring as monitoring_module
-from application.actions.monitoring import GatewayPair
-from application.dataclasses import Gateway, GatewayList
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
@@ -20,19 +18,23 @@ class TestMonitor:
     def instance_test(
         self,
         monitor,
+        logger,
         event_bus,
         scheduler,
         servicenow_repository,
         velocloud_repository,
         notifications_repository,
+        utils_repository,
     ):
 
         assert monitor._event_bus is event_bus
+        assert monitor._logger is logger
         assert monitor._scheduler is scheduler
         assert monitor._config is testconfig
         assert monitor._velocloud_repository is velocloud_repository
         assert monitor._servicenow_repository is servicenow_repository
         assert monitor._notifications_repository is notifications_repository
+        assert monitor._utils_repository is utils_repository
 
     @pytest.mark.asyncio
     async def start_monitoring_with_exec_on_start_test(self, monitor):
@@ -85,81 +87,101 @@ class TestMonitor:
             )
 
     @pytest.mark.asyncio
-    async def monitoring_process_ok_test(self, monitor):
-        monitor._tunnel_count_check = CoroutineMock()
+    async def monitoring_process_test(self, monitor):
+        monitor._process_host = CoroutineMock()
 
         await monitor._monitoring_process()
 
-        monitor._tunnel_count_check.assert_awaited()
+        monitor._process_host.assert_awaited()
 
     @pytest.mark.asyncio
-    async def tunnel_count_check_ok_test(self, monitor, make_rpc_response, logger):
-        response_status = HTTPStatus.OK
-        gateway_status_first_interval = GatewayList(
-            Gateway("mettel.velocloud.net", 2, 423),
-            Gateway("mettel.velocloud.net", 1, 100),
-        )
-        expected_response_first_inteval = make_rpc_response(
-            request_id=uuid_, body=gateway_status_first_interval, status=response_status
-        )
-        gateway_status_second_interval = GatewayList(
-            Gateway("mettel.velocloud.net", 2, 323),
-            Gateway("mettel.velocloud.net", 1, 100),
-        )
-        expected_response_second_interval = make_rpc_response(
-            request_id=uuid_, body=gateway_status_second_interval, status=response_status
-        )
-        monitor._velocloud_repository.get_network_gateway_status_list = CoroutineMock(
-            side_effect=[expected_response_first_inteval, expected_response_second_interval]
-        )
-        monitor._servicenow_repository._check_servicenow = CoroutineMock()
+    async def process_host_ok_test(self, monitor, make_gateway, make_gateway_metrics, make_rpc_response):
+        host = monitor._config.MONITOR_CONFIG["monitored_velocloud_hosts"][0]
+        gateways = [make_gateway(id=1), make_gateway(id=2)]
+        gateway_metrics_1 = make_gateway_metrics(tunnel_count={"average": 100, "min": 100})
+        gateway_metrics_2 = make_gateway_metrics(tunnel_count={"average": 100, "min": 50})
 
-        await monitor._tunnel_count_check(monitor._config.MONITOR_CONFIG["monitored_velocloud_hosts"][0])
+        gateways_response = make_rpc_response(request_id=uuid_, body=gateways, status=HTTPStatus.OK)
+        gateway_metrics_response_1 = make_rpc_response(request_id=uuid_, body=gateway_metrics_1, status=HTTPStatus.OK)
+        gateway_metrics_response_2 = make_rpc_response(request_id=uuid_, body=gateway_metrics_2, status=HTTPStatus.OK)
 
-        monitor._velocloud_repository.get_network_gateway_status_list.assert_awaited()
-        monitor._check_servicenow.assert_awaited()
+        monitor._velocloud_repository.get_network_gateway_list = CoroutineMock(return_value=gateways_response)
+        monitor._velocloud_repository.get_gateway_status_metrics = CoroutineMock(
+            side_effect=[gateway_metrics_response_1, gateway_metrics_response_2]
+        )
+        monitor._report_servicenow_incident = CoroutineMock()
+
+        await monitor._process_host(host)
+
+        monitor._velocloud_repository.get_network_gateway_list.assert_awaited_once_with(host)
+        assert monitor._velocloud_repository.get_gateway_status_metrics.call_count == len(gateways)
+        monitor._report_servicenow_incident.assert_awaited_once()
 
     @pytest.mark.asyncio
-    async def build_pair_statuses_ok_test(self, monitor):
-        gateway_status_first_interval = GatewayList(
-            Gateway("mettel.velocloud.net", 2, 423),
-            Gateway("mettel.velocloud.net", 1, 100),
-        )
-        gateway_status_second_interval = GatewayList(
-            Gateway("mettel.velocloud.net", 2, 323),
-            Gateway("mettel.velocloud.net", 1, 100),
-        )
-        expected_result = GatewayPair(gateway_status_first_interval, gateway_status_second_interval)
+    async def report_servicenow_incident_test(
+        self, monitor, make_gateway_with_metrics, make_rpc_response, make_report_incident_response
+    ):
+        gateway = make_gateway_with_metrics(id=1, tunnel_count={"average": 100, "min": 50})
 
-        result = monitor._build_pair_statuses(gateway_status_first_interval, gateway_status_second_interval)
+        body_1 = make_report_incident_response(state="inserted")
+        body_2 = make_report_incident_response(state="ignored")
+        body_3 = make_report_incident_response(state="reopened")
 
+        response_1 = make_rpc_response(request_id=uuid_, body=body_1, status=HTTPStatus.OK)
+        response_2 = make_rpc_response(request_id=uuid_, body=body_2, status=HTTPStatus.OK)
+        response_3 = make_rpc_response(request_id=uuid_, body=body_3, status=HTTPStatus.OK)
+        response_4 = make_rpc_response(request_id=uuid_, body=None, status=HTTPStatus.INTERNAL_SERVER_ERROR)
+        responses = [response_1, response_2, response_3, response_4]
+
+        monitor._servicenow_repository.report_incident = CoroutineMock(side_effect=responses)
+
+        await monitor._report_servicenow_incident(gateway)
+        await monitor._report_servicenow_incident(gateway)
+        await monitor._report_servicenow_incident(gateway)
+        await monitor._report_servicenow_incident(gateway)
+
+        assert monitor._servicenow_repository.report_incident.call_count == len(responses)
+
+    def filter_gateways_with_metrics_test(self, monitor, make_gateway_with_metrics):
+        gateway_1 = make_gateway_with_metrics(id=1, tunnel_count={"average": 100, "min": 100})
+        gateway_2 = make_gateway_with_metrics(id=2)
+        gateways = [gateway_1, gateway_2]
+        expected_result = [gateway_1]
+
+        result = monitor._filter_gateways_with_metrics(gateways)
         assert result == expected_result
 
-    @pytest.mark.asyncio
-    async def check_average_tunnel_count_ok_test(self, monitor):
-        gateway_status_second_interval = GatewayList(
-            Gateway("mettel.velocloud.net", 2, 323),
-            Gateway("mettel.velocloud.net", 1, 100),
-        )
-        gateway_status_first_interval = GatewayList(
-            Gateway("mettel.velocloud.net", 2, 423),
-            Gateway("mettel.velocloud.net", 1, 100),
-        )
-        gateway_pairs = monitor._build_pair_statuses(gateway_status_first_interval, gateway_status_second_interval)
-        expected_result = GatewayList(Gateway("mettel.velocloud.net", 2, 323))
+    def has_metrics_test(self, monitor, make_gateway_with_metrics):
+        gateway = make_gateway_with_metrics(id=1, tunnel_count={"average": 100, "min": 100})
+        result = monitor._has_metrics(gateway)
+        assert result is True
 
-        unhealthy_gateways = monitor._check_average_tunnel_count(gateway_pairs)
+        gateway = make_gateway_with_metrics(id=2, tunnel_count={"average": 0, "min": 0})
+        result = monitor._has_metrics(gateway)
+        assert result is False
 
-        assert unhealthy_gateways == expected_result
+        gateway = make_gateway_with_metrics(id=3, tunnel_count={})
+        result = monitor._has_metrics(gateway)
+        assert result is False
 
-    @pytest.mark.asyncio
-    async def tunnel_count_less_percentual_value_ok_test(self, monitor):
-        gateway_status_first_interval = 423
-        gateway_status_second_interval = 323
+        gateway = make_gateway_with_metrics(id=4)
+        result = monitor._has_metrics(gateway)
+        assert result is False
 
-        percentual_loss = (1 - (gateway_status_second_interval / gateway_status_first_interval)) * 100
-        expected_result = percentual_loss > monitor._config.MONITOR_CONFIG["thresholds"]["tunnel_count"]
+    def get_unhealthy_gateways_test(self, monitor, make_gateway_with_metrics):
+        gateway_1 = make_gateway_with_metrics(id=1, tunnel_count={"average": 100, "min": 100})
+        gateway_2 = make_gateway_with_metrics(id=2, tunnel_count={"average": 100, "min": 50})
+        gateways = [gateway_1, gateway_2]
+        expected_result = [gateway_2]
 
-        result = monitor._tunnel_count_less(gateway_status_first_interval, gateway_status_second_interval)
-
+        result = monitor._get_unhealthy_gateways(gateways)
         assert result == expected_result
+
+    def is_tunnel_count_within_threshold_test(self, monitor, make_gateway_with_metrics):
+        gateway = make_gateway_with_metrics(id=1, tunnel_count={"average": 100, "min": 100})
+        result = monitor._is_tunnel_count_within_threshold(gateway)
+        assert result is True
+
+        gateway = make_gateway_with_metrics(id=2, tunnel_count={"average": 100, "min": 50})
+        result = monitor._is_tunnel_count_within_threshold(gateway)
+        assert result is False

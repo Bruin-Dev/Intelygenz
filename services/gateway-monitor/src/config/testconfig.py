@@ -33,10 +33,7 @@ MONITOR_CONFIG = {
     "stop_delay": 0,
     "monitoring_job_interval": 60,
     "monitored_velocloud_hosts": ["mettel.velocloud.net"],
-    "gateway_lookup_intervals": {
-        "first_lookup": 3600,
-        "second_lookup": 300,
-    },
+    "gateway_metrics_lookup_interval": 3600,
     "thresholds": {
         "tunnel_count": 20,
     },

@@ -142,28 +142,23 @@ def make_network_enterprises_body(make_network_enterprises_edges):
 
 
 @pytest.fixture(scope="session")
-def make_network_gateway_status_body():
+def make_network_gateways_body():
     def _inner(
         *,
+        host: str = "",
         gateway_ids: List[int] = None,
     ):
         gateway_ids = [1] if gateway_ids is None else gateway_ids
-        gateway_status_template = {
-            "gatewayId": 0,
-            "tunnelCount": 0,
-            "tunnelCountV6": 0,
-            "memoryPct": 0,
-            "flowCount": 0,
-            "cpuPct": 0,
-            "handoffQueueDrops": 0,
-            "connectedEdges": 0,
-        }
-        body = {"metaData": {"limit": 0, "more": True}, "data": []}
+        body = []
 
         for gateway_id in gateway_ids:
-            gateway_status = gateway_status_template.copy()
-            gateway_status["id"] = gateway_id
-            body["data"].append(gateway_status)
+            gateway = {
+                "host": host,
+                "id": gateway_id,
+                "name": f"vcg-test-{gateway_id}",
+            }
+            body.append(gateway)
+
         return body
 
     return _inner
