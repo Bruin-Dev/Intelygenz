@@ -27,8 +27,9 @@ locals {
   // Direct Connect way created and managed by MetTel's Network department
   direct-connect-gateway-name = "Corporate-DC-GW"
 
-  // S3 bucket with EKS cluster info local variables
-  bucket_name = var.CURRENT_ENVIRONMENT == "dev" ? "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}-eks" : "${var.common_info.project}-eks"
+  // S3 bucket
+  bucket_eks_name = var.CURRENT_ENVIRONMENT == "dev" ? "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}-eks" : "${var.common_info.project}-eks"
+  bucket_logs_name = "${var.common_info.project}-logs"
 
   eks_tags = var.CURRENT_ENVIRONMENT == "dev" ? {
     format("kubernetes.io/cluster/%s-dev", var.EKS_KRE_BASE_NAME) = "shared",
