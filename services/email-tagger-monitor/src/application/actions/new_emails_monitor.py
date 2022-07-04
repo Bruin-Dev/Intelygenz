@@ -10,17 +10,17 @@ from pytz import timezone
 
 class NewEmailsMonitor:
     def __init__(
-        self,
-        event_bus,
-        logger,
-        scheduler,
-        config,
-        predicted_tag_repository,
-        new_emails_repository,
-        repair_parent_email_storage,
-        repair_reply_email_storage,
-        email_tagger_repository,
-        bruin_repository,
+            self,
+            event_bus,
+            logger,
+            scheduler,
+            config,
+            predicted_tag_repository,
+            new_emails_repository,
+            repair_parent_email_storage,
+            repair_reply_email_storage,
+            email_tagger_repository,
+            bruin_repository,
     ):
         self._event_bus = event_bus
         self._logger = logger
@@ -95,7 +95,9 @@ class NewEmailsMonitor:
                         tag=email_data["email"].get("tag", None),
                     )
 
-                    self._repair_reply_email_storage.set(id=email_id, data=email, ttl_seconds=300)
+                    self._repair_reply_email_storage.set(id=email_id, data=email,
+                                                         ttl_seconds=self._config.MONITOR_CONFIG[
+                                                             "reply_email_ttl"])
                     # Remove from email tagger namespace
                     self._new_emails_repository.mark_complete(email_id)
                     return
