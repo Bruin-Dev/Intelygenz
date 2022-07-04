@@ -6,7 +6,7 @@ from application.actions import new_emails_monitor as new_emails_monitor_module
 from application.actions.new_emails_monitor import NewEmailsMonitor
 from asynctest import CoroutineMock
 from config import testconfig
-from framework.storage.model.email_storage import Email, EmailMetadata
+from framework.storage.model.email_storage import Email
 from shortuuid import uuid
 
 uuid_ = uuid()
