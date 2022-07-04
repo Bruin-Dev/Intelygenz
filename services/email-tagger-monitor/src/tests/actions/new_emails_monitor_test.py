@@ -4,7 +4,7 @@ from unittest.mock import Mock, call, patch, ANY
 import pytest
 from application.actions import new_emails_monitor as new_emails_monitor_module
 from application.actions.new_emails_monitor import NewEmailsMonitor
-from framework.storage.model.email_storage import Email, EmailMetadata
+from framework.storage.model.email_storage import Email
 from asynctest import CoroutineMock
 from config import testconfig
 from shortuuid import uuid
