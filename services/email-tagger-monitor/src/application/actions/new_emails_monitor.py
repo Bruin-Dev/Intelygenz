@@ -95,7 +95,7 @@ class NewEmailsMonitor:
                         tag=email_data["email"].get("tag", None),
                     )
 
-                    self._repair_reply_email_storage.set(id=email_id, data=email)
+                    self._repair_reply_email_storage.set(id=email_id, data=email, ttl_seconds=300)
                     # Remove from email tagger namespace
                     self._new_emails_repository.mark_complete(email_id)
                     return
