@@ -304,7 +304,6 @@ class TestNewEmailsMonitor:
             parent_id=email_data["email"].get("parent_id", None),
             previous_id=email_data["email"].get("previous_email_id", None),
             tag=email_data["email"].get("tag", None),
-            metadata=EmailMetadata(),
         )
 
         new_emails_monitor._repair_parent_email_storage.exists.return_value = 1
