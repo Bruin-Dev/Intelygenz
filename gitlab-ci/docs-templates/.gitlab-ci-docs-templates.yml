@@ -1,0 +1,29 @@
+.docs_template_deploy: &docs_template_deploy
+  image:
+    name: ${CI_REGISTRY}/mettel/docker_images/python3.6_alpine_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  script:
+    # define banner
+    - >
+      banner()
+      {
+        echo "+----------------------------------------------------------------------------------+"
+        printf "| %-80s |\n" "`date`"
+        printf "\e[1m| %-80s |\e[0m\n%s" "$@"
+        echo "+----------------------------------------------------------------------------------+"
+      }
+    - banner "Generating docs"
+    - git config --global user.name "gitlab" && git config --global user.email "gitlab@mettel.net"
+    - git fetch --all --force 
+    - git checkout $DOCS_BRANCH || git checkout -b $DOCS_BRANCH
+    - git checkout $CI_COMMIT_SHA
+    - mike deploy --update-aliases --rebase -r $HTTPS_REMOTE -p -b $DOCS_BRANCH $AUTOMATION_TAG latest
+    - mike set-default --rebase -r $HTTPS_REMOTE -p -b $DOCS_BRANCH latest
+    - export LAST_COMMIT_HASH=$(curl --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "${GITLAB_API_URL}/repository/commits/${DOCS_BRANCH}" | jq -r .id)
+    - banner "Updating s3 bucket"
+    - wget -O site.zip --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" ${GITLAB_API_URL}/repository/archive.zip\?sha\=${LAST_COMMIT_HASH}
+    - unzip -q site.zip
+    - aws s3 sync automation-engine-*/ $DOCS_S3_BUCKET &> /dev/null
+    - echo -e "s3 bucket updated. Check docs site in:\n    https://${DOCS_DNS}.mettel-automation.net" 

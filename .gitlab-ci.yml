@@ -8,18 +8,23 @@ stages:
   - build
   - deploy
   - helm
+  - docs
   - destroy
 
 variables:
+  # CI/CD variables
   NATS_SERVER1: "nats://nats-server:4222"
   NATS_MODULE_VERSION: 2.1.0
   DOCKER_HOST: tcp://localhost:2375
   DOCKER_DRIVER: overlay2
   REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
   IGZ_PACKAGES_REPOSITORY_URL: https://s3pypi.mettel-automation.net/igzpackages/index.html
+  HTTPS_REMOTE: https://${GITLAB_TOKEN_USER}:${GITLAB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git
+  GITLAB_API_URL: https://gitlab.intelygenz.com/api/v4/projects/1040
   IGZ_PACKAGES_VERSION: 2.0.4
   DOCKER_BASE_IMAGE_VERSION: 2.2.0
-  DOCKER_IMAGE_UTILS_VERSION: 1.4.2
+  DOCKER_IMAGE_UTILS_VERSION: 1.4.7
+
   # Desired replicas of microservices
   BRUIN_BRIDGE_DESIRED_TASKS: "2"
   CUSTOMER_CACHE_DESIRED_TASKS: "1"
@@ -63,6 +68,8 @@ include:
   - local: 'gitlab-ci/basic-templates/.gitlab-ci-build-image-templates.yml'
   # Templates used in Gitlab-CI jobs for helm jobs
   - local: 'gitlab-ci/helm-templates/.gitlab-ci-helm-templates.yml'
+  # Templates used in Gitlab-CI jobs for docs jobs
+  - local: 'gitlab-ci/docs-templates/.gitlab-ci-docs-templates.yml'
   # Templates used in Gitlab-CI jobs for terraform jobs
   - local: 'gitlab-ci/terraform-templates/.gitlab-ci-terraform-basic-templates.yml'
   - local: 'gitlab-ci/terraform-templates/.gitlab-ci-terraform-deploy-templates.yml'
@@ -74,6 +81,7 @@ include:
   - local: 'gitlab-ci/kre-templates/.gitlab-ci-kre-validate-templates.yml'
   # Gitlab-CI jobs declaration for infrastructure
   - local: 'helm/.gitlab-ci.yml'
+  - local: 'docs/.gitlab-ci.yml'
   - local: 'infra-as-code/basic-infra/.gitlab-ci.yml'
   - local: 'infra-as-code/ecr-repositories/.gitlab-ci.yml'
   - local: 'infra-as-code/kre/.gitlab-ci.yml'

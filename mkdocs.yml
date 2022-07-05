@@ -1,0 +1,27 @@
+site_name: Automation Engine Documentation
+site_url: https://docs.mettel-automation.net
+theme: 
+  name: material
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - navigation.tabs
+nav:
+  - Home: "README.md"
+  - Topics: 
+    - Concepts: "CONCEPTS.md"
+    - Pipelines:
+      - Basic configurations: "pipeline/BASIC_CI_CONFIGURATION.md"
+      - Pipeline rules: "pipeline/PIPELINE_RULES.md"
+    - Documentation:
+      - Organization: "DOCUMENTATION.md"
+      - MetTel decisions: "decisions/README.md"
+      - Metrics definitions: "metrics-definitions/README.md"
+    - Development rules: "README.md"
+    - Work in a local env:
+      - Launch docker compose: "kafka/LAUNCH_DOCKER_COMPOSE.md"
+    - Datalake: "snowflake/README.md"
+    - Manueal processes: "README.md"
+extra:
+  version:
+    provider: mike

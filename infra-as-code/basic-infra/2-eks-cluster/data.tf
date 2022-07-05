@@ -1,8 +1,8 @@
-data "aws_caller_identity" "current" {
-}
+data "aws_caller_identity" "current" {}
+
+data "aws_region" "current" {}
 
 ## Data from VPC
-
 data "aws_vpc" "mettel-automation-vpc" {
   filter {
     name   = "tag:Name"
@@ -88,6 +88,15 @@ data "aws_security_group" "elb_ingress_nginx_eks_security_group" {
     module.mettel-automation-eks-cluster,
     helm_release.ingress-nginx
   ]
+}
+
+data "aws_s3_bucket" "bucket_logs" {
+  bucket = "mettel-automation-logs"
+}
+
+data "aws_route53_zone" "mettel_automation" {
+  name         = "mettel-automation.net."
+  private_zone = false
 }
 
 # Data from ACM
