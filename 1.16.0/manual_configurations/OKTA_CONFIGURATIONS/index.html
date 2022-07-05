@@ -600,14 +600,14 @@ OKTA and AWS SSO, because of that, groups and users are going to be synced if so
 <ul>
 <li>Configure IdP with Okta, <a href="https://docs.aws.amazon.com/singlesignon/latest/userguide/okta-idp.html">this is the guide</a>.</li>
 <li>Create the following groups:</li>
-<li>IPA-FED-INT-PRIVILEGED: Internal users Federated privileged group on the federal account. Administration accounts.</li>
-<li>IPA-FED-INT-NON-PRIVILEGED: Internal users Federated non privileged group on the federal account.</li>
-<li>IPA-COM-INT-PRIVILEGED: Internal users Commercial privileged group on the commercial account. Administration accounts.</li>
-<li>IPA-COM-INT-NON-PRIVILEGED: Internal users Federated privileged group on the commercial account. Administration accounts.</li>
-<li>IPA-FED-EXT-PRIVILEGED: External users Federated privileged group on the federal account. Administration accounts.</li>
-<li>IPA-FED-EXT-NON-PRIVILEGED: External users Federated non privileged group on the federal account.</li>
-<li>IPA-COM-EXT-PRIVILEGED: External users Commercial privileged group on the commercial account. Administration accounts.</li>
-<li>IPA-COM-EXT-NON-PRIVILEGED: External users Federated privileged group on the commercial account. Administration accounts.</li>
+<li>OKTA-IPA-FED-INT-PRIVILEGED: Internal users Federated privileged group on the federal account. Administration accounts.</li>
+<li>OKTA-IPA-FED-INT-NON-PRIVILEGED: Internal users Federated non privileged group on the federal account.</li>
+<li>OKTA-IPA-COM-INT-PRIVILEGED: Internal users Commercial privileged group on the commercial account. Administration accounts.</li>
+<li>OKTA-IPA-COM-INT-NON-PRIVILEGED: Internal users Federated privileged group on the commercial account. Administration accounts.</li>
+<li>OKTA-IPA-FED-EXT-PRIVILEGED: External users Federated privileged group on the federal account. Administration accounts.</li>
+<li>OKTA-IPA-FED-EXT-NON-PRIVILEGED: External users Federated non privileged group on the federal account.</li>
+<li>OKTA-IPA-COM-EXT-PRIVILEGED: External users Commercial privileged group on the commercial account. Administration accounts.</li>
+<li>OKTA-IPA-COM-EXT-NON-PRIVILEGED: External users Federated privileged group on the commercial account. Administration accounts.</li>
 <li>Associate permissions to groups. <a href="https://docs.aws.amazon.com/singlesignon/latest/userguide/iam-auth-access-overview.html">Guide</a></li>
 <li>Privileged accounts will have general administrator permissions</li>
 <li>Non privileged accounts will only have access to logs on cloud watch and grafana</li>

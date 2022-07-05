@@ -61,7 +61,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#1-organization" class="md-skip">
+        <a href="#1-docs-organization" class="md-skip">
           Skip to content
         </a>
       
@@ -382,9 +382,40 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Organization
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Organization
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#folder-structure" class="md-nav__link">
+    Folder structure
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -541,6 +572,21 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#folder-structure" class="md-nav__link">
+    Folder structure
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -553,11 +599,32 @@
                 
 
 
-<div align="center">
-<img src="http://photos.prnewswire.com/prnfull/20141022/153661LOGO?p=publish"  width="300" height="120">
-</div>
-
-<h1 id="1-organization">1. Organization</h1>
+<h1 id="1-docs-organization">1. DOCS Organization</h1>
+<h2 id="folder-structure">Folder structure</h2>
+<ul>
+<li><strong>diagrams</strong>: In this folder you will encounter all the diagrams Intelygenz has done.</li>
+<li><strong>decisions</strong>: Folder where Intelygenz store the decisions made by the team.</li>
+<li><strong>metrics-definitions</strong>: Here is where all the metrics of the project are defined.</li>
+<li><strong>images</strong>: Folder to store images to be use on other MD files.</li>
+<li><strong>logging</strong>: </li>
+</ul>
+<h1 id="2-rules">2. Rules</h1>
+<ul>
+<li>This is the Main source of truth.</li>
+<li>Docs must be in the docs folder.</li>
+<li>Always make atomic commits.</li>
+<li>All the documentation must be reviewed and approved.</li>
+<li>Before start the code of a new metric, document it, and work on it only after approved by another team member.</li>
+<li>Organization of the documentation matters. Discuss with your team where is the best place to put new stuff.</li>
+<li>Always link a new MD file in an index README.md where makes sense.</li>
+<li>Diagrams are important, before start coding a new system/infrastructure, update the diagrams.</li>
+</ul>
+<h1 id="3-tools">3. Tools</h1>
+<h3 id="diagrams">Diagrams</h3>
+<p>To create good diagrams centralized in the repository we use <a href="https://www.diagrams.net/">diagrams.net</a>, this tool has plugins for the two main
+IDE that the company use:
+* <a href="https://plugins.jetbrains.com/plugin/15635-diagrams-net-integration">IntelliJ</a>
+* <a href="https://www.diagrams.net/blog/embed-diagrams-vscode">VSCode</a></p>
 <hr />
 <p>With passion from the <a href="https://www.intelygenz.com">Intelygenz</a> Team @ 2021</p>
 
