@@ -539,6 +539,39 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#list-of-decisions-made-by-the-ipa-system" class="md-nav__link">
+    List of Decisions made by the IPA System
+  </a>
+  
+    <nav class="md-nav" aria-label="List of Decisions made by the IPA System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#service-affecting" class="md-nav__link">
+    Service Affecting
+  </a>
+  
+    <nav class="md-nav" aria-label="Service Affecting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#circuit-instability" class="md-nav__link">
+    Circuit Instability
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#event-descriptions" class="md-nav__link">
     Event Descriptions
   </a>
@@ -547,7 +580,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#service-affecting" class="md-nav__link">
+  <a href="#service-affecting_1" class="md-nav__link">
     Service Affecting
   </a>
   
@@ -575,8 +608,60 @@
 <h1 id="ipa-event-logging">IPA Event Logging</h1>
 <h2 id="process-workflows">Process Workflows</h2>
 <p><img alt="" src="../../../images/4-SA-forward-to-ASR.jpg" /></p>
-<h2 id="event-descriptions">Event Descriptions</h2>
+<h2 id="list-of-decisions-made-by-the-ipa-system">List of Decisions made by the IPA System</h2>
 <h3 id="service-affecting">Service Affecting</h3>
+<h4 id="circuit-instability">Circuit Instability</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Check for existing SA ticket for SD-WAN</strong></td>
+<td>SA ticket does not exist for SD-WAN</td>
+<td>Resolved SA ticket exists for SD-WAN</td>
+<td>Open/In progress SA ticket exist for SD-WAN</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>2. Check for other troubles on the ticket</strong></td>
+<td>Other trouble is documented on ticket. (Jitter, Latency, Packet Loss, Bandwidth)</td>
+<td>Only Circuit Instability is the only documented trouble on the ticket</td>
+</tr>
+<tr>
+<td><strong>3. Checking what kind of link the instability was detected on</strong></td>
+<td>Instability was detected for Wireless Link</td>
+<td>Instability was detected for Wired Link</td>
+</tr>
+<tr>
+<td><strong>4. Checking wired link's name for BYOB or Customer Owned</strong></td>
+<td>Wired Link name contains BYOB or Customer Owned</td>
+<td>Wired Link name does NOT contain BYOB or Customer Owned</td>
+</tr>
+<tr>
+<td><strong>5. Checking if the wired link name is an IP</strong></td>
+<td>Wired link name is an IP</td>
+<td>Wired link name is NOT an IP</td>
+</tr>
+</tbody>
+</table>
+<h2 id="event-descriptions">Event Descriptions</h2>
+<h3 id="service-affecting_1">Service Affecting</h3>
 <ul>
 <li><a href="../../services/service-affecting-monitor/actions/_bouncing_check/">Bouncing check</a></li>
 </ul>

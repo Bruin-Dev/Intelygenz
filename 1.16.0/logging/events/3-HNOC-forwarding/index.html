@@ -539,6 +539,46 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#list-of-decisions-made-by-the-hnoc-forwarding-system" class="md-nav__link">
+    List of Decisions made by the HNOC forwarding System
+  </a>
+  
+    <nav class="md-nav" aria-label="List of Decisions made by the HNOC forwarding System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hnoc-forwarding-queue" class="md-nav__link">
+    HNOC forwarding queue
+  </a>
+  
+    <nav class="md-nav" aria-label="HNOC forwarding queue">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#start-of-hnoc-forwarding-workflow-so" class="md-nav__link">
+    Start of  HNOC forwarding workflow (SO)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#start-of-hnoc-forwarding-workflow-sa" class="md-nav__link">
+    Start of  HNOC forwarding workflow (SA)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#event-descriptions" class="md-nav__link">
     Event Descriptions
   </a>
@@ -595,6 +635,82 @@
 <h1 id="hnoc-forwarding-event-logging">HNOC Forwarding Event Logging</h1>
 <h2 id="process-workflows">Process Workflows</h2>
 <p><img alt="" src="../../../images/3-HNOC-fordwarding.png" /></p>
+<h2 id="list-of-decisions-made-by-the-hnoc-forwarding-system">List of Decisions made by the HNOC forwarding System</h2>
+<h3 id="hnoc-forwarding-queue">HNOC forwarding queue</h3>
+<h4 id="start-of-hnoc-forwarding-workflow-so">Start of  HNOC forwarding workflow (SO)</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Service outage detected</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>2. Attempt to create ticket outage</td>
+<td>Create new SO ticket</td>
+<td>Reopen exist ticket</td>
+</tr>
+<tr>
+<td>3. If exist ticket and have more than 60 min</td>
+<td>Forward HNOC</td>
+<td>END</td>
+</tr>
+<tr>
+<td>4. New ticket created</td>
+<td>Append triage note</td>
+<td></td>
+</tr>
+<tr>
+<td>5. If edge outage Forward to HNOC</td>
+<td>END</td>
+<td></td>
+</tr>
+<tr>
+<td>6. If link outage</td>
+<td>Check if more than 60 minutes</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="start-of-hnoc-forwarding-workflow-sa">Start of  HNOC forwarding workflow (SA)</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Service affecting trouble detected</td>
+<td>Not SA ticket for device</td>
+<td>SA ticket for device</td>
+</tr>
+<tr>
+<td>2. Not SA ticket</td>
+<td>Create new SA ticket and append note</td>
+<td></td>
+</tr>
+<tr>
+<td>3. SA ticket exist</td>
+<td>Reopen SA ticket and append note</td>
+<td></td>
+</tr>
+<tr>
+<td>4 Wait 60 seconds and forward to HNOC</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <h2 id="event-descriptions">Event Descriptions</h2>
 <h3 id="hnoc-forwarding-outage-queue">HNOC forwarding outage queue</h3>
 <ul>

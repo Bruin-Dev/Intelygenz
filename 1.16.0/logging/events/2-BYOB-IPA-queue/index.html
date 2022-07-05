@@ -539,6 +539,53 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#list-of-decisions-made-by-the-ipa-system" class="md-nav__link">
+    List of Decisions made by the IPA System
+  </a>
+  
+    <nav class="md-nav" aria-label="List of Decisions made by the IPA System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#byob-ipa-queue" class="md-nav__link">
+    BYOB IPA queue
+  </a>
+  
+    <nav class="md-nav" aria-label="BYOB IPA queue">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#start-of-byob-workflow" class="md-nav__link">
+    Start of BYOB workflow
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trouble-is-detected" class="md-nav__link">
+    Trouble is detected
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trouble-stabilized" class="md-nav__link">
+    Trouble stabilized
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#event-descriptions" class="md-nav__link">
     Event Descriptions
   </a>
@@ -547,7 +594,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#byob-ipa-queue" class="md-nav__link">
+  <a href="#byob-ipa-queue_1" class="md-nav__link">
     BYOB IPA queue
   </a>
   
@@ -575,8 +622,81 @@
 <h1 id="ipa-event-logging">IPA Event Logging</h1>
 <h2 id="process-workflows">Process Workflows</h2>
 <p><img alt="" src="../../../images/2-BYOB-IPA-queue.jpg" /></p>
-<h2 id="event-descriptions">Event Descriptions</h2>
+<h2 id="list-of-decisions-made-by-the-ipa-system">List of Decisions made by the IPA System</h2>
 <h3 id="byob-ipa-queue">BYOB IPA queue</h3>
+<h4 id="start-of-byob-workflow">Start of BYOB workflow</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Determining whether or not there is an ongoing trouble or not</strong></td>
+<td>Trouble is detected</td>
+<td>Trouble stabilized</td>
+</tr>
+</tbody>
+</table>
+<h4 id="trouble-is-detected">Trouble is detected</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>2. Determining what kind of trouble occurred</strong></td>
+<td>Trouble is on the link</td>
+<td>Trouble is on the Edge</td>
+</tr>
+<tr>
+<td><strong>3. Determining what VCO does the troubled device belong too</strong></td>
+<td>VCO 1, 2, 3</td>
+<td>VCO 4</td>
+</tr>
+<tr>
+<td><strong>4. Determining if link name includes "BYOB" or "Customer Provided"</strong></td>
+<td>Link name includes "BYOB" or "Customer Provided"</td>
+<td>Link name doesn't include "BYOB" or "Customer Provided"</td>
+</tr>
+</tbody>
+</table>
+<h4 id="trouble-stabilized">Trouble stabilized</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>5. Determining what kind of trouble last occurred</strong></td>
+<td>Trouble is on the link</td>
+<td>Trouble is on the Edge</td>
+</tr>
+<tr>
+<td><strong>6. Determining what VCO does the device belong too</strong></td>
+<td>VCO 1, 2, 3</td>
+<td>VCO 4</td>
+</tr>
+<tr>
+<td><strong>7. Determining if link name includes "BYOB" or "Customer Provided"</strong></td>
+<td>Link name includes "BYOB" or "Customer Provided"</td>
+<td>Link name doesn't include "BYOB" or "Customer Provided"</td>
+</tr>
+</tbody>
+</table>
+<h2 id="event-descriptions">Event Descriptions</h2>
+<h3 id="byob-ipa-queue_1">BYOB IPA queue</h3>
 <ul>
 <li><a href="../../services/service-outage-monitor/actions/outage_monitoring/_attempt_ticket_creation/">_attempt_ticket_creation</a></li>
 </ul>

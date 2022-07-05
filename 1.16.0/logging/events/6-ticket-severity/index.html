@@ -536,13 +536,60 @@
     Process Workflows
   </a>
   
-    <nav class="md-nav" aria-label="Process Workflows">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#list-of-decisions-made-by-ticket-severity" class="md-nav__link">
+    List of Decisions made by ticket severity
+  </a>
+  
+    <nav class="md-nav" aria-label="List of Decisions made by ticket severity">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ticket-severity_1" class="md-nav__link">
+    Ticket Severity
+  </a>
+  
+    <nav class="md-nav" aria-label="Ticket Severity">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#start-of-change-ticket-severity" class="md-nav__link">
+    Start of change ticket severity
+  </a>
+  
+    <nav class="md-nav" aria-label="Start of change ticket severity">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edge-down" class="md-nav__link">
+    Edge Down
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#link-down" class="md-nav__link">
+    Link Down
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#autoresolution" class="md-nav__link">
     Autoresolution
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -575,6 +622,71 @@
 <h1 id="ticket-severity">Ticket severity</h1>
 <h2 id="process-workflows">Process Workflows</h2>
 <p><img alt="" src="../../../images/6-tickets-severity.png" /></p>
+<h2 id="list-of-decisions-made-by-ticket-severity">List of Decisions made by ticket severity</h2>
+<h3 id="ticket-severity_1">Ticket Severity</h3>
+<h4 id="start-of-change-ticket-severity">Start of change ticket severity</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Outage condition is detected</td>
+<td>Edge DOWN</td>
+<td>Link DOWN</td>
+</tr>
+</tbody>
+</table>
+<h5 id="edge-down">Edge Down</h5>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Attempt to create a service Outage bruin ticket</td>
+<td>Status 200, 409, 473, 472, 471</td>
+</tr>
+<tr>
+<td>2. Set ticket severity 2</td>
+<td>END</td>
+</tr>
+</tbody>
+</table>
+<h5 id="link-down">Link Down</h5>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Attempt to create a service Outage bruin ticket</td>
+<td>Status 200 or 473</td>
+<td>Status 409, 472 or 471</td>
+</tr>
+<tr>
+<td>2. For status 200 or 473</td>
+<td>Set ticket severity 3</td>
+<td>-</td>
+</tr>
+<tr>
+<td>3. For status 409, 472 or 471</td>
+<td>Ticket with only 1 Task set severity 3</td>
+<td>If ticket have more than 1 task end</td>
+</tr>
+</tbody>
+</table>
 <h4 id="autoresolution">Autoresolution</h4>
 <h2 id="event-descriptions">Event Descriptions</h2>
 <ul>

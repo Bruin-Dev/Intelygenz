@@ -539,6 +539,67 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#list-of-decisions-made-by-the-ipa-system" class="md-nav__link">
+    List of Decisions made by the IPA System
+  </a>
+  
+    <nav class="md-nav" aria-label="List of Decisions made by the IPA System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#service-outage" class="md-nav__link">
+    Service Outage
+  </a>
+  
+    <nav class="md-nav" aria-label="Service Outage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#start-of-service-outage-process" class="md-nav__link">
+    Start of Service Outage process
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autoresolution" class="md-nav__link">
+    Autoresolution
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ticket-creation" class="md-nav__link">
+    Ticket Creation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ipa-queue" class="md-nav__link">
+    IPA queue
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#digi-reboot" class="md-nav__link">
+    DiGi Reboot
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#event-descriptions" class="md-nav__link">
     Event Descriptions
   </a>
@@ -547,7 +608,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#service-outage" class="md-nav__link">
+  <a href="#service-outage_1" class="md-nav__link">
     Service Outage
   </a>
   
@@ -575,8 +636,148 @@
 <h1 id="ipa-event-logging">IPA Event Logging</h1>
 <h2 id="process-workflows">Process Workflows</h2>
 <p><img alt="" src="../../../images/1-service-outage.jpg" /></p>
-<h2 id="event-descriptions">Event Descriptions</h2>
+<h2 id="list-of-decisions-made-by-the-ipa-system">List of Decisions made by the IPA System</h2>
 <h3 id="service-outage">Service Outage</h3>
+<h4 id="start-of-service-outage-process">Start of Service Outage process</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Checking edge &amp; link status for outage</strong></td>
+<td>Outage is detected</td>
+<td>Outage is not detected</td>
+</tr>
+</tbody>
+</table>
+<h4 id="autoresolution">Autoresolution</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>2. Checking for non-resolved task for Service Outage ticket</strong></td>
+<td>A non-resolved task exists for the SD-WAN on a Service Outage ticket</td>
+<td>No non-resolved task exists for the SD-WAN</td>
+</tr>
+<tr>
+<td><strong>3. Checking for time at impacted site</strong></td>
+<td>Time at impacted site is between 12am and 6am (NIGHT)</td>
+<td>Time at impacted site is between 6am and 12am (DAY)</td>
+</tr>
+<tr>
+<td><strong>4. Checking if time passed is more or less than 3 hrs</strong></td>
+<td>More than 3 hours has passed since an outage was documented</td>
+<td>Less than 3 hours has passed since an outage was documented</td>
+</tr>
+<tr>
+<td><strong>5. Checking if time passed is more or less than 90 mins</strong></td>
+<td>More than 90 mins has passed since an outage was documented</td>
+<td>Less than 90 mins has passed since an outage was documented</td>
+</tr>
+<tr>
+<td><strong>6. Checking how mamy time ticket has been autoresolved</strong></td>
+<td>Ticket has been autoresolved less than 3 times</td>
+<td>Ticket has been autoresolved more than 3 times</td>
+</tr>
+</tbody>
+</table>
+<h4 id="ticket-creation">Ticket Creation</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>7. Checking the results of ticket creation attempt</strong></td>
+<td>New ticket is created with a task for the SD-WAN and placed in an IPA queue</td>
+<td>Ticket already exists for the location</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>8. Determining what to do with an already existing ticket</strong></td>
+<td>New task for SD-WAN is added to ticket</td>
+<td>SD-WAN task on existing ticket for is reopened</td>
+<td>In-progress tasks for SD-WAN already exists</td>
+</tr>
+</tbody>
+</table>
+<h4 id="ipa-queue">IPA queue</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>9. What type of Outage was caused</strong></td>
+<td>Outage Detected is an EDGE DOWN</td>
+<td>Outage Detected is a LINK DOWN</td>
+</tr>
+<tr>
+<td><strong>10. Checking time at impacted site</strong></td>
+<td>Time at impacted site is between 12am and 6am (NIGHT)</td>
+<td>Time at impacted site is between 6am and 12am (DAY)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="digi-reboot">DiGi Reboot</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>11. Are there any DiGi links</strong></td>
+<td>Edge has at least one offline DiGi link</td>
+<td>Edge has no offline DiGi links</td>
+</tr>
+<tr>
+<td><strong>12. Has a DiGi reboot been attempted</strong></td>
+<td>DiGi reboot has not been attempted yet</td>
+<td>DiGi reboot has been attempted</td>
+</tr>
+<tr>
+<td><strong>13. Has the DiGi reboot attempt occur after 30 mins</strong></td>
+<td>30 min has passed since reboot started</td>
+<td>30 min has not passed since reboot started</td>
+</tr>
+</tbody>
+</table>
+<h2 id="event-descriptions">Event Descriptions</h2>
+<h3 id="service-outage_1">Service Outage</h3>
 <ul>
 <li><a href="../../services/service-outage-monitor/actions/outage_monitoring/start_service_outage_monitoring/">start_service_outage_monitoring</a></li>
 </ul>
