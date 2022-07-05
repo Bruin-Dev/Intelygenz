@@ -184,6 +184,11 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "service-outage-monitor",
                 },
                 {
+                    "query": f"servicenow-bridge AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[servicenow-bridge] - logs",
+                    "repository": "servicenow-bridge",
+                },
+                {
                     "query": f"sites-monitor AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[sites-monitor] - logs",
                     "repository": "sites-monitor",
@@ -320,6 +325,10 @@ PAPERTRAIL_PROVISIONING = {
                 {
                     "query": f"service-outage-monitor AND {ENVIRONMENT_NAME} AND " f'"Triage process finished!"',
                     "search_name": f"[triage] Triage finished",
+                },
+                {
+                    "query": f"servicenow-bridge AND {ENVIRONMENT_NAME} AND " f'"ERROR:"',
+                    "search_name": f"[servicenow-bridge] - ERROR messages",
                 },
                 {
                     "query": f"velocloud-bridge AND {ENVIRONMENT_NAME} AND " f'"ERROR:"',

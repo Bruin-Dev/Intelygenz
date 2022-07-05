@@ -87,6 +87,7 @@
     "./services/repair-tickets-monitor",
     "./services/service-affecting-monitor",
     "./services/service-outage-monitor",
+    "./services/servicenow-bridge",
     "./services/sites-monitor",
     "./services/t7-bridge",
     "./services/ticket-collector",

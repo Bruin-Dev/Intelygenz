@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "servicenow-bridge.fullname" . }}
+  labels:
+    {{- include "servicenow-bridge.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}
+    {{- if .Values.config.metrics.enabled }}
+    - name: {{ .Values.config.metrics.svc.name }}
+      port: {{ .Values.config.metrics.svc.port }}
+    {{- end }}
+  selector:
+    {{- include "servicenow-bridge.selectorLabels" . | nindent 4 }}

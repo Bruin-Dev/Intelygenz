@@ -1037,6 +1037,44 @@ service-outage-monitor-triage:
       memory: 192Mi
 
 
+# -- servicenow-bridge subchart specific configuration
+servicenow-bridge:
+  # -- Field to indicate if the servicenow-bridge module is going to be deployed
+  enabled: ${SERVICENOW_BRIDGE_ENABLED}
+  # -- Number of servicenow-bridge pods
+  replicaCount: ${SERVICENOW_BRIDGE_DESIRED_TASKS}
+  image:
+    # -- Repository image for servicenow-bridge module
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/servicenow-bridge
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ${SERVICENOW_BRIDGE_BUILD_NUMBER}
+  # -- Service Configuration
+  service:
+    type: ClusterIP
+    port: 5000
+  # servicenow-bridge specific configuration variables
+  config:
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+
 # -- sites-monitor subchart specific configuration
 sites-monitor:
   enabled: ${SITES_MONITOR_ENABLED}

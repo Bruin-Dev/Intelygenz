@@ -104,6 +104,9 @@ dependencies:
   - name: service-outage-monitor-triage
     version: '*.*.*'
     condition: service-outage-monitor-triage.enabled
+  - name: servicenow-bridge
+    version: '*.*.*'
+    condition: servicenow-bridge.enabled
   - name: sites-monitor
     version: '*.*.*'
     condition: sites-monitor.enabled

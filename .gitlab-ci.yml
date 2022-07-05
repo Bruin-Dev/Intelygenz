@@ -51,6 +51,7 @@ variables:
   SERVICE_AFFECTING_MONITOR_DESIRED_TASKS: "1"
   SERVICE_OUTAGE_MONITOR_DESIRED_TASKS: "1"
   SERVICE_OUTAGE_MONITOR_TRIAGE_DESIRED_TASKS: "1"
+  SERVICENOW_BRIDGE_DESIRED_TASKS: "1"
   SITES_MONITOR_DESIRED_TASKS: "1"
   TICKET_COLLECTOR_DESIRED_TASKS: "1"
   TICKET_STATISTICS_DESIRED_TASKS: "1"
@@ -108,6 +109,7 @@ include:
   - local: 'services/repair-tickets-kre-bridge/.gitlab-ci.yml'
   - local: 'services/service-affecting-monitor/.gitlab-ci.yml'
   - local: 'services/service-outage-monitor/.gitlab-ci.yml'
+  - local: 'services/servicenow-bridge/.gitlab-ci.yml'
   - local: 'services/sites-monitor/.gitlab-ci.yml'
   - local: 'services/repair-tickets-monitor/.gitlab-ci.yml'
   - local: 'services/t7-bridge/.gitlab-ci.yml'

@@ -248,6 +248,13 @@ data:
         auto_create_group   true
     [OUTPUT]
         Name                cloudwatch
+        Match               kube.var.log.containers.servicenow-bridge*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     servicenow-bridge
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
         Match               kube.var.log.containers.sites-monitor*
         region              {{ .Values.config.region }}
         log_group_name      {{ .Values.config.logGroupName }}

@@ -217,6 +217,13 @@ SERVICE_OUTAGE__TRIAGE__LAST_NOTE_INTERVAL = parameters["common"]["service-outag
 SERVICE_OUTAGE__TRIAGE__MONITORED_VELOCLOUD_HOSTS = json.dumps(json.loads(parameters["dev"]["service-outage"]["triage"]["monitored-velocloud-hosts"]))
 SERVICE_OUTAGE__TRIAGE__MAX_EVENTS_PER_EVENT_NOTE = parameters["common"]["service-outage"]["triage"]["max-events-per-event-note"]
 
+# ServiceNow Bridge variables
+SERVICENOW__BASE_URL = parameters["dev"]["servicenow-bridge"]["base-url"]
+SERVICENOW__CLIENT_ID = parameters["common"]["servicenow-bridge"]["client-id"]
+SERVICENOW__CLIENT_SECRET = parameters["common"]["servicenow-bridge"]["client-secret"]
+SERVICENOW__USERNAME = parameters["common"]["servicenow-bridge"]["username"]
+SERVICENOW__PASSWORD = parameters["common"]["servicenow-bridge"]["password"]
+
 # Sites Monitor variables
 SITES_MONITOR__MONITORING_JOB_INTERVAL = parameters["common"]["sites-monitor"]["monitoring-job-interval"]
 SITES_MONITOR__MONITORED_VELOCLOUD_HOSTS = json.dumps(json.loads(parameters["dev"]["sites-monitor"]["monitored-velocloud-hosts"]))
@@ -725,6 +732,21 @@ env_dict = {
         f"PAPERTRAIL_ACTIVE={PAPERTRAIL_ACTIVE}",
         f"PAPERTRAIL_HOST={PAPERTRAIL_HOST}",
         f"PAPERTRAIL_PORT={PAPERTRAIL_PORT}",
+    ],
+    os.path.join("services", "servicenow-bridge", "src", "config", "env"): [
+        f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",
+        f"CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}",
+        f"REDIS_HOSTNAME={REDIS_HOSTNAME}",
+        f"NATS_SERVER1={NATS_SERVER1}",
+        f"PAPERTRAIL_ACTIVE={PAPERTRAIL_ACTIVE}",
+        f"PAPERTRAIL_HOST={PAPERTRAIL_HOST}",
+        f"PAPERTRAIL_PORT={PAPERTRAIL_PORT}",
+        f"TIMEZONE={TIMEZONE}",
+        f"BASE_URL={SERVICENOW__BASE_URL}",
+        f"CLIENT_ID={SERVICENOW__CLIENT_ID}",
+        f"CLIENT_SECRET={SERVICENOW__CLIENT_SECRET}",
+        f"USERNAME={SERVICENOW__USERNAME}",
+        f"PASSWORD={SERVICENOW__PASSWORD}",
     ],
 }
 
