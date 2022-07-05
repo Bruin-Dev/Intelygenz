@@ -9,18 +9,22 @@
    4. [Datalake]()
    5. [Kafka]()
 2. PIPELINES
-   2. [BASIC CONFIGURATIONS](pipeline/BASIC_CI_CONFIGURATION.md)
+   1. [BASIC CONFIGURATIONS](pipeline/BASIC_CI_CONFIGURATION.md)
       1. [Semantic release](pipeline/BASIC_CI_CONFIGURATION.md#11-semantic-release)
       2. [AIVEN](pipeline/BASIC_CI_CONFIGURATION.md#12-aiven)
       3. [AWS](pipeline/BASIC_CI_CONFIGURATION.md#13-aws)
       4. [Snowflake]()
-   3. [PIPELINES RULES](pipeline/PIPELINE_RULES.md)
-      1. [Add new section](pipeline/PIPELINE_RULES.md#add-new-section)
-      1. [Add new template](pipeline/PIPELINE_RULES.md#add-new-template)
+      5. [PIPELINES RULES](pipeline/PIPELINE_RULES.md)
+         1. [Add new section](pipeline/PIPELINE_RULES.md#add-new-section)
+         2. [Add new template](pipeline/PIPELINE_RULES.md#add-new-template)
 3. DOCUMENTATION
-   1. [Organization](DOCUMENTATION.md#1-organization)
+   1. [Organization](DOCUMENTATION.md#1-docs-organization)
+      1. [Rules](DOCUMENTATION.md#2-rules)
+      2. [Tools](DOCUMENTATION.md#3-tools)
    2. [MetTel Decisions](decisions/README.md)
    3. [Metrics definitions](metrics-definitions/README.md)
+   4. [Diagrams](diagrams/README.md)
+   5. [Logging](logging/README.md)
 4. DEVELOPMENT RULES
    1. [Branch name convention]()
    2. [Semantic release]()
@@ -36,18 +40,22 @@
 8. MANUAL CONFIGURATIONS
    1. [AWS SSO Okta identity provider](manual_configurations/OKTA_CONFIGURATIONS.md)
       1. [Revoke Session token](manual_configurations/OKTA_CONFIGURATIONS.md#revoke-permissions)
-   2. [Gitlab maintenance](manual_configurations/GITLAB_MAINTENANCE.md)
+   2. [AWS SSO Okta JWT token](manual_configurations/OKTA_JWT.md)
+   3. [Gitlab maintenance](manual_configurations/GITLAB_MAINTENANCE.md)
 9. RECOVERY PROCESSES
    1. [Gitlab recovery](recovery_processes/GITLAB_RECOVERY.md)
-10. AUTOMATION ENGINE
-   1. [Lambda Parameter-Replicator](lambda/PARAMETER_REPLICATOR.md)
-11. EXAMPLES
-   3. PRODUCER
-      1. PYTHON
-      2. COMMAND LINE
-   4. CONSUMER
-      1. PYTHON
-      2. COMMAND LINE
-      3. 
+10. AUDIT EVENTS
+    1. Automation
+       1. [Service outage](logging/events/1-service-outage.md)
+       2. [BYOB IPA Queue](logging/events/2-BYOB-IPA-queue.md)
+       3. [HNOC forwarding](logging/events/3-HNOC-forwarding.md)
+       4. [SA forwarding to ASR](logging/events/4-SA-forward-to-ASR.md)
+       5. [TNBA Monitor](logging/events/5-TNBA-monitor.md)
+       6. [Ticket severity](logging/events/6-ticket-severity.md) 
+       7. [Ticket creation outcomes](logging/events/7-ticket-creation-outcome.md)
+       8. [Service affecting](logging/events/8-service-affecting.md)
+    2. Infrastructure
+       1. [Lambda Parameter-Replicator](lambda/PARAMETER_REPLICATOR.md)
+
 ---
 With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2022
