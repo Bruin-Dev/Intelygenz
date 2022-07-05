@@ -21,7 +21,7 @@ nav:
     - Work in a local env:
       - Launch docker compose: "kafka/LAUNCH_DOCKER_COMPOSE.md"
     - Datalake: "snowflake/README.md"
-    - Manueal processes: "README.md"
+    - Manual processes: "README.md"
 extra:
   version:
     provider: mike
