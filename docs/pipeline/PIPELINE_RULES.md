@@ -32,6 +32,3 @@ include:
   - local: templates/gitlab/microservice-ci.yml
   - local: templates/gitlab/infrastructure-ci.yml
 ```
-
----
-With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2021

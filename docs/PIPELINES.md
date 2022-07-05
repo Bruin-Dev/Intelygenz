@@ -345,5 +345,3 @@ In this stage a series of manual jobs are available to destroy what was created 
 - `destroy-branches-aws-nuke`: This job is only available for ephemeral environments, it generates a `yml` file using a [specific script](../ci-utils/aws-nuke/aws_nuke_conf_generator.py) to be used by [aws-nuke](https://github.com/rebuy-de/aws-nuke) to destroy all the infrastructure created for an ephemeral environment in AWS. This job should only be used when the `destroy-branches' job fails.
 
 - `destroy-basic-infra-kre-dev` for ephemeral environments or `destroy-basic-infra-kre-production` for the production environment: This job will destroy everything created by Terraform in the previous stage by the job `deploy-kre-dev` or `deploy-kre-production` depending on the environment.
----
-With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2020

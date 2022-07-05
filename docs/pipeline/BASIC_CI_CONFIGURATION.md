@@ -28,7 +28,3 @@ It's necessary to connect to the S3 from amazon, where we store the tfstate file
 our infrastructure deployments.
 
 # 1.4 Snowflake
-
-
----
-With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2021

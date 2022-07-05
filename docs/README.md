@@ -57,5 +57,3 @@
     2. Infrastructure
        1. [Lambda Parameter-Replicator](lambda/PARAMETER_REPLICATOR.md)
 
----
-With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2022

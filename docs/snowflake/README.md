@@ -22,6 +22,3 @@ manually in the web, if we discover a way to do it automatically without a stati
 + Each private key must have a passphrase.
 + Each new provider must have their own key
 + Devops team must renew keys each month and redeploy the infra.
-
----
-With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2021

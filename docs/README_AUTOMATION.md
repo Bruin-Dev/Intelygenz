@@ -27,5 +27,3 @@
         + [Papertrail Logging Configuration](LOGGING_AND_MONITORING#papertrail-logging-configuration)
         + [Papertrail Searches Configuration](LOGGING_AND_MONITORING#papertrail-searches-configuration)
 
----
-With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2021

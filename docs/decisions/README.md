@@ -4,6 +4,3 @@
 
 1. GLOBAL DECISIONS
    1. [Dashboard infrastructure and architecture](01-dashboards-infrastructure-and-architecture.md) 
-
----
-With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2022

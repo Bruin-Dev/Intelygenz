@@ -24,6 +24,3 @@ versions of one project are related to the other and then syncing them.
 + Monorepo is not the same that Monolith. Monolith is huge amount of coupled code of one application that is hell to maintain.
 
 + This is not only a repository, it's a sum of good practices between automation, code and documentation.
-
----
-With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2020

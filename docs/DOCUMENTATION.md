@@ -23,6 +23,3 @@ To create good diagrams centralized in the repository we use [diagrams.net](http
 IDE that the company use:
 * [IntelliJ](https://plugins.jetbrains.com/plugin/15635-diagrams-net-integration)
 * [VSCode](https://www.diagrams.net/blog/embed-diagrams-vscode)
-
----
-With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2021

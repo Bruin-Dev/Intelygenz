@@ -32,6 +32,3 @@ OKTA and AWS SSO, because of that, groups and users are going to be synced if so
 ## Revoke permissions
 Because of the problem of token duration of 1h that can not be revoked from okta, there is a manual procedure to delete 
 the access from AWS SSO. For revoking access follow [this guide](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_revoke-sessions.html)
-
----
-With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2022
