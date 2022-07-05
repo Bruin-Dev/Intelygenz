@@ -16,8 +16,7 @@
       }
     - banner "Generating docs"
     - git config --global user.name "gitlab" && git config --global user.email "gitlab@mettel.net"
-    - git fetch --all --force 
-    - git checkout $DOCS_BRANCH || git checkout -b $DOCS_BRANCH
+    - git fetch --all --force && git checkout $DOCS_BRANCH || echo "$DOCS_BRANCH branch not created yet."
     - git checkout $CI_COMMIT_SHA
     - mike deploy --update-aliases --rebase -r $HTTPS_REMOTE -p -b $DOCS_BRANCH $AUTOMATION_TAG latest
     - mike set-default --rebase -r $HTTPS_REMOTE -p -b $DOCS_BRANCH latest
