@@ -647,13 +647,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#-destroy-basic-infra-kre-dev-for-ephemeral-environments-or-destroy-basic-infra-kre-production-for-the-production-environment-this-job-will-destroy-everything-created-by-terraform-in-the-previous-stage-by-the-job-deploy-kre-dev-or-deploy-kre-production-depending-on-the-environment" class="md-nav__link">
-    - destroy-basic-infra-kre-dev for ephemeral environments or destroy-basic-infra-kre-production for the production environment: This job will destroy everything created by Terraform in the previous stage by the job deploy-kre-dev or deploy-kre-production depending on the environment.
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -1064,9 +1057,10 @@ We separate the automatation in two parts, <a href="#continuous-integration-ci">
 <li>
 <p><code>destroy-branches-aws-nuke</code>: This job is only available for ephemeral environments, it generates a <code>yml</code> file using a <a href="../ci-utils/aws-nuke/aws_nuke_conf_generator.py">specific script</a> to be used by <a href="https://github.com/rebuy-de/aws-nuke">aws-nuke</a> to destroy all the infrastructure created for an ephemeral environment in AWS. This job should only be used when the `destroy-branches' job fails.</p>
 </li>
+<li>
+<p><code>destroy-basic-infra-kre-dev</code> for ephemeral environments or <code>destroy-basic-infra-kre-production</code> for the production environment: This job will destroy everything created by Terraform in the previous stage by the job <code>deploy-kre-dev</code> or <code>deploy-kre-production</code> depending on the environment.</p>
+</li>
 </ul>
-<h2 id="-destroy-basic-infra-kre-dev-for-ephemeral-environments-or-destroy-basic-infra-kre-production-for-the-production-environment-this-job-will-destroy-everything-created-by-terraform-in-the-previous-stage-by-the-job-deploy-kre-dev-or-deploy-kre-production-depending-on-the-environment">- <code>destroy-basic-infra-kre-dev</code> for ephemeral environments or <code>destroy-basic-infra-kre-production</code> for the production environment: This job will destroy everything created by Terraform in the previous stage by the job <code>deploy-kre-dev</code> or <code>deploy-kre-production</code> depending on the environment.</h2>
-<p>With passion from the <a href="https://www.intelygenz.com">Intelygenz</a> Team @ 2020</p>
 
               
             </article>
