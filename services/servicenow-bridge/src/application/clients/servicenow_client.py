@@ -54,3 +54,14 @@ class ServiceNowClient:
             self._logger.info("Got ServiceNow access token!")
         except Exception as e:
             self._logger.exception(e)
+
+    async def report_incident(self, payload):
+        self._logger.info(f"Reporting incident with payload: {payload}")
+
+        response = await self._request(
+            method="POST",
+            url=f"{self._base_url}/api/g_mtcm/intelygenz",
+            json=payload,
+        )
+
+        return response

@@ -1,6 +1,7 @@
 import asyncio
 
 import redis
+from application.actions.report_incident import ReportIncident
 from application.clients.servicenow_client import ServiceNowClient
 from application.repositories.servicenow_repository import ServiceNowRepository
 from config import config
@@ -36,14 +37,25 @@ class Container:
         self._event_bus.set_producer(self._publisher)
 
         # Instance each action
+        self._report_incident = ReportIncident(self._logger, self._event_bus, self._servicenow_repository)
 
         # Wrap the actions
+        self._action_report_incident = ActionWrapper(
+            self._report_incident, "report_incident", is_async=True, logger=self._logger
+        )
 
         self._server = QuartServer(config)
 
     async def start(self):
         self._start_prometheus_metrics_server()
         await self._event_bus.connect()
+
+        await self._event_bus.subscribe_consumer(
+            consumer_name="report_incident",
+            topic="servicenow.incident.report.request",
+            action_wrapper=self._action_report_incident,
+            queue="servicenow_bridge",
+        )
 
     async def start_server(self):
         await self._server.run_server()
