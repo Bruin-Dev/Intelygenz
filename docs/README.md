@@ -36,7 +36,7 @@
    2. [Add a new provider](snowflake/README.md#3-add-a-new-provider)
    2. [Rules](snowflake/README.md#4-rules)
 7. MANUAL PROCEDURES
-   1. [Give access to a vendor to the API](procedures/API_VENDOR_ACCESS.md)
+   1. [Vendor access to the API](procedures/API_VENDOR_ACCESS.md)
 8. MANUAL CONFIGURATIONS
    1. [AWS SSO Okta identity provider](manual_configurations/OKTA_CONFIGURATIONS.md)
       1. [Revoke Session token](manual_configurations/OKTA_CONFIGURATIONS.md#revoke-permissions)

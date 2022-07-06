@@ -3,7 +3,7 @@
 - AWS Account
 
 ## Description
-This procedure explains how to give access to an specific vendor to the data highway API.
+This procedure explains how to give access to a specific vendor to the data highway API.
 
 ## Vendor requirements
 - Provide a static trusted IP of the vendor
