@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import List, Optional, Type
 
 from dataclasses import dataclass
@@ -7,7 +7,8 @@ from pydantic import BaseModel, Field
 
 
 class EmailMetadata(BaseModel):
-    utc_creation_datetime: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    # Internal datetimes need no timezone, but should remain utc datetimes
+    utc_creation_datetime: datetime = Field(default_factory=datetime.utcnow)
 
 
 class EmailTag(BaseModel):
