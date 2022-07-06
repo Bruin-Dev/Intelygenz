@@ -23,9 +23,10 @@ docs-pro:
   stage: docs
   extends: .docs_template_deploy
   variables:
-    DOCS_S3_BUCKET: s3://s3docs-website/
-    DOCS_BRANCH: s3docs
+    DOCS_S3_BUCKET: s3://s3docs-website-production/
+    DOCS_BRANCH: s3docs-production
     DOCS_DNS: docs
-    AUTOMATION_TAG: $CI_COMMIT_TAG
+  before_script:
+    - export AUTOMATION_TAG=$(echo "CI_COMMIT_TAG" | cut -d "@" -f2)
   rules:
     - if: '$CI_COMMIT_TAG =~ /^automation-engine@\d*.\d*.\d*$/'
