@@ -144,16 +144,30 @@ class VelocloudRepository:
 
         return enterprise_edges_response
 
+    async def get_network_gateways(self, host: str):
+        response = await self._velocloud_client.get_network_gateways(host)
+
+        if response["status"] not in range(200, 300):
+            return response
+
+        gateways = []
+        for gateway in response["body"]:
+            gateways.append(
+                {
+                    "host": host,
+                    "id": gateway["id"],
+                    "name": gateway["name"],
+                }
+            )
+        response["body"] = gateways
+
+        return response
+
     async def get_network_gateway_status(self, host: str, since: str, metrics: List[str]):
         network_gateway_status_response = await self._velocloud_client.get_network_gateway_status(host, since, metrics)
 
         if network_gateway_status_response.status != 200:
             return network_gateway_status_response
 
-        gateways = []
-        for gateway in network_gateway_status_response.body["data"]:
-            gateway_id = gateway.pop("gatewayId")
-            gateways.append({"id": gateway_id, **gateway})
-        network_gateway_status_response.body = gateways
-
+        network_gateway_status_response.body = network_gateway_status_response.body["data"]
         return network_gateway_status_response

@@ -515,6 +515,59 @@ class VelocloudClient:
 
         return result
 
+    async def get_network_gateways(self, velocloud_host: str):
+        request_body = {}
+        result = dict.fromkeys(["body", "status"])
+
+        target_host_client = self._get_header_by_host(velocloud_host)
+
+        if target_host_client is None:
+            await self._start_relogin_job(velocloud_host)
+            result["body"] = f"Cannot find a client to connect to host {velocloud_host}"
+            result["status"] = 404
+            self.__log_result(result)
+            return result
+
+        try:
+            self._logger.info(f"Getting network gateways for host {velocloud_host}...")
+
+            response = await self._session.post(
+                url=f"https://{velocloud_host}/portal/rest/network/getNetworkGateways",
+                json=request_body,
+                headers=target_host_client["headers"],
+                ssl=self._config.VELOCLOUD_CONFIG["verify_ssl"],
+            )
+        except aiohttp.ClientConnectionError:
+            result["body"] = "Error while connecting to Velocloud API"
+            result["status"] = 500
+            self.__log_result(result)
+            return result
+
+        if response.status in range(500, 513):
+            result["body"] = "Got internal error from Velocloud"
+            result["status"] = 500
+            self.__log_result(result)
+            return result
+
+        if response.status == 400:
+            response = await response.json()
+            result["body"] = f"Got 400 from Velocloud -> {response['error']['message']} for host {velocloud_host}"
+            result["status"] = 400
+            return result
+
+        await self.__schedule_relogin_job_if_needed(velocloud_host, response)
+
+        self._logger.info(
+            f"Got HTTP {response.status} from Velocloud after getting network gateways for host {velocloud_host}"
+        )
+
+        result["body"] = await response.json()
+        result["status"] = response.status
+
+        self.__log_result(result)
+
+        return result
+
     async def get_network_gateway_status(self, velocloud_host: str, since: str, metrics: List[str]):
         request_body = {"time": since, "metrics": metrics}
         result = dict.fromkeys(["body", "status"])

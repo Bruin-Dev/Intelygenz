@@ -10,6 +10,7 @@ from application.actions.links_configuration import LinksConfiguration
 from application.actions.links_metric_info import LinksMetricInfo
 from application.actions.links_with_edge_info import LinksWithEdgeInfo
 from application.actions.network_enterprise_edge_list import NetworkEnterpriseEdgeList
+from application.actions.network_gateway_list import NetworkGatewayList
 from application.actions.network_gateway_status_list import NetworkGatewayStatusList
 from application.clients.velocloud_client import VelocloudClient
 from application.repositories.velocloud_repository import VelocloudRepository
@@ -49,6 +50,7 @@ class Container:
         self._subscriber_links_configuration = NATSClient(config, logger=self._logger)
         self._subscriber_edge_links_series = NATSClient(config, logger=self._logger)
         self._subscriber_network_enterprise_edge_list = NATSClient(config, logger=self._logger)
+        self._subscriber_network_gateway_list = NATSClient(config, logger=self._logger)
         self._subscriber_network_gateway_status_list = NATSClient(config, logger=self._logger)
 
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
@@ -63,6 +65,7 @@ class Container:
         self._event_bus.add_consumer(
             self._subscriber_network_enterprise_edge_list, consumer_name="network_enterprise_edge_list"
         )
+        self._event_bus.add_consumer(self._subscriber_network_gateway_list, consumer_name="network_gateway_list")
         self._event_bus.add_consumer(
             self._subscriber_network_gateway_status_list, consumer_name="network_gateway_status_list"
         )
@@ -82,6 +85,7 @@ class Container:
         self._network_enterprise_edge_list = NetworkEnterpriseEdgeList(
             self._event_bus, self._velocloud_repository, self._logger
         )
+        self._network_gateway_list = NetworkGatewayList(self._event_bus, self._velocloud_repository, self._logger)
         self._network_gateway_status_list = NetworkGatewayStatusList(
             self._event_bus, self._velocloud_repository, self._logger
         )
@@ -113,6 +117,9 @@ class Container:
         )
         self._list_network_enterprise_edge = ActionWrapper(
             self._network_enterprise_edge_list, "get_enterprise_edge_list", is_async=True, logger=self._logger
+        )
+        self._list_network_gateway = ActionWrapper(
+            self._network_gateway_list, "get_network_gateway_list", is_async=True, logger=self._logger
         )
         self._list_network_gateway_status = ActionWrapper(
             self._network_gateway_status_list, "get_network_gateway_status_list", is_async=True, logger=self._logger
@@ -178,6 +185,12 @@ class Container:
             consumer_name="network_enterprise_edge_list",
             topic="request.network.enterprise.edges",
             action_wrapper=self._list_network_enterprise_edge,
+            queue="velocloud_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="network_gateway_list",
+            topic="request.network.gateway.list",
+            action_wrapper=self._list_network_gateway,
             queue="velocloud_bridge",
         )
         await self._event_bus.subscribe_consumer(
