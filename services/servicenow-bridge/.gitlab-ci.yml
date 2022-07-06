@@ -1,0 +1,57 @@
+# ===================================================
+# Linter validation jobs for servicenow-bridge module
+# ===================================================
+servicenow-bridge-linter:
+  variables:
+    MODULE: servicenow-bridge
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+      changes:
+        - services/servicenow-bridge/src/application/**/*
+        - services/servicenow-bridge/src/config/**/*
+        - services/servicenow-bridge/src/app.py
+        - services/servicenow-bridge/Dockerfile
+        - services/servicenow-bridge/requirements.txt
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+  extends: .lint_module
+
+# ============================================
+# Unit tests jobs for servicenow-bridge module
+# ============================================
+servicenow-bridge-test:
+  variables:
+    MODULE: servicenow-bridge
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+      changes:
+        - services/servicenow-bridge/src/application/**/*
+        - services/servicenow-bridge/src/config/**/*
+        - services/servicenow-bridge/src/app.py
+        - services/servicenow-bridge/Dockerfile
+        - services/servicenow-bridge/requirements.txt
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+  extends: .unittest_module_python_alpine
+  needs: ["servicenow-bridge-linter"]
+
+# ===============================================
+# Images builds jobs for servicenow-bridge module
+# ===============================================
+servicenow-bridge-build:
+  stage: build
+  variables:
+    MODULE_NAME: servicenow-bridge
+    MODULE_VERSION: ${CI_PIPELINE_ID}
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $SERVICENOW_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+      changes:
+        - services/servicenow-bridge/src/application/**/*
+        - services/servicenow-bridge/src/config/**/*
+        - services/servicenow-bridge/src/app.py
+        - services/servicenow-bridge/Dockerfile
+        - services/servicenow-bridge/requirements.txt
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $SERVICENOW_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
+  extends: .build_app_image
+  needs:
+    - job: servicenow-bridge-test
+    - job: semantic-release
+      optional: true
