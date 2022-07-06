@@ -11,3 +11,15 @@ repos:
     rev: 5.10.1
     hooks:
       - id: isort
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.1.0
+    hooks:
+      - id: codespell
+        types_or: [python, rst, markdown]
+        args: [--ignore-words=.dictionary.txt, --skip=.venv]
+        exclude: >
+          (?x)^(
+              .*\.json|
+              .*\.pyc|
+          )$
