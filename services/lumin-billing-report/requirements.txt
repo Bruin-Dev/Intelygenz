@@ -9,3 +9,4 @@ pytz~=2020.1
 tenacity==5.0.4
 -f https://s3pypi.mettel-automation.net/igzpackages/index.html
 igzpackages==2.0.1
+
