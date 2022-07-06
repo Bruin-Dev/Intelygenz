@@ -96,7 +96,7 @@ Al terraform files are located inside `./infra-as-code`, in this folder there ar
 
         - A SSH key to connect to any worker node of EKS
 
-    - `3-smtp`: In this folder the terraform code to create a SMTP service through [Amazon SES](https://aws.amazon.com/ses/) and all the necessary componentes of it.
+    - `3-smtp`: In this folder the terraform code to create a SMTP service through [Amazon SES](https://aws.amazon.com/ses/) and all the necessary components of it.
 
 5. `kre-runtimes`: there are the necessary terraform files for create the infrastructure needed by a KRE runtime:
     - `modules`: Contains the terraform code for custom modules created for provision a KRE runtimes. It will create the following for each KRE runtime:

@@ -137,7 +137,7 @@ class Route53Util:
         )
         if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
             change_id = response["ChangeInfo"]["Id"]
-            print(f"Change with id {change_id} applyed successfully. It will wait until it has INSYNC status")
+            print(f"Change with id {change_id} applied successfully. It will wait until it has INSYNC status")
             return change_id
         else:
             print(f"Errors appliying change in route53")

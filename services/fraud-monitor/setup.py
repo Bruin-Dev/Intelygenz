@@ -1,4 +1,4 @@
-# This will be executed everytime we make a pip install
+# This will be executed every time we make a pip install
 # The find_packages is very important since it's used to make all our packages visible to each other inside the project
 
 from setuptools import find_packages, setup

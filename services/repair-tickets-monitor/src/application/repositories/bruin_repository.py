@@ -339,7 +339,7 @@ class BruinRepository:
         # TODO: only capture specific exceptions that requires to be managed
         except Exception as e:
             err_msg = (
-                f"ticket_id={ticket_id} An error occurred during RPC comunication\n"
+                f"ticket_id={ticket_id} An error occurred during RPC communication\n"
                 f"Request sent: {rpc_request}\n"
                 f"Error: {e}"
             )
@@ -359,7 +359,7 @@ class BruinRepository:
             await self._notifications_repository.send_slack_message(err_msg)
             return response
 
-        # we need this log because we can see private note onces they have been plubished
+        # we need this log because we can see private note once they have been published
         self._logger.info(
             "ticket_id=%s Note appended to ticket successfully!\n Note published: %s", ticket_id, response["body"]
         )

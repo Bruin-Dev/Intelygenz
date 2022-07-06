@@ -77,7 +77,7 @@ class VelocloudClient:
             self._logger.info("Connection successful")
             client["headers"] = headers["body"]
         else:
-            self._logger.info(f'Connection wasn\'t possible, error {headers["status"]}')
+            self._logger.info(f"Connection wasn't possible, error {headers['status']}")
             self._logger.info(headers["body"])
             client["headers"] = {}
         return client

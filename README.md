@@ -257,7 +257,7 @@ specify it by appending `_PRO` or `_DEV` to the variable name on the gitlab.
   ```
   >If this command is executed in the following commits the CI/CD pipeline will be executed directly on those modules that have changed in each commit.
 - **Remember that all code must have automated tests(unit and integration and must be part of an acceptance test) in it's pipeline.** 
-- Assign that merge request to a any developer of the repository. Also add any affected developer as Approver. I.E: if you are developing a microservice wich is part of a process, you should add as Approvers both the developers of the first microservice ahead and the first behind in the process chain. Those microservices will be the more affected by your changes. 
+- Assign that merge request to a any developer of the repository. Also add any affected developer as Approver. I.E: if you are developing a microservice which is part of a process, you should add as Approvers both the developers of the first microservice ahead and the first behind in the process chain. Those microservices will be the more affected by your changes. 
 - When a branch is merged into master, it will be deployed in production environment.
 - When a new branch is created, it will be deployed in a new Fargate cluster. When a branch is deleted that cluster is deleted. **So every merge request should have "delete branch after merge"**
 - You can also check in gitlab's project view, inside Operations>Environments, to see current running environments
@@ -470,7 +470,7 @@ Run:
 
 - Automation-engine is deployed in [Kubernetes](https://kubernetes.io/docs/home/) cluster using [EKS](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html).
 
-- Additionaly we use [KRE](https://konstellation-io.github.io/website/) proyect for IA, it has been deployed as well in a [Kubernetes](https://kubernetes.io/docs/home/) cluster using [EKS](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html) for each of the necessary environments.
+- Additionally we use [KRE](https://konstellation-io.github.io/website/) project for IA, it has been deployed as well in a [Kubernetes](https://kubernetes.io/docs/home/) cluster using [EKS](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html) for each of the necessary environments.
 
 **NOTE:** *to edit KRE environments we need to use specific commits messages to trigger pipeline jobs, see the [Commit Message Format](#commit) for more info.*
 ## Access Control
@@ -485,7 +485,7 @@ IAM roles are created for each of the users, although these are distinguished in
 
 - **devops**: This tag identify users that will access to any resource in any namespace.
 
-- **ops**: This tag identify users that will have the same access of the developer, but with additionaly options to manage [configmaps](https://kubernetes.io/docs/concepts/configuration/configmap/), [secrets](https://kubernetes.io/docs/concepts/configuration/secret/) and [deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/). This role is util for a developer can manage ephemeral environments.
+- **ops**: This tag identify users that will have the same access of the developer, but with additionally options to manage [configmaps](https://kubernetes.io/docs/concepts/configuration/configmap/), [secrets](https://kubernetes.io/docs/concepts/configuration/secret/) and [deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/). This role is util for a developer can manage ephemeral environments.
 
 ### Roles assigned to Users
 
@@ -548,7 +548,7 @@ The following tools are required to access to the EKS clusters created for each 
      $ sudo mv ./k9s /usr/local/bin/k9s
      ```
 
-- **robo3t** (optional): It is neccessary install this command line tool to interact with [MongoDB](https://www.mongodb.com/) DBs used in KRE. It can be installed with the following commands:
+- **robo3t** (optional): It is necessary install this command line tool to interact with [MongoDB](https://www.mongodb.com/) DBs used in KRE. It can be installed with the following commands:
 
     - *MacOS*:
       
@@ -662,7 +662,7 @@ Remember: you have to know the role (developer, devops or ops) assigned per envi
 
    > The name of the EKS cluster's are, production automation engine: `mettel-automation`, production konstelation: `mettel-automation-kre`, development automation engine: `mettel-automation-dev` and development konstellation: `mettel-automation-kre-dev`.
 
-4. Open k9s to connect to te cluster, if you have more clusters in you kubeconfig file you can chose you cluster with `context` command inside k9s:
+4. Open k9s to connect to the cluster, if you have more clusters in you kubeconfig file you can chose you cluster with `context` command inside k9s:
 
     ```sh
     $ k9s
@@ -724,8 +724,8 @@ Services involved: sites-monitor, velocloud-bridge, notifier.
 
 # Good Practices
 
-- Documentation **must** be updated as frecuently as possible. It's recomended to annotate every action taken in the development phase, and afterwards, add to the documentation the actions or information considered relevant.
-- Pair programming is strongly reccomended when doing difficult or delicate tasks. It is **mandatory** when a new teammate arrives.
+- Documentation **must** be updated as frequently as possible. It's recommended to annotate every action taken in the development phase, and afterwards, add to the documentation the actions or information considered relevant.
+- Pair programming is strongly recommended when doing difficult or delicate tasks. It is **mandatory** when a new teammate arrives.
 - Solutions of hard problems should be put in common in order to use all the knowledge and points of view of the team.
 
 # Setting up logs with Papertrail
@@ -752,10 +752,10 @@ Even if the client ID is Mettel's edge is completely ours, IGZ is physically in 
 to the prometheus app can be found at `http://localhost:9090/targets`.
 
     ```bash
-    - job_name: <the microservice thats hosting you server>
+    - job_name: <the microservice that's hosting you server>
       scrape_interval: 5s
       static_configs:
-      - targets: [' <the microservice thats hosting you server>:<that server's port>']
+      - targets: [' <the microservice that's hosting you server>:<that server's port>']
     ```
 
 - [Grafana](http://localhost:3000) admin/password

@@ -125,7 +125,7 @@ the hood.
 ```
 {
     'request_id': msg_dict['request_id'],
-    'body': All tickets recieved from bruin client,
+    'body': All tickets received from bruin client,
     'status': 200
 }
 
@@ -276,7 +276,7 @@ Service Outage
 ### Description
 When the bruin bridge receives a request with a request message from topic `bruin.ticket.status.open` it makes a callback
 to the function `open_ticket`. From the request message, we need the `ticket_id` to know what ticket status we need to update, 
-aswell as the `detail_id` field.
+as well as the `detail_id` field.
 
 We call the bruin repository with these fields so that it can call the bruin client to set the ticket status to `open`.
 The bruin client should return some success message indicating that our ticket status was successfully changed.
@@ -303,7 +303,7 @@ And then a response message is published to the response topic that was built by
 ### Description
 When the bruin bridge receives a request with a request message from topic `bruin.ticket.status.resolve` it makes a callback
 to the function `resolve_ticket`. From the request message, we need the `ticket_id` to know what ticket status we need to update, 
-aswell as the `detail_id` field.
+as well as the `detail_id` field.
 
 We call the bruin repository with these fields so that it can call the bruin client to set the ticket status to `resolve`.
 The bruin client should return some success message indicating that our ticket status was successfully changed.

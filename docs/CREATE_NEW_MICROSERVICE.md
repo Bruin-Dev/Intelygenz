@@ -36,7 +36,7 @@ new microservice repo, by that way we can deploy our microservice later in dev b
 
 ## 2. Create our new microservice folder
 
-We can start working on our new microservice based on an existing one. It depends if is a `capability`(bridges) or a `use case`. Select one or other depends on what are you developing. For example let's copy a capability "bruing-bridge" and paste in the root of the repo to change his name to "new-bridge". from this moment you can start to develop and do your tests locally. Every microservice must have the following directory structure:
+We can start working on our new microservice based on an existing one. It depends on if is a `capability`(bridges) or a `use case`. Select one or other depends on what are you developing. For example let's copy a capability "bruing-bridge" and paste in the root of the repo to change his name to "new-bridge". from this moment you can start to develop and do your tests locally. Every microservice must have the following directory structure:
 
 ````
 new-bridge
@@ -60,7 +60,7 @@ new-bridge
 
 It's important to have the .gitlab-ci.yaml files correctly defined to enable pipelines:
   * `new-bridge/.gitlab-ci.yml`
-  Change any reference to de template microservice to the new one.. example find and replace "bruin-bridge" for "new-bridge"
+  Change any reference of the template microservice to the new one: example find and replace "bruin-bridge" for "new-bridge"
   * `.gitlab-ci.yml` (the file in the root of the repository)
   Here we need to specify to gitlab-ci that we define other jobs in a different directories (the .gitlab-ci.yml of our new repo). So locate the root gitlab file and add a new line with the path of the new micro jobs (do it respecting the alphabetical order)
   ````
@@ -74,7 +74,7 @@ It's important to have the .gitlab-ci.yaml files correctly defined to enable pip
     - local: 'services/service-outage-monitor/.gitlab-ci.yml'
   ...
   ````
-  Now in the same file, let's define the "desired_tast" variable for this new micro (do it respecting the alphabetical order):
+  Now in the same file, let's define the "desired_tasks" variable for this new micro (do it respecting the alphabetical order):
   ````
   ...
     NATS_SERVER_DESIRED_TASKS: "1"
@@ -101,7 +101,7 @@ We need to edit two files, one in the new micro path and other in the root of th
   }
   ````
   * `package.json` (the file in the root of the repository)
-  add to the semantic-release global config our new path to analize version changes (do it respecting the alphabetical order):
+  add to the semantic-release global config our new path to analyze version changes (do it respecting the alphabetical order):
   ````
   ...
       "./services/links-metrics-api",
@@ -211,7 +211,7 @@ We use 2 systems to storage logs, papertrail for 3 days and cloudwath for 1 mont
 
 ## 5. Helm templates and variables
 
-Here we will define the infraestructure part of our microservice with a helm chart. Is very important to know that this "how to" is only to copy an existing microservice, therefore, we take the following statements for granted:
+Here we will define the infrastructure part of our microservice with a helm chart. Is very important to know that this "how to" is only to copy an existing microservice, therefore, we take the following statements for granted:
 1. The microservice will not have a public endpoint (except email-tagger-monitor)
 2. The microservice port will always be 5000
 3. Depends on the base chart you use to copy & paste, you will have more or less kubernetes resources. although most microservices have: configmap, deployment, secret and service.
@@ -219,7 +219,7 @@ Here we will define the infraestructure part of our microservice with a helm cha
 Perfect, now let's copy and paste another chart to use as template, if we will develop a use-case, we must copy the most similar use-case. For this example we are creating a "new-bridge", so let's copy a "bruin-bridge" as a template:
   * BASE-FOLDER: copy this folder `helm/charts/automation-engine/charts/bruin-bridge` and paste here `helm/charts/automation-engine/charts/` we will have something like `bruin-bridge copy`change the name to `new-bridge`. 
 
-  * PREPARE BASE_FOLDER: now let's do a find and replace in our new folder `new-bridge`. find `bruin-bridge`and replace for `new-bridge`. many substitutions should appear (at the moment of write this, i can see 46 sustitutions in 10 files but over time, this can change). Just remember to do this in the `new-bridge` folder context to evoid modify other resources.
+  * PREPARE BASE_FOLDER: now let's do a find and replace in our new folder `new-bridge`. find `bruin-bridge`and replace for `new-bridge`. many substitutions should appear (at the moment of write this, i can see 46 substitutions in 10 files but over time, this can change). Just remember to do this in the `new-bridge` folder context to evoid modify other resources.
 
   * DEPENDENCIES and CHECKS: Now we have to customize our new microservice, first we must ask ourselves, what dependency does my new microservice have on other services? for example, bruin-bridge have a dependency with Nats and Redis, so it have a few checks to see if those services are available and if they are, it can be deployed. We can find this checks in the `deployment.yaml` file. Specifically in this part:
   ````
@@ -236,7 +236,7 @@ Perfect, now let's copy and paste another chart to use as template, if we will d
                   name: {{ include "new-bridge.configmapName" . }}
   ...
   ````
-  We can add or remove all the initcontainers we want. Even, it is very possible that all the dependencies that we need already have the microservice that we use as a base or some other microservice already developed. So we can navigate through the folders of the rest of the microservices and copy any other dependency check and use it in ours. I will add a new dependency for `notifier` copied from other microservice, and my file will look like the following:
+  We can add or remove all the init containers we want. Even, it is very possible that all the dependencies that we need already have the microservice that we use as a base or some other microservice already developed. So we can navigate through the folders of the rest of the microservices and copy any other dependency check and use it in ours. I will add a new dependency for `notifier` copied from other microservice, and my file will look like the following:
   ````
   ...
         initContainers:
@@ -256,7 +256,7 @@ Perfect, now let's copy and paste another chart to use as template, if we will d
           {{- end }}                                                                                                                    _│
   ...
   ````
-  Note that we have a `if` condition. You will see this in some check, we use this because if we deploy only some microservices, we must contemplate this. If the notifier not exist, the check will not be created. Nats and Redis are always required, thats wy don't have the conditional.
+  Note that we have a `if` condition. You will see this in some check, we use this because if we deploy only some microservices, we must contemplate this. If the notifier not exist, the check will not be created. Nats and Redis are always required, that's wy don't have the conditional.
   * VARIABLES: time to update the variables that will use our microservice, this involves various files:
 
     * `helm/charts/automation-engine/charts/new-bridge/templates/configmap.yaml` this file always will be part of the deployment, it contains the variables base and the variables with no sensitive information. let's add a new variable NEW_VAR:
@@ -294,15 +294,15 @@ Perfect, now let's copy and paste another chart to use as template, if we will d
     ...
     config:    <─────────────── in config section!!!
       papertrail_prefix: ""
-      # -- New usefull variable with no sensitive iformation   ¯│______________ here the configmap variable!
+      # -- New useful variable with no sensitive information   ¯│______________ here the configmap variable!
       new_var: ""                                              _│
-      # -- New usefull variable with sensitive iformation      ¯│______________ and here the secret variable!
+      # -- New useful variable with sensitive information      ¯│______________ and here the secret variable!
       new_sensitive_var: ""                                    _│
     ...
     ````
     Check that we only define the variable but no put any value, although we can also set a default value if we want.
 
-    * `helm/charts/automation-engine/values.yaml` This is the values template off the entire automation-engine application. This only have the structure of the values and no contain any real value. For this part we will copy the content of the values file that we just created and paste in the plase that correspond (respecting the alphabetical order). It's important to note that we are pasting the values inside another Yaml, so we must adapt the indentation for the destiny file:
+    * `helm/charts/automation-engine/values.yaml` This is the values template off the entire automation-engine application. This only have the structure of the values and no contain any real value. For this part we will copy the content of the values file that we just created and paste in the place that correspond (respecting the alphabetical order). It's important to note that we are pasting the values inside another Yaml, so we must adapt the indentation for the destiny file:
     ````
     ...
     # -- lumin-billing-report subchart specific configuration
@@ -344,9 +344,9 @@ Perfect, now let's copy and paste another chart to use as template, if we will d
       enabled: true                                                            │
       config:                                                                  │
         papertrail_prefix: ""                                                  │
-        # -- New usefull variable with no sensitive iformation                 │
+        # -- New useful variable with no sensitive information                 │
         new_var: ""                                                            │
-        # -- New usefull variable with sensitive iformation                    │
+        # -- New useful variable with sensitive information                    │
         new_sensitive_var: ""                                                  │
       image:                                                                   │
         repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/new-bridge    ├──────────────> here!
@@ -381,9 +381,9 @@ Perfect, now let's copy and paste another chart to use as template, if we will d
       # -- notifier Service Configuration
     ...
     ````
-    Things to check: first the indentation!!.. second, the "global" config is not set here; it is define at the beginning of the values file and is common for all microservices. and finnaly, we remove blanck and default configurations to get a sorter file (things removed: autoscaling, the default is false so we can ommit. nodeSelector. tolerations and affinity). PD: You can mantein autoscaling if you will enable it.
+    Things to check: first the indentation!!.. second, the "global" config is not set here; it is defined at the beginning of the values file and is common for all microservices. and finally, we remove blank and default configurations to get a shorter file (things removed: autoscaling, the default is false, so we can omit it. nodeSelector. tolerations and affinity). PD: You can keep autoscaling if you will enable it.
 
-    * `helm/charts/automation-engine/values.yaml.tpl` This is the most important file, it contains the values that will be parsed and used to deploy the Automation-Engine application. Bassicaly it's the same file of values.yaml, but with the variables that will be replaced in the pipeline to deploy a production or develop environment. Let's add our new micro with the variables:
+    * `helm/charts/automation-engine/values.yaml.tpl` This is the most important file, it contains the values that will be parsed and used to deploy the Automation-Engine application. Basically it's the same file of values.yaml, but with the variables that will be replaced in the pipeline to deploy a production or develop environment. Let's add our new micro with the variables:
     ````
     ...
     # -- lumin-billing-report subchart specific configuration
@@ -424,9 +424,9 @@ Perfect, now let's copy and paste another chart to use as template, if we will d
       enabled: ${NEW_BRIDGE_ENABLED}                                           │
       config:                                                                  │
         papertrail_prefix: "new-bridge-${NEW_BRIDGE_BUILD_NUMBER}"             │
-        # -- New usefull variable with no sensitive iformation                 │
+        # -- New useful variable with no sensitive information                 │
         new_var: ${NEW_BRIDGE_NEW_VAR}                                         │
-        # -- New usefull variable with sensitive iformation                    │
+        # -- New useful variable with sensitive information                    │
         new_sensitive_var: ${NEW_BRIDGE_NEW_SENSITIVE_VAR}                     │
       image:                                                                   │
         repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/new-bridge    ├──────────────> here!
@@ -523,7 +523,7 @@ Perfect, now let's copy and paste another chart to use as template, if we will d
     ...
     ````
 
-    * `add the variables in gitlab-ci` finaly, we have all the path until the real value in gitlab.. let's go to the repository [settings/ci-cd](https://gitlab.intelygenz.com/mettel/automation-engine/-/settings/ci_cd) section and create the new varaibles:
+    * `add the variables in gitlab-ci` finally, we have all the path until the real value in Gitlab. Let's go to the repository [settings/ci-cd](https://gitlab.intelygenz.com/mettel/automation-engine/-/settings/ci_cd) section and create the new variables:
     ![IMAGE: gitlab_add_new_var](./img/system_overview/gitlab_add_new_var.png)
 
-That's all, with this and the proper [commit message](README.md#commit) the pipeline will run and deploy an ephimeral environment.
+That's all, with this and the proper [commit message](README.md#commit) the pipeline will run and deploy an ephemeral environment.

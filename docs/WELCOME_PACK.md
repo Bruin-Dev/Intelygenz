@@ -15,7 +15,7 @@
 Please request access to all the things listed below:
 
 - Project repository <https://gitlab.intelygenz.com/mettel/automation-engine/>,
-docker repository <https://gitlab.intelygenz.com/mettel/docker_images/-/tree/master> and One password to itcrowd@intelygenz.com throught their ticketing system <https://docs.google.com/document/d/1YLYdI9Dyq8tNlNy2iJ29InquKDz8r_Dw4XBsxI7pPiM/edit> and CC your manager to allow the request
+docker repository <https://gitlab.intelygenz.com/mettel/docker_images/-/tree/master> and One password to itcrowd@intelygenz.com through their ticketing system <https://docs.google.com/document/d/1YLYdI9Dyq8tNlNy2iJ29InquKDz8r_Dw4XBsxI7pPiM/edit> and CC your manager to allow the request
 
 - Configure vpn <https://docs.google.com/document/d/16_LFpkiBWN0mbfjAoqR4BaEB5kPNsuNHrUS7PtrWnEA/edit#heading=h.to49i8wu1vn3>
 

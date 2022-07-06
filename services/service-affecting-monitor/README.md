@@ -88,7 +88,7 @@ This is the algorithm implemented to carry out the monitoring of edges:
             3. Otherwise, don't take any further action
       2. Otherwise, don't take any further action
 
-## Thesholds
+## Thresholds
 ### Latency
 A link can have a latency of up to `120 milliseconds` when transmitting or receiving info. If this threshold is
 exceeded, the process will report this issue.

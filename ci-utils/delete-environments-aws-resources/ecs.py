@@ -139,7 +139,7 @@ class EcsServices:
         subprocess.call(
             ["aws", "servicediscovery", "delete-namespace", "--id", namespace_id, "--region", "us-east-1"], stdout=FNULL
         )
-        logging.info(f"Namespace {namespace_id} was sucessfully removed")
+        logging.info(f"Namespace {namespace_id} was successfully removed")
 
     def delete_servicediscovery(self, environment):
         logging.info(

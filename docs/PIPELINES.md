@@ -98,7 +98,7 @@ In this stage is also checked whether there are enough free resources in ECS to 
 In this stage will be the following jobs:
 * `deploy-basic-infra-kre-dev` for ephemeral environments and `deploy-basic-infra-kre-production` for the production environment, **these are executed optionally manually**.
 
-  This job is reponsible of checking and creation, if necessary, of the EKS cluster used by KRE in each environment and all the necessary resources related (RBAC configuration, helm charts needed for the KRE runtimes, etc)
+  This job is responsible of checking and creation, if necessary, of the EKS cluster used by KRE in each environment and all the necessary resources related (RBAC configuration, helm charts needed for the KRE runtimes, etc)
 
   The process followed in this job is as follows:
 
@@ -110,7 +110,7 @@ In this stage will be the following jobs:
 
      - An [AutoScaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/AutoScalingGroup.html) to have the desired number of Kubernetes worker nodes
 
-     - A SMTP service through [Amazon SES](https://aws.amazon.com/ses/) and all the necessary componentes of it
+     - A SMTP service through [Amazon SES](https://aws.amazon.com/ses/) and all the necessary components of it
 
      - A set of IAM roles, one for each user with access to the project. These will be used to assign subsequent permissions in the Kubernetes cluster according to the role they belong to. These are stored as terraform [output values](https://www.terraform.io/docs/configuration/outputs.html), saving the list of user roles belonging to each role in their corresponding variable.
      

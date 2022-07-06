@@ -6,7 +6,7 @@
 
 It's a project based on microservices, in which two types are distinguished:
 
-- **Capabilites**: They are in charge of carrying out certain common actions for the business logic. I.e.: Collect information from SD-WAN routers
+- **Capabilities**: They are in charge of carrying out certain common actions for the business logic. I.e.: Collect information from SD-WAN routers
   
   For example: Collect information from SD-WAN routers.
 
@@ -172,7 +172,7 @@ as well as create and update them, so their technicians can assist customers whe
 It also updates Bruin tickets to keep support people posted about the changes in the dispatch requests.
 
 It acts as an intermediary between `dispatch-portal-frontend` and CTS & LIT APIs by providing a REST API with multiple endpoints
-that, once they receive a payload from the frontent side, it modifies its fields with the help of some mappers to match the formats expected
+that, once they receive a payload from the frontend side, it modifies its fields with the help of some mappers to match the formats expected
 by CTS and LIT and then forward those customized payloads to their APIs. 
 
 The following [diagram](https://app.diagrams.net/#G16slq1OcvjBmFVygq6jhC9DlpAMvcZS2W) shows the dependencies or interactions of this microservice with the others.
@@ -228,7 +228,7 @@ In the following [diagram](https://app.diagrams.net/#G1iwUTk1QGrLi2OKuKHpIB6K0KJ
 
 #### Service-dispatch-monitor microservice
 
-This microservice monitor dispatches statuses for different vendors, at the time of writting this document LIT and CTS. Both processes are pretty much the same in concept but with differences in the implementation.
+This microservice monitor dispatches statuses for different vendors, at the time of writing this document LIT and CTS. Both processes are pretty much the same in concept but with differences in the implementation.
 
 A dispatch is general terms can have the following statuses:
 
@@ -251,7 +251,7 @@ The basic algorithm behaves like this:
 - Get all dispatches for a vendor
 - Filter dispatches that are created through the `dispatch-portal`
 - Discard invalid ticket ids or dispatches with not proper fields
-- Split the dispatches by status and then send them to the function to proccess them, there are 3 general functions
+- Split the dispatches by status and then send them to the function to process them, there are 3 general functions
     * Confirmed dispatch:
         - Send sms and append note to bruin when a dispatch is confirmed
         - Send sms and append note to bruin 12 or 2 hours prior the dispatch

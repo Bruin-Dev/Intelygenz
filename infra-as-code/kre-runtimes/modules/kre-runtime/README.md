@@ -31,7 +31,7 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_CURRENT_ENVIRONMENT"></a> [CURRENT\_ENVIRONMENT](#input\_CURRENT\_ENVIRONMENT) | Name of the environment to identify common resources to be used | `string` | `"dev"` | no |
-| <a name="input_HOSTED_ZONE_DOMAIN_NAME"></a> [HOSTED\_ZONE\_DOMAIN\_NAME](#input\_HOSTED\_ZONE\_DOMAIN\_NAME) | Name of the commmon domain name used in the project | `string` | `"mettel-automation.net"` | no |
+| <a name="input_HOSTED_ZONE_DOMAIN_NAME"></a> [HOSTED\_ZONE\_DOMAIN\_NAME](#input\_HOSTED\_ZONE\_DOMAIN\_NAME) | Name of the common domain name used in the project | `string` | `"mettel-automation.net"` | no |
 | <a name="input_RUNTIME_NAME"></a> [RUNTIME\_NAME](#input\_RUNTIME\_NAME) | Name of the runtime to create in KRE | `string` | `""` | no |
 | <a name="input_common_info"></a> [common\_info](#input\_common\_info) | Global Tags # kre infrastructure for mettel-automation project | `map(string)` | <pre>{<br>  "project": "mettel-automation-kre",<br>  "provisioning": "Terraform"<br>}</pre> | no |
 
