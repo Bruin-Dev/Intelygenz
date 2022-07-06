@@ -27,6 +27,6 @@ docs-pro:
     DOCS_BRANCH: s3docs-production
     DOCS_DNS: docs
   before_script:
-    - export AUTOMATION_TAG=$(echo "CI_COMMIT_TAG" | cut -d "@" -f2)
+    - export AUTOMATION_TAG=$(echo "$CI_COMMIT_TAG" | cut -d "@" -f2)
   rules:
     - if: '$CI_COMMIT_TAG =~ /^automation-engine@\d*.\d*.\d*$/'
