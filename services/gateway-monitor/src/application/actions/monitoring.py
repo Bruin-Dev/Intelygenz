@@ -1,6 +1,6 @@
 import time
 from datetime import datetime
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
@@ -66,13 +66,23 @@ class Monitor:
         self._logger.info(f"Processing Velocloud host {host}...")
         gateway_lookup_intervals = self._config.MONITOR_CONFIG["gateway_lookup_intervals"]
 
+        # Get gateways info
+        network_gateway_list_response = await self._velocloud_repository.get_network_gateway_list(host)
+        if network_gateway_list_response["status"] not in range(200, 300):
+            return
+
+        # Group gateways by ID
+        gateways = {}
+        for gateway in network_gateway_list_response["body"]:
+            gateways[gateway["id"]] = gateway
+
         # Get first interval
         first_network_gateway_status_list_response = await self._velocloud_repository.get_network_gateway_status_list(
             host, gateway_lookup_intervals["first"]
         )
         if first_network_gateway_status_list_response["status"] not in range(200, 300):
             return
-        first_gateway_list = first_network_gateway_status_list_response["body"]
+        first_gateway_list = self._map_gateway_info(gateways, first_network_gateway_status_list_response["body"])
 
         # Get second interval
         second_network_gateway_status_list_response = await self._velocloud_repository.get_network_gateway_status_list(
@@ -80,7 +90,7 @@ class Monitor:
         )
         if second_network_gateway_status_list_response["status"] not in range(200, 300):
             return
-        second_gateway_list = second_network_gateway_status_list_response["body"]
+        second_gateway_list = self._map_gateway_info(gateways, second_network_gateway_status_list_response["body"])
 
         # Process gateways
         gateway_pairs = self._build_gateway_pairs(host, first_gateway_list, second_gateway_list)
@@ -93,6 +103,17 @@ class Monitor:
             self._logger.info(f"No unhealthy gateways were found for host {host}")
 
         self._logger.info(f"Finished processing Velocloud host {host}!")
+
+    @staticmethod
+    def _map_gateway_info(gateways_by_id: Dict[int, dict], gateway_status_list: List[dict]) -> List[dict]:
+        gateways = []
+
+        for gateway_status in gateway_status_list:
+            gateway_id = gateway_status.pop("gatewayId")
+            gateway = gateways_by_id[gateway_id]
+            gateways.append({"id": gateway_id, "name": gateway["name"], **gateway_status})
+
+        return gateways
 
     def _build_gateway_pairs(
         self, host: str, first_gateway_list: List[dict], second_gateway_list: List[dict]

@@ -10,6 +10,41 @@ class VelocloudRepository:
         self._config = config
         self._notifications_repository = notifications_repository
 
+    async def get_network_gateway_list(self, velocloud_host: str) -> dict:
+        err_msg = None
+
+        request = {
+            "request_id": uuid(),
+            "body": {
+                "host": velocloud_host,
+            },
+        }
+
+        try:
+            self._logger.info(f"Getting network gateway list from Velocloud host {velocloud_host}...")
+            response = await self._event_bus.rpc_request("request.network.gateway.list", request, timeout=30)
+        except Exception as e:
+            err_msg = f"An error occurred when requesting network gateway list from Velocloud -> {e}"
+            response = {"body": None, "status": 503}
+        else:
+            response_body = response["body"]
+            response_status = response["status"]
+
+            if response_status in range(200, 300):
+                self._logger.info(f"Got network gateway list from Velocloud host {velocloud_host}!")
+            else:
+                environment = self._config.ENVIRONMENT_NAME.upper()
+                err_msg = (
+                    f"Error while retrieving network gateway list from Velocloud in {environment} "
+                    f"environment: Error {response_status} - {response_body}"
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
     async def get_network_gateway_status_list(self, velocloud_host: str, lookup_interval: int) -> dict:
         err_msg = None
         metrics = ["tunnelCount"]
