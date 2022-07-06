@@ -1,3 +1,5 @@
 # .git-blame-ignore-revs
 # Adopt black and isort
 a7b3318bbfaceb2d493a500fe49023a6fc3da635
+# Adopt codespell
+67759419fe962b66bd15fb929397dc7f784f8dae
