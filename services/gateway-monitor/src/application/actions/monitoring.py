@@ -98,11 +98,41 @@ class Monitor:
 
         if unhealthy_gateway_pairs:
             self._logger.info(f"{len(unhealthy_gateway_pairs)} unhealthy gateway(s) found for host {host}")
-            # TODO: Document incident on ServiceNow for each unhealthy gateway
+            for gateway_pair in unhealthy_gateway_pairs:
+                try:
+                    await self._report_servicenow_incident(host, gateway_pair)
+                except Exception as e:
+                    self._logger.exception(e)
         else:
             self._logger.info(f"No unhealthy gateways were found for host {host}")
 
         self._logger.info(f"Finished processing Velocloud host {host}!")
+
+    async def _report_servicenow_incident(self, host: str, gateway_pair: Tuple[dict, dict]):
+        gateway_name = gateway_pair[0]["name"]
+        report_incident_response = await self._servicenow_repository.report_incident(host, gateway_name, gateway_pair)
+
+        if report_incident_response["status"] not in range(200, 300):
+            self._logger.error(f"Failed to report incident to ServiceNow for host {host} and gateway {gateway_name}")
+            return
+
+        result = report_incident_response["body"]["result"]
+
+        if result["state"] == "inserted":
+            self._logger.info(
+                f"A new incident with ID {result['number']} was created in ServiceNow "
+                f"for host {host} and gateway {gateway_name}"
+            )
+        elif result["state"] == "ignored":
+            self._logger.info(
+                f"An open incident with ID {result['number']} already existed in ServiceNow "
+                f"for host {host} and gateway {gateway_name}, a note was added to it"
+            )
+        elif result["state"] == "reopened":
+            self._logger.info(
+                f"A resolved incident with ID {result['number']} already existed in ServiceNow "
+                f"for host {host} and gateway {gateway_name}, it was reopened and a note was added to it"
+            )
 
     @staticmethod
     def _map_gateway_info(gateways_by_id: Dict[int, dict], gateway_status_list: List[dict]) -> List[dict]:
