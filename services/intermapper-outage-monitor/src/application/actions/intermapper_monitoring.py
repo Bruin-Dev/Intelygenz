@@ -1,26 +1,25 @@
 import asyncio
-import re
 import time
 from collections import defaultdict
 from datetime import datetime, timedelta
-from typing import Callable, List, Optional
+from typing import Callable, Dict, List, Optional
 
+from application import (
+    AUTORESOLVE_REGEX,
+    EVENT_REGEX,
+    EVENT_TIME_REGEX,
+    FORWARD_TICKET_TO_QUEUE_JOB_ID,
+    REOPEN_NOTE_REGEX,
+    TRIAGE_NOTE_REGEX,
+    ZIP_CODE_REGEX,
+    ForwardQueues,
+)
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from dateutil.parser import parse
 from pytz import timezone, utc
 from pyzipcode import ZipCodeDatabase
-
-US_STATES_PATTERN = re.compile(
-    r"(AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|"
-    r"PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY)"
-).pattern
-ZIP_CODE_REGEX = re.compile(rf"{US_STATES_PATTERN},? (?P<zip_code>\d{{5}})")
-
-TRIAGE_NOTE_REGEX = re.compile(r"^#\*(MetTel's IPA)\*#\nInterMapper Triage")
-REOPEN_NOTE_REGEX = re.compile(r"^#\*(MetTel's IPA)\*#\nRe-opening")
-EVENT_REGEX = re.compile(r"Event:\s*(?P<event>\w+)")
-EVENT_TIME_REGEX = re.compile(r"(?P<time>^.*): Message from InterMapper (?P<version>.*)")
+from tenacity import retry, stop_after_delay, wait_exponential
 
 
 class InterMapperMonitor:
@@ -77,8 +76,9 @@ class InterMapperMonitor:
         unread_emails_status = unread_emails_response["status"]
 
         if unread_emails_status not in range(200, 300):
-            self._logger.warning(f"Bad status calling to get unread emails. "
-                                 f"Skipping intermapper monitoring process ...")
+            self._logger.warning(
+                f"Bad status calling to get unread emails. " f"Skipping intermapper monitoring process ..."
+            )
             return
 
         emails_by_asset_id = self._group_emails_by_asset_id(unread_emails_body)
@@ -239,8 +239,10 @@ class InterMapperMonitor:
         tickets_body = tickets_response["body"]
         tickets_status = tickets_response["status"]
         if tickets_status not in range(200, 300):
-            self._logger.warning(f"Bad status calling to get ticket basic info for client id:  {client_id}."
-                                 f"Skipping autoresolve ticket ...")
+            self._logger.warning(
+                f"Bad status calling to get ticket basic info for client id:  {client_id}."
+                f"Skipping autoresolve ticket ..."
+            )
             return False
         self._logger.info(f"Found {len(tickets_body)} tickets for circuit ID {circuit_id} from bruin:")
         self._logger.info(tickets_body)
@@ -257,16 +259,20 @@ class InterMapperMonitor:
                 ticket_id, circuit_id, parsed_email_dict, is_piab
             )
             if up_note_response["status"] not in range(200, 300):
-                self._logger.warning(f"Bad status calling to append intermapper note to ticket id: {ticket_id}."
-                                     f"Skipping autoresolve ticket ....")
+                self._logger.warning(
+                    f"Bad status calling to append intermapper note to ticket id: {ticket_id}."
+                    f"Skipping autoresolve ticket ...."
+                )
                 return False
 
             product_category_response = await self._bruin_repository.get_tickets(client_id, ticket_id)
             product_category_response_body = product_category_response["body"]
             product_category_response_status = product_category_response["status"]
             if product_category_response_status not in range(200, 300):
-                self._logger.warning(f"Bad status calling to get ticket for client id: {client_id} and "
-                                     f"ticket id: {ticket_id}. Skipping autoresolve ticket ...")
+                self._logger.warning(
+                    f"Bad status calling to get ticket for client id: {client_id} and "
+                    f"ticket id: {ticket_id}. Skipping autoresolve ticket ..."
+                )
                 return False
 
             if not product_category_response_body:
@@ -292,8 +298,9 @@ class InterMapperMonitor:
             ticket_details_body = ticket_details_response["body"]
             ticket_details_status = ticket_details_response["status"]
             if ticket_details_status not in range(200, 300):
-                self._logger.warning(f"Bad status calling get ticket details to ticket id: {ticket_id}."
-                                     f"Skipping autoresolve ...")
+                self._logger.warning(
+                    f"Bad status calling get ticket details to ticket id: {ticket_id}." f"Skipping autoresolve ..."
+                )
                 return False
 
             details_from_ticket = ticket_details_body["ticketDetails"]
@@ -373,6 +380,9 @@ class InterMapperMonitor:
             self._logger.info(
                 f"Detail {ticket_detail_id} (circuit ID {circuit_id}) of ticket {ticket_id} " f"was autoresolved!"
             )
+
+            self._remove_job_for_autoresolved_task(ForwardQueues.HNOC.value, ticket_id, circuit_id)
+            self._remove_job_for_autoresolved_task(ForwardQueues.IPA.value, ticket_id, circuit_id)
         return True
 
     async def _create_outage_ticket(self, circuit_id, client_id, parsed_email_dict, dri_parameters):
@@ -392,7 +402,7 @@ class InterMapperMonitor:
 
         outage_ticket_response = await self._bruin_repository.create_outage_ticket(client_id, circuit_id)
         outage_ticket_status = outage_ticket_response["status"]
-        outage_ticket_body = outage_ticket_response["body"]
+        ticket_id = outage_ticket_response["body"]
         self._logger.info(
             f"Bruin response for ticket creation for edge with circuit id {circuit_id}: " f"{outage_ticket_response}"
         )
@@ -400,16 +410,16 @@ class InterMapperMonitor:
         is_bruin_custom_status = outage_ticket_status in (409, 472, 473)
 
         if outage_ticket_status in range(200, 300):
-            self._logger.info(f"Successfully created outage ticket with ticket_id {outage_ticket_body}")
+            self._logger.info(f"Successfully created outage ticket with ticket_id {ticket_id}")
             self._metrics_repository.increment_tasks_created(event=event, is_piab=is_piab)
             slack_message = (
                 f"Outage ticket created through InterMapper emails for circuit_id {circuit_id}. Ticket "
-                f"details at https://app.bruin.com/t/{outage_ticket_body}."
+                f"details at https://app.bruin.com/t/{ticket_id}."
             )
             await self._notifications_repository.send_slack_message(slack_message)
         elif is_bruin_custom_status:
             self._logger.info(
-                f"Ticket for circuit id {circuit_id} already exists with ticket_id {outage_ticket_body}."
+                f"Ticket for circuit id {circuit_id} already exists with ticket_id {ticket_id}."
                 f"Status returned was {outage_ticket_status}"
             )
             if outage_ticket_status == 409:
@@ -424,23 +434,32 @@ class InterMapperMonitor:
             return False
         if dri_parameters:
             self._logger.info(
-                f"Appending InterMapper note to ticket id {outage_ticket_body} with dri parameters: "
-                f"{dri_parameters}"
+                f"Appending InterMapper note to ticket id {ticket_id} with dri parameters: " f"{dri_parameters}"
             )
             append_dri_note_response = await self._bruin_repository.append_dri_note(
-                outage_ticket_body, dri_parameters, parsed_email_dict
+                ticket_id, dri_parameters, parsed_email_dict
             )
             if append_dri_note_response["status"] not in range(200, 300):
                 self._logger.warning(f"Bad status calling append dri note. Skipping create outage ticket ...")
                 return False
             return True
-        self._logger.info(f"Appending InterMapper note to ticket id {outage_ticket_body}")
+        self._logger.info(f"Appending InterMapper note to ticket id {ticket_id}")
         append_intermapper_note_response = await self._bruin_repository.append_intermapper_note(
-            outage_ticket_body, parsed_email_dict, self._is_piab_device(parsed_email_dict)
+            ticket_id, parsed_email_dict, self._is_piab_device(parsed_email_dict)
         )
         if append_intermapper_note_response["status"] not in range(200, 300):
             self._logger.warning(f"Bad status calling append intermapper note. Skipping create outage ticket ...")
             return False
+        if self._should_forward_to_ipa_queue(parsed_email_dict):
+            ipa_forward_time = self._config.INTERMAPPER_CONFIG["forward_to_ipa_job_interval"]
+            self._schedule_forward_to_queue(
+                ticket_id, circuit_id, ForwardQueues.IPA.value, ipa_forward_time, is_piab, event
+            )
+
+            hnoc_forward_time = self._config.INTERMAPPER_CONFIG["forward_to_hnoc_job_interval"]
+            self._schedule_forward_to_queue(
+                ticket_id, circuit_id, ForwardQueues.HNOC.value, hnoc_forward_time, is_piab, event
+            )
         return True
 
     async def _get_dri_parameters(self, circuit_id, client_id):
@@ -485,13 +504,12 @@ class InterMapperMonitor:
         return seconds_elapsed_since_last_outage <= max_seconds_since_last_outage
 
     def _is_outage_ticket_detail_auto_resolvable(self, ticket_notes: list, serial_number: str) -> bool:
-        regex = re.compile(r"^#\*(MetTel's IPA)\*#\nAuto-resolving task for")
         max_autoresolves = self._config.INTERMAPPER_CONFIG["autoresolve"]["max_autoresolves"]
         times_autoresolved = 0
 
         for ticket_note in ticket_notes:
             note_value = ticket_note["noteValue"]
-            is_autoresolve_note = bool(regex.match(note_value))
+            is_autoresolve_note = bool(AUTORESOLVE_REGEX.match(note_value))
             is_note_related_to_serial = serial_number in ticket_note["serviceNumber"]
             times_autoresolved += int(is_autoresolve_note and is_note_related_to_serial)
 
@@ -585,3 +603,138 @@ class InterMapperMonitor:
             match = EVENT_REGEX.search(note["noteValue"])
             if match:
                 return match.group("event")
+
+    def _is_battery_alert_probe_type(self, probe_type: str) -> bool:
+        battery_alert_probe_types = self._config.INTERMAPPER_CONFIG["battery_alert_probe_types"]
+        return any(pt for pt in battery_alert_probe_types if pt in probe_type)
+
+    def _is_battery_alert_condition(self, probe_condition: str) -> bool:
+        battery_alert_probe_conditions = self._config.INTERMAPPER_CONFIG["battery_alert_probe_conditions"]
+        return any(pc for pc in battery_alert_probe_conditions if pc == probe_condition)
+
+    def _should_forward_to_ipa_queue(self, parsed_email_dict: Dict[str, str]) -> bool:
+        return self._is_battery_alert_probe_type(parsed_email_dict["probe_type"]) and self._is_battery_alert_condition(
+            parsed_email_dict["condition"]
+        )
+
+    def _schedule_forward_to_queue(
+        self,
+        ticket_id: int,
+        serial_number: str,
+        target_queue: str,
+        forward_time: float,
+        is_piab: bool,
+        event: str,
+    ):
+        tz = timezone(self._config.TIMEZONE)
+        current_datetime = datetime.now(tz)
+        forward_task_run_date = current_datetime + timedelta(seconds=forward_time)
+
+        self._logger.info(
+            f"Scheduling {target_queue} queue forwarding for ticket_id {ticket_id} and circuit ID {serial_number}"
+            f" to happen at timestamp: {forward_task_run_date}"
+        )
+
+        _target_queue = target_queue.replace(" ", "_")
+        job_id = FORWARD_TICKET_TO_QUEUE_JOB_ID.format(
+            ticket_id=ticket_id, serial_number=serial_number, target_queue=_target_queue
+        )
+        self._scheduler.add_job(
+            self.forward_ticket_to_queue,
+            "date",
+            kwargs={
+                "ticket_id": ticket_id,
+                "serial_number": serial_number,
+                "target_queue": target_queue,
+                "is_piab": is_piab,
+                "event": event,
+            },
+            run_date=forward_task_run_date,
+            replace_existing=False,
+            misfire_grace_time=9999,
+            coalesce=True,
+            id=job_id,
+        )
+
+    async def forward_ticket_to_queue(
+        self,
+        ticket_id: int,
+        serial_number: str,
+        target_queue: str,
+        is_piab: bool,
+        event: str,
+    ):
+        @retry(
+            wait=wait_exponential(
+                multiplier=self._config.NATS_CONFIG["multiplier"], min=self._config.NATS_CONFIG["min"]
+            ),
+            stop=stop_after_delay(self._config.NATS_CONFIG["stop_delay"]),
+        )
+        async def forward_ticket_to_queue():
+            self._logger.info(
+                f"Checking if ticket_id {ticket_id} for serial {serial_number} is resolved before "
+                f"attempting to forward to {target_queue} queue..."
+            )
+
+            await self.change_detail_work_queue(
+                ticket_id=ticket_id,
+                serial_number=serial_number,
+                target_queue=target_queue,
+                is_piab=is_piab,
+                event=event,
+            )
+
+        try:
+            await forward_ticket_to_queue()
+        except Exception as e:
+            self._logger.error(
+                f"An error occurred while trying to forward ticket_id {ticket_id} for serial {serial_number} to"
+                f" {target_queue} queue -> {e}"
+            )
+
+    async def change_detail_work_queue(
+        self, ticket_id: int, serial_number: str, target_queue: str, is_piab: bool, event: str
+    ):
+        change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
+            serial_number=serial_number, ticket_id=ticket_id, task_result=target_queue
+        )
+
+        if change_detail_work_queue_response["status"] in range(200, 300):
+            self._metrics_repository.increment_tasks_forwarded(event=event, is_piab=is_piab, target_queue=target_queue)
+
+            slack_message = (
+                f"Detail of ticket {ticket_id} related to serial {serial_number} was successfully forwarded "
+                f"to {target_queue} queue!"
+            )
+            await self._notifications_repository.send_slack_message(slack_message)
+
+            if target_queue == ForwardQueues.HNOC.value:
+                email_response = await self._bruin_repository.send_forward_email_milestone_notification(
+                    ticket_id, serial_number
+                )
+                if email_response["status"] not in range(200, 300):
+                    self._logger.error(
+                        f"Forward email related to circuit ID {serial_number} could not be sent for ticket {ticket_id}!"
+                    )
+
+            self._logger.info(
+                f"Successfully forwarded ticket_id {ticket_id} and serial {serial_number} to {target_queue} queue."
+            )
+        else:
+            self._logger.error(
+                f"Failed to forward ticket_id {ticket_id} and "
+                f"serial {serial_number} to {target_queue} queue due to bruin "
+                f"returning {change_detail_work_queue_response} when attempting to forward to {target_queue} queue."
+            )
+
+    def _remove_job_for_autoresolved_task(self, target_queue: str, ticket_id: int, serial_number: str):
+        _target_queue = target_queue.replace(" ", "_")
+        job_id = FORWARD_TICKET_TO_QUEUE_JOB_ID.format(
+            ticket_id=ticket_id, serial_number=serial_number, target_queue=_target_queue
+        )
+        if self._scheduler.get_job(job_id):
+            self._logger.info(
+                f"Found job to forward to {target_queue} scheduled for autoresolved ticket {ticket_id}"
+                f" related to serial number {serial_number}! Removing..."
+            )
+            self._scheduler.remove_job(job_id)

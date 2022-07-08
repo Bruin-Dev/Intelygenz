@@ -7,6 +7,10 @@ NATS_CONFIG = {
     "servers": "nats://nats-server:4222",
     "subscriber": {"pending_limits": 65536},
     "publisher": {"max_pub_acks_inflight": 6000},
+    "multiplier": 5,
+    "min": 5,
+    "stop_delay": 300,
+    "reconnects": 150,
 }
 
 LOG_CONFIG = {
@@ -59,6 +63,10 @@ INTERMAPPER_CONFIG = {
     "wait_multiplier": 0,
     "wait_min": 0,
     "wait_max": 0,
+    "battery_alert_probe_types": ["Data Remote Probe"],
+    "battery_alert_probe_conditions": ["Device Lost Power - Battery is in use"],
+    "forward_to_hnoc_job_interval": 30,
+    "forward_to_ipa_job_interval": 60,
 }
 
 METRICS_SERVER_CONFIG = {"port": 9090}

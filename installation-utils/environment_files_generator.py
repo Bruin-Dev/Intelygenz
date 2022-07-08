@@ -121,6 +121,10 @@ INTERMAPPER_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OU
 INTERMAPPER_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_NIGHT_TIME = parameters["common"]["intermapper-outage-monitor"]["grace-period-to-autoresolve-after-last-documented-outage-night-time"]
 INTERMAPPER_OUTAGE_MONITOR__DRI_PARAMETERS_FOR_PIAB_NOTES = json.dumps(json.loads(parameters["common"]["intermapper-outage-monitor"]["dri-parameters-for-piab-notes"]))
 INTERMAPPER_OUTAGE_MONITOR__EVENTS_LOOKUP_DAYS = parameters["common"]["intermapper-outage-monitor"]["events-lookup-days"]
+INTERMAPPER_OUTAGE_MONITOR__BATTERY_ALERT_PROBE_TYPES = parameters["common"]["intermapper-outage-monitor"]["battery-alert-probe-types"]
+INTERMAPPER_OUTAGE_MONITOR__BATTERY_ALERT_PROBE_CONDITIONS = parameters["common"]["intermapper-outage-monitor"]["battery-alert-probe-conditions"]
+INTERMAPPER_OUTAGE_MONITOR__FORWARD_TO_HNOC_JOB_INTERVAL = parameters["common"]["intermapper-outage-monitor"]["forward-to-hnoc-job-interval"]
+INTERMAPPER_OUTAGE_MONITOR__FORWARD_TO_IPA_JOB_INTERVAL = parameters["common"]["intermapper-outage-monitor"]["forward-to-ipa-job-interval"]
 
 # Last Contact Report variables
 LAST_CONTACT_REPORT__MONITORED_VELOCLOUD_HOSTS = parameters["dev"]["last-contact-report"]["monitored-velocloud-hosts"]
@@ -521,6 +525,10 @@ env_dict = {
         f"GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_NIGHT_TIME={INTERMAPPER_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_NIGHT_TIME}",
         f"DRI_PARAMETERS_FOR_PIAB_NOTES={INTERMAPPER_OUTAGE_MONITOR__DRI_PARAMETERS_FOR_PIAB_NOTES}",
         f"EVENTS_LOOKUP_DAYS={INTERMAPPER_OUTAGE_MONITOR__EVENTS_LOOKUP_DAYS}",
+        f"BATTERY_ALERT_PROBE_TYPES={INTERMAPPER_OUTAGE_MONITOR__BATTERY_ALERT_PROBE_TYPES}",
+        f"BATTERY_ALERT_PROBE_CONDITIONS={INTERMAPPER_OUTAGE_MONITOR__BATTERY_ALERT_PROBE_CONDITIONS}",
+        f"FORWARD_TO_HNOC_JOB_INTERVAL={INTERMAPPER_OUTAGE_MONITOR__FORWARD_TO_HNOC_JOB_INTERVAL}",
+        f"FORWARD_TO_IPA_JOB_INTERVAL={INTERMAPPER_OUTAGE_MONITOR__FORWARD_TO_IPA_JOB_INTERVAL}",
     ],
     os.path.join("services", "last-contact-report", "src", "config", "env"): [
         f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",

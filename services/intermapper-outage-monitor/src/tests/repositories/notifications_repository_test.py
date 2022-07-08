@@ -13,16 +13,10 @@ uuid_mock = patch.object(notifications_repository_module, "uuid", return_value=u
 
 
 class TestNotificationsRepository:
-    def instance_test(self):
-        logger = Mock()
-        config = testconfig
-        event_bus = Mock()
-
-        notifications_repository = NotificationsRepository(logger, event_bus, config)
-
+    def instance_test(self, notifications_repository, event_bus, logger):
         assert notifications_repository._logger is logger
         assert notifications_repository._event_bus is event_bus
-        assert notifications_repository._config is config
+        assert notifications_repository._config is testconfig
 
     @pytest.mark.asyncio
     async def send_slack_message_test(self):

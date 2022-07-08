@@ -45,6 +45,10 @@ INTERMAPPER_CONFIG = {
     "wait_multiplier": 1,
     "wait_min": 4,
     "wait_max": 10,
+    "battery_alert_probe_types": json.loads(os.environ["BATTERY_ALERT_PROBE_TYPES"]),
+    "battery_alert_probe_conditions": json.loads(os.environ["BATTERY_ALERT_PROBE_CONDITIONS"]),
+    "forward_to_hnoc_job_interval": int(os.environ["FORWARD_TO_HNOC_JOB_INTERVAL"]),
+    "forward_to_ipa_job_interval": int(os.environ["FORWARD_TO_IPA_JOB_INTERVAL"]),
 }
 
 LOG_CONFIG = {

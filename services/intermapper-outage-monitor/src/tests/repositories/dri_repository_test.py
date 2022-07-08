@@ -13,17 +13,10 @@ uuid_mock = patch.object(dri_repository_module, "uuid", return_value=uuid_)
 
 
 class TestDRIRepository:
-    def instance_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        config = testconfig
-        notifications_repository = Mock()
-
-        dri_repository = DRIRepository(event_bus, logger, config, notifications_repository)
-
+    def instance_test(self, dri_repository, event_bus, notifications_repository, logger):
         assert dri_repository._event_bus is event_bus
         assert dri_repository._logger is logger
-        assert dri_repository._config is config
+        assert dri_repository._config is testconfig
         assert dri_repository._notifications_repository is notifications_repository
 
     @pytest.mark.asyncio

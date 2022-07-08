@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from unittest.mock import Mock, call, patch
 
 import pytest
+from application import FORWARD_TICKET_TO_QUEUE_JOB_ID, ForwardQueues
 from application.actions import intermapper_monitoring as intermapper_monitor_module
 from application.actions.intermapper_monitoring import InterMapperMonitor
 from apscheduler.jobstores.base import ConflictingIdError
@@ -11,38 +12,28 @@ from asynctest import CoroutineMock
 from config import testconfig
 from dateutil.parser import parse
 from pytz import utc
+from tests.fixtures._constants import CURRENT_DATETIME
 
 config_mock = patch.object(testconfig, "CURRENT_ENVIRONMENT", "production")
 
 
 class TestInterMapperMonitor:
-    def instance_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        bruin_repository = Mock()
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            bruin_repository,
-            dri_repository,
-        )
-
+    def instance_test(
+        self,
+        intermapper_monitor,
+        event_bus,
+        logger,
+        scheduler,
+        utils_repository,
+        metrics_repository,
+        notifications_repository,
+        bruin_repository,
+        dri_repository,
+    ):
         assert intermapper_monitor._event_bus == event_bus
         assert intermapper_monitor._logger == logger
         assert intermapper_monitor._scheduler == scheduler
-        assert intermapper_monitor._config == config
+        assert intermapper_monitor._config == testconfig
         assert intermapper_monitor._utils_repository == utils_repository
         assert intermapper_monitor._metrics_repository == metrics_repository
         assert intermapper_monitor._notifications_repository == notifications_repository
@@ -1049,7 +1040,7 @@ class TestInterMapperMonitor:
         assert client_id is None
 
     @pytest.mark.asyncio
-    async def create_outage_ticket_test(self):
+    async def create_outage_ticket_test(self, intermapper_monitor):
         client_id = 83959
         dri_parameter = None
         parsed_email_dict = {
@@ -1074,34 +1065,15 @@ class TestInterMapperMonitor:
         )
 
         post_ticket_response = {"body": "success", "status": 200}
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
-
-        bruin_repository = Mock()
-        bruin_repository.create_outage_ticket = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.append_intermapper_note = CoroutineMock(return_value=post_ticket_response)
-        bruin_repository.append_dri_note = CoroutineMock()
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            bruin_repository,
-            dri_repository,
+        intermapper_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        intermapper_monitor._bruin_repository.create_outage_ticket = CoroutineMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.append_intermapper_note = CoroutineMock(return_value=post_ticket_response)
+        intermapper_monitor._bruin_repository.append_dri_note = CoroutineMock()
+        intermapper_monitor._should_forward_to_ipa_queue.return_value = True
+        intermapper_monitor._schedule_forward_to_queue = Mock()
+        post_send_email_response = {"body": "success", "status": 200}
+        intermapper_monitor._bruin_repository.send_forward_email_milestone_notification = CoroutineMock(
+            return_value=post_send_email_response
         )
 
         with config_mock:
@@ -1109,10 +1081,14 @@ class TestInterMapperMonitor:
                 circuit_id, client_id, parsed_email_dict, dri_parameter
             )
 
-        bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, circuit_id)
-        notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
-        bruin_repository.append_dri_note.assert_not_awaited()
-        bruin_repository.append_intermapper_note.assert_awaited_once_with(ticket_id, parsed_email_dict, False)
+        intermapper_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, circuit_id)
+        intermapper_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
+        intermapper_monitor._bruin_repository.append_dri_note.assert_not_awaited()
+        intermapper_monitor._bruin_repository.append_intermapper_note.assert_awaited_once_with(
+            ticket_id, parsed_email_dict, False
+        )
+        intermapper_monitor._should_forward_to_ipa_queue.assert_called()
+        intermapper_monitor._schedule_forward_to_queue.assert_called()
         assert response is True
 
     @pytest.mark.asyncio
@@ -1393,7 +1369,7 @@ class TestInterMapperMonitor:
         assert response is False
 
     @pytest.mark.asyncio
-    async def autoresolve_ticket_test(self):
+    async def autoresolve_ticket_test(self, intermapper_monitor):
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
@@ -1504,40 +1480,21 @@ class TestInterMapperMonitor:
             f"was autoresolved through InterMapper emails. "
             f"Ticket details at https://app.bruin.com/t/{outage_ticket_1_id}."
         )
+
         append_intermapper_up_response = {"body": "OK", "status": 200}
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_ticket_basic_info = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_tickets = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-        bruin_repository.unpause_ticket_detail = CoroutineMock(return_value=unpause_ticket_detail_response)
-        bruin_repository.resolve_ticket = CoroutineMock(return_value=resolve_outage_ticket_response)
-        bruin_repository.append_intermapper_up_note = CoroutineMock(return_value=append_intermapper_up_response)
-        bruin_repository.append_autoresolve_note = CoroutineMock()
-
-        config = testconfig
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            bruin_repository,
-            dri_repository,
+        intermapper_monitor._bruin_repository.get_ticket_basic_info = CoroutineMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_tickets = CoroutineMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        intermapper_monitor._bruin_repository.unpause_ticket_detail = CoroutineMock(
+            return_value=unpause_ticket_detail_response
         )
-
+        intermapper_monitor._bruin_repository.resolve_ticket = CoroutineMock(
+            return_value=resolve_outage_ticket_response
+        )
+        intermapper_monitor._bruin_repository.append_intermapper_up_note = CoroutineMock(
+            return_value=append_intermapper_up_response
+        )
+        intermapper_monitor._bruin_repository.append_autoresolve_note = CoroutineMock()
         intermapper_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
         intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
@@ -1545,23 +1502,25 @@ class TestInterMapperMonitor:
         with config_mock:
             response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, parsed_email_dict)
 
-        bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
-        bruin_repository.append_intermapper_up_note.assert_awaited_once_with(
+        intermapper_monitor._bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
+        intermapper_monitor._bruin_repository.append_intermapper_up_note.assert_awaited_once_with(
             outage_ticket_1_id, circuit_id, parsed_email_dict, False
         )
-        bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
-        bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
+        intermapper_monitor._bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
+        intermapper_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         intermapper_monitor._was_last_outage_detected_recently.assert_called_once_with(
             relevant_notes_for_edge, outage_ticket_1_creation_date, parsed_email_dict
         )
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
             relevant_notes_for_edge, circuit_id
         )
-
-        bruin_repository.resolve_ticket.assert_awaited_once_with(outage_ticket_1_id, outage_ticket_detail_1_id)
-        bruin_repository.append_autoresolve_note.assert_awaited_once_with(outage_ticket_1_id, circuit_id)
-        notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
-
+        intermapper_monitor._bruin_repository.resolve_ticket.assert_awaited_once_with(
+            outage_ticket_1_id, outage_ticket_detail_1_id
+        )
+        intermapper_monitor._bruin_repository.append_autoresolve_note.assert_awaited_once_with(
+            outage_ticket_1_id, circuit_id
+        )
+        intermapper_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
         assert response is True
 
     @pytest.mark.asyncio
@@ -2480,7 +2439,7 @@ class TestInterMapperMonitor:
         assert response is True
 
     @pytest.mark.asyncio
-    async def autoresolve_ticket_failed_resolve_rpc_request_test(self):
+    async def autoresolve_ticket_failed_resolve_rpc_request_test(self, intermapper_monitor):
         asset_id = 123
         client_id = 83959
         parsed_email_dict = {
@@ -2586,62 +2545,49 @@ class TestInterMapperMonitor:
         }
 
         append_intermapper_up_response = {"body": "OK", "status": 200}
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_ticket_basic_info = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_tickets = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-        bruin_repository.unpause_ticket_detail = CoroutineMock(return_value=unpause_ticket_detail_response)
-        bruin_repository.resolve_ticket = CoroutineMock(return_value=resolve_outage_ticket_response)
-        bruin_repository.append_intermapper_up_note = CoroutineMock(return_value=append_intermapper_up_response)
-        bruin_repository.append_autoresolve_note = CoroutineMock()
-
-        config = testconfig
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            bruin_repository,
-            dri_repository,
+        intermapper_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        intermapper_monitor._bruin_repository.get_ticket_basic_info = CoroutineMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_tickets = CoroutineMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        intermapper_monitor._bruin_repository.unpause_ticket_detail = CoroutineMock(
+            return_value=unpause_ticket_detail_response
         )
+        intermapper_monitor._bruin_repository.resolve_ticket = CoroutineMock(
+            return_value=resolve_outage_ticket_response
+        )
+        intermapper_monitor._bruin_repository.append_intermapper_up_note = CoroutineMock(
+            return_value=append_intermapper_up_response
+        )
+        intermapper_monitor._bruin_repository.append_autoresolve_note = CoroutineMock()
         intermapper_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
         intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
+        intermapper_monitor._schedule_forward_to_queue = Mock()
+        post_send_email_response = {"body": "success", "status": 200}
+        intermapper_monitor._bruin_repository.send_forward_email_milestone_notification = CoroutineMock(
+            return_value=post_send_email_response
+        )
 
         with config_mock:
             response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, parsed_email_dict)
 
-        bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
-        bruin_repository.append_intermapper_up_note.assert_awaited_once_with(
+        intermapper_monitor._bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
+        intermapper_monitor._bruin_repository.append_intermapper_up_note.assert_awaited_once_with(
             outage_ticket_1_id, circuit_id, parsed_email_dict, False
         )
-        bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
-        bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
+        intermapper_monitor._bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
+        intermapper_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         intermapper_monitor._was_last_outage_detected_recently.assert_called_once_with(
             relevant_notes_for_edge, outage_ticket_1_creation_date, parsed_email_dict
         )
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
             relevant_notes_for_edge, circuit_id
         )
-
-        bruin_repository.resolve_ticket.assert_awaited_once_with(outage_ticket_1_id, outage_ticket_detail_1_id)
-        bruin_repository.append_autoresolve_note.assert_not_awaited()
-        notifications_repository.send_slack_message.assert_not_awaited()
+        intermapper_monitor._bruin_repository.resolve_ticket.assert_awaited_once_with(
+            outage_ticket_1_id, outage_ticket_detail_1_id
+        )
+        intermapper_monitor._bruin_repository.append_autoresolve_note.assert_not_awaited()
+        intermapper_monitor._notifications_repository.send_slack_message.assert_not_awaited()
         assert response is False
 
     @pytest.mark.asyncio
@@ -3354,3 +3300,427 @@ class TestInterMapperMonitor:
             with patch.dict(day_schedule, start_hour=2, end_hour=8):
                 result = intermapper_monitor._get_max_seconds_since_last_outage(tz_offset)
                 assert result == last_outage_seconds["night"]
+
+    def is_battery_alert_probe_type_test(self, intermapper_monitor):
+        parsed_email_dict = {
+            "time": "01/10 15:35:40",
+            "version": "6.1.5",
+            "event": "Alarm",
+            "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
+            "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
+            "address": "1.3.4",
+            "probe_type": "SNMP - Adtran TA900 ( SNMPv2c)",
+            "condition": '\t\tdefined("lcpu.avgBusy1") && (lcpu.avgBusy1 > 90)',
+            "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
+            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds",
+        }
+        parsed_email_dict2 = {
+            "time": "01/10 15:35:40",
+            "version": "6.1.5",
+            "event": "Alarm",
+            "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
+            "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
+            "address": "1.3.4",
+            "probe_type": "Data Remote Probe",
+            "condition": '\t\tdefined("lcpu.avgBusy1") && (lcpu.avgBusy1 > 90)',
+            "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
+            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds",
+        }
+
+        result = intermapper_monitor._is_battery_alert_probe_type(parsed_email_dict["probe_type"])
+        result2 = intermapper_monitor._is_battery_alert_probe_type(parsed_email_dict2["probe_type"])
+
+        assert result is False
+        assert result2 is True
+
+    def is_battery_alert_condition_test(self, intermapper_monitor):
+        parsed_email_dict = {
+            "time": "01/10 15:35:40",
+            "version": "6.1.5",
+            "event": "Alarm",
+            "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
+            "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
+            "address": "1.3.4",
+            "probe_type": "SNMP - Adtran TA900 ( SNMPv2c)",
+            "condition": '\t\tdefined("lcpu.avgBusy1") && (lcpu.avgBusy1 > 90)',
+            "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
+            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds",
+        }
+        parsed_email_dict2 = {
+            "time": "01/10 15:35:40",
+            "version": "6.1.5",
+            "event": "Alarm",
+            "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
+            "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
+            "address": "1.3.4",
+            "probe_type": "Data Remote Probe",
+            "condition": "Device Lost Power - Battery is in use",
+            "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
+            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds",
+        }
+
+        result = intermapper_monitor._is_battery_alert_condition(parsed_email_dict["condition"])
+        result2 = intermapper_monitor._is_battery_alert_condition(parsed_email_dict2["condition"])
+
+        assert result is False
+        assert result2 is True
+
+    def should_forward_to_ipa_queue_test(self, intermapper_monitor):
+        parsed_email_dict = {
+            "time": "01/10 15:35:40",
+            "version": "6.1.5",
+            "event": "Alarm",
+            "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
+            "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
+            "address": "1.3.4",
+            "probe_type": "SNMP - Adtran TA900 ( SNMPv2c)",
+            "condition": '\t\tdefined("lcpu.avgBusy1") && (lcpu.avgBusy1 > 90)',
+            "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
+            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds",
+        }
+        parsed_email_dict2 = {
+            "time": "01/10 15:35:40",
+            "version": "6.1.5",
+            "event": "Alarm",
+            "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
+            "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
+            "address": "1.3.4",
+            "probe_type": "Data Remote Probe",
+            "condition": "Device Lost Power - Battery is in use",
+            "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
+            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds",
+        }
+
+        result = intermapper_monitor._should_forward_to_ipa_queue(parsed_email_dict)
+        result2 = intermapper_monitor._should_forward_to_ipa_queue(parsed_email_dict2)
+
+        assert result is False
+        assert result2 is True
+
+    @pytest.mark.asyncio
+    async def schedule_forward_ticket_queue_test(self, intermapper_monitor):
+        serial_number = "VC1234567"
+        ticket_id = 12345
+        is_piab = True
+        event = "example"
+        target_queue = ForwardQueues.HNOC.value
+        forward_time = testconfig.INTERMAPPER_CONFIG["forward_to_hnoc_job_interval"]
+        forward_task_run_date = CURRENT_DATETIME + timedelta(
+            seconds=intermapper_monitor._config.INTERMAPPER_CONFIG["forward_to_hnoc_job_interval"]
+        )
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=CURRENT_DATETIME)
+        _target_queue = target_queue.replace(" ", "_")
+        job_id = FORWARD_TICKET_TO_QUEUE_JOB_ID.format(
+            ticket_id=ticket_id, serial_number=serial_number, target_queue=_target_queue
+        )
+
+        with patch.object(intermapper_monitor_module, "datetime", new=datetime_mock):
+            with patch.object(intermapper_monitor_module, "timezone", new=Mock()):
+                intermapper_monitor._schedule_forward_to_queue(
+                    ticket_id=ticket_id,
+                    serial_number=serial_number,
+                    target_queue=target_queue,
+                    forward_time=forward_time,
+                    is_piab=is_piab,
+                    event=event,
+                )
+
+        intermapper_monitor._scheduler.add_job.assert_called_once_with(
+            intermapper_monitor.forward_ticket_to_queue,
+            "date",
+            kwargs={
+                "ticket_id": ticket_id,
+                "serial_number": serial_number,
+                "target_queue": target_queue,
+                "is_piab": is_piab,
+                "event": event,
+            },
+            run_date=forward_task_run_date,
+            replace_existing=False,
+            misfire_grace_time=9999,
+            coalesce=True,
+            id=job_id,
+        )
+
+    @pytest.mark.asyncio
+    async def change_detail_work_queue_2xx_status_test(self, intermapper_monitor):
+        serial_number = "VC1234567"
+        ticket_id = 12345
+        is_piab = True
+        event = "example"
+        target_queue = ForwardQueues.HNOC.value
+        slack_message = (
+            f"Detail of ticket {ticket_id} related to serial {serial_number}"
+            f" was successfully forwarded to {target_queue} queue!"
+        )
+        change_queue_ticket_response = {
+            "body": "ok",
+            "status": 200,
+        }
+        intermapper_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        intermapper_monitor._bruin_repository.change_detail_work_queue = CoroutineMock(
+            return_value=change_queue_ticket_response
+        )
+        intermapper_monitor._bruin_repository.send_forward_email_milestone_notification = CoroutineMock()
+        next_run_time = CURRENT_DATETIME
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=next_run_time)
+
+        with patch.object(intermapper_monitor_module, "datetime", new=datetime_mock):
+            with patch.object(intermapper_monitor_module, "timezone", new=Mock()):
+                await intermapper_monitor.change_detail_work_queue(
+                    ticket_id, serial_number, target_queue, is_piab, event
+                )
+
+        intermapper_monitor._bruin_repository.change_detail_work_queue.assert_called_once_with(
+            serial_number=serial_number, ticket_id=ticket_id, task_result=target_queue
+        )
+        intermapper_monitor._notifications_repository.send_slack_message.assert_awaited_with(slack_message)
+
+    @pytest.mark.asyncio
+    async def change_detail_work_queue_4xx_status_test(self, intermapper_monitor):
+        serial_number = "VC1234567"
+        ticket_id = 12345
+        is_piab = True
+        event = "example"
+        target_queue = ForwardQueues.HNOC.value
+        change_queue_ticket_response = {
+            "body": "ko",
+            "status": 400,
+        }
+        intermapper_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        intermapper_monitor._bruin_repository.change_detail_work_queue = CoroutineMock(
+            return_value=change_queue_ticket_response
+        )
+        next_run_time = CURRENT_DATETIME
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=next_run_time)
+
+        with patch.object(intermapper_monitor_module, "datetime", new=datetime_mock):
+            with patch.object(intermapper_monitor_module, "timezone", new=Mock()):
+                await intermapper_monitor.change_detail_work_queue(
+                    ticket_id, serial_number, target_queue, is_piab, event
+                )
+
+        intermapper_monitor._bruin_repository.change_detail_work_queue.assert_called_once_with(
+            serial_number=serial_number, ticket_id=ticket_id, task_result=target_queue
+        )
+        intermapper_monitor._notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def forward_ticket_to_queue_test(self, intermapper_monitor):
+        serial_number = "VC1234567"
+        ticket_id = 12345
+        target_queue = ForwardQueues.HNOC.value
+        is_piab = True
+        event = "example"
+        change_detail_work_queue_response = {"body": "Success", "status": 200}
+        intermapper_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        intermapper_monitor._bruin_repository.change_detail_work_queue = CoroutineMock(
+            return_value=change_detail_work_queue_response
+        )
+
+        await intermapper_monitor.forward_ticket_to_queue(
+            ticket_id,
+            serial_number,
+            target_queue,
+            is_piab,
+            event,
+        )
+
+        intermapper_monitor._bruin_repository.change_detail_work_queue.assert_awaited_once_with(
+            serial_number=serial_number, ticket_id=ticket_id, task_result=target_queue
+        )
+        intermapper_monitor._notifications_repository.send_slack_message.assert_awaited()
+
+    @pytest.mark.asyncio
+    async def forward_ticket_to_queue_non_2xx_change_work_queue_test(self, intermapper_monitor):
+        serial_number = "VC1234567"
+        ticket_id = 12345
+        target_queue = ForwardQueues.HNOC.value
+        is_piab = True
+        event = "example"
+        change_detail_work_queue_response = {"body": "Failed", "status": 400}
+        intermapper_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        intermapper_monitor._bruin_repository.change_detail_work_queue = CoroutineMock(
+            return_value=change_detail_work_queue_response
+        )
+
+        await intermapper_monitor.forward_ticket_to_queue(
+            ticket_id,
+            serial_number,
+            target_queue,
+            is_piab,
+            event,
+        )
+
+        intermapper_monitor._bruin_repository.change_detail_work_queue.assert_awaited_once_with(
+            serial_number=serial_number,
+            ticket_id=ticket_id,
+            task_result=target_queue,
+        )
+        intermapper_monitor._notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def autoresolve_ticket_remove_pendings_jobs_test(self, intermapper_monitor):
+        client_id = 83959
+        parsed_email_dict = {
+            "time": "01/10 15:35:40",
+            "version": "6.1.5",
+            "event": "Alarm",
+            "name": "OReilly-HotSpringsAR(SD-WAN)-Site803",
+            "document": "O Reilly Auto Parts - South East |83959| Platinum Monitoring",
+            "address": "1.3.4",
+            "probe_type": "SNMP - Adtran TA900 ( SNMPv2c)",
+            "condition": '\t\tdefined("lcpu.avgBusy1") && (lcpu.avgBusy1 > 90)',
+            "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
+            "up_time": "209 days, 10 hours, 44 minutes, 16 seconds",
+        }
+        circuit_id = 3214
+
+        serial_number_2 = "VC9999999"
+
+        outage_ticket_1_id = 99999
+        outage_ticket_1_creation_date = "9/25/2020 6:31:54 AM"
+        outage_ticket_1 = {
+            "clientID": 12345,
+            "clientName": "Aperture Science",
+            "ticketID": outage_ticket_1_id,
+            "category": "POTS in a Box,Switches",
+            "topic": "Service Outage Trouble",
+            "ticketStatus": "New",
+            "createDate": outage_ticket_1_creation_date,
+            "createdBy": "Intelygenz Ai",
+        }
+        outage_ticket_response = {
+            "body": [outage_ticket_1],
+            "status": 200,
+        }
+
+        outage_ticket_detail_1_id = 2746937
+        outage_ticket_detail_1 = {
+            "detailID": outage_ticket_detail_1_id,
+            "detailValue": circuit_id,
+            "detailStatus": "I",
+        }
+        ticket_note_1 = {
+            "noteId": 68246614,
+            "noteValue": f"#*MetTel's IPA*#\nAuto-resolving task for {circuit_id}\n"
+            f"TimeStamp: 2021-01-02 10:18:16-05:00",
+            "serviceNumber": [
+                circuit_id,
+            ],
+        }
+        ticket_note_2 = {
+            "noteId": 68246615,
+            "noteValue": f"#*MetTel's IPA*#\nAuto-resolving task for {circuit_id}\n"
+            f"TimeStamp: 2021-01-03 10:18:16-05:00",
+            "serviceNumber": [
+                circuit_id,
+            ],
+        }
+
+        ticket_note_3 = {
+            "noteId": 68246617,
+            "noteValue": "Some note",
+            "serviceNumber": [
+                serial_number_2,
+            ],
+        }
+        ticket_note_4 = {
+            "noteId": 68246618,
+            "noteValue": "Some other note",
+            "serviceNumber": [
+                circuit_id,
+                serial_number_2,
+            ],
+        }
+        outage_ticket_notes = [
+            ticket_note_1,
+            ticket_note_2,
+            ticket_note_3,
+            ticket_note_4,
+        ]
+
+        ticket_details_response = {
+            "body": {
+                "ticketDetails": [
+                    outage_ticket_detail_1,
+                ],
+                "ticketNotes": outage_ticket_notes,
+            },
+            "status": 200,
+        }
+
+        unpause_ticket_detail_response = {
+            "body": "ok",
+            "status": "200",
+        }
+
+        relevant_notes_for_edge = [
+            ticket_note_1,
+            ticket_note_2,
+            ticket_note_4,
+        ]
+
+        resolve_outage_ticket_response = {
+            "body": "ok",
+            "status": 200,
+        }
+
+        slack_message = (
+            f"Outage ticket {outage_ticket_1_id} for circuit_id {circuit_id} "
+            f"was autoresolved through InterMapper emails. "
+            f"Ticket details at https://app.bruin.com/t/{outage_ticket_1_id}."
+        )
+
+        append_intermapper_up_response = {"body": "OK", "status": 200}
+        intermapper_monitor._bruin_repository.get_ticket_basic_info = CoroutineMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_tickets = CoroutineMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
+        intermapper_monitor._bruin_repository.unpause_ticket_detail = CoroutineMock(
+            return_value=unpause_ticket_detail_response
+        )
+        intermapper_monitor._bruin_repository.resolve_ticket = CoroutineMock(
+            return_value=resolve_outage_ticket_response
+        )
+        intermapper_monitor._bruin_repository.append_intermapper_up_note = CoroutineMock(
+            return_value=append_intermapper_up_response
+        )
+        intermapper_monitor._bruin_repository.append_autoresolve_note = CoroutineMock()
+        intermapper_monitor._was_last_outage_detected_recently = Mock(return_value=True)
+        intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
+        intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
+        target_queue = ForwardQueues.IPA.value.replace(" ", "_")
+        ipa_job_id = FORWARD_TICKET_TO_QUEUE_JOB_ID.format(
+            ticket_id=outage_ticket_1_id, serial_number=circuit_id, target_queue=target_queue
+        )
+        intermapper_monitor._scheduler.get_job = Mock(side_effect=[None, ipa_job_id])
+        intermapper_monitor._scheduler.remove_job = Mock(return_value=True)
+
+        with config_mock:
+            response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, parsed_email_dict)
+
+        intermapper_monitor._bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
+        intermapper_monitor._bruin_repository.append_intermapper_up_note.assert_awaited_once_with(
+            outage_ticket_1_id, circuit_id, parsed_email_dict, False
+        )
+        intermapper_monitor._bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
+        intermapper_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
+        intermapper_monitor._was_last_outage_detected_recently.assert_called_once_with(
+            relevant_notes_for_edge, outage_ticket_1_creation_date, parsed_email_dict
+        )
+        intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
+            relevant_notes_for_edge, circuit_id
+        )
+        intermapper_monitor._bruin_repository.resolve_ticket.assert_awaited_once_with(
+            outage_ticket_1_id, outage_ticket_detail_1_id
+        )
+        intermapper_monitor._bruin_repository.append_autoresolve_note.assert_awaited_once_with(
+            outage_ticket_1_id, circuit_id
+        )
+        intermapper_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
+        assert response is True
+        intermapper_monitor._scheduler.get_job.assert_called_with(ipa_job_id)
+        intermapper_monitor._scheduler.remove_job.assert_called_once_with(ipa_job_id)

@@ -494,3 +494,98 @@ class BruinRepository:
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response
+
+    async def send_forward_email_milestone_notification(self, ticket_id: int, service_number: str) -> dict:
+        notification_type = "TicketPIABDeviceLostPower-E-Mail"
+        return await self.post_notification_email_milestone(ticket_id, service_number, notification_type)
+
+    async def post_notification_email_milestone(self, ticket_id: int, service_number: str, notification_type: str):
+        err_msg = None
+
+        request = {
+            "request_id": uuid(),
+            "body": {
+                "ticket_id": ticket_id,
+                "service_number": service_number,
+                "notification_type": notification_type,
+            },
+        }
+
+        try:
+            self._logger.info(
+                f"Sending email for ticket id {ticket_id}, "
+                f"service_number {service_number} "
+                f"and notification type {notification_type}..."
+            )
+            response = await self._event_bus.rpc_request("bruin.notification.email.milestone", request, timeout=90)
+        except Exception as e:
+            err_msg = (
+                f"An error occurred when sending email for ticket id {ticket_id}, "
+                f"service_number {service_number} "
+                f"and notification type {notification_type}...-> {e}"
+            )
+            response = nats_error_response
+        else:
+            response_body = response["body"]
+            response_status = response["status"]
+
+            if response_status in range(200, 300):
+                self._logger.info(
+                    f"Email sent for ticket {ticket_id}, service number {service_number} "
+                    f"and notification type {notification_type}!"
+                )
+            else:
+                err_msg = (
+                    f"Error while sending email for ticket id {ticket_id}, service_number {service_number} "
+                    f"and notification type {notification_type} in "
+                    f"{self._config.CURRENT_ENVIRONMENT.upper()} environment: "
+                    f"Error {response_status} - {response_body}"
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
+    async def change_detail_work_queue(
+        self,
+        ticket_id: int,
+        task_result: str,
+        serial_number: str,
+    ):
+        err_msg = None
+
+        request = {
+            "request_id": uuid(),
+            "body": {"ticket_id": ticket_id, "queue_name": task_result, "service_number": serial_number},
+        }
+
+        try:
+            self._logger.info(
+                f"Changing task result for ticket {ticket_id} for device " f"{serial_number} to {task_result}..."
+            )
+            response = await self._event_bus.rpc_request("bruin.ticket.change.work", request, timeout=90)
+        except Exception as e:
+            err_msg = f"An error occurred when changing task result for ticket {ticket_id} and serial {serial_number}"
+            response = nats_error_response
+        else:
+            response_body = response["body"]
+            response_status = response["status"]
+
+            if response_status in range(200, 300):
+                self._logger.info(
+                    f"Ticket {ticket_id} and serial {serial_number} task result changed to {task_result} successfully!"
+                )
+            else:
+                err_msg = (
+                    f"Error while changing task result for ticket {ticket_id} and serial {serial_number} in "
+                    f"{self._config.CURRENT_ENVIRONMENT.upper()} environment: "
+                    f"Error {response_status} - {response_body}"
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response

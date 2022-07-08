@@ -93,3 +93,29 @@
 - severity: 3
 - trouble: [Possible Fraud | Request Rate Monitor Violation]
 - target_queue: HNOC Investigate
+
+## InterMapper - Service Outage tasks forwarded to HNOC Investigate queue ##
+
+**Description:** This metric counts how many Service Outage tasks related to InterMapper devices have been forwarded since the intermapper-outage-monitor started until now.
+
+**Labels:**
+- feature: InterMapper Outage Monitor
+- system: InterMapper
+- topic: VOO
+- severity: 2
+- event: [Up | OK | Down | Critical | Alarm | Warning | Link Warning]
+- is_piab: [True | False]
+- target_queue: HNOC Investigate
+
+## InterMapper - Service Outage tasks forwarded to IPA Investigate queue ##
+
+**Description:** This metric counts how many Service Outage tasks related to InterMapper devices have been forwarded since the intermapper-outage-monitor started until now.
+
+**Labels:**
+- feature: InterMapper Outage Monitor
+- system: InterMapper
+- topic: VOO
+- severity: 2
+- event: [Up | OK | Down | Critical | Alarm | Warning | Link Warning]
+- is_piab: [True | False]
+- target_queue: IPA Investigate
