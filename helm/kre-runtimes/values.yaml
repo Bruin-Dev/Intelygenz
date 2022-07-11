@@ -60,6 +60,13 @@ adminUI:
     annotations:
       <<: *ingressAnnotations
 
+k8sManager:
+  krtFilesDownloader:
+    image:
+      repository: konstellation/krt-files-downloader
+      tag: 1.0.0
+      pullPolicy: Always
+
 entrypoint:
   tls: true
   ingress:
@@ -95,3 +102,4 @@ certManager:
 
 prometheus-operator:
   enabled: false
+
