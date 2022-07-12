@@ -101,6 +101,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://docs.mettel-automation.net/1.16.0/logging/events/10-ixia-outage-monitoring/</loc>
+         <lastmod>2022-07-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://docs.mettel-automation.net/1.16.0/logging/events/2-BYOB-IPA-queue/</loc>
          <lastmod>2022-07-12</lastmod>
          <changefreq>daily</changefreq>
@@ -1356,17 +1361,17 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://docs.mettel-automation.net/1.16.0/parameters/parameters/</loc>
+         <lastmod>2022-07-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://docs.mettel-automation.net/1.16.0/pipeline/BASIC_CI_CONFIGURATION/</loc>
          <lastmod>2022-07-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.mettel-automation.net/1.16.0/pipeline/PIPELINE_RULES/</loc>
-         <lastmod>2022-07-12</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://docs.mettel-automation.net/1.16.0/procedures/API_VENDOR_ACCESS/</loc>
          <lastmod>2022-07-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
