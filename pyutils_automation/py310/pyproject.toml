@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "pyutils-automation"
+name = "framework"
 version = "1.0.0"
 description = "Common libs used across the Automation system"
 authors = ["Intelygenz"]
