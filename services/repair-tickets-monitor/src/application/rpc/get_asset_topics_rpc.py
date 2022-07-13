@@ -1,16 +1,17 @@
+from dataclasses import dataclass, field
 from typing import List
+
+from pydantic import BaseModel, Field, ValidationError, validator
 
 from application.domain.asset import AssetId, Topic
 from application.rpc import Rpc, RpcFailedError
-from dataclasses import dataclass, field
-from pydantic import BaseModel, Field, ValidationError, validator
 
 NATS_TOPIC = "bruin.get.asset.topics"
 
 
 @dataclass
 class GetAssetTopicsRpc(Rpc):
-    topic: str = field(init=False, default=NATS_TOPIC)
+    _topic: str = field(init=False, default=NATS_TOPIC)
 
     async def __call__(self, asset_id: AssetId) -> List[Topic]:
         """

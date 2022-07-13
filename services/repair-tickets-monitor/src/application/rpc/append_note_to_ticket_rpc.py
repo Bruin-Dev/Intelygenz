@@ -1,13 +1,15 @@
-from application.rpc import Rpc
 from dataclasses import dataclass, field
+
 from pydantic import BaseModel, Field
+
+from application.rpc import Rpc
 
 NATS_TOPIC = "bruin.ticket.note.append.request"
 
 
 @dataclass
 class AppendNoteToTicketRpc(Rpc):
-    topic: str = field(init=False, default=NATS_TOPIC)
+    _topic: str = field(init=False, default=NATS_TOPIC)
 
     async def __call__(self, ticket_id: str, note: str) -> bool:
         """

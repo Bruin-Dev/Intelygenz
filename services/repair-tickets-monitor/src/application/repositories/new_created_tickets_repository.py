@@ -1,11 +1,16 @@
-from typing import List
+import logging
+from dataclasses import dataclass
+from typing import Any, List
+
+from application.repositories.storage_repository import StorageRepository
+
+log = logging.getLogger(__name__)
 
 
+@dataclass
 class NewCreatedTicketsRepository:
-    def __init__(self, logger, config, storage_repository):
-        self._logger = logger
-        self._config = config
-        self._storage_repository = storage_repository
+    _config: Any
+    _storage_repository: StorageRepository
 
     def get_pending_tickets(self) -> List[dict]:
         """Gets a list of all pending tickets
@@ -25,7 +30,7 @@ class NewCreatedTicketsRepository:
         Returns:
             [int]: Incremented value
         """
-        self._logger.info(f"increasing error={error_code} for ticket id={ticket_id}")
+        log.info(f"increasing error={error_code} for ticket id={ticket_id}")
         key = f"archive_error_{error_code}_ticket_{ticket_id}"
         return self._storage_repository.increment(key)
 
@@ -36,7 +41,7 @@ class NewCreatedTicketsRepository:
             ticket_id (int): [description]
             error_code (int): [description]
         """
-        self._logger.info(f"removing counter for error={error_code} for ticket id={ticket_id}")
+        log.info(f"removing counter for error={error_code} for ticket id={ticket_id}")
         key = f"archived_error_{error_code}_ticket_{ticket_id}"
         self._storage_repository.remove(key)
 
@@ -47,6 +52,6 @@ class NewCreatedTicketsRepository:
             email_id (str): email identification.
             ticket_id (str): ticket identification.
         """
-        self._logger.info(f"marking email complete '{email_id}' and '{ticket_id}' ")
+        log.info(f"marking email complete '{email_id}' and '{ticket_id}' ")
         key = f"archived_ticket_{email_id}_{ticket_id}"
         self._storage_repository.remove(key)

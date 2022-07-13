@@ -3,11 +3,10 @@ from config import testconfig as config
 
 
 class TestNewCreatedTicketsRepository:
-    def instance_test(self, logger, storage_repository):
+    def instance_test(self, storage_repository):
 
-        new_created_tickets_repository = NewCreatedTicketsRepository(logger, config, storage_repository)
+        new_created_tickets_repository = NewCreatedTicketsRepository(config, storage_repository)
 
-        assert new_created_tickets_repository._logger is logger
         assert new_created_tickets_repository._config is config
         assert new_created_tickets_repository._storage_repository is storage_repository
 

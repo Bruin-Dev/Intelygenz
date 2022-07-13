@@ -1,32 +1,34 @@
-import json
+import logging
+from dataclasses import dataclass
 from http import HTTPStatus
 from logging import Logger, LoggerAdapter
 from typing import Any, Optional
 
-from dataclasses import dataclass
-from igz.packages.eventbus.eventbus import EventBus
+from framework.nats.client import Client as NatsClient
 from pydantic import BaseModel
 from shortuuid import uuid
+
+log = logging.getLogger(__name__)
 
 
 @dataclass
 class Rpc:
     """
-    Component that acts as an event_bus wrapper.
+    Component that acts as an nats client wrapper.
     """
 
-    event_bus: EventBus
-    logger: Logger
-    topic: str
-    timeout: int
+    _nats_client: NatsClient
+    _logger: Logger
+    _topic: str
+    _timeout: int
 
     def start(self) -> (str, "RpcLogger"):
         """
-        Start the rpc by generating a request_id and an appropriate logger.
-        :return: a request_id and a logger
+        Start the rpc by generating a request_id and an appropriate _logger.
+        :return: a request_id and a _logger
         """
         request_id = uuid()
-        return RpcRequest(request_id=request_id), RpcLogger(request_id=request_id, logger=self.logger)
+        return RpcRequest(request_id=request_id), RpcLogger(request_id=request_id, logger=self._logger)
 
     async def send(self, rpc_request: "RpcRequest") -> "RpcResponse":
         """
@@ -38,18 +40,19 @@ class Rpc:
         :param rpc_request: the request being sent
         :return: a parsed response
         """
-        logger = RpcLogger(request_id=rpc_request.request_id, logger=self.logger)
+        logger = RpcLogger(request_id=rpc_request.request_id, logger=self._logger)
         logger.debug(f"send(rpc_request={rpc_request})")
 
         try:
-            message = json.loads(rpc_request.json())
-            response = await self.event_bus.rpc_request(topic=self.topic, message=message, timeout=self.timeout)
-            rpc_response = RpcResponse.parse_obj(response)
+            response = await self._nats_client.request(
+                subject=self._topic, payload=rpc_request.bytes(), timeout=self._timeout
+            )
+            rpc_response = RpcResponse.parse_raw(response.data)
         except Exception as error:
             raise RpcError from error
 
         if rpc_response.is_ok():
-            logger.debug(f"event_bus.rpc_request(topic={self.topic}, message={message}) [OK]")
+            logger.debug(f"_nats_client.rpc_request(subject={self._topic}, payload={rpc_request.json()}) [OK]")
         else:
             raise RpcFailedError(request=rpc_request, response=rpc_response)
 
@@ -64,6 +67,9 @@ class RpcRequest(BaseModel):
 
     request_id: str
     body: Any = None
+
+    def bytes(self) -> bytes:
+        return self.json(separators=(",", ":")).encode()
 
 
 class RpcResponse(BaseModel):

@@ -1,6 +1,9 @@
-from typing import Any, Dict, List
+import json
+from typing import Any, Callable, Dict, List
 
 import pytest
+from framework.nats.client import Client as NatsClient
+from nats.aio.msg import Msg
 
 
 @pytest.fixture(scope="session")
@@ -138,3 +141,11 @@ def make_created_ticket_request_payload():
         }
 
     return _inner
+
+
+@pytest.fixture
+def make_msg(event_bus: NatsClient) -> Callable[[Any], Msg]:
+    def builder(data: Any) -> Msg:
+        return Msg(_client=event_bus, data=json.dumps(data).encode())
+
+    return builder

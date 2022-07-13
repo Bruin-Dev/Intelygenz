@@ -1,10 +1,11 @@
+from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import List, Set
 
+from pydantic import BaseModel, Field
+
 from application.domain.asset import AssetId
 from application.rpc import Rpc, RpcError, RpcFailedError
-from dataclasses import dataclass, field
-from pydantic import BaseModel, Field
 
 NATS_TOPIC = "bruin.ticket.creation.outage.request"
 BRUIN_UPDATED_STATUS = [409, 471, 472, 473]
@@ -15,7 +16,7 @@ MULTIPLE_CLIENTS_MSG = "Multiple client ids found"
 
 @dataclass
 class UpsertOutageTicketRpc(Rpc):
-    topic: str = field(init=False, default=NATS_TOPIC)
+    _topic: str = field(init=False, default=NATS_TOPIC)
 
     async def __call__(self, asset_ids: List[AssetId], contact_email: str) -> "UpsertedTicket":
         request, logger = self.start()

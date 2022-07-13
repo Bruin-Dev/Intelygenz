@@ -2,13 +2,13 @@ import logging
 from http import HTTPStatus
 from logging import Logger
 from typing import Callable
-from unittest.mock import ANY, Mock
+from unittest.mock import ANY, AsyncMock, Mock
+
+from framework.nats.client import Client as NatsClient
+from pytest import fixture, mark, raises
 
 from application.rpc import RpcFailedError, RpcLogger, RpcRequest, RpcResponse
 from application.rpc.subscribe_user_rpc import SUBSCRIPTION_TYPE, RequestBody, SubscribeUserRpc
-from asynctest import CoroutineMock
-from igz.packages.eventbus.eventbus import EventBus
-from pytest import fixture, mark, raises
 
 
 class TestSubscribeUserRpc:
@@ -19,7 +19,7 @@ class TestSubscribeUserRpc:
         user_email = "any_user_email"
 
         rpc = make_subscribe_user_rpc()
-        rpc.send = CoroutineMock()
+        rpc.send = AsyncMock()
 
         await rpc(ticket_id, user_email)
 
@@ -34,7 +34,7 @@ class TestSubscribeUserRpc:
     @mark.asyncio
     async def ok_responses_are_properly_handled_test(self, make_subscribe_user_rpc):
         rpc = make_subscribe_user_rpc()
-        rpc.send = CoroutineMock(return_value=RpcResponse(status=HTTPStatus.OK))
+        rpc.send = AsyncMock(return_value=RpcResponse(status=HTTPStatus.OK))
 
         assert await rpc("any_ticket_id", "any_user_email")
 
@@ -45,7 +45,7 @@ class TestSubscribeUserRpc:
         )
 
         rpc = make_subscribe_user_rpc()
-        rpc.send = CoroutineMock(side_effect=forbidden_error)
+        rpc.send = AsyncMock(side_effect=forbidden_error)
 
         assert not await rpc("any_ticket_id", "any_user_email")
 
@@ -56,7 +56,7 @@ class TestSubscribeUserRpc:
         )
 
         rpc = make_subscribe_user_rpc()
-        rpc.send = CoroutineMock(side_effect=internal_server_error)
+        rpc.send = AsyncMock(side_effect=internal_server_error)
 
         assert not await rpc("any_ticket_id", "any_user_email")
 
@@ -67,7 +67,7 @@ class TestSubscribeUserRpc:
         )
 
         rpc = make_subscribe_user_rpc()
-        rpc.send = CoroutineMock(side_effect=other_error)
+        rpc.send = AsyncMock(side_effect=other_error)
 
         with raises(RpcFailedError):
             await rpc("any_ticket_id", "any_user_email")
@@ -76,13 +76,13 @@ class TestSubscribeUserRpc:
 @fixture
 def make_subscribe_user_rpc() -> Callable[..., SubscribeUserRpc]:
     def builder(
-        event_bus: EventBus = Mock(EventBus),
+        event_bus: NatsClient = Mock(NatsClient),
         logger: Logger = logging.getLogger(),
         timeout: int = hash("any_timeout"),
     ):
         rpc = SubscribeUserRpc(event_bus, logger, timeout)
         rpc.start = Mock(return_value=(RpcRequest(request_id="a_request_id"), Mock(RpcLogger)))
-        rpc.send = CoroutineMock()
+        rpc.send = AsyncMock()
         return rpc
 
     return builder
