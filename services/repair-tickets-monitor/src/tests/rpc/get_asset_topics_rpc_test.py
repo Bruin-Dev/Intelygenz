@@ -1,6 +1,4 @@
-import logging
 from http import HTTPStatus
-from logging import Logger
 from typing import Callable
 from unittest.mock import ANY, AsyncMock, Mock
 
@@ -8,7 +6,7 @@ from framework.nats.client import Client as NatsClient
 from pytest import fixture, mark, raises
 
 from application.domain.asset import Topic
-from application.rpc import RpcFailedError, RpcLogger, RpcRequest, RpcResponse
+from application.rpc import RpcFailedError, RpcResponse
 from application.rpc.get_asset_topics_rpc import GetAssetTopicsRpc, RequestBody
 
 
@@ -62,13 +60,7 @@ class TestGetAssetTopicsRpc:
 
 @fixture
 def make_get_asset_topics_rpc() -> Callable[..., GetAssetTopicsRpc]:
-    def builder(
-        event_bus: NatsClient = Mock(NatsClient),
-        logger: Logger = logging.getLogger(),
-        timeout: int = hash("any_timeout"),
-    ):
-        rpc = GetAssetTopicsRpc(event_bus, logger, timeout)
-        rpc.start = Mock(return_value=(RpcRequest(request_id="a_request_id"), Mock(RpcLogger)))
-        return rpc
+    def builder(event_bus: NatsClient = Mock(NatsClient), timeout: int = hash("any_timeout")):
+        return GetAssetTopicsRpc(event_bus, timeout)
 
     return builder

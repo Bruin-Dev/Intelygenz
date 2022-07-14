@@ -101,22 +101,18 @@ class Container:
         # RPCs
         append_note_to_ticket_rpc = AppendNoteToTicketRpc(
             _nats_client=self._nats_client,
-            _logger=log,
             _timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"],
         )
         get_asset_topics_rpc = GetAssetTopicsRpc(
             _nats_client=self._nats_client,
-            _logger=log,
             _timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"],
         )
         upsert_outage_ticket_rpc = UpsertOutageTicketRpc(
             _nats_client=self._nats_client,
-            _logger=log,
             _timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"],
         )
         subscribe_user_rpc = SubscribeUserRpc(
             _nats_client=self._nats_client,
-            _logger=log,
             _timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"],
         )
 

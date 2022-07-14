@@ -1,8 +1,11 @@
+import logging
 from dataclasses import dataclass, field
 
 from pydantic import BaseModel, Field
 
-from application.rpc import Rpc
+from application.rpc import Rpc, RpcRequest
+
+log = logging.getLogger(__name__)
 
 NATS_TOPIC = "bruin.ticket.note.append.request"
 
@@ -19,13 +22,12 @@ class AppendNoteToTicketRpc(Rpc):
         :param note: the Note to be appended
         :return if the Note was appended or not
         """
-        request, logger = self.start()
-        logger.debug(f"__call__(ticket_id={ticket_id}, note=**)")
+        log.debug(f"__call__(ticket_id={ticket_id}, note=**)")
 
-        request.body = RequestBody(ticket_id=ticket_id, note=note)
+        request = RpcRequest(body=RequestBody(ticket_id=ticket_id, note=note))
         await self.send(request)
 
-        logger.debug(f"__call__() [OK]")
+        log.debug(f"__call__() [OK]")
         return True
 
 

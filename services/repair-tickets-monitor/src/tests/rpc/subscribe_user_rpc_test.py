@@ -1,13 +1,11 @@
-import logging
 from http import HTTPStatus
-from logging import Logger
 from typing import Callable
 from unittest.mock import ANY, AsyncMock, Mock
 
 from framework.nats.client import Client as NatsClient
 from pytest import fixture, mark, raises
 
-from application.rpc import RpcFailedError, RpcLogger, RpcRequest, RpcResponse
+from application.rpc import RpcFailedError, RpcRequest, RpcResponse
 from application.rpc.subscribe_user_rpc import SUBSCRIPTION_TYPE, RequestBody, SubscribeUserRpc
 
 
@@ -75,14 +73,7 @@ class TestSubscribeUserRpc:
 
 @fixture
 def make_subscribe_user_rpc() -> Callable[..., SubscribeUserRpc]:
-    def builder(
-        event_bus: NatsClient = Mock(NatsClient),
-        logger: Logger = logging.getLogger(),
-        timeout: int = hash("any_timeout"),
-    ):
-        rpc = SubscribeUserRpc(event_bus, logger, timeout)
-        rpc.start = Mock(return_value=(RpcRequest(request_id="a_request_id"), Mock(RpcLogger)))
-        rpc.send = AsyncMock()
-        return rpc
+    def builder(event_bus: NatsClient = Mock(NatsClient), timeout: int = hash("any_timeout")):
+        return SubscribeUserRpc(event_bus, timeout)
 
     return builder

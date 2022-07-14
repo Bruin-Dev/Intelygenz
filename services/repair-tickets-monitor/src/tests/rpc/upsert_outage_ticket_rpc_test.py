@@ -1,14 +1,22 @@
-import logging
 from http import HTTPStatus
-from logging import Logger
 from typing import Callable
 from unittest.mock import AsyncMock, Mock
 
 from framework.nats.client import Client as NatsClient
 from pytest import fixture, mark, raises
 
-from application.rpc import RpcLogger, RpcRequest, RpcResponse
-from application.rpc.upsert_outage_ticket_rpc import *
+from application.domain.asset import AssetId
+from application.rpc import RpcError, RpcFailedError, RpcRequest, RpcResponse
+from application.rpc.upsert_outage_ticket_rpc import (
+    BRUIN_UPDATED_STATUS,
+    MULTIPLE_CLIENTS_MSG,
+    MULTIPLE_SITES_MSG,
+    RequestBody,
+    TicketContact,
+    UpsertedStatus,
+    UpsertedTicket,
+    UpsertOutageTicketRpc,
+)
 
 
 class TestUpsertOutageTicketRpc:
@@ -126,12 +134,8 @@ class TestUpsertOutageTicketRpc:
 def make_upsert_outage_ticket_rpc() -> Callable[..., UpsertOutageTicketRpc]:
     def builder(
         event_bus: NatsClient = Mock(NatsClient),
-        logger: Logger = logging.getLogger(),
         timeout: int = hash("any_timeout"),
     ):
-        rpc = UpsertOutageTicketRpc(event_bus, logger, timeout)
-        rpc.start = Mock(return_value=(RpcRequest(request_id="a_request_id"), Mock(RpcLogger)))
-        rpc.send = AsyncMock()
-        return rpc
+        return UpsertOutageTicketRpc(event_bus, timeout)
 
     return builder

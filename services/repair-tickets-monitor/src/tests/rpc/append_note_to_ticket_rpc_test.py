@@ -1,13 +1,11 @@
-import logging
 from http import HTTPStatus
-from logging import Logger
 from typing import Callable
 from unittest.mock import ANY, AsyncMock, Mock
 
 from framework.nats.client import Client as NatsClient
 from pytest import fixture, mark
 
-from application.rpc import RpcLogger, RpcRequest, RpcResponse
+from application.rpc import RpcRequest, RpcResponse
 from application.rpc.append_note_to_ticket_rpc import AppendNoteToTicketRpc, RequestBody
 
 
@@ -39,14 +37,7 @@ class TestAppendNoteToTicket:
 
 @fixture
 def make_append_note_to_ticket_rpc() -> Callable[..., AppendNoteToTicketRpc]:
-    def builder(
-        event_bus: NatsClient = Mock(NatsClient),
-        logger: Logger = logging.getLogger(),
-        timeout: int = hash("any_timeout"),
-    ):
-        rpc = AppendNoteToTicketRpc(event_bus, logger, timeout)
-        rpc.start = Mock(return_value=(RpcRequest(request_id="a_request_id"), Mock(RpcLogger)))
-        rpc.send = AsyncMock()
-        return rpc
+    def builder(event_bus: NatsClient = Mock(NatsClient), timeout: int = hash("any_timeout")):
+        return AppendNoteToTicketRpc(event_bus, timeout)
 
     return builder
