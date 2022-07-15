@@ -1,20 +1,31 @@
 ## Append note to ticket
-* If service number:
+
+```python
+self._logger.info(f"Appending note to ticket {ticket_id}... Note contents: {note}")
+```
+
+* If there's an error while posting the data to the `bruin-bridge`:
+  ```python
+  err_msg = (
+      f"An error occurred when appending a ticket note to ticket {ticket_id}. "
+      f"Ticket note: {note}. Error: {e}"
+  )
+  [...]
+  self._logger.error(err_msg)
   ```
-  self._logger.info(f'Appending note for service number(s) {", ".join(service_numbers)} in ticket {ticket_id}...')
+  END
+
+* If response status for append note to ticket is not ok:
+  ```python
+  err_msg = (
+      f"Error while appending note to ticket {ticket_id} in "
+      f"{self._config.ENVIRONMENT_NAME.upper()} environment. Note was {note}. Error: "
+      f"Error {response_status} - {response_body}"
+  )
+  [...]
+  self._logger.error(err_msg)
   ```
-* Else:
-  ```
-  self._logger.info(f"Appending note for all service number(s) in ticket {ticket_id}...")
-  ```
-* If Exception:
-  ```
-  self._logger.error(f"An error occurred when appending a ticket note to ticket {ticket_id}. "
-                     f"Ticket note: {note}. Error: {e}")
-  ```
-* If status not ok:
-  ```
-  self._logger.error(f"Error while appending note to ticket {ticket_id} in "
-                     f"{self._config.CURRENT_ENVIRONMENT.upper()} environment. Note was {note}. Error: "
-                     f"Error {response_status} - {response_body}")
+* Otherwise:
+  ```python
+  self._logger.info(f"Note appended to ticket {ticket_id}!")
   ```
