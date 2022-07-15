@@ -163,11 +163,5 @@ class VelocloudRepository:
 
         return response
 
-    async def get_network_gateway_status(self, host: str, since: str, metrics: List[str]):
-        network_gateway_status_response = await self._velocloud_client.get_network_gateway_status(host, since, metrics)
-
-        if network_gateway_status_response.status != 200:
-            return network_gateway_status_response
-
-        network_gateway_status_response.body = network_gateway_status_response.body["data"]
-        return network_gateway_status_response
+    async def get_gateway_status_metrics(self, host: str, gateway_id: int, interval: dict, metrics: List[str]):
+        return await self._velocloud_client.get_gateway_status_metrics(host, gateway_id, interval, metrics)

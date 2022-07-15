@@ -568,8 +568,14 @@ class VelocloudClient:
 
         return result
 
-    async def get_network_gateway_status(self, velocloud_host: str, since: str, metrics: List[str]):
-        request_body = {"time": since, "metrics": metrics}
+    async def get_gateway_status_metrics(
+        self, velocloud_host: str, gateway_id: int, interval: dict, metrics: List[str]
+    ):
+        request_body = {
+            "gatewayId": gateway_id,
+            "interval": interval,
+            "metrics": metrics,
+        }
         result = dict.fromkeys(["body", "status"])
 
         target_host_client = self._get_header_by_host(velocloud_host)
@@ -582,10 +588,10 @@ class VelocloudClient:
             return result
 
         try:
-            self._logger.info(f"Getting network gateway status for host {velocloud_host}...")
+            self._logger.info(f"Getting gateway status metrics for gateway {gateway_id} and host {velocloud_host}...")
 
             response = await self._session.post(
-                url=f"https://{velocloud_host}/portal/rest/monitoring/getNetworkGatewayStatus",
+                url=f"https://{velocloud_host}/portal/rest/metrics/getGatewayStatusMetrics",
                 json=request_body,
                 headers=target_host_client["headers"],
                 ssl=self._config.VELOCLOUD_CONFIG["verify_ssl"],
@@ -604,15 +610,18 @@ class VelocloudClient:
 
         if response.status == 400:
             response = await response.json()
-            result["body"] = f"Got 400 from Velocloud -> {response['error']['message']} for host {velocloud_host}"
+            result["body"] = (
+                f"Got 400 from Velocloud -> {response['error']['message']} for gateway {gateway_id} "
+                f"and host {velocloud_host}"
+            )
             result["status"] = 400
             return result
 
         await self.__schedule_relogin_job_if_needed(velocloud_host, response)
 
         self._logger.info(
-            f"Got HTTP {response.status} from Velocloud after getting network gateway status "
-            f"for host {velocloud_host}"
+            f"Got HTTP {response.status} from Velocloud after getting gateway status metrics for gateway {gateway_id} "
+            f"and host {velocloud_host}"
         )
 
         result["body"] = await response.json()
