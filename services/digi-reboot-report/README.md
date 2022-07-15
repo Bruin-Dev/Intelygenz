@@ -45,7 +45,8 @@ Last step is take all the data from the ticket map to create a csv file that the
 - [DiGi bridge](../digi-bridge/README.md)
 - [Bruin bridge](../bruin-bridge/README.md)
 - [Notifier](../notifier/README.md)
+- [Notifications bridge](../notifications-bridge/README.md)
 
 # Running in docker-compose 
 
-`docker-compose up --build nats-server redis digi-bridge bruin-bridge notifier digi-reboot-report`
+`docker-compose up --build nats-server redis digi-bridge bruin-bridge notifier notifications-bridge digi-reboot-report`

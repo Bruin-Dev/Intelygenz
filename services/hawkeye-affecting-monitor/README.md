@@ -68,7 +68,8 @@ they were built throughout the process.
 - [Hawkeye customer cache](../hawkeye-customer-cache/README.md)
 - [Bruin bridge](../bruin-bridge/README.md)
 - [Notifier](../notifier/README.md)
+- [Notifications bridge](../notifications-bridge/README.md)
 
 # Running in docker-compose
-`docker-compose up --build redis hawkeye-bridge bruin-bridge notifier nats-server hawkeye-customer-cache hawkeye-affecting-monitor`
+`docker-compose up --build redis hawkeye-bridge bruin-bridge notifier notifications-bridge nats-server hawkeye-customer-cache hawkeye-affecting-monitor`
 

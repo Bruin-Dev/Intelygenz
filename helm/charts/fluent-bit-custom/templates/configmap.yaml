@@ -171,6 +171,13 @@ data:
         auto_create_group   true
     [OUTPUT]
         Name                cloudwatch
+        Match               kube.var.log.containers.notifications-bridge*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     notifications-bridge
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
         Match               kube.var.log.containers.repair-tickets-kre-bridge*
         region              {{ .Values.config.region }}
         log_group_name      {{ .Values.config.logGroupName }}

@@ -80,6 +80,10 @@ prometheus-nats-exporter:
     # will be created in the microservice deployment that will wait until the
     # notifier service responds correctly to healthcheck calls.
     notifier: true
+    # -- Indicate if notifications-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # notifications-bridge service responds correctly to healthcheck calls.
+    notifications_bridge: true
     # -- Indicate if repair-tickets-kre-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the
     # repair-tickets-kre-bridge service responds correctly to healthcheck calls.
@@ -962,6 +966,50 @@ notifier:
       cpu: 100m
       memory: 128Mi
   # -- notifier autoscaling configuration
+  autoscaling:
+    enabled: true
+    minReplicas: 5
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+    
+# -- notifications-bridge subchart specific configuration
+notifications-bridge:
+  # -- Field to indicate if the notifications-bridge module is going to be deployed
+  enabled: true
+  # -- Number of replicas of notifications-bridge module
+  replicaCount: 1
+  config:
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
+  # -- notifications-bridge image details
+  image:
+    # -- notifications-bridge repository for docker images
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/notifications-bridge
+    pullPolicy: Always
+    # -- notifications-bridge tag of docker image
+    tag: ""
+  # -- notifications-bridge Service Configuration
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  # -- notifications-bridge autoscaling configuration
   autoscaling:
     enabled: true
     minReplicas: 5

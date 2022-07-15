@@ -1,0 +1,60 @@
+# ==========================================
+# Linter validation jobs for notifications-bridge module
+# ==========================================
+notifications-bridge-linter:
+  variables:
+    MODULE: notifications-bridge
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+      changes:
+        - services/notifications-bridge/src/application/**/*
+        - services/notifications-bridge/src/config/**/*
+        - services/notifications-bridge/src/app.py
+        - services/notifications-bridge/Dockerfile
+        - services/notifications-bridge/requirements.txt
+        - pyutils_automation/py36/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+  extends: .lint_module
+
+# ===================================
+# Unit tests jobs for notifications-bridge module
+# ===================================
+notifications-bridge-test:
+  variables:
+    MODULE: notifications-bridge
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+      changes:
+        - services/notifications-bridge/src/application/**/*
+        - services/notifications-bridge/src/config/**/*
+        - services/notifications-bridge/src/app.py
+        - services/notifications-bridge/Dockerfile
+        - services/notifications-bridge/requirements.txt
+        - pyutils_automation/py36/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+  extends: .unittest_module_python_36_alpine
+  needs: ["notifications-bridge-linter"]
+
+# ======================================
+# Images builds jobs for notifications-bridge module
+# ======================================
+notifications-bridge-build:
+  stage: build
+  variables:
+    MODULE_NAME: notifications-bridge
+    MODULE_VERSION: ${CI_PIPELINE_ID}
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $NOTIFICATIONS_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+      changes:
+        - services/notifications-bridge/src/application/**/*
+        - services/notifications-bridge/src/config/**/*
+        - services/notifications-bridge/src/app.py
+        - services/notifications-bridge/Dockerfile
+        - services/notifications-bridge/requirements.txt
+        - pyutils_automation/py36/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $NOTIFICATIONS_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
+  extends: .build_app_image
+  needs:
+    - job: notifications-bridge-test
+    - job: semantic-release
+      optional: true

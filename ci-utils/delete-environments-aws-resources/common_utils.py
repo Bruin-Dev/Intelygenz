@@ -33,7 +33,9 @@ class CommonUtils:
     @staticmethod
     def check_current_state_call(current_state, aws_resource, aws_resource_name):
         if current_state == 0:
-            logging.info("AWS resource {} with name {} was successfully removed".format(aws_resource, aws_resource_name))
+            logging.info(
+                "AWS resource {} with name {} was successfully removed".format(aws_resource, aws_resource_name)
+            )
         else:
             logging.info(
                 "There where problems trying to delete AWS resource {} with name {}".format(

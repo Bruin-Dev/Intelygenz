@@ -3,15 +3,15 @@
 </div>
 
 |           Module           |                                                                                                              Coverage                                                                                                              |
-| :------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+|:--------------------------:|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
 |        bruin-bridge        |               [![bruin-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=bruin-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)               |
 |       customer-cache       |             [![customer-cache-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=customer-cache-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)             |
 |        digi-bridge         |                [![digi-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=digi-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)                |
 |     digi-reboot-report     |         [![digi-reboot-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=digi-reboot-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)         |
-|        dri-bridge          |                [![dri-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=dri-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)                  |
+|         dri-bridge         |                 [![dri-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=dri-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)                 |
 |  email-tagger-kre-bridge   |    [![email-tagger-kre-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=email-tagger-kre-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)    |
 |    email-tagger-monitor    |       [![email-tagger-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=email-tagger-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)       |
-|       fraud-monitor        |       [![fraud-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=fraud-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)                     |
+|       fraud-monitor        |              [![fraud-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=fraud-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)              |
 | hawkeye-affecting-monitor  |  [![hawkeye-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)  |
 |       hawkeye-bridge       |             [![hawkeye-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)             |
 |   hawkeye-customer-cache   |     [![hawkeye-customer-cache-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-customer-cache-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)     |
@@ -20,8 +20,9 @@
 |    last-contact-report     |        [![last-contact-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=last-contact-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)        |
 |    lumin-billing-report    |         [![lumin-billing-report](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=lumin-billing-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)          |
 |          notifier          |                   [![notifier-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=notifier-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)                   |
+|    notifications-bridge    |       [![notifications-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=notifications-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)       |
 | repair-tickets-kre-bridge  |  [![repair-tickets-kre-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=repair-tickets-kre-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)  |
-|   repair-tickets-monitor   |  [![repair-tickets-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=repair-tickets-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)        |
+|   repair-tickets-monitor   |     [![repair-tickets-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=repair-tickets-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)     |
 | service-affecting-monitor  |  [![service-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)  |
 |   service-outage-monitor   |     [![service-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)     |
 |         t7-bridge          |                  [![t7-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=t7-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)                  |
@@ -126,7 +127,7 @@ Any line of the commit message cannot be longer than 50 characters.
   │                          hawkeye-outage-monitor|intermapper-outage-monitor|last-contact-report|links-metrics-api|
   |                          links-metrics-collector|lumin-billing-report|notifier|service-affecting-monitor|
   |                          service-outage-monitor|t7-bridge|ticket-collector|
-  |                          ticket-statistics|tnba-feedback|tnba-monitor|velocloud-bridge
+  |                          ticket-statistics|tnba-feedback|tnba-monitor|velocloud-bridge|notifications-bridge
   │
   └─⫸ Commit Type: build|ci|docs|feat|fix|perf|refactor|test
 ```
@@ -288,6 +289,7 @@ variables:
   NATS_SERVER_1_DESIRED_TASKS: 1
   NATS_SERVER_2_DESIRED_TASKS: 1
   NOTIFIER_DESIRED_TASKS: 1
+  NOTIFICATIONS_BRIDGE_DESIRED_TASKS: 1
   SERVICE_AFFECTING_MONITOR_DESIRED_TASKS: 1
   SERVICE_OUTAGE_MONITOR_1_DESIRED_TASKS: 0
   SERVICE_OUTAGE_MONITOR_2_DESIRED_TASKS: 0
@@ -627,6 +629,7 @@ NOTE: k9s works like text editor `vi` so you can use the most of shortcuts, like
 - [Last contact report](last-contact-report/README.md)
 - [Lumin billing report](lumin-billing-report/README.md)
 - [Notifier](notifier/README.md)
+- [Notifications bridge](notifications-bridge/README.md)
 - [Service affecting monitor](service-affecting-monitor/README.md)
 - [Service outage monitor](service-outage-monitor/README.md)
 - [T7 bridge](t7-bridge/README.md)

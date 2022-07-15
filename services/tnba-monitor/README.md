@@ -64,8 +64,9 @@ as a Slack notification.
 # Capabilities used
 - [Bruin bridge](../bruin-bridge/README.md)
 - [Notifier](../notifier/README.md)
+- [Notifications bridge](../notifications-bridge/README.md)
 - [T7 bridge](../t7-bridge/README.md)
 - [Velocloud bridge](../velocloud-bridge/README.md)
 
 # Running in docker-compose
-`docker-compose up --build redis nats-server bruin-bridge velocloud-bridge t7-bridge notifier tnba-monitor`
+`docker-compose up --build redis nats-server bruin-bridge velocloud-bridge t7-bridge notifier notifications-bridge tnba-monitor`

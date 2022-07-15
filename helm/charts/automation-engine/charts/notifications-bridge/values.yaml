@@ -1,0 +1,102 @@
+# Default values for notifications-bridge.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Field to indicate is notifications-bridge is going to be deployed
+enabled: true
+
+# -- Global configuration for all subcharts
+global:
+  # -- Name of environment for EKS cluster and network resources
+  current_environment: "dev"
+  # -- Name of environment for helm charts
+  environment: "automation-test"
+  # -- Redis Hostname used to store heavy NATS messages (>1MB)
+  redis_hostname: "redis"
+  # -- Redis Hostname used to store information used by customer-cache
+  redis_customer_cache_hostname: "redis"
+  # -- Redis Hostname used to store metrics obtained from tnba-feedback to train the ML model
+  redis_tnba_feedback_hostname: "redis"
+  # -- Redis Hostname used to store information used by email-tagger
+  redis_email_tagger_hostname: "redis"
+  # -- external-secrets feature to sync parameters from AWS
+  externalSecrets:
+    # -- Enable/disable external-secrets
+    enabled: true
+    # -- Environment path to reference parameter store secrets
+    envPath: "/automation-engine/test"
+    # -- Common path to reference parameter store secrets
+    commonPath: "/automation-engine/common"
+    # -- secretStorage configuration for create additional k8s resources to allow sync parameters from aws
+    secretStorage:
+      # -- Custom serviceAccount to assign AWS permissions
+      serviceAccount:
+        # -- AWS IAM role that have access to get parameter's from AWS 
+        # (needs secret-manager and ssm IAM permission, if use encryption also kms permissions)
+        roleARN: ""
+  # -- Indicates if the helm chart will be displayed in an aws or local environment,
+  # in case it is local, a specific imagePullSecret will be used to access the images stored in ECR.
+  mode: "aws"
+  ecr_registry:
+    # -- Name of the imagePullSecret created to access the images stored in ECR.
+    name: "ecr-registry"
+
+config:
+  metrics:
+    # -- Indicates whether the microservice will expose metrics through prometheus.
+    enabled: true
+    svc:
+      port: 9090
+      name: metrics
+    ## Additional labels for the service monitor
+    ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+    labels: {}
+    #labels:
+    #  servicediscovery: true
+
+# -- Number of notifications-bridge pods
+replicaCount: 1
+
+image:
+  repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/notifications-bridge
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 5000
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 5
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

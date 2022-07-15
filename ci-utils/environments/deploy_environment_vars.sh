@@ -310,6 +310,16 @@ function notifier_variables() {
   fi
 }
 
+function notifications_bridge_variables() {
+  if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
+    # notifications_bridge environment variables for ephemeral environments
+    export NOTIFICATIONS_BRIDGE__SLACK_WEBHOOK_URL="${DEV__NOTIFICATIONS_BRIDGE__SLACK_WEBHOOK_URL}"
+  else
+    # notifications_bridge environment variables for production environment
+    export NOTIFICATIONS_BRIDGE__SLACK_WEBHOOK_URL="${PRO__NOTIFICATIONS_BRIDGE__SLACK_WEBHOOK_URL}"
+  fi
+}
+
 function repair_tickets_kre_bridge_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # repair-tickets-kre-bridge environment variables for ephemeral environments
@@ -588,6 +598,7 @@ function environments_assign() {
   links_metrics_api_variables
   lumin_billing_report_variables
   notifier_variables
+  notifications_bridge_variables
   repair_tickets_kre_bridge_variables
   repair_tickets_monitor_variables
   service_affecting_monitor_variables

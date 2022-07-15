@@ -124,6 +124,12 @@ scrape_configs:
     static_configs:
       - targets: ['notifier:9090']
 
+  - job_name: 'notifications-bridge'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ 'notifications-bridge:9090' ]
+
   - job_name: 'repair-tickets-kre-bridge'
 
     scrape_interval: 5s

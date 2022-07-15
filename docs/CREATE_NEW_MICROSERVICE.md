@@ -69,7 +69,6 @@ It's important to have the .gitlab-ci.yaml files correctly defined to enable pip
     - local: 'services/links-metrics-collector/.gitlab-ci.yml'
     - local: 'services/lumin-billing-report/.gitlab-ci.yml'
     - local: 'services/new-bridge/.gitlab-ci.yml'    <─────────────── here!
-    - local: 'services/notifier/.gitlab-ci.yml'
     - local: 'services/service-affecting-monitor/.gitlab-ci.yml'
     - local: 'services/service-outage-monitor/.gitlab-ci.yml'
   ...
@@ -81,7 +80,6 @@ It's important to have the .gitlab-ci.yaml files correctly defined to enable pip
     NATS_SERVER_1_DESIRED_TASKS: "1"
     NATS_SERVER_2_DESIRED_TASKS: "1"
     NEW_BRIDGE_DESIRED_TASKS: "1"    <─────────────── here!
-    NOTIFIER_DESIRED_TASKS: "1"
     SERVICE_AFFECTING_MONITOR_DESIRED_TASKS: "1"
     SERVICE_OUTAGE_MONITOR_1_DESIRED_TASKS: "1"
   ...
@@ -108,7 +106,6 @@ We need to edit two files, one in the new micro path and other in the root of th
       "./services/links-metrics-collector",
       "./services/lumin-billing-report",
       "./services/new-bridge",    <─────────────── here!
-      "./services/notifier",
       "./services/service-affecting-monitor",
       "./services/service-outage-monitor",
   ...
@@ -131,11 +128,6 @@ We use 2 systems to storage logs, papertrail for 3 days and cloudwath for 1 mont
                       "search_name": f"[new-bridge] - logs",                               ├──────────────> here!
                       "repository": "new-bridge",                                          │
                   },                                                                      _│
-                  {
-                      "query": f"notifier AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                      "search_name": f"[notifier] - logs",
-                      "repository": "notifier",
-                  },
   ...
   ````
 
@@ -157,13 +149,6 @@ We use 2 systems to storage logs, papertrail for 3 days and cloudwath for 1 mont
           log_group_name      {{ .Values.config.logGroupName }}      │
           log_stream_name     new-bridge                             │
           auto_create_group   true                                  _│
-      [OUTPUT]
-          Name                cloudwatch
-          Match               kube.var.log.containers.notifier*
-          region              {{ .Values.config.region }}
-          log_group_name      {{ .Values.config.logGroupName }}
-          log_stream_name     notifier
-          auto_create_group   true
   ...
   ````
 
@@ -185,9 +170,6 @@ We use 2 systems to storage logs, papertrail for 3 days and cloudwath for 1 mont
       - redis                                                           │
     ports:                                                              │
       - 5006:5000                                                      _│
-
-  notifier:
-    build:
   ...
   ````
 
@@ -202,9 +184,6 @@ We use 2 systems to storage logs, papertrail for 3 days and cloudwath for 1 mont
   - name: new-bridge                          ¯│
     version: '*.*.*'                           ├──────────────> here!
     condition: new-bridge.enabled             _│
-  - name: notifier
-    version: '*.*.*'
-    condition: notifier.enabled
   ...
   ````
 
@@ -235,7 +214,7 @@ Perfect, now let's copy and paste another chart to use as template, if we will d
                   name: {{ include "new-bridge.configmapName" . }}
   ...
   ````
-  We can add or remove all the init containers we want. Even, it is very possible that all the dependencies that we need already have the microservice that we use as a base or some other microservice already developed. So we can navigate through the folders of the rest of the microservices and copy any other dependency check and use it in ours. I will add a new dependency for `notifier` copied from other microservice, and my file will look like the following:
+  We can add or remove all the init containers we want. Even, it is very possible that all the dependencies that we need already have the microservice that we use as a base or some other microservice already developed. So we can navigate through the folders of the rest of the microservices and copy any other dependency check and use it in ours. I will add a new dependency for `notifications-bridge` copied from other microservice, and my file will look like the following:
   ````
   ...
         initContainers:
@@ -248,14 +227,14 @@ Perfect, now let's copy and paste another chart to use as template, if we will d
             envFrom:
               - configMapRef:
                   name: {{ include "new-bridge.configmapName" . }}
-          {{- if .Values.config.capabilities_enabled.notifier }}                                                                        ¯│                                                                     
-          - name: wait-notifier                                                                                                          │
-            image: busybox:1.28                                                                                                          ├──────────────> here!
-            command: ['sh', '-c', 'until wget --spider -S http://notifier:5000/_health; do echo waiting for notifier; sleep 2; done']    │
-          {{- end }}                                                                                                                    _│
+          {{- if .Values.config.capabilities_enabled.notifications_bridge }}                                                                                    ¯│                                                                     
+          - name: wait-notifications-bridge                                                                                                                      │
+            image: busybox:1.28                                                                                                                                  ├──────────────> here!
+            command: ['sh', '-c', 'until wget --spider -S http://notifications-bridge:5000/_health; do echo waiting for notifications-bridge; sleep 2; done']    │
+          {{- end }}                                                                                                                                            _│
   ...
   ````
-  Note that we have a `if` condition. You will see this in some check, we use this because if we deploy only some microservices, we must contemplate this. If the notifier not exist, the check will not be created. Nats and Redis are always required, that's wy don't have the conditional.
+  Note that we have a `if` condition. You will see this in some check, we use this because if we deploy only some microservices, we must contemplate this. If the notifications-bridge does not exist, the check will not be created. Nats and Redis are always required, that's wy don't have the conditional.
   * VARIABLES: time to update the variables that will use our microservice, this involves various files:
 
     * `helm/charts/automation-engine/charts/new-bridge/templates/configmap.yaml` this file always will be part of the deployment, it contains the variables base and the variables with no sensitive information. let's add a new variable NEW_VAR:
@@ -362,22 +341,6 @@ Perfect, now let's copy and paste another chart to use as template, if we will d
         requests:                                                              │
           cpu: 100m                                                            │
           memory: 128Mi                                                       _│
-
-
-    # -- notifier subchart specific configuration
-    notifier:
-      # -- Field to indicate if the notifier module is going to be deployed
-      enabled: true
-      # -- Number of replicas of notifier module
-      replicaCount: 1
-      # -- notifier image details
-      image:
-        # -- notifier repository for docker images
-        repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/notifier
-        pullPolicy: Always
-        # -- notifier tag of docker image
-        tag: ""
-      # -- notifier Service Configuration
     ...
     ````
     Things to check: first the indentation!!.. second, the "global" config is not set here; it is defined at the beginning of the values file and is common for all microservices. and finally, we remove blank and default configurations to get a shorter file (things removed: autoscaling, the default is false, so we can omit it. nodeSelector. tolerations and affinity). PD: You can keep autoscaling if you will enable it.
@@ -442,23 +405,6 @@ Perfect, now let's copy and paste another chart to use as template, if we will d
         requests:                                                              │
           cpu: 100m                                                            │
           memory: 128Mi                                                       _│
-
-
-    # -- notifier subchart specific configuration
-    notifier:
-      enabled: ${NOTIFIER_ENABLED}
-      replicaCount: ${NOTIFIER_DESIRED_TASKS}
-      # -- notifier image details
-      image:
-        # -- notifier repository for docker images
-        repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/notifier
-        pullPolicy: Always
-        # -- notifier tag of docker image
-        tag: ${NOTIFIER_BUILD_NUMBER}
-      # -- notifier Service Configuration
-      service:
-        type: ClusterIP
-        port: 5000
     ...
     ````
     With this, we have the entire template of our new microservice. Now we need to set in the pipeline the variables that we just created.
@@ -487,16 +433,6 @@ Perfect, now let's copy and paste another chart to use as template, if we will d
         export NEW_BRIDGE_NEW_SENSITIVE_VARIABLE=${NEW_BRIDGE_NEW_SENSITIVE_VARIABLE_PRO}    │
       fi                                                                                     │
     }                                                                                       _│ 
-
-    function notifier_variables() {
-      if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
-        # notifier environment variables for ephemeral environments
-        export NOTIFIER_SLACK_URL=${SLACK_URL_DEV}
-      else
-        # notifier environment variables for production environment
-        export NOTIFIER_SLACK_URL=${SLACK_URL_PRO}
-      fi
-    }                                _│
     ...
     function environments_assign() {
       # assign enabled variable for each subchart
@@ -514,7 +450,6 @@ Perfect, now let's copy and paste another chart to use as template, if we will d
       lit_bridge_variables
       lumin_billing_report_variables
       new_bridge_variables    <─────────────── and here!
-      notifier_variables
       t7_bridge_variables
       ticket_collector_variables
       velocloud_bridge_variables

@@ -84,6 +84,7 @@
     "./services/links-metrics-collector",
     "./services/lumin-billing-report",
     "./services/notifier",
+    "./services/notifications-bridge",
     "./services/repair-tickets-kre-bridge",
     "./services/repair-tickets-monitor",
     "./services/service-affecting-monitor",

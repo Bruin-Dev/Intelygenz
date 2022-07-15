@@ -66,6 +66,14 @@ It's recomendable compare the difference between each job of `validation` stage 
     - **Duration**: 1 minute 11 seconds
     - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/341681)
 
+- *notifications-bridge*
+  - using custom image:
+    - **Duration**: 16 seconds
+    - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/340289)
+  - using old method:
+    - **Duration**: 1 minute 11 seconds
+    - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/341681)
+
 - *service-affecting-monitor*
   - using custom image:
     - **Duration**: 16 seconds
@@ -144,6 +152,14 @@ It's recomendable compare the difference between each job of `unit_test` stage f
       - **Duration**: 52 seconds
       - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/334329)
 
+  - *notifications-bridge*:
+    - using custom image:
+      - **Duration**: 30 seconds
+      - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/340298)
+    - using old method:
+      - **Duration**: 52 seconds
+      - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/334329)
+
   - *service-affecting-monitor*:
     - using custom image:
       - **Duration**: 29 seconds
@@ -209,6 +225,14 @@ It’s recomendable compare the difference between each job of `build` stage for
       - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/341700)
 
   - *notifier*:
+    - using custom image:
+      - **Duration**: 3 minutes 0 seconds
+      - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/340316)
+    - using old method:
+      - **Duration**: 5 minutes 25 seconds
+      - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/341708)
+
+  - *notifications-bridge*:
     - using custom image:
       - **Duration**: 3 minutes 0 seconds
       - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/340316)

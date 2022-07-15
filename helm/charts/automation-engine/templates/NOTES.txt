@@ -20,6 +20,7 @@ Automation-Engine deployed version: {{ .Chart.AppVersion }}
 {{- if not (index .Values "links-metrics-collector" "enabled") }} links-metrics-collector{{- end }}
 {{- if not (index .Values "lumin-billing-report" "enabled") }} lumin-billing-report{{- end }}
 {{- if not (index .Values "notifier" "enabled") }} notifier{{- end }}
+{{- if not (index .Values "notifications-bridge" "enabled") }} notifications-bridge{{- end }}
 {{- if not (index .Values "repair-tickets-kre-bridge" "enabled") }} repair-tickets-kre-bridge{{- end }}
 {{- if not (index .Values "repair-tickets-monitor" "enabled") }} repair-tickets-monitor{{- end }}
 {{- if not (index .Values "service-affecting-monitor" "enabled") }} service-affecting-monitor{{- end }}
@@ -51,6 +52,7 @@ Automation-Engine deployed version: {{ .Chart.AppVersion }}
 {{ if (index .Values "links-metrics-collector" "enabled") }}    - links-metrics-collector: {{ (index .Values "links-metrics-collector" "image" "tag") }}{{- end }}
 {{ if (index .Values "lumin-billing-report" "enabled") }}    - lumin-billing-report: {{ (index .Values "lumin-billing-report" "image" "tag") }}{{- end }}
 {{ if (index .Values "notifier" "enabled") }}    - notifier: {{ (index .Values "notifier" "image" "tag") }}{{- end }}
+{{ if (index .Values "notifications-bridge" "enabled") }}    - notifications-bridge: {{ (index .Values "notifications-bridge" "image" "tag") }}{{- end }}
 {{ if (index .Values "repair-tickets-kre-bridge" "enabled") }}    - repair-tickets-kre-bridge: {{ (index .Values "repair-tickets-kre-bridge" "image" "tag") }}{{- end }}
 {{ if (index .Values "repair-tickets-monitor" "enabled") }}    - repair-tickets-monitor: {{ (index .Values "repair-tickets-monitor" "image" "tag") }}{{- end }}
 {{ if (index .Values "service-affecting-monitor" "enabled") }}    - service-affecting-monitor: {{ (index .Values "service-affecting-monitor" "image" "tag") }}{{- end }}
