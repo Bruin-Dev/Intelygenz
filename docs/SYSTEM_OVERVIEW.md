@@ -38,6 +38,7 @@ There are two types of microservices depending on the connection between them an
         - `hawkeye-bridge`
         - `lit-bridge`
         - `notifier`
+        - `notifications-bridge`
         - `t7-bridge`
 
     - Those that take the role of `requester` in the context of NATS, usually microservices that contains **use cases**:
@@ -143,6 +144,16 @@ The following [diagram](https://app.diagrams.net/#G19IZI0cCp1odvYIwgMGlrGiQfKYZb
 
 ![IMAGE: notifier_microservice_relationships](img/system_overview/capabilities/notifier_microservice_relationships.png)
 
+#### Notifications bridge microservice
+
+This microservice is in charge of sending Slack notifications .
+
+It is important to point out that it is not in charge of the composition of the messages to be sent, that is to say, of their content, but only of sending them.
+
+The following [diagram](https://app.diagrams.net/#G19IZI0cCp1odvYIwgMGlrGiQfKYZbedx2) shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
+
+![IMAGE: notifications_bridge_microservice_relationships](img/system_overview/capabilities/notifications_bridge_microservice_relationships.png)
+
 #### T7-bridge microservice
 
 The function of this microservice is to embed in the notes of a ticket the prediction calculated by T7, this prediction will store information on the recommendations actions for the ticket.
@@ -217,7 +228,7 @@ It is possible to see the relations between the mentioned services for the flow 
 
 In this microservice are defined a series of scales and thresholds, the function of this will be to check if there is loss of packages, latencies or jitter measurements that exceed the thresholds defined.
 
-In case the thresholds are exceeded, it will communicate with the notifier service to send a notification by email and slack, by means of which it will warn of the problems detected on a specific edge.
+In case the thresholds are exceeded, it will communicate with the notifier service to send a notification by email and the notifications service to send a notification by slack, by means of which it will warn of the problems detected on a specific edge.
 
 This microservice also communicates with the bruin-bridge microservice to create tickets or add notes to an existing one, including in this information about the routers for which a problem is detected.
 

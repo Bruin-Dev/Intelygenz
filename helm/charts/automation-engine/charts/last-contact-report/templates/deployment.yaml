@@ -27,7 +27,12 @@ spec:
         {{- if .Values.config.capabilities_enabled.notifier }}
         - name: wait-notifier
           image: busybox:1.28
-          command: ['sh', '-c', 'until wget --spider -S http://notifier:5000/_health; do echo waiting for notifier; sleep 2; done']
+          command: [ 'sh', '-c', 'until wget --spider -S http://notifier:5000/_health; do echo waiting for notifier; sleep 2; done' ]
+        {{- end }}
+        {{- if .Values.config.capabilities_enabled.notifications_bridge }}
+        - name: wait-notifications-bridge
+          image: busybox:1.28
+          command: ['sh', '-c', 'until wget --spider -S http://notifications-bridge:5000/_health; do echo waiting for notifications-bridge; sleep 2; done']
         {{- end }}
         {{- if  .Values.config.capabilities_enabled.velocloud_bridge }}
         - name: wait-velocloud-bridge

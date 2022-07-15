@@ -129,6 +129,11 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "notifier",
                 },
                 {
+                    "query": f"notifications-bridge AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[notifications-bridge] - logs",
+                    "repository": "notifications-bridge",
+                },
+                {
                     "query": f"repair-tickets-kre-bridge AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[repair-tickets-kre-bridge] - logs",
                     "repository": "repair-tickets-kre-bridge",

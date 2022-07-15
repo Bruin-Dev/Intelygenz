@@ -84,6 +84,10 @@ prometheus-nats-exporter:
     # will be created in the microservice deployment that will wait until the
     # notifier service responds correctly to healthcheck calls.
     notifier: ${NOTIFIER_ENABLED}
+    # -- Indicate if notifications-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # notifications-bridge service responds correctly to healthcheck calls.
+    notifications_bridge: ${NOTIFICATIONS_BRIDGE_ENABLED}
     # -- Indicate if t7-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the
     # t7-bridge service responds correctly to healthcheck calls.
@@ -886,6 +890,52 @@ notifier:
   autoscaling:
     enabled: ${NOTIFIER_ENABLED}
     minReplicas: ${NOTIFIER_DESIRED_TASKS}
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+
+
+# -- notifications-bridge subchart specific configuration
+notifications-bridge:
+  enabled: ${NOTIFICATIONS_BRIDGE_ENABLED}
+  replicaCount: ${NOTIFICATIONS_BRIDGE_DESIRED_TASKS}
+  config:
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
+  # -- notifications-bridge image details
+  image:
+    # -- notifications-bridge repository for docker images
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/notifications-bridge
+    pullPolicy: Always
+    # -- notifications-bridge tag of docker image
+    tag: ${NOTIFICATIONS_BRIDGE_BUILD_NUMBER}
+  # -- notifications-bridge Service Configuration
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after "resources:".
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  autoscaling:
+    enabled: ${NOTIFICATIONS_BRIDGE_ENABLED}
+    minReplicas: ${NOTIFICATIONS_BRIDGE_DESIRED_TASKS}
     maxReplicas: 5
     targetCPUUtilizationPercentage: 80
     targetMemoryUtilizationPercentage: 80

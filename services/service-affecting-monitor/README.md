@@ -110,6 +110,7 @@ exceeded, the process will report this issue.
 - [Velocloud bridge](../velocloud-bridge/README.md)
 - [Bruin bridge](../bruin-bridge/README.md)
 - [Notifier](../notifier/README.md)
+- [Notifications bridge](../notifications-bridge/README.md)
 
 # Running in docker-compose
-`docker-compose up --build redis nats-server velocloud-bridge notifier customer-cache service-affecting-monitor`
+`docker-compose up --build redis nats-server velocloud-bridge notifier notifications-bridge customer-cache service-affecting-monitor`

@@ -138,6 +138,9 @@ NOTIFIER__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_USERNAME = parameters["common"]["no
 NOTIFIER__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_PASSWORD = parameters["common"]["notifier"]["email-account-for-message-delivery-password"]
 NOTIFIER__MONITORABLE_EMAIL_ACCOUNTS = parameters["dev"]["notifier"]["monitorable-email-accounts"]
 
+# Notifications bridge variables
+NOTIFICATIONS_BRIDGE__SLACK_WEBHOOK = parameters["dev"]["notifications-bridge"]["slack-webhook-url"]
+
 # RTA KRE Bridge variables
 REPAIR_TICKETS_KRE_BRIDGE__KRE_BASE_URL = parameters["dev"]["repair-tickets-kre-bridge"]["kre-base-url"]
 
@@ -553,6 +556,15 @@ env_dict = {
         f"EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_USERNAME={NOTIFIER__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_USERNAME}",
         f"EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_PASSWORD={NOTIFIER__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_PASSWORD}",
         f"MONITORABLE_EMAIL_ACCOUNTS={NOTIFIER__MONITORABLE_EMAIL_ACCOUNTS}",
+    ],
+    os.path.join("services", "notifications-bridge", "src", "config", "env"): [
+        f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",
+        f"NATS_SERVER1={NATS_SERVER1}",
+        f"REDIS_HOSTNAME={REDIS_HOSTNAME}",
+        f"PAPERTRAIL_ACTIVE={PAPERTRAIL_ACTIVE}",
+        f"PAPERTRAIL_HOST={PAPERTRAIL_HOST}",
+        f"PAPERTRAIL_PORT={PAPERTRAIL_PORT}",
+        f"SLACK_WEBHOOK={NOTIFICATIONS_BRIDGE__SLACK_WEBHOOK}"
     ],
     os.path.join("services", "repair-tickets-kre-bridge", "src", "config", "env"): [
         f"CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}",

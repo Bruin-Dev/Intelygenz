@@ -22,6 +22,7 @@ otherwise we need to keep it unread in order to reattempt processing it next tim
 # Capabilities used
 - [Bruin Bridge](../bruin-bridge/README.md)
 - [Notifier](../notifier/README.md)
+- [Notifications bridge](../notifications-bridge/README.md)
 
 # Running in docker-compose
-`docker-compose up --build nats-server notifier bruin-bridge fraud-monitor`
+`docker-compose up --build nats-server notifier notifications-bridge bruin-bridge fraud-monitor`

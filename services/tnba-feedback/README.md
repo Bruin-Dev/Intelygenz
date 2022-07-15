@@ -11,10 +11,11 @@ the task history. If it is then it will send that ticket's task history to T7.
 # Capabilities used
 - [Bruin bridge](../bruin-bridge/README.md)
 - [Notifier](../notifier/README.md)
+- [Notifications bridge](../notifications-bridge/README.md)
 - [T7 bridge](../t7-bridge/README.md)
 
 # Running in docker-compose
 1. Turn VPN on
-2. `docker-compose up --build redis nats-server t7-bridge notifier`
+2. `docker-compose up --build redis nats-server t7-bridge notifier notifications-bridge`
 3. Run bruin in pycharm 
 4. `docker-compose up --build tnba-feedback`

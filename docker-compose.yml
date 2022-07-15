@@ -354,6 +354,24 @@ services:
       - 5002:5000
       - 9095:9090
 
+  notifications-bridge:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: services/notifications-bridge/Dockerfile
+    env_file:
+      - services/notifications-bridge/src/config/env
+    volumes:
+      - ./services/notifications-bridge:/service/app
+    depends_on:
+      - "nats-server"
+      - redis
+    ports:
+      - 5022:5000
+      - 9101:9090
+    stdin_open: true # for debug
+    tty: true # for debug
+
   repair-tickets-monitor:
     build:
       # Context must be the root of the monorepo

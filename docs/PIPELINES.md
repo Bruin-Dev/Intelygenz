@@ -201,6 +201,8 @@ In this stage there are one job:
 
       * [notifier](../notifier)
 
+      * [notifications-bridge](../notifications-bridge)
+
       * [service-affecting-monitor](../service-affecting-monitor)
     
       * [service-dispatch-monitor](../service-dispatch-monitor)
@@ -259,6 +261,7 @@ In this stage there are one job:
      - `cts-bridge`
      - `lit-bridge`
      - `notifier`
+     - `notifications-bridge`
      - `prometheus`
      - `t7-bridge`
      - `velocloud-bridge` 
@@ -300,6 +303,7 @@ In this stage there are one job:
                          null_resource.hawkeye-bridge-healthcheck,
                          null_resource.t7-bridge-healthcheck,
                          null_resource.notifier-healthcheck,
+                         null_resource.notifications-bridge-healthcheck,
                          null_resource.metrics-prometheus-healthcheck ]
         . . .
      }
@@ -325,6 +329,7 @@ In this stage there are one job:
                          null_resource.hawkeye-bridge-healthcheck,
                          null_resource.t7-bridge-healthcheck,
                          null_resource.notifier-healthcheck,
+                         null_resource.notifications-bridge-healthcheck,
                          null_resource.metrics-prometheus-healthcheck,
                          null_resource.dispatch-portal-backend-healthcheck,
                          aws_lb.automation-alb ]
