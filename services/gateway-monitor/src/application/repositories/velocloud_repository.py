@@ -45,28 +45,32 @@ class VelocloudRepository:
 
         return response
 
-    async def get_network_gateway_status_list(self, velocloud_host: str, lookup_interval: int) -> dict:
+    async def get_gateway_status_metrics(self, velocloud_host: str, gateway_id: int) -> dict:
         err_msg = None
+
         metrics = ["tunnelCount"]
-        since = datetime.now() - timedelta(seconds=lookup_interval)
+        lookup_interval = self._config.MONITOR_CONFIG["gateway_metrics_lookup_interval"]
+        start = datetime.now() - timedelta(seconds=lookup_interval)
+        end = datetime.now()
 
         request = {
             "request_id": uuid(),
             "body": {
                 "host": velocloud_host,
+                "gateway_id": gateway_id,
                 "metrics": metrics,
-                "since": since.isoformat() + "Z",
+                "interval": {"start": start.isoformat() + "Z", "end": end.isoformat() + "Z"},
             },
         }
 
         try:
             self._logger.info(
-                f"Getting network gateway status list from Velocloud host {velocloud_host} "
-                f"for the past {lookup_interval // 60} minutes..."
+                f"Getting gateway status metrics from Velocloud host {velocloud_host} "
+                f"for gateway {gateway_id} for the past {lookup_interval // 60} minutes..."
             )
-            response = await self._event_bus.rpc_request("request.network.gateway.status", request, timeout=30)
+            response = await self._event_bus.rpc_request("request.gateway.status.metrics", request, timeout=30)
         except Exception as e:
-            err_msg = f"An error occurred when requesting network gateway status list from Velocloud -> {e}"
+            err_msg = f"An error occurred when requesting gateway status metrics from Velocloud -> {e}"
             response = {"body": None, "status": 503}
         else:
             response_body = response["body"]
@@ -74,13 +78,13 @@ class VelocloudRepository:
 
             if response_status in range(200, 300):
                 self._logger.info(
-                    f"Got network gateway status list from Velocloud host {velocloud_host} "
-                    f"for the past {lookup_interval // 60} minutes!"
+                    f"Got gateway status metrics from Velocloud host {velocloud_host} "
+                    f"for gateway {gateway_id} for the past {lookup_interval // 60} minutes!"
                 )
             else:
                 environment = self._config.ENVIRONMENT_NAME.upper()
                 err_msg = (
-                    f"Error while retrieving network gateway status list from Velocloud in {environment} "
+                    f"Error while retrieving gateway status metrics from Velocloud in {environment} "
                     f"environment: Error {response_status} - {response_body}"
                 )
 

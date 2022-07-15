@@ -246,8 +246,7 @@ TNBA_MONITOR__MIN_REQUIRED_CONFIDENCE_FOR_REQUEST_AND_REPAIR_COMPLETED_PREDICTIO
 # Gateway Monitor
 GATEWAY_MONITOR__MONITORED_VELOCLOUD_HOSTS = json.dumps(json.loads(parameters["dev"]["gateway-monitor"]["monitored-velocloud-hosts"]))
 GATEWAY_MONITOR__MONITORING_JOB_INTERVAL = parameters["common"]["gateway-monitor"]["monitoring-job-interval"]
-GATEWAY_MONITOR__FIRST_GATEWAY_LOOKUP_INTERVAL = parameters["common"]["gateway-monitor"]["first-gateway-lookup-interval"]
-GATEWAY_MONITOR__SECOND_GATEWAY_LOOKUP_INTERVAL = parameters["common"]["gateway-monitor"]["second-gateway-lookup-interval"]
+GATEWAY_MONITOR__GATEWAY_METRICS_LOOKUP_INTERVAL = parameters["common"]["gateway-monitor"]["gateway-metrics-lookup-interval"]
 GATEWAY_MONITOR__TUNNEL_COUNT_THRESHOLD = parameters["common"]["gateway-monitor"]["tunnel-count-threshold"]
 
 # Lumin Billing Report variables
@@ -695,8 +694,7 @@ env_dict = {
         f"PAPERTRAIL_PORT={PAPERTRAIL_PORT}",
         f"MONITORED_VELOCLOUD_HOSTS={GATEWAY_MONITOR__MONITORED_VELOCLOUD_HOSTS}",
         f"MONITORING_JOB_INTERVAL={GATEWAY_MONITOR__MONITORING_JOB_INTERVAL}",
-        f"FIRST_GATEWAY_LOOKUP_INTERVAL={GATEWAY_MONITOR__FIRST_GATEWAY_LOOKUP_INTERVAL}",
-        f"SECOND_GATEWAY_LOOKUP_INTERVAL={GATEWAY_MONITOR__SECOND_GATEWAY_LOOKUP_INTERVAL}",
+        f"GATEWAY_METRICS_LOOKUP_INTERVAL={GATEWAY_MONITOR__GATEWAY_METRICS_LOOKUP_INTERVAL}",
         f"TUNNEL_COUNT_THRESHOLD={GATEWAY_MONITOR__TUNNEL_COUNT_THRESHOLD}",
     ],
     os.path.join("services", "ticket-collector", "src", "config", "env"): [

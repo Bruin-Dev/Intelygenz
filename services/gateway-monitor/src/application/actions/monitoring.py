@@ -64,43 +64,26 @@ class Monitor:
 
     async def _process_host(self, host: str):
         self._logger.info(f"Processing Velocloud host {host}...")
-        gateway_lookup_intervals = self._config.MONITOR_CONFIG["gateway_lookup_intervals"]
-
-        # Get gateways info
         network_gateway_list_response = await self._velocloud_repository.get_network_gateway_list(host)
+
         if network_gateway_list_response["status"] not in range(200, 300):
             return
 
-        # Group gateways by ID
-        gateways = {}
-        for gateway in network_gateway_list_response["body"]:
-            gateways[gateway["id"]] = gateway
+        gateways = network_gateway_list_response["body"]
+        for gateway in gateways:
+            try:
+                gateway["metrics"] = await self._get_gateway_metrics(host, gateway["id"])
+            except Exception as e:
+                self._logger.exception(e)
 
-        # Get first interval
-        first_network_gateway_status_list_response = await self._velocloud_repository.get_network_gateway_status_list(
-            host, gateway_lookup_intervals["first"]
-        )
-        if first_network_gateway_status_list_response["status"] not in range(200, 300):
-            return
-        first_gateway_list = self._map_gateway_info(gateways, first_network_gateway_status_list_response["body"])
+        gateways = self._filter_gateways_with_metrics(gateways)
+        unhealthy_gateways = self._get_unhealthy_gateways(gateways)
 
-        # Get second interval
-        second_network_gateway_status_list_response = await self._velocloud_repository.get_network_gateway_status_list(
-            host, gateway_lookup_intervals["second"]
-        )
-        if second_network_gateway_status_list_response["status"] not in range(200, 300):
-            return
-        second_gateway_list = self._map_gateway_info(gateways, second_network_gateway_status_list_response["body"])
-
-        # Process gateways
-        gateway_pairs = self._build_gateway_pairs(host, first_gateway_list, second_gateway_list)
-        unhealthy_gateway_pairs = self._get_unhealthy_gateways(gateway_pairs)
-
-        if unhealthy_gateway_pairs:
-            self._logger.info(f"{len(unhealthy_gateway_pairs)} unhealthy gateway(s) found for host {host}")
-            for gateway_pair in unhealthy_gateway_pairs:
+        if unhealthy_gateways:
+            self._logger.info(f"{len(unhealthy_gateways)} unhealthy gateway(s) found for host {host}")
+            for gateway in unhealthy_gateways:
                 try:
-                    await self._report_servicenow_incident(host, gateway_pair)
+                    await self._report_servicenow_incident(host, gateway)
                 except Exception as e:
                     self._logger.exception(e)
         else:
@@ -108,12 +91,19 @@ class Monitor:
 
         self._logger.info(f"Finished processing Velocloud host {host}!")
 
-    async def _report_servicenow_incident(self, host: str, gateway_pair: Tuple[dict, dict]):
-        gateway_name = gateway_pair[0]["name"]
-        report_incident_response = await self._servicenow_repository.report_incident(host, gateway_name, gateway_pair)
+    async def _get_gateway_metrics(self, host: str, gateway_id: int):
+        response = await self._velocloud_repository.get_gateway_status_metrics(host, gateway_id)
+
+        if response["status"] not in range(200, 300):
+            return None
+
+        return response["body"]
+
+    async def _report_servicenow_incident(self, host: str, gateway: dict):
+        report_incident_response = await self._servicenow_repository.report_incident(host, gateway)
 
         if report_incident_response["status"] not in range(200, 300):
-            self._logger.error(f"Failed to report incident to ServiceNow for host {host} and gateway {gateway_name}")
+            self._logger.error(f"Failed to report incident to ServiceNow for host {host} and gateway {gateway['name']}")
             return
 
         result = report_incident_response["body"]["result"]
@@ -121,79 +111,47 @@ class Monitor:
         if result["state"] == "inserted":
             self._logger.info(
                 f"A new incident with ID {result['number']} was created in ServiceNow "
-                f"for host {host} and gateway {gateway_name}"
+                f"for host {host} and gateway {gateway['name']}"
             )
         elif result["state"] == "ignored":
             self._logger.info(
                 f"An open incident with ID {result['number']} already existed in ServiceNow "
-                f"for host {host} and gateway {gateway_name}, a note was added to it"
+                f"for host {host} and gateway {gateway['name']}, a note was added to it"
             )
         elif result["state"] == "reopened":
             self._logger.info(
                 f"A resolved incident with ID {result['number']} already existed in ServiceNow "
-                f"for host {host} and gateway {gateway_name}, it was reopened and a note was added to it"
+                f"for host {host} and gateway {gateway['name']}, it was reopened and a note was added to it"
             )
 
-    @staticmethod
-    def _map_gateway_info(gateways_by_id: Dict[int, dict], gateway_status_list: List[dict]) -> List[dict]:
-        gateways = []
+    def _filter_gateways_with_metrics(self, gateways: List[dict]) -> List[dict]:
+        filtered_gateways = []
 
-        for gateway_status in gateway_status_list:
-            gateway_id = gateway_status.pop("gatewayId")
-            gateway = gateways_by_id[gateway_id]
-            gateways.append({"id": gateway_id, "name": gateway["name"], **gateway_status})
-
-        return gateways
-
-    def _build_gateway_pairs(
-        self, host: str, first_gateway_list: List[dict], second_gateway_list: List[dict]
-    ) -> List[Tuple[dict, dict]]:
-        gateway_pairs = []
-        gateways_without_metrics = []
-
-        first_gateway_names = {gw["name"] for gw in first_gateway_list}
-        second_gateway_names = {gw["name"] for gw in second_gateway_list}
-        common_gateway_names = first_gateway_names & second_gateway_names
-        exclusive_gateway_names = first_gateway_names ^ second_gateway_names
-
-        if exclusive_gateway_names:
-            self._logger.warning(
-                f"The following gateways from host {host} "
-                f"were not found in one of the intervals: {list(exclusive_gateway_names)}"
-            )
-
-        for gateway_name in common_gateway_names:
-            first_interval_gateway = self._utils_repository.get_first_element_matching(
-                first_gateway_list, lambda gw: gw["name"] == gateway_name
-            )
-            second_interval_gateway = self._utils_repository.get_first_element_matching(
-                second_gateway_list, lambda gw: gw["name"] == gateway_name
-            )
-
-            if self._has_metrics(first_interval_gateway):
-                gateway_pair = (first_interval_gateway, second_interval_gateway)
-                gateway_pairs.append(gateway_pair)
+        for gateway in gateways:
+            if self._has_metrics(gateway):
+                filtered_gateways.append(gateway)
             else:
-                gateways_without_metrics.append(first_interval_gateway["name"])
+                self._logger.warning(f"Gateway {gateway['name']} has missing metrics")
 
-        if gateways_without_metrics:
-            self._logger.warning(
-                f"The following gateways from host {host} "
-                f"did not have metrics in the first interval: {gateways_without_metrics}"
-            )
-
-        return gateway_pairs
+        return filtered_gateways
 
     @staticmethod
     def _has_metrics(gateway: dict) -> bool:
-        return gateway["tunnelCount"] > 0
+        metrics = gateway["metrics"]
 
-    def _get_unhealthy_gateways(self, gateway_pairs: List[Tuple[dict, dict]]) -> List[Tuple[dict, dict]]:
-        return [gw_pair for gw_pair in gateway_pairs if not self._is_tunnel_count_within_threshold(gw_pair)]
+        if not metrics:
+            return False
 
-    def _is_tunnel_count_within_threshold(self, gateway_pair: Tuple[dict, dict]) -> bool:
-        first_tunnel_count = gateway_pair[0]["tunnelCount"]
-        second_tunnel_count = gateway_pair[1]["tunnelCount"]
+        tunnel_count = metrics.get("tunnelCount")
+        if not tunnel_count or tunnel_count["average"] == 0:
+            return False
 
-        percentage_decrease = (1 - (second_tunnel_count / first_tunnel_count)) * 100
+        return True
+
+    def _get_unhealthy_gateways(self, gateways: List[dict]) -> List[dict]:
+        return [gw for gw in gateways if not self._is_tunnel_count_within_threshold(gw)]
+
+    def _is_tunnel_count_within_threshold(self, gateway: dict) -> bool:
+        tunnel_count = gateway["metrics"]["tunnelCount"]
+        percentage_decrease = (1 - (tunnel_count["min"] / tunnel_count["average"])) * 100
         return percentage_decrease < self._config.MONITOR_CONFIG["thresholds"]["tunnel_count"]
