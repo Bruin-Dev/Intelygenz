@@ -39,8 +39,8 @@ class NetworkGatewayStatusList:
 
         self._logger.info("Getting network gateway status list")
         gateway_status_list = await self._velocloud_repository.get_network_gateway_status(host, since, metrics)
-        network_gateway_status_list_response["body"] = gateway_status_list.body
-        network_gateway_status_list_response["status"] = gateway_status_list.status
+        network_gateway_status_list_response["body"] = gateway_status_list["body"]
+        network_gateway_status_list_response["status"] = gateway_status_list["status"]
 
         await self._event_bus.publish_message(msg["response_topic"], network_gateway_status_list_response)
         self._logger.info(f"Sent list of network gateway status for host {host}")

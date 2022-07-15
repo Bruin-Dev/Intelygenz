@@ -1,7 +1,5 @@
 from typing import Any, Dict, List
 
-from application.repositories.utils_repository import GenericResponse
-
 
 class VelocloudRepository:
     _config = None
@@ -146,7 +144,7 @@ class VelocloudRepository:
 
         return enterprise_edges_response
 
-    async def get_network_gateway_status(self, host: str, since: str, metrics: List[str]) -> GenericResponse:
+    async def get_network_gateway_status(self, host: str, since: str, metrics: List[str]):
         network_gateway_status_response = await self._velocloud_client.get_network_gateway_status(host, since, metrics)
 
         if network_gateway_status_response.status != 200:

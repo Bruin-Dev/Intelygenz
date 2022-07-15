@@ -1,10 +1,8 @@
 import asyncio
 from datetime import datetime
-from http import HTTPStatus
 from typing import Any, Dict, List
 
 import aiohttp
-from application.repositories.utils_repository import GenericResponse
 from apscheduler.jobstores.base import ConflictingIdError
 from pytz import timezone
 
@@ -517,34 +515,59 @@ class VelocloudClient:
 
         return result
 
-    async def get_network_gateway_status(self, velocloud_host: str, since: str, metrics: List[str]) -> GenericResponse:
-        request_body = {}
-        request_body["time"] = since
-        request_body["metrics"] = metrics
+    async def get_network_gateway_status(self, velocloud_host: str, since: str, metrics: List[str]):
+        request_body = {"time": since, "metrics": metrics}
+        result = dict.fromkeys(["body", "status"])
 
-        host_client = self._get_header_by_host(velocloud_host)
+        target_host_client = self._get_header_by_host(velocloud_host)
+
+        if target_host_client is None:
+            await self._start_relogin_job(velocloud_host)
+            result["body"] = f"Cannot find a client to connect to host {velocloud_host}"
+            result["status"] = 404
+            self.__log_result(result)
+            return result
+
         try:
-            client_response = await self._session.post(
+            self._logger.info(f"Getting network gateway status for host {velocloud_host}...")
+
+            response = await self._session.post(
                 url=f"https://{velocloud_host}/portal/rest/monitoring/getNetworkGatewayStatus",
                 json=request_body,
-                headers=host_client["headers"],
+                headers=target_host_client["headers"],
                 ssl=self._config.VELOCLOUD_CONFIG["verify_ssl"],
             )
-            response = await GenericResponse.from_client_response(client_response)
+        except aiohttp.ClientConnectionError:
+            result["body"] = "Error while connecting to Velocloud API"
+            result["status"] = 500
+            self.__log_result(result)
+            return result
 
-            if not response.ok():
-                self._logger.warning(f"post(get_network_gateway_status) => response={response}")
-            else:
-                self._logger.info(response)
+        if response.status in range(500, 513):
+            result["body"] = "Got internal error from Velocloud"
+            result["status"] = 500
+            self.__log_result(result)
+            return result
 
-            return response
+        if response.status == 400:
+            response = await response.json()
+            result["body"] = f"Got 400 from Velocloud -> {response['error']['message']} for host {velocloud_host}"
+            result["status"] = 400
+            return result
 
-        except aiohttp.ClientConnectionError as e:
-            self._logger.error(f"post(get_network_gateway_status) => ClientConnectionError: {e}")
-            return GenericResponse(body=f"ClientConnectionError: {e}", status=HTTPStatus.INTERNAL_SERVER_ERROR)
+        await self.__schedule_relogin_job_if_needed(velocloud_host, response)
 
-        except Exception as e:
-            self._logger.error(f"post(get_network_gateway_status) => UnexpectedError: {e}")
+        self._logger.info(
+            f"Got HTTP {response.status} from Velocloud after getting network gateway status "
+            f"for host {velocloud_host}"
+        )
+
+        result["body"] = await response.json()
+        result["status"] = response.status
+
+        self.__log_result(result)
+
+        return result
 
     async def __schedule_relogin_job_if_needed(self, velocloud_host: str, response: aiohttp.client.ClientResponse):
         if self.__token_expired(response):
