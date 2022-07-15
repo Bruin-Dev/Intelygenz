@@ -1,6 +1,6 @@
 import time
 from datetime import datetime
-from typing import Dict, List, Tuple
+from typing import List
 
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
@@ -72,7 +72,7 @@ class Monitor:
         gateways = network_gateway_list_response["body"]
         for gateway in gateways:
             try:
-                gateway["metrics"] = await self._get_gateway_metrics(host, gateway["id"])
+                gateway["metrics"] = await self._get_gateway_metrics(gateway)
             except Exception as e:
                 self._logger.exception(e)
 
@@ -83,7 +83,7 @@ class Monitor:
             self._logger.info(f"{len(unhealthy_gateways)} unhealthy gateway(s) found for host {host}")
             for gateway in unhealthy_gateways:
                 try:
-                    await self._report_servicenow_incident(host, gateway)
+                    await self._report_servicenow_incident(gateway)
                 except Exception as e:
                     self._logger.exception(e)
         else:
@@ -91,19 +91,21 @@ class Monitor:
 
         self._logger.info(f"Finished processing Velocloud host {host}!")
 
-    async def _get_gateway_metrics(self, host: str, gateway_id: int):
-        response = await self._velocloud_repository.get_gateway_status_metrics(host, gateway_id)
+    async def _get_gateway_metrics(self, gateway: dict):
+        response = await self._velocloud_repository.get_gateway_status_metrics(gateway)
 
         if response["status"] not in range(200, 300):
             return None
 
         return response["body"]
 
-    async def _report_servicenow_incident(self, host: str, gateway: dict):
-        report_incident_response = await self._servicenow_repository.report_incident(host, gateway)
+    async def _report_servicenow_incident(self, gateway: dict):
+        report_incident_response = await self._servicenow_repository.report_incident(gateway)
 
         if report_incident_response["status"] not in range(200, 300):
-            self._logger.error(f"Failed to report incident to ServiceNow for host {host} and gateway {gateway['name']}")
+            self._logger.error(
+                f"Failed to report incident to ServiceNow for host {gateway['host']} and gateway {gateway['name']}"
+            )
             return
 
         result = report_incident_response["body"]["result"]
@@ -111,17 +113,17 @@ class Monitor:
         if result["state"] == "inserted":
             self._logger.info(
                 f"A new incident with ID {result['number']} was created in ServiceNow "
-                f"for host {host} and gateway {gateway['name']}"
+                f"for host {gateway['host']} and gateway {gateway['name']}"
             )
         elif result["state"] == "ignored":
             self._logger.info(
                 f"An open incident with ID {result['number']} already existed in ServiceNow "
-                f"for host {host} and gateway {gateway['name']}, a note was added to it"
+                f"for host {gateway['host']} and gateway {gateway['name']}, a note was added to it"
             )
         elif result["state"] == "reopened":
             self._logger.info(
                 f"A resolved incident with ID {result['number']} already existed in ServiceNow "
-                f"for host {host} and gateway {gateway['name']}, it was reopened and a note was added to it"
+                f"for host {gateway['host']} and gateway {gateway['name']}, it was reopened and a note was added to it"
             )
 
     def _filter_gateways_with_metrics(self, gateways: List[dict]) -> List[dict]:
@@ -131,7 +133,7 @@ class Monitor:
             if self._has_metrics(gateway):
                 filtered_gateways.append(gateway)
             else:
-                self._logger.warning(f"Gateway {gateway['name']} has missing metrics")
+                self._logger.warning(f"Gateway {gateway['name']} from host {gateway['host']} has missing metrics")
 
         return filtered_gateways
 

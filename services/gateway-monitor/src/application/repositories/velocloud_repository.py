@@ -45,7 +45,7 @@ class VelocloudRepository:
 
         return response
 
-    async def get_gateway_status_metrics(self, velocloud_host: str, gateway_id: int) -> dict:
+    async def get_gateway_status_metrics(self, gateway: dict) -> dict:
         err_msg = None
 
         metrics = ["tunnelCount"]
@@ -56,8 +56,8 @@ class VelocloudRepository:
         request = {
             "request_id": uuid(),
             "body": {
-                "host": velocloud_host,
-                "gateway_id": gateway_id,
+                "host": gateway["host"],
+                "gateway_id": gateway["id"],
                 "metrics": metrics,
                 "interval": {"start": start.isoformat() + "Z", "end": end.isoformat() + "Z"},
             },
@@ -65,8 +65,8 @@ class VelocloudRepository:
 
         try:
             self._logger.info(
-                f"Getting gateway status metrics from Velocloud host {velocloud_host} "
-                f"for gateway {gateway_id} for the past {lookup_interval // 60} minutes..."
+                f"Getting gateway status metrics from Velocloud host {gateway['host']} "
+                f"for gateway {gateway['id']} for the past {lookup_interval // 60} minutes..."
             )
             response = await self._event_bus.rpc_request("request.gateway.status.metrics", request, timeout=30)
         except Exception as e:
@@ -78,8 +78,8 @@ class VelocloudRepository:
 
             if response_status in range(200, 300):
                 self._logger.info(
-                    f"Got gateway status metrics from Velocloud host {velocloud_host} "
-                    f"for gateway {gateway_id} for the past {lookup_interval // 60} minutes!"
+                    f"Got gateway status metrics from Velocloud host {gateway['host']} "
+                    f"for gateway {gateway['id']} for the past {lookup_interval // 60} minutes!"
                 )
             else:
                 environment = self._config.ENVIRONMENT_NAME.upper()

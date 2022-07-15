@@ -16,13 +16,13 @@ class ServiceNowRepository:
     def _build_incident_summary(gateway: dict) -> str:
         return f"{gateway['name']}: Medium: VGC Tunnel Count Threshold Violation"
 
-    def _build_incident_note(self, host: str, gateway: dict) -> str:
+    def _build_incident_note(self, gateway: dict) -> str:
         current_datetime_tz_aware = datetime.now(timezone(self._config.TIMEZONE))
         tunnel_count_threshold = self._config.MONITOR_CONFIG["thresholds"]["tunnel_count"]
         tunnel_count = gateway["metrics"]["tunnelCount"]
 
         note_lines = [
-            f"VCO: {host}",
+            f"VCO: {gateway['host']}",
             f"VGC: {gateway['name']}",
             "",
             f"Condition: Over {tunnel_count_threshold}% reduction in tunnel count compared to average",
@@ -34,21 +34,23 @@ class ServiceNowRepository:
 
         return os.linesep.join(note_lines)
 
-    async def report_incident(self, host: str, gateway: dict):
+    async def report_incident(self, gateway: dict):
         err_msg = None
 
         request = {
             "request_id": uuid(),
             "body": {
-                "host": host,
+                "host": gateway["host"],
                 "gateway": gateway["name"],
                 "summary": self._build_incident_summary(gateway),
-                "note": self._build_incident_note(host, gateway),
+                "note": self._build_incident_note(gateway),
             },
         }
 
         try:
-            self._logger.info(f"Reporting incident to ServiceNow for host {host} and gateway {gateway['name']}...")
+            self._logger.info(
+                f"Reporting incident to ServiceNow for host {gateway['host']} and gateway {gateway['name']}..."
+            )
             response = await self._event_bus.rpc_request("servicenow.incident.report.request", request, timeout=30)
         except Exception as e:
             err_msg = f"An error occurred when reporting incident to ServiceNow -> {e}"
@@ -58,7 +60,9 @@ class ServiceNowRepository:
             response_status = response["status"]
 
             if response_status in range(200, 300):
-                self._logger.info(f"Reported incident to ServiceNow for host {host} and gateway {gateway['name']}!")
+                self._logger.info(
+                    f"Reported incident to ServiceNow for host {gateway['host']} and gateway {gateway['name']}!"
+                )
             else:
                 environment = self._config.ENVIRONMENT_NAME.upper()
                 err_msg = (
