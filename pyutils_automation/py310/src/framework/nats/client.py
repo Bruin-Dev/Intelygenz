@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import ssl
 from functools import wraps
 from typing import Any, Awaitable, Callable, Dict, List, Optional
@@ -22,6 +23,9 @@ from nats.aio.msg import Msg
 
 from framework.nats.exceptions import BadSubjectError, NatsConnectionError, ResponseTimeoutError
 from framework.nats.temp_payload_storage import TempPayloadStorage
+
+
+logger = logging.getLogger(__name__)
 
 
 class Client(Client_):
@@ -51,6 +55,10 @@ class Client(Client_):
         @wraps(cb)
         async def inner(msg: Msg):
             if self._temp_payload_storage.is_stored(msg.data):
+                logger.warning(
+                    f"Message received in subject {msg.subject} exceeds the maximum size allowed by NATS. Recovering "
+                    "it from the external storage..."
+                )
                 msg.data = self._temp_payload_storage.recover(msg.data)
 
             await cb(msg)
@@ -94,6 +102,7 @@ class Client(Client_):
         :raises NatsConnectionError: if the connection with NATS fails
         """
         try:
+            logger.info(f"Connecting to NATS servers: {servers}...")
             await super().connect(
                 servers=servers,
                 error_cb=error_cb,
@@ -124,6 +133,7 @@ class Client(Client_):
                 user_credentials=user_credentials,
                 nkeys_seed=nkeys_seed,
             )
+            logger.info(f"Connected to NATS servers successfully")
         except (errors.NoServersError, OSError, errors.Error, asyncio.TimeoutError) as e:
             raise NatsConnectionError from e
 
@@ -146,8 +156,9 @@ class Client(Client_):
         :raises BadSubjectError: if the subject is an empty string
         """
         try:
+            logger.info(f"Subscribing to subject {subject} with queue group {queue}...")
             cb = self._pre_recover_cb(cb)
-            return await super().subscribe(
+            sub = await super().subscribe(
                 subject=subject,
                 queue=queue,
                 cb=cb,
@@ -156,6 +167,8 @@ class Client(Client_):
                 pending_msgs_limit=pending_msgs_limit,
                 pending_bytes_limit=pending_bytes_limit,
             )
+            logger.info(f"Subscribed to subject successfully")
+            return sub
         except (errors.ConnectionClosedError, errors.ConnectionDrainingError) as e:
             raise NatsConnectionError from e
         except errors.BadSubjectError as e:
@@ -173,15 +186,21 @@ class Client(Client_):
         :raises BadSubjectError: if the subject is an empty string
         """
         if self._exceeds_max_payload_size(payload):
+            logger.warning(
+                "Payload exceeds the maximum size allowed by NATS. Storing it to the external storage before "
+                f"publishing to subject {subject}..."
+            )
             payload = self._temp_payload_storage.store(payload)
 
         try:
+            logger.info(f"Publishing payload to subject {subject}...")
             await super().publish(
                 subject=subject,
                 payload=payload,
                 reply=reply,
                 headers=headers,
             )
+            logger.info(f"Payload published to subject {subject} successfully")
         except (errors.ConnectionClosedError, errors.ConnectionDrainingError) as e:
             raise NatsConnectionError from e
         except errors.BadSubjectError as e:
@@ -209,6 +228,7 @@ class Client(Client_):
         :raises TimeoutError: if a subscriber doesn't respond to the request in time
         """
         try:
+            logger.info(f"Requesting a response from subject {subject}...")
             response = await super().request(
                 subject=subject,
                 payload=payload,
@@ -216,6 +236,7 @@ class Client(Client_):
                 old_style=old_style,
                 headers=headers,
             )
+            logger.info(f"Response received from a replier subscribed to subject {subject}")
         except (errors.ConnectionClosedError, errors.ConnectionDrainingError) as e:
             raise NatsConnectionError from e
         except errors.BadSubjectError as e:
@@ -224,6 +245,10 @@ class Client(Client_):
             raise ResponseTimeoutError(subject) from e
 
         if self._temp_payload_storage.is_stored(response.data):
+            logger.warning(
+                f"Response received from subject {subject} exceeds the maximum size allowed by NATS. Recovering it "
+                "from the external storage..."
+            )
             response.data = self._temp_payload_storage.recover(response.data)
 
         return response

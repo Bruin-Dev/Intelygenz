@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from http import HTTPStatus
 from typing import Union
@@ -5,6 +6,9 @@ from typing import Union
 from hypercorn.asyncio import serve
 from hypercorn.config import Config as HyperCornConfig
 from quart import Quart, jsonify
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -35,4 +39,5 @@ class Server:
         """
         Simple endpoint that replies with an HTTP 200 on every call. Useful for periodic health checks.
         """
+        logger.info("Got health check request in /_health")
         return jsonify(None), HTTPStatus.OK, None

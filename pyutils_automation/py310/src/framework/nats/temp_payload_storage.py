@@ -1,9 +1,13 @@
 import json
+import logging
 from abc import ABC, abstractmethod
 from typing import Union
 
 from redis import Redis as RedisClient
 from shortuuid import uuid
+
+
+logger = logging.getLogger(__name__)
 
 SupportedBackends = Union[RedisClient]
 
@@ -74,7 +78,10 @@ class Redis(TempPayloadStorage):
                   SUB end of a NATS PUB/SUB flow
         """
         key = f"{self.TMP_PAYLOAD_PREFIX.decode()} {uuid()}".encode()
+
+        logger.info(f"Storing payload of {len(payload)} bytes under Redis key {key}")
         self._client.set(name=key, value=payload, ex=300)
+        logger.info(f"Payload stored under Redis key {key} successfully")
 
         return key
 
@@ -85,7 +92,11 @@ class Redis(TempPayloadStorage):
         :param token: the token used to recover the payload
         :returns: the payload as a sequence of bytes
         """
-        return self._client.get(name=token)
+        logger.info(f"Retrieving payload stored under Redis key {token}...")
+        payload = self._client.get(name=token)
+        logger.info(f"Payload stored under Redis key {token} retrieved successfully")
+
+        return payload
 
 
 class RedisLegacy(TempPayloadStorage):
@@ -113,7 +124,10 @@ class RedisLegacy(TempPayloadStorage):
                   serves as a way to recover a stored payload at the SUB end of a NATS PUB/SUB flow
         """
         token = uuid()
+
+        logger.info(f"Storing payload of {len(payload)} bytes under Redis key {token}")
         self._client.set(name=token, value=payload, ex=300)
+        logger.info(f"Payload stored under Redis key {token} successfully")
 
         return json.dumps({"is_stored": True, "token": token}).encode()
 
@@ -124,4 +138,10 @@ class RedisLegacy(TempPayloadStorage):
         :param token: the token used to recover the payload
         :returns: the payload as a sequence of bytes
         """
-        return self._client.get(name=json.loads(token)["token"])
+        token = json.loads(token)["token"]
+
+        logger.info(f"Retrieving payload stored under Redis key {token}...")
+        payload = self._client.get(name=token)
+        logger.info(f"Payload stored under Redis key {token} retrieved successfully")
+
+        return payload
