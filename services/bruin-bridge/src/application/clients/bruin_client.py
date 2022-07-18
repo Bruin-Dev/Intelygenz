@@ -47,8 +47,7 @@ class BruinClient:
             self._bruin_session.access_token = self._bearer_token
             self._logger.info("Logged into Bruin!")
         except Exception as err:
-            self._logger.error("An error occurred while trying to login to Bruin")
-            self._logger.error(f"{err}")
+            self._logger.error(f"An error occurred while trying to login to Bruin: {err}")
 
     def _get_request_headers(self):
         if not self._bearer_token:
@@ -135,6 +134,7 @@ class BruinClient:
             return return_response
 
         if response.status in range(200, 300):
+            self._logger.info(f"Got HTTP 200 from GET /api/Ticket/basic for params {json.dumps(request_params)}")
             response_json = await response.json()
             return_response["body"] = response_json
             return_response["status"] = response.status
@@ -1068,6 +1068,7 @@ class BruinClient:
                 return return_response
 
             if response.status in range(200, 300):
+                self._logger.info(f"Got HTTP 200 from GET /api/Site for params {json.dumps(params)}")
                 response_json = await response.json()
                 return_response["body"] = response_json
                 return_response["status"] = response.status

@@ -63,7 +63,16 @@ class BruinRepository:
             response = await fn(params_cp)
 
             if response["status"] not in range(200, 300):
+                self._logger.warning(
+                    f"Call to {fn.__name__} failed for page {current_page}. Checking if max retries threshold has been "
+                    "reached"
+                )
+
                 if retries < max_retries:
+                    self._logger.info(
+                        f"Max retries threshold hasn't been reached yet. Retrying call to {fn.__name__} for page "
+                        f"{current_page}..."
+                    )
                     retries += 1
                     continue
                 else:
@@ -78,6 +87,7 @@ class BruinRepository:
 
             remaining_items -= len(response["body"]["responses"])
             if remaining_items <= 0:
+                self._logger.info(f"Finished fetching all pages for {fn.__name__}.")
                 break
 
             current_page += 1
@@ -341,10 +351,16 @@ class BruinRepository:
         response = await self._bruin_client.get_site(params)
 
         if response["status"] not in range(200, 300):
+            self._logger.error(
+                f"Got response with status {response['status']} while getting site information for params {params}."
+            )
             return response
 
         documents = response["body"].get("documents", [])
         if not documents:
+            msg = f"No site information was found for site {params['site_id']} and client {params['client_id']}"
+            self._logger.warning(msg)
+
             response["status"] = 404
             response[
                 "body"
