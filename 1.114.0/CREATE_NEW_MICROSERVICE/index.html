@@ -1,0 +1,1149 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://docs.mettel-automation.net/1.114.0/CREATE_NEW_MICROSERVICE/">
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+    
+    
+      
+        <title>CREATE NEW MICROSERVICE - Automation Engine Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.8c5ef100.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.9647289d.min.css">
+        
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#create-new-microservice" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        <aside class="md-banner md-banner--warning">
+          
+        </aside>
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Automation Engine Documentation" class="md-header__button md-logo" aria-label="Automation Engine Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Automation Engine Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              CREATE NEW MICROSERVICE
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href=".." class="md-tabs__link">
+      Home
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../CONCEPTS/" class="md-tabs__link">
+        Topics
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Automation Engine Documentation" class="md-nav__button md-logo" aria-label="Automation Engine Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Automation Engine Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Topics
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Topics" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Topics
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CONCEPTS/" class="md-nav__link">
+        Concepts
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_2" type="checkbox" id="__nav_2_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_2">
+          Pipelines
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Pipelines" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_2">
+          <span class="md-nav__icon md-icon"></span>
+          Pipelines
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pipeline/BASIC_CI_CONFIGURATION/" class="md-nav__link">
+        Basic configurations
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pipeline/PIPELINE_RULES/" class="md-nav__link">
+        Pipeline rules
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_3" type="checkbox" id="__nav_2_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_3">
+          Documentation
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Documentation" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_3">
+          <span class="md-nav__icon md-icon"></span>
+          Documentation
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DOCUMENTATION/" class="md-nav__link">
+        Organization
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decisions/" class="md-nav__link">
+        MetTel decisions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../metrics-definitions/" class="md-nav__link">
+        Metrics definitions
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Development rules
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_5" type="checkbox" id="__nav_2_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_5">
+          Work in a local env
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Work in a local env" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_5">
+          <span class="md-nav__icon md-icon"></span>
+          Work in a local env
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kafka/LAUNCH_DOCKER_COMPOSE/" class="md-nav__link">
+        Launch docker compose
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../snowflake/" class="md-nav__link">
+        Datalake
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Manual processes
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-create-ecr-repository" class="md-nav__link">
+    1. Create ECR repository
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-create-our-new-microservice-folder" class="md-nav__link">
+    2. Create our new microservice folder
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-update-ci-cd-gitlab-files-with-the-proper-values" class="md-nav__link">
+    3. Update CI-CD gitlab files with the proper values
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-configure-semantic-release" class="md-nav__link">
+    3. Configure semantic-release
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-configure-logs" class="md-nav__link">
+    3. Configure logs
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-update-docker-compose-to-enable-local-deployments" class="md-nav__link">
+    3. Update docker-compose to enable local deployments
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-add-option-to-enable-or-disable-our-microservice" class="md-nav__link">
+    4. Add option to enable or disable our microservice
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-helm-templates-and-variables" class="md-nav__link">
+    5. Helm templates and variables
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+
+
+<div align="center">
+<img src="https://media.licdn.com/dms/image/C4E0BAQHrME9aCW6ulg/company-logo_200_200/0?e=2159024400&v=beta&t=6xMNS1zK1F8asBlM16EzbJ4Im7SlQ8L7a7sgcaNzZQE"  width="200" height="200">
+</div>
+
+<h1 id="create-new-microservice">CREATE NEW MICROSERVICE</h1>
+<blockquote>
+<p>This process describes step by step how to create a new microservice, from the ECR repository to the helm chart templates that 
+define the microservice. All of this is created from the Gitlab repository in the pipeline; no need for more tools or actions 
+by the developer. </p>
+</blockquote>
+<h2 id="introduction">Introduction</h2>
+<p>The process requires that the steps be carried out in order. Basically, it is necessary to create the ECR repository
+first so that we can then start developing and testing our new microservice in ephemeral environments or in production.</p>
+<h2 id="1-create-ecr-repository">1. Create ECR repository</h2>
+<p>We can't create the ECR repository in the branch where we are developing because the creation or update of the ECR repositories 
+is only in the Master branch. This means that the first thing that we need to do is make a little merge to master to create our 
+new microservice repo, by that way we can deploy our microservice later in dev branches.</p>
+<ul>
+<li>create a new branch from master</li>
+<li>create a new terraform ECR repo file in the folder: <code>infra-as-code/ecr-repositories</code> you can copy any of the other repos to have an example.<ul>
+<li>this is an example:
+<code>bash
+resource "aws_ecr_repository" "new-bridge-repository" {
+name = "new-bridge"
+tags = {
+    Project       = var.common_info.project
+    Provisioning  = var.common_info.provisioning
+    Module        = "new-bridge"
+}
+}</code></li>
+</ul>
+</li>
+<li>merge the new repository to Master branch. The pipeline will run and create the new ECR repo <code>new-bridge</code></li>
+</ul>
+<h2 id="2-create-our-new-microservice-folder">2. Create our new microservice folder</h2>
+<p>We can start working on our new microservice based on an existing one. It depends on if is a <code>capability</code>(bridges) or a <code>use case</code>. Select one or other depends on what are you developing. For example let's copy a capability "bruing-bridge" and paste in the root of the repo to change his name to "new-bridge". from this moment you can start to develop and do your tests locally. Every microservice must have the following directory structure:</p>
+<pre><code>new-bridge
+├── .gitlab-ci.yml
+├── Dockerfile
+├── README.md
+├── package.json
+├── requirements.txt
+├── setup.py
+└── src
+    ├── app.py
+    ├── application
+    │   └── ...
+    ├── config
+    │   └── ...
+    └── tests
+        └── ...
+</code></pre>
+<h2 id="3-update-ci-cd-gitlab-files-with-the-proper-values">3. Update CI-CD gitlab files with the proper values</h2>
+<p>It's important to have the .gitlab-ci.yaml files correctly defined to enable pipelines:
+  * <code>new-bridge/.gitlab-ci.yml</code>
+  Change any reference of the template microservice to the new one: example find and replace "bruin-bridge" for "new-bridge"
+  * <code>.gitlab-ci.yml</code> (the file in the root of the repository)
+  Here we need to specify to gitlab-ci that we define other jobs in a different directories (the .gitlab-ci.yml of our new repo). So locate the root gitlab file and add a new line with the path of the new micro jobs (do it respecting the alphabetical order)
+  <code>...
+    - local: 'services/links-metrics-api/.gitlab-ci.yml'
+    - local: 'services/links-metrics-collector/.gitlab-ci.yml'
+    - local: 'services/lumin-billing-report/.gitlab-ci.yml'
+    - local: 'services/new-bridge/.gitlab-ci.yml'    &lt;─────────────── here!
+    - local: 'services/notifier/.gitlab-ci.yml'
+    - local: 'services/service-affecting-monitor/.gitlab-ci.yml'
+    - local: 'services/service-outage-monitor/.gitlab-ci.yml'
+  ...</code>
+  Now in the same file, let's define the "desired_tasks" variable for this new micro (do it respecting the alphabetical order):
+  <code>...
+    NATS_SERVER_DESIRED_TASKS: "1"
+    NATS_SERVER_1_DESIRED_TASKS: "1"
+    NATS_SERVER_2_DESIRED_TASKS: "1"
+    NEW_BRIDGE_DESIRED_TASKS: "1"    &lt;─────────────── here!
+    NOTIFIER_DESIRED_TASKS: "1"
+    SERVICE_AFFECTING_MONITOR_DESIRED_TASKS: "1"
+    SERVICE_OUTAGE_MONITOR_1_DESIRED_TASKS: "1"
+  ...</code></p>
+<h2 id="3-configure-semantic-release">3. Configure semantic-release</h2>
+<p>We need to edit two files, one in the new micro path and other in the root of the repo:
+  * <code>new-bridge/package.json</code>
+  update the name of the micro with our new working name (do it respecting the alphabetical order):
+  <code>{
+      "name": "new-bridge",    &lt;─────────────── here!
+      "version": "0.0.1",
+      "dependencies": {},
+      "devDependencies": {}
+  }</code>
+  * <code>package.json</code> (the file in the root of the repository)
+  add to the semantic-release global config our new path to analyze version changes (do it respecting the alphabetical order):
+  <code>...
+      "./services/links-metrics-api",
+      "./services/links-metrics-collector",
+      "./services/lumin-billing-report",
+      "./services/new-bridge",    &lt;─────────────── here!
+      "./services/notifier",
+      "./services/service-affecting-monitor",
+      "./services/service-outage-monitor",
+  ...</code></p>
+<h2 id="3-configure-logs">3. Configure logs</h2>
+<p>We use 2 systems to storage logs, papertrail for 3 days and cloudwath for 1 month. Let's add those config in:
+  * <code>ci-utils/papertrail-provisioning/config.py</code>
+  just copy one block form other microservice and paste with the name of our new micro (do it respecting the alphabetical order):
+  <code>...
+                  {
+                      "query": f"lumin-billing-report AND {ENVIRONMENT_NAME} AND &lt;BUILD_NUMBER&gt;",
+                      "search_name": f"[lumin-billing-report] - logs",
+                      "repository": "lumin-billing-report",
+                  },
+                  {                                                                       ¯│
+                      "query": f"new-bridge AND {ENVIRONMENT_NAME} AND &lt;BUILD_NUMBER&gt;",    │
+                      "search_name": f"[new-bridge] - logs",                               ├──────────────&gt; here!
+                      "repository": "new-bridge",                                          │
+                  },                                                                      _│
+                  {
+                      "query": f"notifier AND {ENVIRONMENT_NAME} AND &lt;BUILD_NUMBER&gt;",
+                      "search_name": f"[notifier] - logs",
+                      "repository": "notifier",
+                  },
+  ...</code></p>
+<ul>
+<li><code>helm/charts/fluent-bit-custom/templates/configmap.yaml</code>
+  The same; copy one block form other microservice and paste with the name of our new micro (do it respecting the alphabetical order):
+  <code>...
+      [OUTPUT]
+          Name                cloudwatch
+          Match               kube.var.log.containers.lumin-billing-report*
+          region              {{ .Values.config.region }}
+          log_group_name      {{ .Values.config.logGroupName }}
+          log_stream_name     lumin-billing-report
+          auto_create_group   true
+      [OUTPUT]                                                      ¯│
+          Name                cloudwatch                             │
+          Match               kube.var.log.containers.new-bridge*    │
+          region              {{ .Values.config.region }}            ├──────────────&gt; here!
+          log_group_name      {{ .Values.config.logGroupName }}      │
+          log_stream_name     new-bridge                             │
+          auto_create_group   true                                  _│
+      [OUTPUT]
+          Name                cloudwatch
+          Match               kube.var.log.containers.notifier*
+          region              {{ .Values.config.region }}
+          log_group_name      {{ .Values.config.logGroupName }}
+          log_stream_name     notifier
+          auto_create_group   true
+  ...</code></li>
+</ul>
+<h2 id="3-update-docker-compose-to-enable-local-deployments">3. Update docker-compose to enable local deployments</h2>
+<ul>
+<li><code>docker-compose.yml</code> here we define our container along with the rest of the microservices. Just add the definition of our container respecting the alphabetical order:
+  ````
+  ...
+  new-bridge:                                                          ¯│
+    build:                                                              │
+      # Context must be the root of the monorepo                        │
+      context: .                                                        │
+      dockerfile: new-bridge/Dockerfile                                 │
+      args:                                                             │
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com    ├──────────────&gt; here!
+        DOCKER_BASE_IMAGE_VERSION: 2.2.0                                │
+    env_file:                                                           │<ul>
+<li>new-bridge/src/config/env                                       │
+depends_on:                                                         │</li>
+<li>"nats-server"                                                   │</li>
+<li>redis                                                           │
+ports:                                                              │</li>
+<li>5006:5000                                                      _│</li>
+</ul>
+</li>
+</ul>
+<p>notifier:
+    build:
+  ...
+  ````</p>
+<h2 id="4-add-option-to-enable-or-disable-our-microservice">4. Add option to enable or disable our microservice</h2>
+<ul>
+<li><code>helm/charts/automation-engine/Chart.yaml</code> in this file we define our Automation-engine chart version and his dependencies. Let's add a condition for our microservice to have the possibility of disable or enable in our future deployments.
+  ````
+  ...</li>
+<li>name: lumin-billing-report
+    version: '<em>.</em>.*'
+    condition: lumin-billing-report.enabled</li>
+<li>name: new-bridge                          ¯│
+    version: '<em>.</em>.*'                           ├──────────────&gt; here!
+    condition: new-bridge.enabled             _│</li>
+<li>name: notifier
+    version: '<em>.</em>.*'
+    condition: notifier.enabled
+  ...
+  ````</li>
+</ul>
+<h2 id="5-helm-templates-and-variables">5. Helm templates and variables</h2>
+<p>Here we will define the infrastructure part of our microservice with a helm chart. Is very important to know that this "how to" is only to copy an existing microservice, therefore, we take the following statements for granted:
+1. The microservice will not have a public endpoint (except email-tagger-monitor)
+2. The microservice port will always be 5000
+3. Depends on the base chart you use to copy &amp; paste, you will have more or less kubernetes resources. although most microservices have: configmap, deployment, secret and service.</p>
+<p>Perfect, now let's copy and paste another chart to use as template, if we will develop a use-case, we must copy the most similar use-case. For this example we are creating a "new-bridge", so let's copy a "bruin-bridge" as a template:
+  * BASE-FOLDER: copy this folder <code>helm/charts/automation-engine/charts/bruin-bridge</code> and paste here <code>helm/charts/automation-engine/charts/</code> we will have something like <code>bruin-bridge copy</code>change the name to <code>new-bridge</code>. </p>
+<ul>
+<li>
+<p>PREPARE BASE_FOLDER: now let's do a find and replace in our new folder <code>new-bridge</code>. find <code>bruin-bridge</code>and replace for <code>new-bridge</code>. many substitutions should appear (at the moment of write this, i can see 46 substitutions in 10 files but over time, this can change). Just remember to do this in the <code>new-bridge</code> folder context to evoid modify other resources.</p>
+</li>
+<li>
+<p>DEPENDENCIES and CHECKS: Now we have to customize our new microservice, first we must ask ourselves, what dependency does my new microservice have on other services? for example, bruin-bridge have a dependency with Nats and Redis, so it have a few checks to see if those services are available and if they are, it can be deployed. We can find this checks in the <code>deployment.yaml</code> file. Specifically in this part:
+  <code>...
+        initContainers:
+          - name: wait-nats-server
+            image: busybox:1.28
+            command: ['sh', '-c', 'until wget --spider -S http://automation-engine-nats:8222/varz; do echo waiting for nats-server; sleep 2; done']
+          - name: wait-redis
+            image: busybox:1.28
+            command: ['sh', '-c', 'until printf "PING\r\n" | nc ${REDIS_HOSTNAME} 6379; do echo waiting for redis; sleep 2; done']
+            envFrom:
+              - configMapRef:
+                  name: {{ include "new-bridge.configmapName" . }}
+  ...</code>
+  We can add or remove all the init containers we want. Even, it is very possible that all the dependencies that we need already have the microservice that we use as a base or some other microservice already developed. So we can navigate through the folders of the rest of the microservices and copy any other dependency check and use it in ours. I will add a new dependency for <code>notifier</code> copied from other microservice, and my file will look like the following:
+  <code>...
+        initContainers:
+          - name: wait-nats-server
+            image: busybox:1.28
+            command: ['sh', '-c', 'until wget --spider -S http://automation-engine-nats:8222/varz; do echo waiting for nats-server; sleep 2; done']
+          - name: wait-redis
+            image: busybox:1.28
+            command: ['sh', '-c', 'until printf "PING\r\n" | nc ${REDIS_HOSTNAME} 6379; do echo waiting for redis; sleep 2; done']
+            envFrom:
+              - configMapRef:
+                  name: {{ include "new-bridge.configmapName" . }}
+          {{- if .Values.config.capabilities_enabled.notifier }}                                                                        ¯│                                                                     
+          - name: wait-notifier                                                                                                          │
+            image: busybox:1.28                                                                                                          ├──────────────&gt; here!
+            command: ['sh', '-c', 'until wget --spider -S http://notifier:5000/_health; do echo waiting for notifier; sleep 2; done']    │
+          {{- end }}                                                                                                                    _│
+  ...</code>
+  Note that we have a <code>if</code> condition. You will see this in some check, we use this because if we deploy only some microservices, we must contemplate this. If the notifier not exist, the check will not be created. Nats and Redis are always required, that's wy don't have the conditional.</p>
+</li>
+<li>
+<p>VARIABLES: time to update the variables that will use our microservice, this involves various files:</p>
+<ul>
+<li>
+<p><code>helm/charts/automation-engine/charts/new-bridge/templates/configmap.yaml</code> this file always will be part of the deployment, it contains the variables base and the variables with no sensitive information. let's add a new variable NEW_VAR:
+<code>...
+  CURRENT_ENVIRONMENT: {{ .Values.global.current_environment }}
+  ENVIRONMENT_NAME: "{{ .Values.global.environment }}"
+  NATS_SERVER1: {{ .Values.global.nats_server }}
+  NEW_VAR: "{{ .Values.config.new_var }}"    &lt;─────────────── here!
+  REDIS_HOSTNAME: {{ .Values.global.redis_hostname }}
+  PAPERTRAIL_ACTIVE: "{{ .Values.global.papertrail_active }}"
+  PAPERTRAIL_HOST: {{ .Values.global.papertrail_host }}
+  PAPERTRAIL_PORT: "{{ .Values.global.papertrail_port }}"
+  PAPERTRAIL_PREFIX: "{{ .Values.config.papertrail_prefix }}"
+...</code>
+You can see here two important things, 1. there are variables with quotes and without quotes: this depends on your needs, if you don't put quotes, YAML will interpret the best case for you.. example, if you put a number like 5 as a value, YAML will interpret this as an integer, but careful, this could be a danger if your application expects a string variable; if this is the case, use quotes to define your var. 2. Additionally, we have variables of two types: "global" and "config". The global ones are common for all microservices, and the "config" is specific for this microservice. All the additional variables that we add will be of the type "config"</p>
+</li>
+<li>
+<p><code>helm/charts/automation-engine/charts/new-bridge/templates/secret.yaml</code> this file may or may not exist in the chart and contains variables that have sensitive information. This info will be encoded with base64 to no show in clear text. let's add a new variable NEW_SENSITIVE_VAR:
+<code>apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "new-bridge.secretName" . }}
+  labels:
+    {{- include "new-bridge.labels" . | nindent 4 }}
+  annotations:
+    reloader.stakater.com/match: "true"
+data:
+  NEW_SENSITIVE_VAR: {{ .Values.config.new_sensitive_var | b64enc }}    &lt;─────────────── here!</code></p>
+</li>
+<li>
+<p><code>helm/charts/automation-engine/charts/new-bridge/values.yaml</code> Now that we add our new variable in the configmap.yaml, we have to define it in our values file in order to use it. As you can see above, the definition of our variable points to the values file of our microservice; "Values.config.new_var" so let's go update it:
+<code>...
+config:    &lt;─────────────── in config section!!!
+  papertrail_prefix: ""
+  # -- New useful variable with no sensitive information   ¯│______________ here the configmap variable!
+  new_var: ""                                              _│
+  # -- New useful variable with sensitive information      ¯│______________ and here the secret variable!
+  new_sensitive_var: ""                                    _│
+...</code>
+Check that we only define the variable but no put any value, although we can also set a default value if we want.</p>
+</li>
+<li>
+<p><code>helm/charts/automation-engine/values.yaml</code> This is the values template off the entire automation-engine application. This only have the structure of the values and no contain any real value. For this part we will copy the content of the values file that we just created and paste in the place that correspond (respecting the alphabetical order). It's important to note that we are pasting the values inside another Yaml, so we must adapt the indentation for the destiny file:
+````
+...</p>
+</li>
+</ul>
+<h1 id="-lumin-billing-report-subchart-specific-configuration">-- lumin-billing-report subchart specific configuration</h1>
+<p>lumin-billing-report:
+  # -- Field to indicate if the lumin-billing-report module is going to be deployed
+  enabled: true
+  # -- Number of replicas of lumin-billing-report module
+  replicaCount: 1
+  config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: ""
+    # -- URI of Lumin API
+    lumin_uri: ""
+    # -- Token credentials for Lumin API
+    lumin_token: ""
+    # -- Name of customer to generate lumin-billing-report
+    customer_name: ""
+    # -- Email address to send lumin-billing-report
+    billing_recipient: ""
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/lumin-billing-report
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi</p>
+<h1 id="-new-bridge-subchart-specific-configuration">-- new-bridge subchart specific configuration                           ¯│</h1>
+<p>new-bridge:                                                                │
+  replicaCount: 1                                                          │
+  enabled: true                                                            │
+  config:                                                                  │
+    papertrail_prefix: ""                                                  │
+    # -- New useful variable with no sensitive information                 │
+    new_var: ""                                                            │
+    # -- New useful variable with sensitive information                    │
+    new_sensitive_var: ""                                                  │
+  image:                                                                   │
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/new-bridge    ├──────────────&gt; here!
+    pullPolicy: Always                                                     │
+    # Overrides the image tag whose default is the chart appVersion.       │
+    tag: ""                                                                │
+  service:                                                                 │
+    type: ClusterIP                                                        │
+    port: 5000                                                             │
+  resources:                                                               │
+    limits:                                                                │
+      cpu: 200m                                                            │
+      memory: 256Mi                                                        │
+    requests:                                                              │
+      cpu: 100m                                                            │
+      memory: 128Mi                                                       _│</p>
+<h1 id="-notifier-subchart-specific-configuration">-- notifier subchart specific configuration</h1>
+<p>notifier:
+  # -- Field to indicate if the notifier module is going to be deployed
+  enabled: true
+  # -- Number of replicas of notifier module
+  replicaCount: 1
+  # -- notifier image details
+  image:
+    # -- notifier repository for docker images
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/notifier
+    pullPolicy: Always
+    # -- notifier tag of docker image
+    tag: ""
+  # -- notifier Service Configuration
+...
+````
+Things to check: first the indentation!!.. second, the "global" config is not set here; it is defined at the beginning of the values file and is common for all microservices. and finally, we remove blank and default configurations to get a shorter file (things removed: autoscaling, the default is false, so we can omit it. nodeSelector. tolerations and affinity). PD: You can keep autoscaling if you will enable it.</p>
+<ul>
+<li><code>helm/charts/automation-engine/values.yaml.tpl</code> This is the most important file, it contains the values that will be parsed and used to deploy the Automation-Engine application. Basically it's the same file of values.yaml, but with the variables that will be replaced in the pipeline to deploy a production or develop environment. Let's add our new micro with the variables:
+````
+...</li>
+</ul>
+<h1 id="-lumin-billing-report-subchart-specific-configuration_1">-- lumin-billing-report subchart specific configuration</h1>
+<p>lumin-billing-report:
+  enabled: ${LUMIN_BILLING_REPORT_ENABLED}
+  replicaCount: ${LUMIN_BILLING_REPORT_DESIRED_TASKS}
+  config:
+    # -- Papertrail prefix for create logs definition
+    papertrail_prefix: "lumin-billing-report-${LUMIN_BILLING_REPORT_BUILD_NUMBER}"
+    # -- URI of Lumin API
+    lumin_uri: ${LUMIN_URI}
+    # -- Token credentials for Lumin API
+    lumin_token: ${LUMIN_TOKEN}
+    # -- Name of customer to generate lumin-billing-report
+    customer_name: ${CUSTOMER_NAME_BILLING_REPORT}
+    # -- Email address to send lumin-billing-report
+    billing_recipient: ${BILLING_RECIPIENT}
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/lumin-billing-report
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ${LUMIN_BILLING_REPORT_BUILD_NUMBER}
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi</p>
+<h1 id="-new-bridge-subchart-specific-configuration_1">-- new-bridge subchart specific configuration                           ¯│</h1>
+<p>new-bridge:                                                                │
+  replicaCount: ${NEW_BRIDGE_DESIRED_TASKS}                                │
+  enabled: ${NEW_BRIDGE_ENABLED}                                           │
+  config:                                                                  │
+    papertrail_prefix: "new-bridge-${NEW_BRIDGE_BUILD_NUMBER}"             │
+    # -- New useful variable with no sensitive information                 │
+    new_var: ${NEW_BRIDGE_NEW_VAR}                                         │
+    # -- New useful variable with sensitive information                    │
+    new_sensitive_var: ${NEW_BRIDGE_NEW_SENSITIVE_VAR}                     │
+  image:                                                                   │
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/new-bridge    ├──────────────&gt; here!
+    pullPolicy: Always                                                     │
+    # Overrides the image tag whose default is the chart appVersion.       │
+    tag: ${NEW_BRIDGE_BUILD_NUMBER}                                        │
+  service:                                                                 │
+    type: ClusterIP                                                        │
+    port: 5000                                                             │
+  resources:                                                               │
+    limits:                                                                │
+      cpu: 200m                                                            │
+      memory: 256Mi                                                        │
+    requests:                                                              │
+      cpu: 100m                                                            │
+      memory: 128Mi                                                       _│</p>
+<h1 id="-notifier-subchart-specific-configuration_1">-- notifier subchart specific configuration</h1>
+<p>notifier:
+  enabled: ${NOTIFIER_ENABLED}
+  replicaCount: ${NOTIFIER_DESIRED_TASKS}
+  # -- notifier image details
+  image:
+    # -- notifier repository for docker images
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/notifier
+    pullPolicy: Always
+    # -- notifier tag of docker image
+    tag: ${NOTIFIER_BUILD_NUMBER}
+  # -- notifier Service Configuration
+  service:
+    type: ClusterIP
+    port: 5000
+...
+````
+With this, we have the entire template of our new microservice. Now we need to set in the pipeline the variables that we just created.</p>
+<ul>
+<li><code>ci-utils/environments/deploy_environment_vars.sh</code> In this file, we define the variables that will be used in the values file. Most of the cases are variables that we create in GitLab with the value of dev and production environments. This file is a bash script that has multiple functions to define the variables, each function is for the microservice that requires those variables. If we are adding a new micro that requires variables, we need to define the function and in the bottom of the file execute that function. PD: no all microservices needs specific variables, so in some cases, we wouldn't need to touch this file or even create a secret.yaml. Rebember to respect the alphabetical order:
+````
+...
+function lumin_billing_report_variables() {
+  if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
+    # lumin-billing-report environment variables for ephemeral environments
+    export BILLING_RECIPIENT=${BILLING_RECIPIENT_REPORT_DEV}
+  else
+    # lumin-billing-report environment variables for production environment
+    export BILLING_RECIPIENT=${BILLING_RECIPIENT_REPORT_PROD}
+  fi
+}</li>
+</ul>
+<p>function new_bridge_variables() {                                                       ¯│
+  if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then                                     │
+    # new-bridge environment variables for ephemeral environments                        │
+    export NEW_BRIDGE_NEW_VARIABLE=${NEW_BRIDGE_NEW_VARIABLE_DEV}                        │
+    export NEW_BRIDGE_NEW_SENSITIVE_VARIABLE=${NEW_BRIDGE_NEW_SENSITIVE_VARIABLE_DEV}    ├──────────────&gt; here!
+  else                                                                                   │
+    # new-bridge environment variables for production environment                        │
+    export NEW_BRIDGE_NEW_VARIABLE=${NEW_BRIDGE_NEW_VARIABLE_PRO}                        │
+    export NEW_BRIDGE_NEW_SENSITIVE_VARIABLE=${NEW_BRIDGE_NEW_SENSITIVE_VARIABLE_PRO}    │
+  fi                                                                                     │
+}                                                                                       _│ </p>
+<p>function notifier_variables() {
+  if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
+    # notifier environment variables for ephemeral environments
+    export NOTIFIER_SLACK_URL=${SLACK_URL_DEV}
+  else
+    # notifier environment variables for production environment
+    export NOTIFIER_SLACK_URL=${SLACK_URL_PRO}
+  fi
+}                                _│
+...
+function environments_assign() {
+  # assign enabled variable for each subchart
+  create_enabled_var_for_each_subchart
+  # assign common environment variables for each environment
+  common_variables_by_environment
+  # assign specific environment variables for each subchart
+  bruin_bridge_variables
+  cts_bridge_variables
+  digi_bridge_variables
+  digi_reboot_report_variables
+  email_tagger_monitor_variables
+  hawkeye_bridge_variables
+  links_metrics_api_variables
+  lit_bridge_variables
+  lumin_billing_report_variables
+  new_bridge_variables    &lt;─────────────── and here!
+  notifier_variables
+  t7_bridge_variables
+  ticket_collector_variables
+  velocloud_bridge_variables
+}
+...
+````</p>
+<ul>
+<li><code>add the variables in gitlab-ci</code> finally, we have all the path until the real value in Gitlab. Let's go to the repository <a href="https://gitlab.intelygenz.com/mettel/automation-engine/-/settings/ci_cd">settings/ci-cd</a> section and create the new variables:
+<img alt="IMAGE: gitlab_add_new_var" src="../img/system_overview/gitlab_add_new_var.png" /></li>
+</ul>
+</li>
+</ul>
+<p>That's all, with this and the proper <a href="..#commit">commit message</a> the pipeline will run and deploy an ephemeral environment.</p>
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs"], "search": "../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.748e2769.min.js"></script>
+      
+    
+  </body>
+</html>

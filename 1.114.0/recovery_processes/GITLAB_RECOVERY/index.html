@@ -1,0 +1,711 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://docs.mettel-automation.net/1.114.0/recovery_processes/GITLAB_RECOVERY/">
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+    
+    
+      
+        <title>GITLAB RECOVERY - Automation Engine Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.8c5ef100.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.9647289d.min.css">
+        
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#1-summary" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        <aside class="md-banner md-banner--warning">
+          
+        </aside>
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Automation Engine Documentation" class="md-header__button md-logo" aria-label="Automation Engine Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Automation Engine Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              GITLAB RECOVERY
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../.." class="md-tabs__link">
+      Home
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../CONCEPTS/" class="md-tabs__link">
+        Topics
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Automation Engine Documentation" class="md-nav__button md-logo" aria-label="Automation Engine Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Automation Engine Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Topics
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Topics" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Topics
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../CONCEPTS/" class="md-nav__link">
+        Concepts
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_2" type="checkbox" id="__nav_2_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_2">
+          Pipelines
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Pipelines" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_2">
+          <span class="md-nav__icon md-icon"></span>
+          Pipelines
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline/BASIC_CI_CONFIGURATION/" class="md-nav__link">
+        Basic configurations
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline/PIPELINE_RULES/" class="md-nav__link">
+        Pipeline rules
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_3" type="checkbox" id="__nav_2_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_3">
+          Documentation
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Documentation" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_3">
+          <span class="md-nav__icon md-icon"></span>
+          Documentation
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DOCUMENTATION/" class="md-nav__link">
+        Organization
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../decisions/" class="md-nav__link">
+        MetTel decisions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../metrics-definitions/" class="md-nav__link">
+        Metrics definitions
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Development rules
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_5" type="checkbox" id="__nav_2_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_5">
+          Work in a local env
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Work in a local env" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_5">
+          <span class="md-nav__icon md-icon"></span>
+          Work in a local env
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kafka/LAUNCH_DOCKER_COMPOSE/" class="md-nav__link">
+        Launch docker compose
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../snowflake/" class="md-nav__link">
+        Datalake
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Manual processes
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+
+
+<div align="center">
+<img src="http://photos.prnewswire.com/prnfull/20141022/153661LOGO?p=publish"  width="300" height="120">
+</div>
+
+<h1 id="1-summary">1. Summary</h1>
+<p>Thes process requires one workday and doesn't affect the functionality of the Automation-Engine production environment.</p>
+<p>Gitlab is deployed with the <a href="https://gitlab.fedramp.mettel-automation.net/mettel/fedramp-automation-engine">Automation-Engine fedramp repository</a>, is under "builder" workspace of Terraform definition located in <code>infra-as-code/basic-infra</code>. The deployment, maintenance, and updates are managed locally by the infrastructure team as explained <a href="../../manual_configurations/GITLAB_MAINTENANCE/">here</a>.</p>
+<p>Gitlab has most of its configuration files saved in external storage, we use AWS S3 for all objects and AWS RDS (PostgreSQL) for the database; all of this is in <code>US-EAST-1</code> region. Gitlab has its own process to make backups every day at 06:00 (UTC+02:00) which also includes a Postgres backup and is also saved in S3. All S3 buckets are replicated in <code>US-WEST-1</code> region so we have backups of GitLab backups on the opposite coast of the united states in case of disaster failure in the main region.</p>
+<p>Aditionally to this, we require the <code>secrets.yml</code> config file that have the certificates that gitlab creates on his first deploy to use internally. This file is exported and saved in <code>1password</code>, with the name “GITLAB FedRAMP rails secret backup” and the file name is <code>gitlab-secrets.yaml</code>. This file is required if we want to redeploy gitlab and restore the backup.</p>
+<p>The backups contain:
+* db (database)
+* uploads (attachments)
+* builds (CI job output logs)
+* artifacts (CI job artifacts)
+* lfs (LFS objects)
+* terraform_state (Terraform states)
+* registry (Container Registry images)
+* pages (Pages content)
+* repositories (Git repositories data)
+* packages (Packages)</p>
+<h1 id="2-recovery">2. Recovery</h1>
+<ul>
+<li>
+<p>Deploy required infrastructure. </p>
+</li>
+<li>
+<p>Use the <code>infra-as-code/basic-infra</code> folder, only need: <code>1-parameters</code>, <code>2-network</code> and <code>4-services</code>. The terraform workspace is <code>builder</code>.</p>
+</li>
+<li>Set the required parameters, check de <code>data.tf</code> file in parameters section.</li>
+<li>Change the name of the buckets to avoid conflicts. (files <code>4-services/s3.tf</code> and <code>4-services/s3-cross-replica</code>)</li>
+<li>For deploying the required infra in a new region only need to change Terraform Local variable called <code>region</code> (file <code>locals.tf</code>) with the new region in the 3 folders.</li>
+<li>
+<p>Define a secundary region (file <code>4-services/terraform_config.tf</code>) to set the new S3 bucket replicas in another region if main is not available to be the replica. Or if dont want to create the replicas only change the name of the terrafform file (example <code>s3-cross-replica.back</code>)</p>
+</li>
+<li>
+<p>Install a clean gitlab helm chart with the same version of the backup.</p>
+</li>
+<li>
+<p>Restore the <code>gitlab-rails-secret.yaml</code> as a secret in the cluster:</p>
+</li>
+<li>
+<p>Find the object name for the rails secrets:</p>
+</li>
+</ul>
+<pre><code>kubectl -n gitlab get secrets | grep rails-secret
+</code></pre>
+<ol>
+<li>Delete the existing secret:</li>
+</ol>
+<pre><code>kubectl delete secret &lt;rails-secret-name&gt; (gitlab-rails-secret)
+</code></pre>
+<ol>
+<li>Create the new secret using the same name as the old, and passing in your local YAML file:</li>
+</ol>
+<pre><code> kubectl create secret generic &lt;rails-secret-name&gt; --from-file=secrets.yml=gitlab-secrets.yaml
+</code></pre>
+<ol>
+<li>In order to use the new secrets, the Webservice, Sidekiq and Toolbox pods need to be restarted. The safest way to restart those pods is to run:</li>
+</ol>
+<pre><code>kubectl delete -n gitlab pods -lapp=sidekiq,release=&lt;helm release name&gt;
+kubectl delete -n gitlab pods -lapp=webservice,release=&lt;helm release name&gt;
+kubectl delete -n gitlab pods -lapp=toolbox,release=&lt;helm release name&gt;
+</code></pre>
+<ul>
+<li>
+<p>Restore the backup file:</p>
+</li>
+<li>
+<p>Ensure the Toolbox pod is enabled and running by executing the following command</p>
+</li>
+</ul>
+<pre><code>kubectl get pods -lrelease=RELEASE_NAME,app=toolbox
+</code></pre>
+<ol>
+<li>
+<p>Get the tarball ready in S3 bucket. Make sure it is named in the [timestamp]_[version]_gitlab_backup.tar format.</p>
+</li>
+<li>
+<p>Run the backup utility to restore the tarball</p>
+</li>
+</ol>
+<pre><code>kubectl exec &lt;Toolbox pod name&gt; -it -- backup-utility --restore -t &lt;timestamp&gt;_&lt;version&gt;
+</code></pre>
+<ol>
+<li>Here, <timestamp>_<version> is from the name of the tarball stored in gitlab-backups bucket. In case you want to provide a public URL, use the following command</li>
+</ol>
+<pre><code>kubectl exec &lt;Toolbox pod name&gt; -it -- backup-utility --restore -f &lt;URL&gt;
+</code></pre>
+<p><strong><em>NOTE</em></strong>: <em>You can provide a local path as a URL as long as it's in the format: file://<path></em>
+<em>This process will take time depending on the size of the tarball.</em>
+<em>The restoration process will erase the existing contents of database, move existing repositories to temporary locations and extract the contents of the tarball. Repositories will be moved to their corresponding locations on the disk and other data, like artifacts, uploads, LFS etc. will be uploaded to corresponding buckets in Object Storage.</em>
+<em>During restoration, the backup tarball needs to be extracted to disk. This means the Toolbox pod should have disk of necessary size available. For more details and configuration please see the Toolbox documentation.</em></p>
+<ul>
+<li>
+<p>Restore the runner registration token:
+    after restoring, the included runner will not be able to register to the instance because it no longer has the correct registration token (token has been changed with the new GitLab chart installation). </p>
+</li>
+<li>
+<p>Find the new shared runner token located on the admin/runners webpage of your GitLab installation.</p>
+</li>
+</ul>
+<pre><code>kubectl get secrets | grep gitlab-runner-secret
+</code></pre>
+<ol>
+<li>Find the name of existing runner token Secret stored in Kubernetes</li>
+</ol>
+<pre><code>kubectl delete secret &lt;runner-secret-name&gt;
+</code></pre>
+<ol>
+<li>Delete the existing secret</li>
+</ol>
+<pre><code>kubectl delete secret &lt;runner-secret-name&gt;
+</code></pre>
+<ol>
+<li>Create the new secret with two keys, (runner-registration-token with your shared token, and an empty runner-token)</li>
+</ol>
+<pre><code> kubectl create secret generic &lt;runner-secret-name&gt; (gitlab-gitlab-runner-secret) --from-literal=runner-registration-token=&lt;new-shared-runner-token&gt; (gitlab-gitlab-runner-token-xxxxx) --from-literal=runner-token=&quot;&quot;
+</code></pre>
+<ul>
+<li>
+<p>(optional) Reset the root user’s password:
+    The restoration process does not update the <code>gitlab-initial-root-password</code> secret with the value from backup. For logging in as root, use the original password included in the backup. In the case that the password is no longer accessible, follow the steps below to reset it.</p>
+</li>
+<li>
+<p>Attach to the Webservice pod by executing the command</p>
+</li>
+</ul>
+<pre><code>kubectl exec &lt;Webservice pod name&gt; (gitlab-webservice-default-xxxxx-xxxxx) -it -- bash
+</code></pre>
+<ol>
+<li>Run the following command to reset the password of root user. Replace #{password} with a password of your choice</li>
+</ol>
+<pre><code>/srv/gitlab/bin/rails runner &quot;user = User.first; user.password='#{password}'; user.password_confirmation='#{password}'; user.save!&quot;
+</code></pre>
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs"], "search": "../../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.748e2769.min.js"></script>
+      
+    
+  </body>
+</html>
