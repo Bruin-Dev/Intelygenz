@@ -167,17 +167,17 @@ class TestInterMapperMonitor:
 
     @pytest.mark.asyncio
     async def intermapper_monitoring_process_test(self):
-        asset_id = "123"
+        circuit_id = "123"
 
         email_1 = {
             "msg_uid": 123,
             "body": f"01/19 19:35:31: Message from InterMapper 6.1.5\n"
-            f"Name: OReilly-HotSpringsAR({asset_id})-Site803",
+            f"Name: OReilly-HotSpringsAR({circuit_id})-Site803",
         }
         email_2 = {
             "msg_uid": 456,
             "body": f"01/19 19:35:31: Message from InterMapper 6.1.5\n"
-            f"Name: OReilly-HotSpringsAR({asset_id})-Site803",
+            f"Name: OReilly-HotSpringsAR({circuit_id})-Site803",
         }
         emails = [email_1, email_2]
 
@@ -215,29 +215,29 @@ class TestInterMapperMonitor:
         await intermapper_monitor._intermapper_monitoring_process()
 
         notifications_repository.get_unread_emails.assert_awaited_once()
-        intermapper_monitor._process_email_batch.assert_has_awaits([call(emails, asset_id)], any_order=True)
+        intermapper_monitor._process_email_batch.assert_has_awaits([call(emails, circuit_id)], any_order=True)
 
-    def group_emails_by_asset_id_test(self):
-        asset_id_1 = "123"
-        asset_id_2 = "456"
+    def _group_emails_by_circuit_id_test(self):
+        circuit_id_1 = "123"
+        circuit_id_2 = "456"
 
         email_1 = {
             "body": f"01/19 19:35:31: Message from InterMapper 6.1.5\n"
-            f"Name: OReilly-HotSpringsAR({asset_id_1})-Site803"
+            f"Name: OReilly-HotSpringsAR({circuit_id_1})-Site803"
         }
         email_2 = {
             "body": f"01/19 19:35:31: Message from InterMapper 6.1.5\n"
-            f"Name: OReilly-HotSpringsAR({asset_id_1})-Site803"
+            f"Name: OReilly-HotSpringsAR({circuit_id_1})-Site803"
         }
         email_3 = {
             "body": f"01/19 19:35:31: Message from InterMapper 6.1.5\n"
-            f"Name: OReilly-HotSpringsAR({asset_id_2})-Site803"
+            f"Name: OReilly-HotSpringsAR({circuit_id_2})-Site803"
         }
         emails = [email_1, email_2, email_3]
 
-        emails_by_asset_id = {
-            asset_id_1: [email_1, email_2],
-            asset_id_2: [email_3],
+        emails_by_circuit_id = {
+            circuit_id_1: [email_1, email_2],
+            circuit_id_2: [email_3],
         }
 
         event_bus = Mock()
@@ -262,24 +262,24 @@ class TestInterMapperMonitor:
             dri_repository,
         )
 
-        result = intermapper_monitor._group_emails_by_asset_id(emails)
-        assert result == emails_by_asset_id
+        result = intermapper_monitor._group_emails_by_circuit_id(emails)
+        assert result == emails_by_circuit_id
 
     @pytest.mark.asyncio
     async def process_email_batch_test(self):
-        asset_id = 123
+        circuit_id = 123
         circuit_id = 3214
         client_id = 83959
 
         email_1 = {
             "msg_uid": 123,
             "body": f"01/19 19:35:31: Message from InterMapper 6.1.5\n"
-            f"Name: OReilly-HotSpringsAR({asset_id})-Site803",
+            f"Name: OReilly-HotSpringsAR({circuit_id})-Site803",
         }
         email_2 = {
             "msg_uid": 456,
             "body": f"01/19 19:35:31: Message from InterMapper 6.1.5\n"
-            f"Name: OReilly-HotSpringsAR({asset_id})-Site803",
+            f"Name: OReilly-HotSpringsAR({circuit_id})-Site803",
         }
         emails = [email_1, email_2]
 
@@ -300,7 +300,7 @@ class TestInterMapperMonitor:
         }
 
         bruin_repository = Mock()
-        bruin_repository.get_circuit_id = CoroutineMock(return_value=response)
+        bruin_repository.get_service_number_by_circuit_id = CoroutineMock(return_value=response)
 
         dri_repository = Mock()
 
@@ -317,9 +317,9 @@ class TestInterMapperMonitor:
         )
         intermapper_monitor._process_email = CoroutineMock()
 
-        await intermapper_monitor._process_email_batch(emails, asset_id)
+        await intermapper_monitor._process_email_batch(emails, circuit_id)
 
-        intermapper_monitor._bruin_repository.get_circuit_id.assert_awaited_with(asset_id)
+        intermapper_monitor._bruin_repository.get_service_number_by_circuit_id.assert_awaited_with(circuit_id)
         intermapper_monitor._process_email.assert_has_awaits(
             [
                 call(email_1, circuit_id, client_id),
@@ -328,18 +328,18 @@ class TestInterMapperMonitor:
         )
 
     @pytest.mark.asyncio
-    async def process_email_batch_no_asset_id_test(self):
-        asset_id = None
+    async def process_email_batch_no_circuit_id_test(self):
+        circuit_id = None
 
         email_1 = {
             "msg_uid": 123,
             "body": f"01/19 19:35:31: Message from InterMapper 6.1.5\n"
-            f"Name: OReilly-HotSpringsAR({asset_id})-Site803",
+            f"Name: OReilly-HotSpringsAR({circuit_id})-Site803",
         }
         email_2 = {
             "msg_uid": 456,
             "body": f"01/19 19:35:31: Message from InterMapper 6.1.5\n"
-            f"Name: OReilly-HotSpringsAR({asset_id})-Site803",
+            f"Name: OReilly-HotSpringsAR({circuit_id})-Site803",
         }
         emails = [email_1, email_2]
 
@@ -354,7 +354,7 @@ class TestInterMapperMonitor:
         notifications_repository.mark_email_as_read = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_circuit_id = CoroutineMock()
+        bruin_repository.get_service_number_by_circuit_id = CoroutineMock()
 
         dri_repository = Mock()
 
@@ -371,7 +371,7 @@ class TestInterMapperMonitor:
         )
 
         with config_mock:
-            await intermapper_monitor._process_email_batch(emails, asset_id)
+            await intermapper_monitor._process_email_batch(emails, circuit_id)
 
         intermapper_monitor._notifications_repository.mark_email_as_read.assert_has_awaits(
             [
@@ -379,21 +379,21 @@ class TestInterMapperMonitor:
                 call(email_2["msg_uid"]),
             ]
         )
-        intermapper_monitor._bruin_repository.get_circuit_id.assert_not_awaited()
+        intermapper_monitor._bruin_repository.get_service_number_by_circuit_id.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def process_email_batch_non_2xx_test(self):
-        asset_id = 123
+        circuit_id = 123
 
         email_1 = {
             "msg_uid": 123,
             "body": f"01/19 19:35:31: Message from InterMapper 6.1.5\n"
-            f"Name: OReilly-HotSpringsAR({asset_id})-Site803",
+            f"Name: OReilly-HotSpringsAR({circuit_id})-Site803",
         }
         email_2 = {
             "msg_uid": 456,
             "body": f"01/19 19:35:31: Message from InterMapper 6.1.5\n"
-            f"Name: OReilly-HotSpringsAR({asset_id})-Site803",
+            f"Name: OReilly-HotSpringsAR({circuit_id})-Site803",
         }
         emails = [email_1, email_2]
 
@@ -408,7 +408,7 @@ class TestInterMapperMonitor:
         }
 
         bruin_repository = Mock()
-        bruin_repository.get_circuit_id = CoroutineMock(return_value=response)
+        bruin_repository.get_service_number_by_circuit_id = CoroutineMock(return_value=response)
 
         utils_repository = Mock()
         metrics_repository = Mock()
@@ -430,24 +430,24 @@ class TestInterMapperMonitor:
         )
 
         with config_mock:
-            await intermapper_monitor._process_email_batch(emails, asset_id)
+            await intermapper_monitor._process_email_batch(emails, circuit_id)
 
-        intermapper_monitor._bruin_repository.get_circuit_id.assert_awaited_with(asset_id)
+        intermapper_monitor._bruin_repository.get_service_number_by_circuit_id.assert_awaited_with(circuit_id)
         intermapper_monitor._notifications_repository.mark_email_as_read.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def process_email_batch_204_test(self):
-        asset_id = 123
+        circuit_id = 123
 
         email_1 = {
             "msg_uid": 123,
             "body": f"01/19 19:35:31: Message from InterMapper 6.1.5\n"
-            f"Name: OReilly-HotSpringsAR({asset_id})-Site803",
+            f"Name: OReilly-HotSpringsAR({circuit_id})-Site803",
         }
         email_2 = {
             "msg_uid": 456,
             "body": f"01/19 19:35:31: Message from InterMapper 6.1.5\n"
-            f"Name: OReilly-HotSpringsAR({asset_id})-Site803",
+            f"Name: OReilly-HotSpringsAR({circuit_id})-Site803",
         }
         emails = [email_1, email_2]
 
@@ -462,7 +462,7 @@ class TestInterMapperMonitor:
         }
 
         bruin_repository = Mock()
-        bruin_repository.get_circuit_id = CoroutineMock(return_value=response)
+        bruin_repository.get_service_number_by_circuit_id = CoroutineMock(return_value=response)
 
         utils_repository = Mock()
         metrics_repository = Mock()
@@ -484,9 +484,9 @@ class TestInterMapperMonitor:
         )
 
         with config_mock:
-            await intermapper_monitor._process_email_batch(emails, asset_id)
+            await intermapper_monitor._process_email_batch(emails, circuit_id)
 
-        intermapper_monitor._bruin_repository.get_circuit_id.assert_awaited_with(asset_id)
+        intermapper_monitor._bruin_repository.get_service_number_by_circuit_id.assert_awaited_with(circuit_id)
         intermapper_monitor._notifications_repository.mark_email_as_read.assert_has_awaits(
             [
                 call(email_1["msg_uid"]),
@@ -1060,7 +1060,7 @@ class TestInterMapperMonitor:
         outage_ticket_response = {"body": ticket_id, "status": 200}
 
         slack_message = (
-            f"Outage ticket created through InterMapper emails for circuit_id {circuit_id}. Ticket "
+            f"Outage ticket created through InterMapper emails for service_number {circuit_id}. Ticket "
             f"details at https://app.bruin.com/t/{ticket_id}."
         )
 
@@ -1119,7 +1119,7 @@ class TestInterMapperMonitor:
         outage_ticket_response = {"body": ticket_id, "status": 200}
 
         slack_message = (
-            f"Outage ticket created through InterMapper emails for circuit_id {circuit_id}. Ticket "
+            f"Outage ticket created through InterMapper emails for service_number {circuit_id}. Ticket "
             f"details at https://app.bruin.com/t/{ticket_id}."
         )
 
@@ -1247,7 +1247,7 @@ class TestInterMapperMonitor:
         outage_ticket_response = {"body": ticket_id, "status": 200}
 
         slack_message = (
-            f"Outage ticket created through InterMapper emails for circuit_id {circuit_id}. Ticket "
+            f"Outage ticket created through InterMapper emails for service_number {circuit_id}. Ticket "
             f"details at https://app.bruin.com/t/{ticket_id}."
         )
 
@@ -1321,7 +1321,7 @@ class TestInterMapperMonitor:
         outage_ticket_response = {"body": ticket_id, "status": 200}
 
         slack_message = (
-            f"Outage ticket created through InterMapper emails for circuit_id {circuit_id}. Ticket "
+            f"Outage ticket created through InterMapper emails for service_number {circuit_id}. Ticket "
             f"details at https://app.bruin.com/t/{ticket_id}."
         )
 
@@ -1476,7 +1476,7 @@ class TestInterMapperMonitor:
         }
 
         slack_message = (
-            f"Outage ticket {outage_ticket_1_id} for circuit_id {circuit_id} "
+            f"Outage ticket {outage_ticket_1_id} for service_number {circuit_id} "
             f"was autoresolved through InterMapper emails. "
             f"Ticket details at https://app.bruin.com/t/{outage_ticket_1_id}."
         )
@@ -1525,7 +1525,7 @@ class TestInterMapperMonitor:
 
     @pytest.mark.asyncio
     async def autoresolve_no_tickets_test(self):
-        asset_id = 123
+        service_number = 123
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
@@ -1596,7 +1596,7 @@ class TestInterMapperMonitor:
 
     @pytest.mark.asyncio
     async def autoresolve_ticket_failed_tickets_rpc_request_test(self):
-        asset_id = 123
+        service_number = 123
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
@@ -1666,7 +1666,7 @@ class TestInterMapperMonitor:
 
     @pytest.mark.asyncio
     async def autoresolve_ticket_failed_append_up_note_rpc_request_test(self):
-        asset_id = 123
+        service_number = 123
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
@@ -1754,7 +1754,7 @@ class TestInterMapperMonitor:
 
     @pytest.mark.asyncio
     async def autoresolve_ticket_failed_product_category_rpc_request_test(self):
-        asset_id = 123
+        service_number = 123
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
@@ -1848,7 +1848,7 @@ class TestInterMapperMonitor:
 
     @pytest.mark.asyncio
     async def autoresolve_ticket_no_product_category_test(self):
-        asset_id = 123
+        service_number = 123
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
@@ -1942,7 +1942,7 @@ class TestInterMapperMonitor:
 
     @pytest.mark.asyncio
     async def autoresolve_ticket_product_category_not_in_list_test(self):
-        asset_id = 123
+        service_number = 123
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
@@ -2031,7 +2031,7 @@ class TestInterMapperMonitor:
 
     @pytest.mark.asyncio
     async def autoresolve_ticket_failed_tickets_details_rpc_request_test(self):
-        asset_id = 123
+        service_number = 123
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
@@ -2125,7 +2125,7 @@ class TestInterMapperMonitor:
 
     @pytest.mark.asyncio
     async def autoresolve_ticket_outage_not_detected_recently_test(self):
-        asset_id = 123
+        service_number = 123
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
@@ -2281,7 +2281,7 @@ class TestInterMapperMonitor:
 
     @pytest.mark.asyncio
     async def autoresolve_ticket_cannot_autoresolve_one_more_time_test(self):
-        asset_id = 123
+        service_number = 123
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
@@ -2440,7 +2440,7 @@ class TestInterMapperMonitor:
 
     @pytest.mark.asyncio
     async def autoresolve_ticket_failed_resolve_rpc_request_test(self, intermapper_monitor):
-        asset_id = 123
+        service_number = 123
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
@@ -2617,7 +2617,7 @@ class TestInterMapperMonitor:
         notifications_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_attributes_serial = CoroutineMock(return_value=attribute_serial_response)
+        bruin_repository.get_serial_attribute_from_inventory = CoroutineMock(return_value=attribute_serial_response)
 
         dri_repository = Mock()
         dri_repository.get_dri_parameters = CoroutineMock(return_value=dri_parameters_response)
@@ -2634,7 +2634,7 @@ class TestInterMapperMonitor:
             dri_repository,
         )
         dri_parameters = await intermapper_monitor._get_dri_parameters(circuit_id, client_id)
-        bruin_repository.get_attributes_serial.assert_awaited_once_with(circuit_id, client_id)
+        bruin_repository.get_serial_attribute_from_inventory.assert_awaited_once_with(circuit_id, client_id)
         dri_repository.get_dri_parameters.assert_awaited_once_with(attribute_serial)
         assert dri_parameters == dri_parameters_response_body
 
@@ -2655,7 +2655,7 @@ class TestInterMapperMonitor:
         notifications_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_attributes_serial = CoroutineMock(return_value=attribute_serial_response)
+        bruin_repository.get_serial_attribute_from_inventory = CoroutineMock(return_value=attribute_serial_response)
 
         dri_repository = Mock()
         dri_repository.get_dri_parameters = CoroutineMock()
@@ -2672,7 +2672,7 @@ class TestInterMapperMonitor:
             dri_repository,
         )
         dri_parameters = await intermapper_monitor._get_dri_parameters(circuit_id, client_id)
-        bruin_repository.get_attributes_serial.assert_awaited_once_with(circuit_id, client_id)
+        bruin_repository.get_serial_attribute_from_inventory.assert_awaited_once_with(circuit_id, client_id)
         dri_repository.get_dri_parameters.assert_not_awaited()
         assert dri_parameters is None
 
@@ -2703,7 +2703,7 @@ class TestInterMapperMonitor:
         notifications_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_attributes_serial = CoroutineMock(return_value=attribute_serial_response)
+        bruin_repository.get_serial_attribute_from_inventory = CoroutineMock(return_value=attribute_serial_response)
 
         dri_repository = Mock()
         dri_repository.get_dri_parameters = CoroutineMock(return_value=dri_parameters_response)
@@ -2720,7 +2720,7 @@ class TestInterMapperMonitor:
             dri_repository,
         )
         dri_parameters = await intermapper_monitor._get_dri_parameters(circuit_id, client_id)
-        bruin_repository.get_attributes_serial.assert_awaited_once_with(circuit_id, client_id)
+        bruin_repository.get_serial_attribute_from_inventory.assert_awaited_once_with(circuit_id, client_id)
         dri_repository.get_dri_parameters.assert_not_awaited()
         assert dri_parameters is None
 
@@ -2744,7 +2744,7 @@ class TestInterMapperMonitor:
         notifications_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_attributes_serial = CoroutineMock(return_value=attribute_serial_response)
+        bruin_repository.get_serial_attribute_from_inventory = CoroutineMock(return_value=attribute_serial_response)
 
         dri_repository = Mock()
         dri_repository.get_dri_parameters = CoroutineMock(return_value=dri_parameters_response)
@@ -2761,7 +2761,7 @@ class TestInterMapperMonitor:
             dri_repository,
         )
         dri_parameters = await intermapper_monitor._get_dri_parameters(circuit_id, client_id)
-        bruin_repository.get_attributes_serial.assert_awaited_once_with(circuit_id, client_id)
+        bruin_repository.get_serial_attribute_from_inventory.assert_awaited_once_with(circuit_id, client_id)
         dri_repository.get_dri_parameters.assert_awaited_once_with(attribute_serial)
         assert dri_parameters is None
 
@@ -3577,8 +3577,7 @@ class TestInterMapperMonitor:
             "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
             "up_time": "209 days, 10 hours, 44 minutes, 16 seconds",
         }
-        circuit_id = 3214
-
+        serial_number_1 = 3214
         serial_number_2 = "VC9999999"
 
         outage_ticket_1_id = 99999
@@ -3601,23 +3600,23 @@ class TestInterMapperMonitor:
         outage_ticket_detail_1_id = 2746937
         outage_ticket_detail_1 = {
             "detailID": outage_ticket_detail_1_id,
-            "detailValue": circuit_id,
+            "detailValue": serial_number_1,
             "detailStatus": "I",
         }
         ticket_note_1 = {
             "noteId": 68246614,
-            "noteValue": f"#*MetTel's IPA*#\nAuto-resolving task for {circuit_id}\n"
+            "noteValue": f"#*MetTel's IPA*#\nAuto-resolving task for {serial_number_1}\n"
             f"TimeStamp: 2021-01-02 10:18:16-05:00",
             "serviceNumber": [
-                circuit_id,
+                serial_number_1,
             ],
         }
         ticket_note_2 = {
             "noteId": 68246615,
-            "noteValue": f"#*MetTel's IPA*#\nAuto-resolving task for {circuit_id}\n"
+            "noteValue": f"#*MetTel's IPA*#\nAuto-resolving task for {serial_number_1}\n"
             f"TimeStamp: 2021-01-03 10:18:16-05:00",
             "serviceNumber": [
-                circuit_id,
+                serial_number_1,
             ],
         }
 
@@ -3632,7 +3631,7 @@ class TestInterMapperMonitor:
             "noteId": 68246618,
             "noteValue": "Some other note",
             "serviceNumber": [
-                circuit_id,
+                serial_number_1,
                 serial_number_2,
             ],
         }
@@ -3670,7 +3669,7 @@ class TestInterMapperMonitor:
         }
 
         slack_message = (
-            f"Outage ticket {outage_ticket_1_id} for circuit_id {circuit_id} "
+            f"Outage ticket {outage_ticket_1_id} for service_number {serial_number_1} "
             f"was autoresolved through InterMapper emails. "
             f"Ticket details at https://app.bruin.com/t/{outage_ticket_1_id}."
         )
@@ -3694,17 +3693,17 @@ class TestInterMapperMonitor:
         intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         target_queue = ForwardQueues.IPA.value.replace(" ", "_")
         ipa_job_id = FORWARD_TICKET_TO_QUEUE_JOB_ID.format(
-            ticket_id=outage_ticket_1_id, serial_number=circuit_id, target_queue=target_queue
+            ticket_id=outage_ticket_1_id, serial_number=serial_number_1, target_queue=target_queue
         )
         intermapper_monitor._scheduler.get_job = Mock(side_effect=[None, ipa_job_id])
         intermapper_monitor._scheduler.remove_job = Mock(return_value=True)
 
         with config_mock:
-            response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, parsed_email_dict)
+            response = await intermapper_monitor._autoresolve_ticket(serial_number_1, client_id, parsed_email_dict)
 
-        intermapper_monitor._bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
+        intermapper_monitor._bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, serial_number_1)
         intermapper_monitor._bruin_repository.append_intermapper_up_note.assert_awaited_once_with(
-            outage_ticket_1_id, circuit_id, parsed_email_dict, False
+            outage_ticket_1_id, serial_number_1, parsed_email_dict, False
         )
         intermapper_monitor._bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
         intermapper_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
@@ -3712,13 +3711,13 @@ class TestInterMapperMonitor:
             relevant_notes_for_edge, outage_ticket_1_creation_date, parsed_email_dict
         )
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
-            relevant_notes_for_edge, circuit_id
+            relevant_notes_for_edge, serial_number_1
         )
         intermapper_monitor._bruin_repository.resolve_ticket.assert_awaited_once_with(
             outage_ticket_1_id, outage_ticket_detail_1_id
         )
         intermapper_monitor._bruin_repository.append_autoresolve_note.assert_awaited_once_with(
-            outage_ticket_1_id, circuit_id
+            outage_ticket_1_id, serial_number_1
         )
         intermapper_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
         assert response is True

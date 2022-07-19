@@ -54,7 +54,7 @@ class BruinRepository:
 
         return response
 
-    async def get_circuit_id(self, circuit_id):
+    async def get_service_number_by_circuit_id(self, circuit_id):
         err_msg = None
 
         request = {
@@ -65,10 +65,10 @@ class BruinRepository:
         }
 
         try:
-            self._logger.info(f"Getting the translation of circuit_id {circuit_id}")
+            self._logger.info(f"Getting the translation to service number for circuit_id {circuit_id}")
             response = await self._event_bus.rpc_request("bruin.get.circuit.id", request, timeout=60)
         except Exception as e:
-            err_msg = f"Getting the translation of circuit_id {circuit_id} Error: {e}"
+            err_msg = f"Getting the translation to service number for circuit_id {circuit_id} Error: {e}"
             response = nats_error_response
         else:
             response_body = response["body"]
@@ -76,7 +76,7 @@ class BruinRepository:
 
             if response_status not in range(200, 300) or response_status == 204:
                 err_msg = (
-                    f"Getting the translation of circuit_id {circuit_id} in "
+                    f"Getting the translation to service number for circuit_id {circuit_id} in "
                     f"{self._config.ENVIRONMENT_NAME.upper()} environment. Error: "
                     f"Error {response_status} - {response_body}"
                 )
@@ -128,7 +128,7 @@ class BruinRepository:
 
         return response
 
-    async def get_attributes_serial(self, service_number, client_id):
+    async def get_serial_attribute_from_inventory(self, service_number, client_id):
         err_msg = None
 
         request = {
@@ -141,21 +141,30 @@ class BruinRepository:
         }
 
         try:
-            self._logger.info(f"Getting the attribute's serial number of serial number {service_number}")
+            self._logger.info(
+                f"Getting inventory attributes' serial number for service number {service_number} and client ID"
+                f" {client_id}"
+            )
             response = await self._event_bus.rpc_request("bruin.inventory.attributes.serial", request, timeout=60)
         except Exception as e:
-            err_msg = f"Getting the attribute's serial number of serial number {service_number} Error: {e}"
+            err_msg = (
+                f"Error while getting inventory attributes' serial number for service number {service_number} and "
+                f"client ID {client_id}: {e}"
+            )
             response = nats_error_response
         else:
             response_body = response["body"]
             response_status = response["status"]
 
             if response_status in range(200, 300):
-                self._logger.info(f"Got the attribute's serial number of serial number {service_number}!")
+                self._logger.info(
+                    f"Got inventory attributes' serial number for service number {service_number} and client ID "
+                    f"{client_id}"
+                )
             else:
                 err_msg = (
-                    f"'Getting the attribute's serial number of serial number {service_number}'"
-                    f"{self._config.ENVIRONMENT_NAME.upper()} environment. Error: "
+                    f"Error while getting inventory attributes' serial number for service number {service_number} and "
+                    f"client ID {client_id} in {self._config.ENVIRONMENT_NAME.upper()} environment. Error: "
                     f"Error {response_status} - {response_body}"
                 )
 
@@ -563,7 +572,7 @@ class BruinRepository:
 
         try:
             self._logger.info(
-                f"Changing task result for ticket {ticket_id} for device " f"{serial_number} to {task_result}..."
+                f"Changing task result for ticket {ticket_id} for device {serial_number} to {task_result}..."
             )
             response = await self._event_bus.rpc_request("bruin.ticket.change.work", request, timeout=90)
         except Exception as e:

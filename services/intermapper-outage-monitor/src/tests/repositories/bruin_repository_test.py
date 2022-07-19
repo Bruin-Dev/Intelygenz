@@ -389,7 +389,7 @@ class TestBruinRepository:
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_circuit_id_test(self):
+    async def get_service_number_by_circuit_id_test(self):
         circuit_id = "123"
         client_id = 83959
 
@@ -414,13 +414,13 @@ class TestBruinRepository:
 
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
         with uuid_mock:
-            result = await bruin_repository.get_circuit_id(circuit_id)
+            result = await bruin_repository.get_service_number_by_circuit_id(circuit_id)
 
         event_bus.rpc_request.assert_awaited_once_with("bruin.get.circuit.id", request, timeout=60)
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_circuit_id_failing_rpc_request_test(self):
+    async def get_service_number_by_circuit_id_failing_rpc_request_test(self):
         circuit_id = "123"
 
         request = {
@@ -442,7 +442,7 @@ class TestBruinRepository:
 
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
         with uuid_mock:
-            result = await bruin_repository.get_circuit_id(circuit_id)
+            result = await bruin_repository.get_service_number_by_circuit_id(circuit_id)
 
         event_bus.rpc_request.assert_awaited_once_with("bruin.get.circuit.id", request, timeout=60)
         notifications_repository.send_slack_message.assert_awaited_once()
@@ -450,7 +450,7 @@ class TestBruinRepository:
         assert result == nats_error_response
 
     @pytest.mark.asyncio
-    async def get_circuit_id_non_2xx_response_test(self):
+    async def get_service_number_by_circuit_id_non_2xx_response_test(self):
         circuit_id = "123"
         client_id = 83959
 
@@ -478,13 +478,13 @@ class TestBruinRepository:
 
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
         with uuid_mock:
-            result = await bruin_repository.get_circuit_id(circuit_id)
+            result = await bruin_repository.get_service_number_by_circuit_id(circuit_id)
 
         event_bus.rpc_request.assert_awaited_once_with("bruin.get.circuit.id", request, timeout=60)
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_attributes_serial_test(self):
+    async def get_serial_attribute_from_inventory_test(self):
         circuit_id = "123"
         client_id = 83959
 
@@ -511,13 +511,13 @@ class TestBruinRepository:
 
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
         with uuid_mock:
-            result = await bruin_repository.get_attributes_serial(circuit_id, client_id)
+            result = await bruin_repository.get_serial_attribute_from_inventory(circuit_id, client_id)
 
         event_bus.rpc_request.assert_awaited_once_with("bruin.inventory.attributes.serial", request, timeout=60)
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_attributes_serial_rpc_request_test(self):
+    async def get_serial_attribute_from_inventory_rpc_request_test(self):
         circuit_id = "123"
         client_id = 83959
 
@@ -542,7 +542,7 @@ class TestBruinRepository:
 
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
         with uuid_mock:
-            result = await bruin_repository.get_attributes_serial(circuit_id, client_id)
+            result = await bruin_repository.get_serial_attribute_from_inventory(circuit_id, client_id)
 
         event_bus.rpc_request.assert_awaited_once_with("bruin.inventory.attributes.serial", request, timeout=60)
         notifications_repository.send_slack_message.assert_awaited_once()
@@ -550,7 +550,7 @@ class TestBruinRepository:
         assert result == nats_error_response
 
     @pytest.mark.asyncio
-    async def get_circuit_id_non_2xx_response_test(self):
+    async def get_service_number_by_circuit_id_non_2xx_response_test(self):
         circuit_id = "123"
         client_id = 83959
 
@@ -580,7 +580,7 @@ class TestBruinRepository:
 
         bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
         with uuid_mock:
-            result = await bruin_repository.get_attributes_serial(circuit_id, client_id)
+            result = await bruin_repository.get_serial_attribute_from_inventory(circuit_id, client_id)
 
         event_bus.rpc_request.assert_awaited_once_with("bruin.inventory.attributes.serial", request, timeout=60)
         assert result == response

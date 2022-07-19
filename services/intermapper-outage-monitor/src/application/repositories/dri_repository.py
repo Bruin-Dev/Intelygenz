@@ -35,9 +35,7 @@ class DRIRepository:
                 self._logger.info(f"Getting DRI parameters of serial number {serial_number}")
                 response = await self._event_bus.rpc_request("dri.parameters.request", request, timeout=120)
             except Exception as e:
-                err_msg = (
-                    f"An error occurred while getting DRI parameter for serial number {serial_number}. " f"Error: {e}"
-                )
+                err_msg = f"An error occurred while getting DRI parameter for serial number {serial_number}. Error: {e}"
                 response = nats_error_response
             else:
                 response_body = response["body"]
