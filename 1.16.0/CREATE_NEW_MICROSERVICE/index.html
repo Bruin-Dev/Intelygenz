@@ -643,7 +643,7 @@ tags = {
 <li>merge the new repository to Master branch. The pipeline will run and create the new ECR repo <code>new-bridge</code></li>
 </ul>
 <h2 id="2-create-our-new-microservice-folder">2. Create our new microservice folder</h2>
-<p>We can start working on our new microservice based on an existing one. It depends if is a <code>capability</code>(bridges) or a <code>use case</code>. Select one or other depends on what are you developing. For example let's copy a capability "bruing-bridge" and paste in the root of the repo to change his name to "new-bridge". from this moment you can start to develop and do your tests locally. Every microservice must have the following directory structure:</p>
+<p>We can start working on our new microservice based on an existing one. It depends on if is a <code>capability</code>(bridges) or a <code>use case</code>. Select one or other depends on what are you developing. For example let's copy a capability "bruing-bridge" and paste in the root of the repo to change his name to "new-bridge". from this moment you can start to develop and do your tests locally. Every microservice must have the following directory structure:</p>
 <pre><code>new-bridge
 ├── .gitlab-ci.yml
 ├── Dockerfile
@@ -663,7 +663,7 @@ tags = {
 <h2 id="3-update-ci-cd-gitlab-files-with-the-proper-values">3. Update CI-CD gitlab files with the proper values</h2>
 <p>It's important to have the .gitlab-ci.yaml files correctly defined to enable pipelines:
   * <code>new-bridge/.gitlab-ci.yml</code>
-  Change any reference to de template microservice to the new one.. example find and replace "bruin-bridge" for "new-bridge"
+  Change any reference of the template microservice to the new one: example find and replace "bruin-bridge" for "new-bridge"
   * <code>.gitlab-ci.yml</code> (the file in the root of the repository)
   Here we need to specify to gitlab-ci that we define other jobs in a different directories (the .gitlab-ci.yml of our new repo). So locate the root gitlab file and add a new line with the path of the new micro jobs (do it respecting the alphabetical order)
   <code>...
@@ -675,7 +675,7 @@ tags = {
     - local: 'services/service-affecting-monitor/.gitlab-ci.yml'
     - local: 'services/service-outage-monitor/.gitlab-ci.yml'
   ...</code>
-  Now in the same file, let's define the "desired_tast" variable for this new micro (do it respecting the alphabetical order):
+  Now in the same file, let's define the "desired_tasks" variable for this new micro (do it respecting the alphabetical order):
   <code>...
     NATS_SERVER_DESIRED_TASKS: "1"
     NATS_SERVER_1_DESIRED_TASKS: "1"
@@ -696,7 +696,7 @@ tags = {
       "devDependencies": {}
   }</code>
   * <code>package.json</code> (the file in the root of the repository)
-  add to the semantic-release global config our new path to analize version changes (do it respecting the alphabetical order):
+  add to the semantic-release global config our new path to analyze version changes (do it respecting the alphabetical order):
   <code>...
       "./services/links-metrics-api",
       "./services/links-metrics-collector",
@@ -799,7 +799,7 @@ ports:                                                              │</li>
   ````</li>
 </ul>
 <h2 id="5-helm-templates-and-variables">5. Helm templates and variables</h2>
-<p>Here we will define the infraestructure part of our microservice with a helm chart. Is very important to know that this "how to" is only to copy an existing microservice, therefore, we take the following statements for granted:
+<p>Here we will define the infrastructure part of our microservice with a helm chart. Is very important to know that this "how to" is only to copy an existing microservice, therefore, we take the following statements for granted:
 1. The microservice will not have a public endpoint (except email-tagger-monitor)
 2. The microservice port will always be 5000
 3. Depends on the base chart you use to copy &amp; paste, you will have more or less kubernetes resources. although most microservices have: configmap, deployment, secret and service.</p>
@@ -807,7 +807,7 @@ ports:                                                              │</li>
   * BASE-FOLDER: copy this folder <code>helm/charts/automation-engine/charts/bruin-bridge</code> and paste here <code>helm/charts/automation-engine/charts/</code> we will have something like <code>bruin-bridge copy</code>change the name to <code>new-bridge</code>. </p>
 <ul>
 <li>
-<p>PREPARE BASE_FOLDER: now let's do a find and replace in our new folder <code>new-bridge</code>. find <code>bruin-bridge</code>and replace for <code>new-bridge</code>. many substitutions should appear (at the moment of write this, i can see 46 sustitutions in 10 files but over time, this can change). Just remember to do this in the <code>new-bridge</code> folder context to evoid modify other resources.</p>
+<p>PREPARE BASE_FOLDER: now let's do a find and replace in our new folder <code>new-bridge</code>. find <code>bruin-bridge</code>and replace for <code>new-bridge</code>. many substitutions should appear (at the moment of write this, i can see 46 substitutions in 10 files but over time, this can change). Just remember to do this in the <code>new-bridge</code> folder context to evoid modify other resources.</p>
 </li>
 <li>
 <p>DEPENDENCIES and CHECKS: Now we have to customize our new microservice, first we must ask ourselves, what dependency does my new microservice have on other services? for example, bruin-bridge have a dependency with Nats and Redis, so it have a few checks to see if those services are available and if they are, it can be deployed. We can find this checks in the <code>deployment.yaml</code> file. Specifically in this part:
@@ -823,7 +823,7 @@ ports:                                                              │</li>
               - configMapRef:
                   name: {{ include "new-bridge.configmapName" . }}
   ...</code>
-  We can add or remove all the initcontainers we want. Even, it is very possible that all the dependencies that we need already have the microservice that we use as a base or some other microservice already developed. So we can navigate through the folders of the rest of the microservices and copy any other dependency check and use it in ours. I will add a new dependency for <code>notifier</code> copied from other microservice, and my file will look like the following:
+  We can add or remove all the init containers we want. Even, it is very possible that all the dependencies that we need already have the microservice that we use as a base or some other microservice already developed. So we can navigate through the folders of the rest of the microservices and copy any other dependency check and use it in ours. I will add a new dependency for <code>notifier</code> copied from other microservice, and my file will look like the following:
   <code>...
         initContainers:
           - name: wait-nats-server
@@ -841,7 +841,7 @@ ports:                                                              │</li>
             command: ['sh', '-c', 'until wget --spider -S http://notifier:5000/_health; do echo waiting for notifier; sleep 2; done']    │
           {{- end }}                                                                                                                    _│
   ...</code>
-  Note that we have a <code>if</code> condition. You will see this in some check, we use this because if we deploy only some microservices, we must contemplate this. If the notifier not exist, the check will not be created. Nats and Redis are always required, thats wy don't have the conditional.</p>
+  Note that we have a <code>if</code> condition. You will see this in some check, we use this because if we deploy only some microservices, we must contemplate this. If the notifier not exist, the check will not be created. Nats and Redis are always required, that's wy don't have the conditional.</p>
 </li>
 <li>
 <p>VARIABLES: time to update the variables that will use our microservice, this involves various files:</p>
@@ -879,15 +879,15 @@ data:
 <code>...
 config:    &lt;─────────────── in config section!!!
   papertrail_prefix: ""
-  # -- New usefull variable with no sensitive iformation   ¯│______________ here the configmap variable!
+  # -- New useful variable with no sensitive information   ¯│______________ here the configmap variable!
   new_var: ""                                              _│
-  # -- New usefull variable with sensitive iformation      ¯│______________ and here the secret variable!
+  # -- New useful variable with sensitive information      ¯│______________ and here the secret variable!
   new_sensitive_var: ""                                    _│
 ...</code>
 Check that we only define the variable but no put any value, although we can also set a default value if we want.</p>
 </li>
 <li>
-<p><code>helm/charts/automation-engine/values.yaml</code> This is the values template off the entire automation-engine application. This only have the structure of the values and no contain any real value. For this part we will copy the content of the values file that we just created and paste in the plase that correspond (respecting the alphabetical order). It's important to note that we are pasting the values inside another Yaml, so we must adapt the indentation for the destiny file:
+<p><code>helm/charts/automation-engine/values.yaml</code> This is the values template off the entire automation-engine application. This only have the structure of the values and no contain any real value. For this part we will copy the content of the values file that we just created and paste in the place that correspond (respecting the alphabetical order). It's important to note that we are pasting the values inside another Yaml, so we must adapt the indentation for the destiny file:
 ````
 ...</p>
 </li>
@@ -930,9 +930,9 @@ Check that we only define the variable but no put any value, although we can als
   enabled: true                                                            │
   config:                                                                  │
     papertrail_prefix: ""                                                  │
-    # -- New usefull variable with no sensitive iformation                 │
+    # -- New useful variable with no sensitive information                 │
     new_var: ""                                                            │
-    # -- New usefull variable with sensitive iformation                    │
+    # -- New useful variable with sensitive information                    │
     new_sensitive_var: ""                                                  │
   image:                                                                   │
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/new-bridge    ├──────────────&gt; here!
@@ -965,9 +965,9 @@ Check that we only define the variable but no put any value, although we can als
   # -- notifier Service Configuration
 ...
 ````
-Things to check: first the indentation!!.. second, the "global" config is not set here; it is define at the beginning of the values file and is common for all microservices. and finnaly, we remove blanck and default configurations to get a sorter file (things removed: autoscaling, the default is false so we can ommit. nodeSelector. tolerations and affinity). PD: You can mantein autoscaling if you will enable it.</p>
+Things to check: first the indentation!!.. second, the "global" config is not set here; it is defined at the beginning of the values file and is common for all microservices. and finally, we remove blank and default configurations to get a shorter file (things removed: autoscaling, the default is false, so we can omit it. nodeSelector. tolerations and affinity). PD: You can keep autoscaling if you will enable it.</p>
 <ul>
-<li><code>helm/charts/automation-engine/values.yaml.tpl</code> This is the most important file, it contains the values that will be parsed and used to deploy the Automation-Engine application. Bassicaly it's the same file of values.yaml, but with the variables that will be replaced in the pipeline to deploy a production or develop environment. Let's add our new micro with the variables:
+<li><code>helm/charts/automation-engine/values.yaml.tpl</code> This is the most important file, it contains the values that will be parsed and used to deploy the Automation-Engine application. Basically it's the same file of values.yaml, but with the variables that will be replaced in the pipeline to deploy a production or develop environment. Let's add our new micro with the variables:
 ````
 ...</li>
 </ul>
@@ -1007,9 +1007,9 @@ Things to check: first the indentation!!.. second, the "global" config is not se
   enabled: ${NEW_BRIDGE_ENABLED}                                           │
   config:                                                                  │
     papertrail_prefix: "new-bridge-${NEW_BRIDGE_BUILD_NUMBER}"             │
-    # -- New usefull variable with no sensitive iformation                 │
+    # -- New useful variable with no sensitive information                 │
     new_var: ${NEW_BRIDGE_NEW_VAR}                                         │
-    # -- New usefull variable with sensitive iformation                    │
+    # -- New useful variable with sensitive information                    │
     new_sensitive_var: ${NEW_BRIDGE_NEW_SENSITIVE_VAR}                     │
   image:                                                                   │
     repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/new-bridge    ├──────────────&gt; here!
@@ -1103,12 +1103,12 @@ function environments_assign() {
 ...
 ````</p>
 <ul>
-<li><code>add the variables in gitlab-ci</code> finaly, we have all the path until the real value in gitlab.. let's go to the repository <a href="https://gitlab.intelygenz.com/mettel/automation-engine/-/settings/ci_cd">settings/ci-cd</a> section and create the new varaibles:
+<li><code>add the variables in gitlab-ci</code> finally, we have all the path until the real value in Gitlab. Let's go to the repository <a href="https://gitlab.intelygenz.com/mettel/automation-engine/-/settings/ci_cd">settings/ci-cd</a> section and create the new variables:
 <img alt="IMAGE: gitlab_add_new_var" src="../img/system_overview/gitlab_add_new_var.png" /></li>
 </ul>
 </li>
 </ul>
-<p>That's all, with this and the proper <a href="..#commit">commit message</a> the pipeline will run and deploy an ephimeral environment.</p>
+<p>That's all, with this and the proper <a href="..#commit">commit message</a> the pipeline will run and deploy an ephemeral environment.</p>
 
               
             </article>

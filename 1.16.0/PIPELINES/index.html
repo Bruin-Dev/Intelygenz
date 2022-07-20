@@ -755,7 +755,7 @@ We separate the automatation in two parts, <a href="#continuous-integration-ci">
 <h3 id="basic_infra_kre-steps">Basic_infra_kre steps</h3>
 <p>In this stage will be the following jobs:
 * <code>deploy-basic-infra-kre-dev</code> for ephemeral environments and <code>deploy-basic-infra-kre-production</code> for the production environment, <strong>these are executed optionally manually</strong>.</p>
-<p>This job is reponsible of checking and creation, if necessary, of the EKS cluster used by KRE in each environment and all the necessary resources related (RBAC configuration, helm charts needed for the KRE runtimes, etc)</p>
+<p>This job is responsible of checking and creation, if necessary, of the EKS cluster used by KRE in each environment and all the necessary resources related (RBAC configuration, helm charts needed for the KRE runtimes, etc)</p>
 <p>The process followed in this job is as follows:</p>
 <ol>
 <li>
@@ -771,7 +771,7 @@ We separate the automatation in two parts, <a href="#continuous-integration-ci">
 <p>An <a href="https://docs.aws.amazon.com/autoscaling/ec2/userguide/AutoScalingGroup.html">AutoScaling Group</a> to have the desired number of Kubernetes worker nodes</p>
 </li>
 <li>
-<p>A SMTP service through <a href="https://aws.amazon.com/ses/">Amazon SES</a> and all the necessary componentes of it</p>
+<p>A SMTP service through <a href="https://aws.amazon.com/ses/">Amazon SES</a> and all the necessary components of it</p>
 </li>
 <li>
 <p>A set of IAM roles, one for each user with access to the project. These will be used to assign subsequent permissions in the Kubernetes cluster according to the role they belong to. These are stored as terraform <a href="https://www.terraform.io/docs/configuration/outputs.html">output values</a>, saving the list of user roles belonging to each role in their corresponding variable.</p>

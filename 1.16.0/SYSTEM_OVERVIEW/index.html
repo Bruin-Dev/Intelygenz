@@ -878,7 +878,7 @@
 <h3 id="basic-concepts">Basic concepts</h3>
 <p>It's a project based on microservices, in which two types are distinguished:</p>
 <ul>
-<li><strong>Capabilites</strong>: They are in charge of carrying out certain common actions for the business logic. I.e.: Collect information from SD-WAN routers</li>
+<li><strong>Capabilities</strong>: They are in charge of carrying out certain common actions for the business logic. I.e.: Collect information from SD-WAN routers</li>
 </ul>
 <p>For example: Collect information from SD-WAN routers.</p>
 <ul>
@@ -1009,7 +1009,7 @@
 as well as create and update them, so their technicians can assist customers when they report any issue related to a device.</p>
 <p>It also updates Bruin tickets to keep support people posted about the changes in the dispatch requests.</p>
 <p>It acts as an intermediary between <code>dispatch-portal-frontend</code> and CTS &amp; LIT APIs by providing a REST API with multiple endpoints
-that, once they receive a payload from the frontent side, it modifies its fields with the help of some mappers to match the formats expected
+that, once they receive a payload from the frontend side, it modifies its fields with the help of some mappers to match the formats expected
 by CTS and LIT and then forward those customized payloads to their APIs. </p>
 <p>The following <a href="https://app.diagrams.net/#G16slq1OcvjBmFVygq6jhC9DlpAMvcZS2W">diagram</a> shows the dependencies or interactions of this microservice with the others.</p>
 <p><img alt="IMAGE: grafana_microservice_relationships" src="../img/system_overview/use_cases/grafana_microservice_relationships.png" /></p>
@@ -1046,7 +1046,7 @@ will be taken.</p>
 <p>In the following <a href="https://app.diagrams.net/#G1iwUTk1QGrLi2OKuKHpIB6K0KJ1s2W87e">diagram</a> it's possible see the relationships between this microservice and the others.</p>
 <p><img alt="IMAGE: service-affecting-monitor_microservice_relationships" src="../img/system_overview/use_cases/service-affecting-monitor_microservice_relationships.png" /></p>
 <h4 id="service-dispatch-monitor-microservice">Service-dispatch-monitor microservice</h4>
-<p>This microservice monitor dispatches statuses for different vendors, at the time of writting this document LIT and CTS. Both processes are pretty much the same in concept but with differences in the implementation.</p>
+<p>This microservice monitor dispatches statuses for different vendors, at the time of writing this document LIT and CTS. Both processes are pretty much the same in concept but with differences in the implementation.</p>
 <p>A dispatch is general terms can have the following statuses:</p>
 <ul>
 <li>Requested</li>
@@ -1068,7 +1068,7 @@ will be taken.</p>
 <li>Get all dispatches for a vendor</li>
 <li>Filter dispatches that are created through the <code>dispatch-portal</code></li>
 <li>Discard invalid ticket ids or dispatches with not proper fields</li>
-<li>Split the dispatches by status and then send them to the function to proccess them, there are 3 general functions<ul>
+<li>Split the dispatches by status and then send them to the function to process them, there are 3 general functions<ul>
 <li>Confirmed dispatch:<ul>
 <li>Send sms and append note to bruin when a dispatch is confirmed</li>
 <li>Send sms and append note to bruin 12 or 2 hours prior the dispatch</li>
