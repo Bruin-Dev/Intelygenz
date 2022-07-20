@@ -12,6 +12,7 @@ service-outage-monitor-linter:
         - services/service-outage-monitor/src/app.py
         - services/service-outage-monitor/Dockerfile
         - services/service-outage-monitor/requirements.txt
+        - pyutils_automation/py36/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
@@ -29,6 +30,7 @@ service-outage-monitor-test:
         - services/service-outage-monitor/src/app.py
         - services/service-outage-monitor/Dockerfile
         - services/service-outage-monitor/requirements.txt
+        - pyutils_automation/py36/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .unittest_module_python
   needs: ["service-outage-monitor-linter"]
@@ -49,6 +51,7 @@ service-outage-monitor-build:
         - services/service-outage-monitor/src/app.py
         - services/service-outage-monitor/Dockerfile
         - services/service-outage-monitor/requirements.txt
+        - pyutils_automation/py36/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && ($SERVICE_OUTAGE_MONITOR_DESIRED_TASKS != "0" || $SERVICE_OUTAGE_MONITOR_TRIAGE_DESIRED_TASKS != "0") && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:

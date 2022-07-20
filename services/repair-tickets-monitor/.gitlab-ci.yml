@@ -13,6 +13,7 @@ repair-tickets-monitor-linter:
         - services/repair-tickets-monitor/src/app.py
         - services/repair-tickets-monitor/Dockerfile
         - services/repair-tickets-monitor/requirements.txt
+        - pyutils_automation/py36/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
@@ -31,6 +32,7 @@ repair-tickets-monitor-test:
         - services/repair-tickets-monitor/src/app.py
         - services/repair-tickets-monitor/Dockerfile
         - services/repair-tickets-monitor/requirements.txt
+        - pyutils_automation/py36/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .unittest_module_python
   needs: ["repair-tickets-monitor-linter"]
@@ -51,6 +53,7 @@ repair-tickets-monitor-build:
         - services/repair-tickets-monitor/src/app.py
         - services/repair-tickets-monitor/Dockerfile
         - services/repair-tickets-monitor/requirements.txt
+        - pyutils_automation/py36/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $REPAIR_TICKETS_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:

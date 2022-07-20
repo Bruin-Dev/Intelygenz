@@ -12,6 +12,7 @@ tnba-monitor-linter:
         - services/tnba-monitor/src/app.py
         - services/tnba-monitor/Dockerfile
         - services/tnba-monitor/requirements.txt
+        - pyutils_automation/py36/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
@@ -29,6 +30,7 @@ tnba-monitor-test:
         - services/tnba-monitor/src/app.py
         - services/tnba-monitor/Dockerfile
         - services/tnba-monitor/requirements.txt
+        - pyutils_automation/py36/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .unittest_module_python
   needs: ["tnba-monitor-linter"]
@@ -49,6 +51,7 @@ tnba-monitor-build:
         - services/tnba-monitor/src/app.py
         - services/tnba-monitor/Dockerfile
         - services/tnba-monitor/requirements.txt
+        - pyutils_automation/py36/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $TNBA_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:

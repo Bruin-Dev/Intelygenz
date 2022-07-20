@@ -12,6 +12,7 @@ hawkeye-affecting-monitor-linter:
         - services/hawkeye-affecting-monitor/src/app.py
         - services/hawkeye-affecting-monitor/Dockerfile
         - services/hawkeye-affecting-monitor/requirements.txt
+        - pyutils_automation/py36/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
@@ -29,6 +30,7 @@ hawkeye-affecting-monitor-test:
         - services/hawkeye-affecting-monitor/src/app.py
         - services/hawkeye-affecting-monitor/Dockerfile
         - services/hawkeye-affecting-monitor/requirements.txt
+        - pyutils_automation/py36/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .unittest_module_python
   needs: ["hawkeye-affecting-monitor-linter"]
@@ -49,6 +51,7 @@ hawkeye-affecting-monitor-build:
         - services/hawkeye-affecting-monitor/src/app.py
         - services/hawkeye-affecting-monitor/Dockerfile
         - services/hawkeye-affecting-monitor/requirements.txt
+        - pyutils_automation/py36/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $HAWKEYE_AFFECTING_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:

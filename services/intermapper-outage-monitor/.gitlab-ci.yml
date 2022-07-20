@@ -12,6 +12,7 @@ intermapper-outage-monitor-linter:
         - services/intermapper-outage-monitor/src/app.py
         - services/intermapper-outage-monitor/Dockerfile
         - services/intermapper-outage-monitor/requirements.txt
+        - pyutils_automation/py36/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
@@ -29,6 +30,7 @@ intermapper-outage-monitor-test:
         - services/intermapper-outage-monitor/src/app.py
         - services/intermapper-outage-monitor/Dockerfile
         - services/intermapper-outage-monitor/requirements.txt
+        - pyutils_automation/py36/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .unittest_module_python
   needs: ["intermapper-outage-monitor-linter"]
@@ -49,6 +51,7 @@ intermapper-outage-monitor-build:
         - services/intermapper-outage-monitor/src/app.py
         - services/intermapper-outage-monitor/Dockerfile
         - services/intermapper-outage-monitor/requirements.txt
+        - pyutils_automation/py36/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $INTERMAPPER_OUTAGE_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:
