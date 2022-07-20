@@ -199,7 +199,7 @@ In this stage there are one job:
 
       * [nats-server, nats-server-1, nats-server-2](../nats-server)
 
-      * [notifier](../notifier)
+      * [email-bridge](../email-bridge)
 
       * [notifications-bridge](../notifications-bridge)
 
@@ -260,7 +260,7 @@ In this stage there are one job:
      - `bruin-bridge`
      - `cts-bridge`
      - `lit-bridge`
-     - `notifier`
+     - `email-bridge`
      - `notifications-bridge`
      - `prometheus`
      - `t7-bridge`
@@ -302,7 +302,7 @@ In this stage there are one job:
                          null_resource.velocloud-bridge-healthcheck,
                          null_resource.hawkeye-bridge-healthcheck,
                          null_resource.t7-bridge-healthcheck,
-                         null_resource.notifier-healthcheck,
+                         null_resource.email-bridge-healthcheck,
                          null_resource.notifications-bridge-healthcheck,
                          null_resource.metrics-prometheus-healthcheck ]
         . . .
@@ -328,7 +328,7 @@ In this stage there are one job:
                          null_resource.velocloud-bridge-healthcheck,
                          null_resource.hawkeye-bridge-healthcheck,
                          null_resource.t7-bridge-healthcheck,
-                         null_resource.notifier-healthcheck,
+                         null_resource.email-bridge-healthcheck,
                          null_resource.notifications-bridge-healthcheck,
                          null_resource.metrics-prometheus-healthcheck,
                          null_resource.dispatch-portal-backend-healthcheck,

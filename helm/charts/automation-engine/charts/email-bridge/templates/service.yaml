@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "email-bridge.fullname" . }}
+  labels:
+    {{- include "email-bridge.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}
+    {{- if .Values.config.metrics.enabled }}
+    - name: {{ .Values.config.metrics.svc.name }}
+      port: {{ .Values.config.metrics.svc.port }}
+    {{- end }}
+  selector:
+    {{- include "email-bridge.selectorLabels" . | nindent 4 }}

@@ -132,11 +132,10 @@ INTERMAPPER_OUTAGE_MONITOR__FORWARD_TO_IPA_JOB_INTERVAL = parameters["common"]["
 LAST_CONTACT_REPORT__MONITORED_VELOCLOUD_HOSTS = parameters["dev"]["last-contact-report"]["monitored-velocloud-hosts"]
 LAST_CONTACT_REPORT__RECIPIENT = parameters["dev"]["last-contact-report"]["report-recipient"]
 
-# Notifier variables
-NOTIFIER__SLACK_WEBHOOK = parameters["dev"]["notifier"]["slack-webhook-url"]
-NOTIFIER__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_USERNAME = parameters["common"]["notifier"]["email-account-for-message-delivery-username"]
-NOTIFIER__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_PASSWORD = parameters["common"]["notifier"]["email-account-for-message-delivery-password"]
-NOTIFIER__MONITORABLE_EMAIL_ACCOUNTS = parameters["dev"]["notifier"]["monitorable-email-accounts"]
+# Email Bridge variables
+EMAIL_BRIDGE__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_USERNAME = parameters["common"]["email-bridge"]["email-account-for-message-delivery-username"]
+EMAIL_BRIDGE__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_PASSWORD = parameters["common"]["email-bridge"]["email-account-for-message-delivery-password"]
+EMAIL_BRIDGE__MONITORABLE_EMAIL_ACCOUNTS = parameters["dev"]["email-bridge"]["monitorable-email-accounts"]
 
 # Notifications bridge variables
 NOTIFICATIONS_BRIDGE__SLACK_WEBHOOK = parameters["dev"]["notifications-bridge"]["slack-webhook-url"]
@@ -545,17 +544,16 @@ env_dict = {
         f"PAPERTRAIL_PORT={PAPERTRAIL_PORT}",
         f"REDIS_HOSTNAME={REDIS_HOSTNAME}",
     ],
-    os.path.join("services", "notifier", "src", "config", "env"): [
+    os.path.join("services", "email-bridge", "src", "config", "env"): [
         f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",
         f"NATS_SERVER1={NATS_SERVER1}",
         f"REDIS_HOSTNAME={REDIS_HOSTNAME}",
         f"PAPERTRAIL_ACTIVE={PAPERTRAIL_ACTIVE}",
         f"PAPERTRAIL_HOST={PAPERTRAIL_HOST}",
         f"PAPERTRAIL_PORT={PAPERTRAIL_PORT}",
-        f"SLACK_WEBHOOK={NOTIFIER__SLACK_WEBHOOK}",
-        f"EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_USERNAME={NOTIFIER__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_USERNAME}",
-        f"EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_PASSWORD={NOTIFIER__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_PASSWORD}",
-        f"MONITORABLE_EMAIL_ACCOUNTS={NOTIFIER__MONITORABLE_EMAIL_ACCOUNTS}",
+        f"EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_USERNAME={EMAIL_BRIDGE__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_USERNAME}",
+        f"EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_PASSWORD={EMAIL_BRIDGE__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_PASSWORD}",
+        f"MONITORABLE_EMAIL_ACCOUNTS={EMAIL_BRIDGE__MONITORABLE_EMAIL_ACCOUNTS}",
     ],
     os.path.join("services", "notifications-bridge", "src", "config", "env"): [
         f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",

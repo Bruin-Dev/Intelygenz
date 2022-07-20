@@ -1,0 +1,60 @@
+# ==========================================
+# Linter validation jobs for email-bridge module
+# ==========================================
+email-bridge-linter:
+  variables:
+    MODULE: email-bridge
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+      changes:
+        - services/email-bridge/src/application/**/*
+        - services/email-bridge/src/config/**/*
+        - services/email-bridge/src/app.py
+        - services/email-bridge/Dockerfile
+        - services/email-bridge/requirements.txt
+        - pyutils_automation/py36/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+  extends: .lint_module
+
+# ===================================
+# Unit tests jobs for email-bridge module
+# ===================================
+email-bridge-test:
+  variables:
+    MODULE: email-bridge
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+      changes:
+        - services/email-bridge/src/application/**/*
+        - services/email-bridge/src/config/**/*
+        - services/email-bridge/src/app.py
+        - services/email-bridge/Dockerfile
+        - services/email-bridge/requirements.txt
+        - pyutils_automation/py36/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+  extends: .unittest_module_python_36_alpine
+  needs: ["email-bridge-linter"]
+
+# ======================================
+# Images builds jobs for email-bridge module
+# ======================================
+email-bridge-build:
+  stage: build
+  variables:
+    MODULE_NAME: email-bridge
+    MODULE_VERSION: ${CI_PIPELINE_ID}
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $EMAIL_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+      changes:
+        - services/email-bridge/src/application/**/*
+        - services/email-bridge/src/config/**/*
+        - services/email-bridge/src/app.py
+        - services/email-bridge/Dockerfile
+        - services/email-bridge/requirements.txt
+        - pyutils_automation/py36/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $EMAIL_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
+  extends: .build_app_image
+  needs:
+    - job: email-bridge-test
+    - job: semantic-release
+      optional: true

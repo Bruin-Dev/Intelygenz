@@ -109,8 +109,8 @@ exceeded, the process will report this issue.
 - [Customer cache](../customer-cache/README.md)
 - [Velocloud bridge](../velocloud-bridge/README.md)
 - [Bruin bridge](../bruin-bridge/README.md)
-- [Notifier](../notifier/README.md)
+- [Email bridge](../email-bridge/README.md)
 - [Notifications bridge](../notifications-bridge/README.md)
 
 # Running in docker-compose
-`docker-compose up --build redis nats-server velocloud-bridge notifier notifications-bridge customer-cache service-affecting-monitor`
+`docker-compose up --build redis nats-server velocloud-bridge email-bridge notifications-bridge customer-cache service-affecting-monitor`

@@ -294,19 +294,17 @@ function lumin_billing_report_variables() {
   fi
 }
 
-function notifier_variables() {
+function email_bridge_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
-    # notifier environment variables for ephemeral environments
-    export NOTIFIER__SLACK_WEBHOOK_URL="${DEV__NOTIFIER__SLACK_WEBHOOK_URL}"
-    export NOTIFIER__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_USERNAME="${DEV__NOTIFIER__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_USERNAME}"
-    export NOTIFIER__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_PASSWORD="${DEV__NOTIFIER__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_PASSWORD}"
-    export NOTIFIER__MONITORABLE_EMAIL_ACCOUNTS="$(echo "${DEV__NOTIFIER__MONITORABLE_EMAIL_ACCOUNTS}" | jq . -c)"
+    # email bridge environment variables for ephemeral environments
+    export EMAIL_BRIDGE__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_USERNAME="${DEV__EMAIL_BRIDGE__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_USERNAME}"
+    export EMAIL_BRIDGE__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_PASSWORD="${DEV__EMAIL_BRIDGE__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_PASSWORD}"
+    export EMAIL_BRIDGE__MONITORABLE_EMAIL_ACCOUNTS="$(echo "${DEV__EMAIL_BRIDGE__MONITORABLE_EMAIL_ACCOUNTS}" | jq . -c)"
   else
-    # notifier environment variables for production environment
-    export NOTIFIER__SLACK_WEBHOOK_URL="${PRO__NOTIFIER__SLACK_WEBHOOK_URL}"
-    export NOTIFIER__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_USERNAME="${PRO__NOTIFIER__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_USERNAME}"
-    export NOTIFIER__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_PASSWORD="${PRO__NOTIFIER__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_PASSWORD}"
-    export NOTIFIER__MONITORABLE_EMAIL_ACCOUNTS="$(echo "${PRO__NOTIFIER__MONITORABLE_EMAIL_ACCOUNTS}" | jq . -c)"
+    # email bridge environment variables for production environment
+    export EMAIL_BRIDGE__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_USERNAME="${PRO__EMAIL_BRIDGE__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_USERNAME}"
+    export EMAIL_BRIDGE__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_PASSWORD="${PRO__EMAIL_BRIDGE__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_PASSWORD}"
+    export EMAIL_BRIDGE__MONITORABLE_EMAIL_ACCOUNTS="$(echo "${PRO__EMAIL_BRIDGE__MONITORABLE_EMAIL_ACCOUNTS}" | jq . -c)"
   fi
 }
 
@@ -581,7 +579,7 @@ function environments_assign() {
   last_contact_report_variables
   links_metrics_api_variables
   lumin_billing_report_variables
-  notifier_variables
+  email_bridge_variables
   notifications_bridge_variables
   repair_tickets_kre_bridge_variables
   repair_tickets_monitor_variables

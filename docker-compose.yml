@@ -161,7 +161,7 @@ services:
       - redis
       - velocloud-bridge
       - servicenow-bridge
-      - notifier
+      - email-bridge
     ports:
       - 5010:5000
       - 9009:9000
@@ -338,21 +338,23 @@ services:
       - nats-server/nats-server-2-env
     hostname: nats-server-2
 
-  notifier:
+  email-bridge:
     build:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/notifier/Dockerfile
     env_file:
-      - services/notifier/src/config/env
+      - services/email-bridge/src/config/env
     volumes:
-      - ./services/notifier:/service/app
+      - ./services/email-bridge:/service/app
     depends_on:
       - nats-server
       - redis
     ports:
       - 5002:5000
       - 9095:9090
+    stdin_open: true # for debug
+    tty: true # for debug
 
   notifications-bridge:
     build:

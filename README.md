@@ -19,7 +19,7 @@
 | intermapper-outage-monitor | [![intermapper-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=intermapper-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master) |
 |    last-contact-report     |        [![last-contact-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=last-contact-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)        |
 |    lumin-billing-report    |         [![lumin-billing-report](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=lumin-billing-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)          |
-|          notifier          |                   [![notifier-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=notifier-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)                   |
+|        email-bridge        |               [![email-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=email-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)               |
 |    notifications-bridge    |       [![notifications-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=notifications-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)       |
 | repair-tickets-kre-bridge  |  [![repair-tickets-kre-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=repair-tickets-kre-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)  |
 |   repair-tickets-monitor   |     [![repair-tickets-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=repair-tickets-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)     |
@@ -287,7 +287,7 @@ variables:
   NATS_SERVER_DESIRED_TASKS: 0
   NATS_SERVER_1_DESIRED_TASKS: 1
   NATS_SERVER_2_DESIRED_TASKS: 1
-  NOTIFIER_DESIRED_TASKS: 1
+  EMAIL_BRIDGE_DESIRED_TASKS: 1
   NOTIFICATIONS_BRIDGE_DESIRED_TASKS: 1
   SERVICE_AFFECTING_MONITOR_DESIRED_TASKS: 1
   SERVICE_OUTAGE_MONITOR_1_DESIRED_TASKS: 0
@@ -627,7 +627,7 @@ NOTE: k9s works like text editor `vi` so you can use the most of shortcuts, like
 - [Hawkeye outage monitor](hawkeye-outage-monitor/README.md)
 - [Last contact report](last-contact-report/README.md)
 - [Lumin billing report](lumin-billing-report/README.md)
-- [Notifier](notifier/README.md)
+- [Email bridge](email-bridge/README.md)
 - [Notifications bridge](notifications-bridge/README.md)
 - [Service affecting monitor](service-affecting-monitor/README.md)
 - [Service outage monitor](service-outage-monitor/README.md)

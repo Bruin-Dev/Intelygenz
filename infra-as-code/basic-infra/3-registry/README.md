@@ -36,7 +36,7 @@ No modules.
 | [aws_ecr_lifecycle_policy.links-metrics-api-image-lifecycle](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_lifecycle_policy)                | resource |
 | [aws_ecr_lifecycle_policy.links-metrics-collector-image-lifecycle](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_lifecycle_policy)          | resource |
 | [aws_ecr_lifecycle_policy.lumin-billing-report-image-lifecycle](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_lifecycle_policy)             | resource |
-| [aws_ecr_lifecycle_policy.notifier-image-lifecycle](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_lifecycle_policy)                         | resource |
+| [aws_ecr_lifecycle_policy.email-bridge-image-lifecycle](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_lifecycle_policy)                     | resource |
 | [aws_ecr_lifecycle_policy.notifications-bridge-image-lifecycle](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_lifecycle_policy)             | resource |
 | [aws_ecr_lifecycle_policy.repair-tickets-kre-bridge-image-lifecycle](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_lifecycle_policy)        | resource |
 | [aws_ecr_lifecycle_policy.repair-tickets-monitor-image-lifecycle](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_lifecycle_policy)           | resource |
@@ -63,7 +63,7 @@ No modules.
 | [aws_ecr_repository.links-metrics-api-repository](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository)                                 | resource |
 | [aws_ecr_repository.links-metrics-collector-repository](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository)                           | resource |
 | [aws_ecr_repository.lumin-billing-report-repository](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository)                              | resource |
-| [aws_ecr_repository.notifier-repository](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository)                                          | resource |
+| [aws_ecr_repository.email-bridge-repository](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository)                                      | resource |
 | [aws_ecr_repository.notifications-bridge-repository](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository)                              | resource |
 | [aws_ecr_repository.repair-tickets-kre-bridge-repository](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository)                         | resource |
 | [aws_ecr_repository.repair-tickets-monitor-repository](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository)                            | resource |
@@ -90,7 +90,7 @@ No modules.
 | [aws_ecr_repository_policy.links-metrics-api-fedramp-pull-policy](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository_policy)          | resource |
 | [aws_ecr_repository_policy.links-metrics-collector-fedramp-pull-policy](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository_policy)    | resource |
 | [aws_ecr_repository_policy.lumin-billing-report-fedramp-pull-policy](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository_policy)       | resource |
-| [aws_ecr_repository_policy.notifier-fedramp-pull-policy](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository_policy)                   | resource |
+| [aws_ecr_repository_policy.email-bridge-fedramp-pull-policy](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository_policy)               | resource |
 | [aws_ecr_repository_policy.notifications-bridge-fedramp-pull-policy](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository_policy)       | resource |
 | [aws_ecr_repository_policy.repair-tickets-kre-bridge-fedramp-pull-policy](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository_policy)  | resource |
 | [aws_ecr_repository_policy.repair-tickets-monitor-fedramp-pull-policy](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository_policy)     | resource |

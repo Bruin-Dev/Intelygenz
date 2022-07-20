@@ -118,11 +118,11 @@ scrape_configs:
     static_configs:
       - targets: ['links-metrics-collector:9090']
 
-  - job_name: 'notifier'
+  - job_name: 'email-bridge'
 
     scrape_interval: 5s
     static_configs:
-      - targets: ['notifier:9090']
+      - targets: ['email-bridge:9090']
 
   - job_name: 'notifications-bridge'
 

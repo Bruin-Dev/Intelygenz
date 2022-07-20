@@ -34,10 +34,10 @@ spec:
           image: busybox:1.28
           command: ['sh', '-c', 'until wget --spider -S http://email-tagger-kre-bridge:5000/_health; do echo waiting for email-tagger-kre-bridge; sleep 2; done']
         {{- end }}
-        {{- if .Values.config.capabilities_enabled.notifier }}
-        - name: wait-notifier
+        {{- if .Values.config.capabilities_enabled.email_bridge }}
+        - name: wait-email-bridge
           image: busybox:1.28
-          command: [ 'sh', '-c', 'until wget --spider -S http://notifier:5000/_health; do echo waiting for notifier; sleep 2; done' ]
+          command: [ 'sh', '-c', 'until wget --spider -S http://email-bridge:5000/_health; do echo waiting for email-bridge; sleep 2; done' ]
         {{- end }}
         {{- if .Values.config.capabilities_enabled.notifications_bridge }}
         - name: wait-notifications-bridge
