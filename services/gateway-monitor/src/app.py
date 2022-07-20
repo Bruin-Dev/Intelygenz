@@ -2,6 +2,7 @@ import asyncio
 
 import redis
 from application.actions.monitoring import Monitor as GatewayMonitor
+from application.repositories.metrics_repository import MetricsRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.servicenow_repository import ServiceNowRepository
 from application.repositories.utils_repository import UtilsRepository
@@ -40,6 +41,9 @@ class Container:
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.set_producer(self._publisher)
 
+        # METRICS
+        self._metrics_repository = MetricsRepository()
+
         # REPOSITORIES
         self._utils_repository = UtilsRepository()
         self._notifications_repository = NotificationsRepository(event_bus=self._event_bus)
@@ -62,6 +66,7 @@ class Container:
             self._logger,
             self._scheduler,
             config,
+            self._metrics_repository,
             self._servicenow_repository,
             self._velocloud_repository,
             self._notifications_repository,

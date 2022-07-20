@@ -14,6 +14,7 @@ class Monitor:
         logger,
         scheduler,
         config,
+        metrics_repository,
         servicenow_repository,
         velocloud_repository,
         notifications_repository,
@@ -23,6 +24,7 @@ class Monitor:
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
+        self._metrics_repository = metrics_repository
         self._servicenow_repository = servicenow_repository
         self._velocloud_repository = velocloud_repository
         self._notifications_repository = notifications_repository
@@ -115,6 +117,7 @@ class Monitor:
                 f"A new incident with ID {result['number']} was created in ServiceNow "
                 f"for host {gateway['host']} and gateway {gateway['name']}"
             )
+            self._metrics_repository.increment_tasks_created(host=gateway["host"])
         elif result["state"] == "ignored":
             self._logger.info(
                 f"An open incident with ID {result['number']} already existed in ServiceNow "
@@ -125,6 +128,7 @@ class Monitor:
                 f"A resolved incident with ID {result['number']} already existed in ServiceNow "
                 f"for host {gateway['host']} and gateway {gateway['name']}, it was reopened and a note was added to it"
             )
+            self._metrics_repository.increment_tasks_reopened(host=gateway["host"])
 
     def _filter_gateways_with_metrics(self, gateways: List[dict]) -> List[dict]:
         filtered_gateways = []
