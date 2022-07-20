@@ -184,7 +184,6 @@ kubeprometheusstack:
       - business-metrics-service-affecting
       - business-metrics-service-outage
       - datahighway-kafka
-      - mettel-current-sdwan-status
       - nats-statistics
 
     grafana.ini:
