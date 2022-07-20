@@ -30,8 +30,8 @@ Should look something like this.
  
 # Capabilities used
 - [Velocloud bridge](../velocloud-bridge/README.md)
-- [Notifier](../notifier/README.md)
+- [Email bridge](../email-bridge/README.md)
 - [Notifications bridge](../notifications-bridge/README.md)
 
 # Running in docker-compose 
-`docker-compose up --build redis last-contact-report velocloud-bridge notifier notifications-bridge nats-server`
+`docker-compose up --build redis last-contact-report velocloud-bridge email-bridge notifications-bridge nats-server`

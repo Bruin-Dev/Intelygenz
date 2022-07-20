@@ -26,8 +26,8 @@ Which is then followed up by appending the full `body` of the InterMapper email 
 
 # Capabilities used
 - [Bruin Bridge](../bruin-bridge/README.md)
-- [Notifier](../notifier/README.md)
+- [Email bridge](../email-bridge/README.md)
 - [Notifications bridge](../notifications-bridge/README.md)
 
 # Running in docker-compose
-`docker-compose up --build nats-server notifier notifications-bridge bruin-bridge dri-bridge intermapper-outage-monitor`
+`docker-compose up --build nats-server email-bridge notifications-bridge bruin-bridge dri-bridge intermapper-outage-monitor`

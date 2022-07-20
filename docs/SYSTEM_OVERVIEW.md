@@ -37,7 +37,7 @@ There are two types of microservices depending on the connection between them an
         - `cts-bridge`
         - `hawkeye-bridge`
         - `lit-bridge`
-        - `notifier`
+        - `email-bridge`
         - `notifications-bridge`
         - `t7-bridge`
 
@@ -134,15 +134,15 @@ The following [diagram](https://app.diagrams.net/#G1UztleVULGVS86wYXTEh7efsb2zdB
 
 ![IMAGE: lit-bridge_microservice_relationships](img/system_overview/capabilities/lit-bridge_microservice_relationships.png)
 
-#### Notifier microservice
+#### Email bridge microservice
 
-This microservice is in charge of sending emails, Slack notifications and SMS.
+This microservice is in charge of sending emails and SMS.
 
 It is important to point out that it is not in charge of the composition of the messages to be sent, that is to say, of their content, but only of sending them.
 
 The following [diagram](https://app.diagrams.net/#G19IZI0cCp1odvYIwgMGlrGiQfKYZbedx2) shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
 
-![IMAGE: notifier_microservice_relationships](img/system_overview/capabilities/notifier_microservice_relationships.png)
+![IMAGE: email_bridge_microservice_relationships](img/system_overview/capabilities/email_bridge_microservice_relationships.png)
 
 #### Notifications bridge microservice
 
@@ -219,7 +219,7 @@ The following flow is used to make this report:
 
 1. The *last-contact-report* microservice communicates with the *velocloud-bridge* microservice to obtain events from an edge.
 
-2. Once the events are obtained from an edge, it communicates with the *notifier* microservice to send an email with this information.
+2. Once the events are obtained from an edge, it communicates with the *email-bridge* microservice to send an email with this information.
 
 It is possible to see the relations between the mentioned services for the flow in the following [diagram](https://app.diagrams.net/#G13QWoYPfjPgxZ0Mp1Nl7SDZVonzUj2tIS).
 ![IMAGE: last-contact-report_microservice_relationships](img/system_overview/use_cases/last-contact-report_microservice_relationships.png)
@@ -228,7 +228,7 @@ It is possible to see the relations between the mentioned services for the flow 
 
 In this microservice are defined a series of scales and thresholds, the function of this will be to check if there is loss of packages, latencies or jitter measurements that exceed the thresholds defined.
 
-In case the thresholds are exceeded, it will communicate with the notifier service to send a notification by email and the notifications service to send a notification by slack, by means of which it will warn of the problems detected on a specific edge.
+In case the thresholds are exceeded, it will communicate with the email-bridge service to send a notification by email and the notifications service to send a notification by slack, by means of which it will warn of the problems detected on a specific edge.
 
 This microservice also communicates with the bruin-bridge microservice to create tickets or add notes to an existing one, including in this information about the routers for which a problem is detected.
 

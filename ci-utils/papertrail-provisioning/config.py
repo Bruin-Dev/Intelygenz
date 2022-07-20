@@ -124,9 +124,9 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "lumin-billing-report",
                 },
                 {
-                    "query": f"notifier AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                    "search_name": f"[notifier] - logs",
-                    "repository": "notifier",
+                    "query": f"email-bridge AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[email-bridge] - logs",
+                    "repository": "email-bridge",
                 },
                 {
                     "query": f"notifications-bridge AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",

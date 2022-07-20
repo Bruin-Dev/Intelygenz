@@ -38,7 +38,7 @@ class CheckECSResources:
         os.environ["TF_VAR_nats_server_desired_tasks"],
         os.environ["TF_VAR_nats_server_1_desired_tasks"],
         os.environ["TF_VAR_nats_server_2_desired_tasks"],
-        os.environ["TF_VAR_notifier_desired_tasks"],
+        os.environ["TF_VAR_email_bridge_desired_tasks"],
         os.environ["TF_VAR_notifications_bridge_desired_tasks"],
         os.environ["TF_VAR_service_affecting_monitor_desired_tasks"],
         os.environ["TF_VAR_service_dispatch_monitor_desired_tasks"],

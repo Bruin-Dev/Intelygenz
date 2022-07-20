@@ -58,7 +58,7 @@ It's recomendable compare the difference between each job of `validation` stage 
     - **Duration**: 53 seconds
     - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/341680)
 
-- *notifier*
+- *email-bridge*
   - using custom image:
     - **Duration**: 16 seconds
     - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/340289)
@@ -144,7 +144,7 @@ It's recomendable compare the difference between each job of `unit_test` stage f
       - **Duration**: 1 minute 14 seconds
       - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/334326)
 
-  - *notifier*:
+  - *email-bridge*:
     - using custom image:
       - **Duration**: 30 seconds
       - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/340298)
@@ -224,7 +224,7 @@ It’s recomendable compare the difference between each job of `build` stage for
       - **Duration**: 5 minutes 8 seconds
       - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/341700)
 
-  - *notifier*:
+  - *email-bridge*:
     - using custom image:
       - **Duration**: 3 minutes 0 seconds
       - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/340316)

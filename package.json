@@ -83,7 +83,7 @@
     "./services/links-metrics-api",
     "./services/links-metrics-collector",
     "./services/lumin-billing-report",
-    "./services/notifier",
+    "./services/email-bridge",
     "./services/notifications-bridge",
     "./services/repair-tickets-kre-bridge",
     "./services/repair-tickets-monitor",

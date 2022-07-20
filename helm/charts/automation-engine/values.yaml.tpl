@@ -80,10 +80,10 @@ prometheus-nats-exporter:
     # will be created in the microservice deployment that will wait until the
     # hawkeye-customer-cache service responds correctly to healthcheck calls.
     hawkeye_customer_cache: ${HAWKEYE_CUSTOMER_CACHE_ENABLED}
-    # -- Indicate if notifier is going to be activated. If it is true an initContainer
+    # -- Indicate if email-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the
-    # notifier service responds correctly to healthcheck calls.
-    notifier: ${NOTIFIER_ENABLED}
+    # email-bridge service responds correctly to healthcheck calls.
+    email_bridge: ${EMAIL_BRIDGE_ENABLED}
     # -- Indicate if notifications-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the
     # notifications-bridge service responds correctly to healthcheck calls.
@@ -808,10 +808,10 @@ lumin-billing-report:
       memory: 128Mi
 
 
-# -- notifier subchart specific configuration
-notifier:
-  enabled: ${NOTIFIER_ENABLED}
-  replicaCount: ${NOTIFIER_DESIRED_TASKS}
+# -- email-bridge subchart specific configuration
+email-bridge:
+  enabled: ${EMAIL_BRIDGE_ENABLED}
+  replicaCount: ${EMAIL_BRIDGE_DESIRED_TASKS}
   config:
     metrics:
       # -- Indicates whether the microservice will expose metrics through prometheus.
@@ -824,14 +824,14 @@ notifier:
       labels: {}
       #labels:
       #  servicediscovery: true
-  # -- notifier image details
+  # -- email-bridge image details
   image:
-    # -- notifier repository for docker images
-    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/notifier
+    # -- email-bridge repository for docker images
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/email-bridge
     pullPolicy: Always
-    # -- notifier tag of docker image
-    tag: ${NOTIFIER_BUILD_NUMBER}
-  # -- notifier Service Configuration
+    # -- email-bridge tag of docker image
+    tag: ${EMAIL_BRIDGE_BUILD_NUMBER}
+  # -- email-bridge Service Configuration
   service:
     type: ClusterIP
     port: 5000
@@ -847,8 +847,8 @@ notifier:
       cpu: 100m
       memory: 128Mi
   autoscaling:
-    enabled: ${NOTIFIER_ENABLED}
-    minReplicas: ${NOTIFIER_DESIRED_TASKS}
+    enabled: ${EMAIL_BRIDGE_ENABLED}
+    minReplicas: ${EMAIL_BRIDGE_DESIRED_TASKS}
     maxReplicas: 5
     targetCPUUtilizationPercentage: 80
     targetMemoryUtilizationPercentage: 80

@@ -76,10 +76,10 @@ prometheus-nats-exporter:
     # will be created in the microservice deployment that will wait until the
     # hawkeye-customer-cache service responds correctly to healthcheck calls.
     hawkeye_customer_cache: true
-    # -- Indicate if notifier is going to be activated. If it is true an initContainer
+    # -- Indicate if email-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the
-    # notifier service responds correctly to healthcheck calls.
-    notifier: true
+    # email-bridge service responds correctly to healthcheck calls.
+    email_bridge: true
     # -- Indicate if notifications-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the
     # notifications-bridge service responds correctly to healthcheck calls.
@@ -929,11 +929,11 @@ lumin-billing-report:
       memory: 128Mi
 
 
-# -- notifier subchart specific configuration
-notifier:
-  # -- Field to indicate if the notifier module is going to be deployed
+# -- email-bridge subchart specific configuration
+email-bridge:
+  # -- Field to indicate if the email-bridge module is going to be deployed
   enabled: true
-  # -- Number of replicas of notifier module
+  # -- Number of replicas of email-bridge module
   replicaCount: 1
   config:
     metrics:
@@ -947,14 +947,14 @@ notifier:
       labels: {}
       #labels:
       #  servicediscovery: true
-  # -- notifier image details
+  # -- email-bridge image details
   image:
-    # -- notifier repository for docker images
-    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/notifier
+    # -- email-bridge repository for docker images
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/email-bridge
     pullPolicy: Always
-    # -- notifier tag of docker image
+    # -- email-bridge tag of docker image
     tag: ""
-  # -- notifier Service Configuration
+  # -- email-bridge Service Configuration
   service:
     type: ClusterIP
     port: 5000
@@ -965,7 +965,7 @@ notifier:
     requests:
       cpu: 100m
       memory: 128Mi
-  # -- notifier autoscaling configuration
+  # -- email-bridge autoscaling configuration
   autoscaling:
     enabled: true
     minReplicas: 5

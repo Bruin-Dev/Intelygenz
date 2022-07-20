@@ -42,8 +42,8 @@ or unresolve it depending on the outage state of the device.
 - [Hawkeye customer cache](../hawkeye-customer-cache/README.md)
 - [Hawkeye bridge](../hawkeye-bridge/README.md)
 - [Bruin bridge](../bruin-bridge/README.md)
-- [Notifier](../notifier/README.md)
+- [Email bridge](../email-bridge/README.md)
 - [Notifications bridge](../notifications-bridge/README.md)
 
 # Running in docker-compose
-`docker-compose up --build redis hawkeye-bridge bruin-bridge notifier notifications-bridge nats-server hawkeye-customer-cache hawkeye-outage-monitor`
+`docker-compose up --build redis hawkeye-bridge bruin-bridge email-bridge notifications-bridge nats-server hawkeye-customer-cache hawkeye-outage-monitor`

@@ -89,9 +89,9 @@ dependencies:
   - name: lumin-billing-report
     version: '*.*.*'
     condition: lumin-billing-report.enabled
-  - name: notifier
+  - name: email-bridge
     version: '*.*.*'
-    condition: notifier.enabled
+    condition: email-bridge.enabled
   - name: notification-bridge
     version: '*.*.*'
     condition: notification-bridge.enabled
