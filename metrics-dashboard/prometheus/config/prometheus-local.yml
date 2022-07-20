@@ -16,12 +16,6 @@ scrape_configs:
     static_configs:
       - targets: ['base-microservice:9090']
 
-  - job_name: 'sites-monitor'
-
-    scrape_interval: 5s
-    static_configs:
-      - targets: ['sites-monitor:9090']
-
   - job_name: 'service-affecting-monitor'
 
     scrape_interval: 5s

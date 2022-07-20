@@ -176,12 +176,6 @@ scrape_configs:
     static_configs:
       - targets: ['servicenow-bridge:9090']
 
-  - job_name: 'sites-monitor'
-
-    scrape_interval: 5s
-    static_configs:
-      - targets: ['sites-monitor:9090']
-
   - job_name: 't7-bridge'
 
     scrape_interval: 5s

@@ -228,10 +228,6 @@ SERVICENOW__CLIENT_SECRET = parameters["common"]["servicenow-bridge"]["client-se
 SERVICENOW__USERNAME = parameters["common"]["servicenow-bridge"]["username"]
 SERVICENOW__PASSWORD = parameters["common"]["servicenow-bridge"]["password"]
 
-# Sites Monitor variables
-SITES_MONITOR__MONITORING_JOB_INTERVAL = parameters["common"]["sites-monitor"]["monitoring-job-interval"]
-SITES_MONITOR__MONITORED_VELOCLOUD_HOSTS = json.dumps(json.loads(parameters["dev"]["sites-monitor"]["monitored-velocloud-hosts"]))
-
 # TNBA Feedback variables
 TNBA_FEEDBACK__FEEDBACK_JOB_INTERVAL = parameters["common"]["tnba-feedback"]["feedback-job-interval"]
 TNBA_FEEDBACK__MONITORED_VELOCLOUD_HOSTS = json.dumps(json.loads(parameters["dev"]["tnba-feedback"]["monitored-velocloud-hosts"]))
@@ -644,17 +640,6 @@ env_dict = {
         f"TRIAGE__LAST_NOTE_INTERVAL={SERVICE_OUTAGE__TRIAGE__LAST_NOTE_INTERVAL}",
         f"TRIAGE__MONITORED_VELOCLOUD_HOSTS={SERVICE_OUTAGE__TRIAGE__MONITORED_VELOCLOUD_HOSTS}",
         f"TRIAGE__MAX_EVENTS_PER_EVENT_NOTE={SERVICE_OUTAGE__TRIAGE__MAX_EVENTS_PER_EVENT_NOTE}",
-    ],
-    os.path.join("services", "sites-monitor", "src", "config", "env"): [
-        f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",
-        f"NATS_SERVER1={NATS_SERVER1}",
-        f"REDIS_HOSTNAME={REDIS_HOSTNAME}",
-        f"PAPERTRAIL_ACTIVE={PAPERTRAIL_ACTIVE}",
-        f"PAPERTRAIL_HOST={PAPERTRAIL_HOST}",
-        f"PAPERTRAIL_PORT={PAPERTRAIL_PORT}",
-        f"TIMEZONE={TIMEZONE}",
-        f"MONITORING_JOB_INTERVAL={SITES_MONITOR__MONITORING_JOB_INTERVAL}",
-        f"MONITORED_VELOCLOUD_HOSTS={SITES_MONITOR__MONITORED_VELOCLOUD_HOSTS}",
     ],
     os.path.join("services", "t7-bridge", "src", "config", "env"): [
         f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",

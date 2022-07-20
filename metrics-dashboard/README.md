@@ -32,8 +32,6 @@ A `Dockerfile` of this tool is available in the [prometheus](./prometheus) folde
 
 In the [configuration files](./prometheus/configs) of Prometheus, it is indicated from which microservices it is desired to scrape metrics, indicating for each of them the necessary connection endpoint.
 
->At the moment, Prometheus is used to collect metrics from the `sites-monitor` microservice, using the DNS address of the AWS Route53 service as connection endpoint.
-
 ## Thanos
 
 [Thanos](https://github.com/thanos-io/thanos) is a set of components that can be composed into a highly available metric system with unlimited storage capacity, which can be added seamlessly on top of existing Prometheus deployments.

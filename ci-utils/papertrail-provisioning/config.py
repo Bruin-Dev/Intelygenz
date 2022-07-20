@@ -194,11 +194,6 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "servicenow-bridge",
                 },
                 {
-                    "query": f"sites-monitor AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                    "search_name": f"[sites-monitor] - logs",
-                    "repository": "sites-monitor",
-                },
-                {
                     "query": f"t7-bridge AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[t7-bridge] - logs",
                     "repository": "t7-bridge",

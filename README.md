@@ -24,7 +24,6 @@
 |   repair-tickets-monitor   |  [![repair-tickets-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=repair-tickets-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)        |
 | service-affecting-monitor  |  [![service-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)  |
 |   service-outage-monitor   |     [![service-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)     |
-|       sites-monitor        |              [![sites-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=sites-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)              |
 |         t7-bridge          |                  [![t7-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=t7-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)                  |
 |       tnba-feedback        |              [![tnba-feedback-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=tnba-feedback-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)              |
 |        tnba-monitor        |               [![tnba-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=tnba-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)               |
@@ -70,10 +69,6 @@
 - [Lists of projects READMEs](#lists-of-projects-readmes)
   - [Microservices](#microservices)
   - [Acceptance Tests](#acceptance-tests)
-- [Processes' overview](#processes-overview)
-  - [Monitoring edge and link status](#monitoring-edge-and-link-status)
-    - [Process goal](#process-goal)
-    - [Process flow](#process-flow)
 - [Good Practices](#good-practices)
 - [Setting up logs with Papertrail](#setting-up-logs-with-papertrail)
 - [Testing device](#testing-device)
@@ -130,7 +125,7 @@ Any line of the commit message cannot be longer than 50 characters.
   │                          hawkeye-affecting-monitor|hawkeye-bridge|hawkeye-customer-cache|
   │                          hawkeye-outage-monitor|intermapper-outage-monitor|last-contact-report|links-metrics-api|
   |                          links-metrics-collector|lumin-billing-report|notifier|service-affecting-monitor|
-  |                          service-outage-monitor|sites-monitor|t7-bridge|ticket-collector|
+  |                          service-outage-monitor|t7-bridge|ticket-collector|
   |                          ticket-statistics|tnba-feedback|tnba-monitor|velocloud-bridge
   │
   └─⫸ Commit Type: build|ci|docs|feat|fix|perf|refactor|test
@@ -299,7 +294,6 @@ variables:
   SERVICE_OUTAGE_MONITOR_3_DESIRED_TASKS: 0
   SERVICE_OUTAGE_MONITOR_4_DESIRED_TASKS: 0
   SERVICE_OUTAGE_MONITOR_TRIAGE_DESIRED_TASKS: 0
-  SITES_MONITOR_DESIRED_TASKS: 0
   T7_BRIDGE_DESIRED_TASKS: 0
   VELOCLOUD_BRIDGE_DESIRED_TASKS: 5
   . . .
@@ -689,7 +683,6 @@ NOTE: k9s works like text editor `vi` so you can use the most of shortcuts, like
 - [Notifier](notifier/README.md)
 - [Service affecting monitor](service-affecting-monitor/README.md)
 - [Service outage monitor](service-outage-monitor/README.md)
-- [Sites monitor](sites-monitor/README.md)
 - [T7 bridge](t7-bridge/README.md)
 - [TNBA feedback](tnba-feedback/README.md)
 - [TNBA monitor](tnba-monitor/README.md)
@@ -698,29 +691,6 @@ NOTE: k9s works like text editor `vi` so you can use the most of shortcuts, like
 ## Acceptance Tests
 
 - [Acceptance tests](acceptance-tests/README.md)
-
-# Processes' overview
-
-## Monitoring edge and link status
-
-Services involved: sites-monitor, velocloud-bridge, notifier.
-
-### Process goal
-
-- Given an interval, process all edges and links statuses in that interval.
-- Notify in a given channel. Just notify the faulty edges and a metric of it's statuses.
-
-### Process flow
-
-- Sites Monitor send a message to the Bridge through to ask for all edges given a list of Velocloud clusters.
-- For each edge it builds an event composed by the cluster's hostname, the edge ID and the company ID for that edge.
-- Publish events on NATS.
-- Sites Monitor consumes the events from NATS and then send each edge to the NATS to be consumed by the Bridge.
-- For each event, it fetches the edge and link data related to the given IDs
-- Publishes edge and link data to NATS
-- Depending on the state of the edge, the Sites Monitor will put the result event in a different Message Queue (one Queue for faulty edges, other for ok edges)
-- Notifier consumes the faulty edge queue and creates statistics. 
-- Notifier has an interval set. For each interval will send the statistics to a Slack channel and reset the statistics for the next cycle.
 
 # Good Practices
 

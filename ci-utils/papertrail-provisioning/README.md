@@ -122,11 +122,6 @@ Below is the configuration of the `PAPERTRAIL_PROVISIONING` element mentioned in
                     "repository": "automation-service-outage-monitor"
                 },
                 {
-                    "query": f"sites-monitor AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
-                    "search_name": f"[sites-monitor] - logs",
-                    "repository": "automation-sites-monitor"
-                },
-                {
                     "query": f"t7-bridge AND {ENVIRONMENT_ID} AND <BUILD_NUMBER>",
                     "search_name": f"[t7-bridge] - logs",
                     "repository": "automation-t7-bridge"

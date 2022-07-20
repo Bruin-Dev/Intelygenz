@@ -1075,41 +1075,6 @@ servicenow-bridge:
       memory: 128Mi
 
 
-# -- sites-monitor subchart specific configuration
-sites-monitor:
-  enabled: ${SITES_MONITOR_ENABLED}
-  replicaCount: ${SITES_MONITOR_DESIRED_TASKS}
-  config:
-    # -- Indicate the capabilities dependencies
-    <<: *capabilitiesEnabled
-    metrics:
-      # -- Indicates whether the microservice will expose metrics through prometheus.
-      enabled: true
-      svc:
-        port: 9090
-        name: metrics
-      ## Additional labels for the service monitor
-      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
-      labels: {}
-      #labels:
-      #  servicediscovery: true
-  image:
-    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/sites-monitor
-    pullPolicy: Always
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: ${SITES_MONITOR_BUILD_NUMBER}
-  service:
-    type: ClusterIP
-    port: 5000
-  resources:
-    limits:
-      cpu: 200m
-      memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
-
-
 # -- t7-bridge subchart specific configuration
 t7-bridge:
   enabled: ${T7_BRIDGE_ENABLED}

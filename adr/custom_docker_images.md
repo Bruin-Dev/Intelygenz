@@ -82,14 +82,6 @@ It's recomendable compare the difference between each job of `validation` stage 
     - **Duration**: 1 minute 16 seconds
     - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/341683)
 
-- *sites-monitor*:
-  - using custom image:
-    - **Duration**: 19 seconds
-    - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/340295)
-  - using old method:
-    - **Duration**: 1 minute 16 seconds
-    - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/341686)
-
 - *t7-bridge*:
   - using custom image:
     - **Duration**: 15 seconds
@@ -194,14 +186,6 @@ It's recomendable compare the difference between each job of `unit_test` stage f
       - **Duration**: 1 minute 10 seconds
       - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/334332)
 
-  - *sites-monitor*:
-    - using custom image:
-      - **Duration**: 19 seconds
-      - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/340304)
-    - using old method:
-      - **Duration**: 1 minute 22 seconds
-      - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/334335)
-
   - *t7-bridge*:
     - using custom image:
       - **Duration**: 20 seconds
@@ -273,14 +257,6 @@ It’s recomendable compare the difference between each job of `build` stage for
     - using old method*
       - **Duration**: 12 minutes 9 seconds
       - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/341469)
-
-  - *sites-monitor*:
-    - using custom image:
-      - **Duration**: 6 minutes 12 seconds
-      - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/340322)
-    - using old method:
-      - **Duration**: 8 minutes 40 seconds
-      - [**GitlabCI job link**](https://gitlab.intelygenz.com/mettel/automation-engine/-/jobs/341472)
 
   - *t7-bridge*:
     - using custom image:

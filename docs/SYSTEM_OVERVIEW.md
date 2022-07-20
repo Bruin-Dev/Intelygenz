@@ -50,7 +50,6 @@ There are two types of microservices depending on the connection between them an
         - `service-affecting-monitor`
         - `service-dispatch-monitor`
         - `service-outage-monitor`
-        - `sites-monitor`
         - `tnba-feedback`
         - `tnba-monitor`
 
@@ -294,14 +293,6 @@ will be taken.
 
 In the following [diagram](https://app.diagrams.net/#G1-ESnlWgdP7-SbwhP3NAuRWv6ZMuSOUu0) it's possible see the relationship of this microservice with the others.
 ![IMAGE: service-outage-monitor_microservice_relationships](img/system_overview/use_cases/service-outage-monitor_microservice_relationships.png)
-
-#### Sites-monitor microservice
-
-This microservice requests data from the velocloud API via the velocloud-bridge microservice, using this information to enrich Prometheus. The prometheus data serves as a feed for Grafana.
-
-The following [diagram](https://app.diagrams.net/#G1XwwdfpZZ5Wxn-0L-gt-fmlsysUqIhC_7) shows the relationship between this microservice and the others.
-
-![IMAGE: sites-monitor_microservice_relationships](img/system_overview/use_cases/sites-monitor_microservice_relationships.png)
 
 #### TNBA-feedback microservice
 

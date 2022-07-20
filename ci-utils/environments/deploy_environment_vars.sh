@@ -481,18 +481,6 @@ function service_outage_monitor_variables() {
   fi
 }
 
-function sites_monitor_variables() {
-  if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
-    # sites-monitor environment variables for ephemeral environments
-    export SITES_MONITOR__MONITORING_JOB_INTERVAL="${DEV__SITES_MONITOR__MONITORING_JOB_INTERVAL}"
-    export SITES_MONITOR__MONITORED_VELOCLOUD_HOSTS="$(echo "${DEV__SITES_MONITOR__MONITORED_VELOCLOUD_HOSTS}" | jq . -c)"
-  else
-    # sites-monitor environment variables for production environment
-    export SITES_MONITOR__MONITORING_JOB_INTERVAL="${PRO__SITES_MONITOR__MONITORING_JOB_INTERVAL}"
-    export SITES_MONITOR__MONITORED_VELOCLOUD_HOSTS="$(echo "${PRO__SITES_MONITOR__MONITORED_VELOCLOUD_HOSTS}" | jq . -c)"
-  fi
-}
-
 function t7_bridge_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # t7-bridge environment variables for ephemeral environments
@@ -608,7 +596,6 @@ function environments_assign() {
   repair_tickets_monitor_variables
   service_affecting_monitor_variables
   service_outage_monitor_variables
-  sites_monitor_variables
   t7_bridge_variables
   ticket_collector_variables
   tnba_feedback_variables

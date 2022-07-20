@@ -22,7 +22,6 @@ A Helm chart for Kubernetes to deploy automation-engine project
 |  | service-outage-monitor-3 | *.*.* |
 |  | service-outage-monitor-4 | *.*.* |
 |  | service-outage-monitor-triage | *.*.* |
-|  | sites-monitor | *.*.* |
 |  | t7-bridge | *.*.* |
 |  | tnba-feedback | *.*.* |
 |  | tnba-monitor | *.*.* |
@@ -393,25 +392,6 @@ A Helm chart for Kubernetes to deploy automation-engine project
 | service-outage-monitor-triage.resources.requests.memory | string | `"128Mi"` |  |
 | service-outage-monitor-triage.service.port | int | `5000` |  |
 | service-outage-monitor-triage.service.type | string | `"ClusterIP"` |  |
-| sites-monitor.config.capabilities_enabled.bruin_bridge | bool | `true` | Indicate is bruin-bridge is going to be activated. If it is true an initContainer will be created in the tnba-monitor deployment that will wait until the bruin-bridge service responds correctly to healthcheck calls. |
-| sites-monitor.config.capabilities_enabled.cts_bridge | bool | `true` | Indicate is cts-bridge is going to be activated. If it is true an initContainer will be created in the tnba-monitor deployment that will wait until the cts-bridge service responds correctly to healthcheck calls. |
-| sites-monitor.config.capabilities_enabled.hawkeye_bridge | bool | `true` | Indicate is hawkeye-bridge is going to be activated. If it is true an initContainer will be created in the tnba-monitor deployment that will wait until the hawkeye-bridge service responds correctly to healthcheck calls. |
-| sites-monitor.config.capabilities_enabled.lit_bridge | bool | `true` | Indicate is lit-bridge is going to be activated. If it is true an initContainer will be created in the tnba-monitor deployment that will wait until the lit-bridge service responds correctly to healthcheck calls. |
-| sites-monitor.config.capabilities_enabled.notifier | bool | `true` | Indicate is notifier is going to be activated. If it is true an initContainer will be created in the tnba-monitor deployment that will wait until the notifier service responds correctly to healthcheck calls. |
-| sites-monitor.config.capabilities_enabled.t7_bridge | bool | `true` | Indicate is t8-bridge is going to be activated. If it is true an initContainer will be created in the tnba-monitor deployment that will wait until the t7-bridge service responds correctly to healthcheck calls. |
-| sites-monitor.config.capabilities_enabled.velocloud_bridge | bool | `true` | Indicate is velocloud-bridge is going to be activated. If it is true an initContainer will be created in the tnba-monitor deployment that will wait until the velocloud-bridge service responds correctly to healthcheck calls. |
-| sites-monitor.config.monitoring_seconds | string | `""` | Period in second for do monitoring process |
-| sites-monitor.enabled | bool | `true` |  |
-| sites-monitor.image.pullPolicy | string | `"IfNotPresent"` |  |
-| sites-monitor.image.repository | string | `"374050862540.dkr.ecr.us-east-1.amazonaws.com/sites-monitor"` |  |
-| sites-monitor.image.tag | string | `""` |  |
-| sites-monitor.replicaCount | int | `1` |  |
-| sites-monitor.resources.limits.cpu | string | `"200m"` |  |
-| sites-monitor.resources.limits.memory | string | `"256Mi"` |  |
-| sites-monitor.resources.requests.cpu | string | `"100m"` |  |
-| sites-monitor.resources.requests.memory | string | `"128Mi"` |  |
-| sites-monitor.service.port | int | `5000` |  |
-| sites-monitor.service.type | string | `"ClusterIP"` |  |
 | t7-bridge | object | `{"config":{"kre_base_url":"","t7_base_url":"","t7_token":""},"fullnameOverride":"","image":{"pullPolicy":"IfNotPresent","repository":"374050862540.dkr.ecr.us-east-1.amazonaws.com/t7-bridge","tag":""},"imagePullSecrets":[],"nameOverride":"","replicaCount":1,"resources":{"limits":{"cpu":"200m","memory":"256Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"service":{"port":5000,"type":"ClusterIP"}}` | t7-bridge subchart specific configuration |
 | t7-bridge.config.kre_base_url | string | `""` | KRE Base URL to make calls for get tickets predictions |
 | t7-bridge.config.t7_base_url | string | `""` | Base URL for T7 API |

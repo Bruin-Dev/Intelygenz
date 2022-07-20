@@ -110,9 +110,6 @@ dependencies:
   - name: servicenow-bridge
     version: '*.*.*'
     condition: servicenow-bridge.enabled
-  - name: sites-monitor
-    version: '*.*.*'
-    condition: sites-monitor.enabled
   - name: t7-bridge
     version: '*.*.*'
     condition: t7-bridge.enabled

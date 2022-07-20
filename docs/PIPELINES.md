@@ -207,8 +207,6 @@ In this stage there are one job:
 
       * [service-outage-monitor-1, service-outage-monitor-2, service-outage-monitor-3, service-outage-monitor-4, service-outage-monitor-triage](../service-outage-monitor)
     
-      * [sites-monitor](../sites-monitor)
-
       * [t7-bridge](../t7-bridge)
 
       * [tnba-feedback](../tnba-feedback)
@@ -283,7 +281,6 @@ In this stage there are one job:
      - `service-outage-monitor-3`
      - `service-outage-monitor-4`
      - `service-outage-monitor-triage`
-     - `sites-monitor`
      - `tnba-feedback`
      - `tnba-monitor`
 
