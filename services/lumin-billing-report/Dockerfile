@@ -1,13 +1,16 @@
 #NOTE: This dockerfile is made to be run with context in the root of the monorepo
-ARG REPOSITORY_URL
-ARG DOCKER_BASE_IMAGE_VERSION
-FROM ${REPOSITORY_URL}/python-3.6:${DOCKER_BASE_IMAGE_VERSION}
+FROM python:3.6-alpine
 
-COPY services/lumin-billing-report /service/app
-
+RUN apk --no-cache add curl gcc musl-dev libffi-dev g++
 RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
 
+COPY pyutils_automation/py36 /pyutils_automation/py36
+WORKDIR /pyutils_automation/py36
+RUN python setup.py install
+
+COPY services/lumin-billing-report/ /service/app
+WORKDIR /service/app
+RUN pip install -r requirements.txt
 
 ENV PYTHONUNBUFFERED 1
 

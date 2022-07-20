@@ -8,8 +8,6 @@ services:
       context: .
       dockerfile: base-microservice/Dockerfile
       args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
         IGZ_PACKAGES_REPOSITORY_URL: https://s3pypi.mettel-automation.net/igzpackages/index.html
         IGZ_PACKAGES_VERSION: 2.0.4
     env_file:
@@ -26,9 +24,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/bruin-bridge/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/bruin-bridge/src/config/env
     volumes:
@@ -45,9 +40,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/customer-cache/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/customer-cache/src/config/env
     volumes:
@@ -65,9 +57,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/digi-bridge/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/digi-bridge/src/config/env
     volumes:
@@ -84,9 +73,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/digi-reboot-report/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/digi-reboot-report/src/config/env
     volumes:
@@ -100,9 +86,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/dri-bridge/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/dri-bridge/src/config/env
     volumes:
@@ -116,9 +99,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/email-tagger-kre-bridge/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/email-tagger-kre-bridge/src/config/env
     volumes:
@@ -138,9 +118,6 @@ services:
       # Context must be the root of the monorepo since we need to copy custompackages
       context: .
       dockerfile: services/email-tagger-monitor/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/email-tagger-monitor/src/config/env
     volumes:
@@ -158,9 +135,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/fraud-monitor/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/fraud-monitor/src/config/env
     volumes:
@@ -177,9 +151,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/gateway-monitor/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/gateway-monitor/src/config/env
     volumes:
@@ -199,9 +170,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/hawkeye-affecting-monitor/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/hawkeye-affecting-monitor/src/config/env
     volumes:
@@ -218,9 +186,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/hawkeye-bridge/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/hawkeye-bridge/src/config/env
     volumes:
@@ -237,9 +202,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/hawkeye-customer-cache/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/hawkeye-customer-cache/src/config/env
     volumes:
@@ -257,9 +219,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/hawkeye-outage-monitor/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/hawkeye-outage-monitor/src/config/env
     volumes:
@@ -276,9 +235,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/intermapper-outage-monitor/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/intermapper-outage-monitor/src/config/env
     volumes:
@@ -295,9 +251,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/last-contact-report/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/last-contact-report/src/config/env
     volumes:
@@ -314,9 +267,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/links-metrics-api/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/links-metrics-api/src/config/env
     volumes:
@@ -333,9 +283,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/links-metrics-collector/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/links-metrics-collector/src/config/env
     volumes:
@@ -352,9 +299,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/lumin-billing-report/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/lumin-billing-report/src/config/env
     volumes:
@@ -398,9 +342,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/notifier/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/notifier/src/config/env
     volumes:
@@ -417,9 +358,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/repair-tickets-monitor/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/repair-tickets-monitor/src/config/env
     volumes:
@@ -441,9 +379,6 @@ services:
     build:
       context: .
       dockerfile: services/repair-tickets-kre-bridge/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/repair-tickets-kre-bridge/src/config/env
     volumes:
@@ -469,9 +404,6 @@ services:
 #      # Context must be the root of the monorepo
 #      context: .
 #      dockerfile: services/service-affecting-monitor/Dockerfile
-#      args:
-#        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-#        DOCKER_BASE_IMAGE_VERSION: 2.2.0
 #    env_file:
 #      - services/service-affecting-monitor/src/config/<env_filename>
 #    depends_on:
@@ -497,9 +429,6 @@ services:
 #      # Context must be the root of the monorepo
 #      context: .
 #      dockerfile: services/service-outage-monitor/Dockerfile
-#      args:
-#        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-#        DOCKER_BASE_IMAGE_VERSION: 2.2.0
 #    env_file:
 #      - services/service-outage-monitor/src/config/<env_filename>
 #    depends_on:
@@ -520,9 +449,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/service-outage-monitor/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/service-outage-monitor/src/config/env-triage
     volumes:
@@ -539,9 +465,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/servicenow-bridge/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/servicenow-bridge/src/config/env
     volumes:
@@ -558,9 +481,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/t7-bridge/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/t7-bridge/src/config/env
     volumes:
@@ -577,8 +497,6 @@ services:
       context: .
       dockerfile: services/ticket-collector/Dockerfile
       args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
         IGZ_PACKAGES_REPOSITORY_URL: https://s3pypi.mettel-automation.net/igzpackages/index.html
         IGZ_PACKAGES_VERSION: 2.0.4
     env_file:
@@ -596,8 +514,6 @@ services:
       context: .
       dockerfile: services/ticket-statistics/Dockerfile
       args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
         IGZ_PACKAGES_REPOSITORY_URL: https://s3pypi.mettel-automation.net/igzpackages/index.html
         IGZ_PACKAGES_VERSION: 2.0.4
     env_file:
@@ -616,9 +532,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/tnba-feedback/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/tnba-feedback/src/config/env
     volumes:
@@ -641,9 +554,6 @@ services:
 #      # Context must be the root of the monorepo
 #      context: .
 #      dockerfile: services/tnba-monitor/Dockerfile
-#      args:
-#        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-#        DOCKER_BASE_IMAGE_VERSION: 2.2.0
 #    env_file:
 #      - services/tnba-monitor/src/config/<env_filename>
 #    depends_on:
@@ -664,9 +574,6 @@ services:
       # Context must be the root of the monorepo
       context: .
       dockerfile: services/velocloud-bridge/Dockerfile
-      args:
-        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0
     env_file:
       - services/velocloud-bridge/src/config/env
     volumes:

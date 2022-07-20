@@ -1,13 +1,18 @@
 #NOTE: This dockerfile is made to be run with context in the root of the monorepo
-ARG REPOSITORY_URL
-ARG DOCKER_BASE_IMAGE_VERSION
-FROM ${REPOSITORY_URL}/python-3.6:${DOCKER_BASE_IMAGE_VERSION}
+FROM python:3.6
+
+RUN apt-get update -y
+RUN apt-get install -y curl gcc musl-dev
+RUN pip install --upgrade pip
+RUN wget https://grpcio-certs.s3.amazonaws.com/root-certificates.txt -O /tmp/root-certificates.txt
+
+COPY pyutils_automation/py36 /pyutils_automation/py36
+WORKDIR /pyutils_automation/py36
+RUN python setup.py install
 
 COPY services/t7-bridge/ /service/app
-
-RUN pip install --upgrade pip
+WORKDIR /service/app
 RUN pip install -r requirements.txt
-RUN wget https://grpcio-certs.s3.amazonaws.com/root-certificates.txt -O /tmp/root-certificates.txt
 
 ENV PYTHONUNBUFFERED 1
 
