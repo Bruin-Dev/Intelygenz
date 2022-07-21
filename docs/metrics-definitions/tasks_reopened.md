@@ -61,6 +61,7 @@
 - **feature:** Gateway Monitor
 - **system:** VeloCloud
 - **host:** <host\>
+- **trouble:** Tunnel Count
 
 ## Hawkeye Outage Monitor ##
 
