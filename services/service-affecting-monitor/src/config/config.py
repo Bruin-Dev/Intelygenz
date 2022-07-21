@@ -69,12 +69,8 @@ MONITOR_CONFIG = {
         // 60,
         AffectingTroubles.BOUNCING: int(os.environ["MONITORING__CIRCUIT_INSTABILITY_MONITORING_LOOKUP_INTERVAL"]) // 60,
     },
-    "blacklisted_link_labels_for_asr_forwards": json.loads(
-        os.environ["MONITORING__LINK_LABELS_BLACKLISTED_IN_ASR_FORWARDS"]
-    ),
-    "blacklisted_link_labels_for_hnoc_forwards": json.loads(
-        os.environ["MONITORING__LINK_LABELS_BLACKLISTED_IN_HNOC_FORWARDS"]
-    ),
+    "blacklisted_link_labels_for_asr_forwards": json.loads(os.environ["LINK_LABELS_BLACKLISTED_FROM_ASR_FORWARDS"]),
+    "blacklisted_link_labels_for_hnoc_forwards": json.loads(os.environ["LINK_LABELS_BLACKLISTED_FROM_HNOC_FORWARDS"]),
     "autoresolve": {
         "semaphore": 3,
         "metrics_lookup_interval_minutes": int(os.environ["MONITORING__AUTORESOLVE_LOOKUP_INTERVAL"]) // 60,

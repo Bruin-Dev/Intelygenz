@@ -62,11 +62,9 @@ else:
         "velocloud_instances_filter": {
             VELOCLOUD_HOST: [],
         },
-        "blacklisted_link_labels_for_asr_forwards": json.loads(
-            os.environ["MONITORING__LINK_LABELS_BLACKLISTED_IN_ASR_FORWARDS"]
-        ),
+        "blacklisted_link_labels_for_asr_forwards": json.loads(os.environ["LINK_LABELS_BLACKLISTED_FROM_ASR_FORWARDS"]),
         "blacklisted_link_labels_for_hnoc_forwards": json.loads(
-            os.environ["MONITORING__LINK_LABELS_BLACKLISTED_IN_HNOC_FORWARDS"]
+            os.environ["LINK_LABELS_BLACKLISTED_FROM_HNOC_FORWARDS"]
         ),
         "blacklisted_edges": json.loads(os.environ["MONITORING__BLACKLISTED_EDGES"]),
         "forward_link_outage_seconds": 60 * 60,
