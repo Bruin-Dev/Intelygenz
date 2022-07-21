@@ -41,6 +41,7 @@ class TestServiceNowRepository:
                 f"Condition: Over 20% reduction in tunnel count compared to average",
                 f"Minimum Tunnel Count: 50",
                 f"Average Tunnel Count: 100",
+                f"Scan Interval: 60 minutes",
                 "",
                 f"TimeStamp: {CURRENT_DATETIME}",
             ]

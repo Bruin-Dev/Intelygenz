@@ -18,6 +18,7 @@ class ServiceNowRepository:
 
     def _build_incident_note(self, gateway: dict) -> str:
         current_datetime_tz_aware = datetime.now(timezone(self._config.TIMEZONE))
+        lookup_interval = self._config.MONITOR_CONFIG["gateway_metrics_lookup_interval"]
         tunnel_count_threshold = self._config.MONITOR_CONFIG["thresholds"]["tunnel_count"]
         tunnel_count = gateway["metrics"]["tunnelCount"]
 
@@ -28,6 +29,7 @@ class ServiceNowRepository:
             f"Condition: Over {tunnel_count_threshold}% reduction in tunnel count compared to average",
             f"Minimum Tunnel Count: {tunnel_count['min']}",
             f"Average Tunnel Count: {tunnel_count['average']}",
+            f"Scan Interval: {lookup_interval // 60} minutes",
             "",
             f"TimeStamp: {current_datetime_tz_aware}",
         ]
