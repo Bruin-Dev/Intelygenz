@@ -9,9 +9,9 @@ The goal of the `gateway-monitoring` service is to monitor the status of gateway
 A gateway is considered to be having issues if the tunnel count drops by a significant amount within a short period of time.
 
 # Overview
-Every few minutes we get two snapshots of the status of all gateways from each VeloCloud host for two different time intervals.
-A gateway is considered to be having issues if its tunnel count on the second snapshot is significantly lower than on the first one.
-For each unhealthy gateway we call a ServiceNow endpoint that automatically creates, re-opens and/or adds a note to a ticket.
+Every few minutes we get the status metrics of all gateways from each VeloCloud host for a recent amount of time.
+If the tunnel count of a gateway was significantly lower than average at any point during this period,
+we call a ServiceNow endpoint that automatically creates or re-opens a ticket for that gateway.
 
 # Capabilities used
 - [Velocloud bridge](../velocloud-bridge/README.md)
