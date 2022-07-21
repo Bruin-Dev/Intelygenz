@@ -23,7 +23,7 @@ class TestServiceNowRepository:
     def build_incident_summary_test(self, servicenow_repository, make_gateway):
         gateway = make_gateway(id=1)
         result = servicenow_repository._build_incident_summary(gateway)
-        assert result == "vcg-test-1: Medium: VGC Tunnel Count Threshold Violation"
+        assert result == "vcg-test-1: Medium: VCG Tunnel Count Threshold Violation"
 
     def build_incident_note_test(self, servicenow_repository, make_gateway_with_metrics):
         gateway = make_gateway_with_metrics(id=1, tunnel_count={"average": 100, "min": 50})
@@ -36,7 +36,7 @@ class TestServiceNowRepository:
         assert note == os.linesep.join(
             [
                 f"VCO: mettel.velocloud.net",
-                f"VGC: vcg-test-1",
+                f"VCG: vcg-test-1",
                 "",
                 f"Condition: Over 20% reduction in tunnel count compared to average",
                 f"Minimum Tunnel Count: 50",

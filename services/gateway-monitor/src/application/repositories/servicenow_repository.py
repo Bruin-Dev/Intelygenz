@@ -14,7 +14,7 @@ class ServiceNowRepository:
 
     @staticmethod
     def _build_incident_summary(gateway: dict) -> str:
-        return f"{gateway['name']}: Medium: VGC Tunnel Count Threshold Violation"
+        return f"{gateway['name']}: Medium: VCG Tunnel Count Threshold Violation"
 
     def _build_incident_note(self, gateway: dict) -> str:
         current_datetime_tz_aware = datetime.now(timezone(self._config.TIMEZONE))
@@ -23,7 +23,7 @@ class ServiceNowRepository:
 
         note_lines = [
             f"VCO: {gateway['host']}",
-            f"VGC: {gateway['name']}",
+            f"VCG: {gateway['name']}",
             "",
             f"Condition: Over {tunnel_count_threshold}% reduction in tunnel count compared to average",
             f"Minimum Tunnel Count: {tunnel_count['min']}",
