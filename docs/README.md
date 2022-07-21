@@ -46,7 +46,9 @@
 	1. [Gitlab recovery](recovery_processes/GITLAB_RECOVERY.md)
 10. AUDIT EVENTS
     1. Automation
-       1. Use Cases
+       1. Communication between services
+          1. [Messages Bus](logging/events/0-messages-bus.md)
+       2. Use Cases
            1. [Service outage](logging/events/1-service-outage.md)
            2. [BYOB IPA Queue](logging/events/2-BYOB-IPA-queue.md)
            3. [HNOC forwarding](logging/events/3-HNOC-forwarding.md)
@@ -57,7 +59,7 @@
            8. [Service affecting](logging/events/8-service-affecting.md)
            9. [InterMapper Outage Monitoring](logging/events/9-intermapper-monitor.md)
            10. [Ixia Outage Monitoring](logging/events/10-ixia-outage-monitoring.md)
-       2. Bridges
+       3. Bridges
           1. [Bruin Bridge](logging/events/11-bruin-bridge.md)
     2. Infrastructure
         1. [Lambda Parameter-Replicator](lambda/PARAMETER_REPLICATOR.md)
