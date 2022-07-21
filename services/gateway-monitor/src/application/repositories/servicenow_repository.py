@@ -31,6 +31,8 @@ class ServiceNowRepository:
             f"Average Tunnel Count: {tunnel_count['average']}",
             f"Scan Interval: {lookup_interval // 60} minutes",
             "",
+            f"Link: https://{gateway['host']}/#!/operator/admin/gateways/{gateway['id']}/monitor/",
+            "",
             f"TimeStamp: {current_datetime_tz_aware}",
         ]
 

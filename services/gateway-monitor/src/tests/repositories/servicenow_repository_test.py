@@ -43,6 +43,8 @@ class TestServiceNowRepository:
                 f"Average Tunnel Count: 100",
                 f"Scan Interval: 60 minutes",
                 "",
+                f"Link: https://mettel.velocloud.net/#!/operator/admin/gateways/1/monitor/",
+                "",
                 f"TimeStamp: {CURRENT_DATETIME}",
             ]
         )
