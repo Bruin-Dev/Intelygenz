@@ -45,15 +45,20 @@
 9. RECOVERY PROCESSES
 	1. [Gitlab recovery](recovery_processes/GITLAB_RECOVERY.md)
 10. AUDIT EVENTS
-	1. Automation
-		1. [Service outage](logging/events/1-service-outage.md)
-		2. [BYOB IPA Queue](logging/events/2-BYOB-IPA-queue.md)
-		3. [HNOC forwarding](logging/events/3-HNOC-forwarding.md)
-		4. [SA forwarding to ASR](logging/events/4-SA-forward-to-ASR.md)
-		5. [TNBA Monitor](logging/events/5-TNBA-monitor.md)
-		6. [Ticket severity](logging/events/6-ticket-severity.md)
-		7. [Ticket creation outcomes](logging/events/7-ticket-creation-outcome.md)
-		8. [Service affecting](logging/events/8-service-affecting.md)
-	2. Infrastructure
-		1. [Lambda Parameter-Replicator](lambda/PARAMETER_REPLICATOR.md)
+    1. Automation
+       1. Use Cases
+           1. [Service outage](logging/events/1-service-outage.md)
+           2. [BYOB IPA Queue](logging/events/2-BYOB-IPA-queue.md)
+           3. [HNOC forwarding](logging/events/3-HNOC-forwarding.md)
+           4. [SA forwarding to ASR](logging/events/4-SA-forward-to-ASR.md)
+           5. [TNBA Monitor](logging/events/5-TNBA-monitor.md)
+           6. [Ticket severity](logging/events/6-ticket-severity.md)
+           7. [Ticket creation outcomes](logging/events/7-ticket-creation-outcome.md)
+           8. [Service affecting](logging/events/8-service-affecting.md)
+           9. [InterMapper Outage Monitoring](logging/events/9-intermapper-monitor.md)
+           10. [Ixia Outage Monitoring](logging/events/10-ixia-outage-monitoring.md)
+       2. Bridges
+          1. [Bruin Bridge](logging/events/11-bruin-bridge.md)
+    2. Infrastructure
+        1. [Lambda Parameter-Replicator](lambda/PARAMETER_REPLICATOR.md)
 
