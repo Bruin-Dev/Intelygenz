@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/service-outage-monitor/actions/outage_monitoring/_process_velocloud_host/">
       
       <link rel="icon" href="../../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,77 +553,75 @@
   <h1> process velocloud host</h1>
 
 <h2 id="process-velocloud-host-documentation">Process velocloud host Documentation</h2>
-<pre><code>self._logger.info(f&quot;Processing {len(host_cache)} edges in Velocloud {host}...&quot;)
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(f&quot;Processing {len(host_cache)} edges in Velocloud {host}...&quot;)
+</code></pre></div>
 <ul>
 <li><a href="../../../repositories/velocloud_repository/get_links_with_edge_info/">get_link_with_edge_info</a></li>
 <li>If status get link with edge info not OK:
-  <code>self._logger.warning(f"Not found links with edge info for host: {host}. Stop process velocloud host")</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.warning(f&quot;Not found links with edge info for host: {host}. Stop process velocloud host&quot;)
+</code></pre></div></li>
 <li><a href="../../../repositories/velocloud_repository/get_network_enterprises/">get_network_enterprises</a></li>
 <li>If status get network enterprises not OK:
-  <code>self._logger.warning(f"Not found network enterprises for host: {host}. Stop process velocloud host")</code></li>
-</ul>
-<pre><code>self._logger.warning(f&quot;Link status with edge info from Velocloud: {links_with_edge_info}&quot;)
-</code></pre>
-<ul>
-<li><a href="../../../repositories/velocloud_repository/group_links_by_edge/">grouped_links_by_edge</a></li>
-</ul>
-<pre><code>self._logger.info(
-            &quot;Adding HA info to existing edges, and putting standby edges under monitoring as if they were &quot;
-            &quot;standalone edges...&quot;
-        )
-</code></pre>
-<ul>
-<li><a href="../../../repositories/ha_repository/map_edges_with_ha_info/">map_edges_with_ha_info</a></li>
-</ul>
-<pre><code>self._logger.info(f&quot;Service Outage monitoring is about to check {len(all_edges)} edges&quot;)
-self._logger.info(f&quot;{len(serials_with_ha_disabled)} edges have HA disabled: {serials_with_ha_disabled}&quot;)
-self._logger.info(f&quot;{len(serials_with_ha_enabled)} edges have HA enabled: {serials_with_ha_enabled}&quot;)
-self._logger.info(f&quot;{len(primary_serials)} edges are the primary of a HA pair: {primary_serials}&quot;)
-self._logger.info(f&quot;{len(standby_serials)} edges are the standby of a HA pair: {standby_serials}&quot;)
-</code></pre>
-<ul>
-<li><a href="../_map_cached_edges_with_edges_status/">map_cached_edges_with_edges_status</a></li>
-</ul>
-<pre><code>self._logger.info(f&quot;Mapped cache serials with status: {mapped_serials_w_status}&quot;)
-</code></pre>
-<ul>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.warning(f&quot;Not found network enterprises for host: {host}. Stop process velocloud host&quot;)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.warning(f&quot;Link status with edge info from Velocloud: {links_with_edge_info}&quot;)
+</code></pre></div></li>
+<li><a href="../../../repositories/velocloud_repository/group_links_by_edge/">grouped_links_by_edge</a>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.info(
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>            &quot;Adding HA info to existing edges, and putting standby edges under monitoring as if they were &quot;
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>            &quot;standalone edges...&quot;
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>        )
+</code></pre></div></li>
+<li><a href="../../../repositories/ha_repository/map_edges_with_ha_info/">map_edges_with_ha_info</a>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>self._logger.info(f&quot;Service Outage monitoring is about to check {len(all_edges)} edges&quot;)
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>self._logger.info(f&quot;{len(serials_with_ha_disabled)} edges have HA disabled: {serials_with_ha_disabled}&quot;)
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>self._logger.info(f&quot;{len(serials_with_ha_enabled)} edges have HA enabled: {serials_with_ha_enabled}&quot;)
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>self._logger.info(f&quot;{len(primary_serials)} edges are the primary of a HA pair: {primary_serials}&quot;)
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>self._logger.info(f&quot;{len(standby_serials)} edges are the standby of a HA pair: {standby_serials}&quot;)
+</code></pre></div></li>
+<li><a href="../_map_cached_edges_with_edges_status/">map_cached_edges_with_edges_status</a>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>self._logger.info(f&quot;Mapped cache serials with status: {mapped_serials_w_status}&quot;)
+</code></pre></div></li>
 <li>For outage in outages:
-  <code>self._logger.info(f'{outage_type.value} serials: {[e["status"]["edgeSerialNumber"] for e in down_edges]}')
-  self._logger.info(
-                f"{outage_type.value} serials that should be documented: "
-                f'{[e["status"]["edgeSerialNumber"] for e in relevant_down_edges]}'
-            )</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>self._logger.info(f&#39;{outage_type.value} serials: {[e[&quot;status&quot;][&quot;edgeSerialNumber&quot;] for e in down_edges]}&#39;)
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>self._logger.info(
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>              f&quot;{outage_type.value} serials that should be documented: &quot;
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>              f&#39;{[e[&quot;status&quot;][&quot;edgeSerialNumber&quot;] for e in relevant_down_edges]}&#39;
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>          )
+</code></pre></div></li>
 <li>If relevant down edges:
-    <code>self._logger.info(f"{len(relevant_down_edges)} edges were detected in {outage_type.value} state.")</code><ul>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>self._logger.info(f&quot;{len(relevant_down_edges)} edges were detected in {outage_type.value} state.&quot;)
+</code></pre></div><ul>
 <li><a href="../_attempt_ticket_creation/">attempt_ticket_creation</a></li>
 <li>If ticket creation None:
-  <code>self._logger.error(f"[{outage_type.value}] Error while attempting ticket creation(s) for edge "
-                     f"with Business Grade Link(s): {ex}")</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>self._logger.error(f&quot;[{outage_type.value}] Error while attempting ticket creation(s) for edge &quot;
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>                   f&quot;with Business Grade Link(s): {ex}&quot;)
+</code></pre></div></li>
 <li><a href="../_schedule_recheck_job_for_edges/">_schedule_recheck_job_for_edges</a></li>
 </ul>
 </li>
 <li>Else:
-    <code>self._logger.info(
-                    f"No edges were detected in {outage_type.value} state. "
-                    f"No ticket creations will trigger for this outage type"
-                )</code></li>
-</ul>
-<pre><code>self._logger.info(f'Healthy serials: {[e[&quot;status&quot;][&quot;edgeSerialNumber&quot;] for e in healthy_edges]}')
-</code></pre>
-<ul>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>self._logger.info(
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>                f&quot;No edges were detected in {outage_type.value} state. &quot;
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>                f&quot;No ticket creations will trigger for this outage type&quot;
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>            )
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>self._logger.info(f&#39;Healthy serials: {[e[&quot;status&quot;][&quot;edgeSerialNumber&quot;] for e in healthy_edges]}&#39;)
+</code></pre></div></li>
 <li>IF healthy edges:
-  <code>self._logger.info(
-                f"{len(healthy_edges)} edges were detected in healthy state. Running autoresolve for all of them..."
-            )</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>self._logger.info(
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>              f&quot;{len(healthy_edges)} edges were detected in healthy state. Running autoresolve for all of them...&quot;
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>          )
+</code></pre></div></li>
 <li><a href="../_run_ticket_autoresolve_for_edge/">_run_ticket_autoresolve_for_edge</a></li>
 <li>Else:
-  <code>self._logger.info(
-                "No edges were detected in healthy state. Autoresolve won't be triggered"
-            )</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>self._logger.info(
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>              &quot;No edges were detected in healthy state. Autoresolve won&#39;t be triggered&quot;
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>          )
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>self._logger.info(f&quot;Elapsed time processing edges in host {host}: {round((stop - start) / 60, 2)} minutes&quot;)
+</code></pre></div></li>
 </ul>
-<pre><code>self._logger.info(f&quot;Elapsed time processing edges in host {host}: {round((stop - start) / 60, 2)} minutes&quot;)
-</code></pre>
 
               
             </article>

@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/hawkeye-outage-monitor/actions/_reopen_outage_ticket/">
       
       <link rel="icon" href="../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,19 +553,20 @@
   <h1> reopen outage ticket</h1>
 
 <h2 id="reopen-outage-ticket">Reopen outage ticket</h2>
-<pre><code>self._logger.info(f&quot;Reopening Hawkeye outage ticket {ticket_id}...&quot;)
-</code></pre>
-<ul>
-<li><a href="../../repositories/bruin_repository/get_ticket_details/">get_ticket_details</a></li>
-<li>If status is not ok:
-  <code>self._logger.warning(f"Bad status calling get ticket details. Skipping reopen outage ticket ...")</code></li>
-<li><a href="../../repositories/bruin_repository/open_ticket/">open_ticket</a></li>
-<li>If status is not Ok:
-  <code>self._logger.error(f"[outage-ticket-creation] Outage ticket {ticket_id} reopening failed.")</code></li>
-<li>Else:
-  <code>self._logger.info(f"Hawkeye outage ticket {ticket_id} reopening succeeded.")</code></li>
-<li><a href="../../repositories/bruin_repository/append_note_to_ticket/">append_note_to_ticket</a></li>
-</ul>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(f&quot;Reopening Hawkeye outage ticket {ticket_id}...&quot;)
+</code></pre></div>
+* <a href="../../repositories/bruin_repository/get_ticket_details/">get_ticket_details</a>
+* If status is not ok:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.warning(f&quot;Bad status calling get ticket details. Skipping reopen outage ticket ...&quot;) 
+</code></pre></div>
+* <a href="../../repositories/bruin_repository/open_ticket/">open_ticket</a>
+* If status is not Ok:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.error(f&quot;[outage-ticket-creation] Outage ticket {ticket_id} reopening failed.&quot;)
+</code></pre></div>
+* Else:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.info(f&quot;Hawkeye outage ticket {ticket_id} reopening succeeded.&quot;)
+</code></pre></div>
+  * <a href="../../repositories/bruin_repository/append_note_to_ticket/">append_note_to_ticket</a></p>
 
               
             </article>

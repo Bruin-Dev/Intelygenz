@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/metrics-definitions/tasks_forwarded/">
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -573,6 +573,20 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#intermapper-service-outage-tasks-forwarded-to-hnoc-investigate-queue" class="md-nav__link">
+    InterMapper - Service Outage tasks forwarded to HNOC Investigate queue
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#intermapper-service-outage-tasks-forwarded-to-ipa-investigate-queue" class="md-nav__link">
+    InterMapper - Service Outage tasks forwarded to IPA Investigate queue
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -661,6 +675,26 @@
 - severity: 3
 - trouble: [Possible Fraud | Request Rate Monitor Violation]
 - target_queue: HNOC Investigate</p>
+<h2 id="intermapper-service-outage-tasks-forwarded-to-hnoc-investigate-queue">InterMapper - Service Outage tasks forwarded to HNOC Investigate queue</h2>
+<p><strong>Description:</strong> This metric counts how many Service Outage tasks related to InterMapper devices have been forwarded since the intermapper-outage-monitor started until now.</p>
+<p><strong>Labels:</strong>
+- feature: InterMapper Outage Monitor
+- system: InterMapper
+- topic: VOO
+- severity: 2
+- event: [Up | OK | Down | Critical | Alarm | Warning | Link Warning]
+- is_piab: [True | False]
+- target_queue: HNOC Investigate</p>
+<h2 id="intermapper-service-outage-tasks-forwarded-to-ipa-investigate-queue">InterMapper - Service Outage tasks forwarded to IPA Investigate queue</h2>
+<p><strong>Description:</strong> This metric counts how many Service Outage tasks related to InterMapper devices have been forwarded since the intermapper-outage-monitor started until now.</p>
+<p><strong>Labels:</strong>
+- feature: InterMapper Outage Monitor
+- system: InterMapper
+- topic: VOO
+- severity: 2
+- event: [Up | OK | Down | Critical | Alarm | Warning | Link Warning]
+- is_piab: [True | False]
+- target_queue: IPA Investigate</p>
 
               
             </article>

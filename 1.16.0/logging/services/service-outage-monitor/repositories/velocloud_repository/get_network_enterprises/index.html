@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/service-outage-monitor/repositories/velocloud_repository/get_network_enterprises/">
       
       <link rel="icon" href="../../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -556,38 +556,44 @@
 <ul>
 <li>If enterprises ids:</li>
 </ul>
-<p><code>self._logger.info(
-                      f"Getting network information for all edges belonging to enterprises "
-                      f"{', '.join(map(str, enterprise_ids))} in host {velocloud_host}..."
-                  )</code>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                    f&quot;Getting network information for all edges belonging to enterprises &quot;
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>                    f&quot;{&#39;, &#39;.join(map(str, enterprise_ids))} in host {velocloud_host}...&quot;
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>                )
+</code></pre></div>
 * Else:</p>
-<p><code>self._logger.info(
-                      "Getting network information for all edges belonging to all enterprises in host "
-                      f"{velocloud_host}..."
-                  )</code></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>                    &quot;Getting network information for all edges belonging to all enterprises in host &quot;
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>                    f&quot;{velocloud_host}...&quot;
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>                )
+</code></pre></div>
 <ul>
 <li>If <code>Exception</code></li>
 </ul>
-<p><code>self._logger.error(f"An error occurred when requesting network info from Velocloud host {velocloud_host} -&gt; {e}")</code>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.error(f&quot;An error occurred when requesting network info from Velocloud host {velocloud_host} -&gt; {e}&quot;)
+</code></pre></div>
 * If status OK:</p>
 <ul>
 <li>
 <p>If enterprises ids:</p>
-<p><code>self._logger.info(
-                        f"Got network information for all edges belonging to enterprises "
-                        f"{', '.join(map(str, enterprise_ids))} in host {velocloud_host}!"
-                    )</code>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.info(
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>                        f&quot;Got network information for all edges belonging to enterprises &quot;
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>                        f&quot;{&#39;, &#39;.join(map(str, enterprise_ids))} in host {velocloud_host}!&quot;
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>                    )
+</code></pre></div>
   * Else:</p>
-<p><code>self._logger.info(
-                        f"Got network information for all edges belonging to all enterprises in host {velocloud_host}!"
-                    )</code></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.info(
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>                        f&quot;Got network information for all edges belonging to all enterprises in host {velocloud_host}!&quot;
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>                    )
+</code></pre></div>
 </li>
 <li>
 <p>Else:</p>
 </li>
 </ul>
-<p><code>self._logger.error(f"Error while retrieving network info from Velocloud host {velocloud_host} in "
-                      f"{self._config.ENVIRONMENT_NAME.upper()} environment: Error {response_status} - {response_body}")</code></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>self._logger.error(f&quot;Error while retrieving network info from Velocloud host {velocloud_host} in &quot;
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>                    f&quot;{self._config.ENVIRONMENT_NAME.upper()} environment: Error {response_status} - {response_body}&quot;)
+</code></pre></div>
 
               
             </article>

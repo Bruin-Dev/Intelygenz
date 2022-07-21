@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/service-outage-monitor/actions/outage_monitoring/_check_for_failed_digi_reboot/">
       
       <link rel="icon" href="../../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,36 +553,35 @@
   <h1> check for failed digi reboot</h1>
 
 <h2 id="check-for-failed-digi-reboot">Check for failed digi reboot</h2>
-<pre><code>self._logger.info(f&quot;Checking edge {serial_number} for DiGi Links&quot;)
-</code></pre>
-<ul>
-<li>for link in digi_links:</li>
-<li><a href="../../../repositories/bruin_repository/get_ticket_details/">get_ticket_details</a></li>
-<li>If status is not Ok:
-    <code>self._logger.info(f"Bad status calling to get ticket details checking failed digi reboot."
-                      f" Skipping link ...")</code></li>
-<li>If not find digi note:
-    <code>self._logger.info(f"No DiGi note was found for ticket {ticket_id}")</code></li>
-<li>If rebooted recently:
-    <code>self._logger.info(f"The last DiGi reboot attempt for Edge {serial_number} did not occur "
-                      f'{self._config.MONITOR_CONFIG["last_digi_reboot_seconds"] / 60} or more mins ago.')</code></li>
-<li>If interface note is same that link:<ul>
-<li>If not find wireless:
-  <code>self._logger.info(f'Task results has already been changed to "{target_queue}"')</code></li>
-<li><a href="../../../repositories/bruin_repository/change_detail_work_queue/">change_detail_work_queue</a></li>
-<li>If status Ok:</li>
-<li><a href="../../../repositories/bruin_repository/append_task_result_change_note/">append_task_result_change_note</a></li>
-<li>Else:</li>
-<li><a href="../../../repositories/digi_repository/reboot_link/">reboot_link</a></li>
-<li>If reboot link status Ok:
-    <code>self._logger.info(f'Attempting DiGi reboot of link with MAC address of {digi_link["logical_id"]}'
-                        f"in edge {serial_number}")</code><ul>
-<li><a href="../../../repositories/bruin_repository/append_digi_reboot_note/">append_digi_reboot_note</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(f&quot;Checking edge {serial_number} for DiGi Links&quot;)
+</code></pre></div>
+* for link in digi_links:
+  * <a href="../../../repositories/bruin_repository/get_ticket_details/">get_ticket_details</a>
+  * If status is not Ok:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(f&quot;Bad status calling to get ticket details checking failed digi reboot.&quot;
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>                  f&quot; Skipping link ...&quot;)
+</code></pre></div>
+  * If not find digi note:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(f&quot;No DiGi note was found for ticket {ticket_id}&quot;)
+</code></pre></div>
+  * If rebooted recently:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.info(f&quot;The last DiGi reboot attempt for Edge {serial_number} did not occur &quot;
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>                  f&#39;{self._config.MONITOR_CONFIG[&quot;last_digi_reboot_seconds&quot;] / 60} or more mins ago.&#39;)
+</code></pre></div>
+  * If interface note is same that link:
+    * If not find wireless:
+      <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.info(f&#39;Task results has already been changed to &quot;{target_queue}&quot;&#39;)
+</code></pre></div>
+    * <a href="../../../repositories/bruin_repository/change_detail_work_queue/">change_detail_work_queue</a>
+    * If status Ok:
+      * <a href="../../../repositories/bruin_repository/append_task_result_change_note/">append_task_result_change_note</a>
+    * Else:
+      * <a href="../../../repositories/digi_repository/reboot_link/">reboot_link</a>
+      * If reboot link status Ok:
+        <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>self._logger.info(f&#39;Attempting DiGi reboot of link with MAC address of {digi_link[&quot;logical_id&quot;]}&#39;
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>                    f&quot;in edge {serial_number}&quot;)
+</code></pre></div>
+        * <a href="../../../repositories/bruin_repository/append_digi_reboot_note/">append_digi_reboot_note</a></p>
 
               
             </article>

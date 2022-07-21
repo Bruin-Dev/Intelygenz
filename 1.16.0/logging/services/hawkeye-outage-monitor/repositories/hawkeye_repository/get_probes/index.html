@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/hawkeye-outage-monitor/repositories/hawkeye_repository/get_probes/">
       
       <link rel="icon" href="../../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,16 +553,17 @@
   <h1>Get probes</h1>
 
 <h2 id="get-probes">Get probes</h2>
-<pre><code>self._logger.info(f&quot;Getting all probes from Hawkeye...&quot;)
-</code></pre>
-<ul>
-<li>If Exception:
-  <code>self._logger.error(f"An error occurred when requesting all probes from Hawkeye -&gt; {e}")</code></li>
-<li>If status ok:
-  <code>self._logger.info("Got all probes from Hawkeye!")</code></li>
-<li>Else:
-  <code>self._logger.error(f"Error while retrieving probes: Error {response_status} - {response_body}")</code></li>
-</ul>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(f&quot;Getting all probes from Hawkeye...&quot;)
+</code></pre></div>
+* If Exception:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.error(f&quot;An error occurred when requesting all probes from Hawkeye -&gt; {e}&quot;)
+</code></pre></div>
+* If status ok:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(&quot;Got all probes from Hawkeye!&quot;)
+</code></pre></div>
+* Else:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.error(f&quot;Error while retrieving probes: Error {response_status} - {response_body}&quot;)
+</code></pre></div></p>
 
               
             </article>

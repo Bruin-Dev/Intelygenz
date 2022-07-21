@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/service-outage-monitor/actions/outage_monitoring/_send_reminder/">
       
       <link rel="icon" href="../../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,25 +553,27 @@
   <h1> send reminder</h1>
 
 <h2 id="send-reminder">Send reminder</h2>
-<pre><code>self._logger.info(f&quot;Attempting to send reminder for service number {service_number} to ticket {ticket_id}&quot;)
-</code></pre>
-<ul>
-<li>If not should reminder notification:
-  <code>self._logger.info(f"No Reminder note will be appended for service number {service_number} to ticket {ticket_id},"
-                    f" since either the last documentation cycle started or the last reminder"
-                    f" was sent too recently")</code></li>
-<li>If working environment not PRODUCTION:
-  <code>self._logger.info(f"No Reminder note will be appended for service number {service_number} to ticket {ticket_id} since "
-                    f"the current environment is {working_environment.upper()}")</code></li>
-<li><a href="../../../repositories/bruin_repository/send_reminder_email_milestone_notification/">send_reminder_email_milestone_notification</a></li>
-<li>If status not OK:
-  <code>self._logger.error(f"Reminder email of edge {service_number} could not be sent for ticket" f" {ticket_id}!")</code></li>
-<li><a href="../_append_reminder_note/">_append_reminder_note</a></li>
-<li>If status to append reminder note not Ok:
-  <code>self._logger.error(f"Reminder note of edge {service_number} could not be appended to ticket" f" {ticket_id}!")</code></li>
-</ul>
-<pre><code>self._logger.error(f&quot;Reminder note of edge {service_number} was successfully appended to ticket&quot; f&quot; {ticket_id}!&quot;)
-</code></pre>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(f&quot;Attempting to send reminder for service number {service_number} to ticket {ticket_id}&quot;)
+</code></pre></div>
+* If not should reminder notification:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(f&quot;No Reminder note will be appended for service number {service_number} to ticket {ticket_id},&quot;
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>                  f&quot; since either the last documentation cycle started or the last reminder&quot;
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>                  f&quot; was sent too recently&quot;)
+</code></pre></div>
+* If working environment not PRODUCTION:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(f&quot;No Reminder note will be appended for service number {service_number} to ticket {ticket_id} since &quot;
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>                  f&quot;the current environment is {working_environment.upper()}&quot;)
+</code></pre></div>
+* <a href="../../../repositories/bruin_repository/send_reminder_email_milestone_notification/">send_reminder_email_milestone_notification</a>
+* If status not OK:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.error(f&quot;Reminder email of edge {service_number} could not be sent for ticket&quot; f&quot; {ticket_id}!&quot;)
+</code></pre></div>
+* <a href="../_append_reminder_note/">_append_reminder_note</a>
+* If status to append reminder note not Ok:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.error(f&quot;Reminder note of edge {service_number} could not be appended to ticket&quot; f&quot; {ticket_id}!&quot;)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>self._logger.error(f&quot;Reminder note of edge {service_number} was successfully appended to ticket&quot; f&quot; {ticket_id}!&quot;)
+</code></pre></div></p>
 
               
             </article>

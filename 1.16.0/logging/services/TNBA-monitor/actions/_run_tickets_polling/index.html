@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/TNBA-monitor/actions/_run_tickets_polling/">
       
       <link rel="icon" href="../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,83 +553,68 @@
   <h1> run tickets polling</h1>
 
 <h2 id="run-tickets-polling">Run tickets polling</h2>
-<pre><code>self._logger.info(&quot;Starting TNBA process...&quot;)
-</code></pre>
-<ul>
-<li><a href="../../repositories/customer_cache/get_cache_for_tnba_monitoring/">get_cache_for_tnba_monitoring</a></li>
-<li>If get cache status is not Ok:
-  <code>self._logger.warning(f"Bad status calling to get cache. Skipping run ticket polling ...")</code></li>
-<li><a href="../../repositories/velocloud_repository/get_edges_for_tnba_monitoring/">get_edges_for_tnba_monitoring</a></li>
-<li>If not edges statuses:
-  <code>self._logger.error("No edges statuses were received from VeloCloud. Aborting TNBA monitoring...")</code></li>
-</ul>
-<pre><code>self._logger.info(&quot;Keeping serials that exist in both the customer cache and the set of edges statuses...&quot;)
-</code></pre>
-<ul>
-<li><a href="get_links_metrics_for_autoresolve.md">get_links_metrics_for_autoresolve</a></li>
-<li>If not link metrics:
-  <code>self._logger.info("List of links metrics arrived empty. Skipping...")</code></li>
-<li><a href="../../repositories/velocloud_repository/get_events_by_serial_and_interface/">get_events_by_serial_and_interface</a></li>
-</ul>
-<pre><code>self._logger.info(&quot;Loading customer cache and edges statuses by serial into the monitor instance...&quot;)
-self._logger.info(&quot;Getting all open tickets for all customers...&quot;)
-</code></pre>
-<ul>
-<li><a href="../_get_all_open_tickets_with_details_for_monitored_companies/">_get_all_open_tickets_with_details_for_monitored_companies</a></li>
-</ul>
-<pre><code>self._logger.info(
-            f&quot;Got {len(open_tickets)} open tickets for all customers. &quot;
-            f&quot;Filtering them (and their details) to get only the ones under the device list&quot;
-        )
-</code></pre>
-<ul>
-<li><a href="../_filter_tickets_and_details_related_to_edges_under_monitoring/">_filter_tickets_and_details_related_to_edges_under_monitoring</a></li>
-</ul>
-<pre><code>self._logger.info(
-            f&quot;Got {len(relevant_open_tickets)} relevant tickets for all customers. &quot;
-            f&quot;Cleaning them up to exclude all invalid notes...&quot;
-        )
-self._logger.info(&quot;Getting T7 predictions for all relevant open tickets...&quot;)
-</code></pre>
-<ul>
-<li><a href="../_get_predictions_by_ticket_id/">_get_predictions_by_ticket_id</a></li>
-</ul>
-<pre><code>self._logger.info(&quot;Removing erroneous T7 predictions...&quot;)
-</code></pre>
-<ul>
-<li><a href="../_remove_erroneous_predictions/">_remove_erroneous_predictions</a></li>
-</ul>
-<pre><code>self._logger.info(&quot;Creating detail objects based on all tickets...&quot;)
-self._logger.info(&quot;Discarding resolved ticket details...&quot;)
-self._logger.info(&quot;Discarding ticket details of outage tickets whose last outage happened too recently...&quot;)
-</code></pre>
-<ul>
-<li><a href="../_filter_outage_ticket_details_based_on_last_outage/">_filter_outage_ticket_details_based_on_last_outage</a></li>
-</ul>
-<pre><code>self._logger.info(&quot;Mapping all ticket details with their predictions...&quot;)
-</code></pre>
-<ul>
-<li><a href="../_map_ticket_details_with_predictions/">_map_ticket_details_with_predictions</a></li>
-</ul>
-<pre><code>self._logger.info(
-            f&quot;{len(ticket_detail_objects)} ticket details were successfully mapped to predictions. &quot;
-            &quot;Processing all details...&quot;
-        )
-</code></pre>
-<ul>
-<li><a href="../_process_ticket_detail/">_process_ticket_detail</a></li>
-</ul>
-<pre><code>self._logger.info(&quot;All ticket details were processed.&quot;)
-</code></pre>
-<ul>
-<li>If not append notes TNBA:
-  <code>self._logger.info("No TNBA notes for append were built for any detail processed.")</code></li>
-<li>Else:
-  <code>self._logger.info(f"{len(self._tnba_notes_to_append)} TNBA notes were built for append.")</code></li>
-<li><a href="../_append_tnba_notes/">_append_tnba_notes</a></li>
-</ul>
-<pre><code>self._logger.info(f&quot;TNBA process finished! Took {round((end_time - start_time) / 60, 2)} minutes.&quot;)
-</code></pre>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(&quot;Starting TNBA process...&quot;)
+</code></pre></div>
+* <a href="../../repositories/customer_cache/get_cache_for_tnba_monitoring/">get_cache_for_tnba_monitoring</a>
+* If get cache status is not Ok:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.warning(f&quot;Bad status calling to get cache. Skipping run ticket polling ...&quot;)
+</code></pre></div>
+* <a href="../../repositories/velocloud_repository/get_edges_for_tnba_monitoring/">get_edges_for_tnba_monitoring</a>
+* If not edges statuses:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.error(&quot;No edges statuses were received from VeloCloud. Aborting TNBA monitoring...&quot;)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.info(&quot;Keeping serials that exist in both the customer cache and the set of edges statuses...&quot;)
+</code></pre></div>
+* <a href="get_links_metrics_for_autoresolve.md">get_links_metrics_for_autoresolve</a>
+* If not link metrics:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.info(&quot;List of links metrics arrived empty. Skipping...&quot;)
+</code></pre></div>
+* <a href="../../repositories/velocloud_repository/get_events_by_serial_and_interface/">get_events_by_serial_and_interface</a>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>self._logger.info(&quot;Loading customer cache and edges statuses by serial into the monitor instance...&quot;)
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>self._logger.info(&quot;Getting all open tickets for all customers...&quot;)
+</code></pre></div>
+* <a href="../_get_all_open_tickets_with_details_for_monitored_companies/">_get_all_open_tickets_with_details_for_monitored_companies</a>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>self._logger.info(
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>            f&quot;Got {len(open_tickets)} open tickets for all customers. &quot;
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>            f&quot;Filtering them (and their details) to get only the ones under the device list&quot;
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>        )
+</code></pre></div>
+* <a href="../_filter_tickets_and_details_related_to_edges_under_monitoring/">_filter_tickets_and_details_related_to_edges_under_monitoring</a>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>self._logger.info(
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>            f&quot;Got {len(relevant_open_tickets)} relevant tickets for all customers. &quot;
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>            f&quot;Cleaning them up to exclude all invalid notes...&quot;
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>        )
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>self._logger.info(&quot;Getting T7 predictions for all relevant open tickets...&quot;)
+</code></pre></div>
+* <a href="../_get_predictions_by_ticket_id/">_get_predictions_by_ticket_id</a>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>self._logger.info(&quot;Removing erroneous T7 predictions...&quot;)
+</code></pre></div>
+* <a href="../_remove_erroneous_predictions/">_remove_erroneous_predictions</a>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>self._logger.info(&quot;Creating detail objects based on all tickets...&quot;)
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>self._logger.info(&quot;Discarding resolved ticket details...&quot;)
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>self._logger.info(&quot;Discarding ticket details of outage tickets whose last outage happened too recently...&quot;)
+</code></pre></div>
+* <a href="../_filter_outage_ticket_details_based_on_last_outage/">_filter_outage_ticket_details_based_on_last_outage</a>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>self._logger.info(&quot;Mapping all ticket details with their predictions...&quot;)
+</code></pre></div>
+* <a href="../_map_ticket_details_with_predictions/">_map_ticket_details_with_predictions</a>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>self._logger.info(
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>            f&quot;{len(ticket_detail_objects)} ticket details were successfully mapped to predictions. &quot;
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>            &quot;Processing all details...&quot;
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>        )
+</code></pre></div>
+* <a href="../_process_ticket_detail/">_process_ticket_detail</a>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>self._logger.info(&quot;All ticket details were processed.&quot;)
+</code></pre></div>
+* If not append notes TNBA:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>self._logger.info(&quot;No TNBA notes for append were built for any detail processed.&quot;)
+</code></pre></div>
+* Else:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>self._logger.info(f&quot;{len(self._tnba_notes_to_append)} TNBA notes were built for append.&quot;)
+</code></pre></div>
+  * <a href="../_append_tnba_notes/">_append_tnba_notes</a>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>self._logger.info(f&quot;TNBA process finished! Took {round((end_time - start_time) / 60, 2)} minutes.&quot;)
+</code></pre></div></p>
 
               
             </article>

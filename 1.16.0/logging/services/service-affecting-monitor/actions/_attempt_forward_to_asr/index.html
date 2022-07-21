@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/service-affecting-monitor/actions/_attempt_forward_to_asr/">
       
       <link rel="icon" href="../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,47 +553,51 @@
   <h1> attempt forward to asr</h1>
 
 <h2 id="attempt-forward-to-asr-documentation">Attempt forward to asr Documentation</h2>
-<pre><code>self._logger.info(
-            f&quot;Attempting to forward task of ticket {ticket_id} related to serial {serial_number} to ASR Investigate...&quot;
-        )
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>            f&quot;Attempting to forward task of ticket {ticket_id} related to serial {serial_number} to ASR Investigate...&quot;
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>        )
+</code></pre></div>
 <ul>
 <li>if link_interface_type != "WIRED"
-  <code>self._logger.info(
-                f"Link {interface} is of type {link_interface_type} and not WIRED. Attempting to forward " f"to HNOC..."
-            )</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>              f&quot;Link {interface} is of type {link_interface_type} and not WIRED. Attempting to forward &quot; f&quot;to HNOC...&quot;
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>          )
+</code></pre></div></li>
 <li><a href="../_forward_ticket_to_hnoc_queue/">Forward ticket to hnoc queue</a></li>
 </ul>
-<pre><code>self._logger.info(
-            f&quot;Filtering out any of the wired links of serial {serial_number} that contains any of the &quot;
-            f&quot;following: &quot;
-            f'{self._config.ASR_CONFIG[&quot;link_labels_blacklist&quot;]} '
-            f&quot;in the link label&quot;
-        )
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>            f&quot;Filtering out any of the wired links of serial {serial_number} that contains any of the &quot;
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>            f&quot;following: &quot;
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>            f&#39;{self._config.ASR_CONFIG[&quot;link_labels_blacklist&quot;]} &#39;
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>            f&quot;in the link label&quot;
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>        )
+</code></pre></div>
 <ul>
 <li>
 <p>if not _should_be_forwarded_to_asr
-  <code>self._logger.info(
-                f"No links with whitelisted labels were found for serial {serial_number}. "
-                f"Related detail of ticket {ticket_id} will not be forwarded to {target_queue}."
-            )</code></p>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.info(
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>              f&quot;No links with whitelisted labels were found for serial {serial_number}. &quot;
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>              f&quot;Related detail of ticket {ticket_id} will not be forwarded to {target_queue}.&quot;
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>          )
+</code></pre></div></p>
 </li>
 <li>
 <p><a href="../../repositories/bruin_repository/get_ticket_details/">Get ticket details</a></p>
 </li>
 <li>
 <p>if other_troubles_in_ticket
- <code>self._logger.info(
-                f"Other service affecting troubles were found in ticket id {ticket_id}. Skipping forward" f"to asr..."
-            )</code></p>
+ <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.info(
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>               f&quot;Other service affecting troubles were found in ticket id {ticket_id}. Skipping forward&quot; f&quot;to asr...&quot;
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>           )
+</code></pre></div></p>
 </li>
 <li>
 <p>if task_result_note is not None
-  <code>self._logger.info(
-                f"Detail related to serial {serial_number} of ticket {ticket_id} has already been forwarded to "
-                f'"{task_result}"'
-            )</code></p>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>self._logger.info(
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>              f&quot;Detail related to serial {serial_number} of ticket {ticket_id} has already been forwarded to &quot;
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>              f&#39;&quot;{task_result}&quot;&#39;
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>          )
+</code></pre></div></p>
 </li>
 <li><a href="../../repositories/bruin_repository/change_detail_work_queue/">Change detail work queue</a></li>
 <li><a href="../../repositories/bruin_repository/append_asr_forwarding_note_to_ticket/">Append asr forwarding note</a></li>

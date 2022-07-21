@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/service-outage-monitor/actions/triage/_process_ticket_details_without_triage/">
       
       <link rel="icon" href="../../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,40 +553,40 @@
   <h1> process ticket details without triage</h1>
 
 <h2 id="process-ticket-details-without-triage">Process ticket details without triage</h2>
-<pre><code>self._logger.info(&quot;Processing ticket details without triage...&quot;)
-</code></pre>
-<ul>
-<li>For detail in details:
-  <code>self._logger.info(f"Processing detail {ticket_detail_id} without triage of ticket {ticket_id}...")</code></li>
-<li>If not outage type:
-    <code>self._logger.info(
-                    f"Edge {serial_number} is no longer down, so the initial triage note won't be posted to ticket "
-                    f"{ticket_id}. Posting events of the last 24 hours to the ticket so it's not blank..."
-                )</code> <ul>
-<li><a href="../_append_new_triage_notes_based_on_recent_events/">_append_new_triage_notes_based_on_recent_events</a></li>
-</ul>
-</li>
-<li>Else:
-    <code>self._logger.info(
-                    f"Edge {serial_number} is in {outage_type.value} state. Posting initial triage note to ticket "
-                    f"{ticket_id}..."
-                )</code><ul>
-<li>If not document outage:
-  <code>self._logger.info(
-                    f"Edge {serial_number} is down, but it doesn't qualify to be documented as a Service Outage in "
-                    f"ticket {ticket_id}. Most probable thing is that the edge is the standby of a HA pair, and "
-                    "standbys in outage state are only documented in the event of a Soft Down. Skipping..."
-                )</code></li>
-<li><a href="../../../repositories/velocloud_repository/get_last_edge_events/">get_last_edge_events</a></li>
-<li>If get last edge events not Ok:
-  <code>self._logger.warning(f"Bad status calling to get last edge events. "
-  f"Skipping process details without details ...")</code>
-  <code>self._logger.info(f"Finished processing detail {ticket_detail_id} of ticket {ticket_id}!")</code>  </li>
-</ul>
-</li>
-</ul>
-<pre><code>self._logger.info(&quot;Finished processing ticket details without triage!&quot;)
-</code></pre>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(&quot;Processing ticket details without triage...&quot;)
+</code></pre></div>
+* For detail in details:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(f&quot;Processing detail {ticket_detail_id} without triage of ticket {ticket_id}...&quot;)
+</code></pre></div>
+  * If not outage type:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>                f&quot;Edge {serial_number} is no longer down, so the initial triage note won&#39;t be posted to ticket &quot;
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>                f&quot;{ticket_id}. Posting events of the last 24 hours to the ticket so it&#39;s not blank...&quot;
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>            )
+</code></pre></div>
+    * <a href="../_append_new_triage_notes_based_on_recent_events/">_append_new_triage_notes_based_on_recent_events</a>
+  * Else:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.info(
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>                f&quot;Edge {serial_number} is in {outage_type.value} state. Posting initial triage note to ticket &quot;
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>                f&quot;{ticket_id}...&quot;
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>            )
+</code></pre></div>
+    * If not document outage:
+      <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.info(
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>                  f&quot;Edge {serial_number} is down, but it doesn&#39;t qualify to be documented as a Service Outage in &quot;
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>                  f&quot;ticket {ticket_id}. Most probable thing is that the edge is the standby of a HA pair, and &quot;
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>                  &quot;standbys in outage state are only documented in the event of a Soft Down. Skipping...&quot;
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>              )
+</code></pre></div>
+    * <a href="../../../repositories/velocloud_repository/get_last_edge_events/">get_last_edge_events</a>
+    * If get last edge events not Ok:
+      <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>self._logger.warning(f&quot;Bad status calling to get last edge events. &quot;
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>f&quot;Skipping process details without details ...&quot;)
+</code></pre></div>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>self._logger.info(f&quot;Finished processing detail {ticket_detail_id} of ticket {ticket_id}!&quot;)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>self._logger.info(&quot;Finished processing ticket details without triage!&quot;)
+</code></pre></div></p>
 
               
             </article>

@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/service-outage-monitor/actions/outage_monitoring/start_service_outage_monitoring/">
       
       <link rel="icon" href="../../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,15 +553,15 @@
   <h1>Start service outage monitoring</h1>
 
 <h2 id="start-service-outage-monitoring-start-the-process-of-outage">Start service outage monitoring (<strong>start the process of outage</strong>)</h2>
-<pre><code>self._logger.info(&quot;Scheduling Service Outage Monitor job...&quot;)
-</code></pre>
-<ul>
-<li>If exe on start:
-  <code>self._logger.info("Service Outage Monitor job is going to be executed immediately")</code></li>
-<li><a href="../_outage_monitoring_process/">_outage_monitoring_process</a></li>
-<li>If Exception:
-  <code>self._logger.error(f"Skipping start of Service Outage Monitoring job. Reason: {conflict}")</code></li>
-</ul>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(&quot;Scheduling Service Outage Monitor job...&quot;)
+</code></pre></div>
+* If exe on start:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(&quot;Service Outage Monitor job is going to be executed immediately&quot;)
+</code></pre></div>
+* <a href="../_outage_monitoring_process/">_outage_monitoring_process</a>
+* If Exception:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.error(f&quot;Skipping start of Service Outage Monitoring job. Reason: {conflict}&quot;)
+</code></pre></div></p>
 
               
             </article>

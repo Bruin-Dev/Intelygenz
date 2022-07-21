@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/service-outage-monitor/repositories/digi_repository/reboot_link/">
       
       <link rel="icon" href="../../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,16 +553,15 @@
   <h1>Reboot link</h1>
 
 <h2 id="reboot-link">Reboot link</h2>
-<pre><code>self._logger.info(f&quot;Rebooting DiGi link of ticket {ticket_id} from Bruin...&quot;)
-</code></pre>
-<ul>
-<li>If Exception:
-  <code>self._logger.error(f"An error occurred when attempting a DiGi reboot for ticket {ticket_id} -&gt; {e}")</code>
-<code>self._logger.info(f"Got details of ticket {ticket_id} from Bruin!")</code></li>
-<li>If status not ok:
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(f&quot;Rebooting DiGi link of ticket {ticket_id} from Bruin...&quot;)
+</code></pre></div>
+* If Exception:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.error(f&quot;An error occurred when attempting a DiGi reboot for ticket {ticket_id} -&gt; {e}&quot;)
+</code></pre></div>
+<code>self._logger.info(f"Got details of ticket {ticket_id} from Bruin!")</code>
+* If status not ok:
   <code>self._logger.error(f"Error while attempting a DiGi reboot for ticket {ticket_id} in 
-  {self._config.CURRENT_ENVIRONMENT.upper()} environment: Error {response_status} - {response_body}")</code></li>
-</ul>
+  {self._config.CURRENT_ENVIRONMENT.upper()} environment: Error {response_status} - {response_body}")</code></p>
 
               
             </article>

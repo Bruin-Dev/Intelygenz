@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/service-affecting-monitor/repositories/bruin_repository/get_tickets/">
       
       <link rel="icon" href="../../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -555,47 +555,54 @@
 <h2 id="get-tickets-documentation">Get tickets Documentation</h2>
 <ul>
 <li>if not service_number
-    <code>self._logger.info(
-        f"Getting all tickets with any status of {ticket_statuses}, with ticket topic "
-        f"{ticket_topic} and belonging to client {client_id} from Bruin..."
-    )</code></li>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    f&quot;Getting all tickets with any status of {ticket_statuses}, with ticket topic &quot;
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    f&quot;{ticket_topic} and belonging to client {client_id} from Bruin...&quot;
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>)
+</code></pre></div></li>
 <li>else
-    <code>self._logger.info(
-        f"Getting all tickets with any status of {ticket_statuses}, with ticket topic "
-        f"{ticket_topic}, service number {service_number} and belonging to client {client_id} from Bruin..."
-    )</code></li>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    f&quot;Getting all tickets with any status of {ticket_statuses}, with ticket topic &quot;
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    f&quot;{ticket_topic}, service number {service_number} and belonging to client {client_id} from Bruin...&quot;
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>)
+</code></pre></div></li>
 <li>if <code>Exception</code>
-  <code>self._logger.error(
-                f"An error occurred when requesting tickets from Bruin API with any status of {ticket_statuses}, "
-                f"with ticket topic {ticket_topic} and belonging to client {client_id} -&gt; {e}"
-            )</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.error(
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>              f&quot;An error occurred when requesting tickets from Bruin API with any status of {ticket_statuses}, &quot;
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>              f&quot;with ticket topic {ticket_topic} and belonging to client {client_id} -&gt; {e}&quot;
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>          )
+</code></pre></div></li>
 <li>if response_status in range(200, 300):</li>
 <li>if not service_number:
-    <code>self._logger.info(
-                      f"Got all tickets with any status of {ticket_statuses}, with ticket topic "
-                      f"{ticket_topic} and belonging to client {client_id} from Bruin!"
-                    )</code></li>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.info(
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>                  f&quot;Got all tickets with any status of {ticket_statuses}, with ticket topic &quot;
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>                  f&quot;{ticket_topic} and belonging to client {client_id} from Bruin!&quot;
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>                )
+</code></pre></div></li>
 <li>else
-    <code>self._logger.info(
-                      f"Got all tickets with any status of {ticket_statuses}, with ticket topic "
-                      f"{ticket_topic}, service number {service_number} and belonging to client "
-                      f"{client_id} from Bruin!"
-                    )</code></li>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.info(
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>                  f&quot;Got all tickets with any status of {ticket_statuses}, with ticket topic &quot;
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>                  f&quot;{ticket_topic}, service number {service_number} and belonging to client &quot;
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>                  f&quot;{client_id} from Bruin!&quot;
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>                )
+</code></pre></div></li>
 <li>else</li>
 <li>if not service_number
-    <code>self._logger.error(
-                        f"Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic "
-                        f"{ticket_topic} and belonging to client {client_id} in "
-                        f"{self._config.ENVIRONMENT_NAME.upper()} environment: "
-                        f"Error {response_status} - {response_body}"
-                    )</code></li>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>self._logger.error(
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>                    f&quot;Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic &quot;
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>                    f&quot;{ticket_topic} and belonging to client {client_id} in &quot;
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>                    f&quot;{self._config.ENVIRONMENT_NAME.upper()} environment: &quot;
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>                    f&quot;Error {response_status} - {response_body}&quot;
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>                )
+</code></pre></div></li>
 <li>else
-    <code>self._logger.error(
-                        f"Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic "
-                        f"{ticket_topic}, service number {service_number} and belonging to client {client_id} in "
-                        f"{self._config.ENVIRONMENT_NAME.upper()} environment: "
-                        f"Error {response_status} - {response_body}"
-                    )</code></li>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>self._logger.error(
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>                    f&quot;Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic &quot;
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>                    f&quot;{ticket_topic}, service number {service_number} and belonging to client {client_id} in &quot;
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>                    f&quot;{self._config.ENVIRONMENT_NAME.upper()} environment: &quot;
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>                    f&quot;Error {response_status} - {response_body}&quot;
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>                )
+</code></pre></div></li>
 </ul>
 
               

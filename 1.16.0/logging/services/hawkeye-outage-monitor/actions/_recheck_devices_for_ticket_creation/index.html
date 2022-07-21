@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/hawkeye-outage-monitor/actions/_recheck_devices_for_ticket_creation/">
       
       <link rel="icon" href="../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,71 +553,81 @@
   <h1> recheck devices for ticket creation</h1>
 
 <h2 id="recheck-devices-for-ticket-creation">Recheck devices for ticket creation</h2>
-<pre><code>self._logger.info(f&quot;Re-checking {len(devices)} devices in outage state prior to ticket creation...&quot;)
-</code></pre>
-<ul>
-<li><a href="../../repositories/hawkeye_repository/get_probes/">get_probes</a></li>
-<li>If status not Ok:
-  <code>self._logger.warning(f"Bad status calling to get probes. Skipping hawkeye outage monitoring process ...")</code></li>
-<li>If not probes:
-  <code>self._logger.info("The list of probes arrived empty. Skipping monitoring process...")</code></li>
-<li>If not active probes:
-  <code>self._logger.info("All probes were detected as inactive. Skipping monitoring process...")</code></li>
-<li><a href="../_map_probes_info_with_customer_cache/">_map_probes_info_with_customer_cache</a></li>
-<li>If environment not PRODUCTION:
-  <code>self._logger.info(
-                f"Process cannot keep going as the current environment is {working_environment.upper()}. "
-                f"Healthy devices: {len(healthy_devices)} | Outage devices: {len(devices_still_in_outage)}"
-            )</code></li>
-<li>If devices still outage:
-  <code>self._logger.info(
-                f"{len(devices_still_in_outage)} devices were detected as still in outage state after re-check."
-            )</code></li>
-<li>for device in devices:
-    <code>self._logger.info(f"Attempting outage ticket creation for faulty device {serial_number}...")</code><ul>
-<li><a href="../../repositories/bruin_repository/create_outage_ticket/">create_outage_ticket</a></li>
-<li>If create outage ticket status is Ok:
-  <code>self._logger.info(f"Outage ticket created for device {serial_number}! Ticket ID: {ticket_id}")
-  self._logger.info(f"Appending triage note to outage ticket {ticket_id}...")</code></li>
-<li><a href="../../repositories/bruin_repository/append_triage_note/">append_triage_note_to_ticket</a></li>
-<li>If create outage ticket status is 409:
-  <code>self._logger.info(
-                    f"Faulty device {serial_number} already has an outage ticket in progress (ID = {ticket_id})."
-                )</code></li>
-<li><a href="../_append_triage_note_if_needed/">_append_triage_note_if_needed</a></li>
-<li>If create outage ticket status is 471:
-  <code>self._logger.info(
-                    f"Faulty device {serial_number} has a resolved outage ticket (ID = {ticket_id}). "
-                    "Re-opening ticket..."
-                )</code></li>
-<li><a href="../_reopen_outage_ticket/">_reopen_outage_ticket</a></li>
-<li>If create outage ticket status is 472:
-  <code>self._logger.info(
-                    f"[outage-recheck] Faulty device {serial_number} has a resolved outage ticket "
-                    f"(ID = {ticket_id}). Its ticket detail was automatically unresolved "
-                    f"by Bruin. Appending reopen note to ticket..."
-                )</code></li>
-<li><a href="../../repositories/bruin_repository/append_note_to_ticket/">append_note_to_ticket</a></li>
-<li>If create outage ticket status is 473:
-  <code>self._logger.info(
-                    f"[outage-recheck] There is a resolve outage ticket for the same location of faulty device "
-                    f"{serial_number} (ticket ID = {ticket_id}). The ticket was"
-                    f"automatically unresolved by Bruin and a new ticket detail for serial {serial_number} was "
-                    f"appended to it. Appending initial triage note for this service number..."
-                )</code></li>
-<li><a href="../../repositories/bruin_repository/append_note_to_ticket/">append_triage_note</a></li>
-</ul>
-</li>
-<li>Else: 
-  <code>self._logger.info(
-                "No devices were detected in outage state after re-check. Outage tickets won't be created"
-            )</code></li>
-<li>If healthy devices:
-  <code>self._logger.info(f"{len(healthy_devices)} devices were detected in healthy state after re-check.")</code></li>
-<li><a href="../_run_ticket_autoresolve/">_run_ticket_autoresolve</a></li>
-<li>Else:
-  <code>self._logger.info("No devices were detected in healthy state after re-check.")</code></li>
-</ul>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(f&quot;Re-checking {len(devices)} devices in outage state prior to ticket creation...&quot;)
+</code></pre></div>
+* <a href="../../repositories/hawkeye_repository/get_probes/">get_probes</a>
+* If status not Ok:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.warning(f&quot;Bad status calling to get probes. Skipping hawkeye outage monitoring process ...&quot;)
+</code></pre></div>
+* If not probes:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(&quot;The list of probes arrived empty. Skipping monitoring process...&quot;)
+</code></pre></div>
+* If not active probes:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.info(&quot;All probes were detected as inactive. Skipping monitoring process...&quot;)
+</code></pre></div>
+* <a href="../_map_probes_info_with_customer_cache/">_map_probes_info_with_customer_cache</a>
+* If environment not PRODUCTION:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.info(
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>              f&quot;Process cannot keep going as the current environment is {working_environment.upper()}. &quot;
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>              f&quot;Healthy devices: {len(healthy_devices)} | Outage devices: {len(devices_still_in_outage)}&quot;
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>          )
+</code></pre></div>
+* If devices still outage:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>self._logger.info(
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>              f&quot;{len(devices_still_in_outage)} devices were detected as still in outage state after re-check.&quot;
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>          )
+</code></pre></div>
+  * for device in devices:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>self._logger.info(f&quot;Attempting outage ticket creation for faulty device {serial_number}...&quot;)
+</code></pre></div>
+    * <a href="../../repositories/bruin_repository/create_outage_ticket/">create_outage_ticket</a>
+    * If create outage ticket status is Ok:
+      <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>self._logger.info(f&quot;Outage ticket created for device {serial_number}! Ticket ID: {ticket_id}&quot;)
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>self._logger.info(f&quot;Appending triage note to outage ticket {ticket_id}...&quot;)
+</code></pre></div>
+      * <a href="../../repositories/bruin_repository/append_triage_note/">append_triage_note_to_ticket</a>
+    * If create outage ticket status is 409:
+      <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>self._logger.info(
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>                  f&quot;Faulty device {serial_number} already has an outage ticket in progress (ID = {ticket_id}).&quot;
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>              )
+</code></pre></div>
+      * <a href="../_append_triage_note_if_needed/">_append_triage_note_if_needed</a>
+    * If create outage ticket status is 471:
+      <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>self._logger.info(
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>                  f&quot;Faulty device {serial_number} has a resolved outage ticket (ID = {ticket_id}). &quot;
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>                  &quot;Re-opening ticket...&quot;
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>              )
+</code></pre></div>
+      * <a href="../_reopen_outage_ticket/">_reopen_outage_ticket</a>
+    * If create outage ticket status is 472:
+      <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>self._logger.info(
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>                  f&quot;[outage-recheck] Faulty device {serial_number} has a resolved outage ticket &quot;
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>                  f&quot;(ID = {ticket_id}). Its ticket detail was automatically unresolved &quot;
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>                  f&quot;by Bruin. Appending reopen note to ticket...&quot;
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>              )
+</code></pre></div>
+      * <a href="../../repositories/bruin_repository/append_note_to_ticket/">append_note_to_ticket</a>
+    * If create outage ticket status is 473:
+      <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>self._logger.info(
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>                  f&quot;[outage-recheck] There is a resolve outage ticket for the same location of faulty device &quot;
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>                  f&quot;{serial_number} (ticket ID = {ticket_id}). The ticket was&quot;
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>                  f&quot;automatically unresolved by Bruin and a new ticket detail for serial {serial_number} was &quot;
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>                  f&quot;appended to it. Appending initial triage note for this service number...&quot;
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>              )
+</code></pre></div>
+      * <a href="../../repositories/bruin_repository/append_note_to_ticket/">append_triage_note</a>
+* Else: 
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>self._logger.info(
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>              &quot;No devices were detected in outage state after re-check. Outage tickets won&#39;t be created&quot;
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>          )
+</code></pre></div>
+* If healthy devices:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>self._logger.info(f&quot;{len(healthy_devices)} devices were detected in healthy state after re-check.&quot;)
+</code></pre></div>
+  * <a href="../_run_ticket_autoresolve/">_run_ticket_autoresolve</a>
+* Else:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>self._logger.info(&quot;No devices were detected in healthy state after re-check.&quot;)
+</code></pre></div></p>
 
               
             </article>

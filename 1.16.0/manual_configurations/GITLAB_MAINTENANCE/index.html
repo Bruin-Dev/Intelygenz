@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/manual_configurations/GITLAB_MAINTENANCE/">
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -550,22 +550,22 @@
 <p><code>2-network</code>, manage the networking of the environemt, this terraform configuration have all the VPC configuration required to deploy gitlab.</p>
 <p><code>4-services</code>, deploy AWS services required like RDS, EKS, or S3 among others. Also deploy the Chart of the gitlab application.</p>
 <h1 id="3-deploy">3. Deploy</h1>
-<p>All terraform modules have a common <code>Makefile</code> that contain the required configuratión to apply terraform in a specifig workspace. For example, to deploy the complete gitlab environment you need to:</p>
-<pre><code>cd infra-as-code/basic-infra/1-parameters
-make terraform_apply env=builder
-  // note: after parameter creation, you need to update the value of that paramters in AWS web console.
-cd ../2-network
-make terraform_apply env=builder
-cd ../4-services
-make terraform_apply env=builder
-</code></pre>
+<p>All terraform modules have a common <code>Makefile</code> that contain the required configuratión to apply terraform in a specifig workspace. For example, to deploy the complete gitlab environment you need to:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>cd infra-as-code/basic-infra/1-parameters
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>make terraform_apply env=builder
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  // note: after parameter creation, you need to update the value of that paramters in AWS web console.
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>cd ../2-network
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>make terraform_apply env=builder
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>cd ../4-services
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>make terraform_apply env=builder
+</code></pre></div></p>
 <h1 id="4-updates">4. Updates</h1>
-<p>Gitlab receives constant security patches and updates, it is recommended to keep gitlab up to date. To do this, we go to the <code>gitlab-ci.yml</code> root file of the repo and update the version, for example:</p>
-<pre><code>  ...
-  TF_VAR_GITLAB_CHART_VERSION: &quot;6.0.3&quot;
-  ...
-</code></pre>
-<p>Then just execute in <code>4-services</code> folder the command: <code>make terraform apply env=builder</code> verify the changes, and accepting them by write "yes" to applied it.</p>
+<p>Gitlab receives constant security patches and updates, it is recommended to keep gitlab up to date. To do this, we go to the <code>gitlab-ci.yml</code> root file of the repo and update the version, for example:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>  ...
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  TF_VAR_GITLAB_CHART_VERSION: &quot;6.0.3&quot;
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  ...
+</code></pre></div>
+Then just execute in <code>4-services</code> folder the command: <code>make terraform apply env=builder</code> verify the changes, and accepting them by write "yes" to applied it.</p>
 <h1 id="5-references">5. References</h1>
 <ul>
 <li>https://docs.gitlab.com/ee/raketasks/backup_restore.html</li>

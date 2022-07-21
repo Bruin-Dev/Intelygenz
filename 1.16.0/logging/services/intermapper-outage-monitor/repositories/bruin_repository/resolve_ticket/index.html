@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/intermapper-outage-monitor/repositories/bruin_repository/resolve_ticket/">
       
       <link rel="icon" href="../../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,19 +553,17 @@
   <h1>Resolve ticket</h1>
 
 <h2 id="resolve-ticket-detail">Resolve ticket detail</h2>
-<pre><code>self._logger.info(f&quot;Resolving ticket {ticket_id} (affected detail ID: {detail_id})...&quot;)
-</code></pre>
-<ul>
-<li>If Exception:
-  <code>self._logger.error(f"An error occurred when resolving ticket {ticket_id} -&gt; {e}")</code></li>
-</ul>
-<pre><code>self._logger.info(f&quot;Ticket {ticket_id} resolved!&quot;)
-</code></pre>
-<ul>
-<li>If status not ok:
-  <code>self._logger.error(f"Error while resolving ticket {ticket_id} in {self._config.CURRENT_ENVIRONMENT.upper()} "
-                    f"environment: Error {response_status} - {response_body}")</code></li>
-</ul>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(f&quot;Resolving ticket {ticket_id} (affected detail ID: {detail_id})...&quot;)
+</code></pre></div>
+* If Exception:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.error(f&quot;An error occurred when resolving ticket {ticket_id} -&gt; {e}&quot;)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(f&quot;Ticket {ticket_id} resolved!&quot;)
+</code></pre></div>
+* If status not ok:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.error(f&quot;Error while resolving ticket {ticket_id} in {self._config.CURRENT_ENVIRONMENT.upper()} &quot;
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>                  f&quot;environment: Error {response_status} - {response_body}&quot;)
+</code></pre></div></p>
 
               
             </article>

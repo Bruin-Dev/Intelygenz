@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/service-affecting-monitor/actions/_latency_check/">
       
       <link rel="icon" href="../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,23 +553,25 @@
   <h1> latency check</h1>
 
 <h2 id="latency-check-documentation">Latency Check Documentation</h2>
-<pre><code>self._logger.info(&quot;Looking for latency issues...&quot;)
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(&quot;Looking for latency issues...&quot;)
+</code></pre></div>
 <ul>
 <li><a href="../../repositories/velocloud_repository/get_links_metrics_for_latency_checks/">Get links metrics for latency checks</a></li>
 <li>Check if link metrics is empty
-    <code>self._logger.info("List of links arrived empty while checking latency issues. Skipping...")</code></li>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(&quot;List of links arrived empty while checking latency issues. Skipping...&quot;)
+</code></pre></div></li>
 <li><a href="../_structure_links_metrics/">Structure link metrics</a></li>
 <li><a href="../_map_cached_edges_with_links_metrics_and_contact_info/">Map cached edges with links metrics and contact info</a></li>
 <li>for elem in metrics_with_cache_and_contact_info:</li>
 <li>if are_latency_metrics_within_threshold
-    <code>self._logger.info(
-                    f"Link {link_status['interface']} from {serial_number} didn't exceed latency thresholds"
-                )</code>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>                f&quot;Link {link_status[&#39;interface&#39;]} from {serial_number} didn&#39;t exceed latency thresholds&quot;
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>            )
+</code></pre></div>
   *<a href="../_process_latency_trouble/">Process latency trouble</a></li>
 </ul>
-<pre><code>self._logger.info(&quot;Finished looking for latency issues!&quot;)
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.info(&quot;Finished looking for latency issues!&quot;)
+</code></pre></div>
 
               
             </article>

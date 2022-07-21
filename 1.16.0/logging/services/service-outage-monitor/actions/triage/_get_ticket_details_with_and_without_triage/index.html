@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/service-outage-monitor/actions/triage/_get_ticket_details_with_and_without_triage/">
       
       <link rel="icon" href="../../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -555,24 +555,28 @@
 <h2 id="get-ticket-details-with-and-without-triage">Get ticket details with and without triage</h2>
 <ul>
 <li>For ticket in tickets:
-  <code>self._logger.info(f"Checking details of ticket_id: {ticket_id}")</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(f&quot;Checking details of ticket_id: {ticket_id}&quot;)
+</code></pre></div></li>
 <li>For detail in ticket details:
-    <code>self._logger.info(
-                    f"Checking for triage notes in ticket_id: {ticket_id} "
-                    f"relating to serial number: {serial_number}"
-                )</code><ul>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>                f&quot;Checking for triage notes in ticket_id: {ticket_id} &quot;
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>                f&quot;relating to serial number: {serial_number}&quot;
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>            )
+</code></pre></div><ul>
 <li>If notes related to serial:
-  <code>self._logger.info(
-                    f"No triage notes found in ticket_id: {ticket_id} "
-                    f"for serial number {serial_number}. "
-                    f"Adding to ticket_details_without_triage list..."
-                )</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>                  f&quot;No triage notes found in ticket_id: {ticket_id} &quot;
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>                  f&quot;for serial number {serial_number}. &quot;
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>                  f&quot;Adding to ticket_details_without_triage list...&quot;
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>              )
+</code></pre></div></li>
 <li>Else:
-  <code>sself._logger.info(
-                    f"Triage note found in ticket_id: {ticket_id} "
-                    f"for serial number {serial_number}. "
-                    f"Adding to ticket_details_with_triage list..."
-                )</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sself._logger.info(
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>                  f&quot;Triage note found in ticket_id: {ticket_id} &quot;
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>                  f&quot;for serial number {serial_number}. &quot;
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>                  f&quot;Adding to ticket_details_with_triage list...&quot;
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>              )
+</code></pre></div></li>
 </ul>
 </li>
 </ul>

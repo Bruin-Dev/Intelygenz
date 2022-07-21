@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/hawkeye-affecting-monitor/repositories/bruin_repository/create_affecting_ticket/">
       
       <link rel="icon" href="../../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,30 +553,33 @@
   <h1>Create affecting ticket</h1>
 
 <h2 id="create-affecting-ticket-documentation">Create Affecting ticket Documentation</h2>
-<pre><code>self._logger.info(
-                f&quot;Creating affecting ticket for serial {service_number} belonging to client {client_id}...&quot;
-            )
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                f&quot;Creating affecting ticket for serial {service_number} belonging to client {client_id}...&quot;
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>            )
+</code></pre></div>
 <ul>
 <li>
 <p>if <code>Exception</code>
-  <code>self._logger.error(
-                f"An error occurred while creating affecting ticket for client id {client_id} and serial "
-                f"{service_number} -&gt; {e}"
-            )</code></p>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.error(
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>              f&quot;An error occurred while creating affecting ticket for client id {client_id} and serial &quot;
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>              f&quot;{service_number} -&gt; {e}&quot;
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>          )
+</code></pre></div></p>
 </li>
 <li>
 <p>if response_status in range(200, 300)
-  <code>self._logger.info(
-                    f"Affecting ticket for client {client_id} and serial {service_number} created successfully!"
-                )</code></p>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>                  f&quot;Affecting ticket for client {client_id} and serial {service_number} created successfully!&quot;
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>              )
+</code></pre></div></p>
 </li>
 <li>else
-  <code>self._logger.error(
-                    f"Error while opening affecting ticket for client {client_id} and serial {service_number} in "
-                    f"{self._config.ENVIRONMENT_NAME.upper()} environment: "
-                    f"Error {response_status} - {response_body}"
-                )</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.error(
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>                  f&quot;Error while opening affecting ticket for client {client_id} and serial {service_number} in &quot;
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>                  f&quot;{self._config.ENVIRONMENT_NAME.upper()} environment: &quot;
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>                  f&quot;Error {response_status} - {response_body}&quot;
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>              )
+</code></pre></div></li>
 </ul>
 
               

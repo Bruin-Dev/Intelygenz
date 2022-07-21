@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/hawkeye-affecting-monitor/actions/_append_new_notes_for_device/">
       
       <link rel="icon" href="../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -555,22 +555,25 @@
 <h2 id="append-new-notes-for-device">Append new notes for device</h2>
 <ul>
 <li>If serial not in ticket:
-  <code>self._logger.info(
-                f"Serial {serial_number} could not be added to the tickets mapping at the beginning of the "
-                f"process, so no notes can be posted to any ticket. Skipping..."
-            )</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>              f&quot;Serial {serial_number} could not be added to the tickets mapping at the beginning of the &quot;
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>              f&quot;process, so no notes can be posted to any ticket. Skipping...&quot;
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>          )
+</code></pre></div></li>
 <li>If not notes to append:
-  <code>self._logger.info(f"No notes to append for serial {serial_number} were found. Skipping...")</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(f&quot;No notes to append for serial {serial_number} were found. Skipping...&quot;)
+</code></pre></div></li>
 <li>If environment is PRODUCTION:
-  <code>self._logger.info(
-                f"{len(notes_to_append)} affecting notes to append to ticket {ticket_id} were found, but the current "
-                "environment is not PRODUCTION. Skipping..."
-            )</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>              f&quot;{len(notes_to_append)} affecting notes to append to ticket {ticket_id} were found, but the current &quot;
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>              &quot;environment is not PRODUCTION. Skipping...&quot;
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>          )
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.info(
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>            f&quot;Posting {len(notes_to_append)} affecting notes to ticket {ticket_id} (serial: {serial_number})...&quot;
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>        )
+</code></pre></div></li>
 </ul>
-<pre><code>self._logger.info(
-            f&quot;Posting {len(notes_to_append)} affecting notes to ticket {ticket_id} (serial: {serial_number})...&quot;
-        )
-</code></pre>
 
               
             </article>

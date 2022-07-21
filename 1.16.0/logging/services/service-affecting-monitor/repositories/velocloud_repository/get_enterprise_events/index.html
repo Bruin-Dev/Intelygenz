@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/service-affecting-monitor/repositories/velocloud_repository/get_enterprise_events/">
       
       <link rel="icon" href="../../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,29 +553,32 @@
   <h1>Get enterprise events</h1>
 
 <h2 id="get-enterprise-events-documentation">Get enterprise events Documentation</h2>
-<pre><code>self._logger.info(
-                f&quot;Getting events of host {host} and enterprise id {enterprise_id} having any type of {event_types} &quot;
-                f&quot;that took place between {past_moment} and {now} from Velocloud...&quot;
-            )
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                f&quot;Getting events of host {host} and enterprise id {enterprise_id} having any type of {event_types} &quot;
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>                f&quot;that took place between {past_moment} and {now} from Velocloud...&quot;
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>            )
+</code></pre></div>
 <ul>
 <li>if <code>Exception</code>:
-  <code>self._logger.error(
-                f"An error occurred when requesting edge events from Velocloud for host {host} "
-                f"and enterprise id {enterprise_id} -&gt; {e}"
-            )</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.error(
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>              f&quot;An error occurred when requesting edge events from Velocloud for host {host} &quot;
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>              f&quot;and enterprise id {enterprise_id} -&gt; {e}&quot;
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>          )
+</code></pre></div></li>
 <li>if response_status in range(200, 300)
-  <code>self._logger.info(
-                    f"Got events of host {host} and enterprise id {enterprise_id} having any type in {event_types} "
-                    f"that took place between {past_moment} and {now} from Velocloud!"
-                )</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>                  f&quot;Got events of host {host} and enterprise id {enterprise_id} having any type in {event_types} &quot;
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>                  f&quot;that took place between {past_moment} and {now} from Velocloud!&quot;
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>              )
+</code></pre></div></li>
 <li>else
-  <code>self._logger.error(
-                    f"Error while retrieving events of host {host} and enterprise id {enterprise_id} having any type "
-                    f"in {event_types} that took place between {past_moment} and {now} "
-                    f"in {self._config.ENVIRONMENT_NAME.upper()}"
-                    f"environment: Error {response_status} - {response_body}"
-                )</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.error(
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>                  f&quot;Error while retrieving events of host {host} and enterprise id {enterprise_id} having any type &quot;
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>                  f&quot;in {event_types} that took place between {past_moment} and {now} &quot;
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>                  f&quot;in {self._config.ENVIRONMENT_NAME.upper()}&quot;
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>                  f&quot;environment: Error {response_status} - {response_body}&quot;
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>              )
+</code></pre></div></li>
 </ul>
 
               

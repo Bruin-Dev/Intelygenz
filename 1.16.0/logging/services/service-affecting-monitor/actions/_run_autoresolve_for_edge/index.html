@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/service-affecting-monitor/actions/_run_autoresolve_for_edge/">
       
       <link rel="icon" href="../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,68 +553,78 @@
   <h1> run autoresolve for edge</h1>
 
 <h2 id="run-autoresolve-for-edge-documentation">Run autoresolve for edge Documentation</h2>
-<pre><code>self._logger.info(f&quot;Starting autoresolve for edge {serial_number}...&quot;)
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(f&quot;Starting autoresolve for edge {serial_number}...&quot;)
+</code></pre></div>
 <ul>
 <li>if all_metrics_within_thresholds is empty
-  <code>self._logger.info(
-                    f"At least one metric of edge {serial_number} is not within the threshold. Skipping autoresolve..."
-                )</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a> self._logger.info(
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>                  f&quot;At least one metric of edge {serial_number} is not within the threshold. Skipping autoresolve...&quot;
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>              )
+</code></pre></div></li>
 <li>
 <p><a href="../../repositories/bruin_repository/get_open_affecting_tickets/">Get open affecting tickets</a></p>
 </li>
 <li>
 <p>if affecting tickets is empty
-  <code>self._logger.info(
-                    f"No affecting ticket found for edge with serial number {serial_number}. Skipping autoresolve..."
-                )</code></p>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>                  f&quot;No affecting ticket found for edge with serial number {serial_number}. Skipping autoresolve...&quot;
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>              )
+</code></pre></div></p>
 </li>
 <li>for affecting_ticket in affecting_tickets</li>
 <li>if not was_ticket_created_by_automation_engine
-    <code>self._logger.info(f"Ticket {affecting_ticket_id} was not created by Automation Engine. Skipping autoresolve...")</code></li>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.info(f&quot;Ticket {affecting_ticket_id} was not created by Automation Engine. Skipping autoresolve...&quot;)
+</code></pre></div></li>
 <li><a href="../../repositories/bruin_repository/get_ticket_details/">Get ticket details</a></li>
 <li>if remove_auto_resolution_restrictions_for_byob
-    <code>self._logger.info(
-                      f"Task for serial {serial_number} in ticket {affecting_ticket_id} is in the IPA Investigate"
-                      f" queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last"
-                      f" documented trouble..."
-                    )</code></li>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.info(
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>                  f&quot;Task for serial {serial_number} in ticket {affecting_ticket_id} is in the IPA Investigate&quot;
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>                  f&quot; queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last&quot;
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>                  f&quot; documented trouble...&quot;
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>                )
+</code></pre></div></li>
 <li>else<ul>
 <li>if not last_trouble_was_detected_recently
-  <code>self._logger.info(
-                    f"Edge with serial number {serial_number} has been under an affecting trouble for a long "
-                    f"time, so the detail of ticket {affecting_ticket_id} related to it will not be "
-                    f"autoresolved. Skipping autoresolve..."
-                    )</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>self._logger.info(
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>                  f&quot;Edge with serial number {serial_number} has been under an affecting trouble for a long &quot;
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>                  f&quot;time, so the detail of ticket {affecting_ticket_id} related to it will not be &quot;
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>                  f&quot;autoresolved. Skipping autoresolve...&quot;
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>                  )
+</code></pre></div></li>
 <li>if is_autoresolve_threshold_maxed_out
-  <code>self._logger.info(
-                    f"Limit to autoresolve detail of ticket {affecting_ticket_id} related to serial "
-                    f"{serial_number} has been maxed out already. Skipping autoresolve..."
-                    )</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>self._logger.info(
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>                  f&quot;Limit to autoresolve detail of ticket {affecting_ticket_id} related to serial &quot;
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>                  f&quot;{serial_number} has been maxed out already. Skipping autoresolve...&quot;
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>                  )
+</code></pre></div></li>
 </ul>
 </li>
 <li>if is_task_resolved
-    <code>self._logger.info(
-                        f"Detail of ticket {affecting_ticket_id} related to serial {serial_number} is already "
-                        "resolved. Skipping autoresolve..."
-                    )</code></li>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>self._logger.info(
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>                    f&quot;Detail of ticket {affecting_ticket_id} related to serial {serial_number} is already &quot;
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>                    &quot;resolved. Skipping autoresolve...&quot;
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>                )
+</code></pre></div></li>
 <li>if working_environment != "production"
-    <code>self._logger.info(
-                        f"Skipping autoresolve for detail of ticket {affecting_ticket_id} related to serial number "
-                        f"{serial_number} since the current environment is {working_environment.upper()}"
-                    )</code></li>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>self._logger.info(
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>                    f&quot;Skipping autoresolve for detail of ticket {affecting_ticket_id} related to serial number &quot;
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>                    f&quot;{serial_number} since the current environment is {working_environment.upper()}&quot;
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>                )
+</code></pre></div></li>
 </ul>
-<p><code>self._logger.info(
-                    f"Autoresolving detail of ticket {affecting_ticket_id} related to serial number {serial_number}..."
-                )</code>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>self._logger.info(
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>                  f&quot;Autoresolving detail of ticket {affecting_ticket_id} related to serial number {serial_number}...&quot;
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>              )
+</code></pre></div>
   * <a href="../../repositories/bruin_repository/unpause_ticket_detail/">Unpause ticket detail</a>
   * <a href="../../repositories/bruin_repository/resolve_ticket/">Resolve ticket</a>
   * <a href="../../repositories/bruin_repository/append_autoresolve_note_to_ticket/">Append autoresolve note to ticket</a>
-  <code>self._logger.info(
-                    f"Detail of ticket {affecting_ticket_id} related to serial number {serial_number} was autoresolved!"
-                )</code></p>
-<pre><code>self._logger.info(f&quot;Finished autoresolve for edge {serial_number}!&quot;)
-</code></pre>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>self._logger.info(
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>                  f&quot;Detail of ticket {affecting_ticket_id} related to serial number {serial_number} was autoresolved!&quot;
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>              )
+</code></pre></div></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>self._logger.info(f&quot;Finished autoresolve for edge {serial_number}!&quot;)
+</code></pre></div>
 
               
             </article>

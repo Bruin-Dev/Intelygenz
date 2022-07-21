@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/intermapper-outage-monitor/actions/_create_outage_ticket/">
       
       <link rel="icon" href="../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,52 +553,55 @@
   <h1> create outage ticket</h1>
 
 <h2 id="create-outage-ticket">Create outage ticket</h2>
-<pre><code>self._logger.info(
-            f&quot;Attempting outage ticket creation for client_id {client_id}, &quot; f&quot;and circuit_id {circuit_id}&quot;
-        )
-</code></pre>
-<ul>
-<li>If not PRODUCTION:
-  <code>self._logger.info(
-                f"No outage ticket will be created for client_id {client_id} and circuit_id {circuit_id} "
-                f"since the current environment is not production"
-            )</code></li>
-<li><a href="../../repositories/bruin_repository/create_outage_ticket/">create_outage_ticket</a></li>
-</ul>
-<pre><code>self._logger.info(
-            f&quot;Bruin response for ticket creation for edge with circuit id {circuit_id}: &quot; f&quot;{outage_ticket_response}&quot;
-        )
-</code></pre>
-<ul>
-<li>If status is Ok:
-  <code>self._logger.info(f"Successfully created outage ticket with ticket_id {outage_ticket_body}")</code></li>
-<li>If is custom status:
-  <code>self._logger.info(
-                f"Ticket for circuit id {circuit_id} already exists with ticket_id {outage_ticket_body}."
-                f"Status returned was {outage_ticket_status}"
-            )</code></li>
-<li>If status = 409:
-    <code>self._logger.info(f"In Progress ticket exists for location of circuit id {circuit_id}")</code></li>
-<li>If status = 472:
-    <code>self._logger.info(f"Resolved ticket exists for circuit id {circuit_id}")</code></li>
-<li>If status = 473:
-    <code>self._logger.info(f"Resolved ticket exists for location of circuit id {circuit_id}")</code></li>
-<li>If dri paramas:
-  <code>self._logger.info(
-                f"Appending InterMapper note to ticket id {outage_ticket_body} with dri parameters: "
-                f"{dri_parameters}"
-            )</code></li>
-<li><a href="../../repositories/bruin_repository/append_dri_note/">append_dri_note</a></li>
-<li>If status is not Ok:
-    <code>self._logger.warning(f"Bad status calling append dri note. Skipping create outage ticket ...")</code></li>
-</ul>
-<pre><code>self._logger.info(f&quot;Appending InterMapper note to ticket id {outage_ticket_body}&quot;)
-</code></pre>
-<ul>
-<li><a href="../../repositories/bruin_repository/append_intermapper_note/">append_intermapper_note</a></li>
-<li>If status is not Ok:
-  <code>self._logger.warning(f"Bad status calling append intermapper note. Skipping create outage ticket ...")</code></li>
-</ul>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>            f&quot;Attempting outage ticket creation for client_id {client_id}, &quot; f&quot;and circuit_id {circuit_id}&quot;
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>        )
+</code></pre></div>
+* If not PRODUCTION:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>              f&quot;No outage ticket will be created for client_id {client_id} and circuit_id {circuit_id} &quot;
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>              f&quot;since the current environment is not production&quot;
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>          )
+</code></pre></div>
+* <a href="../../repositories/bruin_repository/create_outage_ticket/">create_outage_ticket</a>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>            f&quot;Bruin response for ticket creation for edge with circuit id {circuit_id}: &quot; f&quot;{outage_ticket_response}&quot;
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>        )
+</code></pre></div>
+* If status is Ok:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.info(f&quot;Successfully created outage ticket with ticket_id {outage_ticket_body}&quot;)
+</code></pre></div>
+* If is custom status:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.info(
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>              f&quot;Ticket for circuit id {circuit_id} already exists with ticket_id {outage_ticket_body}.&quot;
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>              f&quot;Status returned was {outage_ticket_status}&quot;
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>          )
+</code></pre></div>
+  * If status = 409:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>self._logger.info(f&quot;In Progress ticket exists for location of circuit id {circuit_id}&quot;)
+</code></pre></div>
+  * If status = 472:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>self._logger.info(f&quot;Resolved ticket exists for circuit id {circuit_id}&quot;)
+</code></pre></div>
+  * If status = 473:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>self._logger.info(f&quot;Resolved ticket exists for location of circuit id {circuit_id}&quot;)
+</code></pre></div>
+* If dri paramas:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>self._logger.info(
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>              f&quot;Appending InterMapper note to ticket id {outage_ticket_body} with dri parameters: &quot;
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>              f&quot;{dri_parameters}&quot;
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>          )
+</code></pre></div>
+  * <a href="../../repositories/bruin_repository/append_dri_note/">append_dri_note</a>
+  * If status is not Ok:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>self._logger.warning(f&quot;Bad status calling append dri note. Skipping create outage ticket ...&quot;)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>self._logger.info(f&quot;Appending InterMapper note to ticket id {outage_ticket_body}&quot;)
+</code></pre></div>
+* <a href="../../repositories/bruin_repository/append_intermapper_note/">append_intermapper_note</a>
+* If status is not Ok:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>self._logger.warning(f&quot;Bad status calling append intermapper note. Skipping create outage ticket ...&quot;)
+</code></pre></div></p>
 
               
             </article>

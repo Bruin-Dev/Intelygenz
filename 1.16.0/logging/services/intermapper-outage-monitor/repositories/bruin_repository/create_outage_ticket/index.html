@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/intermapper-outage-monitor/repositories/bruin_repository/create_outage_ticket/">
       
       <link rel="icon" href="../../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,15 +553,15 @@
   <h1>Create outage ticket</h1>
 
 <h2 id="create-outage-ticket-documentation">Create outage ticket Documentation</h2>
-<pre><code>  self._logger.info(f&quot;Creating outage ticket for device {service_number} that belongs to client {client_id}...&quot;)
-  ```
-* If Exception:
-  ```
-  self._logger.error(f&quot;An error occurred when creating outage ticket for device {service_number} belong to client 
-  {client_id} -&gt; {e}&quot;)
-  ```
-</code></pre>
-<p>self._logger.info(f"Outage ticket for device {service_number} that belongs to client {client_id} created!")
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>  self._logger.info(f&quot;Creating outage ticket for device {service_number} that belongs to client {client_id}...&quot;)
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  ```
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>* If Exception:
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  ```
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  self._logger.error(f&quot;An error occurred when creating outage ticket for device {service_number} belong to client 
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  {client_id} -&gt; {e}&quot;)
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  ```
+</code></pre></div>
+self._logger.info(f"Outage ticket for device {service_number} that belongs to client {client_id} created!")
 <code>* If not a correct status</code>
   self._logger.error(f"Error while creating outage ticket for device {service_number} that belongs to client "
                     f"{client_id} in {self._config.CURRENT_ENVIRONMENT.upper()} environment: "

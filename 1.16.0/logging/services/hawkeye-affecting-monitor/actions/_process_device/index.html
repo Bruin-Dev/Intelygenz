@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/hawkeye-affecting-monitor/actions/_process_device/">
       
       <link rel="icon" href="../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,27 +553,22 @@
   <h1> process device</h1>
 
 <h2 id="process-device">Process device</h2>
-<pre><code>self._logger.info(f&quot;Processing device {serial_number}...&quot;)
-</code></pre>
-<ul>
-<li>for test result in test results:</li>
-<li>If test result passed:<ul>
-<li><a href="../_process_passed_test_result/">_process_passed_test_result</a></li>
-</ul>
-</li>
-<li>If test result failed:<ul>
-<li><a href="../_process_failed_test_result/">_process_failed_test_result</a></li>
-</ul>
-</li>
-<li>Else: 
-    <code>self._logger.info(
-                    f'Test result {test_result["summary"]["id"]} has state {test_result["summary"]["status"].upper()}. '
-                    "Skipping..."
-                )</code></li>
-<li><a href="../_append_new_notes_for_device/">_append_new_notes_for_device</a></li>
-</ul>
-<pre><code>self._logger.info(f&quot;Finished processing device {serial_number}!&quot;)
-</code></pre>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(f&quot;Processing device {serial_number}...&quot;)
+</code></pre></div>
+* for test result in test results:
+  * If test result passed:
+    * <a href="../_process_passed_test_result/">_process_passed_test_result</a>
+  * If test result failed:
+    * <a href="../_process_failed_test_result/">_process_failed_test_result</a>
+  * Else: 
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>                f&#39;Test result {test_result[&quot;summary&quot;][&quot;id&quot;]} has state {test_result[&quot;summary&quot;][&quot;status&quot;].upper()}. &#39;
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>                &quot;Skipping...&quot;
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>            )
+</code></pre></div>
+* <a href="../_append_new_notes_for_device/">_append_new_notes_for_device</a>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(f&quot;Finished processing device {serial_number}!&quot;)
+</code></pre></div></p>
 
               
             </article>

@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/kafka/LAUNCH_DOCKER_COMPOSE/">
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -560,18 +560,18 @@
 <h1 id="1-how-to-run">1. How to run</h1>
 <p>In this section we explain all the useful information that we can use when working in our local environment.</p>
 <p>In order to raise our system we will have to go to the root folder of our system and launch the following command</p>
-<pre><code class="language-html">docker-compose up
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>docker-compose up
+</code></pre></div>
 <p>This will launch our system by creating a local docker image and deploying our fetcher.</p>
 <p>It is important to keep in mind that this process launches a multitude of requests against the production environment
 and it is important to limit them all so as not to overload the system.</p>
 <p>To facilitate the work in local we also have several local configurations that allow us to test step by step our
 application avoiding possible problems of launching too many requests.</p>
-<p>To launch this configuration in Intellij you will need to verify that the following steps were done:</p>
-<pre><code class="language-html">- Go to Settings &gt;&gt; Build, Execution, Deployment &gt;&gt; Docker
-- Select &quot;TCP socket&quot;
-- Enter 'unix:///var/run/docker.sock' under &quot;Engine API URL&quot;
-</code></pre>
+<p>To launch this configuration in Intellij you will need to verify that the following steps were done:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>- Go to Settings &gt;&gt; Build, Execution, Deployment &gt;&gt; Docker
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>- Select &quot;TCP socket&quot;
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>- Enter &#39;unix:///var/run/docker.sock&#39; under &quot;Engine API URL&quot;
+</code></pre></div></p>
 
               
             </article>

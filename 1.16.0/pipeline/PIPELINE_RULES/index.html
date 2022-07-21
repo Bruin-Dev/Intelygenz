@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/pipeline/PIPELINE_RULES/">
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -619,29 +619,29 @@
 
 <h1 id="pipelines-rules">PIPELINES RULES</h1>
 <h2 id="add-new-section">Add new section</h2>
-<p>To add new section of jobs in the pipeline, we must include the section adding an included in the general .gitlab-ci.yml:</p>
-<pre><code class="language-yaml">include:
-  - local: microservices/.gitlab-ci.yml
-</code></pre>
-<p>Could be possible that an included .gitlab-ci.yml of another section include more sub-sections(Example microservices):</p>
-<pre><code class="language-yaml">include:
-  - local: microservices/fetchers/velocloud/.gitlab-ci.yml
-</code></pre>
-<p>We should follow this organization technique to isolate code to their respective area and avoid big files with
+<p>To add new section of jobs in the pipeline, we must include the section adding an included in the general .gitlab-ci.yml:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">include</span><span class="p">:</span><span class="w"></span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">local</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">microservices/.gitlab-ci.yml</span><span class="w"></span>
+</code></pre></div>
+Could be possible that an included .gitlab-ci.yml of another section include more sub-sections(Example microservices):
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">include</span><span class="p">:</span><span class="w"></span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">local</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">microservices/fetchers/velocloud/.gitlab-ci.yml</span><span class="w"></span>
+</code></pre></div>
+We should follow this organization technique to isolate code to their respective area and avoid big files with
 spaghetti code.</p>
 <h2 id="add-new-template">Add new template</h2>
-<p>To add a new template we should take a look in the folder structure:</p>
-<pre><code class="language-yaml"># templates (folder where project templating is going to be saved)
-  ## gitlab (section of the templating)
-</code></pre>
-<p>Inside gitlab folder we should create template YAML files that fits with a section, for example, for microservices
+<p>To add a new template we should take a look in the folder structure:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># templates (folder where project templating is going to be saved)</span><span class="w"></span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="c1">## gitlab (section of the templating)</span><span class="w"></span>
+</code></pre></div>
+Inside gitlab folder we should create template YAML files that fits with a section, for example, for microservices
 we created a microservice-ci.yml to store the templates of that section. Same in infrastructure. Also, we should include 
-new templates in the index.yml in templates/index.yml</p>
-<pre><code class="language-yaml">include:
-  # CI templates
-  - local: templates/gitlab/microservice-ci.yml
-  - local: templates/gitlab/infrastructure-ci.yml
-</code></pre>
+new templates in the index.yml in templates/index.yml
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">include</span><span class="p">:</span><span class="w"></span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="c1"># CI templates</span><span class="w"></span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">local</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">templates/gitlab/microservice-ci.yml</span><span class="w"></span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">local</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">templates/gitlab/infrastructure-ci.yml</span><span class="w"></span>
+</code></pre></div></p>
 
               
             </article>

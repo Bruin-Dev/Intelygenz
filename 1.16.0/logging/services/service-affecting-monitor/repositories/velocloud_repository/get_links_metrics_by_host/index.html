@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/service-affecting-monitor/repositories/velocloud_repository/get_links_metrics_by_host/">
       
       <link rel="icon" href="../../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,24 +553,26 @@
   <h1>Get links metrics by host</h1>
 
 <h2 id="get-links-metrics-by-host-documentation">Get links metrics by host Documentation</h2>
-<pre><code>self._logger.info(
-                f&quot;Getting links metrics between {interval['start']} and {interval['end']} &quot;
-                f&quot;from Velocloud host {host}...&quot;
-            )
-
-self._logger.info(f&quot;Got links metrics from Velocloud host {host}!&quot;)
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                f&quot;Getting links metrics between {interval[&#39;start&#39;]} and {interval[&#39;end&#39;]} &quot;
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>                f&quot;from Velocloud host {host}...&quot;
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>            )
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>self._logger.info(f&quot;Got links metrics from Velocloud host {host}!&quot;)
+</code></pre></div>
 <ul>
 <li>
 <p>if <code>Exception</code>:
-  <code>self._logger.error(f"An error occurred when requesting links metrics from Velocloud -&gt; {e}")</code></p>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.error(f&quot;An error occurred when requesting links metrics from Velocloud -&gt; {e}&quot;)
+</code></pre></div></p>
 </li>
 <li>
 <p>if response status not in range(200, 300)
-  <code>self._logger.error(
-                    f"Error while retrieving links metrics in {self._config.ENVIRONMENT_NAME.upper()} "
-                    f"environment: Error {response_status} - {response_body}"
-                )</code></p>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.error(
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>                  f&quot;Error while retrieving links metrics in {self._config.ENVIRONMENT_NAME.upper()} &quot;
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>                  f&quot;environment: Error {response_status} - {response_body}&quot;
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>              )
+</code></pre></div></p>
 </li>
 </ul>
 

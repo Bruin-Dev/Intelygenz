@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/service-affecting-monitor/actions/_append_latest_trouble_to_ticket/">
       
       <link rel="icon" href="../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,37 +553,39 @@
   <h1> append latest trouble to ticket</h1>
 
 <h2 id="append-latest-trouble-to-ticket-documentation">Append latest trouble to ticket Documentation</h2>
-<pre><code>self._logger.info(
-            f&quot;Appending Service Affecting trouble note to ticket {ticket_id} for {trouble.value} trouble detected in &quot;
-            f&quot;interface {interface} of edge {serial_number}...&quot;
-        )
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>            f&quot;Appending Service Affecting trouble note to ticket {ticket_id} for {trouble.value} trouble detected in &quot;
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>            f&quot;interface {interface} of edge {serial_number}...&quot;
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>        )
+</code></pre></div>
 <ul>
 <li>
 <p>if is_there_any_note_for_trouble
-  <code>self._logger.info(
-                f"No Service Affecting trouble note will be appended to ticket {ticket_id} for {trouble.value} trouble "
-                f"detected in interface {interface} of edge {serial_number}. A note for this trouble was already "
-                f"appended to the ticket after the latest re-open (or ticket creation)"
-            )</code></p>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>              f&quot;No Service Affecting trouble note will be appended to ticket {ticket_id} for {trouble.value} trouble &quot;
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>              f&quot;detected in interface {interface} of edge {serial_number}. A note for this trouble was already &quot;
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>              f&quot;appended to the ticket after the latest re-open (or ticket creation)&quot;
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>          )
+</code></pre></div></p>
 </li>
 <li>
 <p>if not working_environment == "production"
-  <code>self._logger.info(
-                f"No Service Affecting trouble note will be appended to ticket {ticket_id} for {trouble.value} trouble "
-                f"detected in interface {interface} of edge {serial_number}, since the current environment is "
-                f"{working_environment.upper()}"
-            )</code></p>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>              f&quot;No Service Affecting trouble note will be appended to ticket {ticket_id} for {trouble.value} trouble &quot;
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>              f&quot;detected in interface {interface} of edge {serial_number}, since the current environment is &quot;
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>              f&quot;{working_environment.upper()}&quot;
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>          )
+</code></pre></div></p>
 </li>
 <li>
 <p><a href="../../repositories/bruin_repository/append_note_to_ticket/">Append note to ticket</a></p>
 </li>
 </ul>
-<pre><code>self._logger.info(
-            f&quot;Service Affecting trouble note for {trouble.value} trouble detected in interface {interface} &quot;
-            f&quot;of edge {serial_number} was successfully appended to ticket {ticket_id}!&quot;
-        )
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.info(
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>            f&quot;Service Affecting trouble note for {trouble.value} trouble detected in interface {interface} &quot;
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>            f&quot;of edge {serial_number} was successfully appended to ticket {ticket_id}!&quot;
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>        )
+</code></pre></div>
 
               
             </article>

@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/service-affecting-monitor/actions/_bouncing_check/">
       
       <link rel="icon" href="../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,29 +553,32 @@
   <h1> bouncing check</h1>
 
 <h2 id="bouncing-check-documentation">Bouncing Check Documentation</h2>
-<pre><code>self._logger.info(&quot;Looking for bouncing issues...&quot;)
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(&quot;Looking for bouncing issues...&quot;)
+</code></pre></div>
 <ul>
 <li><a href="../../repositories/velocloud_repository/get_links_metrics_for_bouncing_checks/">Get links metrics for bouncing checks</a></li>
 <li>Check if link metrics is empty
-    <code>self._logger.info("List of links arrived empty while checking bouncing issues. Skipping...")</code></li>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(&quot;List of links arrived empty while checking bouncing issues. Skipping...&quot;)
+</code></pre></div></li>
 <li><a href="../../repositories/velocloud_repository/get_events_by_serial_and_interface/">Get events by serial and interface</a></li>
 <li><a href="../_structure_links_metrics/">Structure link metrics</a></li>
 <li><a href="../_map_cached_edges_with_links_metrics_and_contact_info/">Map cached edges with links metrics and contact info</a></li>
 <li>for elem in metrics_with_cache_and_contact_info:</li>
 <li>if not events
-    <code>self._logger.info(
-                    f"No events were found for {link_status['interface']} from {serial_number} "
-                    f"while looking for bouncing troubles"
-                )</code></li>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>                f&quot;No events were found for {link_status[&#39;interface&#39;]} from {serial_number} &quot;
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>                f&quot;while looking for bouncing troubles&quot;
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>            ) 
+</code></pre></div></li>
 <li>if are_bouncing_events_within_threshold
-    <code>self._logger.info(
-                    f"Link {link_status['interface']} from {serial_number} didn't exceed bouncing thresholds"
-                )</code>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.info(
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>                f&quot;Link {link_status[&#39;interface&#39;]} from {serial_number} didn&#39;t exceed bouncing thresholds&quot;
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>            )
+</code></pre></div>
   *<a href="../_process_bouncing_trouble/">Process bouncing trouble</a></li>
 </ul>
-<pre><code>self._logger.info(&quot;Finished looking for bouncing issues!&quot;)
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.info(&quot;Finished looking for bouncing issues!&quot;)
+</code></pre></div>
 
               
             </article>

@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/hawkeye-outage-monitor/actions/_outage_monitoring_process/">
       
       <link rel="icon" href="../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,38 +553,44 @@
   <h1> outage monitoring process</h1>
 
 <h2 id="outage-monitoring-process">Outage monitoring process</h2>
-<pre><code>self._logger.info(f&quot;Starting Hawkeye Outage Monitor!&quot;)
-</code></pre>
-<ul>
-<li><a href="../../repositories/customer_cache_repository/get_cache_for_outage_monitoring/">get_cache_for_outage_monitoring</a></li>
-<li>If status is not ok:
-  <code>self._logger.warning(f"Bad status calling to get cache. Skipping hawkeyey outage monitoring process ...")</code></li>
-<li><a href="../../repositories/hawkeye_repository/get_probes/">get_probes</a></li>
-<li>If status is not ok:
-  <code>self._logger.warning(f"Bad status calling to get probes. Skipping hawkeye outage monitoring process ...")</code></li>
-<li>If not probes:
-  <code>self._logger.info("The list of probes arrived empty. Skipping monitoring process...")</code></li>
-<li>If not active probes:
-  <code>self._logger.info("All probes were detected as inactive. Skipping monitoring process...")</code></li>
-<li><a href="../_map_probes_info_with_customer_cache/">_map_probes_info_with_customer_cache</a></li>
-<li>If outage devices:
-  <code>self._logger.info(
-                f"{len(outage_devices)} devices were detected in outage state. "
-                "Scheduling re-check job for all of them..."
-            )</code></li>
-<li><a href="../_schedule_recheck_job_for_devices/">_schedule_recheck_job_for_devices</a></li>
-<li>Else:
-  <code>self._logger.info("No devices were detected in outage state. Re-check job won't be scheduled")</code> </li>
-<li>If healthy edges:
-  <code>self._logger.info(
-                f"{len(healthy_devices)} devices were detected in healthy state. Running autoresolve for all of them"
-            )</code></li>
-<li><a href="../_run_ticket_autoresolve/">_run_ticket_autoresolve</a></li>
-<li>Else:
-  <code>self._logger.info("No devices were detected in healthy state. Autoresolve won't be triggered")</code></li>
-</ul>
-<pre><code>self._logger.info(f&quot;Hawkeye Outage Monitor process finished! Took {round((stop - start) / 60, 2)} minutes&quot;)
-</code></pre>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(f&quot;Starting Hawkeye Outage Monitor!&quot;)
+</code></pre></div>
+* <a href="../../repositories/customer_cache_repository/get_cache_for_outage_monitoring/">get_cache_for_outage_monitoring</a>
+* If status is not ok:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.warning(f&quot;Bad status calling to get cache. Skipping hawkeyey outage monitoring process ...&quot;)
+</code></pre></div>
+* <a href="../../repositories/hawkeye_repository/get_probes/">get_probes</a>
+* If status is not ok:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.warning(f&quot;Bad status calling to get probes. Skipping hawkeye outage monitoring process ...&quot;)
+</code></pre></div>
+* If not probes:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.info(&quot;The list of probes arrived empty. Skipping monitoring process...&quot;)
+</code></pre></div>
+* If not active probes:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.info(&quot;All probes were detected as inactive. Skipping monitoring process...&quot;)
+</code></pre></div>
+* <a href="../_map_probes_info_with_customer_cache/">_map_probes_info_with_customer_cache</a>
+* If outage devices:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>self._logger.info(
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>              f&quot;{len(outage_devices)} devices were detected in outage state. &quot;
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>              &quot;Scheduling re-check job for all of them...&quot;
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>          )
+</code></pre></div>
+  * <a href="../_schedule_recheck_job_for_devices/">_schedule_recheck_job_for_devices</a>
+* Else:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>self._logger.info(&quot;No devices were detected in outage state. Re-check job won&#39;t be scheduled&quot;)
+</code></pre></div>
+* If healthy edges:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>self._logger.info(
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>              f&quot;{len(healthy_devices)} devices were detected in healthy state. Running autoresolve for all of them&quot;
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>          )
+</code></pre></div>
+  * <a href="../_run_ticket_autoresolve/">_run_ticket_autoresolve</a>
+* Else:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>self._logger.info(&quot;No devices were detected in healthy state. Autoresolve won&#39;t be triggered&quot;)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>self._logger.info(f&quot;Hawkeye Outage Monitor process finished! Took {round((stop - start) / 60, 2)} minutes&quot;)
+</code></pre></div></p>
 
               
             </article>

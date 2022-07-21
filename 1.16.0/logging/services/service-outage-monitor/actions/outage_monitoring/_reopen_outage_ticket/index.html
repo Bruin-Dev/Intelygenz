@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/service-outage-monitor/actions/outage_monitoring/_reopen_outage_ticket/">
       
       <link rel="icon" href="../../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,19 +553,20 @@
   <h1> reopen outage ticket</h1>
 
 <h2 id="reopen-outage-ticket">Reopen outage ticket</h2>
-<pre><code>self._logger.info(f&quot;Reopening outage ticket {ticket_id} for serial {serial_number}...&quot;)
-</code></pre>
-<ul>
-<li><a href="../../../repositories/bruin_repository/get_ticket_details/">get_ticket_details</a></li>
-<li>If get ticket details status is not Ok:
-  <code>self._logger.info(f"Bad status calling to get ticket details. Skipping reopen ticket ...")</code></li>
-<li><a href="../../../repositories/bruin_repository/open_ticket/">open_ticket</a></li>
-<li>If open ticket status is Ok:
-  <code>self._logger.info(f"Detail {detail_id_for_reopening} of outage ticket {ticket_id} reopened successfully.")</code></li>
-<li><a href="../_append_triage_note/">_append_triage_note</a></li>
-<li>Else:
-  <code>self._logger.error(f"Reopening for detail {detail_id_for_reopening} of outage ticket {ticket_id} failed.")</code></li>
-</ul>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(f&quot;Reopening outage ticket {ticket_id} for serial {serial_number}...&quot;)
+</code></pre></div>
+* <a href="../../../repositories/bruin_repository/get_ticket_details/">get_ticket_details</a>
+* If get ticket details status is not Ok:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(f&quot;Bad status calling to get ticket details. Skipping reopen ticket ...&quot;)
+</code></pre></div>
+* <a href="../../../repositories/bruin_repository/open_ticket/">open_ticket</a>
+* If open ticket status is Ok:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(f&quot;Detail {detail_id_for_reopening} of outage ticket {ticket_id} reopened successfully.&quot;)
+</code></pre></div>
+  * <a href="../_append_triage_note/">_append_triage_note</a>
+* Else:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.error(f&quot;Reopening for detail {detail_id_for_reopening} of outage ticket {ticket_id} failed.&quot;)
+</code></pre></div></p>
 
               
             </article>

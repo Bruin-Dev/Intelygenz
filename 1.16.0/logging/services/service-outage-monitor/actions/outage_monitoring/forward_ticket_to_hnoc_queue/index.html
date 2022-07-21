@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/service-outage-monitor/actions/outage_monitoring/forward_ticket_to_hnoc_queue/">
       
       <link rel="icon" href="../../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,27 +553,25 @@
   <h1>Forward ticket to hnoc queue</h1>
 
 <h2 id="forward_ticket_to_hnoc_queue">Forward_ticket_to_hnoc_queue</h2>
-<pre><code>self._logger.info(f&quot;Checking if ticket_id {ticket_id} for serial {serial_number} is resolved before &quot;
-                  f&quot;attempting to forward to HNOC...&quot;)
-</code></pre>
-<ul>
-<li><a href="../../../repositories/bruin_repository/get_ticket_details/">get_ticket_details</a></li>
-<li>If ticket details status is not OK
-  <code>self._logger.info(f"Getting ticket details of ticket_id {ticket_id} and serial {serial_number} "
-                    f"from Bruin failed: {ticket_details_response}. "
-                    f"Retrying forward to HNOC...")</code></li>
-<li>If detail is resolved:
-  <code>self._logger.info(f"Ticket id {ticket_id} for serial {serial_number} is resolved. " f"Skipping forward to HNOC...")</code></li>
-</ul>
-<pre><code>self._logger.info(f&quot;Ticket id {ticket_id} for serial {serial_number} is not resolved. &quot; f&quot;Forwarding to HNOC...&quot;)
-</code></pre>
-<ul>
-<li><a href="../change_detail_work_queue_to_hnoc/">change_detail_work_queue_to_hnoc</a></li>
-<li>If Exception:</li>
-</ul>
-<pre><code>self._logger.error(f&quot;An error occurred while trying to forward ticket_id {ticket_id} for serial {serial_number} to HNOC&quot;
-                   f&quot; -&gt; {e}&quot;)
-</code></pre>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(f&quot;Checking if ticket_id {ticket_id} for serial {serial_number} is resolved before &quot;
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                  f&quot;attempting to forward to HNOC...&quot;)
+</code></pre></div>
+* <a href="../../../repositories/bruin_repository/get_ticket_details/">get_ticket_details</a>
+* If ticket details status is not OK
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(f&quot;Getting ticket details of ticket_id {ticket_id} and serial {serial_number} &quot;
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>                  f&quot;from Bruin failed: {ticket_details_response}. &quot;
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>                  f&quot;Retrying forward to HNOC...&quot;)
+</code></pre></div>
+* If detail is resolved:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(f&quot;Ticket id {ticket_id} for serial {serial_number} is resolved. &quot; f&quot;Skipping forward to HNOC...&quot;)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.info(f&quot;Ticket id {ticket_id} for serial {serial_number} is not resolved. &quot; f&quot;Forwarding to HNOC...&quot;)
+</code></pre></div>
+* <a href="../change_detail_work_queue_to_hnoc/">change_detail_work_queue_to_hnoc</a>
+* If Exception:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.error(f&quot;An error occurred while trying to forward ticket_id {ticket_id} for serial {serial_number} to HNOC&quot;
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>                   f&quot; -&gt; {e}&quot;)
+</code></pre></div></p>
 
               
             </article>

@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/service-outage-monitor/actions/outage_monitoring/_recheck_edges_for_ticket_creation/">
       
       <link rel="icon" href="../../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,70 +553,68 @@
   <h1> recheck edges for ticket creation</h1>
 
 <h2 id="recheck-edges-for-ticket-creation">Recheck edges for ticket creation</h2>
-<pre><code>self._logger.info(f&quot;[{outage_type.value}] Re-checking {len(outage_edges)} edges in outage state prior to ticket creation...&quot;)
-self._logger.info(f&quot;[{outage_type.value}] Edges in outage before quarantine recheck: {outage_edges}&quot;)
-</code></pre>
-<ul>
-<li><a href="../../../repositories/velocloud_repository/get_links_with_edge_info/">get_links_with_edge_info</a></li>
-<li>If get links with edge info status not Ok:
-  <code>self._logger.warning(f"Bad status calling to get links with edge info for host: {host}. Skipping recheck ...")</code></li>
-<li><a href="../../../repositories/velocloud_repository/get_network_enterprises/">get_network_enterprises</a></li>
-<li>If get network enterprises tatus not Ok:
-  <code>self._logger.warning(f"Bad status calling to get network enterprises info for host: {host}. Skipping recheck ...")</code>    </li>
-</ul>
-<pre><code>self._logger.info(f&quot;[{outage_type.value}] Velocloud edge status response in quarantine recheck: &quot;
-                    f&quot;{links_with_edge_info_response}&quot;)
-</code></pre>
-<ul>
-<li><a href="../../../repositories/velocloud_repository/group_links_by_edge/">group_links_by_edge</a></li>
-</ul>
-<pre><code>self._logger.info(f&quot;[{outage_type.value}] Adding HA info to existing edges, and putting standby edges under monitoring as if &quot;
-            &quot;they were standalone edges...&quot;)
-</code></pre>
-<ul>
-<li><a href="../../../repositories/ha_repository/map_edges_with_ha_info/">map_edges_with_ha_info</a></li>
-<li><a href="../../../repositories/ha_repository/get_edges_with_standbys_as_standalone_edges/">get_edges_with_standbys_as_standalone_edges</a></li>
-<li><a href="../_map_cached_edges_with_edges_status/">_map_cached_edges_with_edges_status</a></li>
-</ul>
-<pre><code>self._logger.info(f&quot;[{outage_type.value}] Current status of edges that were in outage state: {edges_full_info}&quot;)
-self._logger.info(f&quot;[{outage_type.value}] Edges still in outage state after recheck: {edges_still_down}&quot;)
-self._logger.info(f&quot;[{outage_type.value}] Serials still in outage state after recheck: {serials_still_down}&quot;)
-self._logger.info(f&quot;[{outage_type.value}] Edges that are healthy after recheck: {healthy_edges}&quot;)
-self._logger.info(f&quot;[{outage_type.value}] Serials that are healthy after recheck: {healthy_serials}&quot;)
-</code></pre>
-<ul>
-<li>If edges still down:
-  <code>self._logger.info(f"[{outage_type.value}] {len(edges_still_down)} edges are still in outage state after re-check. "
-                "Attempting outage ticket creation for all of them...")</code> </li>
-<li>If environment PRODUCTION:<ul>
-<li><a href="../_attempt_ticket_creation/">_attempt_ticket_creation</a></li>
-<li>If error in attempt ticket creation:
-  <code>self._logger.error(f"[{outage_type.value}] Error while attempting ticket creation(s) for edge in "
-                     f"the quarantine: {ex}")</code> </li>
-</ul>
-</li>
-<li>Else:
-    <code>self._logger.info(f"[{outage_type.value}] Not starting outage ticket creation for {len(edges_still_down)} faulty "
-                      f"edges because the current working environment is {working_environment.upper()}.")</code> </li>
-<li>Else:
-  <code>self._logger.info(f"[{outage_type.value}] No edges were detected in outage state after re-check. "
-              "Outage tickets won't be created")</code> </li>
-<li>If healthy edges:
-  <code>self._logger.info(
-                f"[{outage_type.value}] {len(healthy_edges)} edges were detected in healthy state after re-check. '"
-                "Running autoresolve for all of them..."
-            )
-  self._logger.info(
-                f"[{outage_type.value}] Edges that are going to be attempted to autoresolve: {healthy_edges}"
-            )</code> </li>
-<li><a href="../_run_ticket_autoresolve_for_edge/">_run_ticket_autoresolve_for_edge</a></li>
-<li>Else:
-  <code>self._logger.info(
-                f"[{outage_type.value}] No edges were detected in healthy state. " "Autoresolve won't be triggered"
-            )</code> </li>
-</ul>
-<pre><code>self._logger.info(f&quot;[{outage_type.value}] Re-check process finished for {len(outage_edges)} edges&quot;)
-</code></pre>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(f&quot;[{outage_type.value}] Re-checking {len(outage_edges)} edges in outage state prior to ticket creation...&quot;)
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>self._logger.info(f&quot;[{outage_type.value}] Edges in outage before quarantine recheck: {outage_edges}&quot;)
+</code></pre></div>
+* <a href="../../../repositories/velocloud_repository/get_links_with_edge_info/">get_links_with_edge_info</a>
+* If get links with edge info status not Ok:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.warning(f&quot;Bad status calling to get links with edge info for host: {host}. Skipping recheck ...&quot;)
+</code></pre></div>
+* <a href="../../../repositories/velocloud_repository/get_network_enterprises/">get_network_enterprises</a>
+* If get network enterprises tatus not Ok:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.warning(f&quot;Bad status calling to get network enterprises info for host: {host}. Skipping recheck ...&quot;)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.info(f&quot;[{outage_type.value}] Velocloud edge status response in quarantine recheck: &quot;
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>                    f&quot;{links_with_edge_info_response}&quot;)
+</code></pre></div>
+* <a href="../../../repositories/velocloud_repository/group_links_by_edge/">group_links_by_edge</a>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.info(f&quot;[{outage_type.value}] Adding HA info to existing edges, and putting standby edges under monitoring as if &quot;
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>            &quot;they were standalone edges...&quot;)
+</code></pre></div>
+* <a href="../../../repositories/ha_repository/map_edges_with_ha_info/">map_edges_with_ha_info</a>
+* <a href="../../../repositories/ha_repository/get_edges_with_standbys_as_standalone_edges/">get_edges_with_standbys_as_standalone_edges</a>
+* <a href="../_map_cached_edges_with_edges_status/">_map_cached_edges_with_edges_status</a>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>self._logger.info(f&quot;[{outage_type.value}] Current status of edges that were in outage state: {edges_full_info}&quot;)
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>self._logger.info(f&quot;[{outage_type.value}] Edges still in outage state after recheck: {edges_still_down}&quot;)
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>self._logger.info(f&quot;[{outage_type.value}] Serials still in outage state after recheck: {serials_still_down}&quot;)
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>self._logger.info(f&quot;[{outage_type.value}] Edges that are healthy after recheck: {healthy_edges}&quot;)
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>self._logger.info(f&quot;[{outage_type.value}] Serials that are healthy after recheck: {healthy_serials}&quot;)
+</code></pre></div>
+* If edges still down:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>self._logger.info(f&quot;[{outage_type.value}] {len(edges_still_down)} edges are still in outage state after re-check. &quot;
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>              &quot;Attempting outage ticket creation for all of them...&quot;)
+</code></pre></div>
+  * If environment PRODUCTION:
+    * <a href="../_attempt_ticket_creation/">_attempt_ticket_creation</a>
+    * If error in attempt ticket creation:
+      <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>self._logger.error(f&quot;[{outage_type.value}] Error while attempting ticket creation(s) for edge in &quot;
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>                   f&quot;the quarantine: {ex}&quot;)
+</code></pre></div>
+  * Else:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>self._logger.info(f&quot;[{outage_type.value}] Not starting outage ticket creation for {len(edges_still_down)} faulty &quot;
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>                  f&quot;edges because the current working environment is {working_environment.upper()}.&quot;)
+</code></pre></div>
+* Else:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>self._logger.info(f&quot;[{outage_type.value}] No edges were detected in outage state after re-check. &quot;
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>            &quot;Outage tickets won&#39;t be created&quot;)
+</code></pre></div>
+* If healthy edges:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>self._logger.info(
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>              f&quot;[{outage_type.value}] {len(healthy_edges)} edges were detected in healthy state after re-check. &#39;&quot;
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>              &quot;Running autoresolve for all of them...&quot;
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>          )
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>self._logger.info(
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>              f&quot;[{outage_type.value}] Edges that are going to be attempted to autoresolve: {healthy_edges}&quot;
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>          )
+</code></pre></div>
+  * <a href="../_run_ticket_autoresolve_for_edge/">_run_ticket_autoresolve_for_edge</a>
+* Else:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>self._logger.info(
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>              f&quot;[{outage_type.value}] No edges were detected in healthy state. &quot; &quot;Autoresolve won&#39;t be triggered&quot;
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>          )
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>self._logger.info(f&quot;[{outage_type.value}] Re-check process finished for {len(outage_edges)} edges&quot;)
+</code></pre></div></p>
 
               
             </article>

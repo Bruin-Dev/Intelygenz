@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/service-outage-monitor/actions/outage_monitoring/_attempt_forward_to_asr/">
       
       <link rel="icon" href="../../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,42 +553,39 @@
   <h1> attempt forward to asr</h1>
 
 <h2 id="attempt-forward-to-asr">Attempt forward to asr</h2>
-<pre><code>self._logger.info(f&quot;Attempting to forward task of ticket {ticket_id} related to serial {serial_number} to ASR Investigate...&quot;)
-</code></pre>
-<ul>
-<li>If faulty edge:
-  <code>self._logger.info(f"Outage of serial {serial_number} is caused by a faulty edge. Related detail of ticket {ticket_id} "
-                "will not be forwarded to ASR Investigate.")</code></li>
-</ul>
-<pre><code>self._logger.info(f&quot;Searching serial {serial_number} for any wired links&quot;)
-</code></pre>
-<ul>
-<li>If not wired links:
-  <code>self._logger.info(f"No wired links are disconnected for serial {serial_number}. Related detail of ticket {ticket_id} "
-                "will not be forwarded to ASR Investigate.")</code></li>
-</ul>
-<pre><code>self._logger.info(f&quot;Filtering out any of the wired links of serial {serial_number} that contains any of the &quot;
-            f'following: {self._config.MONITOR_CONFIG[&quot;blacklisted_link_labels_for_asr_forwards&quot;]} '
-            f&quot;in the link label&quot;)
-</code></pre>
-<ul>
-<li>If not whitelist links:
-  <code>self._logger.info(f"No links with whitelisted labels were found for serial {serial_number}. "
-                    f"Related detail of ticket {ticket_id} will not be forwarded to ASR Investigate.")</code></li>
-<li><a href="../../../repositories/bruin_repository/get_ticket_details/">get_ticket_details</a></li>
-<li>If status not Ok:
-  <code>self._logger.info(f"Bad status calling get ticket details. Skipping forward asr ...")</code></li>
-</ul>
-<pre><code>self._logger.info(f&quot;Notes of ticket {ticket_id}: {notes_from_outage_ticket}&quot;)
-</code></pre>
-<ul>
-<li>If task result note:
-  <code>self._logger.info(f"Detail related to serial {serial_number} of ticket {ticket_id} has already been forwarded to "
-                    f'"{target_queue}"')</code></li>
-<li><a href="../../../repositories/bruin_repository/change_detail_work_queue/">change_detail_work_queue</a></li>
-<li>If status of change detail work queue in Ok:</li>
-<li><a href="../../../repositories/bruin_repository/append_asr_forwarding_note/">append_asr_forwarding_note</a></li>
-</ul>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(f&quot;Attempting to forward task of ticket {ticket_id} related to serial {serial_number} to ASR Investigate...&quot;)
+</code></pre></div>
+* If faulty edge:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(f&quot;Outage of serial {serial_number} is caused by a faulty edge. Related detail of ticket {ticket_id} &quot;
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>              &quot;will not be forwarded to ASR Investigate.&quot;)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(f&quot;Searching serial {serial_number} for any wired links&quot;)
+</code></pre></div>
+* If not wired links:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.info(f&quot;No wired links are disconnected for serial {serial_number}. Related detail of ticket {ticket_id} &quot;
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>              &quot;will not be forwarded to ASR Investigate.&quot;)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.info(f&quot;Filtering out any of the wired links of serial {serial_number} that contains any of the &quot;
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>            f&#39;following: {self._config.MONITOR_CONFIG[&quot;blacklisted_link_labels_for_asr_forwards&quot;]} &#39;
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>            f&quot;in the link label&quot;)
+</code></pre></div>
+* If not whitelist links:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>self._logger.info(f&quot;No links with whitelisted labels were found for serial {serial_number}. &quot;
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>                  f&quot;Related detail of ticket {ticket_id} will not be forwarded to ASR Investigate.&quot;)
+</code></pre></div>
+* <a href="../../../repositories/bruin_repository/get_ticket_details/">get_ticket_details</a>
+* If status not Ok:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>self._logger.info(f&quot;Bad status calling get ticket details. Skipping forward asr ...&quot;)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>self._logger.info(f&quot;Notes of ticket {ticket_id}: {notes_from_outage_ticket}&quot;)
+</code></pre></div>
+* If task result note:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>self._logger.info(f&quot;Detail related to serial {serial_number} of ticket {ticket_id} has already been forwarded to &quot;
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>                  f&#39;&quot;{target_queue}&quot;&#39;)
+</code></pre></div>
+* <a href="../../../repositories/bruin_repository/change_detail_work_queue/">change_detail_work_queue</a>
+* If status of change detail work queue in Ok:
+  * <a href="../../../repositories/bruin_repository/append_asr_forwarding_note/">append_asr_forwarding_note</a></p>
 
               
             </article>

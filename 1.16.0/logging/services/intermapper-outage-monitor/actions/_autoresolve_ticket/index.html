@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/intermapper-outage-monitor/actions/_autoresolve_ticket/">
       
       <link rel="icon" href="../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -553,80 +553,92 @@
   <h1> autoresolve ticket</h1>
 
 <h2 id="autoresolve-ticket">Autoresolve ticket</h2>
-<pre><code>self._logger.info(&quot;Starting the autoresolve process&quot;)
-</code></pre>
-<ul>
-<li><a href="../../repositories/bruin_repository/get_ticket_basic_info/">get_ticket_basic_info</a></li>
-<li>If status is not Ok:
-  <code>self._logger.warning(f"Bad status calling to get ticket basic info for client id:  {client_id}."
-                                 f"Skipping autoresolve ticket ...")</code></li>
-</ul>
-<pre><code>self._logger.info(f&quot;Found {len(tickets_body)} tickets for circuit ID {circuit_id} from bruin:&quot;)
-self._logger.info(tickets_body)
-</code></pre>
-<ul>
-<li>For ticket in tickets:
-  <code>self._logger.info(
-                f"Posting InterMapper UP note to task of ticket id {ticket_id} "
-                f"related to circuit ID {circuit_id}..."
-            )</code></li>
-<li><a href="../../repositories/bruin_repository/append_intermapper_up_note/">_append_intermapper_up_note</a></li>
-<li>If status is not Ok:
-    <code>self._logger.warning(f"Bad status calling to append intermapper note to ticket id: {ticket_id}."
-                                     f"Skipping autoresolve ticket ....")</code></li>
-<li><a href="../../repositories/bruin_repository/get_tickets/">get_tickets</a></li>
-<li>If status is not Ok:
-    <code>self._logger.warning(f"Bad status calling to get ticket for client id: {client_id} and "
-                                     f"ticket id: {ticket_id}. Skipping autoresolve ticket ...")</code></li>
-<li>If no product category:
-    <code>self._logger.info(f"Ticket {ticket_id} couldn't be found in Bruin. Skipping autoresolve...")</code>
-  <code>self._logger.info(f"Product category of ticket {ticket_id} from bruin is {product_category}")</code></li>
-<li>If product category whitelisted:
-    <code>self._logger.info(
-                    f"At least one product category of ticket {ticket_id} from the "
-                    f"following list is not one of the whitelisted categories for "
-                    f"auto-resolve: {product_category}. Skipping autoresolve ..."
-                )</code>
-  <code>self._logger.info(f"Checking to see if ticket {ticket_id} can be autoresolved")</code></li>
-<li><a href="../../repositories/bruin_repository/get_ticket_details/">get_ticket_details</a></li>
-<li>If status is not Ok:
-    <code>self._logger.warning(f"Bad status calling get ticket details to ticket id: {ticket_id}."
-                                     f"Skipping autoresolve ...")</code></li>
-<li>If not detected outage recently:
-    <code>self._logger.info(
-                    f"Edge has been in outage state for a long time, so detail {ticket_detail_id} "
-                    f"(circuit ID {circuit_id}) of ticket {ticket_id} will not be autoresolved. Skipping "
-                    f"autoresolve..."
-                )</code></li>
-<li>If can't autoresolve one more time:
-    <code>self._logger.info(
-                    f"Limit to autoresolve detail {ticket_detail_id} (circuit ID {circuit_id}) "
-                    f"of ticket {ticket_id} has been maxed out already. "
-                    "Skipping autoresolve..."
-                )</code></li>
-<li>If detail is resolved:
-    <code>self._logger.info(
-                    f"Detail {ticket_detail_id} (circuit ID {circuit_id}) of ticket {ticket_id} is already "
-                    "resolved. Skipping autoresolve..."
-                )</code></li>
-<li>If curren environment is not production:
-    <code>self._logger.info(
-                    f"Skipping autoresolve for circuit ID {circuit_id} "
-                    f"since the current environment is not production"
-                )</code></li>
-<li><a href="../../repositories/bruin_repository/unpause_ticket_detail/">unpause_ticket_detail</a></li>
-<li><a href="../../repositories/bruin_repository/resolve_ticket/">resolve_ticket</a></li>
-<li>If status is not Ok:
-    <code>self._logger.warning(f"Bad status calling to resolve ticket: {ticket_id}. Skipping autoresolve ...")</code>
-  <code>self._logger.info(
-                f"Autoresolve was successful for task of ticket {ticket_id} related to "
-                f"circuit ID {circuit_id}. Posting autoresolve note..."
-            )</code></li>
-<li><a href="../../repositories/bruin_repository/append_autoresolve_note_to_ticket/">append_autoresolve_note_to_ticket</a>
-  <code>self._logger.info(
-                f"Detail {ticket_detail_id} (circuit ID {circuit_id}) of ticket {ticket_id} " f"was autoresolved!"
-            )</code></li>
-</ul>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(&quot;Starting the autoresolve process&quot;)
+</code></pre></div>
+* <a href="../../repositories/bruin_repository/get_ticket_basic_info/">get_ticket_basic_info</a>
+* If status is not Ok:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.warning(f&quot;Bad status calling to get ticket basic info for client id:  {client_id}.&quot;
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>                               f&quot;Skipping autoresolve ticket ...&quot;)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(f&quot;Found {len(tickets_body)} tickets for circuit ID {circuit_id} from bruin:&quot;)
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>self._logger.info(tickets_body)
+</code></pre></div>
+* For ticket in tickets:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.info(
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>              f&quot;Posting InterMapper UP note to task of ticket id {ticket_id} &quot;
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>              f&quot;related to circuit ID {circuit_id}...&quot;
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>          )
+</code></pre></div>
+  * <a href="../../repositories/bruin_repository/append_intermapper_up_note/">_append_intermapper_up_note</a>
+  * If status is not Ok:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.warning(f&quot;Bad status calling to append intermapper note to ticket id: {ticket_id}.&quot;
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>                                 f&quot;Skipping autoresolve ticket ....&quot;)
+</code></pre></div>
+  * <a href="../../repositories/bruin_repository/get_tickets/">get_tickets</a>
+  * If status is not Ok:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>self._logger.warning(f&quot;Bad status calling to get ticket for client id: {client_id} and &quot;
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>                                 f&quot;ticket id: {ticket_id}. Skipping autoresolve ticket ...&quot;)
+</code></pre></div>
+  * If no product category:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>self._logger.info(f&quot;Ticket {ticket_id} couldn&#39;t be found in Bruin. Skipping autoresolve...&quot;)
+</code></pre></div>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>self._logger.info(f&quot;Product category of ticket {ticket_id} from bruin is {product_category}&quot;)
+</code></pre></div>
+  * If product category whitelisted:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>self._logger.info(
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>                f&quot;At least one product category of ticket {ticket_id} from the &quot;
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>                f&quot;following list is not one of the whitelisted categories for &quot;
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>                f&quot;auto-resolve: {product_category}. Skipping autoresolve ...&quot;
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>            )
+</code></pre></div>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>self._logger.info(f&quot;Checking to see if ticket {ticket_id} can be autoresolved&quot;)
+</code></pre></div>
+  * <a href="../../repositories/bruin_repository/get_ticket_details/">get_ticket_details</a>
+  * If status is not Ok:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>self._logger.warning(f&quot;Bad status calling get ticket details to ticket id: {ticket_id}.&quot;
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>                                 f&quot;Skipping autoresolve ...&quot;)
+</code></pre></div>
+  * If not detected outage recently:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>self._logger.info(
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>                f&quot;Edge has been in outage state for a long time, so detail {ticket_detail_id} &quot;
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>                f&quot;(circuit ID {circuit_id}) of ticket {ticket_id} will not be autoresolved. Skipping &quot;
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>                f&quot;autoresolve...&quot;
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>            )
+</code></pre></div>
+  * If can't autoresolve one more time:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>self._logger.info(
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>                f&quot;Limit to autoresolve detail {ticket_detail_id} (circuit ID {circuit_id}) &quot;
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>                f&quot;of ticket {ticket_id} has been maxed out already. &quot;
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>                &quot;Skipping autoresolve...&quot;
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>            )
+</code></pre></div>
+  * If detail is resolved:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>self._logger.info(
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>                f&quot;Detail {ticket_detail_id} (circuit ID {circuit_id}) of ticket {ticket_id} is already &quot;
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>                &quot;resolved. Skipping autoresolve...&quot;
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>            )
+</code></pre></div>
+  * If curren environment is not production:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>self._logger.info(
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>                f&quot;Skipping autoresolve for circuit ID {circuit_id} &quot;
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>                f&quot;since the current environment is not production&quot;
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>            )
+</code></pre></div>
+  * <a href="../../repositories/bruin_repository/unpause_ticket_detail/">unpause_ticket_detail</a>
+  * <a href="../../repositories/bruin_repository/resolve_ticket/">resolve_ticket</a>
+  * If status is not Ok:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>self._logger.warning(f&quot;Bad status calling to resolve ticket: {ticket_id}. Skipping autoresolve ...&quot;)
+</code></pre></div>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>self._logger.info(
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>              f&quot;Autoresolve was successful for task of ticket {ticket_id} related to &quot;
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>              f&quot;circuit ID {circuit_id}. Posting autoresolve note...&quot;
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>          )
+</code></pre></div>
+  * <a href="../../repositories/bruin_repository/append_autoresolve_note_to_ticket/">append_autoresolve_note_to_ticket</a>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>self._logger.info(
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>              f&quot;Detail {ticket_detail_id} (circuit ID {circuit_id}) of ticket {ticket_id} &quot; f&quot;was autoresolved!&quot;
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>          )
+</code></pre></div></p>
 
               
             </article>

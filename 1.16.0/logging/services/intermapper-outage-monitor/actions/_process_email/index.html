@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/logging/services/intermapper-outage-monitor/actions/_process_email/">
       
       <link rel="icon" href="../../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.11">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
@@ -555,45 +555,50 @@
 <h2 id="process-email">Process email</h2>
 <ul>
 <li>If not message or msg_uid = -1:
-  <code>self._logger.error(f"Invalid message: {email}")</code></li>
-</ul>
-<pre><code>self._logger.info(f&quot;Processing email with msg_uid: {msg_uid} and subject: {subject}&quot;)
-</code></pre>
-<ul>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.error(f&quot;Invalid message: {email}&quot;)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(f&quot;Processing email with msg_uid: {msg_uid} and subject: {subject}&quot;)
+</code></pre></div></li>
 <li>If event in intermaper config up events:
-  <code>self._logger.info(
-                f'Event from InterMapper was {parsed_email_dict["event"]}, there is no need to create '
-                f"a new ticket. Checking for autoresolve ..."
-            )</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>              f&#39;Event from InterMapper was {parsed_email_dict[&quot;event&quot;]}, there is no need to create &#39;
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>              f&quot;a new ticket. Checking for autoresolve ...&quot;
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>          )
+</code></pre></div></li>
 <li><a href="../_autoresolve_ticket/">_autoresolve_ticket</a></li>
 <li>If event in intermaper config down events:
-  <code>self._logger.info(
-                f'Event from InterMapper was {parsed_email_dict["event"]}, '
-                f'condition was {parsed_email_dict["condition"]}. Checking for ticket creation ...'
-            )</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.info(
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>              f&#39;Event from InterMapper was {parsed_email_dict[&quot;event&quot;]}, &#39;
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>              f&#39;condition was {parsed_email_dict[&quot;condition&quot;]}. Checking for ticket creation ...&#39;
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>          )
+</code></pre></div></li>
 <li>If is piab device;
-    <code>self._logger.info(
-                    f"The probe type from Intermapper is {parsed_email_dict['probe_type']}."
-                    f"Attempting to get additional parameters from DRI..."
-                )</code><ul>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.info(
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>                f&quot;The probe type from Intermapper is {parsed_email_dict[&#39;probe_type&#39;]}.&quot;
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>                f&quot;Attempting to get additional parameters from DRI...&quot;
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>            )
+</code></pre></div><ul>
 <li><a href="../_get_dri_parameters/">_get_dri_parameters</a></li>
 </ul>
 </li>
 <li><a href="../_create_outage_ticket/">_create_outage_ticket</a></li>
 <li>Else:
-  <code>self._logger.info(
-                f'Event from InterMapper was {parsed_email_dict["event"]}, '
-                f"so no further action is needs to be taken"
-            )</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>self._logger.info(
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>              f&#39;Event from InterMapper was {parsed_email_dict[&quot;event&quot;]}, &#39;
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>              f&quot;so no further action is needs to be taken&quot;
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>          )
+</code></pre></div></li>
 <li>If event process successfully and environment is production:</li>
 <li><a href="../_mark_email_as_read/">_mark_email_as_read</a></li>
 <li>If even process successfully:
-  <code>self._logger.info(f"Processed email: {msg_uid}")</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>self._logger.info(f&quot;Processed email: {msg_uid}&quot;)
+</code></pre></div></li>
 <li>Else:
-  <code>self._logger.error(
-                f"Email with msg_uid: {msg_uid} and subject: {subject} "
-                f"related to circuit ID: {circuit_id} could not be processed"
-            )</code></li>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>self._logger.error(
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>              f&quot;Email with msg_uid: {msg_uid} and subject: {subject} &quot;
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>              f&quot;related to circuit ID: {circuit_id} could not be processed&quot;
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>          )
+</code></pre></div></li>
 </ul>
 
               
