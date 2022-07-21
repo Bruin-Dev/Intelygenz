@@ -26,7 +26,6 @@ class TestMonitor:
         notifications_repository,
         utils_repository,
     ):
-
         assert monitor._event_bus is event_bus
         assert monitor._logger is logger
         assert monitor._scheduler is scheduler
@@ -134,6 +133,7 @@ class TestMonitor:
         responses = [response_1, response_2, response_3, response_4]
 
         monitor._servicenow_repository.report_incident = CoroutineMock(side_effect=responses)
+        monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         await monitor._report_servicenow_incident(gateway)
         await monitor._report_servicenow_incident(gateway)
@@ -141,6 +141,7 @@ class TestMonitor:
         await monitor._report_servicenow_incident(gateway)
 
         assert monitor._servicenow_repository.report_incident.call_count == len(responses)
+        assert monitor._notifications_repository.send_slack_message.call_count == len(responses)
 
     def filter_gateways_with_metrics_test(self, monitor, make_gateway_with_metrics):
         gateway_1 = make_gateway_with_metrics(id=1, tunnel_count={"average": 100, "min": 100})

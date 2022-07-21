@@ -105,30 +105,38 @@ class Monitor:
         report_incident_response = await self._servicenow_repository.report_incident(gateway)
 
         if report_incident_response["status"] not in range(200, 300):
-            self._logger.error(
+            message = (
                 f"Failed to report incident to ServiceNow for host {gateway['host']} and gateway {gateway['name']}"
             )
+            self._logger.error(message)
+            await self._notifications_repository.send_slack_message(message)
             return
 
         result = report_incident_response["body"]["result"]
 
         if result["state"] == "inserted":
-            self._logger.info(
+            message = (
                 f"A new incident with ID {result['number']} was created in ServiceNow "
                 f"for host {gateway['host']} and gateway {gateway['name']}"
             )
             self._metrics_repository.increment_tasks_created(host=gateway["host"])
+            self._logger.info(message)
+            await self._notifications_repository.send_slack_message(message)
         elif result["state"] == "ignored":
-            self._logger.info(
+            message = (
                 f"An open incident with ID {result['number']} already existed in ServiceNow "
                 f"for host {gateway['host']} and gateway {gateway['name']}, a note was added to it"
             )
+            self._logger.info(message)
+            await self._notifications_repository.send_slack_message(message)
         elif result["state"] == "reopened":
-            self._logger.info(
+            message = (
                 f"A resolved incident with ID {result['number']} already existed in ServiceNow "
                 f"for host {gateway['host']} and gateway {gateway['name']}, it was reopened and a note was added to it"
             )
             self._metrics_repository.increment_tasks_reopened(host=gateway["host"])
+            self._logger.info(message)
+            await self._notifications_repository.send_slack_message(message)
 
     def _filter_gateways_with_metrics(self, gateways: List[dict]) -> List[dict]:
         filtered_gateways = []
