@@ -451,7 +451,8 @@ class InterMapperMonitor:
         if append_intermapper_note_response["status"] not in range(200, 300):
             self._logger.warning(f"Bad status calling append intermapper note. Skipping create outage ticket ...")
             return False
-        if self._should_forward_to_ipa_queue(parsed_email_dict):
+
+        if self._should_forward_to_ipa_queue(parsed_email_dict) and outage_ticket_status in (200, 471, 472, 473):
             ipa_forward_time = self._config.INTERMAPPER_CONFIG["forward_to_ipa_job_interval"]
             self._schedule_forward_to_queue(
                 ticket_id, service_number, ForwardQueues.IPA.value, ipa_forward_time, is_piab, event
