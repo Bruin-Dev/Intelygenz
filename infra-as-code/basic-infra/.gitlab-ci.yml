@@ -132,3 +132,79 @@ destroy-basic-infra-pro:
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /destroy\(.*\): .*$/'
       when: manual
       allow_failure: true
+
+
+# ============================================================
+# Jobs to deploy infra-as-code/basic-infra/1-parameters module
+# ============================================================
+
+dev-deploy-parameters:
+  stage: parameters
+  extends: .terraform_template_deploy_one_folder  
+  variables:
+    CURRENT_ENVIRONMENT: dev
+    MODULE: "infra-as-code/basic-infra/1-parameters"
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT="dev"
+    - export TF_VAR_ENVIRONMENT="dev"
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(.*\): .*$/'
+      changes:
+        - infra-as-code/basic-infra/1-parameters/**/*
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"'
+  needs:
+    - job: terraform-valite-basic-infra
+
+pro-deploy-parameters:
+  stage: parameters
+  extends: .terraform_template_deploy_one_folder  
+  variables:
+    CURRENT_ENVIRONMENT: production
+    MODULE: "infra-as-code/basic-infra/1-parameters"
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT="production"
+    - export TF_VAR_ENVIRONMENT="production"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(.*\): .*$/'
+      changes:
+        - infra-as-code/basic-infra/1-parameters/**/*
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "web"'
+  needs:
+    - job: terraform-valite-basic-infra
+
+
+
+# =========================================================================
+# Terraform deployment jobs for infra-as-code/basic-infra/3-registry module
+# =========================================================================
+registry:
+  stage: basic_infra
+  extends: .terraform_template_deploy_one_folder
+  variables:
+    MODULE: "infra-as-code/basic-infra/3-registry"
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT="production"
+    - export TF_VAR_ENVIRONMENT="production"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "web"'
+      when: manual
+      allow_failure: true
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor|build|destroy)\(.*\): .*$/'
+      changes:
+        - infra-as-code/basic-infra/3-registry/**/*
+
+# ======================================================================
+# Terraform destroy jobs for infra-as-code/basic-infra/3-registry module
+# ======================================================================
+destroy-registry:
+  stage: destroy
+  extends: .terraform_template_destroy_one_folder
+  variables:
+    MODULE: "infra-as-code/basic-infra/3-registry"
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT="production"
+    - export TF_VAR_ENVIRONMENT="production"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TITLE =~ /destroy\(.*\): .*$/'
+      when: manual
+      allow_failure: true

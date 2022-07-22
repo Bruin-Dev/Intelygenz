@@ -20,15 +20,15 @@
           (
               cd "${i}" || exit
               echo "The current Workdir is $i"
-              if [[ ${i} != "4-elasticaches" ]]; then
+              if [[ ${i} != "6-elasticaches" && ${i} != "3-registry" ]]; then
                   terraform init -backend=true -get=true -input=false
-                  if [[ ${i} != "0-ecr-repositories" && ${i} != "3-eks-roles" ]]; then
+                  if [[ ${i} != "5-access" ]]; then
                       terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
                       terraform refresh
                       terraform DESTROY -auto-approve
                   fi
                   cd ..
-              else
+              elif [[ ${i} != "3-registry" ]]; then
                   for i in $(find . -mindepth 1 -maxdepth 1 -type d | sort -n -r | sed 's|^./||' || exit 1); do
                       (
                           cd "${i}" || exit 1
@@ -58,4 +58,5 @@
     - cd "${MODULE}" || exit 1
     - terraform init -backend=true -get=true -input=false
     - terraform refresh
+    - terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
     - terraform destroy -auto-approve

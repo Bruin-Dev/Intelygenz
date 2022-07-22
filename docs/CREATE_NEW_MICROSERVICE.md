@@ -20,7 +20,7 @@ is only in the Master branch. This means that the first thing that we need to do
 new microservice repo, by that way we can deploy our microservice later in dev branches.
 
   * create a new branch from master
-  * create a new terraform ECR repo file in the folder: `infra-as-code/ecr-repositories` you can copy any of the other repos to have an example.
+  * create a new terraform ECR repo file in the folder: `infra-as-code/basic-infra/3-registry` you can copy any of the other repos to have an example.
     * this is an example:
     ````bash
     resource "aws_ecr_repository" "new-bridge-repository" {

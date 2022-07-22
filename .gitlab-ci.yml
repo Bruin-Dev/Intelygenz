@@ -1,6 +1,7 @@
 stages:
   - validation
   - unit_test
+  - parameters
   - basic_infra
   - basic_infra_kre
   - deploy_kre_runtimes
@@ -13,7 +14,6 @@ stages:
 
 variables:
   # CI/CD variables
-  NATS_SERVER1: "nats://nats-server:4222"
   NATS_MODULE_VERSION: 2.1.0
   DOCKER_HOST: tcp://localhost:2375
   DOCKER_DRIVER: overlay2
@@ -61,63 +61,13 @@ variables:
   VELOCLOUD_BRIDGE_DESIRED_TASKS: "2"
 
 include:
-  # Templates used in Gitlab-CI jobs for validation jobs
-  - local: 'gitlab-ci/basic-templates/.gitlab-ci-validation-templates.yml'
-  # Templates used in Gitlab-CI jobs for unit tests jobs
-  - local: 'gitlab-ci/basic-templates/.gitlab-ci-unit_test-templates.yml'
-  # Templates used in Gitlab-CI jobs for build jobs
-  - local: 'gitlab-ci/basic-templates/.gitlab-ci-build-image-templates.yml'
-  # Templates used in Gitlab-CI jobs for helm jobs
-  - local: 'gitlab-ci/helm-templates/.gitlab-ci-helm-templates.yml'
-  # Templates used in Gitlab-CI jobs for docs jobs
-  - local: 'gitlab-ci/docs-templates/.gitlab-ci-docs-templates.yml'
-  # Templates used in Gitlab-CI jobs for terraform jobs
-  - local: 'gitlab-ci/terraform-templates/.gitlab-ci-terraform-basic-templates.yml'
-  - local: 'gitlab-ci/terraform-templates/.gitlab-ci-terraform-deploy-templates.yml'
-  - local: 'gitlab-ci/terraform-templates/.gitlab-ci-terraform-destroy-templates.yml'
-  - local: 'gitlab-ci/terraform-templates/.gitlab-ci-terraform-validate-templates.yml'
-  - local: 'gitlab-ci/kre-templates/.gitlab-ci-kre-basic-templates.yml'
-  - local: 'gitlab-ci/kre-templates/.gitlab-ci-kre-deploy-templates.yml'
-  - local: 'gitlab-ci/kre-templates/.gitlab-ci-kre-destroy-templates.yml'
-  - local: 'gitlab-ci/kre-templates/.gitlab-ci-kre-validate-templates.yml'
-  # Gitlab-CI jobs declaration for infrastructure
+  # Jobs templates used in Gitlab-CI Yml's
+  - local: 'gitlab-ci/**/*.yml'
+  # Gitlab-CI jobs
+  - local: 'infra-as-code/**/.gitlab-ci.yml'
+  - local: 'services/**/.gitlab-ci.yml'
   - local: 'helm/.gitlab-ci.yml'
   - local: 'docs/.gitlab-ci.yml'
-  - local: 'infra-as-code/basic-infra/.gitlab-ci.yml'
-  - local: 'infra-as-code/ecr-repositories/.gitlab-ci.yml'
-  - local: 'infra-as-code/kre/.gitlab-ci.yml'
-  - local: 'infra-as-code/kre-runtimes/.gitlab-ci.yml'
-  # Gitlab-CI jobs declaration for each microservice/module
-  - local: 'services/bruin-bridge/.gitlab-ci.yml'
-  - local: 'services/customer-cache/.gitlab-ci.yml'
-  - local: 'services/digi-bridge/.gitlab-ci.yml'
-  - local: 'services/digi-reboot-report/.gitlab-ci.yml'
-  - local: 'services/dri-bridge/.gitlab-ci.yml'
-  - local: 'services/email-tagger-kre-bridge/.gitlab-ci.yml'
-  - local: 'services/email-tagger-monitor/.gitlab-ci.yml'
-  - local: 'services/fraud-monitor/.gitlab-ci.yml'
-  - local: 'services/gateway-monitor/.gitlab-ci.yml'
-  - local: 'services/hawkeye-affecting-monitor/.gitlab-ci.yml'
-  - local: 'services/hawkeye-bridge/.gitlab-ci.yml'
-  - local: 'services/hawkeye-customer-cache/.gitlab-ci.yml'
-  - local: 'services/hawkeye-outage-monitor/.gitlab-ci.yml'
-  - local: 'services/intermapper-outage-monitor/.gitlab-ci.yml'
-  - local: 'services/last-contact-report/.gitlab-ci.yml'
-  - local: 'services/links-metrics-api/.gitlab-ci.yml'
-  - local: 'services/links-metrics-collector/.gitlab-ci.yml'
-  - local: 'services/lumin-billing-report/.gitlab-ci.yml'
-  - local: 'services/notifier/.gitlab-ci.yml'
-  - local: 'services/repair-tickets-kre-bridge/.gitlab-ci.yml'
-  - local: 'services/service-affecting-monitor/.gitlab-ci.yml'
-  - local: 'services/service-outage-monitor/.gitlab-ci.yml'
-  - local: 'services/servicenow-bridge/.gitlab-ci.yml'
-  - local: 'services/repair-tickets-monitor/.gitlab-ci.yml'
-  - local: 'services/t7-bridge/.gitlab-ci.yml'
-  - local: 'services/tnba-feedback/.gitlab-ci.yml'
-  - local: 'services/tnba-monitor/.gitlab-ci.yml'
-  - local: 'services/ticket-collector/.gitlab-ci.yml'
-  - local: 'services/ticket-statistics/.gitlab-ci.yml'
-  - local: 'services/velocloud-bridge/.gitlab-ci.yml'
 
 semantic-release:
   stage: release

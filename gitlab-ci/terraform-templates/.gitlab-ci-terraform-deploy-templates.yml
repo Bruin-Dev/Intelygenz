@@ -41,34 +41,32 @@
           (
               cd "${i}" || exit
               echo "The current Workdir is $i"
-              if [[ ${i} != "4-elasticaches" ]]; then
+              if [[ ${i} != "6-elasticaches" && ${i} != "3-registry" ]]; then
                   terraform init -upgrade -backend=true -get=true -input=false
-                  if [[ ${i} != "0-ecr-repositories" ]]; then
-                      terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
-                  fi
-                  if [[ ${i} == "3-eks-roles" ]]; then
+                  terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
+                  if [[ ${i} == "5-access" ]]; then
                       terraform plan -var-file="./eks-access/${TF_VAR_CURRENT_ENVIRONMENT}.tfvars" && terraform apply -var-file="./eks-access/${TF_VAR_CURRENT_ENVIRONMENT}.tfvars" -auto-approve
                       echo "updating gitlab-ci variables with deployed infra values.."
                       curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/AUTOMATION_SSL_CERTIFICATE_ARN" --form "value=$(terraform output ssl-certificate-arn)"
                   else
                       terraform plan && terraform apply -auto-approve
                   fi
-                  if [[ ${i} == "2-eks-cluster"  &&  "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]]; then
+                  if [[ ${i} == "4-services"  &&  "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]]; then
                       echo "updating gitlab-ci variables with deployed infra values.."
                       curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/OREILLY_SECURITY_GROUP_ID_PRO" --form "value=$(terraform output oreilly-security-group-id)"
                       curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/FLUENT_BIT_LOG_GROUP_NAME" --form "value=$(terraform output fluent-bit-log-group-name)"
                       curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/FLUENT_BIT_IAM_ROLE_ARN" --form "value=$(terraform output fluent-bit-role-arn)"
                   fi
-                  if [[ ${i} == "2-eks-cluster"  &&  "$TF_VAR_CURRENT_ENVIRONMENT" == "dev" ]]; then
+                  if [[ ${i} == "4-services"  &&  "$TF_VAR_CURRENT_ENVIRONMENT" == "dev" ]]; then
                       echo "updating gitlab-ci variables with deployed infra values.."
                       curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/OREILLY_SECURITY_GROUP_ID_DEV" --form "value=$(terraform output oreilly-security-group-id)"
                   fi
-                  if [[ ${i} == "5-documentdb"  &&  "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]]; then
+                  if [[ ${i} == "7-documentdb"  &&  "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]]; then
                       echo "updating gitlab-ci variables with deployed infra values.."
                       curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/TICKET_COLLECTOR_MONGO_HOST" --form "value=$(terraform output ticket-collector-mongo-host)"
                   fi
                   cd ..
-              else
+              elif [[ ${i} != "3-registry" ]]; then
                   for e in $(find . -mindepth 1 -maxdepth 1 -type d | sort | sed 's|^./||' || exit 1); do
                       (
                           cd "${e}" || exit 1
@@ -147,4 +145,5 @@
   script:
     - cd "${MODULE}" || exit 1
     - terraform init -backend=true -get=true -input=false
+    - terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
     - terraform plan && terraform apply -auto-approve
