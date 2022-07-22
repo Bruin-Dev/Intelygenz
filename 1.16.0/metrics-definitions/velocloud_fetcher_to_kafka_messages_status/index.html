@@ -15,7 +15,7 @@
     
     
       
-        <title>Task Velocloud fetcher errors when to kafka # - Automation Engine Documentation</title>
+        <title>VeloCloud fetcher errors when pushing to kafka # - Automation Engine Documentation</title>
       
     
     
@@ -61,7 +61,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#task-velocloud-fetcher-errors-when-to-kafka" class="md-skip">
+        <a href="#velocloud-fetcher-errors-when-pushing-to-kafka" class="md-skip">
           Skip to content
         </a>
       
@@ -100,7 +100,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Task Velocloud fetcher errors when to kafka #
+              VeloCloud fetcher errors when pushing to kafka #
             
           </span>
         </div>
@@ -533,7 +533,7 @@
       
         <li class="md-nav__item">
   <a href="#velocloud-status-of-messages-sent-to-kafka" class="md-nav__link">
-    VeloCloud  - Status of Messages sent to Kafka
+    VeloCloud - Status of Messages sent to Kafka
   </a>
   
 </li>
@@ -552,16 +552,18 @@
                 
 
 
-<h1 id="task-velocloud-fetcher-errors-when-to-kafka">Task Velocloud fetcher errors when to kafka</h1>
+<h1 id="velocloud-fetcher-errors-when-pushing-to-kafka">VeloCloud fetcher errors when pushing to kafka</h1>
 <p><strong>Metric name:</strong> velocloud_fetcher_to_kafka_messages_status</p>
-<p><strong>Type of metric:</strong> Counter</p>
+<p><strong>Metric type:</strong> Counter</p>
 <p><strong>Data store:</strong> Prometheus</p>
-<h2 id="velocloud-status-of-messages-sent-to-kafka">VeloCloud  - Status of Messages sent to Kafka</h2>
-<p><strong>Description:</strong> This metrics counts the number of OK calls or Errors when push data to the kafka server.</p>
-<p><strong>Labels:</strong>
-- schema_name: Name of the schema
-- status: [OK, ERROR]
-- environment: [develop, master]</p>
+<h2 id="velocloud-status-of-messages-sent-to-kafka">VeloCloud - Status of Messages sent to Kafka</h2>
+<p><strong>Description:</strong> Number of OK calls or Errors when pushing data to the kafka server.</p>
+<p><strong>Labels:</strong></p>
+<ul>
+<li><strong>schema_name:</strong> &lt;schema_name></li>
+<li><strong>status:</strong> [OK | ERROR]</li>
+<li><strong>environment:</strong> [develop | master]</li>
+</ul>
 
               
             </article>

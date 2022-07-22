@@ -61,7 +61,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#metrics-definitons" class="md-skip">
+        <a href="#metrics-definitions" class="md-skip">
           Skip to content
         </a>
       
@@ -431,8 +431,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#metrics-definitons" class="md-nav__link">
-    Metrics Definitons
+  <a href="#metrics-definitions" class="md-nav__link">
+    Metrics Definitions
   </a>
   
 </li>
@@ -580,8 +580,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#metrics-definitons" class="md-nav__link">
-    Metrics Definitons
+  <a href="#metrics-definitions" class="md-nav__link">
+    Metrics Definitions
   </a>
   
 </li>
@@ -609,49 +609,42 @@
 
   <h1>Metrics definitions</h1>
 
-<h2 id="metrics-definitons">Metrics Definitons</h2>
-<p>This folder will contain all the metrics created to track functional and business values that improve the overall observability of the system</p>
-<p>There will be one markdown file in this folder per metric, the filename will be the metric name and it will contain all their descriptions and all their possible variations.</p>
-<p>Naming conventions must follow the Prometheus Best Practices for naming and units: https://prometheus.io/docs/practices/naming/</p>
+<h2 id="metrics-definitions">Metrics Definitions</h2>
+<p>This folder will contain all the metrics created to track functional and business values that improve the overall observability of the system.</p>
+<p>There will be one markdown file per metric in this folder. The filename will be the metric name and it will contain all the descriptions and possible label combinations.</p>
+<p>Naming conventions must follow the <a href="https://prometheus.io/docs/practices/naming/">Prometheus Best Practices for naming and units</a>.</p>
 <h2 id="list-of-metrics">List of metrics</h2>
 <table>
 <thead>
 <tr>
-<th>Metric Name</th>
+<th>Metric</th>
 <th>Description</th>
-<th>File</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>tasks_created</td>
+<td><a href="tasks_created/">tasks_created</a></td>
 <td>Task Creations</td>
-<td><a href="tasks_created/">tasks_created.md</a></td>
 </tr>
 <tr>
-<td>tasks_reopened</td>
-<td>Task Re-opens</td>
-<td><a href="tasks_reopened/">tasks_reopened.md</a></td>
+<td><a href="tasks_reopened/">tasks_reopened</a></td>
+<td>Task Re-Opens</td>
 </tr>
 <tr>
-<td>tasks_forwarded</td>
+<td><a href="tasks_forwarded/">tasks_forwarded</a></td>
 <td>Task Forwards</td>
-<td><a href="tasks_forwarded/">tasks_forwarded.md</a></td>
 </tr>
 <tr>
-<td>tasks_autoresolved</td>
-<td>Task Auto-resolves</td>
-<td><a href="tasks_autoresolved/">tasks_autoresolved.md</a></td>
+<td><a href="tasks_autoresolved/">tasks_autoresolved</a></td>
+<td>Task Auto-Resolves</td>
 </tr>
 <tr>
-<td>velocloud_fetcher_to_kafka_messages_attempts</td>
-<td>Velocloud fetcher attempts to kafka</td>
-<td><a href="velocloud_fetcher_to_kafka_messages_attempts/">velocloud_fetcher_to_kafka_messages_attempts.md</a></td>
+<td><a href="velocloud_fetcher_to_kafka_messages_attempts/">velocloud_fetcher_to_kafka_messages_attempts</a></td>
+<td>VeloCloud fetcher attempts to kafka</td>
 </tr>
 <tr>
-<td>velocloud_fetcher_to_kafka_messages_status</td>
-<td>Velocloud fetcher errors when to kafka</td>
-<td><a href="velocloud_fetcher_to_kafka_messages_status/">velocloud_fetcher_to_kafka_messages_status.md</a></td>
+<td><a href="velocloud_fetcher_to_kafka_messages_status/">velocloud_fetcher_to_kafka_messages_status</a></td>
+<td>VeloCloud fetcher errors when pushing to kafka</td>
 </tr>
 </tbody>
 </table>

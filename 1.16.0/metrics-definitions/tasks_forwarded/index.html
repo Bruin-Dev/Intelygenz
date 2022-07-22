@@ -532,57 +532,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#velocloud-service-outage-tasks-forwarded-to-hnoc-investigate-queue" class="md-nav__link">
-    VeloCloud - Service Outage tasks forwarded to HNOC Investigate queue
+  <a href="#service-outage-monitor" class="md-nav__link">
+    Service Outage Monitor
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#velocloud-service-outage-tasks-forwarded-to-wireless-repair-intervention-needed-queue" class="md-nav__link">
-    VeloCloud  - Service Outage tasks forwarded to Wireless Repair Intervention Needed queue
+  <a href="#service-affecting-monitor" class="md-nav__link">
+    Service Affecting Monitor
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#velocloud-service-outage-tasks-forwarded-to-asr-investigate-queue" class="md-nav__link">
-    VeloCloud - Service Outage tasks forwarded to ASR Investigate queue
+  <a href="#intermapper-outage-monitor" class="md-nav__link">
+    InterMapper Outage Monitor
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#velocloud-service-affecting-tasks-forwarded-to-hnoc-investigate-queue" class="md-nav__link">
-    VeloCloud - Service Affecting tasks forwarded to HNOC Investigate queue
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#velocloud-service-affecting-tasks-forwarded-to-asr-investigate-queue" class="md-nav__link">
-    VeloCloud - Service Affecting tasks forwarded to ASR Investigate queue
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#fraud-service-affecting-tasks-forwarded-to-hnoc-investigate-queue" class="md-nav__link">
-    Fraud - Service Affecting tasks forwarded to HNOC Investigate queue
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#intermapper-service-outage-tasks-forwarded-to-hnoc-investigate-queue" class="md-nav__link">
-    InterMapper - Service Outage tasks forwarded to HNOC Investigate queue
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#intermapper-service-outage-tasks-forwarded-to-ipa-investigate-queue" class="md-nav__link">
-    InterMapper - Service Outage tasks forwarded to IPA Investigate queue
+  <a href="#fraud-monitor" class="md-nav__link">
+    Fraud Monitor
   </a>
   
 </li>
@@ -603,98 +575,62 @@
 
 <h1 id="task-forwards">Task Forwards</h1>
 <p><strong>Metric name:</strong> tasks_forwarded</p>
-<p><strong>Type of metric:</strong> Counter</p>
+<p><strong>Metric type:</strong> Counter</p>
 <p><strong>Data store:</strong> Prometheus</p>
-<h2 id="velocloud-service-outage-tasks-forwarded-to-hnoc-investigate-queue">VeloCloud - Service Outage tasks forwarded to HNOC Investigate queue</h2>
-<p><strong>Description:</strong> This metric counts how many Service Outage tasks in progress related to VeloCloud edges have been forwarded to the HNOC Investigate queue since the service-outage-monitor instances started until now.</p>
-<p><strong>Labels:</strong>
-- feature: Service Outage Monitor
-- system: VeloCloud
-- topic: VOO
-- client: <em>&lt;one of the relevant clients defined in AWS></em>
-- host: [mettel.velocloud.net | metvco02.mettel.net | metvco03.mettel.net | metvco04.mettel.net]
-- outage_type: [Hard Down Outage (no HA) | Hard Down Outage (HA) | Soft Down Outage (HA) | Link Down Outage (no HA) | Link Down Outage (HA)]
-- severity: [2 | 3]
-- target_queue: HNOC Investigate</p>
-<h2 id="velocloud-service-outage-tasks-forwarded-to-wireless-repair-intervention-needed-queue">VeloCloud  - Service Outage tasks forwarded to Wireless Repair Intervention Needed queue</h2>
-<p><strong>Description:</strong> This metric counts how many Service Outage tasks in progress related to VeloCloud edges with at least one disconnected DiGi link have been forwarded to the Wireless Repair Intervention Needed queue after a failed DiGi reboot since the service-outage-monitor instances started until now.</p>
-<p><strong>Labels:</strong>
-- feature: Service Outage Monitor
-- system: VeloCloud
-- topic: VOO
-- client: <em>&lt;one of the relevant clients defined in AWS></em>
-- host: [mettel.velocloud.net | metvco02.mettel.net | metvco03.mettel.net | metvco04.mettel.net]
-- outage_type: [Link Down Outage (no HA) | Link Down Outage (HA)]
-- severity: 3
-- has_digi: True
-- has_byob: [True | False]
-- link_types: Wireless
-- target_queue: Wireless Repair Intervention Needed</p>
-<h2 id="velocloud-service-outage-tasks-forwarded-to-asr-investigate-queue">VeloCloud - Service Outage tasks forwarded to ASR Investigate queue</h2>
-<p><strong>Description:</strong> This metric counts how many Service Outage tasks in progress related to VeloCloud edges with at least one wired disconnected link that is not BYOB, Customer Owned or a PIAB have been forwarded to the ASR Investigate queue since the service-outage-monitor instances started until now.</p>
-<p><strong>Labels:</strong>
-- feature: Service Outage Monitor
-- system: VeloCloud
-- topic: VOO
-- client: <em>&lt;one of the relevant clients defined in AWS></em>
-- host: [mettel.velocloud.net | metvco02.mettel.net | metvco03.mettel.net | metvco04.mettel.net]
-- outage_type: [Link Down Outage (no HA) | Link Down Outage (HA)]
-- severity: 3
-- has_digi: [True | False]
-- has_byob: False
-- link_types: Wired
-- target_queue: ASR Investigate</p>
-<h2 id="velocloud-service-affecting-tasks-forwarded-to-hnoc-investigate-queue">VeloCloud - Service Affecting tasks forwarded to HNOC Investigate queue</h2>
-<p><strong>Description:</strong> This metric counts how many Service Affecting tasks in progress related to VeloCloud edges with a jitter, latency, packet loss or bandwidth over utilization issue have been forwarded to the HNOC Investigate queue since the service-affecting-monitor instances started until now.</p>
-<p><strong>Labels:</strong>
-- feature: Service Affecting Monitor
-- system: VeloCloud
-- topic: VAS
-- client: <em>&lt;one of the relevant clients defined in AWS></em>
-- host: [mettel.velocloud.net | metvco02.mettel.net | metvco03.mettel.net | metvco04.mettel.net]
-- severity: 3
-- trouble: [Jitter | Latency | Packet Loss | Bandwidth Over Utilization]
-- target_queue: HNOC Investigate</p>
-<h2 id="velocloud-service-affecting-tasks-forwarded-to-asr-investigate-queue">VeloCloud - Service Affecting tasks forwarded to ASR Investigate queue</h2>
-<p><strong>Description:</strong> This metric counts how many Service Affecting tasks in progress related to VeloCloud edges related to a non BYOB or Customer Owned wired link with a circuit instability issue have been forwarded to the ASR Investigate queue since the service-affecting-monitor instances started until now.</p>
-<p><strong>Labels:</strong>
-- feature: Service Affecting Monitor
-- system: VeloCloud
-- topic: VAS
-- client: <em>&lt;one of the relevant clients defined in AWS></em>
-- host: [mettel.velocloud.net | metvco02.mettel.net | metvco03.mettel.net | metvco04.mettel.net]
-- severity: 3
-- trouble: Circuit Instability
-- target_queue: ASR Investigate</p>
-<h2 id="fraud-service-affecting-tasks-forwarded-to-hnoc-investigate-queue">Fraud - Service Affecting tasks forwarded to HNOC Investigate queue</h2>
-<p><strong>Description:</strong> This metric counts how many Service Affecting tasks in progress related to Fraud alerts have been forwarded to the HNOC Investigate queue since the fraud-monitor started until now.</p>
-<p><strong>Labels:</strong>
-- feature: Fraud Monitor
-- system: MetTel Fraud Alerts
-- topic: VAS
-- severity: 3
-- trouble: [Possible Fraud | Request Rate Monitor Violation]
-- target_queue: HNOC Investigate</p>
-<h2 id="intermapper-service-outage-tasks-forwarded-to-hnoc-investigate-queue">InterMapper - Service Outage tasks forwarded to HNOC Investigate queue</h2>
-<p><strong>Description:</strong> This metric counts how many Service Outage tasks related to InterMapper devices have been forwarded since the intermapper-outage-monitor started until now.</p>
-<p><strong>Labels:</strong>
-- feature: InterMapper Outage Monitor
-- system: InterMapper
-- topic: VOO
-- severity: 2
-- event: [Up | OK | Down | Critical | Alarm | Warning | Link Warning]
-- is_piab: [True | False]
-- target_queue: HNOC Investigate</p>
-<h2 id="intermapper-service-outage-tasks-forwarded-to-ipa-investigate-queue">InterMapper - Service Outage tasks forwarded to IPA Investigate queue</h2>
-<p><strong>Description:</strong> This metric counts how many Service Outage tasks related to InterMapper devices have been forwarded since the intermapper-outage-monitor started until now.</p>
-<p><strong>Labels:</strong>
-- feature: InterMapper Outage Monitor
-- system: InterMapper
-- topic: VOO
-- severity: 2
-- event: [Up | OK | Down | Critical | Alarm | Warning | Link Warning]
-- is_piab: [True | False]
-- target_queue: IPA Investigate</p>
+<h2 id="service-outage-monitor">Service Outage Monitor</h2>
+<p><strong>Description:</strong> Number of service outage tasks related to VeloCloud edges that have been forwarded by the <code>service-outage-monitor</code>.</p>
+<p><strong>Labels:</strong></p>
+<ul>
+<li><strong>feature:</strong> Service Outage Monitor</li>
+<li><strong>system:</strong> VeloCloud</li>
+<li><strong>topic:</strong> VOO</li>
+<li><strong>client:</strong> [&lt;client> | FIS | Other]</li>
+<li><strong>host:</strong> &lt;host></li>
+<li><strong>outage_type:</strong> [Hard Down (no HA) | Hard Down (HA) | Soft Down (HA) | Link Down (no HA) | Link Down (HA)]</li>
+<li><strong>severity:</strong> [2 | 3]</li>
+<li><strong>has_digi:</strong> [True | False]</li>
+<li><strong>has_byob:</strong> [True | False]</li>
+<li><strong>link_types:</strong> [Wired | Wireless | Both | None]</li>
+<li><strong>target_queue:</strong> [HNOC Investigate | ASR Investigate | Wireless Repair Intervention Needed]</li>
+</ul>
+<h2 id="service-affecting-monitor">Service Affecting Monitor</h2>
+<p><strong>Description:</strong> Number of service affecting tasks related to VeloCloud edges that have been forwarded by the <code>service-affecting-monitor</code>.</p>
+<p><strong>Labels:</strong></p>
+<ul>
+<li><strong>feature:</strong> Service Affecting Monitor</li>
+<li><strong>system:</strong> VeloCloud</li>
+<li><strong>topic:</strong> VAS</li>
+<li><strong>client:</strong> [&lt;client> | FIS | Other]</li>
+<li><strong>host:</strong> &lt;host></li>
+<li><strong>severity:</strong> 3</li>
+<li><strong>trouble:</strong> [Latency | Packet Loss | Jitter | Bandwidth Over Utilization | Circuit Instability]</li>
+<li><strong>has_byob:</strong> [True | False]</li>
+<li><strong>link_types:</strong> [Wired | Wireless]</li>
+<li><strong>target_queue:</strong> [HNOC Investigate | ASR Investigate]</li>
+</ul>
+<h2 id="intermapper-outage-monitor">InterMapper Outage Monitor</h2>
+<p><strong>Description:</strong> Number of service outage tasks related to InterMapper devices that have been forwarded by the <code>intermapper-outage-monitor</code>.</p>
+<p><strong>Labels:</strong></p>
+<ul>
+<li><strong>feature:</strong> InterMapper Outage Monitor</li>
+<li><strong>system:</strong> InterMapper</li>
+<li><strong>topic:</strong> VOO</li>
+<li><strong>severity:</strong> 2</li>
+<li><strong>event:</strong> &lt;event></li>
+<li><strong>is_piab:</strong> [True | False]</li>
+<li><strong>target_queue:</strong> [HNOC Investigate | IPA Investigate]</li>
+</ul>
+<h2 id="fraud-monitor">Fraud Monitor</h2>
+<p><strong>Description:</strong> Number of service affecting tasks related to Fraud alerts that have been forwarded by the <code>fraud-monitor</code>.</p>
+<p><strong>Labels:</strong></p>
+<ul>
+<li><strong>feature:</strong> Fraud Monitor</li>
+<li><strong>system:</strong> MetTel Fraud Alerts</li>
+<li><strong>topic:</strong> VAS</li>
+<li><strong>severity:</strong> 3</li>
+<li><strong>trouble:</strong> [Possible Fraud | Request Rate Monitor Violation]</li>
+<li><strong>target_queue:</strong> HNOC Investigate</li>
+</ul>
 
               
             </article>

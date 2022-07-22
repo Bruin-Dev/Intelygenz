@@ -627,7 +627,7 @@ is only in the Master branch. This means that the first thing that we need to do
 new microservice repo, by that way we can deploy our microservice later in dev branches.</p>
 <ul>
 <li>create a new branch from master</li>
-<li>create a new terraform ECR repo file in the folder: <code>infra-as-code/ecr-repositories</code> you can copy any of the other repos to have an example.<ul>
+<li>create a new terraform ECR repo file in the folder: <code>infra-as-code/basic-infra/3-registry</code> you can copy any of the other repos to have an example.<ul>
 <li>this is an example:
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>resource <span class="s2">&quot;aws_ecr_repository&quot;</span> <span class="s2">&quot;new-bridge-repository&quot;</span> <span class="o">{</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nv">name</span> <span class="o">=</span> <span class="s2">&quot;new-bridge&quot;</span>

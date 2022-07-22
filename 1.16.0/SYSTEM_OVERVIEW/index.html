@@ -700,13 +700,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#sites-monitor-microservice" class="md-nav__link">
-    Sites-monitor microservice
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#tnba-feedback-microservice" class="md-nav__link">
     TNBA-feedback microservice
   </a>
@@ -927,7 +920,6 @@
 <li><code>service-affecting-monitor</code></li>
 <li><code>service-dispatch-monitor</code></li>
 <li><code>service-outage-monitor</code></li>
-<li><code>sites-monitor</code></li>
 <li><code>tnba-feedback</code></li>
 <li><code>tnba-monitor</code></li>
 </ul>
@@ -1113,10 +1105,6 @@ will be taken.</p>
 </ul>
 <p>In the following <a href="https://app.diagrams.net/#G1-ESnlWgdP7-SbwhP3NAuRWv6ZMuSOUu0">diagram</a> it's possible see the relationship of this microservice with the others.
 <img alt="IMAGE: service-outage-monitor_microservice_relationships" src="../img/system_overview/use_cases/service-outage-monitor_microservice_relationships.png" /></p>
-<h4 id="sites-monitor-microservice">Sites-monitor microservice</h4>
-<p>This microservice requests data from the velocloud API via the velocloud-bridge microservice, using this information to enrich Prometheus. The prometheus data serves as a feed for Grafana.</p>
-<p>The following <a href="https://app.diagrams.net/#G1XwwdfpZZ5Wxn-0L-gt-fmlsysUqIhC_7">diagram</a> shows the relationship between this microservice and the others.</p>
-<p><img alt="IMAGE: sites-monitor_microservice_relationships" src="../img/system_overview/use_cases/sites-monitor_microservice_relationships.png" /></p>
 <h4 id="tnba-feedback-microservice">TNBA-feedback microservice</h4>
 <p>This microservice is in charge of collecting closed tickets that had a TNBA note appended by <code>tnba-monitor</code> at some point. After collecting them, they are sent to <code>t7-bridge</code> to retrain predictive models and hence improve
 the accuracy of predictions claimed by <code>tnba-monitor</code>.</p>

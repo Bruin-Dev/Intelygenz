@@ -532,36 +532,43 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#velocloud-service-outage-tasks-created" class="md-nav__link">
-    VeloCloud - Service Outage tasks created
+  <a href="#service-outage-monitor" class="md-nav__link">
+    Service Outage Monitor
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#ixia-service-outage-tasks-created" class="md-nav__link">
-    Ixia - Service Outage tasks created
+  <a href="#service-affecting-monitor" class="md-nav__link">
+    Service Affecting Monitor
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#intermapper-service-outage-tasks-created" class="md-nav__link">
-    InterMapper - Service Outage tasks created
+  <a href="#intermapper-outage-monitor" class="md-nav__link">
+    InterMapper Outage Monitor
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#velocloud-service-affecting-tasks-created" class="md-nav__link">
-    VeloCloud - Service Affecting tasks created
+  <a href="#gateway-monitor" class="md-nav__link">
+    Gateway Monitor
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#fraud-service-affecting-tasks-created" class="md-nav__link">
-    Fraud - Service Affecting tasks created
+  <a href="#hawkeye-outage-monitor" class="md-nav__link">
+    Hawkeye Outage Monitor
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fraud-monitor" class="md-nav__link">
+    Fraud Monitor
   </a>
   
 </li>
@@ -582,57 +589,78 @@
 
 <h1 id="task-creations">Task Creations</h1>
 <p><strong>Metric name:</strong> tasks_created</p>
-<p><strong>Type of metric:</strong> Counter</p>
+<p><strong>Metric type:</strong> Counter</p>
 <p><strong>Data store:</strong> Prometheus</p>
-<h2 id="velocloud-service-outage-tasks-created">VeloCloud - Service Outage tasks created</h2>
-<p><strong>Description:</strong> This metric counts how many Service Outage tasks related to VeloCloud edges have been created since the service-outage-monitor instances started until now.</p>
-<p><strong>Labels:</strong>
-- feature: Service Outage Monitor
-- system: VeloCloud
-- topic: VOO
-- client: <em>&lt;one of the relevant clients defined in AWS></em>
-- host: [mettel.velocloud.net | metvco02.mettel.net | metvco03.mettel.net | metvco04.mettel.net]
-- outage_type: [Hard Down (no HA) | Hard Down (HA) | Soft Down (HA) | Link Down (no HA) | Link Down (HA)]
-- severity: [2 | 3]
-- has_digi: [True | False]
-- has_byob: [True | False]
-- link_types: [Wired | Wireless | Both]</p>
-<h2 id="ixia-service-outage-tasks-created">Ixia - Service Outage tasks created</h2>
-<p><strong>Description:</strong> This metric counts how many Service Outage tasks related to Ixia probes have been created since the hawkeye-outage-monitor instances started until now.</p>
-<p><strong>Labels:</strong>
-- feature: Hawkeye Outage Monitor
-- system: Ixia
-- topic: VOO
-- client: <em>&lt;one of the relevant clients defined in AWS></em>
-- outage_type: [Node To Node | Real Service | Both]
-- severity: 2</p>
-<h2 id="intermapper-service-outage-tasks-created">InterMapper - Service Outage tasks created</h2>
-<p><strong>Description:</strong> This metric counts how many Service Outage tasks related to InterMapper devices have been created since the intermapper-outage-monitor started until now.</p>
-<p><strong>Labels:</strong>
-- feature: InterMapper Outage Monitor
-- system: InterMapper
-- topic: VOO
-- severity: 2
-- event: [Up | OK | Down | Critical | Alarm | Warning | Link Warning]
-- is_piab: [True | False]</p>
-<h2 id="velocloud-service-affecting-tasks-created">VeloCloud - Service Affecting tasks created</h2>
-<p><strong>Description:</strong> This metric counts how many Service Affecting tasks related to VeloCloud edges have been created since the service-affecting-monitor instances started until now.</p>
-<p><strong>Labels:</strong>
-- feature: Service Affecting Monitor
-- system: VeloCloud
-- topic: VAS
-- client: <em>&lt;one of the relevant clients defined in AWS></em>
-- host: [mettel.velocloud.net | metvco02.mettel.net | metvco03.mettel.net | metvco04.mettel.net]
-- severity: 3
-- trouble: [Jitter | Latency | Packet Loss | Bandwidth Over Utilization | Circuit Instability]</p>
-<h2 id="fraud-service-affecting-tasks-created">Fraud - Service Affecting tasks created</h2>
-<p><strong>Description:</strong> This metric counts how many Service Affecting tasks related to Fraud alerts have been created since the fraud-monitor started until now.</p>
-<p><strong>Labels:</strong>
-- feature: Fraud Monitor
-- system: MetTel Fraud Alerts
-- topic: VAS
-- severity: 3
-- trouble: [Possible Fraud | Request Rate Monitor Violation]</p>
+<h2 id="service-outage-monitor">Service Outage Monitor</h2>
+<p><strong>Description:</strong> Number of service outage tasks related to VeloCloud edges that have been created by the <code>service-outage-monitor</code>.</p>
+<p><strong>Labels:</strong></p>
+<ul>
+<li><strong>feature:</strong> Service Outage Monitor</li>
+<li><strong>system:</strong> VeloCloud</li>
+<li><strong>topic:</strong> VOO</li>
+<li><strong>client:</strong> [&lt;client> | FIS | Other]</li>
+<li><strong>host:</strong> &lt;host></li>
+<li><strong>outage_type:</strong> [Hard Down (no HA) | Hard Down (HA) | Soft Down (HA) | Link Down (no HA) | Link Down (HA)]</li>
+<li><strong>severity:</strong> [2 | 3]</li>
+<li><strong>has_digi:</strong> [True | False]</li>
+<li><strong>has_byob:</strong> [True | False]</li>
+<li><strong>link_types:</strong> [Wired | Wireless | Both | None]</li>
+</ul>
+<h2 id="service-affecting-monitor">Service Affecting Monitor</h2>
+<p><strong>Description:</strong> Number of service affecting tasks related to VeloCloud edges that have been created by the <code>service-affecting-monitor</code>.</p>
+<p><strong>Labels:</strong></p>
+<ul>
+<li><strong>feature:</strong> Service Affecting Monitor</li>
+<li><strong>system:</strong> VeloCloud</li>
+<li><strong>topic:</strong> VAS</li>
+<li><strong>client:</strong> [&lt;client> | FIS | Other]</li>
+<li><strong>host:</strong> &lt;host></li>
+<li><strong>severity:</strong> 3</li>
+<li><strong>trouble:</strong> [Latency | Packet Loss | Jitter | Bandwidth Over Utilization | Circuit Instability]</li>
+<li><strong>has_byob:</strong> [True | False]</li>
+<li><strong>link_types:</strong> [Wired | Wireless]</li>
+</ul>
+<h2 id="intermapper-outage-monitor">InterMapper Outage Monitor</h2>
+<p><strong>Description:</strong> Number of service outage tasks related to InterMapper devices that have been created by the <code>intermapper-outage-monitor</code>.</p>
+<p><strong>Labels:</strong></p>
+<ul>
+<li><strong>feature:</strong> InterMapper Outage Monitor</li>
+<li><strong>system:</strong> InterMapper</li>
+<li><strong>topic:</strong> VOO</li>
+<li><strong>severity:</strong> 2</li>
+<li><strong>event:</strong> &lt;event></li>
+<li><strong>is_piab:</strong> [True | False]</li>
+</ul>
+<h2 id="gateway-monitor">Gateway Monitor</h2>
+<p><strong>Description:</strong> Number of ServiceNow incidents related to VeloCloud gateways that have been created by the <code>gateway-monitor</code>.</p>
+<p><strong>Labels:</strong></p>
+<ul>
+<li><strong>feature:</strong> Gateway Monitor</li>
+<li><strong>system:</strong> VeloCloud</li>
+<li><strong>host:</strong> &lt;host></li>
+<li><strong>trouble:</strong> Tunnel Count</li>
+</ul>
+<h2 id="hawkeye-outage-monitor">Hawkeye Outage Monitor</h2>
+<p><strong>Description:</strong> Number of service outage tasks related to Ixia probes that have been created by the <code>hawkeye-outage-monitor</code>.</p>
+<p><strong>Labels:</strong></p>
+<ul>
+<li><strong>feature:</strong> Hawkeye Outage Monitor</li>
+<li><strong>system:</strong> Ixia</li>
+<li><strong>topic:</strong> VOO</li>
+<li><strong>client:</strong> [&lt;client> | FIS | Other]</li>
+<li><strong>outage_type:</strong> [Node To Node | Real Service | Both | None]</li>
+<li><strong>severity:</strong> 2</li>
+</ul>
+<h2 id="fraud-monitor">Fraud Monitor</h2>
+<p><strong>Description:</strong> Number of service affecting tasks related to Fraud alerts that have been created by the <code>fraud-monitor</code>.</p>
+<p><strong>Labels:</strong></p>
+<ul>
+<li><strong>feature:</strong> Fraud Monitor</li>
+<li><strong>system:</strong> MetTel Fraud Alerts</li>
+<li><strong>topic:</strong> VAS</li>
+<li><strong>severity:</strong> 3</li>
+<li><strong>trouble:</strong> [Possible Fraud | Request Rate Monitor Violation]</li>
+</ul>
 
               
             </article>
