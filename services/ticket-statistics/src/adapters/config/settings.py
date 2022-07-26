@@ -60,6 +60,6 @@ def get_mongo_params():
         return "authSource=admin"
     else:
         return (
-            "ssl=true&ssl_ca_certs=/service/app/rds-combined-ca-bundle.pem"
+            "ssl=true&ssl_ca_certs=/rds-combined-ca-bundle.pem"
             "&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false"
         )
