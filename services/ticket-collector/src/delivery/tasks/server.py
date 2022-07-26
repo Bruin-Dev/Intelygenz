@@ -5,6 +5,7 @@ from adapters.config import settings
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from delivery.tasks import get_data_tasks
 from igz.packages.server.api import QuartServer
+from pytz import timezone
 
 
 class ITasksServer(metaclass=abc.ABCMeta):
@@ -12,7 +13,7 @@ class ITasksServer(metaclass=abc.ABCMeta):
         self.config = config
         self.logger = logger
         self.use_cases = use_cases
-        self.scheduler = AsyncIOScheduler()
+        self.scheduler = AsyncIOScheduler(timezone=timezone("US/Eastern"))
         self.use_cases.wire(modules=[get_data_tasks])
         self._server = QuartServer(settings)
         self.initialize()
