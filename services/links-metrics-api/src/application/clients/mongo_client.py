@@ -15,7 +15,7 @@ class MyMongoClient:
         if self._config.CURRENT_ENVIRONMENT == "production":
             conn_string = (
                 f"mongodb://{username}:{password}@{url}:{port}/velocloud?ssl=true&ssl_ca_certs="
-                f"/service/app/rds-combined-ca-bundle.pem&replicaSet=rs0&readPreference"
+                f"/rds-combined-ca-bundle.pem&replicaSet=rs0&readPreference"
                 f"=secondaryPreferred&retryWrites=false"
             )
         else:
