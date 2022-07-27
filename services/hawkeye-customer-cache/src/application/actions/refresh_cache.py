@@ -18,6 +18,7 @@ class RefreshCache:
         bruin_repository,
         hawkeye_repository,
         notifications_repository,
+        email_repository,
     ):
         self._config = config
         self._event_bus = event_bus
@@ -27,6 +28,7 @@ class RefreshCache:
         self._bruin_repository = bruin_repository
         self._hawkeye_repository = hawkeye_repository
         self._notifications_repository = notifications_repository
+        self._email_repository = email_repository
 
     async def _refresh_cache(self):
         @retry(wait=wait_random(min=120, max=300), reraise=True)
@@ -97,7 +99,7 @@ class RefreshCache:
             self._logger.info(
                 f"Sending mail with serials having multiples inventories to  {email_obj['email_data']['recipient']}"
             )
-            response = await self._notifications_repository.send_email(email_obj)
+            response = await self._email_repository.send_email(email_obj)
             self._logger.info(
                 f"Response from sending email with serials having multiple inventories: {json.dumps(response)}"
             )

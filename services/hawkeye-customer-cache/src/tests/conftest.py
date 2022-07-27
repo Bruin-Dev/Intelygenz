@@ -37,6 +37,11 @@ def notifications_repository():
 
 
 @pytest.fixture(scope="function")
+def email_repository():
+    return Mock()
+
+
+@pytest.fixture(scope="function")
 def scheduler():
     return Mock()
 
@@ -69,7 +74,8 @@ def instance_get_customer(storage_repository, logger, event_bus):
 
 @pytest.fixture(scope="function")
 def refresh_cache(
-    logger, event_bus, scheduler, storage_repository, bruin_repository, hawkeye_repository, notifications_repository
+    logger, event_bus, scheduler, storage_repository, bruin_repository, hawkeye_repository, notifications_repository,
+    email_repository
 ):
     return RefreshCache(
         config,
@@ -80,6 +86,7 @@ def refresh_cache(
         bruin_repository,
         hawkeye_repository,
         notifications_repository,
+        email_repository,
     )
 
 
