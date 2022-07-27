@@ -11,12 +11,11 @@
 # Capabilities used
 - [Bruin bridge](../bruin-bridge/README.md)
 - [T7 bridge](../email-tagger-kre-bridge/README.md)
-- [Email bridge](../email-bridge/README.md)
 - [Notifications bridge](../notifications-bridge/README.md)
 
 # Running in docker-compose
 `docker-compose up --build nats-server redis redis-email-tagger`
-`docker-compose up --build bruin-bridge email-tagger-kre-bridge email-bridge notifications-bridge`
+`docker-compose up --build bruin-bridge email-tagger-kre-bridge notifications-bridge`
 `docker-compose up --build email-tagger-monitor`
 
 # Running with Bruin mock and Konstellation local 

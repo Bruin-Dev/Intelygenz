@@ -130,6 +130,7 @@ services:
       - "nats-server"
       - redis
       - redis-email-tagger
+      - "notifications-bridge"
     ports:
       - 5055:5000
       - 9790:9090
