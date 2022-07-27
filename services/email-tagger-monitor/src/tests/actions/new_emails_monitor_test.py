@@ -305,11 +305,20 @@ class TestNewEmailsMonitor:
             previous_id=email_data["email"].get("previous_email_id", None),
             tag=email_data["email"].get("tag", None),
         )
+        prediction_response = [
+            {"tag_id": "TEST", "probability": 0.77},
+            {"tag_id": "TEST2", "probability": 0.23},
+        ]
+        most_prob_tag_data = {"id": "TEST", "probability": 0.77}
 
         new_emails_monitor._repair_parent_email_storage.exists.return_value = 1
         new_emails_monitor._repair_reply_email_storage.set = Mock()
         new_emails_monitor._new_emails_repository.mark_complete = Mock()
-        new_emails_monitor._email_tagger_repository.get_prediction = Mock()
+        new_emails_monitor._email_tagger_repository.get_prediction = CoroutineMock(
+            return_value={"status": 200, "body": prediction_response}
+        )
+        new_emails_monitor.get_most_probable_tag_id = Mock(return_value=most_prob_tag_data)
+        new_emails_monitor._bruin_repository.post_email_tag = CoroutineMock(return_value={"status": 200, "body": "ok"})
 
         await new_emails_monitor._process_new_email(email_data)
 
@@ -318,7 +327,7 @@ class TestNewEmailsMonitor:
             id=email_id, data=email_model, ttl_seconds=300
         )
         new_emails_monitor._new_emails_repository.mark_complete.assert_called_once_with(email_id)
-        new_emails_monitor._email_tagger_repository.get_prediction.assert_not_called()
+        new_emails_monitor._email_tagger_repository.get_prediction.assert_awaited_once_with(email_data)
 
     @pytest.mark.asyncio
     async def _process_new_reply_email_when_parent_id_does_not_exist_ok_test(self):
