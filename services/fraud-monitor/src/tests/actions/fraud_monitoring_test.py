@@ -24,6 +24,7 @@ class TestFraudMonitor:
         logger,
         scheduler,
         notifications_repository,
+        email_repository,
         bruin_repository,
         ticket_repository,
         utils_repository,
@@ -33,6 +34,7 @@ class TestFraudMonitor:
         assert fraud_monitor._scheduler == scheduler
         assert fraud_monitor._config == testconfig
         assert fraud_monitor._notifications_repository == notifications_repository
+        assert fraud_monitor._email_repository == email_repository
         assert fraud_monitor._bruin_repository == bruin_repository
         assert fraud_monitor._ticket_repository == ticket_repository
         assert fraud_monitor._utils_repository == utils_repository
@@ -80,7 +82,7 @@ class TestFraudMonitor:
             "status": 200,
         }
 
-        fraud_monitor._notifications_repository.get_unread_emails.return_value = response
+        fraud_monitor._email_repository.get_unread_emails.return_value = response
 
         await fraud_monitor._fraud_monitoring_process()
         fraud_monitor._process_fraud.assert_not_called()
@@ -94,7 +96,7 @@ class TestFraudMonitor:
             "status": 200,
         }
 
-        fraud_monitor._notifications_repository.get_unread_emails.return_value = response
+        fraud_monitor._email_repository.get_unread_emails.return_value = response
 
         await fraud_monitor._fraud_monitoring_process()
         fraud_monitor._process_fraud.assert_not_called()
@@ -108,7 +110,7 @@ class TestFraudMonitor:
             "status": 200,
         }
 
-        fraud_monitor._notifications_repository.get_unread_emails.return_value = response
+        fraud_monitor._email_repository.get_unread_emails.return_value = response
 
         await fraud_monitor._fraud_monitoring_process()
         fraud_monitor._process_fraud.assert_not_called()
@@ -141,15 +143,15 @@ class TestFraudMonitor:
             "status": 204,
         }
 
-        fraud_monitor._notifications_repository.get_unread_emails.return_value = get_unread_emails_response
-        fraud_monitor._notifications_repository.mark_email_as_read.return_value = mark_email_as_read_response
+        fraud_monitor._email_repository.get_unread_emails.return_value = get_unread_emails_response
+        fraud_monitor._email_repository.mark_email_as_read.return_value = mark_email_as_read_response
         fraud_monitor._process_fraud.return_value = True
 
         with config_mock:
             await fraud_monitor._fraud_monitoring_process()
 
         fraud_monitor._process_fraud.assert_called_once_with(EMAIL_REGEXES[0], body, msg_uid)
-        fraud_monitor._notifications_repository.mark_email_as_read.assert_called_once_with(msg_uid)
+        fraud_monitor._email_repository.mark_email_as_read.assert_called_once_with(msg_uid)
 
     @pytest.mark.asyncio
     async def fraud_monitoring_process__email_not_processed_test(self, fraud_monitor, make_email):
@@ -174,13 +176,13 @@ class TestFraudMonitor:
             "status": 200,
         }
 
-        fraud_monitor._notifications_repository.get_unread_emails.return_value = get_unread_emails_response
+        fraud_monitor._email_repository.get_unread_emails.return_value = get_unread_emails_response
         fraud_monitor._process_fraud.return_value = False
 
         await fraud_monitor._fraud_monitoring_process()
 
         fraud_monitor._process_fraud.assert_called_once_with(EMAIL_REGEXES[0], body, msg_uid)
-        fraud_monitor._notifications_repository.mark_email_as_read.assert_not_called()
+        fraud_monitor._email_repository.mark_email_as_read.assert_not_called()
 
     @pytest.mark.asyncio
     async def process_fraud__append_note_to_ticket_test(
