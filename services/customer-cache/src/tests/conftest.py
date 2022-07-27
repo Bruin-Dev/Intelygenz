@@ -6,6 +6,7 @@ from application.actions.get_customers import GetCustomers
 from application.actions.refresh_cache import RefreshCache
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.email_repository import EmailRepository
 from application.repositories.storage_repository import StorageRepository
 from application.repositories.velocloud_repository import VelocloudRepository
 from asynctest import CoroutineMock
@@ -55,7 +56,12 @@ def mock_velocloud_repository():
 
 @pytest.fixture(scope="function")
 def instance_notifications_repository(mock_event_bus):
-    return NotificationsRepository(mock_event_bus, config)
+    return NotificationsRepository(mock_event_bus, config)\
+
+
+@pytest.fixture(scope="function")
+def instance_email_repository(mock_event_bus):
+    return EmailRepository(mock_event_bus, config)
 
 
 @pytest.fixture(scope="function")
@@ -92,6 +98,7 @@ def instance_refresh_cache(
         instance_bruin_repository,
         mock_velocloud_repository,
         instance_notifications_repository,
+        instance_email_repository,
     )
 
 
