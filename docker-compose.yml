@@ -220,6 +220,8 @@ services:
       - nats-server
       - redis
       - redis-customer-cache
+      - "notifications-bridge"
+      - "email-bridge"
     ports:
       - 5023:5000
       - 9091:9090

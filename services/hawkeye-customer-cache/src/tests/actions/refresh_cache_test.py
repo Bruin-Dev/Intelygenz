@@ -33,6 +33,7 @@ class TestRefreshCache:
         bruin_repository = Mock()
         hawkeye_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
 
         refresh_cache = RefreshCache(
             config,
@@ -43,6 +44,7 @@ class TestRefreshCache:
             bruin_repository,
             hawkeye_repository,
             notifications_repository,
+            email_repository
         )
 
         assert refresh_cache._config == config
@@ -53,6 +55,7 @@ class TestRefreshCache:
         assert refresh_cache._bruin_repository == bruin_repository
         assert refresh_cache._hawkeye_repository == hawkeye_repository
         assert refresh_cache._notifications_repository == notifications_repository
+        assert refresh_cache._email_repository == email_repository
 
     @pytest.mark.asyncio
     async def schedule_cache_refresh_job_test(self, refresh_cache):
@@ -189,4 +192,4 @@ class TestRefreshCache:
             response_get_probes_down_ok["body"][1],
         )
         refresh_cache._notifications_repository.send_slack_message.assert_called()
-        refresh_cache._notifications_repository.send_email.assert_called_once()
+        refresh_cache._email_repository.send_email.assert_called_once()

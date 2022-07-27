@@ -6,6 +6,7 @@ from application.actions.refresh_cache import RefreshCache
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.hawkeye_repository import HawkeyeRepository
 from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.email_repository import EmailRepository
 from application.repositories.storage_repository import StorageRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import config
@@ -51,6 +52,7 @@ class Container:
 
         # REPOSITORIES
         self._notifications_repository = NotificationsRepository(self._event_bus, config)
+        self._email_repository = EmailRepository(self._event_bus, config)
         self._bruin_repository = BruinRepository(config, self._logger, self._event_bus, self._notifications_repository)
         self._hawkeye_repository = HawkeyeRepository(
             self._event_bus, self._logger, config, self._notifications_repository
@@ -67,6 +69,7 @@ class Container:
             self._bruin_repository,
             self._hawkeye_repository,
             self._notifications_repository,
+            self._email_repository,
         )
         self._get_customers = GetCustomers(config, self._logger, self._storage_repository, self._event_bus)
 
