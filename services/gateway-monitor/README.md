@@ -16,7 +16,7 @@ we call a ServiceNow endpoint that automatically creates or re-opens a ticket fo
 # Capabilities used
 - [Velocloud bridge](../velocloud-bridge/README.md)
 - [ServiceNow bridge](../servicenow-bridge/README.md)
-- [Notifier](../notifier/README.md)
+- [Notifications bridge](../notifications-bridge/README.md)
 
 # Running in docker-compose
-`docker-compose up --build nats-server redis velocloud-bridge servicenow-bridge notifier gateway-monitor`
+`docker-compose up --build nats-server redis velocloud-bridge servicenow-bridge notifications-bridge gateway-monitor`
