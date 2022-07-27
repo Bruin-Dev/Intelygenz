@@ -78,6 +78,9 @@ services:
       - services/digi-reboot-report/src/config/env
     volumes:
       - ./services/digi-reboot-report:/service/app
+    depends_on:
+      - "notifications-bridge"
+      - "email-bridge"
     ports:
       - 5016:5000
       - 9590:9090
