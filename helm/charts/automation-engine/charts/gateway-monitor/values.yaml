@@ -48,10 +48,10 @@ config:
     #labels:
     #  servicediscovery: true
   capabilities_enabled:
-    # -- Indicate if notifier is going to be activated. If it is true an initContainer
+    # -- Indicate if notifications-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the
-    # notifier service responds correctly to healthcheck calls.
-    notifier: true
+    # notifications-bridge service responds correctly to healthcheck calls.
+    notifications-bridge: true
     # -- Indicate if velocloud-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the
     # velocloud-bridge service responds correctly to healthcheck calls.

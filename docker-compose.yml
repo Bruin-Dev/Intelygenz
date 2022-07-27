@@ -167,7 +167,7 @@ services:
       - redis
       - "velocloud-bridge"
       - "servicenow-bridge"
-      - "email-bridge"
+      - "notifications-bridge"
     ports:
       - 5010:5000
       - 9009:9000
