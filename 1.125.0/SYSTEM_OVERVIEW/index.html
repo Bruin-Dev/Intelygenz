@@ -1,0 +1,1244 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://docs.mettel-automation.net/1.125.0/SYSTEM_OVERVIEW/">
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
+    
+    
+      
+        <title>System overview - Automation Engine Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.8c5ef100.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.9647289d.min.css">
+        
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#system-overview" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        <aside class="md-banner md-banner--warning">
+          
+        </aside>
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Automation Engine Documentation" class="md-header__button md-logo" aria-label="Automation Engine Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Automation Engine Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              System overview
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href=".." class="md-tabs__link">
+      Home
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../CONCEPTS/" class="md-tabs__link">
+        Topics
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Automation Engine Documentation" class="md-nav__button md-logo" aria-label="Automation Engine Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Automation Engine Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Topics
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Topics" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Topics
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CONCEPTS/" class="md-nav__link">
+        Concepts
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_2" type="checkbox" id="__nav_2_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_2">
+          Pipelines
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Pipelines" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_2">
+          <span class="md-nav__icon md-icon"></span>
+          Pipelines
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pipeline/BASIC_CI_CONFIGURATION/" class="md-nav__link">
+        Basic configurations
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pipeline/PIPELINE_RULES/" class="md-nav__link">
+        Pipeline rules
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_3" type="checkbox" id="__nav_2_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_3">
+          Documentation
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Documentation" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_3">
+          <span class="md-nav__icon md-icon"></span>
+          Documentation
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DOCUMENTATION/" class="md-nav__link">
+        Organization
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decisions/" class="md-nav__link">
+        MetTel decisions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../metrics-definitions/" class="md-nav__link">
+        Metrics definitions
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Development rules
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_5" type="checkbox" id="__nav_2_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_5">
+          Work in a local env
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Work in a local env" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_5">
+          <span class="md-nav__icon md-icon"></span>
+          Work in a local env
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kafka/LAUNCH_DOCKER_COMPOSE/" class="md-nav__link">
+        Launch docker compose
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../snowflake/" class="md-nav__link">
+        Datalake
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Manual processes
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#architecture" class="md-nav__link">
+    Architecture
+  </a>
+  
+    <nav class="md-nav" aria-label="Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-concepts" class="md-nav__link">
+    Basic concepts
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#messaging-system" class="md-nav__link">
+    Messaging system
+  </a>
+  
+    <nav class="md-nav" aria-label="Messaging system">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#microservices-communications" class="md-nav__link">
+    Microservices communications
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#relationships-between-microservices" class="md-nav__link">
+    Relationships between microservices
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#capabilities-microservices" class="md-nav__link">
+    Capabilities microservices
+  </a>
+  
+    <nav class="md-nav" aria-label="Capabilities microservices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bruin-bridge-microservice" class="md-nav__link">
+    Bruin-bridge microservice
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cts-bridge-microservice" class="md-nav__link">
+    Cts-bridge microservice
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#digi-bridge-microservice" class="md-nav__link">
+    Digi-bridge microservice
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hawkeye-bridge-microservice" class="md-nav__link">
+    Hawkeye-bridge microservice
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lit-bridge-microservice" class="md-nav__link">
+    Lit-bridge microservice
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notifier-microservice" class="md-nav__link">
+    Notifier microservice
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#t7-bridge-microservice" class="md-nav__link">
+    T7-bridge microservice
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#velocloud-bridge-microservice" class="md-nav__link">
+    Velocloud-bridge microservice
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-cases-microservices" class="md-nav__link">
+    Use cases microservices
+  </a>
+  
+    <nav class="md-nav" aria-label="Use cases microservices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dispatch-portal-backend-microservice" class="md-nav__link">
+    Dispatch-portal-backend microservice
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#grafana-microservice" class="md-nav__link">
+    Grafana microservice
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hawkeye-outage-monitor-microservice" class="md-nav__link">
+    Hawkeye-outage-monitor microservice
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#last-contact-report-microservice" class="md-nav__link">
+    Last-contact-report microservice
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#service-affecting-monitor-microservice" class="md-nav__link">
+    Service-affecting-monitor microservice
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#service-dispatch-monitor-microservice" class="md-nav__link">
+    Service-dispatch-monitor microservice
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#service-outage-monitor-microservice" class="md-nav__link">
+    Service-outage-monitor microservice
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tnba-feedback-microservice" class="md-nav__link">
+    TNBA-feedback microservice
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tnba-monitor-microservice" class="md-nav__link">
+    TNBA-monitor microservice
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#special-microservices-nats-requester-and-replier" class="md-nav__link">
+    Special microservices (NATS Requester and Replier)
+  </a>
+  
+    <nav class="md-nav" aria-label="Special microservices (NATS Requester and Replier)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#customer-cache-microservice" class="md-nav__link">
+    Customer-cache microservice
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hawkeye-customer-cache-microservice" class="md-nav__link">
+    Hawkeye-customer-cache microservice
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#microservices-that-dont-communicate-with-nats" class="md-nav__link">
+    Microservices that don't communicate with NATS
+  </a>
+  
+    <nav class="md-nav" aria-label="Microservices that don't communicate with NATS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dispatch-portal-frontend" class="md-nav__link">
+    dispatch-portal-frontend
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lumin-billing-report" class="md-nav__link">
+    lumin-billing-report
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prometheus-thanos" class="md-nav__link">
+    Prometheus &amp; Thanos
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#redis" class="md-nav__link">
+    Redis
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technologies-and-tools" class="md-nav__link">
+    Technologies and tools
+  </a>
+  
+    <nav class="md-nav" aria-label="Technologies and tools">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#code-repository" class="md-nav__link">
+    Code repository
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#containerization" class="md-nav__link">
+    Containerization
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#infrastructure" class="md-nav__link">
+    Infrastructure
+  </a>
+  
+    <nav class="md-nav" aria-label="Infrastructure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#microservices-infrastructure" class="md-nav__link">
+    Microservices Infrastructure
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kre-infrastructure" class="md-nav__link">
+    KRE Infrastructure
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#network-infrastructure" class="md-nav__link">
+    Network infrastructure
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+
+
+<h1 id="system-overview">System overview</h1>
+<h2 id="architecture">Architecture</h2>
+<h3 id="basic-concepts">Basic concepts</h3>
+<p>It's a project based on microservices, in which two types are distinguished:</p>
+<ul>
+<li><strong>Capabilities</strong>: They are in charge of carrying out certain common actions for the business logic. I.e.: Collect information from SD-WAN routers</li>
+</ul>
+<p>For example: Collect information from SD-WAN routers.</p>
+<ul>
+<li><strong>Use cases</strong>: They use capabilities as a base to make specific use cases. I.e.: Obtain certain tickets from SD-WAN routers of a company, obtaining the information from the routers for the subsequent storage in the corresponding tickets.</li>
+</ul>
+<p>For example: Obtain certain tickets from SD-WAN routers of a company, obtaining the information from the routers for subsequent storage in the corresponding tickets.</p>
+<p>It is important to emphasize on the architecture of the system the use of <a href="https://github.com/nats-io/nats-server">NATS</a> in it.</p>
+<h3 id="messaging-system">Messaging system</h3>
+<p>It's important to emphasize in the architecture of the system the use of <a href="https://nats.io/">NATS</a> in it.</p>
+<ul>
+<li>
+<p>NATS is a simple, secure and performant communications system for digital system, services and devices</p>
+</li>
+<li>
+<p>NATS is used in the microservices system as a communication center for all of them.</p>
+</li>
+</ul>
+<blockquote>
+<p>NATS it's used in cluster mode to safistify more work to be done by it due to the high number of events in the system to be processed</p>
+</blockquote>
+<h4 id="microservices-communications">Microservices communications</h4>
+<p>There are two types of microservices depending on the connection between them and NATS:</p>
+<ul>
+<li>
+<p><strong>Microservices that communicates with NATS</strong>, divided into three types:</p>
+<ul>
+<li>
+<p>Those that take the role of <code>replier</code> in the context of NATS, usually microservices that contains <strong>capabilities</strong>:</p>
+<ul>
+<li><code>bruin-bridge</code></li>
+<li><code>cts-bridge</code></li>
+<li><code>hawkeye-bridge</code></li>
+<li><code>lit-bridge</code></li>
+<li><code>notifier</code></li>
+<li><code>t7-bridge</code></li>
+</ul>
+</li>
+<li>
+<p>Those that take the role of <code>requester</code> in the context of NATS, usually microservices that contains <strong>use cases</strong>:</p>
+<ul>
+<li><code>dispatch-portal-backend</code></li>
+<li><code>grafana</code> component, from <code>metrics-prometheus</code> microservice</li>
+<li><code>hawkeye-affecting-monitor</code></li>
+<li><code>hawkeye-outage-monitor</code></li>
+<li><code>last-contact-report</code></li>
+<li><code>service-affecting-monitor</code></li>
+<li><code>service-dispatch-monitor</code></li>
+<li><code>service-outage-monitor</code></li>
+<li><code>tnba-feedback</code></li>
+<li><code>tnba-monitor</code></li>
+</ul>
+</li>
+<li>
+<p>Those that take the role of both <code>requester</code> and <code>replier</code> in the context of NATS. These microservices can be considered a mixture between use <strong>use cases</strong> and <strong>capabilities</strong>:</p>
+<ul>
+<li><code>customer-cache</code></li>
+<li><code>hawkeye-customer-cache</code></li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>It's important take into account that all microservices that communicate with NATS can also communicate with the Redis Cluster. This is needed to bypass the limit size that NATS enforces for all messages it receives (1MB).</p>
+</blockquote>
+</li>
+<li>
+<p><strong>Microservices that doesn't communicate with NATS</strong>:</p>
+<ul>
+<li><code>dispatch-portal-frontend</code></li>
+<li><code>lumin-billing-report</code></li>
+<li><code>prometheus</code> and <code>thanos</code> components, from <code>metrics-prometheus</code> microservice</li>
+<li><code>redis cluster</code> (Docker container in local environment or an Elasticache Redis Cluster in AWS environments)</li>
+</ul>
+</li>
+</ul>
+<p>NATS is used in the microservice system as a communication center for all of them. It is used in cluster mode to satisfy more work to be done by it.</p>
+<p>In the following <a href="https://www.draw.io/#G1zd4zHYf7B0iTxBUmXxq9qK-Tap4zH5vh">diagram</a> it's possible see a graph with the relationships between the microservices explained previously in this section</p>
+<p><img alt="IMAGE: microservices_general_architecture" src="../img/system_overview/mettel_microservices_general_architecture.png" /></p>
+<h4 id="relationships-between-microservices">Relationships between microservices</h4>
+<p>The services that are part of the previously explained architecture are related to each other, in the following <a href="https://www.draw.io/#G1npbFKJq-cODHY5WddFt4aB-d3y9bv_lW">diagram</a> it's possible see the relationships between them.</p>
+<p><img alt="IMAGE: microservices_general_relationship" src="../img/system_overview/microservices_general_relationship.png" /></p>
+<h3 id="capabilities-microservices">Capabilities microservices</h3>
+<h4 id="bruin-bridge-microservice">Bruin-bridge microservice</h4>
+<p>This microservice is in charge of making requests to the bruin API, taking the role of replier in the context of NATS.</p>
+<p>When another microservice requests bruin data, it will be in charge of making response messages to the same and never of request, that is to say, it will always be a producer within a NATS topic and never a consumer.</p>
+<blockquote>
+<p>Bruin is a third-party system that allows creating and managing support tickets to deal with issues that appear in network devices, among other types of devices.</p>
+</blockquote>
+<p>The following <a href="https://app.diagrams.net/#G1g8vBpgNG_UFBwsUnNi5_z5nN5aoXhf6a">diagram</a> shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.</p>
+<p><img alt="IMAGE: bruin-bridge_microservice_relationships" src="../img/system_overview/capabilities/bruin-bridge_microservice_relationships.png" /></p>
+<h4 id="cts-bridge-microservice">Cts-bridge microservice</h4>
+<p>This microservice is in charge of making requests to the CTS API, taking the role of replier in the context of NATS.</p>
+<p>When another microservice requests CTS data, it will be in charge of making response messages to the same and never of request, that is to say, it will always be a producer within a NATS topic and never a consumer.</p>
+<p>The following <a href="https://app.diagrams.net/#G1UrbamtWY7hB7Xy9p0gnRgah9eWvoEYKK">diagram</a> shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.</p>
+<p><img alt="IMAGE: cts-bridge_microservice_relationships" src="../img/system_overview/capabilities/cts-bridge_microservice_relationships.png" /></p>
+<h4 id="digi-bridge-microservice">Digi-bridge microservice</h4>
+<p>This microservice is in charge of making requests to the Digi Reboot API, taking the role of replier in the context of NATS.</p>
+<p>When another microservice asks to reboot a SD-WAN device, it will be in charge of making response messages to the same and never of request, that is to say, it will always be a producer within a NATS topic and never a consumer.</p>
+<p>The following <a href="https://app.diagrams.net/#G184B7YUYaKKWe5MsRKKY1rVVVQd_a1CbJ">diagram</a> shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.</p>
+<p><img alt="IMAGE: digi-bridge_microservice_relationships" src="../img/system_overview/capabilities/digi-bridge_microservice_relationships.png" /></p>
+<h4 id="hawkeye-bridge-microservice">Hawkeye-bridge microservice</h4>
+<p>This microservice is in charge of making requests to the Hawkeye API, taking the role of replier in the context of NATS.</p>
+<p>When another microservice requests Hawkeye data, it will be in charge of making response messages to the same and never of request, that is to say, it will always be a producer within a NATS topic and never a consumer.</p>
+<p>The following <a href="https://app.diagrams.net/#G1ki13-NoKadfUai12FWQCFebwkNGoKGFo">diagram</a> shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.</p>
+<p><img alt="IMAGE: hawkeye-bridge_microservice_relationships" src="../img/system_overview/capabilities/hawkeye-bridge_microservice_relationships.png" /></p>
+<h4 id="lit-bridge-microservice">Lit-bridge microservice</h4>
+<p>This microservice is in charge of making requests to the LIT API, taking the role of replier in the context of NATS.</p>
+<p>When another microservice requests LIT data, it will be in charge of making response messages to the same and never of request, that is to say, it will always be a producer within a NATS topic and never a consumer.</p>
+<p>The following <a href="https://app.diagrams.net/#G1UztleVULGVS86wYXTEh7efsb2zdBWNJy">diagram</a> shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.</p>
+<p><img alt="IMAGE: lit-bridge_microservice_relationships" src="../img/system_overview/capabilities/lit-bridge_microservice_relationships.png" /></p>
+<h4 id="notifier-microservice">Notifier microservice</h4>
+<p>This microservice is in charge of sending emails, Slack notifications and SMS.</p>
+<p>It is important to point out that it is not in charge of the composition of the messages to be sent, that is to say, of their content, but only of sending them.</p>
+<p>The following <a href="https://app.diagrams.net/#G19IZI0cCp1odvYIwgMGlrGiQfKYZbedx2">diagram</a> shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.</p>
+<p><img alt="IMAGE: notifier_microservice_relationships" src="../img/system_overview/capabilities/notifier_microservice_relationships.png" /></p>
+<h4 id="t7-bridge-microservice">T7-bridge microservice</h4>
+<p>The function of this microservice is to embed in the notes of a ticket the prediction calculated by T7, this prediction will store information on the recommendations actions for the ticket.</p>
+<p>In order to carry out the mentioned actions, it communicates with the API of T7 to obtain the information about the prediction, as it can be seen in the following <a href="https://app.diagrams.net/#G18eBQnyAJwUxAAME2gKjxb9NCVbeCVzWt">diagram</a>.</p>
+<p><img alt="IMAGE: t7-bridge_microservice_relationships" src="../img/system_overview/capabilities/t7-bridge_microservice_relationships.png" /></p>
+<h4 id="velocloud-bridge-microservice">Velocloud-bridge microservice</h4>
+<p>This microservice is in charge of making requests to the velocloud API, taking the role of replier in the context of NATS.</p>
+<p>When another microservice requests velocloud data, it will be in charge of making response messages to the same and never of request, that is to say, it will always be a producer within a NATS topic and never a consumer.</p>
+<p>The following <a href="https://app.diagrams.net/#G1bn-S0EvBXgnLW22Zwvdx4MJVx0hauXdQ">diagram</a> shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.</p>
+<p><img alt="IMAGE: velocloud-bridge_microservice_relationships" src="../img/system_overview/capabilities/velocloud-bridge_microservice_relationships.png" /></p>
+<h3 id="use-cases-microservices">Use cases microservices</h3>
+<h4 id="dispatch-portal-backend-microservice">Dispatch-portal-backend microservice</h4>
+<p>In conjunction with <code>dispatch-portal-frontend</code>, this service provides MetTel the ability to track the status of dispatch requests,
+as well as create and update them, so their technicians can assist customers when they report any issue related to a device.</p>
+<p>It also updates Bruin tickets to keep support people posted about the changes in the dispatch requests.</p>
+<p>It acts as an intermediary between <code>dispatch-portal-frontend</code> and CTS &amp; LIT APIs by providing a REST API with multiple endpoints
+that, once they receive a payload from the frontend side, it modifies its fields with the help of some mappers to match the formats expected
+by CTS and LIT and then forward those customized payloads to their APIs. </p>
+<p>The following <a href="https://app.diagrams.net/#G16slq1OcvjBmFVygq6jhC9DlpAMvcZS2W">diagram</a> shows the dependencies or interactions of this microservice with the others.</p>
+<p><img alt="IMAGE: grafana_microservice_relationships" src="../img/system_overview/use_cases/grafana_microservice_relationships.png" /></p>
+<h4 id="grafana-microservice">Grafana microservice</h4>
+<p>Although Grafana is a visualization tool for metrics, it needs to fetch some data from VeloCloud API to build dashboards for customer
+Titan America.</p>
+<p>The following <a href="https://app.diagrams.net/#G1Q4GtTXtbDXUyJibl4bXF8ZKAaQMQlVrf">diagram</a> shows the dependencies or interactions of this microservice with the others.</p>
+<p><img alt="IMAGE: dispatch-portal-backend_microservice_relationships" src="../img/system_overview/use_cases/dispatch-portal-backend_microservice_relationships.png" /></p>
+<h4 id="hawkeye-outage-monitor-microservice">Hawkeye-outage-monitor microservice</h4>
+<p>This service is responsible for resolving/unresolving outage tickets depending on the state of a Hawkeye device. It is triggered every 3 minutes.</p>
+<p>If a device is detected to be in outage state then it is scheduled for a recheck in the next 5 seconds. If the device is still in outage state, the system
+will try creating a new outage ticket. If Bruin reports back that an outage ticket with Resolved status exists already then it is unresolved; if not, a new outage ticket may have been created or an outage ticket with In Progress status may exist already, so no additional action
+will be taken.</p>
+<p>In case the device was detected to be healthy, the system looks for an open outage ticket for this device and resolves it in case it exists.</p>
+<p>In the following <a href="https://app.diagrams.net/#G1ZAQSFthTrg4w2RGuzINR03LNlT54aOpZ">diagram</a> it's possible see the relationship of this microservice with the others.
+<img alt="IMAGE: hawkeye-outage-monitor_microservice_relationships" src="../img/system_overview/use_cases/hawkeye-outage-monitor_microservice_relationships.png" /></p>
+<h4 id="last-contact-report-microservice">Last-contact-report microservice</h4>
+<p>The function to be performed by this microservice is to send a monthly report with information about routers that were last contacted more than 30 days ago.</p>
+<p>The following flow is used to make this report:</p>
+<ol>
+<li>
+<p>The <em>last-contact-report</em> microservice communicates with the <em>velocloud-bridge</em> microservice to obtain events from an edge.</p>
+</li>
+<li>
+<p>Once the events are obtained from an edge, it communicates with the <em>notifier</em> microservice to send an email with this information.</p>
+</li>
+</ol>
+<p>It is possible to see the relations between the mentioned services for the flow in the following <a href="https://app.diagrams.net/#G13QWoYPfjPgxZ0Mp1Nl7SDZVonzUj2tIS">diagram</a>.
+<img alt="IMAGE: last-contact-report_microservice_relationships" src="../img/system_overview/use_cases/last-contact-report_microservice_relationships.png" /></p>
+<h4 id="service-affecting-monitor-microservice">Service-affecting-monitor microservice</h4>
+<p>In this microservice are defined a series of scales and thresholds, the function of this will be to check if there is loss of packages, latencies or jitter measurements that exceed the thresholds defined.</p>
+<p>In case the thresholds are exceeded, it will communicate with the notifier service to send a notification by email and slack, by means of which it will warn of the problems detected on a specific edge.</p>
+<p>This microservice also communicates with the bruin-bridge microservice to create tickets or add notes to an existing one, including in this information about the routers for which a problem is detected.</p>
+<p>In the following <a href="https://app.diagrams.net/#G1iwUTk1QGrLi2OKuKHpIB6K0KJ1s2W87e">diagram</a> it's possible see the relationships between this microservice and the others.</p>
+<p><img alt="IMAGE: service-affecting-monitor_microservice_relationships" src="../img/system_overview/use_cases/service-affecting-monitor_microservice_relationships.png" /></p>
+<h4 id="service-dispatch-monitor-microservice">Service-dispatch-monitor microservice</h4>
+<p>This microservice monitor dispatches statuses for different vendors, at the time of writing this document LIT and CTS. Both processes are pretty much the same in concept but with differences in the implementation.</p>
+<p>A dispatch is general terms can have the following statuses:</p>
+<ul>
+<li>Requested</li>
+<li>Confirmed</li>
+<li>Tech on site</li>
+<li>Canceled</li>
+<li>Completed</li>
+</ul>
+<p>The main use is to monitor:</p>
+<ul>
+<li>Dispatch status changed</li>
+<li>Updates in the dispatch like the technician</li>
+<li>Send sms prior 2 and 12 hours before</li>
+<li>Send sms tech on site</li>
+<li>Cancel dispatch</li>
+</ul>
+<p>The basic algorithm behaves like this:</p>
+<ul>
+<li>Get all dispatches for a vendor</li>
+<li>Filter dispatches that are created through the <code>dispatch-portal</code></li>
+<li>Discard invalid ticket ids or dispatches with not proper fields</li>
+<li>Split the dispatches by status and then send them to the function to process them, there are 3 general functions<ul>
+<li>Confirmed dispatch:<ul>
+<li>Send sms and append note to bruin when a dispatch is confirmed</li>
+<li>Send sms and append note to bruin 12 or 2 hours prior the dispatch</li>
+<li>Send sms and append note to bruin when a tech has changed</li>
+</ul>
+</li>
+<li>Tech on site dispatch:<ul>
+<li>Send sms and append note to bruin when tech on site</li>
+</ul>
+</li>
+<li>Canceled dispatch:<ul>
+<li>Append note to bruin when a dispatch is canceled</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>Each vendor has it's own details like how to retrieve some fields or how we identify the tickets with the dispatches, all explained in the <code>service-dispatch-monitor</code>.</p>
+<p>In the following <a href="https://app.diagrams.net/#G1cy-zEqGpzKDxFTlCYuVNrrq8VqcVO7l0">diagram</a> it's possible see the relationships between this microservice and the others.</p>
+<p><img alt="IMAGE: service-dispatch-monitor_microservice_relationships" src="../img/system_overview/use_cases/service-dispatch-monitor_microservice_relationships.png" /></p>
+<h4 id="service-outage-monitor-microservice">Service-outage-monitor microservice</h4>
+<p>This microservice orchestrates the execution of two different processes:</p>
+<ul>
+<li>Outage monitoring. This process is responsible for resolving/unresolving outage tickets depending on the state of an edge. It is triggered every 3 minutes.</li>
+</ul>
+<p>If an edge is detected to be in outage state then it is scheduled for a recheck in the next 5 seconds. If the edge is still in outage state, the system
+will try creating a new outage ticket. If Bruin reports back that an outage ticket with Resolved status exists already then it is unresolved; if not, a new outage ticket may have been created or an outage ticket with In Progress status may exist already, so no additional action
+will be taken.</p>
+<p>In case the edge was detected to be healthy, the system looks for an open outage ticket for this edge and resolves it in case it exists.</p>
+<ul>
+<li>Triage. This process is aimed at updating Bruin tickets with information related to recent edge events. It is triggered every 10 minutes.</li>
+</ul>
+<p>At the beginning, the process gathers all the open tickets related with the companies that are under triage monitoring. Tickets not related with edges belonging to these companies
+  are discarded before going on.</p>
+<p>The process starts dealing with every ticket in the set collected in the previous step:
+  * If the outage ticket does not have any triage note from a previous execution of the triage process then a triage note is appended with information of the events related to the edge corresponding to this ticket. Events correspond to the period between 7 days ago and the current moment.
+    If the current environment is DEV instead of PRODUCTION then no note is appended to the ticket; instead, a notification with a summary of the triage results is delivered to a Slack channel.</p>
+<ul>
+<li>If the outage ticket already has a triage note from a previous execution then the process attempts to append new triage notes to the ticket but only if the last triage note was not appended recently (30 minutes or less ago). In case there's no recent triage note, edge events from the period
+    between the creation date of the last triage note and the current moment are claimed to Velocloud and then they are included in the triage notes, which are finally appended to the ticket. Note that due to Bruin limitations it is not feasible to have a triage note with 1500 characters or more;
+    that is the reason why several triage notes are appended to the ticket (instead of just appending one).</li>
+</ul>
+<p>In the following <a href="https://app.diagrams.net/#G1-ESnlWgdP7-SbwhP3NAuRWv6ZMuSOUu0">diagram</a> it's possible see the relationship of this microservice with the others.
+<img alt="IMAGE: service-outage-monitor_microservice_relationships" src="../img/system_overview/use_cases/service-outage-monitor_microservice_relationships.png" /></p>
+<h4 id="tnba-feedback-microservice">TNBA-feedback microservice</h4>
+<p>This microservice is in charge of collecting closed tickets that had a TNBA note appended by <code>tnba-monitor</code> at some point. After collecting them, they are sent to <code>t7-bridge</code> to retrain predictive models and hence improve
+the accuracy of predictions claimed by <code>tnba-monitor</code>.</p>
+<p>The following <a href="https://www.draw.io/#G1Gwr3JseMInuIsKIB1CQOU9TEABipepfq">diagram</a> shows the relationship between this microservice and the others.</p>
+<p><img alt="IMAGE: tnba-feedback_microservice_relationships" src="../img/system_overview/use_cases/tnba-feedback_microservice_relationships.png" /></p>
+<h4 id="tnba-monitor-microservice">TNBA-monitor microservice</h4>
+<p>This microservice is in charge of appending notes to Bruin tickets indicating what is <em>T</em>he <em>N</em>ext <em>B</em>est <em>A</em>ction a member of the support team of
+Bruin can take to move forward on the resolution of the ticket.</p>
+<p>It mostly communicates with <code>bruin-bridge</code> and <code>t7-bridge</code> to embed predictions into tickets, but it also communicates with other capabilities as shown in the following <a href="https://www.draw.io/#G1uD7Otczhg_kZrgtBztJ5GvLkud0uaTNv">diagram</a>.</p>
+<p>The following <a href="https://app.diagrams.net/#G1Gwr3JseMInuIsKIB1CQOU9TEABipepfq">diagram</a> shows the relationship between this microservice and the others.</p>
+<p><img alt="IMAGE: tnba-monitor_microservice_relationships" src="../img/system_overview/use_cases/tnba-monitor_microservice_relationships.png" /></p>
+<h3 id="special-microservices-nats-requester-and-replier">Special microservices (NATS Requester and Replier)</h3>
+<h4 id="customer-cache-microservice">Customer-cache microservice</h4>
+<p>This microservice is in charge of crossing Bruin and Velocloud data. More specifically, it focus on associating Bruin customers with Velocloud edges.
+On the other hand, it also serves this information to the rest of services.</p>
+<p>This service is a special one, since it acts as a requester (to build and store caches) but also as a replier (to serve caches to services requesting them).</p>
+<p>The following <a href="https://www.draw.io/#G1y-I8UCvNxvZo538T9BEY0mfteGi52Pzk">diagram</a> shows the dependencies or interactions of this microservice with the rest.</p>
+<p><img alt="IMAGE: customer-cache_microservice_relationships" src="../img/system_overview/mixed_services/customer-cache_microservice_relationships.png" /></p>
+<p>From the point of view of services to the left of <code>customer-cache</code>, it plays the role of a replier as it answers to requests sent by them.</p>
+<p>From the point of view of services to the right of <code>customer-cache</code>, it plays the role of a requester as it asks for data to Velocloud and Bruin to cross it.</p>
+<h4 id="hawkeye-customer-cache-microservice">Hawkeye-customer-cache microservice</h4>
+<p>This microservice is in charge of crossing Bruin and Hawkeye data. More specifically, it focus on associating Bruin customers with Hawkeye devices.
+On the other hand, it also serves this information to the rest of services.</p>
+<p>This service is a special one, since it acts as a requester (to build and store caches) but also as a replier (to serve caches to services requesting them).</p>
+<p>The following <a href="https://www.draw.io/#G1QLpox45cZE4PV3dxlZsnK5Gv1N6hQNvM">diagram</a> shows the dependencies or interactions of this microservice with the rest.</p>
+<p><img alt="IMAGE: hawkeye-customer-cache_microservice_relationships" src="../img/system_overview/mixed_services/hawkeye-customer-cache_microservice_relationships.png" /></p>
+<p>From the point of view of services to the left of <code>hawkeye-customer-cache</code>, it plays the role of a replier as it answers to requests sent by them.</p>
+<p>From the point of view of services to the right of <code>hawkeye-customer-cache</code>, it plays the role of a requester as it asks for data to Hawkeye and Bruin to cross it.</p>
+<h3 id="microservices-that-dont-communicate-with-nats">Microservices that don't communicate with NATS</h3>
+<h4 id="dispatch-portal-frontend">dispatch-portal-frontend</h4>
+<p>In conjunction with <code>dispatch-portal-backend</code>, this service provides MetTel the ability to track the status of dispatch requests,
+as well as create and update them, so their technicians can assist customers when they report any issue related to a device.</p>
+<p>It exposes a UI that communicates directly with a REST API in <code>dispatch-portal-backend</code> to handle the visualization, creation and
+update of dispatch requests.</p>
+<p>The following <a href="https://app.diagrams.net/#G15bx0C_yx4lsMM9h9a16Ew4YmHu62U5uD">diagram</a> shows the relationship between this microservice and <code>dispatch-portal-backend</code>.</p>
+<p><img alt="IMAGE: dispatch-portal-frontend_microservice_relationships" src="../img/system_overview/isolated_services/dispatch-portal-frontend_microservice_relationships.png" /></p>
+<h4 id="lumin-billing-report">lumin-billing-report</h4>
+<p>This service automates requesting billing information for a given customer from the Lumin.AI service provider, generating a summary HTML email and attaching a csv with all data for the current billing period.</p>
+<p>This service is self-contained, i.e., it does not require access to NATS or Redis, or any other microservice within the Automation Engine.</p>
+<p>The following <a href="https://app.diagrams.net/#G1kdUzFnFiu_u1c5SltBs6MSeXr2nqQgFw">diagram</a> shows the relationship between this service and the third-party services it uses.</p>
+<p><img alt="IMAGE: lumin-billing-report_microservice_relationships" src="../img/system_overview/isolated_services/lumin-billing-report_microservice_relationships.png" /></p>
+<h4 id="prometheus-thanos">Prometheus &amp; Thanos</h4>
+<p>The purpose of Prometheus is to scrape metrics from HTTP servers placed in those services with the ability to write metrics, nothing else.</p>
+<p>Thanos is just another component that adds a layer of persistence to Prometheus, thus allowing to save metrics before they are lost when a service is re-deployed. These metrics
+can be restored after the deployment completes.</p>
+<p>Metrics are usually displayed in a Grafana instance with a few custom dashboards.</p>
+<p>The following <a href="https://app.diagrams.net/#G15dB_8RisA3p0HWtdsFr-5--iUAj1_Y34">diagram</a> shows the relationship between Prometheus, the metrics servers it scrapes metrics, and Grafana.</p>
+<p><img alt="IMAGE: prometheus_microservice_relationships" src="../img/system_overview/isolated_services/prometheus_microservice_relationships.png" /></p>
+<h4 id="redis">Redis</h4>
+<p>Redis is an in-memory key-value store that, in this system, is used mostly for caching purposes, and also as a temporary storage for
+messages larger than 1 MB, which NATS cannot handle by itself.</p>
+<p>There are three Redis instances:
+* <strong>redis</strong>. Used to store NATS messages larger than 1 MB temporarily. All microservices that communicate with NATS in some way have the
+ability to store and retrieve messages from this Redis instance.</p>
+<ul>
+<li>
+<p><strong>redis-customer-cache</strong>. Used to turn <code>customer-cache</code> and <code>hawkeye-customer-cache</code> into fault-tolerant services, so if any of them
+fail caches will still be available to serve as soon as they come back.</p>
+</li>
+<li>
+<p><strong>redis-tnba-feedback</strong>. Used to collect huge amounts of Bruin tickets' task histories before they are sent to T7 by the <code>tnba-feedback</code> service.</p>
+</li>
+</ul>
+<h2 id="technologies-and-tools">Technologies and tools</h2>
+<h3 id="code-repository">Code repository</h3>
+<ul>
+<li>
+<p><a href="https://gitlab.intelygenz.com/">Intelygenz's Gitlab</a> is used to store the project's code</p>
+</li>
+<li>
+<p><a href="https://docs.gitlab.com/ee/ci/">Gitlab CI</a> is used as the CI/CD tool for the project</p>
+</li>
+</ul>
+<h3 id="containerization">Containerization</h3>
+<p>The following containerization tools are used:</p>
+<ul>
+<li>
+<p><a href="https://docs.docker.com/">Docker</a> is used to create o container of this type by microservice
+    &gt; In the folder of each microservice there is a <code>Dockerfile</code> that allows to execute that microservice as a container</p>
+</li>
+<li>
+<p><a href="https://docs.docker.com/compose/">Docker-compose</a> is used for defining and running project microservices as a multi-container Docker application:
+    &gt; At the root of the repository there is a <code>docker-compose.yml</code> file that allows to run one or more microservices as docker containers</p>
+</li>
+</ul>
+<h2 id="infrastructure">Infrastructure</h2>
+<h3 id="microservices-infrastructure">Microservices Infrastructure</h3>
+<p>For the microservices ECS is used to deploy a container for each microservice for all <a href="../PIPELINES/#microservices-environments">environments</a> deployed, as each one has its own repository in the ECR registry used in the project.</p>
+<p>In the following <a href="https://www.draw.io/#G1eET1FDYMJ7bf2xpZVXfEaEnz1DA-V6M2">diagram</a> it's possible see how the microservices of the project are deployed, using the different images available in the registry created for the project in ECR.</p>
+<p><img alt="IMAGE: ecs_infrastructure" src="../img/system_overview/infrastructure/ECS_infrastructure.png" /></p>
+<h3 id="kre-infrastructure">KRE Infrastructure</h3>
+<p>In this project <a href="https://konstellation-io.github.io/website/">KRE</a> is used, it has been deployed in an <a href="https://kubernetes.io/docs/home/">Kubernetes</a> cluster using <a href="https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html">EKS</a> for each of the necessary <a href="../PIPELINES/#KRE-Environments">environments</a>, as well as all the parts needed for this in AWS.</p>
+<p>In the following <a href="https://app.diagrams.net/#G1Mcg9-Z0AOkA_R8juMD6UuQQGIJX57b2f">diagram</a> it's possible see how is configured the KRE infrastructure in the project.</p>
+<p><img alt="IMAGE: kre_infrastructure" src="../img/system_overview/infrastructure/kre_infrastructure.png" /></p>
+<h3 id="network-infrastructure">Network infrastructure</h3>
+<p>For the infrastructure of the network resources there is a distinction according to the <a href="../PIPELINES/#microservices-environments">microservice environments</a> and also the <a href="../PIPELINES/#kre-environments">kre-environmetns</a> to deploy belongs to <code>dev</code> or <code>production</code>.</p>
+<p>In the following <a href="https://www.draw.io/#G1s8eD7_XNplcVC6b-Aqtjd1p_Vf2quPnn">diagram</a> it's possible see the infrastructure relative to the existing network resources in AWS created for the two type of environments.</p>
+<p><img alt="IMAGE: network_infrastructure" src="../img/system_overview/infrastructure/network_infrastructure.png" /></p>
+<p>When deploying an environment it will use the resources belonging to the environment type. This approach has been implemented so that regardless of the number of ECS clusters being used, the same public IPs are always used to make requests outward from the different environments. KRE's clusters will also use the VPCs corresponding to each environment, i.e., <code>dev</code> or <code>production</code>.</p>
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs"], "search": "../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.748e2769.min.js"></script>
+      
+    
+  </body>
+</html>
