@@ -98,9 +98,6 @@ class NewEmailsMonitor:
                     self._repair_reply_email_storage.set(id=email_id, data=email,
                                                          ttl_seconds=self._config.MONITOR_CONFIG[
                                                              "reply_email_ttl"])
-                    # Remove from email tagger namespace
-                    self._new_emails_repository.mark_complete(email_id)
-                    return
 
             # Get tag from KRE
             response = await self._email_tagger_repository.get_prediction(email_data)
