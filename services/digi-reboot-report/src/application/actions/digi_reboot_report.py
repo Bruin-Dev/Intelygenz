@@ -9,7 +9,7 @@ from pytz import timezone, utc
 
 class DiGiRebootReport:
     def __init__(
-        self, event_bus, scheduler, logger, config, bruin_repository, digi_repository, notification_repository
+        self, event_bus, scheduler, logger, config, bruin_repository, digi_repository, email_repository
     ):
         self._event_bus = event_bus
         self._scheduler = scheduler
@@ -17,7 +17,7 @@ class DiGiRebootReport:
         self._config = config
         self._bruin_repository = bruin_repository
         self._digi_repository = digi_repository
-        self._notification_repository = notification_repository
+        self._email_repository = email_repository
 
     async def start_digi_reboot_report_job(self, exec_on_start=False):
         self._logger.info(
@@ -352,4 +352,4 @@ class DiGiRebootReport:
             buf.seek(0)
             raw_csv = buf.read()
             self._logger.info("Sending csv file through email")
-            await self._notification_repository.send_email(raw_csv)
+            await self._email_repository.send_email(raw_csv)
