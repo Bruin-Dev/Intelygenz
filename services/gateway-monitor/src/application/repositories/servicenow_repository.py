@@ -31,12 +31,14 @@ class ServiceNowRepository:
             f"Average Tunnel Count: {tunnel_count['average']}",
             f"Scan Interval: {lookup_interval // 60} minutes",
             "",
-            f"Link: https://{gateway['host']}/#!/operator/admin/gateways/{gateway['id']}/monitor/",
-            "",
             f"TimeStamp: {current_datetime_tz_aware}",
         ]
 
         return os.linesep.join(note_lines)
+
+    @staticmethod
+    def _build_incident_link(gateway: dict) -> str:
+        return f"https://{gateway['host']}/#!/operator/admin/gateways/{gateway['id']}/monitor/"
 
     async def report_incident(self, gateway: dict):
         err_msg = None
@@ -48,6 +50,7 @@ class ServiceNowRepository:
                 "gateway": gateway["name"],
                 "summary": self._build_incident_summary(gateway),
                 "note": self._build_incident_note(gateway),
+                "link": self._build_incident_link(gateway),
             },
         }
 

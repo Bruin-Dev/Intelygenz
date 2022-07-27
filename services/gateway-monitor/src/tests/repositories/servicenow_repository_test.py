@@ -43,11 +43,14 @@ class TestServiceNowRepository:
                 f"Average Tunnel Count: 100",
                 f"Scan Interval: 60 minutes",
                 "",
-                f"Link: https://mettel.velocloud.net/#!/operator/admin/gateways/1/monitor/",
-                "",
                 f"TimeStamp: {CURRENT_DATETIME}",
             ]
         )
+
+    def build_incident_link_test(self, servicenow_repository, make_gateway):
+        gateway = make_gateway(id=1)
+        result = servicenow_repository._build_incident_link(gateway)
+        assert result == "https://mettel.velocloud.net/#!/operator/admin/gateways/1/monitor/"
 
     @pytest.mark.asyncio
     async def report_incident_test(
@@ -60,12 +63,14 @@ class TestServiceNowRepository:
         gateway = make_gateway_with_metrics(id=1, tunnel_count={"average": 100, "min": 50})
         summary = "Test summary"
         note = "Test note"
+        link = "https://mettel.velocloud.net/#!/operator/admin/gateways/1/monitor/"
 
         payload = {
             "host": gateway["host"],
             "gateway": gateway["name"],
             "summary": summary,
             "note": note,
+            "link": link,
         }
 
         request = make_rpc_request(request_id=uuid_, body=payload)
