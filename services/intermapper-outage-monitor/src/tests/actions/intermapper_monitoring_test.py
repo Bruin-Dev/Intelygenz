@@ -27,6 +27,7 @@ class TestInterMapperMonitor:
         utils_repository,
         metrics_repository,
         notifications_repository,
+        email_repository,
         bruin_repository,
         dri_repository,
     ):
@@ -37,6 +38,7 @@ class TestInterMapperMonitor:
         assert intermapper_monitor._utils_repository == utils_repository
         assert intermapper_monitor._metrics_repository == metrics_repository
         assert intermapper_monitor._notifications_repository == notifications_repository
+        assert intermapper_monitor._email_repository == email_repository
         assert intermapper_monitor._bruin_repository == bruin_repository
         assert intermapper_monitor._dri_repository == dri_repository
 
@@ -52,6 +54,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         bruin_repository = Mock()
 
         dri_repository = Mock()
@@ -64,6 +67,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -91,6 +95,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         bruin_repository = Mock()
 
         dri_repository = Mock()
@@ -103,6 +108,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -137,6 +143,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         bruin_repository = Mock()
 
         dri_repository = Mock()
@@ -149,6 +156,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -195,7 +203,8 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
-        notifications_repository.get_unread_emails = CoroutineMock(return_value=response)
+        email_repository = Mock()
+        email_repository.get_unread_emails = CoroutineMock(return_value=response)
 
         dri_repository = Mock()
 
@@ -207,6 +216,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -214,7 +224,7 @@ class TestInterMapperMonitor:
 
         await intermapper_monitor._intermapper_monitoring_process()
 
-        notifications_repository.get_unread_emails.assert_awaited_once()
+        intermapper_monitor._email_repository.get_unread_emails.assert_awaited_once()
         intermapper_monitor._process_email_batch.assert_has_awaits([call(emails, circuit_id)], any_order=True)
 
     def _group_emails_by_circuit_id_test(self):
@@ -247,6 +257,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         config = testconfig
         dri_repository = Mock()
 
@@ -258,6 +269,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -289,6 +301,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         config = testconfig
 
         response = {
@@ -312,6 +325,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -351,7 +365,8 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
-        notifications_repository.mark_email_as_read = CoroutineMock()
+        email_repository = Mock()
+        email_repository.mark_email_as_read = CoroutineMock()
 
         bruin_repository = Mock()
         bruin_repository.get_service_number_by_circuit_id = CoroutineMock()
@@ -366,6 +381,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -373,7 +389,7 @@ class TestInterMapperMonitor:
         with config_mock:
             await intermapper_monitor._process_email_batch(emails, circuit_id)
 
-        intermapper_monitor._notifications_repository.mark_email_as_read.assert_has_awaits(
+        intermapper_monitor._email_repository.mark_email_as_read.assert_has_awaits(
             [
                 call(email_1["msg_uid"]),
                 call(email_2["msg_uid"]),
@@ -413,7 +429,8 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
-        notifications_repository.mark_email_as_read = CoroutineMock()
+        email_repository = Mock()
+        email_repository.mark_email_as_read = CoroutineMock()
 
         dri_repository = Mock()
 
@@ -425,6 +442,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -433,7 +451,7 @@ class TestInterMapperMonitor:
             await intermapper_monitor._process_email_batch(emails, circuit_id)
 
         intermapper_monitor._bruin_repository.get_service_number_by_circuit_id.assert_awaited_with(circuit_id)
-        intermapper_monitor._notifications_repository.mark_email_as_read.assert_not_awaited()
+        intermapper_monitor._email_repository.mark_email_as_read.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def process_email_batch_204_test(self):
@@ -467,7 +485,8 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
-        notifications_repository.mark_email_as_read = CoroutineMock()
+        email_repository = Mock()
+        email_repository.mark_email_as_read = CoroutineMock()
 
         dri_repository = Mock()
 
@@ -479,6 +498,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -487,7 +507,7 @@ class TestInterMapperMonitor:
             await intermapper_monitor._process_email_batch(emails, circuit_id)
 
         intermapper_monitor._bruin_repository.get_service_number_by_circuit_id.assert_awaited_with(circuit_id)
-        intermapper_monitor._notifications_repository.mark_email_as_read.assert_has_awaits(
+        intermapper_monitor._email_repository.mark_email_as_read.assert_has_awaits(
             [
                 call(email_1["msg_uid"]),
                 call(email_2["msg_uid"]),
@@ -515,7 +535,8 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
-        notifications_repository.mark_email_as_read = CoroutineMock()
+        email_repository = Mock()
+        email_repository.mark_email_as_read = CoroutineMock()
 
         dri_repository = Mock()
 
@@ -527,6 +548,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -535,7 +557,7 @@ class TestInterMapperMonitor:
             await intermapper_monitor._process_email(email, circuit_id, client_id)
 
         intermapper_monitor._logger.error.assert_called_once()
-        notifications_repository.mark_email_as_read.assert_not_awaited()
+        intermapper_monitor._email_repository.mark_email_as_read.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def process_email_down_event_non_PIAB_device_test(self):
@@ -563,7 +585,8 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
-        notifications_repository.mark_email_as_read = CoroutineMock(return_value=response)
+        email_repository = Mock()
+        email_repository.mark_email_as_read = CoroutineMock(return_value=response)
 
         dri_repository = Mock()
 
@@ -575,6 +598,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -590,7 +614,7 @@ class TestInterMapperMonitor:
         intermapper_monitor._create_outage_ticket.assert_awaited_once_with(
             circuit_id, client_id, parsed_email_dict, dri_parameters
         )
-        notifications_repository.mark_email_as_read.assert_awaited_once_with(email["msg_uid"])
+        intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(email["msg_uid"])
 
     @pytest.mark.asyncio
     async def process_email_down_event_PIAB_device_test(self):
@@ -625,7 +649,8 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
-        notifications_repository.mark_email_as_read = CoroutineMock(return_value=response)
+        email_repository = Mock()
+        email_repository.mark_email_as_read = CoroutineMock(return_value=response)
 
         dri_repository = Mock()
 
@@ -637,6 +662,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -652,7 +678,7 @@ class TestInterMapperMonitor:
         intermapper_monitor._create_outage_ticket.assert_awaited_once_with(
             circuit_id, client_id, parsed_email_dict, dri_parameters
         )
-        notifications_repository.mark_email_as_read.assert_awaited_once_with(email["msg_uid"])
+        intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(email["msg_uid"])
 
     @pytest.mark.asyncio
     async def process_email_up_event_test(self):
@@ -677,7 +703,8 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
-        notifications_repository.mark_email_as_read = CoroutineMock(return_value=response)
+        email_repository = Mock()
+        email_repository.mark_email_as_read = CoroutineMock(return_value=response)
 
         dri_repository = Mock()
 
@@ -689,6 +716,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -699,7 +727,7 @@ class TestInterMapperMonitor:
             await intermapper_monitor._process_email(email, circuit_id, client_id)
 
         intermapper_monitor._autoresolve_ticket.assert_awaited_once_with(circuit_id, client_id, parsed_email_dict)
-        notifications_repository.mark_email_as_read.assert_awaited_once_with(email["msg_uid"])
+        intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(email["msg_uid"])
 
     @pytest.mark.asyncio
     async def process_email_irrelevant_event_test(self):
@@ -724,7 +752,8 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
-        notifications_repository.mark_email_as_read = CoroutineMock(return_value=response)
+        email_repository = Mock()
+        email_repository.mark_email_as_read = CoroutineMock(return_value=response)
 
         dri_repository = Mock()
 
@@ -736,6 +765,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -747,7 +777,7 @@ class TestInterMapperMonitor:
 
         intermapper_monitor._create_outage_ticket.assert_not_awaited()
         intermapper_monitor._autoresolve_ticket.assert_not_awaited()
-        notifications_repository.mark_email_as_read.assert_awaited_once_with(email["msg_uid"])
+        intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(email["msg_uid"])
 
     @pytest.mark.asyncio
     async def process_email_failed_test(self):
@@ -770,7 +800,8 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
-        notifications_repository.mark_email_as_read = CoroutineMock()
+        email_repository = Mock()
+        email_repository.mark_email_as_read = CoroutineMock()
 
         dri_repository = Mock()
 
@@ -782,6 +813,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -790,7 +822,7 @@ class TestInterMapperMonitor:
         with config_mock:
             await intermapper_monitor._process_email(email, circuit_id, client_id)
 
-        notifications_repository.mark_email_as_read.assert_not_awaited()
+        intermapper_monitor._email_repository.mark_email_as_read.assert_not_awaited()
 
     def parse_email_body_test(self):
         event_bus = Mock()
@@ -800,6 +832,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         bruin_repository = Mock()
         dri_repository = Mock()
 
@@ -840,6 +873,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -855,6 +889,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         bruin_repository = Mock()
         dri_repository = Mock()
 
@@ -895,6 +930,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -910,6 +946,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         bruin_repository = Mock()
         dri_repository = Mock()
 
@@ -948,6 +985,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -963,6 +1001,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         bruin_repository = Mock()
         dri_repository = Mock()
 
@@ -977,6 +1016,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -991,6 +1031,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         bruin_repository = Mock()
         dri_repository = Mock()
 
@@ -1005,6 +1046,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -1019,6 +1061,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         bruin_repository = Mock()
         dri_repository = Mock()
 
@@ -1033,6 +1076,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -1133,6 +1177,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
         bruin_repository = Mock()
@@ -1150,6 +1195,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -1161,7 +1207,7 @@ class TestInterMapperMonitor:
             )
 
         bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, circuit_id)
-        notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
+        intermapper_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
         bruin_repository.append_dri_note.assert_awaited_once_with(ticket_id, dri_parameter, parsed_email_dict)
         bruin_repository.append_intermapper_note.assert_not_awaited()
         assert response is True
@@ -1194,6 +1240,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
         bruin_repository = Mock()
@@ -1211,6 +1258,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -1261,6 +1309,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
         bruin_repository = Mock()
@@ -1278,6 +1327,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -1288,7 +1338,7 @@ class TestInterMapperMonitor:
             )
 
         bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, circuit_id)
-        notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
+        intermapper_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
         bruin_repository.append_dri_note.assert_not_awaited()
         bruin_repository.append_intermapper_note.assert_awaited_once_with(ticket_id, parsed_email_dict, False)
         assert response is False
@@ -1335,6 +1385,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
         bruin_repository = Mock()
@@ -1352,6 +1403,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -1363,7 +1415,7 @@ class TestInterMapperMonitor:
             )
 
         bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, circuit_id)
-        notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
+        intermapper_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
         bruin_repository.append_dri_note.assert_awaited_once_with(ticket_id, dri_parameter, parsed_email_dict)
         bruin_repository.append_intermapper_note.assert_not_awaited()
         assert response is False
@@ -1552,6 +1604,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
         bruin_repository = Mock()
@@ -1573,6 +1626,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -1623,6 +1677,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
         bruin_repository = Mock()
@@ -1644,6 +1699,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -1707,6 +1763,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
         bruin_repository = Mock()
@@ -1729,6 +1786,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -1800,6 +1858,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
         bruin_repository = Mock()
@@ -1822,6 +1881,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -1894,6 +1954,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
         bruin_repository = Mock()
@@ -1916,6 +1977,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -1983,6 +2045,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
         bruin_repository = Mock()
@@ -2005,6 +2068,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -2077,6 +2141,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
         bruin_repository = Mock()
@@ -2099,6 +2164,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -2232,6 +2298,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
         bruin_repository = Mock()
@@ -2254,6 +2321,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -2388,6 +2456,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
         bruin_repository = Mock()
@@ -2410,6 +2479,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -2615,6 +2685,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_serial_attribute_from_inventory = CoroutineMock(return_value=attribute_serial_response)
@@ -2630,6 +2701,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -2653,6 +2725,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_serial_attribute_from_inventory = CoroutineMock(return_value=attribute_serial_response)
@@ -2668,6 +2741,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -2701,6 +2775,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_serial_attribute_from_inventory = CoroutineMock(return_value=attribute_serial_response)
@@ -2716,6 +2791,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -2742,6 +2818,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_serial_attribute_from_inventory = CoroutineMock(return_value=attribute_serial_response)
@@ -2757,6 +2834,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -2777,6 +2855,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         bruin_repository = Mock()
         dri_repository = Mock()
 
@@ -2788,6 +2867,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -2854,6 +2934,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         bruin_repository = Mock()
         dri_repository = Mock()
 
@@ -2865,6 +2946,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -2921,6 +3003,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         bruin_repository = Mock()
         dri_repository = Mock()
 
@@ -2932,6 +3015,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -3109,6 +3193,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         bruin_repository = Mock()
         dri_repository = Mock()
 
@@ -3120,6 +3205,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -3157,7 +3243,8 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
-        notifications_repository.mark_email_as_read = CoroutineMock(return_value=response)
+        email_repository = Mock()
+        email_repository.mark_email_as_read = CoroutineMock(return_value=response)
 
         dri_repository = Mock()
 
@@ -3169,13 +3256,14 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
 
         await intermapper_monitor._mark_email_as_read(msg_uid)
 
-        intermapper_monitor._notifications_repository.mark_email_as_read.assert_awaited_once_with(msg_uid)
+        intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(msg_uid)
         intermapper_monitor._logger.error.assert_not_called()
 
     @pytest.mark.asyncio
@@ -3193,7 +3281,8 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
-        notifications_repository.mark_email_as_read = CoroutineMock(return_value=response)
+        email_repository = Mock()
+        email_repository.mark_email_as_read = CoroutineMock(return_value=response)
 
         dri_repository = Mock()
 
@@ -3205,13 +3294,14 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
 
         await intermapper_monitor._mark_email_as_read(msg_uid)
 
-        intermapper_monitor._notifications_repository.mark_email_as_read.assert_awaited_once_with(msg_uid)
+        intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(msg_uid)
         intermapper_monitor._logger.error.assert_called_once()
 
     def get_tz_offset_test(self):
@@ -3222,6 +3312,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         dri_repository = Mock()
         config = testconfig
 
@@ -3236,6 +3327,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )
@@ -3256,6 +3348,7 @@ class TestInterMapperMonitor:
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
         dri_repository = Mock()
         config = testconfig
 
@@ -3267,6 +3360,7 @@ class TestInterMapperMonitor:
             utils_repository,
             metrics_repository,
             notifications_repository,
+            email_repository,
             bruin_repository,
             dri_repository,
         )

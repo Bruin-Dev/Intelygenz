@@ -5,6 +5,7 @@ from application.actions.intermapper_monitoring import InterMapperMonitor
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.dri_repository import DRIRepository
 from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.email_repository import EmailRepository
 from application.repositories.utils_repository import UtilsRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from asynctest import create_autospec
@@ -38,6 +39,15 @@ def scheduler():
 @pytest.fixture(scope="function")
 def notifications_repository(event_bus, logger):
     instance = NotificationsRepository(event_bus=event_bus, logger=logger, config=config)
+    wrap_all_methods(instance)
+
+    return instance
+
+
+@pytest.fixture(scope="function")
+def email_repository(event_bus, logger, notifications_repository):
+    instance = EmailRepository(event_bus=event_bus, logger=logger, config=config,
+                               notifications_repository=notifications_repository)
     wrap_all_methods(instance)
 
     return instance
@@ -84,6 +94,7 @@ def intermapper_monitor(
     scheduler,
     bruin_repository,
     notifications_repository,
+    email_repository,
     metrics_repository,
     dri_repository,
     utils_repository,
@@ -95,6 +106,7 @@ def intermapper_monitor(
         config=config,
         bruin_repository=bruin_repository,
         notifications_repository=notifications_repository,
+        email_repository=email_repository,
         utils_repository=utils_repository,
         dri_repository=dri_repository,
         metrics_repository=metrics_repository,
