@@ -47,6 +47,8 @@ services:
       - "nats-server"
       - redis
       - redis-customer-cache
+      - "notifications-bridge"
+      - "email-bridge"
     ports:
       - 5013:5000
       - 9390:9090

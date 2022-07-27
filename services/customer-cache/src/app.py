@@ -4,6 +4,7 @@ import redis
 from application.actions.get_customers import GetCustomers
 from application.actions.refresh_cache import RefreshCache
 from application.repositories.bruin_repository import BruinRepository
+from application.repositories.email_repository import EmailRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.storage_repository import StorageRepository
 from application.repositories.velocloud_repository import VelocloudRepository
@@ -51,6 +52,7 @@ class Container:
 
         # REPOSITORIES
         self._notifications_repository = NotificationsRepository(event_bus=self._event_bus, config=config)
+        self._email_repository = EmailRepository(event_bus=self._event_bus, config=config)
         self._bruin_repository = BruinRepository(
             event_bus=self._event_bus,
             logger=self._logger,
@@ -77,6 +79,7 @@ class Container:
             self._bruin_repository,
             self._velocloud_repository,
             self._notifications_repository,
+            self._email_repository,
         )
         self._get_customers = GetCustomers(config, self._logger, self._storage_repository, self._event_bus)
 

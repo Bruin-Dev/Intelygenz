@@ -34,6 +34,7 @@ class TestRefreshCache:
         velocloud_repository = Mock()
         bruin_repository = Mock()
         notifications_repository = Mock()
+        email_repository = Mock()
 
         refresh_cache = RefreshCache(
             config,
@@ -44,6 +45,7 @@ class TestRefreshCache:
             bruin_repository,
             velocloud_repository,
             notifications_repository,
+            email_repository,
         )
 
         assert refresh_cache._config == config
@@ -54,6 +56,7 @@ class TestRefreshCache:
         assert refresh_cache._velocloud_repository == velocloud_repository
         assert refresh_cache._bruin_repository == bruin_repository
         assert refresh_cache._notifications_repository == notifications_repository
+        assert refresh_cache._email_repository == email_repository
 
     @pytest.mark.asyncio
     async def schedule_cache_refresh_job_test(self, instance_refresh_cache):
