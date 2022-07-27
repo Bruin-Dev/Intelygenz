@@ -21,14 +21,15 @@ class ReportIncident:
         gateway = body.get("gateway")
         summary = body.get("summary")
         note = body.get("note")
+        link = body.get("link")
 
-        if not host or not gateway or not summary or not note:
+        if not host or not gateway or not summary or not note or not link:
             self._logger.error(f"Cannot report incident using {json.dumps(msg)}. JSON malformed")
-            response["body"] = 'You must include "host", "gateway", "summary" and "note" in the request body'
+            response["body"] = 'You must include "host", "gateway", "summary", "note" and "link" in the request body'
             response["status"] = 400
             await self._event_bus.publish_message(msg["response_topic"], response)
             return
 
-        response = await self._servicenow_repository.report_incident(host, gateway, summary, note)
+        response = await self._servicenow_repository.report_incident(host, gateway, summary, note, link)
         self._logger.info(f"Report incident response: {response}")
         await self._event_bus.publish_message(msg["response_topic"], response)

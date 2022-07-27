@@ -23,12 +23,14 @@ class TestReportIncident:
         gateway = "vcg-test-1"
         summary = "Test summary"
         note = "Test note"
+        link = "https://mettel.velocloud.net/#!/operator/admin/gateways/1/monitor/"
 
         msg_body = {
             "host": host,
             "gateway": gateway,
             "summary": summary,
             "note": note,
+            "link": link,
         }
 
         request = {"request_id": 1, "body": msg_body, "response_topic": "some.topic"}
@@ -43,7 +45,7 @@ class TestReportIncident:
         action._servicenow_repository.report_incident = CoroutineMock(return_value=response)
 
         await action.report_incident(request)
-        servicenow_repository.report_incident.assert_awaited_once_with(host, gateway, summary, note)
+        servicenow_repository.report_incident.assert_awaited_once_with(host, gateway, summary, note, link)
         event_bus.publish_message.assert_awaited_once_with("some.topic", response)
 
     @pytest.mark.asyncio
@@ -72,7 +74,7 @@ class TestReportIncident:
 
         response = {
             "request_id": 1,
-            "body": 'You must include "host", "gateway", "summary" and "note" in the request body',
+            "body": 'You must include "host", "gateway", "summary", "note" and "link" in the request body',
             "status": 400,
         }
 

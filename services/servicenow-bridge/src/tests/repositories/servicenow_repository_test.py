@@ -18,12 +18,14 @@ class TestServiceNowRepository:
         gateway = "vcg-test-1"
         summary = "Test summary"
         note = "Test note"
+        link = "https://mettel.velocloud.net/#!/operator/admin/gateways/1/monitor/"
 
         payload = {
             "u_host_name": host,
             "u_vcg": gateway,
             "u_short_description": summary,
             "u_description": note,
+            "u_link": link,
         }
 
         response = {}
@@ -32,7 +34,7 @@ class TestServiceNowRepository:
         servicenow_client.report_incident = CoroutineMock(return_value=response)
 
         servicenow_repository = ServiceNowRepository(servicenow_client)
-        result = await servicenow_repository.report_incident(host, gateway, summary, note)
+        result = await servicenow_repository.report_incident(host, gateway, summary, note, link)
 
         servicenow_client.report_incident.assert_awaited_once_with(payload)
         assert result == response
