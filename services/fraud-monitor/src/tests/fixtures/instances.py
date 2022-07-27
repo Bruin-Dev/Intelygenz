@@ -5,6 +5,7 @@ from application.actions.fraud_monitoring import FraudMonitor
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.metrics_repository import MetricsRepository
 from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.email_repository import EmailRepository
 from application.repositories.ticket_repository import TicketRepository
 from application.repositories.utils_repository import UtilsRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -47,6 +48,19 @@ def notifications_repository(logger, event_bus):
 
 
 @pytest.fixture(scope="function")
+def email_repository(logger, event_bus, notifications_repository):
+    instance = EmailRepository(
+        logger=logger,
+        event_bus=event_bus,
+        config=testconfig,
+        notifications_repository=notifications_repository
+    )
+    wrap_all_methods(instance)
+
+    return instance
+
+
+@pytest.fixture(scope="function")
 def bruin_repository(event_bus, logger, notifications_repository):
     instance = BruinRepository(
         event_bus=event_bus,
@@ -82,6 +96,7 @@ def fraud_monitor(
     scheduler,
     metrics_repository,
     notifications_repository,
+    email_repository,
     bruin_repository,
     ticket_repository,
     utils_repository,
@@ -93,6 +108,7 @@ def fraud_monitor(
         config=testconfig,
         metrics_repository=metrics_repository,
         notifications_repository=notifications_repository,
+        email_repository=email_repository,
         bruin_repository=bruin_repository,
         ticket_repository=ticket_repository,
         utils_repository=utils_repository,

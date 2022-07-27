@@ -147,6 +147,8 @@ services:
     depends_on:
       - "nats-server"
       - redis
+      - "notifications-bridge"
+      - "email-bridge"
     ports:
       - 5024:5000
       - 9890:9090

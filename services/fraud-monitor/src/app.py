@@ -5,6 +5,7 @@ from application.actions.fraud_monitoring import FraudMonitor
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.metrics_repository import MetricsRepository
 from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.email_repository import EmailRepository
 from application.repositories.ticket_repository import TicketRepository
 from application.repositories.utils_repository import UtilsRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -47,6 +48,7 @@ class Container:
         # REPOSITORIES
         self._utils_repository = UtilsRepository()
         self._notifications_repository = NotificationsRepository(self._logger, self._event_bus, config)
+        self._email_repository = EmailRepository(self._logger, self._event_bus, config, self._notifications_repository)
         self._bruin_repository = BruinRepository(self._event_bus, self._logger, config, self._notifications_repository)
         self._ticket_repository = TicketRepository(self._utils_repository)
 
@@ -58,6 +60,7 @@ class Container:
             config,
             self._metrics_repository,
             self._notifications_repository,
+            self._email_repository,
             self._bruin_repository,
             self._ticket_repository,
             self._utils_repository,

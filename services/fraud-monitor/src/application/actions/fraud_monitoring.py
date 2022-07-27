@@ -34,6 +34,7 @@ class FraudMonitor:
         config,
         metrics_repository,
         notifications_repository,
+        email_repository,
         bruin_repository,
         ticket_repository,
         utils_repository,
@@ -44,6 +45,7 @@ class FraudMonitor:
         self._config = config
         self._metrics_repository = metrics_repository
         self._notifications_repository = notifications_repository
+        self._email_repository = email_repository
         self._bruin_repository = bruin_repository
         self._ticket_repository = ticket_repository
         self._utils_repository = utils_repository
@@ -72,7 +74,7 @@ class FraudMonitor:
     async def _fraud_monitoring_process(self):
         self._logger.info(f'Processing all unread email from {self._config.FRAUD_CONFIG["inbox_email"]}')
         start = time.time()
-        unread_emails_response = await self._notifications_repository.get_unread_emails()
+        unread_emails_response = await self._email_repository.get_unread_emails()
         unread_emails_body = unread_emails_response["body"]
         unread_emails_status = unread_emails_response["status"]
 
@@ -106,7 +108,7 @@ class FraudMonitor:
             processed = await self._process_fraud(email_regex, body, msg_uid)
 
             if processed and self._config.CURRENT_ENVIRONMENT == "production":
-                mark_email_as_read_response = await self._notifications_repository.mark_email_as_read(msg_uid)
+                mark_email_as_read_response = await self._email_repository.mark_email_as_read(msg_uid)
                 mark_email_as_read_status = mark_email_as_read_response["status"]
 
                 if mark_email_as_read_status not in range(200, 300):
