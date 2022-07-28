@@ -2,18 +2,40 @@
 # Using gitlab-ci extends to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#extends)
 #
 
-.unittest_module_python: &unittest_module_python
+.unittest_module_python_36: &unittest_module_python_36
   stage: unit_test
-  image: ${CI_REGISTRY}/mettel/docker_images/python-3.6:${DOCKER_BASE_IMAGE_VERSION}
+  image: python:3.6
+  variables:
+    PY_VERSION: py36
   before_script:
-    - cd services/${MODULE}
-    - pip install -r requirements.txt
+    - apt-get update -y
+    - apt-get install -y curl gcc musl-dev
+    - wget https://grpcio-certs.s3.amazonaws.com/root-certificates.txt -O /tmp/root-certificates.txt
   script:
+    - pip install --upgrade pip
+    - cd ${CI_PROJECT_DIR}/pyutils_automation/${PY_VERSION}
+    - python setup.py install
+    - cd ${CI_PROJECT_DIR}/services/${MODULE}
+    - pip install -r requirements.txt
     - python -m pytest --cov
   coverage: '/^TOTAL.+?(\d{2,3}.\d+\%)$/'
   tags:
     - kubernetes
 
-.unittest_module_python_alpine: &unittest_module_python_alpine
-  extends: .unittest_module_python
-  image: ${CI_REGISTRY}/mettel/docker_images/python-3.6-alpine:${DOCKER_BASE_IMAGE_VERSION}
+.unittest_module_python_36_alpine: &unittest_module_python_36_alpine
+  extends: .unittest_module_python_36
+  image: python:3.6-alpine
+  before_script:
+    - apk --no-cache add curl gcc musl-dev
+
+.unittest_module_python_310: &unittest_module_python_310
+  extends: .unittest_module_python_36
+  image: python:3.10
+  variables:
+    PY_VERSION: py310
+
+.unittest_module_python_310_alpine: &unittest_module_python_310_alpine
+  extends: .unittest_module_python_36_alpine
+  image: python:3.10-alpine
+  variables:
+    PY_VERSION: py310

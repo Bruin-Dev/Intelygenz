@@ -3,7 +3,7 @@
 #
 .build_app_image: &build_app_image
   image:
-    name: ${CI_REGISTRY}/mettel/docker_images/docker18_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    name: ${CI_REGISTRY}/mettel/dockers/images/docker18:1.1.0
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
@@ -16,8 +16,7 @@
   script:
     # GET COSIGNS KEYS
     - aws s3 sync s3://mettel-automation-keys/ . --exclude "*" --include "automation-engine-container-cosign*"
-    - docker build --build-arg DOCKER_BASE_IMAGE_VERSION=${DOCKER_BASE_IMAGE_VERSION}
-      --build-arg REPOSITORY_URL="${REPOSITORY_URL}"
+    - docker build --build-arg REPOSITORY_URL="${REPOSITORY_URL}"
       -t ${REPOSITORY_URL}/${MODULE_NAME}:${DOCKER_BUILD_LATEST_TAG}
       -t ${REPOSITORY_URL}/${MODULE_NAME}:${TAG}
       -f services/${MODULE_NAME}/Dockerfile .
@@ -44,7 +43,7 @@
   services:
     - docker:18-dind
   image:
-    name: ${CI_REGISTRY}/mettel/docker_images/docker18_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    name: ${CI_REGISTRY}/mettel/dockers/images/docker18:1.1.0
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
@@ -54,7 +53,7 @@
     - pip3 install -r ci-utils/ecr/requirements.txt
   script:
     - source ci-utils/environments/environment_assign.sh
-    - docker build --build-arg DOCKER_BASE_IMAGE_VERSION=${DOCKER_BASE_IMAGE_VERSION} --build-arg GRPC_PORT=${GRPC_PORT} --build-arg HTTP_PORT=${HTTP_PORT} -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
+    - docker build --build-arg GRPC_PORT=${GRPC_PORT} --build-arg HTTP_PORT=${HTTP_PORT} -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
     - python3 ci-utils/ecr/manage_ecr_docker_images.py -d -o -e ${ENVIRONMENT_VAR} -r automation-${REPOSITORY_NAME} -p
     - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest
     - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}

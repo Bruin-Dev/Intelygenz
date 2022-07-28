@@ -5,7 +5,7 @@
 .lint_module: &lint_module
   stage: validation
   image:
-    name: ${CI_REGISTRY}/mettel/docker_images/alpine3.6_python3_pycodestyle:${DOCKER_IMAGE_UTILS_VERSION}
+    name: ${CI_REGISTRY}/mettel/dockers/images/pycodestyle:1.1.2
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'

@@ -178,7 +178,6 @@ We use 2 systems to storage logs, papertrail for 3 days and cloudwath for 1 mont
       dockerfile: new-bridge/Dockerfile                                 │
       args:                                                             │
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com    ├──────────────> here!
-        DOCKER_BASE_IMAGE_VERSION: 2.2.0                                │
     env_file:                                                           │
       - new-bridge/src/config/env                                       │
     depends_on:                                                         │

@@ -21,9 +21,6 @@ variables:
   IGZ_PACKAGES_REPOSITORY_URL: https://s3pypi.mettel-automation.net/igzpackages/index.html
   HTTPS_REMOTE: https://${GITLAB_TOKEN_USER}:${GITLAB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git
   GITLAB_API_URL: https://gitlab.intelygenz.com/api/v4/projects/1040
-  IGZ_PACKAGES_VERSION: 2.0.4
-  DOCKER_BASE_IMAGE_VERSION: 2.2.0
-  DOCKER_IMAGE_UTILS_VERSION: 1.4.8
 
   # Desired replicas of microservices
   BRUIN_BRIDGE_DESIRED_TASKS: "2"

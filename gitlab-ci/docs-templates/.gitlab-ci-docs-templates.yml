@@ -1,6 +1,6 @@
 .docs_template_deploy: &docs_template_deploy
   image:
-    name: ${CI_REGISTRY}/mettel/docker_images/python3.6_alpine_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    name: ${CI_REGISTRY}/mettel/dockers/images/python3.6-utils:1.2.1
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'

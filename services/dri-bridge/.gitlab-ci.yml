@@ -30,7 +30,7 @@ dri-bridge-test:
         - services/dri-bridge/Dockerfile
         - services/dri-bridge/requirements.txt
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
-  extends: .unittest_module_python_alpine
+  extends: .unittest_module_python_36_alpine
   needs: ["dri-bridge-linter"]
 
 # ==========================================

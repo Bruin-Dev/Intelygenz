@@ -388,60 +388,6 @@ In order to use these images it will be necessary to have configured the authent
 
    To solve this error, simply execute the command mentioned in this step for the generation of a new token.
 
-## Docker custom images and Python Libraries
-
-As mentioned in the previous section, the project uses custom images created from a specific repository, in which semantic-release is used to version these images. Each of these images has a specific version of the python library `igzpackages` installed.
-
-There are a number of variables to indicate the version number of these images, as well as of the `igzpackages` library, which will be used in the CI/CD process of the branch you are working on
-
-- `IGZ_PACKAGES_VERSION`: Used version of the `igzpackages` library. These are published in a S3 bucket, accessible via [CloudFront URL](https://s3pypi.mettel-automation.net/igzpackages/index.html).
-
-- `DOCKER_BASE_IMAGE_VERSION`: Used version of the docker custom images as base images of the Python microservices in its `Dockerfile`.
-
->The versions are available in the [releases](https://gitlab.intelygenz.com/mettel/docker_images/-/releases) section of the repository that manages igzpackages.
-
-These variables are indicated in different ways, depending on whether you want to make the changes locally or in an AWS environment:
-
-- For deploy in an AWS environment it's necessary modify the [.gitlab-ci.yml](.gitlab-ci.yml) file, as explained below:
-
-  ```yaml
-  . . .
-
-  variables:
-    . . .
-    IGZ_PACKAGES_VERSION: 2.0.4
-    DOCKER_BASE_IMAGE_VERSION: 2.0.0
-    . . .
-
-  . . .
-  ```
-
-  So in case you want to change the version used of the `igzpackages` library and/or the base docker images you must change the variables mentioned. These changes will affect the construction of the different images of the microservices to be deployed in AWS or in local environment.
-
-- For the local environment, two files must be modified:
-
-  - In the different microservices declared in the [docker-compose.yml](./docker-compose.yml) file for local use, you must change the version of the docker images to be used, **so it is important to update them with the desired values, below you can see how they are used in this file for a microservice declaration**
-
-    ```yaml
-      <microservice_name>:
-        build:
-          context: .
-          dockerfile: <microservice_folder>/Dockerfile
-          args:
-            DOCKER_BASE_IMAGE_VERSION: 2.0.0
-      . . .
-    ```
-
-  - In each of the `requirements.txt` files of the microservices, which allow these libraries to be installed in the local environment, indicating `-f` flag so that these libraries are searched in the URL configured by means of Cloudfront to access the index.html where the different versions are located. Below is an example of this file for the `velocloud-bridge` microservice
-
-    ```bash
-    . . .
-    -f https://s3pypi.mettel-automation.net/igzpackages/index.html
-    igzpackages==2.0.0
-    ```
-
->It is important to reflect the changes in all files simultaneously so that the version of the development in local and AWS is the same at the end of the development of a feature or fix.
-
 ## Env files
 
 Clone the mettel repo and run:
