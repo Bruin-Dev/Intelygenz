@@ -17,6 +17,7 @@ class ServiceAffectingMonitorReports:
         template_repository,
         bruin_repository,
         notifications_repository,
+        email_repository,
         customer_cache_repository,
     ):
         self._event_bus = event_bus
@@ -26,6 +27,7 @@ class ServiceAffectingMonitorReports:
         self._template_repository = template_repository
         self._bruin_repository = bruin_repository
         self._notifications_repository = notifications_repository
+        self._email_repository = email_repository
         self._ISO_8601_FORMAT_UTC = "%Y-%m-%dT%H:%M:%SZ"
         self._customer_cache_repository = customer_cache_repository
 
@@ -142,7 +144,7 @@ class ServiceAffectingMonitorReports:
                 report_items=final_report_list,
             )
             if email:
-                await self._notifications_repository.send_email(email_object=email)
+                await self._email_repository.send_email(email_object=email)
 
             self._logger.info(f"Report for client {client_id} sent via email")
 

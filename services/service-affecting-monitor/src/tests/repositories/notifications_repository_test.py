@@ -33,26 +33,6 @@ class TestNotificationsRepository:
         )
 
     @pytest.mark.asyncio
-    async def send_email_test(self, notifications_repository):
-        email_data = {
-            "request_id": uuid(),
-            "email_data": {
-                "subject": "some-subject",
-                "recipient": "some-recipient",
-                "text": "this is the accessible text for the email",
-                "html": "<html><head>some-data</head><body>some-more-data</body></html>",
-                "images": [],
-                "attachments": [],
-            },
-        }
-
-        await notifications_repository.send_email(email_data)
-
-        notifications_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "notification.email.request", email_data, timeout=60
-        )
-
-    @pytest.mark.asyncio
     async def notify_successful_ticket_creation_test(self, notifications_repository):
         ticket_id = 12345
         serial_number = "VC1234567"
