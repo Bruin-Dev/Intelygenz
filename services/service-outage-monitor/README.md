@@ -184,16 +184,15 @@ This is the algorithm implemented to carry out the triage process of edges:
 - [Customer cache](../customer-cache/README.md)
 - [Velocloud bridge](../velocloud-bridge/README.md)
 - [Bruin bridge](../bruin-bridge/README.md)
-- [Email bridge](../email-bridge/README.md)
 - [Notifications bridge](../notifications-bridge/README.md)
 
 # Running in docker-compose
 
 * To run any of the outage monitors:
-Velocloud host #1 -> `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge email-bridge notifications-bridge customer-cache service-outage-monitor-1`
-Velocloud host #2 -> `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge email-bridge notifications-bridge customer-cache service-outage-monitor-2`
-Velocloud host #3 -> `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge email-bridge notifications-bridge customer-cache service-outage-monitor-3`
-Velocloud host #4 -> `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge email-bridge notifications-bridge customer-cache service-outage-monitor-4`
+Velocloud host #1 -> `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifications-bridge customer-cache service-outage-monitor-1`
+Velocloud host #2 -> `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifications-bridge customer-cache service-outage-monitor-2`
+Velocloud host #3 -> `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifications-bridge customer-cache service-outage-monitor-3`
+Velocloud host #4 -> `docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifications-bridge customer-cache service-outage-monitor-4`
 
 * To run the triage process:
-`docker-compose up --build nats-server redis velocloud-bridge bruin-bridge email-bridge notifications-bridge customer-cache service-outage-monitor-triage`
+`docker-compose up --build nats-server redis velocloud-bridge bruin-bridge notifications-bridge customer-cache service-outage-monitor-triage`
