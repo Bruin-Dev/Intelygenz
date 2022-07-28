@@ -495,6 +495,7 @@ services:
     depends_on:
       - "nats-server"
       - redis
+      - "notifications-bridge"
     ports:
       - 5007:5000
       - 9180:9090
