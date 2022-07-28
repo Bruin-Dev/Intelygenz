@@ -405,6 +405,8 @@ services:
       - bruin-bridge
       - redis
       - redis-email-tagger
+      - "notifications-bridge"
+      - "email-bridge"
     ports:
       - 5057:5000
       - 9096:9090
