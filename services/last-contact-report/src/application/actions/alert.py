@@ -16,14 +16,14 @@ class Alert:
         config,
         velocloud_repository,
         template_renderer,
-        notifications_repository,
+        email_repository,
     ):
         self._event_bus = event_bus
         self._scheduler = scheduler
         self._logger = logger
         self._config = config
         self._velocloud_repository = velocloud_repository
-        self._notifications_repository = notifications_repository
+        self._email_repository = email_repository
         self._template_renderer = template_renderer
 
     async def start_alert_job(self, exec_on_start=False):
@@ -76,5 +76,5 @@ class Alert:
             edges_to_report.append(edge_for_alert)
 
         email_obj = self._template_renderer.compose_email_object(edges_to_report)
-        await self._notifications_repository.send_email(email_obj)
+        await self._email_repository.send_email(email_obj)
         self._logger.info("Last Contact Report sent")

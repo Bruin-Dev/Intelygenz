@@ -273,6 +273,8 @@ services:
     depends_on:
       - nats-server
       - redis
+      - "notifications-bridge"
+      - "email-bridge"
     ports:
       - 5003:5000
       - 9093:9090

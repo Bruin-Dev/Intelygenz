@@ -1,13 +1,15 @@
-import base64
 from collections import OrderedDict
 from datetime import datetime
 from unittest.mock import Mock
 
 import pytest
 from application.actions.alert import Alert
+from application.repositories.email_repository import EmailRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.template_management import TemplateRenderer
 from application.repositories.velocloud_repository import VelocloudRepository
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from asynctest import create_autospec
 from config import testconfig
 from shortuuid import uuid
 
@@ -30,8 +32,18 @@ def event_bus():
 
 
 @pytest.fixture(scope="function")
+def scheduler():
+    return create_autospec(AsyncIOScheduler)
+
+
+@pytest.fixture(scope="function")
 def notifications_repository(event_bus):
     return NotificationsRepository(event_bus, testconfig)
+
+
+@pytest.fixture(scope="function")
+def email_repository(event_bus):
+    return EmailRepository(event_bus, testconfig)
 
 
 @pytest.fixture(scope="function")
@@ -40,12 +52,9 @@ def velocloud_repository(event_bus, logger, notifications_repository):
 
 
 @pytest.fixture(scope="function")
-def alert(event_bus, logger, notifications_repository):
-    scheduler = Mock()
+def alert(event_bus, logger, email_repository, scheduler):
     template_renderer = TemplateRenderer(testconfig.REPORT_CONFIG)
-    return Alert(
-        event_bus, scheduler, logger, testconfig, velocloud_repository, template_renderer, notifications_repository
-    )
+    return Alert(event_bus, scheduler, logger, testconfig, velocloud_repository, template_renderer, email_repository)
 
 
 @pytest.fixture(scope="function")
