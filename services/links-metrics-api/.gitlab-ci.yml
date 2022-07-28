@@ -24,14 +24,14 @@ links-metrics-api-build:
     MODULE_NAME: links-metrics-api
     MODULE_VERSION: ${CI_PIPELINE_ID}
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $TICKET_COLLECTOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $LINKS_METRICS_API_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
         - services/links-metrics-api/src/application/**/*
         - services/links-metrics-api/src/config/**/*
         - services/links-metrics-api/src/app.py
         - services/links-metrics-api/Dockerfile
         - services/links-metrics-api/requirements.txt
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $TICKET_COLLECTOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $LINKS_METRICS_API_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:
     - job: links-metrics-api-linter

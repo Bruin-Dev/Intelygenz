@@ -25,7 +25,7 @@ links-metrics-collector-build:
     MODULE_NAME: links-metrics-collector
     MODULE_VERSION: ${CI_PIPELINE_ID}
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $TICKET_COLLECTOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $LINKS_METRICS_COLLECTOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
         - services/links-metrics-collector/src/application/**/*
         - services/links-metrics-collector/src/config/**/*
@@ -33,7 +33,7 @@ links-metrics-collector-build:
         - services/links-metrics-collector/Dockerfile
         - services/links-metrics-collector/requirements.txt
         - pyutils_automation/py36/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $TICKET_COLLECTOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $LINKS_METRICS_COLLECTOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:
     - job: links-metrics-collector-linter
