@@ -70,10 +70,6 @@ config:
     # will be created in the microservice deployment that will wait until the
     # hawkeye-customer-cache service responds correctly to healthcheck calls.
     hawkeye_customer_cache: true
-    # -- Indicate if email-bridge is going to be activated. If it is true an initContainer
-    # will be created in the microservice deployment that will wait until the
-    # email-bridge service responds correctly to healthcheck calls.
-    email_bridge: true
     # -- Indicate if notifications-bridge is going to be activated. If it is true an initContainer
     # will be created in the microservice deployment that will wait until the
     # notifications-bridge service responds correctly to healthcheck calls.
