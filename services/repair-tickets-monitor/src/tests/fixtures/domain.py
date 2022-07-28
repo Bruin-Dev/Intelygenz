@@ -1,9 +1,11 @@
+from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Callable, List
+
+from pytest import fixture
 
 from application.domain.asset import AssetId
 from application.domain.email import Email, EmailTag
-from dataclasses import dataclass, field
-from pytest import fixture
 
 
 @fixture(scope="function")
@@ -18,15 +20,15 @@ def make_asset_id() -> Callable[..., AssetId]:
 
 @dataclass
 class AnyEmailTag(EmailTag):
-    type: str = "any_type"
+    type: str = "1"
     probability: float = 1.0
 
 
 @dataclass
 class AnyEmail(Email):
     id: str = "any_id"
-    client_id: str = "any_client_id"
-    date: str = "any_date"
+    client_id: str = "1234"
+    date: datetime = datetime.utcnow()
     subject: str = "any_subject"
     body: str = "any_body"
     tag: EmailTag = AnyEmailTag()

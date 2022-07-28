@@ -34,8 +34,7 @@ MONITOR_CONFIG = {
     },
 }
 
-ENVIRONMENT = "dev"
-
+CURRENT_ENVIRONMENT = "dev"
 ENVIRONMENT_NAME = "dev"
 
 LOG_CONFIG = {
