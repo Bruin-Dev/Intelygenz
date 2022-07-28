@@ -16,7 +16,7 @@ class BandwidthReports:
         bruin_repository,
         trouble_repository,
         customer_cache_repository,
-        notifications_repository,
+        email_repository,
         utils_repository,
         template_repository,
     ):
@@ -27,7 +27,7 @@ class BandwidthReports:
         self._bruin_repository = bruin_repository
         self._trouble_repository = trouble_repository
         self._customer_cache_repository = customer_cache_repository
-        self._notifications_repository = notifications_repository
+        self._email_repository = email_repository
         self._utils_repository = utils_repository
         self._template_repository = template_repository
 
@@ -124,7 +124,7 @@ class BandwidthReports:
         )
 
         if email:
-            await self._notifications_repository.send_email(email_object=email)
+            await self._email_repository.send_email(email_object=email)
             self._logger.info(f"[bandwidth-reports] Report for client {client_id} sent via email")
 
     def _add_bandwidth_to_links_metrics(self, links_metrics):

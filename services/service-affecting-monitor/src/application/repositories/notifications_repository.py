@@ -14,9 +14,6 @@ class NotificationsRepository:
         }
         await self._event_bus.rpc_request("notification.slack.request", message, timeout=10)
 
-    async def send_email(self, email_object: dict):
-        await self._event_bus.rpc_request("notification.email.request", email_object, timeout=60)
-
     async def notify_successful_ticket_creation(self, ticket_id: int, serial_number: str, trouble: AffectingTroubles):
         message = (
             f"Service Affecting ticket has been created for serial number {serial_number}. Detected trouble was "

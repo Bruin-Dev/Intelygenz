@@ -1,11 +1,8 @@
-from datetime import datetime, timedelta
-from datetime import timezone as tz
+from datetime import datetime
 from unittest.mock import Mock, patch
 
 import pytest
 from application.actions import bandwidth_reports as bandwidth_reports_module
-from application.actions.bandwidth_reports import BandwidthReports
-from apscheduler.triggers.cron import CronTrigger
 from asynctest import CoroutineMock
 from config import testconfig
 from shortuuid import uuid
@@ -28,7 +25,7 @@ class TestBandwidthReports:
         bruin_repository,
         trouble_repository,
         customer_cache_repository,
-        notifications_repository,
+        email_repository,
         utils_repository,
         template_repository,
     ):
@@ -39,7 +36,7 @@ class TestBandwidthReports:
         assert bandwidth_reports._bruin_repository is bruin_repository
         assert bandwidth_reports._trouble_repository is trouble_repository
         assert bandwidth_reports._customer_cache_repository is customer_cache_repository
-        assert bandwidth_reports._notifications_repository is notifications_repository
+        assert bandwidth_reports._email_repository is email_repository
         assert bandwidth_reports._utils_repository is utils_repository
         assert bandwidth_reports._template_repository is template_repository
 
@@ -170,7 +167,7 @@ class TestBandwidthReports:
         bandwidth_reports._template_repository.compose_bandwidth_report_email.assert_called_once_with(
             client_id=client_id, client_name=client_name, report_items=report_items
         )
-        bandwidth_reports._notifications_repository.send_email.assert_awaited_once()
+        bandwidth_reports._email_repository.send_email.assert_awaited_once()
 
     def add_bandwidth_to_links_metrics_test(self, bandwidth_reports, make_metrics):
         bytes_rx = 9_600_000

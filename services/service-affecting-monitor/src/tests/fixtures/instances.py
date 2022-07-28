@@ -5,6 +5,7 @@ from application.actions.service_affecting_monitor import ServiceAffectingMonito
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.customer_cache_repository import CustomerCacheRepository
 from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.email_repository import EmailRepository
 from application.repositories.template_repository import TemplateRepository
 from application.repositories.ticket_repository import TicketRepository
 from application.repositories.trouble_repository import TroubleRepository
@@ -42,6 +43,14 @@ def scheduler():
 @pytest.fixture(scope="function")
 def notifications_repository(event_bus):
     instance = NotificationsRepository(event_bus=event_bus, config=config)
+    wrap_all_methods(instance)
+
+    return instance
+
+
+@pytest.fixture(scope="function")
+def email_repository(event_bus):
+    instance = EmailRepository(event_bus=event_bus, config=config)
     wrap_all_methods(instance)
 
     return instance

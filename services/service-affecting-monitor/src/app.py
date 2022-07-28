@@ -8,6 +8,7 @@ from application.repositories.bruin_repository import BruinRepository
 from application.repositories.customer_cache_repository import CustomerCacheRepository
 from application.repositories.metrics_repository import MetricsRepository
 from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.email_repository import EmailRepository
 from application.repositories.template_repository import TemplateRepository
 from application.repositories.ticket_repository import TicketRepository
 from application.repositories.trouble_repository import TroubleRepository
@@ -57,6 +58,7 @@ class Container:
         self._utils_repository = UtilsRepository()
         self._template_repository = TemplateRepository(config=config)
         self._notifications_repository = NotificationsRepository(event_bus=self._event_bus, config=config)
+        self._email_repository = EmailRepository(event_bus=self._event_bus, config=config)
         self._bruin_repository = BruinRepository(
             event_bus=self._event_bus,
             logger=self._logger,
@@ -104,6 +106,7 @@ class Container:
             template_repository=self._template_repository,
             bruin_repository=self._bruin_repository,
             notifications_repository=self._notifications_repository,
+            email_repository=self._email_repository,
             customer_cache_repository=self._customer_cache_repository,
         )
 
@@ -115,7 +118,7 @@ class Container:
             bruin_repository=self._bruin_repository,
             trouble_repository=self._trouble_repository,
             customer_cache_repository=self._customer_cache_repository,
-            notifications_repository=self._notifications_repository,
+            email_repository=self._email_repository,
             utils_repository=self._utils_repository,
             template_repository=self._template_repository,
         )

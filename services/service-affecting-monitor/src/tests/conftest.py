@@ -26,6 +26,7 @@ def service_affecting_monitor_reports(
     template_repository,
     bruin_repository,
     notifications_repository,
+    email_repository,
     customer_cache_repository,
 ):
     return ServiceAffectingMonitorReports(
@@ -36,6 +37,7 @@ def service_affecting_monitor_reports(
         template_repository,
         bruin_repository,
         notifications_repository,
+        email_repository,
         customer_cache_repository,
     )
 
@@ -48,7 +50,7 @@ def bandwidth_reports(
     bruin_repository,
     trouble_repository,
     customer_cache_repository,
-    notifications_repository,
+    email_repository,
     utils_repository,
     template_repository,
 ):
@@ -60,7 +62,7 @@ def bandwidth_reports(
         bruin_repository,
         trouble_repository,
         customer_cache_repository,
-        notifications_repository,
+        email_repository,
         utils_repository,
         template_repository,
     )
