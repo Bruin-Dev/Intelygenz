@@ -263,7 +263,7 @@ kubeprometheusstack:
         matchLabels:
           mettel-automation-mon: "true"
 
-      retention: 30d
+      retention: 365d
       walCompression: true
 
       ## storage
@@ -273,9 +273,9 @@ kubeprometheusstack:
             storageClassName: gp2
             resources:
               requests:
-                storage: 50Gi
-      
-      ## Metrics from data-higway
+                storage: 500Gi
+
+      ## Metrics from data-highway
       #### ca certificate to scrape kafka metrics
       configMaps: 
         - ca-pemstore
