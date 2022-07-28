@@ -112,7 +112,7 @@ services:
       - 9690:9090
 
     # extra_hosts:
-    #  - "host.docker.internal:192.168.1.51"
+    #  - host.docker.internal:192.168.1.51
 
   email-tagger-monitor:
     build:
@@ -157,10 +157,10 @@ services:
     volumes:
       - ./services/gateway-monitor:/service/app
     depends_on:
-      - "nats-server"
+      - nats-server
       - redis
-      - "velocloud-bridge"
-      - "servicenow-bridge"
+      - velocloud-bridge
+      - servicenow-bridge
       - notifier
     ports:
       - 5010:5000
@@ -392,7 +392,7 @@ services:
       - 5058:5000
       - 9010:9000
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - host.docker.internal:host-gateway
     stdin_open: true # for debug
     tty: true # for debug
 
@@ -409,7 +409,7 @@ services:
 #    env_file:
 #      - services/service-affecting-monitor/src/config/<env_filename>
 #    depends_on:
-#      - "nats-server"
+#      - nats-server
 #      - redis
 #    ports:
 #      - <port_mapped_to_quartz>:5000
@@ -434,7 +434,7 @@ services:
 #    env_file:
 #      - services/service-outage-monitor/src/config/<env_filename>
 #    depends_on:
-#      - "nats-server"
+#      - nats-server
 #      - redis
 #    ports:
 #      - <port_mapped_to_quartz>:5000
@@ -493,43 +493,6 @@ services:
     ports:
       - 5009:5000
       - 9097:9090
-
-  ticket-collector:
-    build:
-      context: .
-      dockerfile: services/ticket-collector/Dockerfile
-      args:
-        IGZ_PACKAGES_REPOSITORY_URL: https://s3pypi.mettel-automation.net/igzpackages/index.html
-    env_file:
-      - services/ticket-collector/src/config/env
-    volumes:
-      - ./services/ticket-collector:/service/app
-    depends_on:
-      - mongo
-    volumes:
-      - ./services/ticket-collector:/service/app
-    ports:
-      - 5617:5000
-      - 9194:9000
-
-  ticket-statistics:
-    build:
-      context: .
-      dockerfile: services/ticket-statistics/Dockerfile
-      args:
-        IGZ_PACKAGES_REPOSITORY_URL: https://s3pypi.mettel-automation.net/igzpackages/index.html
-    env_file:
-      - services/ticket-statistics/src/config/env
-    volumes:
-      - ./services/ticket-statistics:/service/app
-    depends_on:
-      - mongo
-      - redis
-    volumes:
-      - ./services/ticket-statistics:/service/app
-    ports:
-      - 3000:3000
-      - 9195:9000
 
   tnba-feedback:
     build:
@@ -700,7 +663,6 @@ services:
       MONGO_INITDB_DATABASE: bruin
     volumes:
       - ${HOME}/databases/mettel/mongodb:/data/db
-      - ./services/ticket-collector/scripts:/docker-entrypoint-initdb.d/:ro
 
   mongo-links-metrics:
     image: mongo:latest

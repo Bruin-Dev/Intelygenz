@@ -26,8 +26,6 @@ Automation-Engine deployed version: {{ .Chart.AppVersion }}
 {{- if not (index .Values "service-outage-monitor" "enabled") }} service-outage-monitor{{- end }}
 {{- if not (index .Values "service-outage-monitor-triage" "enabled") }} service-outage-monitor-triage{{- end }}
 {{- if not (index .Values "t7-bridge" "enabled") }} t7-bridge{{- end }}
-{{- if not (index .Values "ticket-collector" "enabled") }} ticket-collector{{- end }}
-{{- if not (index .Values "ticket-statistics" "enabled") }} ticket-statistics{{- end }}
 {{- if not (index .Values "tnba-feedback" "enabled") }} tnba-feedback{{- end }}
 {{- if not (index .Values "tnba-monitor" "enabled") }} tnba-monitor{{- end }}
 {{- if not (index .Values "velocloud-bridge" "enabled") }} velocloud-bridge{{- end }}
@@ -57,8 +55,6 @@ Automation-Engine deployed version: {{ .Chart.AppVersion }}
 {{ if (index .Values "service-outage-monitor" "enabled") }}    - service-outage-monitor: {{ (index .Values "service-outage-monitor" "image" "tag") }}{{- end }}
 {{ if (index .Values "service-outage-monitor-triage" "enabled") }}    - service-outage-monitor-triage: {{ (index .Values "service-outage-monitor-triage" "image" "tag") }}{{- end }}
 {{ if (index .Values "t7-bridge" "enabled") }}    - t7-bridge: {{ (index .Values "t7-bridge" "image" "tag") }}{{- end }}
-{{ if (index .Values "ticket-collector" "enabled") }}    - ticket-collector: {{ (index .Values "ticket-collector" "image" "tag") }}{{- end }}
-{{ if (index .Values "ticket-statistics" "enabled") }}    - ticket-statistics: {{ (index .Values "ticket-statistics" "image" "tag") }}{{- end }}
 {{ if (index .Values "tnba-feedback" "enabled") }}    - tnba-feedback: {{ (index .Values "tnba-feedback" "image" "tag") }}{{- end }}
 {{ if (index .Values "tnba-monitor" "enabled") }}    - tnba-monitor: {{ (index .Values "tnba-monitor" "image" "tag") }}{{- end }}
 {{ if (index .Values "velocloud-bridge" "enabled") }}    - velocloud-bridge: {{ (index .Values "velocloud-bridge" "image" "tag") }}{{- end }}

@@ -199,16 +199,6 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "t7-bridge",
                 },
                 {
-                    "query": f"ticket-collector AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                    "search_name": f"[ticket-collector] - logs",
-                    "repository": "ticket-collector",
-                },
-                {
-                    "query": f"ticket-statistics AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                    "search_name": f"[ticket-statistics] - logs",
-                    "repository": "ticket-statistics",
-                },
-                {
                     "query": f"tnba-feedback AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[tnba-feedback] - logs",
                     "repository": "tnba-feedback",

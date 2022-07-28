@@ -182,18 +182,6 @@ scrape_configs:
     static_configs:
       - targets: ['t7-bridge:9090']
 
-  - job_name: 'ticket-collector'
-
-    scrape_interval: 5s
-    static_configs:
-      - targets: ['ticket-collector:9090']
-
-  - job_name: 'ticket-statistics'
-
-    scrape_interval: 5s
-    static_configs:
-      - targets: ['ticket-statistics:9090']
-
   - job_name: 'tnba-feedback'
 
     scrape_interval: 5s

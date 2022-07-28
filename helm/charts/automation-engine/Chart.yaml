@@ -113,12 +113,6 @@ dependencies:
   - name: t7-bridge
     version: '*.*.*'
     condition: t7-bridge.enabled
-  - name: ticket-collector
-    version: '*.*.*'
-    condition: ticket-collector.enabled
-  - name: ticket-statistics
-    version: '*.*.*'
-    condition: ticket-statistics.enabled
   - name: tnba-feedback
     version: '*.*.*'
     condition: tnba-feedback.enabled

@@ -487,22 +487,6 @@ function t7_bridge_variables() {
   fi
 }
 
-function ticket_collector_variables() {
-  if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
-    # ticket-collector environment variables for ephemeral environments
-    export TICKET_COLLECTOR_MONGO_USERNAME="user"
-    export TICKET_COLLECTOR_MONGO_PASSWORD="mypassword"
-    export TICKET_COLLECTOR_MONGO_HOST="docdb"
-    export TICKET_COLLECTOR_MONGO_DB_NAME="mydb"
-  else
-    # ticket-collector environment variables for production environment
-    export TICKET_COLLECTOR_MONGO_USERNAME=${TICKET_COLLECTOR_MONGO_USERNAME}
-    export TICKET_COLLECTOR_MONGO_PASSWORD=${TICKET_COLLECTOR_MONGO_PASSWORD}
-    export TICKET_COLLECTOR_MONGO_HOST=${TICKET_COLLECTOR_MONGO_HOST}
-    export TICKET_COLLECTOR_MONGO_DB_NAME=${TICKET_COLLECTOR_MONGO_DB_NAME}
-  fi
-}
-
 function tnba_feedback_variables() {
   if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
     # tnba-feedback environment variables for ephemeral environments
@@ -593,7 +577,6 @@ function environments_assign() {
   service_affecting_monitor_variables
   service_outage_monitor_variables
   t7_bridge_variables
-  ticket_collector_variables
   tnba_feedback_variables
   tnba_monitor_variables
   velocloud_bridge_variables

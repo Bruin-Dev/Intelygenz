@@ -516,7 +516,6 @@ Perfect, now let's copy and paste another chart to use as template, if we will d
       new_bridge_variables    <─────────────── and here!
       notifier_variables
       t7_bridge_variables
-      ticket_collector_variables
       velocloud_bridge_variables
     }
     ...

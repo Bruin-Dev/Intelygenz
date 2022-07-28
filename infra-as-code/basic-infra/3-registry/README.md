@@ -42,8 +42,6 @@ No modules.
 | [aws_ecr_lifecycle_policy.service-affecting-monitor-image-lifecycle](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_lifecycle_policy) | resource |
 | [aws_ecr_lifecycle_policy.service-outage-monitor-image-lifecycle](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_lifecycle_policy) | resource |
 | [aws_ecr_lifecycle_policy.t7-bridge-image-lifecycle](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_lifecycle_policy) | resource |
-| [aws_ecr_lifecycle_policy.ticket-collector-image-lifecycle](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_lifecycle_policy) | resource |
-| [aws_ecr_lifecycle_policy.ticket-statistics-image-lifecycle](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_lifecycle_policy) | resource |
 | [aws_ecr_lifecycle_policy.tnba-feedback-image-lifecycle](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_lifecycle_policy) | resource |
 | [aws_ecr_lifecycle_policy.tnba-monitor-image-lifecycle](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_lifecycle_policy) | resource |
 | [aws_ecr_lifecycle_policy.velocloud-bridge-image-lifecycle](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_lifecycle_policy) | resource |
@@ -70,8 +68,6 @@ No modules.
 | [aws_ecr_repository.service-affecting-monitor-repository](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository) | resource |
 | [aws_ecr_repository.service-outage-monitor-repository](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository) | resource |
 | [aws_ecr_repository.t7-bridge-repository](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository) | resource |
-| [aws_ecr_repository.ticket-collector-repository](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository) | resource |
-| [aws_ecr_repository.ticket-statistics-repository](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository) | resource |
 | [aws_ecr_repository.tnba-feedback-repository](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository) | resource |
 | [aws_ecr_repository.tnba-monitor-repository](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository) | resource |
 | [aws_ecr_repository.velocloud-bridge-repository](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository) | resource |
@@ -98,8 +94,6 @@ No modules.
 | [aws_ecr_repository_policy.service-affecting-monitor-fedramp-pull-policy](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository_policy) | resource |
 | [aws_ecr_repository_policy.service-outage-monitor-fedramp-pull-policy](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository_policy) | resource |
 | [aws_ecr_repository_policy.t7-bridge-fedramp-pull-policy](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository_policy) | resource |
-| [aws_ecr_repository_policy.ticket-collector-fedramp-pull-policy](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository_policy) | resource |
-| [aws_ecr_repository_policy.ticket-statistics-fedramp-pull-policy](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository_policy) | resource |
 | [aws_ecr_repository_policy.tnba-feedback-fedramp-pull-policy](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository_policy) | resource |
 | [aws_ecr_repository_policy.tnba-monitor-fedramp-pull-policy](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository_policy) | resource |
 | [aws_ecr_repository_policy.velocloud-bridge-fedramp-pull-policy](https://registry.terraform.io/providers/hashicorp/aws/3.70.0/docs/resources/ecr_repository_policy) | resource |
