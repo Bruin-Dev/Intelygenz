@@ -578,6 +578,7 @@ services:
       - "nats-server"
       - redis
       - redis-tnba-feedback
+      - "notifications-bridge"
     ports:
       - 5014:5000
       - 9098:9090
