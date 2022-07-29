@@ -2,11 +2,10 @@ from http import HTTPStatus
 from typing import Callable
 from unittest.mock import ANY, AsyncMock, Mock
 
-from framework.nats.client import Client as NatsClient
-from pytest import fixture, mark, raises
-
 from application.rpc import RpcFailedError, RpcRequest, RpcResponse
 from application.rpc.subscribe_user_rpc import SUBSCRIPTION_TYPE, RequestBody, SubscribeUserRpc
+from framework.nats.client import Client as NatsClient
+from pytest import fixture, mark, raises
 
 
 class TestSubscribeUserRpc:

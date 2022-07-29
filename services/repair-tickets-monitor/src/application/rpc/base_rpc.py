@@ -1,8 +1,8 @@
 import logging
-from dataclasses import dataclass
 from http import HTTPStatus
 from typing import Any, Optional
 
+from dataclasses import dataclass
 from framework.nats.client import Client as NatsClient
 from pydantic import BaseModel, Field
 from shortuuid import uuid

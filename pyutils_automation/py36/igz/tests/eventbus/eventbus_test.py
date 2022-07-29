@@ -1,22 +1,19 @@
-from igz.packages.eventbus.eventbus import EventBus
-from igz.packages.eventbus.action import ActionWrapper
-from igz.packages.nats.clients import NATSClient
+import json
+import logging
+from datetime import datetime
+from unittest.mock import Mock, patch
+
 import pytest
 from asynctest import CoroutineMock
 from igz.config import testconfig as config
-from unittest.mock import Mock
-from unittest.mock import patch
-import logging
-import json
-
-from datetime import datetime
-from shortuuid import uuid
-
 from igz.packages.eventbus import storage_managers as storage_managers_module
+from igz.packages.eventbus.action import ActionWrapper
+from igz.packages.eventbus.eventbus import EventBus
+from igz.packages.nats.clients import NATSClient
+from shortuuid import uuid
 
 
 class TestEventBus:
-
     def instantiation_test(self):
         mock_logger = Mock()
         storage_manager = Mock()
@@ -66,15 +63,9 @@ class TestEventBus:
 
         event_bus.set_producer(publisher)
 
-        await event_bus.rpc_request(
-            topic="some_topic",
-            message={'msg': "some_message"},
-            timeout=10
-        )
+        await event_bus.rpc_request(topic="some_topic", message={"msg": "some_message"}, timeout=10)
 
-        publisher.rpc_request.assert_awaited_once_with(
-            "some_topic", '{"msg":"some_message"}', 10
-        )
+        publisher.rpc_request.assert_awaited_once_with("some_topic", '{"msg":"some_message"}', 10)
 
     @pytest.mark.asyncio
     async def rpc_request_with_complex_datatypes_test(self):
@@ -90,13 +81,13 @@ class TestEventBus:
         event_bus.set_producer(publisher)
 
         await event_bus.rpc_request(
-            topic="some_topic",
-            message={'epoch_time': datetime(1970, 1, 1, 0, 0, 0)},
-            timeout=10
+            topic="some_topic", message={"epoch_time": datetime(1970, 1, 1, 0, 0, 0)}, timeout=10
         )
 
         publisher.rpc_request.assert_awaited_once_with(
-            "some_topic", '{"epoch_time":"1970-01-01 00:00:00"}', 10,
+            "some_topic",
+            '{"epoch_time":"1970-01-01 00:00:00"}',
+            10,
         )
 
     @pytest.mark.asyncio
@@ -112,43 +103,37 @@ class TestEventBus:
 
         event_bus.set_producer(publisher)
 
-        await event_bus.rpc_request(
-            topic="some_topic",
-            message="some_str_message",
-            timeout=10
-        )
+        await event_bus.rpc_request(topic="some_topic", message="some_str_message", timeout=10)
 
         publisher.rpc_request.assert_awaited_once_with(
-            "some_topic", '{"message":"some_str_message"}', 10,
+            "some_topic",
+            '{"message":"some_str_message"}',
+            10,
         )
 
         publisher.rpc_request.reset_mock()
-        await event_bus.rpc_request(
-            topic="some_topic",
-            message=9999,
-            timeout=10
-        )
+        await event_bus.rpc_request(topic="some_topic", message=9999, timeout=10)
 
         publisher.rpc_request.assert_awaited_once_with(
-            "some_topic", '{"message":9999}', 10,
+            "some_topic",
+            '{"message":9999}',
+            10,
         )
 
         publisher.rpc_request.reset_mock()
-        await event_bus.rpc_request(
-            topic="some_topic",
-            message=datetime(1970, 1, 1, 0, 0, 0),
-            timeout=10
-        )
+        await event_bus.rpc_request(topic="some_topic", message=datetime(1970, 1, 1, 0, 0, 0), timeout=10)
 
         publisher.rpc_request.assert_awaited_once_with(
-            "some_topic", '{"message":"1970-01-01 00:00:00"}', 10,
+            "some_topic",
+            '{"message":"1970-01-01 00:00:00"}',
+            10,
         )
 
     @pytest.mark.asyncio
     async def rpc_request_with_message_larger_than_1mb_in_request_stage_test(self):
         uuid_ = uuid()
         bytes_in_1mb = 1048576
-        payload = {'foo': 'X' * (bytes_in_1mb + 100)}
+        payload = {"foo": "X" * (bytes_in_1mb + 100)}
 
         published_message = {"token": uuid_, "is_stored": True}
         encoded_published_message = f'{{"token":"{uuid_}","is_stored":true}}'
@@ -165,12 +150,8 @@ class TestEventBus:
 
         event_bus.set_producer(publisher)
 
-        with patch.object(storage_managers_module, 'uuid', return_value=uuid_):
-            await event_bus.rpc_request(
-                topic="some_topic",
-                message=payload,
-                timeout=10
-            )
+        with patch.object(storage_managers_module, "uuid", return_value=uuid_):
+            await event_bus.rpc_request(topic="some_topic", message=payload, timeout=10)
 
         storage_manager.is_message_larger_than_1mb.assert_called_once_with(payload)
         storage_manager.store_message.assert_called_once_with(payload, encode_result=False)
@@ -179,12 +160,12 @@ class TestEventBus:
     @pytest.mark.asyncio
     async def rpc_request_with_message_larger_than_1mb_in_reply_stage_test(self):
         uuid_ = uuid()
-        payload = {'data': 'some-data'}
+        payload = {"data": "some-data"}
         encoded_payload = '{"data":"some-data"}'
         response_message = {"token": uuid_, "is_stored": True}
 
         bytes_in_1mb = 1048576
-        recovered_message = {'foo': 'X' * (bytes_in_1mb + 100)}
+        recovered_message = {"foo": "X" * (bytes_in_1mb + 100)}
 
         mock_logger = Mock()
 
@@ -198,12 +179,8 @@ class TestEventBus:
 
         event_bus.set_producer(publisher)
 
-        with patch.object(storage_managers_module, 'uuid', return_value=uuid_):
-            response = await event_bus.rpc_request(
-                topic="some_topic",
-                message=payload,
-                timeout=10
-            )
+        with patch.object(storage_managers_module, "uuid", return_value=uuid_):
+            response = await event_bus.rpc_request(topic="some_topic", message=payload, timeout=10)
 
         storage_manager.is_message_larger_than_1mb.assert_called_once_with(payload)
         publisher.rpc_request.assert_awaited_once_with("some_topic", encoded_payload, 10)
@@ -238,10 +215,10 @@ class TestEventBus:
     @pytest.mark.asyncio
     async def add_consumer_check_behavior_of_decorated_callback_in_consumer_when_message_length_exceeds_1mb_test(self):
         bytes_in_1mb = 1048576
-        topic = 'some-topic'
-        recovered_message = {'data': 'X' * (bytes_in_1mb + 100)}
+        topic = "some-topic"
+        recovered_message = {"data": "X" * (bytes_in_1mb + 100)}
         recovered_message_encoded = json.dumps(recovered_message)
-        message_needed_for_recover = {'token': uuid(), 'is_stored': True}
+        message_needed_for_recover = {"token": uuid(), "is_stored": True}
         message_needed_for_recover_encoded = json.dumps(message_needed_for_recover)
 
         mock_logger = Mock()
@@ -262,14 +239,14 @@ class TestEventBus:
         message_instance = Mock()
         message_instance.data = message_needed_for_recover_encoded
         message_instance.subject = topic
-        message_instance.reply = '_INBOX abcdefgh12345'
+        message_instance.reply = "_INBOX abcdefgh12345"
 
         await subscriber._cb_with_action(message_instance)
 
         storage_manager.recover_message.assert_called_once_with(message_needed_for_recover, encode_result=True)
-        action_wrapper.execute_stateful_action.assert_called_once_with({
-            **recovered_message, 'response_topic': message_instance.reply
-        })
+        action_wrapper.execute_stateful_action.assert_called_once_with(
+            {**recovered_message, "response_topic": message_instance.reply}
+        )
 
     def set_producer_OK_test(self):
         mock_logger = Mock()
@@ -304,7 +281,9 @@ class TestEventBus:
         )
 
         subscribe_action_mock.assert_awaited_once_with(
-            "Some-topic", action_mock, "",
+            "Some-topic",
+            action_mock,
+            "",
         )
 
     @pytest.mark.asyncio
@@ -320,9 +299,7 @@ class TestEventBus:
 
         event_bus.set_producer(publisher)
 
-        await event_bus.publish_message(
-            topic="some_topic", msg={'msg': "some_message"}
-        )
+        await event_bus.publish_message(topic="some_topic", msg={"msg": "some_message"})
 
         publisher.publish.assert_awaited_once_with("some_topic", '{"msg":"some_message"}')
 
@@ -339,9 +316,7 @@ class TestEventBus:
 
         event_bus.set_producer(publisher)
 
-        await event_bus.publish_message(
-            topic="some_topic", msg={'epoch_time': datetime(1970, 1, 1, 0, 0, 0)}
-        )
+        await event_bus.publish_message(topic="some_topic", msg={"epoch_time": datetime(1970, 1, 1, 0, 0, 0)})
 
         publisher.publish.assert_awaited_once_with("some_topic", '{"epoch_time":"1970-01-01 00:00:00"}')
 
@@ -373,7 +348,7 @@ class TestEventBus:
     async def publish_message_larger_than_1mb_test(self):
         uuid_ = uuid()
         bytes_in_1mb = 1048576
-        payload = {'foo': 'X' * (bytes_in_1mb + 100)}
+        payload = {"foo": "X" * (bytes_in_1mb + 100)}
 
         published_message = {"token": uuid_, "is_stored": True}
         encoded_published_message = f'{{"token":"{uuid_}","is_stored":true}}'
@@ -390,7 +365,7 @@ class TestEventBus:
 
         event_bus.set_producer(publisher)
 
-        with patch.object(storage_managers_module, 'uuid', return_value=uuid_):
+        with patch.object(storage_managers_module, "uuid", return_value=uuid_):
             await event_bus.publish_message(topic="Test-topic", msg=payload)
 
         storage_manager.is_message_larger_than_1mb.assert_called_once_with(payload)

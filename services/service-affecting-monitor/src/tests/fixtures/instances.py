@@ -4,8 +4,8 @@ import pytest
 from application.actions.service_affecting_monitor import ServiceAffectingMonitor
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.customer_cache_repository import CustomerCacheRepository
-from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.email_repository import EmailRepository
+from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.template_repository import TemplateRepository
 from application.repositories.ticket_repository import TicketRepository
 from application.repositories.trouble_repository import TroubleRepository

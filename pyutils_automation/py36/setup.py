@@ -1,5 +1,6 @@
 import sys
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup
 
 NAME = "igzpackages"
 VERSION = "0.0.1"
@@ -59,15 +60,15 @@ REQUIRES = [
 setup(
     name=NAME,
     version=VERSION,
-    description='IGZ\'s utilities for Automation-Engine project',
-    author='Intelygenz',
-    author_email='mettel@intelygenz.com',
-    url='http://s3pypi.mettel-automation.net.s3.amazonaws.com/igzpackages/index.html',
+    description="IGZ's utilities for Automation-Engine project",
+    author="Intelygenz",
+    author_email="mettel@intelygenz.com",
+    url="http://s3pypi.mettel-automation.net.s3.amazonaws.com/igzpackages/index.html",
     install_requires=REQUIRES,
-    packages=find_packages(exclude=['*tests']),
+    packages=find_packages(exclude=["*tests"]),
     include_package_data=True,
     setup_requires=[
-        'pytest-runner',
+        "pytest-runner",
     ],
-    test_suite='test.unittest'
+    test_suite="test.unittest",
 )

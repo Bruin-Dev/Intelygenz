@@ -1,8 +1,8 @@
 import logging
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from typing import Generic, Iterator, Optional, Type, TypeVar
 
+from dataclasses import dataclass
 from redis.client import Redis
 
 T = TypeVar("T")

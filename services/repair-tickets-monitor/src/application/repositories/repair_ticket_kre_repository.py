@@ -1,17 +1,16 @@
 import json
 import logging
-from dataclasses import dataclass
 from typing import Any, Dict, List
-
-from framework.nats.client import Client as NatsClient
-from shortuuid import uuid
-from tenacity import retry, stop_after_delay, wait_exponential
 
 from application.domain.repair_email_output import RepairEmailOutput
 from application.repositories import nats_error_response
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.repair_ticket_kre_repository_mapper import to_output_message
 from application.repositories.utils import to_json_bytes
+from dataclasses import dataclass
+from framework.nats.client import Client as NatsClient
+from shortuuid import uuid
+from tenacity import retry, stop_after_delay, wait_exponential
 
 log = logging.getLogger(__name__)
 

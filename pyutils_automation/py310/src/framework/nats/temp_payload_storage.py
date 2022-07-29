@@ -6,7 +6,6 @@ from typing import Union
 from redis import Redis as RedisClient
 from shortuuid import uuid
 
-
 logger = logging.getLogger(__name__)
 
 SupportedBackends = Union[RedisClient]

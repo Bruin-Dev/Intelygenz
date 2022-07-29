@@ -2,30 +2,30 @@ import json
 import logging
 import sys
 
-from nats.aio.client import Client as NATS
-from tenacity import retry, wait_exponential, stop_after_delay
-
 from igz.packages.eventbus.action import ActionWrapper
+from nats.aio.client import Client as NATS
+from tenacity import retry, stop_after_delay, wait_exponential
 
 
 class NATSClient:
-
     def __init__(self, config, logger=None):
         self._config = config.NATS_CONFIG
         self._topic_action = dict()
         self._subs = list()
         if logger is None:
-            logger = logging.getLogger('nats')
+            logger = logging.getLogger("nats")
             logger.setLevel(logging.DEBUG)
             log_handler = logging.StreamHandler(sys.stdout)
-            formatter = logging.Formatter('%(asctime)s: %(module)s: %(levelname)s: %(message)s')
+            formatter = logging.Formatter("%(asctime)s: %(module)s: %(levelname)s: %(message)s")
             log_handler.setFormatter(formatter)
             logger.addHandler(log_handler)
         self._logger = logger
 
     async def connect_to_nats(self):
-        @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
-               stop=stop_after_delay(self._config['stop_delay']))
+        @retry(
+            wait=wait_exponential(multiplier=self._config["multiplier"], min=self._config["min"]),
+            stop=stop_after_delay(self._config["stop_delay"]),
+        )
         async def connect_to_nats():
             self._nc = NATS()
 
@@ -36,8 +36,10 @@ class NATSClient:
         await connect_to_nats()
 
     async def publish(self, topic, message):
-        @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
-               stop=stop_after_delay(self._config['stop_delay']))
+        @retry(
+            wait=wait_exponential(multiplier=self._config["multiplier"], min=self._config["min"]),
+            stop=stop_after_delay(self._config["stop_delay"]),
+        )
         async def publish():
             self._logger.info(f"Publishing message to subject {topic}...")
 
@@ -52,8 +54,10 @@ class NATSClient:
         await publish()
 
     async def rpc_request(self, topic, message, timeout=10):
-        @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
-               stop=stop_after_delay(self._config['stop_delay']))
+        @retry(
+            wait=wait_exponential(multiplier=self._config["multiplier"], min=self._config["min"]),
+            stop=stop_after_delay(self._config["stop_delay"]),
+        )
         async def rpc_request():
             self._logger.info(f"Publishing request message to subject {topic}...")
 
@@ -72,9 +76,9 @@ class NATSClient:
     async def _cb_with_action(self, msg):
         msg_subject = msg.subject
 
-        self._logger.info(f'Message received from topic {msg_subject}')
+        self._logger.info(f"Message received from topic {msg_subject}")
         if self._topic_action[msg_subject] is None or not isinstance(self._topic_action[msg_subject], ActionWrapper):
-            self._logger.error(f'No ActionWrapper defined for topic {msg_subject}.')
+            self._logger.error(f"No ActionWrapper defined for topic {msg_subject}.")
             return
 
         event = json.loads(msg.data)
@@ -93,8 +97,10 @@ class NATSClient:
             )
 
     async def subscribe_action(self, topic, action: ActionWrapper, queue=""):
-        @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
-               stop=stop_after_delay(self._config['stop_delay']))
+        @retry(
+            wait=wait_exponential(multiplier=self._config["multiplier"], min=self._config["min"]),
+            stop=stop_after_delay(self._config["stop_delay"]),
+        )
         async def subscribe_action():
             self._logger.info(
                 f"Subscribing action {type(action.state_instance).__name__} to subject {topic} under NATS queue "
@@ -107,12 +113,13 @@ class NATSClient:
                 await self.close_nats_connections()
                 await self.connect_to_nats()
 
-            sub = await self._nc.subscribe(topic,
-                                           queue=queue,
-                                           is_async=True,
-                                           cb=self._cb_with_action,
-                                           pending_msgs_limit=self._config["subscriber"][
-                                               "pending_limits"])
+            sub = await self._nc.subscribe(
+                topic,
+                queue=queue,
+                is_async=True,
+                cb=self._cb_with_action,
+                pending_msgs_limit=self._config["subscriber"]["pending_limits"],
+            )
             self._logger.info(
                 f"Action {type(action.state_instance).__name__} subscribed to subject {topic} successfully"
             )

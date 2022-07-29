@@ -3,11 +3,10 @@ from datetime import datetime
 from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
-from shortuuid import uuid
-
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.utils import to_json_bytes
 from config import testconfig as config
+from shortuuid import uuid
 
 uuid_ = uuid()
 

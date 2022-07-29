@@ -1,12 +1,11 @@
 from typing import Callable
 from unittest.mock import ANY, AsyncMock, Mock
 
-from framework.nats.client import Client as NatsClient
-from pytest import fixture, mark
-
 from application.domain.email import EmailStatus
 from application.rpc import RpcRequest
 from application.rpc.set_email_status_rpc import RequestBody, SetEmailStatusRpc
+from framework.nats.client import Client as NatsClient
+from pytest import fixture, mark
 
 
 class TestSubscribeUserRpc:

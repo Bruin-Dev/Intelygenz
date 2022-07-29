@@ -1,9 +1,8 @@
 from unittest.mock import ANY, Mock
 
-from redis.client import Redis
-
 from framework.storage import Utf8Storage
 from framework.testing import given
+from redis.client import Redis
 
 
 def data_is_properly_serialized_test():

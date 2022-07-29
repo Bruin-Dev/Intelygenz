@@ -1,19 +1,18 @@
 import asyncio
 import logging
 import time
-from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any, Dict, List
-
-from apscheduler.jobstores.base import ConflictingIdError
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.util import undefined
-from framework.nats.client import Client as NatsClient
-from pytz import timezone
 
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.new_created_tickets_repository import NewCreatedTicketsRepository
 from application.repositories.repair_ticket_kre_repository import RepairTicketKreRepository
+from apscheduler.jobstores.base import ConflictingIdError
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.util import undefined
+from dataclasses import dataclass
+from framework.nats.client import Client as NatsClient
+from pytz import timezone
 
 log = logging.getLogger(__name__)
 

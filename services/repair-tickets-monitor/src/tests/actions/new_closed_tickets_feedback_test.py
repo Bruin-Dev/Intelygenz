@@ -3,11 +3,10 @@ from logging import Logger
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from shortuuid import uuid
-
 from application import actions
 from application.actions.new_closed_tickets_feedback import NewClosedTicketsFeedback
 from config import testconfig as config
+from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch("application.actions.new_closed_tickets_feedback.uuid", return_value=uuid_)

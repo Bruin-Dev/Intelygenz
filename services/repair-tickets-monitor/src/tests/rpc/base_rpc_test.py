@@ -2,11 +2,10 @@ from http import HTTPStatus
 from typing import Callable, Dict, List, Set
 from unittest.mock import ANY, AsyncMock, Mock
 
+from application.rpc import Rpc, RpcError, RpcFailedError, RpcRequest, RpcResponse
 from framework.nats.client import Client as NatsClient
 from pydantic import BaseModel
 from pytest import fixture, mark, raises
-
-from application.rpc import Rpc, RpcError, RpcFailedError, RpcRequest, RpcResponse
 
 
 class FooObject(BaseModel):

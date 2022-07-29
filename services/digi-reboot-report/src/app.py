@@ -4,8 +4,8 @@ import redis
 from application.actions.digi_reboot_report import DiGiRebootReport
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.digi_repository import DiGiRepository
-from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.email_repository import EmailRepository
+from application.repositories.notifications_repository import NotificationsRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import config
 from igz.packages.eventbus.eventbus import EventBus

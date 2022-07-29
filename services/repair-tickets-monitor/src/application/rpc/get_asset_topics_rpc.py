@@ -1,11 +1,10 @@
 import logging
-from dataclasses import dataclass, field
 from typing import List
-
-from pydantic import BaseModel, Field, ValidationError, validator
 
 from application.domain.asset import AssetId, Topic
 from application.rpc import Rpc, RpcFailedError, RpcRequest
+from dataclasses import dataclass, field
+from pydantic import BaseModel, Field, ValidationError, validator
 
 log = logging.getLogger(__name__)
 

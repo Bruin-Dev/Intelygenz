@@ -5,12 +5,11 @@ import logging
 from asyncio import BoundedSemaphore
 from datetime import datetime, timedelta, timezone
 
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from dateutil.relativedelta import relativedelta
-
 from application.clients.velocloud_client import VelocloudClient
 from application.repositories.velocloud_repository import VelocloudRepository
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import config
+from dateutil.relativedelta import relativedelta
 
 scheduler = AsyncIOScheduler(timezone=config.TIMEZONE)
 

@@ -1,9 +1,7 @@
+from application.repositories.utils import to_json_bytes
 from dataclasses import dataclass
-
 from framework.nats.client import Client as NatsClient
 from shortuuid import uuid
-
-from application.repositories.utils import to_json_bytes
 
 
 @dataclass

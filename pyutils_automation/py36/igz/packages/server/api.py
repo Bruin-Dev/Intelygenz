@@ -1,7 +1,8 @@
-from quart import jsonify, Quart
 from http import HTTPStatus
+
 from hypercorn.asyncio import serve
 from hypercorn.config import Config as HyperCornConfig
+from quart import Quart, jsonify
 
 
 class QuartServer:
@@ -12,10 +13,10 @@ class QuartServer:
     _quart_server = Quart(__name__)
 
     def __init__(self, config):
-        self._title = config.QUART_CONFIG['title']
-        self._port = config.QUART_CONFIG['port']
+        self._title = config.QUART_CONFIG["title"]
+        self._port = config.QUART_CONFIG["port"]
         self._hypercorn_config = HyperCornConfig()
-        self._new_bind = f'0.0.0.0:{self._port}'
+        self._new_bind = f"0.0.0.0:{self._port}"
         self._quart_server.title = self._title
         self._status = HTTPStatus.OK
 

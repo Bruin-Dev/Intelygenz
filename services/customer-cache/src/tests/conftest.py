@@ -5,8 +5,8 @@ import pytest
 from application.actions.get_customers import GetCustomers
 from application.actions.refresh_cache import RefreshCache
 from application.repositories.bruin_repository import BruinRepository
-from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.email_repository import EmailRepository
+from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.storage_repository import StorageRepository
 from application.repositories.velocloud_repository import VelocloudRepository
 from asynctest import CoroutineMock
@@ -56,7 +56,7 @@ def mock_velocloud_repository():
 
 @pytest.fixture(scope="function")
 def instance_notifications_repository(mock_event_bus):
-    return NotificationsRepository(mock_event_bus, config)\
+    return NotificationsRepository(mock_event_bus, config)
 
 
 @pytest.fixture(scope="function")

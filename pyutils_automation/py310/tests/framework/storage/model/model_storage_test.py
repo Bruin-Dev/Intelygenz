@@ -1,10 +1,9 @@
 from unittest.mock import ANY, Mock
 
-from pydantic import BaseModel
-from redis.client import Redis
-
 from framework.storage.model import ModelStorage
 from framework.testing import given
+from pydantic import BaseModel
+from redis.client import Redis
 
 
 def models_are_properly_serialized_test():

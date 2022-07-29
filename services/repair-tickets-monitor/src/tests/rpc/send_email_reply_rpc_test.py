@@ -2,11 +2,10 @@ from http import HTTPStatus
 from typing import Callable
 from unittest.mock import ANY, AsyncMock, Mock
 
-from framework.nats.client import Client as NatsClient
-from pytest import fixture, mark, raises
-
 from application.rpc import RpcFailedError, RpcResponse
 from application.rpc.send_email_reply_rpc import RequestBody, SendEmailReplyRpc
+from framework.nats.client import Client as NatsClient
+from pytest import fixture, mark, raises
 
 
 class TestSendEmailReplyRpc:

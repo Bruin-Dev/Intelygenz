@@ -4,9 +4,9 @@ import redis
 from application.actions.get_customers import GetCustomers
 from application.actions.refresh_cache import RefreshCache
 from application.repositories.bruin_repository import BruinRepository
+from application.repositories.email_repository import EmailRepository
 from application.repositories.hawkeye_repository import HawkeyeRepository
 from application.repositories.notifications_repository import NotificationsRepository
-from application.repositories.email_repository import EmailRepository
 from application.repositories.storage_repository import StorageRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import config

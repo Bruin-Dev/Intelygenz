@@ -2,9 +2,6 @@ from http import HTTPStatus
 from typing import Callable
 from unittest.mock import AsyncMock, Mock
 
-from framework.nats.client import Client as NatsClient
-from pytest import fixture, mark, raises
-
 from application.domain.asset import AssetId
 from application.rpc import RpcError, RpcFailedError, RpcRequest, RpcResponse
 from application.rpc.upsert_outage_ticket_rpc import (
@@ -17,6 +14,8 @@ from application.rpc.upsert_outage_ticket_rpc import (
     UpsertedTicket,
     UpsertOutageTicketRpc,
 )
+from framework.nats.client import Client as NatsClient
+from pytest import fixture, mark, raises
 
 
 class TestUpsertOutageTicketRpc:

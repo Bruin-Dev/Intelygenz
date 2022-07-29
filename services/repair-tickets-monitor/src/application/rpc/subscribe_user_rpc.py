@@ -1,10 +1,9 @@
 import logging
-from dataclasses import dataclass, field
 from http import HTTPStatus
 
-from pydantic import BaseModel, Field
-
 from application.rpc import Rpc, RpcFailedError, RpcRequest
+from dataclasses import dataclass, field
+from pydantic import BaseModel, Field
 
 log = logging.getLogger(__name__)
 

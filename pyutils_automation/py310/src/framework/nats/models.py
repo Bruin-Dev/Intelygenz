@@ -1,8 +1,8 @@
 import asyncio
 import ssl
-from dataclasses import dataclass, field
 from typing import Any, Awaitable, Callable, Optional
 
+from dataclasses import dataclass, field
 from nats.aio.client import (
     DEFAULT_CONNECT_TIMEOUT,
     DEFAULT_DRAIN_TIMEOUT,

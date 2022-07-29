@@ -1,10 +1,9 @@
 from unittest.mock import AsyncMock, patch
 
-from pytest import fixture
-
 import framework
 from framework.http.server import Config as QuartConfig
 from framework.http.server import Server as QuartServer
+from pytest import fixture
 
 
 @fixture(scope="module")

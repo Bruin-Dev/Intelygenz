@@ -1,8 +1,8 @@
 from unittest.mock import Mock, patch
 
 import pytest
-from application.repositories import nats_error_response
 from application.repositories import email_repository as email_repository_module
+from application.repositories import nats_error_response
 from asynctest import CoroutineMock
 from config import testconfig
 from shortuuid import uuid
@@ -112,7 +112,9 @@ class TestEmailRepository:
 
         with uuid_mock:
             result = await email_repository.mark_email_as_read(msg_uid)
-        email_repository._event_bus.rpc_request.assert_awaited_once_with("mark.email.read.request", msg_dict, timeout=90)
+        email_repository._event_bus.rpc_request.assert_awaited_once_with(
+            "mark.email.read.request", msg_dict, timeout=90
+        )
         assert result == expected_response
 
     @pytest.mark.asyncio
@@ -128,7 +130,9 @@ class TestEmailRepository:
         email_repository._notifications_repository.send_slack_message = CoroutineMock()
         with uuid_mock:
             result = await email_repository.mark_email_as_read(msg_uid)
-        email_repository._event_bus.rpc_request.assert_awaited_once_with("mark.email.read.request", msg_dict, timeout=90)
+        email_repository._event_bus.rpc_request.assert_awaited_once_with(
+            "mark.email.read.request", msg_dict, timeout=90
+        )
         email_repository._notifications_repository.send_slack_message.assert_awaited_once()
         email_repository._logger.error.assert_called_once()
         assert result == nats_error_response
@@ -147,7 +151,9 @@ class TestEmailRepository:
         email_repository._notifications_repository.send_slack_message = CoroutineMock()
         with uuid_mock:
             result = await email_repository.mark_email_as_read(msg_uid)
-        email_repository._event_bus.rpc_request.assert_awaited_once_with("mark.email.read.request", msg_dict, timeout=90)
+        email_repository._event_bus.rpc_request.assert_awaited_once_with(
+            "mark.email.read.request", msg_dict, timeout=90
+        )
         email_repository._notifications_repository.send_slack_message.assert_awaited_once()
         email_repository._logger.error.assert_called_once()
         assert result == expected_response

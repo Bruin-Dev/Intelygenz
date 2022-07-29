@@ -2,10 +2,9 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from shortuuid import uuid
-
 from application.actions.new_created_tickets_feedback import NewCreatedTicketsFeedback
 from config import testconfig as config
+from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch("application.actions.new_created_tickets_feedback.uuid", return_value=uuid_)

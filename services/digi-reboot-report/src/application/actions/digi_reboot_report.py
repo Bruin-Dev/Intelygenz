@@ -8,9 +8,7 @@ from pytz import timezone, utc
 
 
 class DiGiRebootReport:
-    def __init__(
-        self, event_bus, scheduler, logger, config, bruin_repository, digi_repository, email_repository
-    ):
+    def __init__(self, event_bus, scheduler, logger, config, bruin_repository, digi_repository, email_repository):
         self._event_bus = event_bus
         self._scheduler = scheduler
         self._logger = logger

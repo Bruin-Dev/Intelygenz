@@ -1,10 +1,10 @@
-from igz.packages.eventbus.action import ActionWrapper
-from unittest.mock import Mock
 import logging
+from unittest.mock import Mock
+
+from igz.packages.eventbus.action import ActionWrapper
 
 
 class TestActionWrapper:
-
     def instantiation_test(self):
         state_instance = Mock()
         state_instance.target_function = Mock()

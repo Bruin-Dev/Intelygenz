@@ -1,10 +1,10 @@
-from igz.packages.Logger.logger_client import LoggerClient
-from igz.config import testconfig as config
 import logging
+
+from igz.config import testconfig as config
+from igz.packages.Logger.logger_client import LoggerClient
 
 
 class TestLoggerClient:
-
     def instantiation_test(self):
         test_log = LoggerClient(config)
         assert test_log._config == config.LOG_CONFIG

@@ -1,10 +1,10 @@
-from igz.packages.nats.clients import NATSClient
-from igz.packages.eventbus.action import ActionWrapper
+import json
 import logging
 import sys
-import json
 from typing import Callable
 
+from igz.packages.eventbus.action import ActionWrapper
+from igz.packages.nats.clients import NATSClient
 from nats.aio.client import Msg as NATSMessage
 
 
@@ -17,10 +17,10 @@ class EventBus:
         self._consumers = dict()
         self._messages_storage_manager = messages_storage_manager
         if logger is None:
-            logger = logging.getLogger('event-bus')
+            logger = logging.getLogger("event-bus")
             logger.setLevel(logging.DEBUG)
             log_handler = logging.StreamHandler(sys.stdout)
-            formatter = logging.Formatter('%(asctime)s: %(module)s: %(levelname)s: %(message)s')
+            formatter = logging.Formatter("%(asctime)s: %(module)s: %(levelname)s: %(message)s")
             log_handler.setFormatter(formatter)
             logger.addHandler(log_handler)
         self._logger = logger
@@ -35,21 +35,21 @@ class EventBus:
         if self._messages_storage_manager.is_message_larger_than_1mb(message):
             message = self._messages_storage_manager.store_message(message, encode_result=False)
             self._logger.info(
-                'Message received in rpc_request() was larger than 1MB so it was stored with '
-                f'{type(self._messages_storage_manager).__name__}. The token needed to recover it is '
+                "Message received in rpc_request() was larger than 1MB so it was stored with "
+                f"{type(self._messages_storage_manager).__name__}. The token needed to recover it is "
                 f'{message["token"]}.'
             )
 
-        message = json.dumps(message, default=str, separators=(',', ':'))
+        message = json.dumps(message, default=str, separators=(",", ":"))
 
         self._logger.info(f"Requesting a response from subject {topic}...")
         rpc_response = await self._producer.rpc_request(topic, message, timeout)
         self._logger.info(f"Response received from a replier subscribed to subject {topic}")
 
-        if rpc_response.get('is_stored') is True:
+        if rpc_response.get("is_stored") is True:
             self._logger.info(
-                f'Message received from topic {topic} indicates that the actual message was larger than 1MB '
-                f'and was stored with {type(self._messages_storage_manager).__name__}.'
+                f"Message received from topic {topic} indicates that the actual message was larger than 1MB "
+                f"and was stored with {type(self._messages_storage_manager).__name__}."
             )
             rpc_response = self._messages_storage_manager.recover_message(rpc_response, encode_result=False)
 
@@ -61,8 +61,8 @@ class EventBus:
             if event.get("is_stored") is True:
                 message.data = self._messages_storage_manager.recover_message(event, encode_result=True)
                 self._logger.info(
-                    f'Message received from topic {event} indicates that the actual message was larger than 1MB '
-                    f'and was stored with {type(self._messages_storage_manager).__name__}.'
+                    f"Message received from topic {event} indicates that the actual message was larger than 1MB "
+                    f"and was stored with {type(self._messages_storage_manager).__name__}."
                 )
 
             await func(message)
@@ -72,7 +72,7 @@ class EventBus:
     def add_consumer(self, consumer: NATSClient, consumer_name: str):
         self._logger.info(f"Adding consumer {consumer_name} to the event bus...")
         if self._consumers.get(consumer_name) is not None:
-            self._logger.error(f'Consumer name {consumer_name} already registered. Skipping...')
+            self._logger.error(f"Consumer name {consumer_name} already registered. Skipping...")
             return
 
         consumer._cb_with_action = self.__check_large_messages_decorator(consumer._cb_with_action)
@@ -110,12 +110,12 @@ class EventBus:
         if self._messages_storage_manager.is_message_larger_than_1mb(msg):
             msg = self._messages_storage_manager.store_message(msg, encode_result=False)
             self._logger.info(
-                'Message received in publish() was larger than 1MB so it was stored with '
-                f'{type(self._messages_storage_manager).__name__}. The token needed to recover it is '
+                "Message received in publish() was larger than 1MB so it was stored with "
+                f"{type(self._messages_storage_manager).__name__}. The token needed to recover it is "
                 f'{msg["token"]}.'
             )
 
-        msg = json.dumps(msg, default=str, separators=(',', ':'))
+        msg = json.dumps(msg, default=str, separators=(",", ":"))
         await self._producer.publish(topic, msg)
 
         self._logger.info(f"Message published to subject {topic} successfully")

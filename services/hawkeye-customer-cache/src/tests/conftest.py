@@ -74,8 +74,14 @@ def instance_get_customer(storage_repository, logger, event_bus):
 
 @pytest.fixture(scope="function")
 def refresh_cache(
-    logger, event_bus, scheduler, storage_repository, bruin_repository, hawkeye_repository, notifications_repository,
-    email_repository
+    logger,
+    event_bus,
+    scheduler,
+    storage_repository,
+    bruin_repository,
+    hawkeye_repository,
+    notifications_repository,
+    email_repository,
 ):
     return RefreshCache(
         config,

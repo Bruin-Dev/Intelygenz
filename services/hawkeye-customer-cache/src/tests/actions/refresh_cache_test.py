@@ -44,7 +44,7 @@ class TestRefreshCache:
             bruin_repository,
             hawkeye_repository,
             notifications_repository,
-            email_repository
+            email_repository,
         )
 
         assert refresh_cache._config == config

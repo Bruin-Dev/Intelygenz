@@ -1,8 +1,8 @@
 import logging
-from dataclasses import dataclass
 from typing import Any, List
 
 from application.repositories.storage_repository import StorageRepository
+from dataclasses import dataclass
 
 log = logging.getLogger(__name__)
 

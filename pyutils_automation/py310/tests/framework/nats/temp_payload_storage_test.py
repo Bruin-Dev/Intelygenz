@@ -2,13 +2,12 @@ import json
 from unittest.mock import Mock, patch
 
 import pytest
-from pytest import fixture
-from redis import Redis
-
 from framework.nats import temp_payload_storage
 from framework.nats.temp_payload_storage import Redis as RedisStorage
 from framework.nats.temp_payload_storage import RedisLegacy as RedisLegacyStorage
 from framework.nats.temp_payload_storage import TempPayloadStorage
+from pytest import fixture
+from redis import Redis
 
 
 class Dummy(TempPayloadStorage):

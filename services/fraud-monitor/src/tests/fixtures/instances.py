@@ -3,9 +3,9 @@ from unittest.mock import Mock
 import pytest
 from application.actions.fraud_monitoring import FraudMonitor
 from application.repositories.bruin_repository import BruinRepository
+from application.repositories.email_repository import EmailRepository
 from application.repositories.metrics_repository import MetricsRepository
 from application.repositories.notifications_repository import NotificationsRepository
-from application.repositories.email_repository import EmailRepository
 from application.repositories.ticket_repository import TicketRepository
 from application.repositories.utils_repository import UtilsRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -50,10 +50,7 @@ def notifications_repository(logger, event_bus):
 @pytest.fixture(scope="function")
 def email_repository(logger, event_bus, notifications_repository):
     instance = EmailRepository(
-        logger=logger,
-        event_bus=event_bus,
-        config=testconfig,
-        notifications_repository=notifications_repository
+        logger=logger, event_bus=event_bus, config=testconfig, notifications_repository=notifications_repository
     )
     wrap_all_methods(instance)
 

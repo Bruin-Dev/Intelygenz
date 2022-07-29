@@ -2,11 +2,10 @@ from datetime import datetime
 from typing import List
 from unittest.mock import Mock, patch
 
-from pydantic import Field
-from redis.client import Redis
-
 from framework.storage import RedisStorage
 from framework.storage.model import Email, EmailMetadata, EmailStorage, EmailTag, ModelStorage
+from pydantic import Field
+from redis.client import Redis
 
 
 def email_metadata_model_is_properly_initialized_test():
