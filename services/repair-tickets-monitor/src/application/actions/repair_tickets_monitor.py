@@ -27,7 +27,7 @@ from application.rpc.get_asset_topics_rpc import GetAssetTopicsRpc
 from application.rpc.send_email_reply_rpc import SendEmailReplyRpc
 from application.rpc.set_email_status_rpc import SetEmailStatusRpc
 from application.rpc.subscribe_user_rpc import SubscribeUserRpc
-from application.rpc.upsert_outage_ticket_rpc import UpsertedStatus, UpsertOutageTicketRpc
+from application.rpc.upsert_outage_ticket_rpc import UpsertedStatus, UpsertedTicket, UpsertOutageTicketRpc
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.util import undefined
@@ -394,16 +394,17 @@ class RepairTicketsMonitor:
                         output.tickets_could_be_updated.append(TicketOutput(ticket_id=ticket.id))
 
             if not service_number_site_map and not output.tickets_updated and not output.tickets_could_be_updated:
-                self._logger.info(f"email_id={email.id} No service number nor ticket actions triggered")
+                log.info(f"email_id={email.id} No service number nor ticket actions triggered")
                 auto_reply_reason = "No validated service numbers"
+
                 if email.is_parent_email and is_actionable and not output.validated_tickets:
-                    self._logger.info(f"email_id={email.id} Sending auto-reply")
+                    log.info(f"email_id={email.id} Sending auto-reply")
                     auto_reply_reason = "No validated service numbers. Sent auto-reply"
                     await self._set_email_status_rpc(email.id, EmailStatus.AIQ)
                     await self._send_email_reply_rpc(email.id, resources.AUTO_REPLY_BODY)
                     self._new_tagged_emails_repository.save_parent_email(email.parent)
                 elif email.is_reply_email:
-                    self._logger.info(f"email_id={email.id} Restoring parent_email {email.parent.id}")
+                    log.info(f"email_id={email.id} Restoring parent_email {email.parent.id}")
                     await self._set_email_status_rpc(email.parent.id, EmailStatus.NEW)
                     self._new_tagged_emails_repository.remove_parent_email(email.parent)
 
@@ -557,21 +558,27 @@ class RepairTicketsMonitor:
                     )
                 )
 
-            notes_to_append = self._compose_bec_note_to_ticket(
-                ticket_id=result.ticket_id,
-                service_numbers=service_numbers,
-                email=email,
-                is_update_note=result.status == UpsertedStatus.updated,
-            )
+            await self._post_process_upsert(email, result, service_numbers)
+            if email.is_reply_email:
+                await self._post_process_upsert(email.parent, result, service_numbers)
 
-            await self._bruin_repository.append_notes_to_ticket(result.ticket_id, notes_to_append)
-            await self._bruin_repository.link_email_to_ticket(result.ticket_id, email.id)
             try:
                 await self._subscribe_user_rpc(ticket_id=result.ticket_id, user_email=email.sender_address)
             except RpcError:
                 log.exception(f"email_id={email.id} Error while subscribing user to ticket {result.ticket_id}")
 
         return create_tickets_output
+
+    async def _post_process_upsert(self, email: Email, ticket: UpsertedTicket, service_numbers: List[str]):
+        notes_to_append = self._compose_bec_note_to_ticket(
+            ticket_id=ticket.ticket_id,
+            service_numbers=service_numbers,
+            email=email,
+            is_update_note=ticket.status == UpsertedStatus.updated,
+        )
+
+        await self._bruin_repository.append_notes_to_ticket(ticket.ticket_id, notes_to_append)
+        await self._bruin_repository.link_email_to_ticket(ticket.ticket_id, email.id)
 
     def _get_potential_tickets(
         self,
