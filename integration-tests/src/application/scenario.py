@@ -1,19 +1,30 @@
+import asyncio
 import logging
 from typing import Any, Awaitable, Callable, Optional
 
-from application.handler import Handler, WillReturn
+from application.data.bruin import Document, Inventory
+from application.data.bruin.ticket_basic import TicketBasic
+from application.data.bruin.ticket_details import TicketDetails, TicketNote
+from application.handler import Handler, WillReturnJSON
 from application.route import Route, Routes
 from dataclasses import dataclass, field
 from starlette.requests import Request
-from starlette.responses import JSONResponse, Response
+from starlette.responses import Response
 
 log = logging.getLogger(__name__)
 
 
 # These are the default routes for any scenario. It can be expected for this dict to grow on any iteration.
 DEFAULT_ROUTES = {
-    "/login/identity/connect/token": WillReturn(JSONResponse({"access_token": "token"})),
-    "/api/Ticket/basic": WillReturn(JSONResponse({"responses": [], "total": 0})),
+    "/login/identity/connect/token": WillReturnJSON({"access_token": "token"}),
+    "/api/Ticket/basic": WillReturnJSON(TicketBasic()),
+    "/api/Ticket/{ticket_id}/notes/advanced": WillReturnJSON({"ticketNotes": []}),
+    "/api/Ticket/{ticket_id}/details": WillReturnJSON(
+        TicketDetails(ticketNotes=[TicketNote(serviceNumber=["VC05200011984"])])
+    ),
+    "/api/Inventory": WillReturnJSON(Inventory(documents=[Document()])),
+    "/api/Email/{email_id}/link/ticket/{ticket_id}": WillReturnJSON({"success": "success"}),
+    "/api/Email/status": WillReturnJSON({"success": "success"}),
 }
 
 
@@ -106,6 +117,14 @@ class Scenario:
         :return: a failed scenario result
         """
         return ScenarioResult(name=self.name, passed=False, reason=reason)
+
+    async def check(self, *args: Awaitable) -> ScenarioResult:
+        results = await asyncio.gather(*args, return_exceptions=True)
+        failed_waits = [failed_wait for failed_wait in results if isinstance(failed_wait, Exception)]
+        if failed_waits:
+            return self.failed(reason=str(failed_waits))
+        else:
+            return self.passed()
 
 
 # default scenario to be used when the server is idle and not executing any scenario

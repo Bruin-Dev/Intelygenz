@@ -24,8 +24,9 @@ grpc_servers: Dict[int, GrpcServer] = {
 
 # Generic settings
 class Settings(BaseSettings):
-    notify_email_key = "dev-shared-secret-body-signature"
+    notify_key = "dev-shared-secret-body-signature"
     notify_email_url = "http://email-tagger-monitor:5000/api/email-tagger-webhook/email"
+    notify_ticket_url = "http://email-tagger-monitor:5000/api/email-tagger-webhook/ticket"
 
 
 settings = Settings()

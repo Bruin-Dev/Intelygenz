@@ -1,8 +1,14 @@
 import logging
 
+from application.data.rta import (
+    prediction_response,
+    save_closed_ticket_feedback_response,
+    save_created_ticket_feedback_response,
+    save_outputs_response,
+)
 from application.scenario import get_current_scenario
 from application.servers.grpc.grpc import GrpcServer, GrpcService
-from application.servers.grpc.rta.rta_pb2 import DESCRIPTOR, OutputFilterFlags, PredictionResponse, SaveOutputsResponse
+from application.servers.grpc.rta.rta_pb2 import DESCRIPTOR
 from application.servers.grpc.rta.rta_pb2_grpc import (
     EntrypointServicer,
     EntrypointStub,
@@ -23,55 +29,78 @@ class RtaService(GrpcService, EntrypointServicer):
         return GrpcService.method_path("rta", "Entrypoint", method_name, DESCRIPTOR)
 
     async def GetPrediction(self, request, context):
-        log.info(f"path={RtaService.path('GetPrediction')}")
+        path = self.path("GetPrediction")
+        log.info(f"path={path}")
         response = await get_current_scenario().handle_grpc(
-            path=self.path("GetPrediction"),
+            path=path,
             request=request,
             context=context,
             resend=self.resend_get_prediction,
         )
 
-        log.info(f"path={RtaService.path('GetPrediction')} => response={response}")
+        log.info(f"path={path} => response={response}")
         return response
 
     async def resend_get_prediction(self, request, context):
         log.info(f"resend_get_prediction(request={request})")
-        return await self.stub().GetPrediction(request) if self.proxy else default_prediction_response()
+        return await self.stub().GetPrediction(request) if self.proxy else prediction_response()
 
     async def SaveOutputs(self, request, context):
-        log.info(f"path={RtaService.path('SaveOutputs')}")
+        path = self.path("SaveOutputs")
+        log.info(f"path={path}")
         response = await get_current_scenario().handle_grpc(
-            path=self.path("SaveOutputs"),
+            path=path,
             request=request,
             context=context,
             resend=self.resend_save_outputs,
         )
 
-        log.info(f"path={RtaService.path('SaveOutputs')} => response={response}")
+        log.info(f"path={path} => response={response}")
         return response
 
     async def resend_save_outputs(self, request, context):
         log.info(f"resend_save_outputs(request={request})")
-        return await self.stub().SaveOutputs(request) if self.proxy else default_save_outputs_response()
+        return await self.stub().SaveOutputs(request) if self.proxy else save_outputs_response()
 
+    async def SaveCreatedTicketsFeedback(self, request, context):
+        path = self.path("SaveCreatedTicketsFeedback")
+        log.info(f"path={path}")
+        response = await get_current_scenario().handle_grpc(
+            path=path,
+            request=request,
+            context=context,
+            resend=self.resend_save_closed_tickets_feedback,
+        )
 
-def default_prediction_response() -> PredictionResponse:
-    return PredictionResponse(
-        potential_service_numbers=["any_service_number"],
-        potential_ticket_numbers=["any_ticket_number"],
-        predicted_class="",
-        filter_flags=OutputFilterFlags(
-            tagger_is_below_threshold=False,
-            rta_model1_is_below_threshold=False,
-            rta_model2_is_below_threshold=False,
-            is_filtered=False,
-            in_validation_set=False,
-        ),
-    )
+        log.info(f"path={path} => response={response}")
+        return response
 
+    async def resend_save_created_tickets_feedback(self, request, context):
+        log.info(f"resend_save_created_tickets_feedback(request={request})")
+        if self.proxy:
+            return await self.stub().SaveCreatedTicketsFeedback(request)
+        else:
+            return save_created_ticket_feedback_response()
 
-def default_save_outputs_response() -> SaveOutputsResponse:
-    return SaveOutputsResponse(success=True)
+    async def SaveClosedTicketsFeedback(self, request, context):
+        path = self.path("SaveClosedTicketsFeedback")
+        log.info(f"path={path}")
+        response = await get_current_scenario().handle_grpc(
+            path=path,
+            request=request,
+            context=context,
+            resend=self.resend_save_closed_tickets_feedback,
+        )
+
+        log.info(f"path={path} => response={response}")
+        return response
+
+    async def resend_save_closed_tickets_feedback(self, request, context):
+        log.info(f"resend_save_closed_tickets_feedback(request={request})")
+        if self.proxy:
+            return await self.stub().SaveClosedTicketsFeedback(request)
+        else:
+            return save_closed_ticket_feedback_response()
 
 
 @dataclass

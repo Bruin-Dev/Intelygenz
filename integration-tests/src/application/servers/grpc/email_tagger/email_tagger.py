@@ -1,7 +1,8 @@
 import logging
 
+from application.data.email_tagger import prediction_response, save_metrics_response
 from application.scenario import get_current_scenario
-from application.servers.grpc.email_tagger.email_tagger_pb2 import DESCRIPTOR, PredictionResponse
+from application.servers.grpc.email_tagger.email_tagger_pb2 import DESCRIPTOR
 from application.servers.grpc.email_tagger.email_tagger_pb2_grpc import (
     EntrypointServicer,
     EntrypointStub,
@@ -23,29 +24,38 @@ class EmailTaggerService(GrpcService, EntrypointServicer):
         return GrpcService.method_path("email-tagger", "Entrypoint", method_name, DESCRIPTOR)
 
     async def GetPrediction(self, request, context):
-        log.info(f"path={EmailTaggerService.path('GetPrediction')}")
+        path = EmailTaggerService.path("GetPrediction")
+        log.info(f"path={path}")
         response = await get_current_scenario().handle_grpc(
-            path=self.path("GetPrediction"),
+            path=path,
             request=request,
             context=context,
             resend=self.resend_get_prediction,
         )
 
-        log.info(f"path={EmailTaggerService.path('GetPrediction')} => response={response}")
+        log.info(f"path={path} => response={response}")
         return response
 
     async def resend_get_prediction(self, request, context):
         log.info(f"resend_get_prediction(request={request})")
-        return await self.stub().GetPrediction(request) if self.proxy else default_prediction_response()
+        return await self.stub().GetPrediction(request) if self.proxy else prediction_response()
 
+    async def SaveMetrics(self, request, context):
+        path = EmailTaggerService.path("SaveMetrics")
+        log.info(f"path={path}")
+        response = await get_current_scenario().handle_grpc(
+            path=path,
+            request=request,
+            context=context,
+            resend=self.resend_save_metrics,
+        )
 
-def default_prediction_response() -> PredictionResponse:
-    return PredictionResponse(
-        success=True,
-        message="any_message",
-        email_id="any_email_id",
-        prediction=[PredictionResponse.Prediction(tag_id=1, probability=0.9)],
-    )
+        log.info(f"path={path} => response={response}")
+        return response
+
+    async def resend_save_metrics(self, request, context):
+        log.info(f"resend_save_metrics(request={request})")
+        return await self.stub().SaveMetrics(request) if self.proxy else save_metrics_response()
 
 
 @dataclass

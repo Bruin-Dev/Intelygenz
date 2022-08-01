@@ -16,6 +16,7 @@ services:
   email-tagger-monitor:
     environment:
       NEW_EMAILS_JOB_INTERVAL: 5
+      NEW_TICKETS_JOB_INTERVAL: 5
   repair-tickets-monitor:
     environment:
       RTA_MONITOR_JOB_INTERVAL: 5

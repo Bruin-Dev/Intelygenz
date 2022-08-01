@@ -5,7 +5,7 @@ from typing import Dict, List, Optional
 import aiohttp
 from application.config import http_proxies
 from application.scenario import Scenario, clear_current_scenario, get_current_scenario, set_current_scenario
-from application.scenarios import ExampleScenario
+from application.scenarios import bruin_webhook_scenarios, rta_poll_scenarios
 from fastapi import FastAPI
 from hypercorn import Config
 from hypercorn.asyncio import serve
@@ -15,7 +15,7 @@ from starlette.responses import JSONResponse, Response
 log = logging.getLogger(__name__)
 
 # Scenarios to be executed
-scenarios: List[Scenario] = [ExampleScenario()]
+scenarios: List[Scenario] = [*bruin_webhook_scenarios, *rta_poll_scenarios]
 
 http = FastAPI()
 HTTP_METHODS = ["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"]
@@ -47,10 +47,10 @@ async def _run_scenarios():
     scenario_results = []
     for scenario in scenarios:
         set_current_scenario(scenario)
-        log.info(f"[Scenario] {scenario.name} started")
+        log.info(f"===> [Scenario STARTED] {scenario.name}")
         scenario_result = await scenario.run()
         scenario_results.append(scenario_result)
-        log.info(f"[Scenario] {scenario.name} {'passed' if scenario_result.passed else 'failed'}")
+        log.info(f"===> [Scenario {'PASSED' if scenario_result.passed else 'FAILED'}] {scenario.name}")
         clear_current_scenario()
 
     return scenario_results

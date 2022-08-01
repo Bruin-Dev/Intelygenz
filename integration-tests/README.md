@@ -106,7 +106,9 @@ This should work as a scenario assert.
 ## Local environment
 1. `docker-compose -f docker-compose.yml -f docker-compose.integration-tests.yml up -d`.  
    You can start any services you want, but it should be better to start them all to try to mimic a real environment.  
-2. `curl -X PUT "http://localhost:8001/_run_scenarios"`
+2. `curl -X PUT "http://localhost:8001/_run_scenarios"`  
+   _Trick: you can pipe a JSON processor to the curl output to get a formatted result._  
+   _e.g using [jq](https://stedolan.github.io/jq/) `curl -X PUT "http://localhost:8001/_run_scenarios" | jq`_
 3. (Optional) You can check the scenarios execution by doing `docker-compose logs -f integration-tests`
 4. (Optional) Once the tests are finished, you can run `docker-compose kill`
 ## Ephemereal environment
