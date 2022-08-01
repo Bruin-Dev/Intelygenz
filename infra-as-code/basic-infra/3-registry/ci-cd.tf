@@ -23,8 +23,28 @@ resource "aws_ecr_repository_policy" "terraform-1x-fedramp-pull-policy" {
             "Action": [
                 "ecr:BatchGetImage",
                 "ecr:GetDownloadUrlForLayer",
-                "ecr:BatchCheckLayerAvailability"
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetAuthorization"
             ]
+        },
+        {
+            "Sid":"CodeBuildAccessPrincipal",
+            "Effect":"Allow",
+            "Principal":{
+                "Service":"codebuild.amazonaws.com"
+            },
+            "Action":[
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetAuthorization"
+            ],
+            "Condition":{
+                "StringEquals":{
+                "aws:SourceArn":"arn:aws:codebuild:*:${var.FEDERAL_ACCOUNT_ID}:project/*",
+                "aws:SourceAccount":"${var.FEDERAL_ACCOUNT_ID}"
+                }
+            }
         }
     ]
 }
