@@ -20,6 +20,7 @@ from application.actions.get_tickets_basic_info import GetTicketsBasicInfo
 from application.actions.link_ticket_to_email import LinkTicketToEmail
 from application.actions.mark_email_as_done import MarkEmailAsDone
 from application.actions.open_ticket import OpenTicket
+from application.actions.post_email_reply import PostEmailReply
 from application.actions.post_email_status import PostEmailStatus
 from application.actions.post_email_tag import PostEmailTag
 from application.actions.post_multiple_notes import PostMultipleNotes
@@ -96,6 +97,7 @@ class Container:
         self._subscriber_get_asset_topics = NATSClient(config, self._logger)
         self._subscriber_subscribe_user = NATSClient(config, self._logger)
         self._subscriber_post_email_status = NATSClient(config, self._logger)
+        self._subscriber_post_email_reply = NATSClient(config, self._logger)
 
         # Add NATS clients as event bus consumers
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
@@ -141,6 +143,7 @@ class Container:
         self._event_bus.add_consumer(self._subscriber_get_asset_topics, consumer_name="get_asset_topics")
         self._event_bus.add_consumer(self._subscriber_subscribe_user, consumer_name="subscribe_user")
         self._event_bus.add_consumer(self._subscriber_post_email_status, consumer_name="post_email_status")
+        self._event_bus.add_consumer(self._subscriber_post_email_reply, consumer_name="post_email_reply")
 
         self._event_bus.set_producer(self._publisher)
 
@@ -181,6 +184,7 @@ class Container:
         )
         self._get_asset_topics = GetAssetTopics(self._logger, self._event_bus, self._bruin_repository)
         self._subscribe_user = SubscribeUser(self._logger, self._event_bus, self._bruin_client)
+        self._post_email_reply = PostEmailReply(self._logger, self._event_bus, self._bruin_client)
 
         self._sentence_formatter = SentenceFormatter(_subject=config.IPA_SYSTEM_USERNAME_IN_BRUIN)
         self._post_email_status = PostEmailStatus(
@@ -293,6 +297,9 @@ class Container:
         )
         self._action_post_email_status = ActionWrapper(
             self._post_email_status, "post_email_status", is_async=True, logger=self._logger
+        )
+        self._action_post_email_reply = ActionWrapper(
+            self._post_email_reply, "post_email_reply", is_async=True, logger=self._logger
         )
 
         self._server = QuartServer(config)
@@ -471,6 +478,12 @@ class Container:
             consumer_name="post_email_status",
             topic="bruin.email.status",
             action_wrapper=self._action_post_email_status,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="post_email_reply",
+            topic="bruin.email.reply",
+            action_wrapper=self._action_post_email_reply,
             queue="bruin_bridge",
         )
 
