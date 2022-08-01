@@ -1,0 +1,55 @@
+// THIS PROTO IS INCLUDED IN THE INTEGRATION TESTS FOR DOCUMENTATION PURPOSES ONLY
+syntax = "proto3";
+
+package entrypoint;
+
+message Email {
+  string email_id = 1;
+  string date = 2;
+  string subject = 3;
+  string body = 4;
+  string parent_id = 5;
+  string previous_email_id = 6;
+  string client_id = 7;
+}
+
+message PredictionRequest {
+  Email email = 1;
+  repeated int64 tag_ids = 2;
+}
+
+message PredictionResponse {
+  message Prediction {
+    int64 tag_id = 1;
+    float probability = 2;
+  }
+  bool success = 1;
+  string message = 2;
+  string email_id = 3;
+  repeated Prediction prediction = 4;
+}
+
+message SaveMetricsRequest {
+  message Ticket {
+    int64 ticket_id = 1;
+    string call_type = 2;
+    string category = 3;
+    string creation_date = 4;
+    string status = 5;
+  }
+
+  PredictionRequest original_email = 1;
+  Ticket ticket = 2;
+}
+
+message SaveMetricsResponse {
+  string message = 1;
+}
+
+
+service Entrypoint {
+  rpc GetPrediction (PredictionRequest) returns (PredictionResponse) {
+  };
+  rpc SaveMetrics (SaveMetricsRequest) returns (SaveMetricsResponse) {
+  };
+};

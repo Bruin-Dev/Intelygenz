@@ -34,7 +34,7 @@ print("Finished getting parameters")
 
 # Shared variables
 ENVIRONMENT_NAME = getpass.getuser() + "-local"
-CURRENT_ENVIRONMENT = "dev"
+CURRENT_ENVIRONMENT = "local"
 TIMEZONE = parameters["common"]["timezone"]
 IPA_SYSTEM_USERNAME_IN_BRUIN = parameters["common"]["bruin-ipa-system-username"]
 AUTORESOLVE_DAY_START_HOUR = parameters["common"]["autoresolve-day-start-hour"]
@@ -316,7 +316,6 @@ PAPERTRAIL_ACTIVE = False
 PAPERTRAIL_PORT = 1111
 PAPERTRAIL_HOST = "logs.papertrailapp.com"
 
-
 env_dict = {
     os.path.join("base-microservice", "src", "config", "env"): [
         f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",
@@ -327,7 +326,7 @@ env_dict = {
         f"REDIS_HOSTNAME={REDIS_HOSTNAME}",
     ],
     os.path.join("services", "bruin-bridge", "src", "config", "env"): [
-        f"CURRENT_ENVIRONMENT={ENVIRONMENT_NAME}",
+        f"CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}",
         f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",
         f"NATS_SERVER1={NATS_SERVER1}",
         f"NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}",
@@ -356,7 +355,7 @@ env_dict = {
         f"PAPERTRAIL_PORT={PAPERTRAIL_PORT}",
     ],
     os.path.join("services", "digi-reboot-report", "src", "config", "env"): [
-        f"CURRENT_ENVIRONMENT={ENVIRONMENT_NAME}",
+        f"CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}",
         f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",
         f"NATS_SERVER1={NATS_SERVER1}",
         f"REDIS_HOSTNAME={REDIS_HOSTNAME}",
@@ -400,6 +399,7 @@ env_dict = {
         f"WHITELISTED_MANAGEMENT_STATUSES={CUSTOMER_CACHE__WHITELISTED_MANAGEMENT_STATUSES}",
     ],
     os.path.join("services", "email-tagger-kre-bridge", "src", "config", "env"): [
+        f"CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}",
         f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",
         f"NATS_SERVER1={NATS_SERVER1}",
         f"REDIS_HOSTNAME={REDIS_HOSTNAME}",
@@ -557,6 +557,7 @@ env_dict = {
         f"MONITORABLE_EMAIL_ACCOUNTS={NOTIFIER__MONITORABLE_EMAIL_ACCOUNTS}",
     ],
     os.path.join("services", "repair-tickets-kre-bridge", "src", "config", "env"): [
+        f"CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}",
         f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",
         f"NATS_SERVER1={NATS_SERVER1}",
         f"REDIS_HOSTNAME={REDIS_HOSTNAME}",

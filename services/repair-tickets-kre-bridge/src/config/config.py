@@ -31,7 +31,7 @@ LOG_CONFIG = {
 
 KRE_CONFIG = {
     "base_url": os.environ["KRE_BASE_URL"],
-    "grpc_secure_mode": True,
+    "grpc_secure_mode": os.environ["CURRENT_ENVIRONMENT"] != "local",
 }
 
 QUART_CONFIG = {"title": "repair-tickets-kre-bridge", "port": 5000}

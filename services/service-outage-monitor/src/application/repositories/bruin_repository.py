@@ -628,15 +628,7 @@ class BruinRepository:
         ticket_detail_id = ticket_detail["ticket_detail"]["detailID"]
         service_number = ticket_detail["ticket_detail"]["detailValue"]
 
-        if self._config.CURRENT_ENVIRONMENT == "dev":
-            triage_message = (
-                f"Triage note would have been appended to detail {ticket_detail_id} of ticket {ticket_id}"
-                f"(serial: {service_number}). Note: {ticket_note}. Details at app.bruin.com/t/{ticket_id}"
-            )
-            self._logger.info(triage_message)
-            await self._notifications_repository.send_slack_message(triage_message)
-            return None
-        elif self._config.CURRENT_ENVIRONMENT == "production":
+        if self._config.CURRENT_ENVIRONMENT == "production":
             if len(ticket_note) < 1500:
 
                 append_note_response = await self.append_note_to_ticket(
@@ -672,6 +664,14 @@ class BruinRepository:
                         counter = counter + 1
                         accumulator = "#*MetTel's IPA*#\n" "Triage (VeloCloud)\n"
             return 200
+        else:
+            triage_message = (
+                f"Triage note would have been appended to detail {ticket_detail_id} of ticket {ticket_id}"
+                f"(serial: {service_number}). Note: {ticket_note}. Details at app.bruin.com/t/{ticket_id}"
+            )
+            self._logger.info(triage_message)
+            await self._notifications_repository.send_slack_message(triage_message)
+            return None
 
     async def append_digi_reboot_note(self, ticket_id, serial_number, interface):
         current_datetime_tz_aware = datetime.now(timezone(self._config.TIMEZONE))

@@ -1,0 +1,166 @@
+// THIS PROTO IS INCLUDED IN THE INTEGRATION TESTS FOR DOCUMENTATION PURPOSES ONLY
+syntax = "proto3";
+
+package entrypoint;
+
+
+// TBD: Check with Marc if we can move all these messages to internal_nodes.proto
+// import "internal_nodes.proto";
+
+message Tag {
+    string type = 1;
+    float probability = 2;
+}
+
+message Email {
+    string email_id = 1;
+    string parent_id = 2;
+    string client_id = 3;
+    string subject = 4;
+    string body = 5;
+    string from_address = 6;
+    repeated string to = 7;
+    string cc = 8;
+    string date = 9;
+    Tag tag = 10;
+}
+
+// Node: Preprocess Email
+message PreprocessEmailFields{
+    string subject_no_html = 1;
+    string body_no_html = 2;
+    string subject_mlp_classifier = 3;
+    string body_mlp_classifier = 4;
+}
+
+message PreprocessEmailOutput {
+    Email email = 1;
+    PreprocessEmailFields processed_email = 2;
+}
+
+// Node: Extract Service Numbers
+message ExtractServiceNumbersOutput{
+    Email email = 1;
+    PreprocessEmailFields processed_email = 2;
+    repeated string potential_service_numbers = 3;
+    repeated string potential_ticket_numbers = 4;
+}
+
+// Node: Classify VOO/VAS/Other
+message ClassifyOutageVsAffectingFields{
+    string predicted_class = 1;
+    string predicted_class_voovas_vs_other = 2;
+    float predicted_class_voovas_vs_other_probability = 3;
+    string predicted_class_voo_vs_vas = 4;
+    float predicted_class_voo_vs_vas_probability = 5;
+}
+
+message ClassifyOutageVsAffectingOutput{
+    Email email = 1;
+    PreprocessEmailFields processed_email = 2;
+    repeated string potential_service_numbers = 3;
+    ClassifyOutageVsAffectingFields classification = 4;
+    repeated string potential_ticket_numbers = 5;
+}
+
+// NODE Prepare Output
+message PrepareOutputFields{
+    float tagger_threshold_value = 1;
+    bool tagger_is_below_threshold = 2;
+    float rta_model1_threshold_value = 3;
+    bool rta_model1_is_below_threshold = 4;
+    float rta_model2_threshold_value = 5;
+    bool rta_model2_is_below_threshold = 6;
+    bool is_filtered = 7;
+    string filtered_reason = 8;
+    bool in_validation_set = 9;
+    float validation_set_probability = 10;
+}
+
+// Input
+message PredictionRequest {
+    Email email = 1;
+}
+
+// Output
+message OutputFilterFlags{
+    bool tagger_is_below_threshold = 1;
+    bool rta_model1_is_below_threshold = 2;
+    bool rta_model2_is_below_threshold = 3;
+    bool is_filtered = 4;
+    bool in_validation_set = 5;
+}
+
+message PredictionResponse{
+    repeated string potential_service_numbers = 1;
+    string predicted_class = 2;
+    OutputFilterFlags filter_flags = 3;
+    repeated string potential_ticket_numbers = 4;
+}
+
+message Ticket {
+    string site_id = 1;
+    repeated string service_numbers = 2;
+    string ticket_id = 3;
+    string not_creation_reason = 4;
+}
+
+message ValidatedTicket {
+    string ticket_id = 1;
+    string ticket_status = 2;
+    string category = 3;
+    string call_type = 4;
+    string site_id = 5;
+}
+
+message SaveOutputsRequest {
+    string email_id = 1;
+    map<string, string> service_numbers_sites_map = 2;
+    repeated string validated_service_numbers = 3;
+    repeated Ticket tickets_created = 4;
+    repeated Ticket tickets_updated = 5;
+    repeated Ticket tickets_could_be_created = 6;
+    repeated Ticket tickets_could_be_updated = 7;
+    repeated Ticket tickets_cannot_be_created = 9;
+    repeated string validated_ticket_numbers = 10 [deprecated = true];
+    map<string, string> bruin_ticket_status_map = 11 [deprecated = true];
+    map<string, string> bruin_ticket_call_type_map = 12 [deprecated = true];
+    map<string, string> bruin_ticket_category_map = 13 [deprecated = true];
+    repeated ValidatedTicket validated_tickets = 14;
+}
+
+message SaveOutputsResponse {
+    bool success = 1;
+}
+
+message SaveCreatedTicketsFeedbackRequest {
+    string ticket_id = 1;
+    string email_id = 2;
+    string parent_id = 3;
+    string client_id = 4;
+    repeated string real_service_numbers = 5;
+    string real_class = 6;
+    map<string, string> site_map = 7;
+}
+
+message SaveCreatedTicketsFeedbackResponse {
+    bool success = 1;
+}
+
+message SaveClosedTicketsFeedbackRequest {
+    string ticket_id = 1;
+    string client_id = 2;
+    string ticket_status = 3;
+    repeated string cancelled_reasons = 4;
+}
+
+message SaveClosedTicketsFeedbackResponse {
+    bool success = 1;
+}
+
+service Entrypoint {
+    rpc GetPrediction (PredictionRequest) returns (PredictionResponse) {};
+    rpc SaveOutputs(SaveOutputsRequest) returns (SaveOutputsResponse) {};
+    rpc SaveCreatedTicketsFeedback(SaveCreatedTicketsFeedbackRequest) returns (SaveCreatedTicketsFeedbackResponse) {};
+    rpc SaveClosedTicketsFeedback(SaveClosedTicketsFeedbackRequest) returns (SaveClosedTicketsFeedbackResponse) {};
+};

@@ -2183,7 +2183,7 @@ class TestBruinRepository:
             await bruin_repository.append_triage_note(ticket_detail, ticket_note)
 
         bruin_repository.append_note_to_ticket.assert_not_awaited()
-        notifications_repository.send_slack_message.assert_not_awaited()
+        notifications_repository.send_slack_message.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def append_triage_note_with_triage_note_greater_than_1500_char_test(self):

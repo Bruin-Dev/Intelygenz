@@ -1,0 +1,23 @@
+services:
+  bruin-bridge:
+    environment:
+      BRUIN_LOGIN_URL: http://integration-tests:8001/login
+      BRUIN_BASE_URL: http://integration-tests:8002
+  email-tagger-kre-bridge:
+    environment:
+      KRE_BASE_URL: integration-tests:50001
+  repair-tickets-kre-bridge:
+    environment:
+      KRE_BASE_URL: integration-tests:50002
+  notifier:
+    environment:
+      # Prevent notifier thread to hang up when retrieving emails for intermapper-outage-monitor
+      MONITORABLE_EMAIL_ACCOUNTS: "{}"
+  email-tagger-monitor:
+    environment:
+      NEW_EMAILS_JOB_INTERVAL: 5
+  repair-tickets-monitor:
+    environment:
+      RTA_MONITOR_JOB_INTERVAL: 5
+      NEW_CREATED_TICKETS_FEEDBACK_JOB_INTERVAL: 5
+      NEW_CLOSED_TICKETS_FEEDBACK_JOB_INTERVAL: 5

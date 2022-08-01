@@ -661,7 +661,7 @@ class TNBAMonitor:
                         "service_number": serial_number,
                     }
                 )
-            elif self._config.CURRENT_ENVIRONMENT == "dev":
+            else:
                 tnba_message = (
                     f"TNBA note would have been appended to ticket {ticket_id} and detail {ticket_detail_id} "
                     f"(serial: {serial_number}). Note: {tnba_note}. Details at app.bruin.com/t/{ticket_id}"

@@ -12,7 +12,7 @@ services:
     env_file:
       - base-microservice/src/config/env
     depends_on:
-      - "nats-server"
+      - nats-server
       - redis
     ports:
       - 9100:9100
@@ -28,8 +28,9 @@ services:
     volumes:
       - ./services/bruin-bridge:/service/app
     depends_on:
-      - "nats-server"
+      - nats-server
       - redis
+      - integration-tests
     ports:
       - 5006:5000
       - 9190:9090
@@ -44,7 +45,7 @@ services:
     volumes:
       - ./services/customer-cache:/service/app
     depends_on:
-      - "nats-server"
+      - nats-server
       - redis
       - redis-customer-cache
     ports:
@@ -61,7 +62,7 @@ services:
     volumes:
       - ./services/digi-bridge:/service/app
     depends_on:
-      - "nats-server"
+      - nats-server
       - redis
     ports:
       - 5015:5000
@@ -103,8 +104,9 @@ services:
     volumes:
       - ./services/email-tagger-kre-bridge:/service/app
     depends_on:
-      - "nats-server"
+      - nats-server
       - redis
+      - integration-tests
     ports:
       - 5056:5000
       - 9690:9090
@@ -122,7 +124,7 @@ services:
     volumes:
       - ./services/email-tagger-monitor:/service/app
     depends_on:
-      - "nats-server"
+      - nats-server
       - redis
       - redis-email-tagger
     ports:
@@ -139,7 +141,7 @@ services:
     volumes:
       - ./services/fraud-monitor:/service/app
     depends_on:
-      - "nats-server"
+      - nats-server
       - redis
     ports:
       - 5024:5000
@@ -174,7 +176,7 @@ services:
     volumes:
       - ./services/hawkeye-affecting-monitor:/service/app
     depends_on:
-      - "nats-server"
+      - nats-server
       - redis
     ports:
       - 5707:5000
@@ -190,7 +192,7 @@ services:
     volumes:
       - ./services/hawkeye-bridge:/service/app
     depends_on:
-      - "nats-server"
+      - nats-server
       - redis
     ports:
       - 5507:5000
@@ -206,7 +208,7 @@ services:
     volumes:
       - ./services/hawkeye-customer-cache:/service/app
     depends_on:
-      - "nats-server"
+      - nats-server
       - redis
       - redis-customer-cache
     ports:
@@ -223,7 +225,7 @@ services:
     volumes:
       - ./services/hawkeye-outage-monitor:/service/app
     depends_on:
-      - "nats-server"
+      - nats-server
       - redis
     ports:
       - 5607:5000
@@ -239,7 +241,7 @@ services:
     volumes:
       - ./services/intermapper-outage-monitor:/service/app
     depends_on:
-      - "nats-server"
+      - nats-server
       - redis
     ports:
       - 5017:5000
@@ -255,7 +257,7 @@ services:
     volumes:
       - ./services/last-contact-report:/service/app
     depends_on:
-      - "nats-server"
+      - nats-server
       - redis
     ports:
       - 5003:5000
@@ -271,7 +273,7 @@ services:
     volumes:
       - ./services/links-metrics-api:/service/app
     depends_on:
-      - "nats-server"
+      - nats-server
       - redis
     ports:
       - 5019:5000
@@ -287,7 +289,7 @@ services:
     volumes:
       - ./services/links-metrics-collector:/service/app
     depends_on:
-      - "nats-server"
+      - nats-server
       - redis
     ports:
       - 5018:5000
@@ -346,7 +348,7 @@ services:
     volumes:
       - ./services/notifier:/service/app
     depends_on:
-      - "nats-server"
+      - nats-server
       - redis
     ports:
       - 5002:5000
@@ -362,7 +364,7 @@ services:
     volumes:
       - ./services/repair-tickets-monitor:/service/app
     depends_on:
-      - "nats-server"
+      - nats-server
       - repair-tickets-kre-bridge
       - bruin-bridge
       - redis
@@ -383,8 +385,9 @@ services:
     volumes:
       - ./services/repair-tickets-kre-bridge:/service/app
     depends_on:
-      - "nats-server"
+      - nats-server
       - redis
+      - integration-tests
     ports:
       - 5058:5000
       - 9010:9000
@@ -453,7 +456,7 @@ services:
     volumes:
       - ./services/service-outage-monitor:/service/app
     depends_on:
-      - "nats-server"
+      - nats-server
       - redis
     ports:
       - 5007:5000
@@ -469,7 +472,7 @@ services:
     volumes:
       - ./services/servicenow-bridge:/service/app
     depends_on:
-      - "nats-server"
+      - nats-server
       - redis
     ports:
       - 5021:5000
@@ -485,7 +488,7 @@ services:
     volumes:
       - ./services/t7-bridge:/service/app
     depends_on:
-      - "nats-server"
+      - nats-server
       - redis
     ports:
       - 5009:5000
@@ -503,6 +506,8 @@ services:
       - ./services/ticket-collector:/service/app
     depends_on:
       - mongo
+    volumes:
+      - ./services/ticket-collector:/service/app
     ports:
       - 5617:5000
       - 9194:9000
@@ -520,6 +525,8 @@ services:
     depends_on:
       - mongo
       - redis
+    volumes:
+      - ./services/ticket-statistics:/service/app
     ports:
       - 3000:3000
       - 9195:9000
@@ -534,7 +541,7 @@ services:
     volumes:
       - ./services/tnba-feedback:/service/app
     depends_on:
-      - "nats-server"
+      - nats-server
       - redis
       - redis-tnba-feedback
     ports:
@@ -554,7 +561,7 @@ services:
 #    env_file:
 #      - services/tnba-monitor/src/config/<env_filename>
 #    depends_on:
-#      - "nats-server"
+#      - nats-server
 #      - redis
 #    ports:
 #      - <port_mapped_to_quartz>:5000
@@ -565,7 +572,7 @@ services:
 #  - <env_filename> is the filename of the env file you want to use for the configuration of the service
 #  - <port_mapped_to_quartz> is the port of the host machine mapped to Quartz's
 #  - <port_mapped_to_metrics_server> is the port of the host machine mapped to the metric server's
-      
+
   velocloud-bridge:
     build:
       # Context must be the root of the monorepo
@@ -576,7 +583,7 @@ services:
     volumes:
       - ./services/velocloud-bridge:/service/app
     depends_on:
-      - "nats-server"
+      - nats-server
       - redis
     ports:
       - 5001:5000
@@ -619,11 +626,11 @@ services:
       - metrics-dashboard/grafana/config/env
     depends_on:
       - prometheus
-      - "nats-server"
+      - nats-server
       - redis
     restart: unless-stopped
     ports:
-      - 3000:3000
+      - 3001:3000
     volumes:
       - ./metrics-dashboard/grafana/datasources:/etc/grafana/provisioning/datasources
       - ./metrics-dashboard/grafana/dashboards:/etc/grafana/provisioning/dashboards
@@ -686,7 +693,7 @@ services:
     image: mongo:latest
     restart: always
     ports:
-    - 27017:27017
+      - 27017:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
@@ -699,7 +706,7 @@ services:
     image: mongo:latest
     restart: always
     ports:
-      - 27017:27017
+      - 27018:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
@@ -709,17 +716,28 @@ services:
 
   # Mongo Express Web-based MongoDB admin interface
   mongo-express:
-      image: mongo-express
-      container_name: 'mongo-express'
-      environment:
-        - ME_CONFIG_OPTIONS_EDITORTHEME=ambiance
-        # Change mongodb server to another mongo instance name in docker compose to inspect it
-        - ME_CONFIG_MONGODB_SERVER=mongo-links-metrics
-        - ME_CONFIG_MONGODB_PORT=27017
-        - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
-        - ME_CONFIG_MONGODB_AUTH_DATABASE=admin
-        - ME_CONFIG_MONGODB_ADMINUSERNAME=root
-        - ME_CONFIG_MONGODB_ADMINPASSWORD=example
-      ports:
-          - '8081:8081'
-      restart: always
+    image: mongo-express
+    container_name: 'mongo-express'
+    environment:
+      - ME_CONFIG_OPTIONS_EDITORTHEME=ambiance
+      # Change mongodb server to another mongo instance name in docker compose to inspect it
+      - ME_CONFIG_MONGODB_SERVER=mongo-links-metrics
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+      - ME_CONFIG_MONGODB_AUTH_DATABASE=admin
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=example
+    ports:
+      - '8081:8081'
+    restart: always
+
+  integration-tests:
+    build:
+      dockerfile: integration-tests/Dockerfile
+    ports:
+      - 8001:8001
+      - 8002:8002
+      - 50001:50001
+      - 50002:50002
+    volumes:
+      - ./integration-tests:/service/app
