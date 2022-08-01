@@ -15,14 +15,15 @@ resource "aws_ecr_repository_policy" "terraform-1x-fedramp-pull-policy" {
     "Version": "2008-10-17",
     "Statement": [
         {
-            "Sid": "new policy",
+            "Sid": "ECRAccess",
             "Effect": "Allow",
             "Principal": {
                 "AWS": "arn:aws:iam::${var.FEDERAL_ACCOUNT_ID}:root"
             },
             "Action": [
                 "ecr:BatchGetImage",
-                "ecr:GetDownloadUrlForLayer"
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchCheckLayerAvailability"
             ]
         }
     ]
