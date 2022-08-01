@@ -24,7 +24,7 @@ resource "aws_ecr_repository_policy" "terraform-1x-fedramp-pull-policy" {
                 "ecr:BatchGetImage",
                 "ecr:GetDownloadUrlForLayer",
                 "ecr:BatchCheckLayerAvailability",
-                "ecr:GetAuthorization"
+                "ecr:GetAuthorizationToken"
             ]
         },
         {
@@ -37,7 +37,7 @@ resource "aws_ecr_repository_policy" "terraform-1x-fedramp-pull-policy" {
                 "ecr:GetDownloadUrlForLayer",
                 "ecr:BatchGetImage",
                 "ecr:BatchCheckLayerAvailability",
-                "ecr:GetAuthorization"
+                "ecr:GetAuthorizationToken"
             ],
             "Condition":{
                 "StringEquals":{
