@@ -1,8 +1,9 @@
+from dataclasses import dataclass, field
 from typing import Dict, List
 
-from application.domain.ticket import Ticket
-from dataclasses import dataclass, field
 from multipledispatch import dispatch
+
+from application.domain.ticket import Ticket
 
 
 @dataclass

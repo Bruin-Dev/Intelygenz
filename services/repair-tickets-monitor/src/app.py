@@ -1,9 +1,21 @@
 import asyncio
 import logging
-import socket
-import sys
+from dataclasses import asdict
 
-import redis
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from framework.http.server import Config as HealthConfig
+from framework.http.server import Server as HealthServer
+from framework.logging.formatters import Papertrail as PapertrailFormatter
+from framework.logging.formatters import Standard as StandardFormatter
+from framework.logging.handlers import Papertrail as PapertrailHandler
+from framework.logging.handlers import Stdout as StdoutHandler
+from framework.nats.client import Client
+from framework.nats.models import Connection
+from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
+from prometheus_client import start_http_server
+from pytz import timezone
+from redis.client import Redis
+
 from application.actions.new_closed_tickets_feedback import NewClosedTicketsFeedback
 from application.actions.new_created_tickets_feedback import NewCreatedTicketsFeedback
 from application.actions.repair_tickets_monitor import RepairTicketsMonitor
@@ -17,107 +29,96 @@ from application.rpc.append_note_to_ticket_rpc import AppendNoteToTicketRpc
 from application.rpc.get_asset_topics_rpc import GetAssetTopicsRpc
 from application.rpc.subscribe_user_rpc import SubscribeUserRpc
 from application.rpc.upsert_outage_ticket_rpc import UpsertOutageTicketRpc
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import config
-from config.configuration import config as conf
-from igz.packages.eventbus.eventbus import EventBus
-from igz.packages.eventbus.storage_managers import RedisStorageManager
-from igz.packages.Logger.logger_client import LoggerClient
-from igz.packages.nats.clients import NATSClient
-from igz.packages.server.api import QuartServer
-from middleware.logging import ContextFilter, JsonFormatter
-from prometheus_client import start_http_server
-from pytz import timezone
 
-json_formatter = JsonFormatter(
-    fields={
-        "timestamp": "asctime",
-        "name": "name",
-        "module": "module",
-        "line": "lineno",
-        "log_level": "levelname",
-        "message": "message",
-    },
-    always_extra={"environment": conf.environment, "hostname": socket.gethostname()},
-)
-console_handler = logging.StreamHandler(sys.stdout)
-console_handler.setFormatter(json_formatter)
-console_handler.addFilter(ContextFilter())
+# json_formatter = JsonFormatter(
+#     fields={
+#         "timestamp": "asctime",
+#         "name": "name",
+#         "module": "module",
+#         "line": "lineno",
+#         "log_level": "levelname",
+#         "message": "message",
+#     },
+#     always_extra={"environment": conf.environment, "hostname": socket.gethostname()},
+# )
+# console_handler = logging.StreamHandler(sys.stdout)
+# console_handler.setFormatter(json_formatter)
+# console_handler.addFilter(ContextFilter())
+#
+# logger = logging.getLogger("middleware")
+# logger.addHandler(console_handler)
+# logger.setLevel(conf.logging.level)
 
-logger = logging.getLogger("middleware")
-logger.addHandler(console_handler)
-logger.setLevel(conf.logging.level)
+log = logging.getLogger("application")
+log.setLevel(logging.DEBUG)
+base_handler = StdoutHandler()
+base_handler.setFormatter(StandardFormatter(environment_name=config.ENVIRONMENT_NAME))
+log.addHandler(base_handler)
+
+if config.LOG_CONFIG["papertrail"]["active"]:
+    pt_handler = PapertrailHandler(
+        host=config.LOG_CONFIG["papertrail"]["host"],
+        port=config.LOG_CONFIG["papertrail"]["port"],
+    )
+    pt_handler.setFormatter(
+        PapertrailFormatter(
+            environment_name=config.ENVIRONMENT_NAME,
+            papertrail_prefix=config.LOG_CONFIG["papertrail"]["prefix"],
+        )
+    )
+    log.addHandler(pt_handler)
 
 
 class Container:
     def __init__(self):
         # LOGGER
-        self._logger = LoggerClient(config).get_logger()
-        self._logger.info("Repair Ticket Monitor starting...")
-
-        # REDIS
-        self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
-        self._redis_client.ping()
-        self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
+        log.info("Repair Ticket Monitor starting...")
 
         # HEALTH CHECK ENDPOINT
-        self._server = QuartServer(config)
-
-        # REDIS DATA STORAGE
-        self._redis_cache_client = redis.Redis(host=config.REDIS_CACHE["host"], port=6379, decode_responses=True)
-        self._redis_cache_client.ping()
+        self._server = HealthServer(HealthConfig(port=config.QUART_CONFIG["port"]))
 
         # SCHEDULER
         self._scheduler = AsyncIOScheduler(timezone=timezone(config.TIMEZONE))
 
         # EVENT BUS
-        self._publisher = NATSClient(config, logger=self._logger)
-        self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
-        self._event_bus.set_producer(self._publisher)
+        redis = Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
+        redis.ping()
+        tmp_redis_storage = RedisStorage(storage_client=redis)
+        self._nats_client = Client(temp_payload_storage=tmp_redis_storage)
 
         # REPOSITORIES
-        self._storage_repository = StorageRepository(config, self._logger, self._redis_cache_client)
-        self._notifications_repository = NotificationsRepository(self._event_bus)
-        self._bruin_repository = BruinRepository(self._event_bus, self._logger, config, self._notifications_repository)
-        self._new_tagged_emails_repository = NewTaggedEmailsRepository(
-            self._logger,
-            config,
-            self._storage_repository,
-        )
-        self._new_tickets_repository = NewCreatedTicketsRepository(
-            self._logger,
-            config,
-            self._storage_repository,
-        )
+        redis_cache = Redis(host=config.REDIS_CACHE["host"], port=6379, decode_responses=True)
+        redis_cache.ping()
+        self._storage_repository = StorageRepository(config, redis_cache)
+        self._notifications_repository = NotificationsRepository(self._nats_client)
+        self._bruin_repository = BruinRepository(self._nats_client, config, self._notifications_repository)
+        self._new_tagged_emails_repository = NewTaggedEmailsRepository(config, self._storage_repository)
+        self._new_tickets_repository = NewCreatedTicketsRepository(config, self._storage_repository)
         self._repair_ticket_repository = RepairTicketKreRepository(
-            self._event_bus, self._logger, config, self._notifications_repository
+            self._nats_client, config, self._notifications_repository
         )
         # RPCs
         append_note_to_ticket_rpc = AppendNoteToTicketRpc(
-            event_bus=self._event_bus,
-            logger=self._logger,
-            timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"],
+            _nats_client=self._nats_client,
+            _timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"],
         )
         get_asset_topics_rpc = GetAssetTopicsRpc(
-            event_bus=self._event_bus,
-            logger=self._logger,
-            timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"],
+            _nats_client=self._nats_client,
+            _timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"],
         )
         upsert_outage_ticket_rpc = UpsertOutageTicketRpc(
-            event_bus=self._event_bus,
-            logger=self._logger,
-            timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"],
+            _nats_client=self._nats_client,
+            _timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"],
         )
         subscribe_user_rpc = SubscribeUserRpc(
-            event_bus=self._event_bus,
-            logger=self._logger,
-            timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"],
+            _nats_client=self._nats_client,
+            _timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"],
         )
 
         # ACTIONS
         self._new_created_tickets_feedback = NewCreatedTicketsFeedback(
-            self._event_bus,
-            self._logger,
+            self._nats_client,
             self._scheduler,
             config,
             self._new_tickets_repository,
@@ -125,16 +126,14 @@ class Container:
             self._bruin_repository,
         )
         self._new_closed_tickets_feedback = NewClosedTicketsFeedback(
-            self._event_bus,
-            self._logger,
+            self._nats_client,
             self._scheduler,
             config,
             self._repair_ticket_repository,
             self._bruin_repository,
         )
         self._repair_tickets_monitor = RepairTicketsMonitor(
-            self._event_bus,
-            self._logger,
+            self._nats_client,
             self._scheduler,
             config,
             self._bruin_repository,
@@ -147,12 +146,14 @@ class Container:
         )
 
     async def start_server(self):
-        await self._server.run_server()
+        await self._server.run()
 
     async def _start(self):
         self._start_prometheus_metrics_server()
 
-        await self._event_bus.connect()
+        conn = Connection(servers=config.NATS_CONFIG["servers"])
+        await self._nats_client.connect(**asdict(conn))
+
         await self._new_created_tickets_feedback.start_created_ticket_feedback(exec_on_start=True)
         await self._new_closed_tickets_feedback.start_closed_ticket_feedback(exec_on_start=True)
         await self._repair_tickets_monitor.start_repair_tickets_monitor(exec_on_start=True)

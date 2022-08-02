@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from application.actions.new_created_tickets_feedback import NewCreatedTicketsFeedback
-from asynctest import CoroutineMock
-from config import testconfig as config
 from shortuuid import uuid
+
+from application.actions.new_created_tickets_feedback import NewCreatedTicketsFeedback
+from config import testconfig as config
 
 uuid_ = uuid()
 uuid_mock = patch("application.actions.new_created_tickets_feedback.uuid", return_value=uuid_)
@@ -15,7 +15,6 @@ class TestNewCreatedTicketsFeedback:
     def instance_test(
         self,
         event_bus,
-        logger,
         scheduler,
         new_created_tickets_repository,
         repair_ticket_kre_repository,
@@ -23,7 +22,6 @@ class TestNewCreatedTicketsFeedback:
     ):
         new_created_tickets_feedback = NewCreatedTicketsFeedback(
             event_bus,
-            logger,
             scheduler,
             config,
             new_created_tickets_repository,
@@ -32,7 +30,6 @@ class TestNewCreatedTicketsFeedback:
         )
 
         assert new_created_tickets_feedback._event_bus is event_bus
-        assert new_created_tickets_feedback._logger is logger
         assert new_created_tickets_feedback._scheduler is scheduler
         assert new_created_tickets_feedback._config is config
         assert new_created_tickets_feedback._new_created_tickets_repository is new_created_tickets_repository
@@ -72,7 +69,6 @@ class TestNewCreatedTicketsFeedback:
 
         new_created_tickets_feedback._check_error(error_code, ticket_id, email_id)
 
-        new_created_tickets_repository.delete_ticket.assert_called_once_with(email_id, ticket_id)
         new_created_tickets_repository.delete_ticket_error_counter.assert_called_once_with(ticket_id, error_code)
 
     @pytest.mark.asyncio
@@ -94,7 +90,7 @@ class TestNewCreatedTicketsFeedback:
         site_map = {"1234": "site_id"}
 
         rta_response = make_rpc_response(status=200, body={"success": True})
-        get_site_map_mock = CoroutineMock(return_value=site_map)
+        get_site_map_mock = AsyncMock(return_value=site_map)
 
         new_created_tickets_feedback._bruin_repository = Mock()
         new_created_tickets_feedback._new_created_tickets_repository = Mock()
@@ -102,12 +98,12 @@ class TestNewCreatedTicketsFeedback:
         new_created_tickets_feedback._get_site_map_for_ticket = get_site_map_mock
 
         rta_repository = new_created_tickets_feedback._rta_repository
-        rta_repository.save_created_ticket_feedback = CoroutineMock(return_value=rta_response)
+        rta_repository.save_created_ticket_feedback = AsyncMock(return_value=rta_response)
 
         new_created_tickets_repository = new_created_tickets_feedback._new_created_tickets_repository
 
         bruin_repository = new_created_tickets_feedback._bruin_repository
-        bruin_repository.get_single_ticket_info_with_service_numbers = CoroutineMock(return_value=ticket_response)
+        bruin_repository.get_single_ticket_info_with_service_numbers = AsyncMock(return_value=ticket_response)
 
         await new_created_tickets_feedback._save_created_ticket_feedback(email_data, ticket_input)
 
@@ -127,7 +123,7 @@ class TestNewCreatedTicketsFeedback:
         new_created_tickets_feedback._bruin_repository = Mock()
         new_created_tickets_feedback._new_created_tickets_repository = Mock()
         bruin_repository = new_created_tickets_feedback._bruin_repository
-        bruin_repository.get_single_ticket_info_with_service_numbers = CoroutineMock(return_value=response)
+        bruin_repository.get_single_ticket_info_with_service_numbers = AsyncMock(return_value=response)
         new_created_tickets_feedback._new_created_tickets_repository.increase_ticket_error_counter.return_value = 1000
 
         await new_created_tickets_feedback._save_created_ticket_feedback(email_data, ticket_data)
@@ -144,7 +140,7 @@ class TestNewCreatedTicketsFeedback:
         bruin_response = make_rpc_response(status=200, body={"site_id": 1234})
 
         bruin_repository_mock = Mock()
-        bruin_repository_mock.verify_service_number_information = CoroutineMock(return_value=bruin_response)
+        bruin_repository_mock.verify_service_number_information = AsyncMock(return_value=bruin_response)
         new_created_tickets_feedback._bruin_repository = bruin_repository_mock
 
         results = await new_created_tickets_feedback._get_site_map_for_ticket(client_id, service_numbers)
@@ -159,7 +155,7 @@ class TestNewCreatedTicketsFeedback:
         bruin_response = make_rpc_response(status=400, body="Error")
 
         bruin_repository_mock = Mock()
-        bruin_repository_mock.verify_service_number_information = CoroutineMock(return_value=bruin_response)
+        bruin_repository_mock.verify_service_number_information = AsyncMock(return_value=bruin_response)
 
         results = await new_created_tickets_feedback._get_site_map_for_ticket(client_id, service_numbers)
 

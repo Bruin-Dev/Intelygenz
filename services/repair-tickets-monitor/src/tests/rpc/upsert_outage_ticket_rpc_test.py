@@ -1,14 +1,22 @@
-import logging
 from http import HTTPStatus
-from logging import Logger
 from typing import Callable
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
-from application.rpc import RpcLogger, RpcRequest, RpcResponse
-from application.rpc.upsert_outage_ticket_rpc import *
-from asynctest import CoroutineMock
-from igz.packages.eventbus.eventbus import EventBus
+from framework.nats.client import Client as NatsClient
 from pytest import fixture, mark, raises
+
+from application.domain.asset import AssetId
+from application.rpc import RpcError, RpcFailedError, RpcRequest, RpcResponse
+from application.rpc.upsert_outage_ticket_rpc import (
+    BRUIN_UPDATED_STATUS,
+    MULTIPLE_CLIENTS_MSG,
+    MULTIPLE_SITES_MSG,
+    RequestBody,
+    TicketContact,
+    UpsertedStatus,
+    UpsertedTicket,
+    UpsertOutageTicketRpc,
+)
 
 
 class TestUpsertOutageTicketRpc:
@@ -35,7 +43,7 @@ class TestUpsertOutageTicketRpc:
                 raise RpcFailedError(request=request, response=RpcResponse(status=HTTPStatus.BAD_REQUEST))
 
         rpc = make_upsert_outage_ticket_rpc()
-        rpc.send = CoroutineMock(side_effect=side_effect)
+        rpc.send = AsyncMock(side_effect=side_effect)
 
         subject = await rpc(asset_ids=asset_ids, contact_email=contact_email)
 
@@ -66,7 +74,7 @@ class TestUpsertOutageTicketRpc:
                 raise RpcFailedError(request=request, response=RpcResponse(status=HTTPStatus.BAD_REQUEST))
 
         rpc = make_upsert_outage_ticket_rpc()
-        rpc.send = CoroutineMock(side_effect=side_effect)
+        rpc.send = AsyncMock(side_effect=side_effect)
 
         subject = await rpc(asset_ids=asset_ids, contact_email=contact_email)
 
@@ -94,7 +102,7 @@ class TestUpsertOutageTicketRpc:
     async def empty_bodies_raise_a_proper_error_test(self, make_upsert_outage_ticket_rpc, make_asset_id):
         # given
         rpc = make_upsert_outage_ticket_rpc()
-        rpc.send = CoroutineMock(return_value=RpcResponse(status=HTTPStatus.OK, body=None))
+        rpc.send = AsyncMock(return_value=RpcResponse(status=HTTPStatus.OK, body=None))
 
         with raises(RpcFailedError):
             await rpc(asset_ids=[make_asset_id()], contact_email="any")
@@ -103,7 +111,7 @@ class TestUpsertOutageTicketRpc:
     async def non_int_bodies_raise_a_proper_error_test(self, make_upsert_outage_ticket_rpc, make_asset_id):
         # given
         rpc = make_upsert_outage_ticket_rpc()
-        rpc.send = CoroutineMock(return_value=RpcResponse(status=HTTPStatus.OK, body="non_int"))
+        rpc.send = AsyncMock(return_value=RpcResponse(status=HTTPStatus.OK, body="non_int"))
 
         with raises(RpcFailedError):
             await rpc(asset_ids=[make_asset_id()], contact_email="any")
@@ -112,7 +120,7 @@ class TestUpsertOutageTicketRpc:
     async def other_statuses_raise_a_proper_error_test(self, make_upsert_outage_ticket_rpc, make_asset_id):
         # given
         rpc = make_upsert_outage_ticket_rpc()
-        rpc.send = CoroutineMock(
+        rpc.send = AsyncMock(
             side_effect=RpcFailedError(
                 request=RpcRequest.construct(), response=RpcResponse(status=HTTPStatus.BAD_REQUEST)
             )
@@ -125,13 +133,9 @@ class TestUpsertOutageTicketRpc:
 @fixture
 def make_upsert_outage_ticket_rpc() -> Callable[..., UpsertOutageTicketRpc]:
     def builder(
-        event_bus: EventBus = Mock(EventBus),
-        logger: Logger = logging.getLogger(),
+        event_bus: NatsClient = Mock(NatsClient),
         timeout: int = hash("any_timeout"),
     ):
-        rpc = UpsertOutageTicketRpc(event_bus, logger, timeout)
-        rpc.start = Mock(return_value=(RpcRequest(request_id="a_request_id"), Mock(RpcLogger)))
-        rpc.send = CoroutineMock()
-        return rpc
+        return UpsertOutageTicketRpc(event_bus, timeout)
 
     return builder

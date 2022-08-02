@@ -1,8 +1,12 @@
+import logging
+from dataclasses import dataclass, field
 from http import HTTPStatus
 
-from application.rpc import Rpc, RpcFailedError
-from dataclasses import dataclass, field
 from pydantic import BaseModel, Field
+
+from application.rpc import Rpc, RpcFailedError, RpcRequest
+
+log = logging.getLogger(__name__)
 
 NATS_TOPIC = "bruin.subscribe.user"
 SUBSCRIPTION_TYPE = "NotesAndMilestones"
@@ -10,7 +14,7 @@ SUBSCRIPTION_TYPE = "NotesAndMilestones"
 
 @dataclass
 class SubscribeUserRpc(Rpc):
-    topic: str = field(init=False, default=NATS_TOPIC)
+    _topic: str = field(init=False, default=NATS_TOPIC)
 
     async def __call__(self, ticket_id: str, user_email: str) -> bool:
         """
@@ -26,14 +30,13 @@ class SubscribeUserRpc(Rpc):
         :param user_email: the User being subscribed email
         :return if the User was subscribed or not
         """
-        request, logger = self.start()
-        logger.debug(f"__call__(ticket_id={ticket_id}, user_email=**)")
-        request.body = RequestBody(ticket_id=ticket_id, user_email=user_email)
+        log.debug(f"__call__(ticket_id={ticket_id}, user_email=**)")
+        request = RpcRequest(body=RequestBody(ticket_id=ticket_id, user_email=user_email))
 
         try:
             await self.send(request)
 
-            logger.debug(f"__call__() [OK]")
+            log.debug(f"__call__() [OK]")
             return True
 
         except RpcFailedError as error:

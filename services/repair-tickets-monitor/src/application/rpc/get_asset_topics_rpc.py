@@ -1,16 +1,20 @@
+import logging
+from dataclasses import dataclass, field
 from typing import List
 
-from application.domain.asset import AssetId, Topic
-from application.rpc import Rpc, RpcFailedError
-from dataclasses import dataclass, field
 from pydantic import BaseModel, Field, ValidationError, validator
+
+from application.domain.asset import AssetId, Topic
+from application.rpc import Rpc, RpcFailedError, RpcRequest
+
+log = logging.getLogger(__name__)
 
 NATS_TOPIC = "bruin.get.asset.topics"
 
 
 @dataclass
 class GetAssetTopicsRpc(Rpc):
-    topic: str = field(init=False, default=NATS_TOPIC)
+    _topic: str = field(init=False, default=NATS_TOPIC)
 
     async def __call__(self, asset_id: AssetId) -> List[Topic]:
         """
@@ -20,21 +24,25 @@ class GetAssetTopicsRpc(Rpc):
         :param asset_id: an Asset Id
         :return: a list of recommended Topics
         """
-        request, logger = self.start()
-        logger.debug(f"__call__(asset_id={asset_id})")
+        log.debug(f"__call__(asset_id={asset_id})")
 
-        request.body = RequestBody(client_id=asset_id.client_id, service_number=asset_id.service_number)
+        request = RpcRequest(body=RequestBody(client_id=asset_id.client_id, service_number=asset_id.service_number))
         response = await self.send(request)
 
         try:
             body = ResponseBody.parse_obj(response.body)
             topics = [Topic(call_type=item.call_type, category=item.category) for item in body.call_types]
 
-            logger.debug(f"__call__(): topics={topics}, response={response.body}")
+            log.debug(f"__call__(): topics={topics}, response={response.body}")
             return topics
 
         except ValidationError as error:
             raise RpcFailedError(request=request, response=response) from error
+
+
+class ResponseCallType(BaseModel):
+    call_type: str = Field(alias="callType")
+    category: str
 
 
 class RequestBody(BaseModel):
@@ -43,7 +51,7 @@ class RequestBody(BaseModel):
 
 
 class ResponseBody(BaseModel):
-    call_types: List["ResponseCallType"] = Field(alias="callTypes")
+    call_types: List[ResponseCallType] = Field(alias="callTypes")
 
     @validator("call_types", pre=True)
     def only_valid_items(cls, v):
@@ -55,12 +63,3 @@ class ResponseBody(BaseModel):
                 pass
 
         return valid_items
-
-
-class ResponseCallType(BaseModel):
-    call_type: str = Field(alias="callType")
-    category: str
-
-
-# Resolve forward refs for pydantic
-ResponseBody.update_forward_refs()

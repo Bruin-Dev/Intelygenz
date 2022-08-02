@@ -1,11 +1,13 @@
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
+from logging import Logger
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from application.actions.new_closed_tickets_feedback import NewClosedTicketsFeedback
-from asynctest import CoroutineMock
-from config import testconfig as config
 from shortuuid import uuid
+
+from application import actions
+from application.actions.new_closed_tickets_feedback import NewClosedTicketsFeedback
+from config import testconfig as config
 
 uuid_ = uuid()
 uuid_mock = patch("application.actions.new_closed_tickets_feedback.uuid", return_value=uuid_)
@@ -38,13 +40,12 @@ def ticket_created_human(make_ticket_decamelized):
 
 
 class TestNewClosedTicketsFeedback:
-    def instance_test(self, event_bus, logger, scheduler, repair_ticket_kre_repository, bruin_repository):
+    def instance_test(self, event_bus, scheduler, repair_ticket_kre_repository, bruin_repository):
         new_closed_tickets_feedback_instance = NewClosedTicketsFeedback(
-            event_bus, logger, scheduler, config, repair_ticket_kre_repository, bruin_repository
+            event_bus, scheduler, config, repair_ticket_kre_repository, bruin_repository
         )
 
         assert new_closed_tickets_feedback_instance._event_bus is event_bus
-        assert new_closed_tickets_feedback_instance._logger is logger
         assert new_closed_tickets_feedback_instance._scheduler is scheduler
         assert new_closed_tickets_feedback_instance._config is config
         assert new_closed_tickets_feedback_instance._rta_repository is repair_ticket_kre_repository
@@ -93,7 +94,7 @@ class TestNewClosedTicketsFeedback:
         bruin_response = {"status": 200, "body": [ticket_created_ai]}
 
         bruin_repository = Mock()
-        bruin_repository.get_closed_tickets_with_creation_date_limit = CoroutineMock(return_value=bruin_response)
+        bruin_repository.get_closed_tickets_with_creation_date_limit = AsyncMock(return_value=bruin_response)
         new_closed_tickets_feedback._bruin_repository = bruin_repository
 
         tickets = await new_closed_tickets_feedback.get_closed_tickets_created_during_last_3_days()
@@ -105,7 +106,7 @@ class TestNewClosedTicketsFeedback:
         bruin_response = {"status": 500, "body": "Error"}
 
         bruin_repository = Mock()
-        bruin_repository.get_closed_tickets_with_creation_date_limit = CoroutineMock(return_value=bruin_response)
+        bruin_repository.get_closed_tickets_with_creation_date_limit = AsyncMock(return_value=bruin_response)
         new_closed_tickets_feedback._bruin_repository = bruin_repository
 
         tickets = await new_closed_tickets_feedback.get_closed_tickets_created_during_last_3_days()
@@ -116,8 +117,8 @@ class TestNewClosedTicketsFeedback:
     async def run_closed_tickets_polling__ok_test(self, new_closed_tickets_feedback, ticket_created_ai):
         tickets = [ticket_created_ai]
 
-        get_tickets_mock = CoroutineMock(return_value=tickets)
-        save_tickets_mock = CoroutineMock(return_value=None)
+        get_tickets_mock = AsyncMock(return_value=tickets)
+        save_tickets_mock = AsyncMock(return_value=None)
         new_closed_tickets_feedback.get_closed_tickets_created_during_last_3_days = get_tickets_mock
         new_closed_tickets_feedback._save_closed_ticket_feedback = save_tickets_mock
 
@@ -134,11 +135,11 @@ class TestNewClosedTicketsFeedback:
         kre_response = {"status": 200, "body": {"success": True}}
 
         bruin_repository = Mock()
-        bruin_repository.get_status_and_cancellation_reasons = CoroutineMock(return_value=bruin_response)
+        bruin_repository.get_status_and_cancellation_reasons = AsyncMock(return_value=bruin_response)
         new_closed_tickets_feedback._bruin_repository = bruin_repository
 
         repair_ticket_kre_repository = Mock()
-        repair_ticket_kre_repository.save_closed_ticket_feedback = CoroutineMock(return_value=kre_response)
+        repair_ticket_kre_repository.save_closed_ticket_feedback = AsyncMock(return_value=kre_response)
         new_closed_tickets_feedback._rta_repository = repair_ticket_kre_repository
 
         await new_closed_tickets_feedback._save_closed_ticket_feedback(ticket_created_ai)
@@ -158,14 +159,15 @@ class TestNewClosedTicketsFeedback:
         bruin_response = {"status": 500, "body": "Error"}
 
         bruin_repository = Mock()
-        bruin_repository.get_status_and_cancellation_reasons = CoroutineMock(return_value=bruin_response)
+        bruin_repository.get_status_and_cancellation_reasons = AsyncMock(return_value=bruin_response)
         new_closed_tickets_feedback._bruin_repository = bruin_repository
 
         logger = Mock()
-        new_closed_tickets_feedback._logger = logger
+        actions.new_closed_tickets_feedback.log = logger
 
         repair_ticket_kre_repository = Mock()
-        repair_ticket_kre_repository.save_closed_ticket_feedback = CoroutineMock()
+        repair_ticket_kre_repository.save_closed_ticket_feedback = AsyncMock()
+        new_closed_tickets_feedback.log = Mock(Logger)
         new_closed_tickets_feedback._rta_repository = repair_ticket_kre_repository
 
         await new_closed_tickets_feedback._save_closed_ticket_feedback(ticket_created_ai)
@@ -182,14 +184,14 @@ class TestNewClosedTicketsFeedback:
         kre_response = {"status": 500, "body": "Error"}
 
         bruin_repository = Mock()
-        bruin_repository.get_status_and_cancellation_reasons = CoroutineMock(return_value=bruin_response)
+        bruin_repository.get_status_and_cancellation_reasons = AsyncMock(return_value=bruin_response)
         new_closed_tickets_feedback._bruin_repository = bruin_repository
 
         logger = Mock()
-        new_closed_tickets_feedback._logger = logger
+        actions.new_closed_tickets_feedback.log = logger
 
         repair_ticket_kre_repository = Mock()
-        repair_ticket_kre_repository.save_closed_ticket_feedback = CoroutineMock(return_value=kre_response)
+        repair_ticket_kre_repository.save_closed_ticket_feedback = AsyncMock(return_value=kre_response)
         new_closed_tickets_feedback._rta_repository = repair_ticket_kre_repository
 
         await new_closed_tickets_feedback._save_closed_ticket_feedback(ticket_created_ai)

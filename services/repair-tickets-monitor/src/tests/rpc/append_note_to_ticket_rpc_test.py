@@ -1,14 +1,12 @@
-import logging
 from http import HTTPStatus
-from logging import Logger
 from typing import Callable
-from unittest.mock import ANY, Mock
+from unittest.mock import ANY, AsyncMock, Mock
 
-from application.rpc import RpcLogger, RpcRequest, RpcResponse
-from application.rpc.append_note_to_ticket_rpc import AppendNoteToTicketRpc, RequestBody
-from asynctest import CoroutineMock
-from igz.packages.eventbus.eventbus import EventBus
+from framework.nats.client import Client as NatsClient
 from pytest import fixture, mark
+
+from application.rpc import RpcRequest, RpcResponse
+from application.rpc.append_note_to_ticket_rpc import AppendNoteToTicketRpc, RequestBody
 
 
 class TestAppendNoteToTicket:
@@ -19,7 +17,7 @@ class TestAppendNoteToTicket:
         note = "any_note"
 
         rpc = make_append_note_to_ticket_rpc()
-        rpc.send = CoroutineMock()
+        rpc.send = AsyncMock()
 
         # when
         await rpc(ticket_id, note)
@@ -32,21 +30,14 @@ class TestAppendNoteToTicket:
     @mark.asyncio
     async def ok_responses_are_properly_handled_test(self, make_append_note_to_ticket_rpc):
         rpc = make_append_note_to_ticket_rpc()
-        rpc.send = CoroutineMock(return_value=RpcResponse(status=HTTPStatus.OK))
+        rpc.send = AsyncMock(return_value=RpcResponse(status=HTTPStatus.OK))
 
         assert await rpc("any_ticket_id", "any_note")
 
 
 @fixture
 def make_append_note_to_ticket_rpc() -> Callable[..., AppendNoteToTicketRpc]:
-    def builder(
-        event_bus: EventBus = Mock(EventBus),
-        logger: Logger = logging.getLogger(),
-        timeout: int = hash("any_timeout"),
-    ):
-        rpc = AppendNoteToTicketRpc(event_bus, logger, timeout)
-        rpc.start = Mock(return_value=(RpcRequest(request_id="a_request_id"), Mock(RpcLogger)))
-        rpc.send = CoroutineMock()
-        return rpc
+    def builder(event_bus: NatsClient = Mock(NatsClient), timeout: int = hash("any_timeout")):
+        return AppendNoteToTicketRpc(event_bus, timeout)
 
     return builder

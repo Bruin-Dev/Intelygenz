@@ -6,11 +6,10 @@ from config import testconfig as config
 
 
 class TestStorageRepository:
-    def instance_test(self, logger, redis):
-        storage_repo = StorageRepository(config, logger, redis)
+    def instance_test(self, redis):
+        storage_repo = StorageRepository(config, redis)
 
         assert storage_repo._config == config
-        assert storage_repo._logger == logger
         assert storage_repo._redis == redis
 
     def get_exist_test(self, storage_repository):

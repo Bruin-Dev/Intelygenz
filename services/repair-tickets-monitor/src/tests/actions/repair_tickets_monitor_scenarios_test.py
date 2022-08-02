@@ -1,13 +1,13 @@
 from http import HTTPStatus
 from typing import List
-from unittest.mock import ANY, Mock
+from unittest.mock import ANY, AsyncMock, Mock
+
+from pytest import fixture, mark
 
 from application.actions.repair_tickets_monitor import RepairTicketsMonitor
 from application.domain.asset import AssetId
 from application.rpc import RpcFailedError, RpcRequest, RpcResponse
-from asynctest import CoroutineMock
 from config import testconfig as config
-from pytest import fixture, mark
 from tests.actions.repair_tickets_monitor_scenarios import (
     RepairTicketsMonitorScenario,
     make_repair_tickets_monitor_scenarios,
@@ -37,10 +37,10 @@ async def repair_tickets_monitor_scenarios_test(
         else:
             raise RpcFailedError(request=RpcRequest.construct(), response=RpcResponse(status=HTTPStatus.BAD_REQUEST))
 
-    repair_tickets_monitor.append_note_to_ticket_rpc = CoroutineMock(side_effect=scenario.append_note_to_ticket_effect)
-    repair_tickets_monitor.get_asset_topics_rpc = CoroutineMock(side_effect=append_note_to_ticket_rpc)
-    repair_tickets_monitor.upsert_outage_ticket_rpc = CoroutineMock(side_effect=upsert_outage_ticket_rpc)
-    repair_ticket_kre_repository.get_email_inference = CoroutineMock(return_value=inference_data_for(scenario))
+    repair_tickets_monitor._append_note_to_ticket_rpc = AsyncMock(side_effect=scenario.append_note_to_ticket_effect)
+    repair_tickets_monitor._get_asset_topics_rpc = AsyncMock(side_effect=append_note_to_ticket_rpc)
+    repair_tickets_monitor._upsert_outage_ticket_rpc = AsyncMock(side_effect=upsert_outage_ticket_rpc)
+    repair_ticket_kre_repository.get_email_inference = AsyncMock(return_value=inference_data_for(scenario))
     mock_bruin_repository(bruin_repository, scenario)
 
     await repair_tickets_monitor._process_repair_email(make_email_tag_info())
@@ -63,9 +63,9 @@ async def repair_tickets_monitor_scenarios_test(
     for ticket_id in scenario.email_linked_to:
         bruin_repository.link_email_to_ticket.assert_any_await(ticket_id, ANY)
 
-    assert repair_tickets_monitor.append_note_to_ticket_rpc.await_count == len(scenario.global_note_added_to)
+    assert repair_tickets_monitor._append_note_to_ticket_rpc.await_count == len(scenario.global_note_added_to)
     for ticket_id in scenario.global_note_added_to:
-        repair_tickets_monitor.append_note_to_ticket_rpc.assert_any_await(ticket_id, ANY)
+        repair_tickets_monitor._append_note_to_ticket_rpc.assert_any_await(ticket_id, ANY)
 
 
 @fixture
@@ -89,7 +89,6 @@ def inference_data_for(make_inference_data, make_filter_flags):
 @fixture(scope="function")
 def repair_tickets_monitor(
     event_bus,
-    logger,
     scheduler,
     bruin_repository,
     new_tagged_emails_repository,
@@ -98,20 +97,19 @@ def repair_tickets_monitor(
     make_inference_data,
 ) -> RepairTicketsMonitor:
     new_tagged_emails_repository.get_email_details = Mock(return_value=make_email())
-    repair_ticket_kre_repository.save_outputs = CoroutineMock()
+    repair_ticket_kre_repository.save_outputs = AsyncMock()
 
     return RepairTicketsMonitor(
         event_bus,
-        logger,
         scheduler,
         config,
         bruin_repository,
         new_tagged_emails_repository,
         repair_ticket_kre_repository,
-        CoroutineMock(),
-        CoroutineMock(),
-        CoroutineMock(),
-        CoroutineMock(),
+        AsyncMock(),
+        AsyncMock(),
+        AsyncMock(),
+        AsyncMock(),
     )
 
 
@@ -135,7 +133,7 @@ def mock_bruin_repository(bruin_repository, scenario: RepairTicketsMonitorScenar
         else:
             return {"status": 400}
 
-    bruin_repository.verify_service_number_information = CoroutineMock(side_effect=verify_service_number_information)
-    bruin_repository.get_single_ticket_basic_info = CoroutineMock(side_effect=get_single_ticket_basic_info)
-    bruin_repository.get_existing_tickets_with_service_numbers = CoroutineMock(return_value={"status": 200, "body": []})
-    bruin_repository.link_email_to_ticket = CoroutineMock(return_value=scenario.link_email_to_ticket_response)
+    bruin_repository.verify_service_number_information = AsyncMock(side_effect=verify_service_number_information)
+    bruin_repository.get_single_ticket_basic_info = AsyncMock(side_effect=get_single_ticket_basic_info)
+    bruin_repository.get_existing_tickets_with_service_numbers = AsyncMock(return_value={"status": 200, "body": []})
+    bruin_repository.link_email_to_ticket = AsyncMock(return_value=scenario.link_email_to_ticket_response)

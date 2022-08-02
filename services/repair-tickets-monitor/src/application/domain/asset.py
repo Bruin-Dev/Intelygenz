@@ -1,6 +1,5 @@
-from typing import List
-
 from dataclasses import dataclass
+from typing import List
 
 
 class Assets(List["Asset"]):
@@ -38,7 +37,7 @@ class AssetId:
 @dataclass
 class Topic:
     """
-    Data structure that represents a Bruin topic.
+    Data structure that represents a Bruin _topic.
     """
 
     call_type: str

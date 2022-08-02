@@ -1,18 +1,28 @@
+import json
+import logging
+from dataclasses import dataclass
 from typing import Any, Dict, List
 
-from application.domain.repair_email_output import RepairEmailOutput
-from application.repositories import nats_error_response
-from application.repositories.repair_ticket_kre_repository_mapper import to_output_message
+from framework.nats.client import Client as NatsClient
 from shortuuid import uuid
 from tenacity import retry, stop_after_delay, wait_exponential
 
+from application.domain.repair_email_output import RepairEmailOutput
+from application.repositories import nats_error_response
+from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.repair_ticket_kre_repository_mapper import to_output_message
+from application.repositories.utils import to_json_bytes
 
+log = logging.getLogger(__name__)
+
+
+@dataclass
 class RepairTicketKreRepository:
-    def __init__(self, event_bus, logger, config, notifications_repository):
-        self._event_bus = event_bus
-        self._logger = logger
-        self._config = config
-        self._notifications_repository = notifications_repository
+    _event_bus: NatsClient
+    _config: Any
+    _notifications_repository: NotificationsRepository
+
+    def __post_init__(self):
         self._timeout = self._config.MONITOR_CONFIG["nats_request_timeout"]["kre_seconds"]
 
     async def get_email_inference(self, email_data: Dict[str, Any], tag_info: Dict[str, Any]):
@@ -35,12 +45,13 @@ class RepairTicketKreRepository:
         async def get_email_inference():
             err_msg = None
 
-            self._logger.info("email_id=%s Sending email data to get prediction", email_id)
+            log.info("email_id=%s Sending email data to get prediction", email_id)
             request_msg = {"request_id": uuid(), "body": payload}
             try:
-                response = await self._event_bus.rpc_request(
-                    "rta.prediction.request", request_msg, timeout=self._timeout
+                response = await self._event_bus.request(
+                    "rta.prediction.request", to_json_bytes(request_msg), timeout=self._timeout
                 )
+                response = json.loads(response.data)
 
             except Exception as e:
                 err_msg = f"An error occurred when sending emails to rta for email_id '{email_id}' -> {e}"
@@ -64,17 +75,17 @@ class RepairTicketKreRepository:
                     )
 
             if err_msg:
-                self._logger.error(err_msg)
+                log.error(err_msg)
                 await self._notifications_repository.send_slack_message(err_msg)
             else:
-                self._logger.info("email_id=%s Prediction request sent to rta", email_id)
+                log.info("email_id=%s Prediction request sent to rta", email_id)
 
             return response
 
         try:
             return await get_email_inference()
         except Exception as e:
-            self._logger.error("email_id=%s Error trying to get prediction from rta KRE %e", email_id, e)
+            log.error("email_id=%s Error trying to get prediction from rta KRE %e", email_id, e)
 
     async def save_outputs(self, output: RepairEmailOutput):
         @retry(
@@ -87,16 +98,17 @@ class RepairTicketKreRepository:
         async def save_outputs():
             request_id = uuid()
             request_msg = to_output_message(output)
-            self._logger.info(
+            log.info(
                 "request_id=%s email_id=%s Sending data to save output in repair-tickets-kre-bridge",
                 request_id,
                 output.email_id,
             )
 
             try:
-                response = await self._event_bus.rpc_request(
-                    "rta.save_outputs.request", request_msg, timeout=self._timeout
+                response = await self._event_bus.request(
+                    "rta.save_outputs.request", to_json_bytes(request_msg), timeout=self._timeout
                 )
+                response = json.loads(response.data)
 
             except Exception as exception:
                 err_msg = (
@@ -105,7 +117,7 @@ class RepairTicketKreRepository:
                     % (request_id, output.email_id, exception)
                 )
                 response = nats_error_response
-                self._logger.error(err_msg)
+                log.error(err_msg)
                 await self._notifications_repository.send_slack_message(err_msg)
                 return response
 
@@ -123,11 +135,11 @@ class RepairTicketKreRepository:
                         response_body,
                     )
                 )
-                self._logger.error(err_msg)
+                log.error(err_msg)
                 await self._notifications_repository.send_slack_message(err_msg)
                 return response
 
-            self._logger.info("request_id=%s email_id=%s Output saved", request_id, output.email_id)
+            log.info("request_id=%s email_id=%s Output saved", request_id, output.email_id)
             return response
 
         return await save_outputs()
@@ -144,7 +156,7 @@ class RepairTicketKreRepository:
         )
         async def save_created_ticket_feedback():
             err_msg = None
-            self._logger.info(f"Sending email and ticket data to save_created_tickets: {email_id}")
+            log.info(f"Sending email and ticket data to save_created_tickets: {email_id}")
             request_msg = {
                 "request_id": uuid(),
                 "body": {
@@ -158,9 +170,10 @@ class RepairTicketKreRepository:
                 },
             }
             try:
-                response = await self._event_bus.rpc_request(
-                    "rta.created_ticket_feedback.request", request_msg, timeout=self._timeout
+                response = await self._event_bus.request(
+                    "rta.created_ticket_feedback.request", to_json_bytes(request_msg), timeout=self._timeout
                 )
+                response = json.loads(response.data)
 
             except Exception as e:
                 err_msg = (
@@ -180,19 +193,17 @@ class RepairTicketKreRepository:
                     )
 
             if err_msg:
-                self._logger.error(err_msg)
+                log.error(err_msg)
                 await self._notifications_repository.send_slack_message(err_msg)
             else:
-                self._logger.info(
-                    f"SaveCreatedTicketFeedback request sent for email {email_id} and ticket {ticket_id} to RTA"
-                )
+                log.info(f"SaveCreatedTicketFeedback request sent for email {email_id} and ticket {ticket_id} to RTA")
 
             return response
 
         try:
             return await save_created_ticket_feedback()
         except Exception as e:
-            self._logger.error(
+            log.error(
                 f"Error trying to save_created tickets feedback to KRE "
                 f"[email_id='{email_id}', ticket_id='{ticket_id}']: {e}"
             )
@@ -208,7 +219,7 @@ class RepairTicketKreRepository:
         )
         async def save_closed_ticket_feedback():
             err_msg = None
-            self._logger.info("ticket_id=%s Sending ticket data to save_closed_tickets", ticket_id)
+            log.info("ticket_id=%s Sending ticket data to save_closed_tickets", ticket_id)
             request_msg = {
                 "request_id": uuid(),
                 "body": {
@@ -219,9 +230,10 @@ class RepairTicketKreRepository:
                 },
             }
             try:
-                response = await self._event_bus.rpc_request(
-                    "rta.closed_ticket_feedback.request", request_msg, timeout=self._timeout
+                response = await self._event_bus.request(
+                    "rta.closed_ticket_feedback.request", to_json_bytes(request_msg), timeout=self._timeout
                 )
+                response = json.loads(response.data)
 
             except Exception as e:
                 err_msg = f'An error occurred when sending tickets to RTA for ticket_id "{ticket_id} {e}"'
@@ -238,16 +250,14 @@ class RepairTicketKreRepository:
                     )
 
             if err_msg:
-                self._logger.error(err_msg)
+                log.error(err_msg)
                 await self._notifications_repository.send_slack_message(err_msg)
             else:
-                self._logger.info("ticket_id=%s Save closed request sent to RTA", ticket_id)
+                log.info("ticket_id=%s Save closed request sent to RTA", ticket_id)
 
             return response
 
         try:
             return await save_closed_ticket_feedback()
         except Exception as e:
-            self._logger.error(
-                f"Error trying to save closed tickets feedback to KRE " f"[ticket_id='{ticket_id}']: {e}"
-            )
+            log.error(f"Error trying to save closed tickets feedback to KRE " f"[ticket_id='{ticket_id}']: {e}")

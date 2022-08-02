@@ -5,13 +5,11 @@ from config import testconfig as config
 
 
 class TestNewTaggedEmailsRepository:
-    def instance_test(self, logger, notifications_repository, storage_repository):
+    def instance_test(self, storage_repository):
         new_tagged_emails_repository = NewTaggedEmailsRepository(
-            logger,
             config,
             storage_repository,
         )
-        assert new_tagged_emails_repository._logger == logger
         assert new_tagged_emails_repository._config == config
         assert new_tagged_emails_repository._storage_repository == storage_repository
 
