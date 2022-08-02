@@ -1,37 +1,35 @@
 import asyncio
 import time
 from datetime import datetime
+from logging import Logger
+from typing import Any
 
+from application.repositories.bruin_repository import BruinRepository
+from application.repositories.email_tagger_repository import EmailTaggerRepository
+from application.repositories.new_emails_repository import NewEmailsRepository
+from application.repositories.predicted_tags_repository import PredictedTagsRepository
 from apscheduler.jobstores.base import ConflictingIdError
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.util import undefined
-from framework.storage.model.email_storage import Email
+from dataclasses import dataclass
+from framework.storage.model import RepairParentEmailStorage
+from igz.packages.eventbus.eventbus import EventBus
 from pytz import timezone
 
 
+@dataclass
 class NewEmailsMonitor:
-    def __init__(
-            self,
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            predicted_tag_repository,
-            new_emails_repository,
-            repair_parent_email_storage,
-            repair_reply_email_storage,
-            email_tagger_repository,
-            bruin_repository,
-    ):
-        self._event_bus = event_bus
-        self._logger = logger
-        self._scheduler = scheduler
-        self._config = config
-        self._new_emails_repository = new_emails_repository
-        self._repair_parent_email_storage = repair_parent_email_storage
-        self._repair_reply_email_storage = repair_reply_email_storage
-        self._predicted_tag_repository = predicted_tag_repository
-        self._email_tagger_repository = email_tagger_repository
-        self._bruin_repository = bruin_repository
+    _event_bus: EventBus
+    _logger: Logger
+    _scheduler: AsyncIOScheduler
+    _config: Any
+    _predicted_tag_repository: PredictedTagsRepository
+    _new_emails_repository: NewEmailsRepository
+    _repair_parent_email_storage: RepairParentEmailStorage
+    _email_tagger_repository: EmailTaggerRepository
+    _bruin_repository: BruinRepository
+
+    def __post_init__(self):
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG["semaphores"]["new_emails_concurrent"])
 
     async def start_email_events_monitor(self, exec_on_start=False):
@@ -74,35 +72,26 @@ class NewEmailsMonitor:
         parent_id = email_data["email"].get("parent_id", None)
 
         async with self._semaphore:
-            # Checks if the current email is a reply, and saves it to the reply storage in that case
-            if parent_id is not None:
-                # Check if the given parent_id exists on the current parent email storage
-                email_parent_exists = self._repair_parent_email_storage.exists(parent_id) > 0
-
-                if email_parent_exists:
-                    # Save email as a reply email
-                    email = Email(
-                        email_id=email_data["email"]["email_id"],
-                        client_id=email_data["email"]["client_id"],
-                        date=email_data["email"]["date"],
-                        subject=email_data["email"]["subject"],
-                        body=email_data["email"]["body"],
-                        from_address=email_data["email"]["from_address"],
-                        to_address=email_data["email"]["to_address"],
-                        send_cc=email_data["email"].get("send_cc", []),
-                        parent_id=email_data["email"].get("parent_id", None),
-                        previous_id=email_data["email"].get("previous_email_id", None),
-                        tag=email_data["email"].get("tag", None),
-                    )
-
-                    self._repair_reply_email_storage.set(id=email_id, data=email,
-                                                         ttl_seconds=self._config.MONITOR_CONFIG[
-                                                             "reply_email_ttl"])
-
-            # Get tag from KRE
+            # KRE will fail if the mail is not a parent email, but currently KRE monitors the number of processed emails
+            # So, always get tag from KRE event if we know the mail is not a parent email.
             response = await self._email_tagger_repository.get_prediction(email_data)
             prediction = response.get("body")
             self._logger.info("email_id=%s - Got prediction %s", email_id, prediction)
+
+            # Once KRE was informed, we can make our own logic if the email is not a parent email
+            if parent_id:
+                parent = self._repair_parent_email_storage.find(parent_id)
+                if parent:
+                    self._logger.info("email_id=%s is a reply to email %s", email_id, parent_id)
+                    # Remove from email tagger namespace
+                    self._new_emails_repository.mark_complete(email_id)
+
+                    # add predicted tag to DB
+                    self._predicted_tag_repository.save_new_tag(email_id, parent.tag.type, parent.tag.probability)
+
+                return
+
+            # If the mail is a reply email, status won't be in the 200~300 range
             if response["status"] not in range(200, 300):
                 return
 

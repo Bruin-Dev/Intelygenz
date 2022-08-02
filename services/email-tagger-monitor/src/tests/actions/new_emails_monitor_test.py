@@ -1,13 +1,14 @@
 from datetime import datetime
-from unittest.mock import ANY, Mock, call, patch
+from unittest.mock import Mock, call, patch
 
 import pytest
 from application.actions import new_emails_monitor as new_emails_monitor_module
 from application.actions.new_emails_monitor import NewEmailsMonitor
 from asynctest import CoroutineMock
 from config import testconfig
-from framework.storage.model.email_storage import Email
 from shortuuid import uuid
+from tests import given
+from tests.framework.storage.model.email_storage_test import AnyEmail, AnyEmailTag
 
 uuid_ = uuid()
 uuid_mock = patch.object(new_emails_monitor_module, "uuid", return_value=uuid_)
@@ -23,7 +24,6 @@ class TestNewEmailsMonitor:
         predicted_tag_repository = Mock()
         new_emails_repository = Mock()
         repair_parent_email_storage = Mock()
-        repair_reply_email_storage = Mock()
         email_tagger_repository = Mock()
 
         new_emails_monitor = NewEmailsMonitor(
@@ -34,7 +34,6 @@ class TestNewEmailsMonitor:
             predicted_tag_repository,
             new_emails_repository,
             repair_parent_email_storage,
-            repair_reply_email_storage,
             email_tagger_repository,
             bruin_repository,
         )
@@ -57,7 +56,6 @@ class TestNewEmailsMonitor:
         bruin_repository = Mock()
         new_emails_repository = Mock()
         repair_parent_email_storage = Mock()
-        repair_reply_email_storage = Mock()
         email_tagger_repository = Mock()
         predicted_tag_repository = Mock()
         new_emails_monitor = NewEmailsMonitor(
@@ -68,7 +66,6 @@ class TestNewEmailsMonitor:
             predicted_tag_repository,
             new_emails_repository,
             repair_parent_email_storage,
-            repair_reply_email_storage,
             email_tagger_repository,
             bruin_repository,
         )
@@ -97,7 +94,6 @@ class TestNewEmailsMonitor:
         bruin_repository = Mock()
         new_emails_repository = Mock()
         repair_parent_email_storage = Mock()
-        repair_reply_email_storage = Mock()
         email_tagger_repository = Mock()
         predicted_tag_repository = Mock()
         new_emails_monitor = NewEmailsMonitor(
@@ -108,7 +104,6 @@ class TestNewEmailsMonitor:
             predicted_tag_repository,
             new_emails_repository,
             repair_parent_email_storage,
-            repair_reply_email_storage,
             email_tagger_repository,
             bruin_repository,
         )
@@ -156,7 +151,6 @@ class TestNewEmailsMonitor:
         bruin_repository = Mock()
         new_emails_repository = Mock()
         repair_parent_email_storage = Mock()
-        repair_reply_email_storage = Mock()
         email_tagger_repository = Mock()
         predicted_tag_repository = Mock()
         new_emails_monitor = NewEmailsMonitor(
@@ -167,7 +161,6 @@ class TestNewEmailsMonitor:
             predicted_tag_repository,
             new_emails_repository,
             repair_parent_email_storage,
-            repair_reply_email_storage,
             email_tagger_repository,
             bruin_repository,
         )
@@ -203,7 +196,6 @@ class TestNewEmailsMonitor:
         bruin_repository = Mock()
         new_emails_repository = Mock()
         repair_parent_email_storage = Mock()
-        repair_reply_email_storage = Mock()
         email_tagger_repository = Mock()
         predicted_tag_repository = Mock()
         new_emails_monitor = NewEmailsMonitor(
@@ -214,7 +206,6 @@ class TestNewEmailsMonitor:
             predicted_tag_repository,
             new_emails_repository,
             repair_parent_email_storage,
-            repair_reply_email_storage,
             email_tagger_repository,
             bruin_repository,
         )
@@ -252,32 +243,29 @@ class TestNewEmailsMonitor:
         predicted_tag_repository.save_new_tag.assert_called_once()
 
     @pytest.mark.asyncio
-    async def _process_new_reply_email_when_parent_id_exists_ok_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        bruin_repository = Mock()
+    async def _process_new_reply_email_when_parent_exists_ok_test(self):
         new_emails_repository = Mock()
         repair_parent_email_storage = Mock()
-        repair_reply_email_storage = Mock()
         email_tagger_repository = Mock()
         predicted_tag_repository = Mock()
+        bruin_repository = Mock()
         new_emails_monitor = NewEmailsMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
+            Mock(),
+            Mock(),
+            Mock(),
+            testconfig,
             predicted_tag_repository,
             new_emails_repository,
             repair_parent_email_storage,
-            repair_reply_email_storage,
             email_tagger_repository,
             bruin_repository,
         )
 
         email_id = "123456"
         parent_id = "654321"
+        parent_tag = "any_tag"
+        parent_probability = hash("any_probability")
+        parent_email = AnyEmail(id=parent_id, tag=AnyEmailTag(type=parent_tag, probability=parent_probability))
         email_data = {
             "email": {
                 "email_id": email_id,
@@ -292,64 +280,36 @@ class TestNewEmailsMonitor:
             }
         }
 
-        email_model = Email(
-            email_id=email_data["email"]["email_id"],
-            client_id=email_data["email"]["client_id"],
-            date=email_data["email"]["date"],
-            subject=email_data["email"]["subject"],
-            body=email_data["email"]["body"],
-            from_address=email_data["email"]["from_address"],
-            to_address=email_data["email"]["to_address"],
-            send_cc=email_data["email"].get("send_cc", []),
-            parent_id=email_data["email"].get("parent_id", None),
-            previous_id=email_data["email"].get("previous_email_id", None),
-            tag=email_data["email"].get("tag", None),
-        )
-        prediction_response = [
-            {"tag_id": "TEST", "probability": 0.77},
-            {"tag_id": "TEST2", "probability": 0.23},
-        ]
-        most_prob_tag_data = {"id": "TEST", "probability": 0.77}
-
-        new_emails_monitor._repair_parent_email_storage.exists.return_value = 1
-        new_emails_monitor._repair_reply_email_storage.set = Mock()
-        new_emails_monitor._new_emails_repository.mark_complete = Mock()
-        new_emails_monitor._email_tagger_repository.get_prediction = CoroutineMock(
-            return_value={"status": 200, "body": prediction_response}
-        )
-        new_emails_monitor.get_most_probable_tag_id = Mock(return_value=most_prob_tag_data)
-        new_emails_monitor._bruin_repository.post_email_tag = CoroutineMock(return_value={"status": 200, "body": "ok"})
+        repair_parent_email_storage.find = given(parent_id).returns(parent_email)
+        new_emails_repository.mark_complete = Mock()
+        predicted_tag_repository.save_new_tag = Mock()
+        email_tagger_repository.get_prediction = CoroutineMock(return_value={"status": 400})
+        bruin_repository.post_email_tag = Mock()
 
         await new_emails_monitor._process_new_email(email_data)
 
-        new_emails_monitor._repair_parent_email_storage.exists.assert_called_once_with(parent_id)
-        new_emails_monitor._repair_reply_email_storage.set.assert_called_once_with(
-            id=email_id, data=email_model, ttl_seconds=300
+        email_tagger_repository.get_prediction.assert_awaited_once_with(email_data)
+        new_emails_repository.mark_complete.assert_called_once_with(email_id)
+        predicted_tag_repository.save_new_tag.assert_called_once_with(
+            email_id, parent_email.tag.type, parent_email.tag.probability
         )
-        new_emails_monitor._new_emails_repository.mark_complete.assert_called_once_with(email_id)
-        new_emails_monitor._email_tagger_repository.get_prediction.assert_awaited_once_with(email_data)
+        bruin_repository.post_email_tag.assert_not_called()
 
     @pytest.mark.asyncio
-    async def _process_new_reply_email_when_parent_id_does_not_exist_ok_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        bruin_repository = Mock()
+    async def _process_new_reply_email_when_parent_does_not_exist_ok_test(self):
         new_emails_repository = Mock()
         repair_parent_email_storage = Mock()
-        repair_reply_email_storage = Mock()
         email_tagger_repository = Mock()
         predicted_tag_repository = Mock()
+        bruin_repository = Mock()
         new_emails_monitor = NewEmailsMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
+            Mock(),
+            Mock(),
+            Mock(),
+            testconfig,
             predicted_tag_repository,
             new_emails_repository,
             repair_parent_email_storage,
-            repair_reply_email_storage,
             email_tagger_repository,
             bruin_repository,
         )
@@ -365,32 +325,19 @@ class TestNewEmailsMonitor:
                 "date": "2021-01-01T08:00:00.001Z",
             }
         }
-        prediction_response = [
-            {"tag_id": "TEST", "probability": 0.77},
-            {"tag_id": "TEST2", "probability": 0.23},
-        ]
-        most_prob_tag_data = {"id": "TEST", "probability": 0.77}
 
-        new_emails_monitor._repair_parent_email_storage.exists.return_value = 0
-        new_emails_monitor._repair_reply_email_storage.set = Mock()
-        new_emails_monitor._email_tagger_repository.get_prediction = CoroutineMock(
-            return_value={"status": 200, "body": prediction_response}
-        )
-        new_emails_monitor.get_most_probable_tag_id = Mock(return_value=most_prob_tag_data)
-        new_emails_monitor._bruin_repository.post_email_tag = CoroutineMock(return_value={"status": 200, "body": "ok"})
-        new_emails_monitor._new_emails_repository.mark_complete = Mock()
+        repair_parent_email_storage.find = given(parent_id).returns(None)
+        new_emails_repository.mark_complete = Mock()
+        predicted_tag_repository.save_new_tag = Mock()
+        email_tagger_repository.get_prediction = CoroutineMock(return_value={"status": 400})
+        bruin_repository.post_email_tag = Mock()
 
         await new_emails_monitor._process_new_email(email_data)
 
-        new_emails_monitor._repair_parent_email_storage.exists.assert_called_once_with(parent_id)
-        new_emails_monitor._repair_reply_email_storage.set.assert_not_called()
-        new_emails_monitor._email_tagger_repository.get_prediction.assert_awaited_once_with(email_data)
-        new_emails_monitor._bruin_repository.post_email_tag.assert_awaited_once_with(
-            email_data["email"]["email_id"], prediction_response[0]["tag_id"]
-        )
-        new_emails_monitor._new_emails_repository.mark_complete.assert_called_once_with(email_id)
-
-        predicted_tag_repository.save_new_tag.assert_called_once()
+        email_tagger_repository.get_prediction.assert_awaited_once_with(email_data)
+        new_emails_repository.mark_complete.assert_not_called()
+        predicted_tag_repository.save_new_tag.assert_not_called()
+        bruin_repository.post_email_tag.assert_not_called()
 
     @pytest.mark.asyncio
     async def _process_new_email_non_2xx_get_prediction_status_test(self):
@@ -401,7 +348,6 @@ class TestNewEmailsMonitor:
         bruin_repository = Mock()
         new_emails_repository = Mock()
         repair_parent_email_storage = Mock()
-        repair_reply_email_storage = Mock()
         email_tagger_repository = Mock()
         predicted_tag_repository = Mock()
         new_emails_monitor = NewEmailsMonitor(
@@ -412,7 +358,6 @@ class TestNewEmailsMonitor:
             predicted_tag_repository,
             new_emails_repository,
             repair_parent_email_storage,
-            repair_reply_email_storage,
             email_tagger_repository,
             bruin_repository,
         )
@@ -448,7 +393,6 @@ class TestNewEmailsMonitor:
         bruin_repository = Mock()
         new_emails_repository = Mock()
         repair_parent_email_storage = Mock()
-        repair_reply_email_storage = Mock()
         email_tagger_repository = Mock()
         predicted_tag_repository = Mock()
         new_emails_monitor = NewEmailsMonitor(
@@ -459,7 +403,6 @@ class TestNewEmailsMonitor:
             predicted_tag_repository,
             new_emails_repository,
             repair_parent_email_storage,
-            repair_reply_email_storage,
             email_tagger_repository,
             bruin_repository,
         )
@@ -507,7 +450,6 @@ class TestNewEmailsMonitor:
         bruin_repository = Mock()
         new_emails_repository = Mock()
         repair_parent_email_storage = Mock()
-        repair_reply_email_storage = Mock()
         email_tagger_repository = Mock()
         predicted_tag_repository = Mock()
         new_emails_monitor = NewEmailsMonitor(
@@ -518,7 +460,6 @@ class TestNewEmailsMonitor:
             predicted_tag_repository,
             new_emails_repository,
             repair_parent_email_storage,
-            repair_reply_email_storage,
             email_tagger_repository,
             bruin_repository,
         )

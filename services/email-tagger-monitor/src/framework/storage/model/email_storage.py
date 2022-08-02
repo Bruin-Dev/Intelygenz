@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import List, Optional, Type
 
 from dataclasses import dataclass
@@ -7,32 +7,40 @@ from pydantic import BaseModel, Field
 
 
 class EmailMetadata(BaseModel):
-    utc_creation_datetime: datetime = Field(default_factory=lambda: datetime.utcnow)
+    # Internal datetimes need no timezone, but should remain utc datetimes
+    # lambda was used to be able to properly mock datetime @ unit tests
+    utc_creation_datetime: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 
 class EmailTag(BaseModel):
-    type: int
+    type: str
     probability: float
 
 
 class Email(BaseModel):
-    email_id: int
-    client_id: int
-    date: str
+    id: str
+    client_id: str
+    date: datetime
     subject: str
     body: str
-    from_address: str
-    to_address: List[str]
-    send_cc: List[str]
-    parent_id: Optional[int]
-    previous_id: Optional[int]
-    tag: Optional[EmailTag]
+    sender_address: str
+    recipient_addresses: List[str]
+    cc_addresses: List[str]
+    parent_id: Optional[str]
+    previous_id: Optional[str]
+    tag: EmailTag
     metadata: EmailMetadata = Field(default_factory=EmailMetadata)
 
 
 @dataclass
 class EmailStorage(ModelStorage[Email]):
     data_type: Type = Email
+
+    def store(self, email: Email, ttl_seconds: Optional[int] = None) -> bool:
+        return super().set(email.id, email, ttl_seconds)
+
+    def delete(self, email: Email) -> int:
+        return super().delete(email.id)
 
 
 @dataclass

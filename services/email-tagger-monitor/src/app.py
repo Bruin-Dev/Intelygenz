@@ -11,10 +11,10 @@ from application.repositories.notifications_repository import NotificationsRepos
 from application.repositories.predicted_tags_repository import PredictedTagsRepository
 from application.repositories.storage_repository import StorageRepository
 from application.repositories.utils_repository import UtilsRepository
-from framework.storage.model import RepairParentEmailStorage, RepairReplyEmailStorage
 from application.server.api_server import APIServer
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import config
+from framework.storage.model import RepairParentEmailStorage, RepairReplyEmailStorage
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.Logger.logger_client import LoggerClient
@@ -70,7 +70,6 @@ class Container:
             self._predicted_tag_repository,
             self._new_emails_repository,
             self._repair_parent_email_storage,
-            self._repair_reply_email_storage,
             self._email_tagger_repository,
             self._bruin_repository,
         )
