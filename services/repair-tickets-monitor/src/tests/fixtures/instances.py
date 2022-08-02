@@ -119,6 +119,8 @@ def repair_tickets_monitor(
         AsyncMock(),
         AsyncMock(),
         AsyncMock(),
+        AsyncMock(),
+        AsyncMock(),
     )
 
 

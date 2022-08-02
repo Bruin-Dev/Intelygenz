@@ -26,6 +26,14 @@ class Email:
     def comma_separated_cc_addresses(self) -> str:
         return ", ".join(self.cc_addresses) if self.cc_addresses else ""
 
+    @property
+    def is_parent_email(self) -> bool:
+        return self.parent is None
+
+    @property
+    def is_reply_email(self) -> bool:
+        return self.parent is not None
+
 
 class EmailStatus(IntEnum):
     NEW = auto()

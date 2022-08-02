@@ -27,6 +27,8 @@ from application.repositories.repair_ticket_kre_repository import RepairTicketKr
 from application.repositories.storage_repository import StorageRepository
 from application.rpc.append_note_to_ticket_rpc import AppendNoteToTicketRpc
 from application.rpc.get_asset_topics_rpc import GetAssetTopicsRpc
+from application.rpc.send_email_reply_rpc import SendEmailReplyRpc
+from application.rpc.set_email_status_rpc import SetEmailStatusRpc
 from application.rpc.subscribe_user_rpc import SubscribeUserRpc
 from application.rpc.upsert_outage_ticket_rpc import UpsertOutageTicketRpc
 from config import config
@@ -114,6 +116,16 @@ class Container:
         subscribe_user_rpc = SubscribeUserRpc(
             _nats_client=self._nats_client,
             _timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"],
+        )
+        set_email_status_rpc = SetEmailStatusRpc(
+            event_bus=self._event_bus,
+            logger=self._logger,
+            timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"],
+        )
+        send_email_reply_rpc = SendEmailReplyRpc(
+            event_bus=self._event_bus,
+            logger=self._logger,
+            timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"],
         )
 
         # ACTIONS

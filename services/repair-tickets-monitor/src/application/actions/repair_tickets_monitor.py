@@ -3,19 +3,13 @@ import logging
 import os
 import time
 from collections import defaultdict
-from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, DefaultDict, Dict, List, Set, Tuple
 
 import html2text
-from apscheduler.jobstores.base import ConflictingIdError
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.util import undefined
-from framework.nats.client import Client as NatsClient
-from pytz import timezone
-
+from application import resources
 from application.domain.asset import Asset, AssetId, Assets
-from application.domain.email import Email
+from application.domain.email import Email, EmailStatus
 from application.domain.repair_email_output import (
     CreateTicketsOutput,
     PotentialTicketsOutput,
@@ -30,8 +24,16 @@ from application.repositories.repair_ticket_kre_repository import RepairTicketKr
 from application.rpc import RpcError
 from application.rpc.append_note_to_ticket_rpc import AppendNoteToTicketRpc
 from application.rpc.get_asset_topics_rpc import GetAssetTopicsRpc
+from application.rpc.send_email_reply_rpc import SendEmailReplyRpc
+from application.rpc.set_email_status_rpc import SetEmailStatusRpc
 from application.rpc.subscribe_user_rpc import SubscribeUserRpc
 from application.rpc.upsert_outage_ticket_rpc import UpsertedStatus, UpsertOutageTicketRpc
+from apscheduler.jobstores.base import ConflictingIdError
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.util import undefined
+from dataclasses import dataclass
+from framework.nats.client import Client as NatsClient
+from pytz import timezone
 
 log = logging.getLogger(__name__)
 
@@ -64,6 +66,8 @@ class RepairTicketsMonitor:
     _get_asset_topics_rpc: GetAssetTopicsRpc
     _upsert_outage_ticket_rpc: UpsertOutageTicketRpc
     _subscribe_user_rpc: SubscribeUserRpc
+    _set_email_status_rpc: SetEmailStatusRpc
+    _send_email_reply_rpc: SendEmailReplyRpc
 
     def __post_init__(self):
         self._semaphore = asyncio.BoundedSemaphore(
@@ -390,7 +394,20 @@ class RepairTicketsMonitor:
                         output.tickets_could_be_updated.append(TicketOutput(ticket_id=ticket.id))
 
             if not service_number_site_map and not output.tickets_updated and not output.tickets_could_be_updated:
-                output.tickets_cannot_be_created.append(TicketOutput(reason="No validated service numbers"))
+                self._logger.info(f"email_id={email.id} No service number nor ticket actions triggered")
+                auto_reply_reason = "No validated service numbers"
+                if email.is_parent_email and is_actionable and not output.validated_tickets:
+                    self._logger.info(f"email_id={email.id} Sending auto-reply")
+                    auto_reply_reason = "No validated service numbers. Sent auto-reply"
+                    await self._set_email_status_rpc(email.id, EmailStatus.AIQ)
+                    await self._send_email_reply_rpc(email.id, resources.AUTO_REPLY_BODY)
+                    self._new_tagged_emails_repository.save_parent_email(email.parent)
+                elif email.is_reply_email:
+                    self._logger.info(f"email_id={email.id} Restoring parent_email {email.parent.id}")
+                    await self._set_email_status_rpc(email.parent.id, EmailStatus.NEW)
+                    self._new_tagged_emails_repository.remove_parent_email(email.parent)
+
+                output.tickets_cannot_be_created.append(TicketOutput(reason=auto_reply_reason))
 
             log.info("email_id=%s output_send_to_save=%s", email.id, output)
             await self._save_output(output)

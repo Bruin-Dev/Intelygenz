@@ -3,16 +3,18 @@ import json
 import os
 from collections import defaultdict
 from datetime import datetime
-from unittest.mock import ANY, AsyncMock, Mock, patch
+from unittest.mock import ANY, AsyncMock, Mock, call, patch
 
 import html2text
 import pytest
+from framework.testing import case, given
 
 from application.actions.repair_tickets_monitor import RepairTicketsMonitor, get_feedback_not_created_due_cancellations
 from application.domain.asset import Topic
 from application.domain.repair_email_output import CreateTicketsOutput, RepairEmailOutput, TicketOutput
 from application.domain.ticket import Ticket, TicketStatus
 from application.exceptions import ResponseException
+from application.repositories.bruin_repository import BruinRepository
 from application.rpc import RpcError
 from application.rpc.upsert_outage_ticket_rpc import UpsertedStatus, UpsertedTicket
 from config import testconfig as config
@@ -141,6 +143,8 @@ class TestRepairTicketsMonitor:
             AsyncMock(),
             AsyncMock(),
             AsyncMock(),
+            AsyncMock(),
+            AsyncMock(),
         )
 
         assert repair_tickets_monitor._event_bus == event_bus
@@ -186,8 +190,6 @@ class TestRepairTicketsMonitor:
         repair_tickets_monitor,
         inference_data_voo_validation_set,
         make_rpc_response,
-        email_data_full_details,
-        tag_data_repair,
     ):
         email = AnyEmail(cc_addresses=["cc1", "cc2"])
         expected_cc = "cc1, cc2"
@@ -612,7 +614,6 @@ class TestRepairTicketsMonitor:
         inference_data = make_inference_data(potential_tickets_numbers=["1234"], filter_flags=filter_flags)
 
         response_exception = ResponseException("Error")
-        repair_tickets_monitor._new_tagged_emails_repository = Mock()
         repair_tickets_monitor._save_output = AsyncMock(return_value=None)
         repair_tickets_monitor._get_inference = AsyncMock(return_value=inference_data)
         repair_tickets_monitor._get_valid_service_numbers_site_map = AsyncMock(side_effect=response_exception)
@@ -665,7 +666,6 @@ class TestRepairTicketsMonitor:
 
         existing_tickets_response = [make_ticket_decamelized()]
 
-        repair_tickets_monitor._new_tagged_emails_repository = Mock()
         repair_tickets_monitor._save_output = AsyncMock(return_value=None)
         repair_tickets_monitor._get_inference = AsyncMock(return_value=inference_data)
         repair_tickets_monitor._get_valid_service_numbers_site_map = AsyncMock(return_value=service_number_site_map)
@@ -1049,6 +1049,90 @@ class TestRepairTicketsMonitor:
         repair_tickets_monitor._subscribe_user_rpc.assert_awaited_once_with(ticket_id=ticket_id, user_email=ANY)
         assert response == CreateTicketsOutput(
             tickets_created=[TicketOutput(site_id=site_id, ticket_id=ticket_id, service_numbers=["1", "6"])],
+        )
+
+    @pytest.mark.asyncio
+    async def _create_reply_tickets_is_properly_post_processed_test(self, repair_tickets_monitor):
+        # given
+        site_id = "any_site_id"
+        ticket_id = "any_ticket_id"
+        service_numbers = {"1": site_id, "6": site_id}
+        parent_email = AnyEmail(id="any_parent_email")
+        reply_email = AnyEmail(id="any_reply_email", parent=parent_email)
+
+        upserted_ticket = UpsertedTicket(status=UpsertedStatus.created, ticket_id=ticket_id)
+        repair_tickets_monitor._upsert_outage_ticket_rpc = AsyncMock(return_value=upserted_ticket)
+        repair_tickets_monitor._subscribe_user_rpc = AsyncMock()
+
+        bruin_repository = Mock(BruinRepository)
+        bruin_repository.append_notes_to_ticket = AsyncMock()
+        bruin_repository.link_email_to_ticket = AsyncMock()
+        repair_tickets_monitor._bruin_repository = bruin_repository
+
+        repair_tickets_monitor._compose_bec_note_to_ticket = case(
+            given(
+                ticket_id=ticket_id,
+                service_numbers=["1", "6"],
+                email=reply_email,
+                is_update_note=False,
+            ).returns("reply_note"),
+            given(
+                ticket_id=ticket_id,
+                service_numbers=["1", "6"],
+                email=parent_email,
+                is_update_note=False,
+            ).returns("parent_note"),
+        )
+
+        # when
+        await repair_tickets_monitor._create_tickets(reply_email, service_numbers)
+
+        # then
+        append_notes_to_ticket_calls = [call(ticket_id, "reply_note"), call(ticket_id, "parent_note")]
+        link_email_to_ticket_calls = [call(ticket_id, reply_email.id), call(ticket_id, parent_email.id)]
+
+        assert bruin_repository.append_notes_to_ticket.call_count == 2
+        assert bruin_repository.link_email_to_ticket.call_count == 2
+        bruin_repository.append_notes_to_ticket.assert_has_awaits(append_notes_to_ticket_calls, any_order=True)
+        bruin_repository.link_email_to_ticket.assert_has_awaits(link_email_to_ticket_calls, any_order=True)
+        repair_tickets_monitor._subscribe_user_rpc.assert_awaited_once_with(
+            ticket_id=ticket_id,
+            user_email=reply_email.sender_address,
+        )
+
+    @pytest.mark.asyncio
+    async def _create_parent_tickets_is_properly_post_processed_test(self, repair_tickets_monitor):
+        # given
+        site_id = "any_site_id"
+        ticket_id = "any_ticket_id"
+        service_numbers = {"1": site_id, "6": site_id}
+        parent_email = AnyEmail(id="any_parent_email")
+
+        upserted_ticket = UpsertedTicket(status=UpsertedStatus.created, ticket_id=ticket_id)
+        repair_tickets_monitor._upsert_outage_ticket_rpc = AsyncMock(return_value=upserted_ticket)
+        repair_tickets_monitor._subscribe_user_rpc = AsyncMock()
+
+        bruin_repository = Mock(BruinRepository)
+        bruin_repository.append_notes_to_ticket = AsyncMock()
+        bruin_repository.link_email_to_ticket = AsyncMock()
+        repair_tickets_monitor._bruin_repository = bruin_repository
+
+        repair_tickets_monitor._compose_bec_note_to_ticket = given(
+            ticket_id=ticket_id,
+            service_numbers=["1", "6"],
+            email=parent_email,
+            is_update_note=False,
+        ).returns("parent_note")
+
+        # when
+        await repair_tickets_monitor._create_tickets(parent_email, service_numbers)
+
+        # then
+        bruin_repository.append_notes_to_ticket.assert_awaited_once_with(ticket_id, "parent_note")
+        bruin_repository.link_email_to_ticket.assert_awaited_once_with(ticket_id, parent_email.id)
+        repair_tickets_monitor._subscribe_user_rpc.assert_awaited_once_with(
+            ticket_id=ticket_id,
+            user_email=parent_email.sender_address,
         )
 
     @pytest.mark.asyncio
