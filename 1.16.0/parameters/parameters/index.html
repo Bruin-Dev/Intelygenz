@@ -2085,8 +2085,8 @@
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/METRICS_LIST/description?region=us-east-1&amp;tab=Table">/data-highway/develop/velocloud-fetcher/METRICS_LIST</a></td>
 <td>Metrics list</td>
 <td>string</td>
-<td>metrics;...</td>
 <td></td>
+<td>metrics;...</td>
 <td>bytesRx;bytesTx;totalBytes;totalPackets;p1BytesRx;p1BytesTx;p1PacketsRx;p1PacketsTx;p2BytesRx;p2BytesTx;p2PacketsRx;p2PacketsTx;p3BytesRx;p3BytesTx;p3PacketsRx;p3PacketsTx;packetsRx;packetsTx;controlBytesRx;controlBytesTx;controlPacketsRx;controlPacketsTx;bestJitterMsRx;bestJitterMsTx;bestLatencyMsRx;bestLatencyMsTx;bestLossPctRx;bestLossPctTx;bpsOfBestPathRx;bpsOfBestPathTx;signalStrength;scoreTx;scoreRx</td>
 </tr>
 <tr>
@@ -2101,33 +2101,121 @@
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_BYPASS_AVRO_ENFORCEMENT_FOR_SCHEMAS/description?region=us-east-1&amp;tab=Table">/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_BYPASS_AVRO_ENFORCEMENT_FOR_SCHEMAS</a></td>
 <td>Bypass velocloud pruner for schemas</td>
 <td>boolean</td>
-<td>True/False</td>
 <td></td>
+<td>True/False</td>
 <td>True</td>
 </tr>
 <tr>
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_BYPASS_PRUNER_FOR_SCHEMAS/description?region=us-east-1&amp;tab=Table">/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_BYPASS_PRUNER_FOR_SCHEMAS</a></td>
 <td>Metrics list</td>
 <td>boolean</td>
-<td>True/False</td>
 <td></td>
+<td>True/False</td>
 <td>True</td>
 </tr>
 <tr>
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/VELOCLOUD_HOSTS/description?region=us-east-1&amp;tab=Table">/data-highway/develop/velocloud-fetcher/VELOCLOUD_HOSTS</a></td>
 <td>Velocloud hosts to fetch data from</td>
 <td>string</td>
-<td>host;...</td>
 <td></td>
+<td>host;...</td>
 <td>mettel.velocloud.net,metvco02.mettel.net,metvco03.mettel.net,metvco04.mettel.net</td>
 </tr>
 <tr>
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/VELOCLOUD_VERIFY_SSL/description?region=us-east-1&amp;tab=Table">/data-highway/develop/velocloud-fetcher/VELOCLOUD_VERIFY_SSL</a></td>
 <td>Velocloud verify ssl</td>
 <td>string</td>
-<td>yes/no</td>
 <td></td>
+<td>yes/no</td>
 <td>yes</td>
+</tr>
+<tr>
+<td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_JOB_INTERVAL_LINK_QOE_METRICS/description?region=us-east-1&amp;tab=Table#list_parameter_filters=Name:Contains:velocloud">/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_JOB_INTERVAL_LINK_QOE_METRICS</a></td>
+<td>Time to launch the fetcher for qoe link metrics</td>
+<td>int</td>
+<td>seconds</td>
+<td>0-inf</td>
+<td>3600</td>
+</tr>
+<tr>
+<td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_JOB_INTERVAL_HOST_EDGES/description?region=us-east-1&amp;tab=Table#list_parameter_filters=Name:Contains:velocloud">/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_JOB_INTERVAL_HOST_EDGES</a></td>
+<td>Time to launch the fetcher for edges</td>
+<td>int</td>
+<td>seconds</td>
+<td>0-inf</td>
+<td>300</td>
+</tr>
+<tr>
+<td><a href="/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_JOB_INTERVAL_EDGE_LINK_SERIES">/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_JOB_INTERVAL_EDGE_LINK_SERIES</a></td>
+<td>Time to launch the fetcher for links series</td>
+<td>int</td>
+<td>seconds</td>
+<td>0-inf</td>
+<td>3600</td>
+</tr>
+<tr>
+<td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_JOB_INTERVAL_EDGE_CONFIGURATION_MODULES/description?region=us-east-1&amp;tab=Table#list_parameter_filters=Name:Contains:velocloud">/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_JOB_INTERVAL_EDGE_CONFIGURATION_MODULES</a></td>
+<td>Time to launch the fetcher for configuration modules</td>
+<td>int</td>
+<td>seconds</td>
+<td>0-inf</td>
+<td>900</td>
+</tr>
+<tr>
+<td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_JOB_INTERVAL_CONFIGURATION_STACK/description?region=us-east-1&amp;tab=Table#list_parameter_filters=Name:Contains:velocloud">/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_JOB_INTERVAL_CONFIGURATION_STACK</a></td>
+<td>Time to launch the fetcher for configuration stack</td>
+<td>int</td>
+<td>seconds</td>
+<td>0-inf</td>
+<td>300</td>
+</tr>
+<tr>
+<td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_JOB_INTERVAL_EDGE_EVENTS/description?region=us-east-1&amp;tab=Table#list_parameter_filters=Name:Contains:velocloud">/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_JOB_INTERVAL_EDGE_EVENTS</a></td>
+<td>Time to launch the fetcher for events</td>
+<td>int</td>
+<td>seconds</td>
+<td>0-inf</td>
+<td>300</td>
+</tr>
+<tr>
+<td><a href="/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_JOB_INTERVAL_LINK_METRICS">/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_JOB_INTERVAL_LINK_METRICS</a></td>
+<td>Time to launch the fetcher for links metrics</td>
+<td>int</td>
+<td>seconds</td>
+<td>0-inf</td>
+<td>300</td>
+</tr>
+<tr>
+<td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_JOB_INTERVAL_MONITOR_AGGREGATES/description?region=us-east-1&amp;tab=Table#list_parameter_filters=Name:Contains:velocloud">/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_JOB_INTERVAL_MONITOR_AGGREGATES</a></td>
+<td>Time to launch the fetcher for monitor aggregates</td>
+<td>int</td>
+<td>seconds</td>
+<td>0-inf</td>
+<td>300</td>
+</tr>
+<tr>
+<td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_JOB_INTERVAL_ENTERPRISES/description?region=us-east-1&amp;tab=Table#list_parameter_filters=Name:Contains:velocloud">/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_JOB_INTERVAL_ENTERPRISES</a></td>
+<td>Time to launch the fetcher for enterprises</td>
+<td>int</td>
+<td>seconds</td>
+<td>0-inf</td>
+<td>300</td>
+</tr>
+<tr>
+<td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/metrics-velocloud-api/SNOWFLAKE_API_USER_PASSWORD/description?region=us-east-1&amp;tab=Table#list_parameter_filters=Name:Contains:velocloud">/data-highway/develop/metrics-velocloud-api/SNOWFLAKE_API_USER_PASSWORD</a></td>
+<td>Snowflake api user password</td>
+<td>string</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/metrics-velocloud-api/SNOWFLAKE_API_USER_NAME/description?region=us-east-1&amp;tab=Table#list_parameter_filters=Name:Contains:velocloud">/data-highway/develop/metrics-velocloud-api/SNOWFLAKE_API_USER_NAME</a></td>
+<td>Snowflake api user name</td>
+<td>string</td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 </tbody>
 </table>
