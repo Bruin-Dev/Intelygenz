@@ -399,7 +399,16 @@ class RepairTicketsMonitor:
                 log.info(f"email_id={email.id} No service number nor ticket actions triggered")
                 auto_reply_reason = "No validated service numbers"
 
-                if email.is_parent_email and is_actionable and not output.validated_tickets:
+                auto_reply_enabled = self._config.MONITOR_CONFIG["auto_reply_enabled"]
+                log.info(f"email_id={email.id} auto_reply_enabled={auto_reply_enabled}")
+                auto_reply_whitelist = self._config.MONITOR_CONFIG["auto_reply_whitelist"]
+                auto_reply_allowed = True
+                if len(auto_reply_whitelist) > 0:
+                    auto_reply_allowed = email.sender_address in auto_reply_whitelist
+                log.info(f"email_id={email.id} auto_reply_allowed={auto_reply_allowed}")
+
+                send_auto_reply = auto_reply_enabled and auto_reply_allowed
+                if email.is_parent_email and is_actionable and not output.validated_tickets and send_auto_reply:
                     log.info(f"email_id={email.id} Sending auto-reply")
                     auto_reply_reason = "No validated service numbers. Sent auto-reply"
                     await self._set_email_status_rpc(email.id, EmailStatus.AIQ)

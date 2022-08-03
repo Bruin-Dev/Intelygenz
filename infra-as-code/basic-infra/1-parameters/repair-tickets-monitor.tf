@@ -137,3 +137,40 @@ resource "aws_ssm_parameter" "parameter-repair-tickets-monitor-tag-ids-mapping" 
     note = "can be updated from the parameter store dashboard"
   })
 }
+
+resource "aws_ssm_parameter" "parameter-repair-tickets-monitor-auto-reply-enabled" {
+  name        = "/automation-engine/${local.env}/repair-tickets-monitor/auto-reply-enabled"
+  description = "Boolean flag to enable the auto-reply feature"
+  type        = "String"
+  value       = "false"  # to edit go to parameter store dashboard.
+
+  lifecycle {
+    ignore_changes = [
+      value,
+    ]
+  }
+
+  tags = merge(var.common_info, {
+    Name = "AUTO_REPLY_ENABLED"
+    note = "can be updated from the parameter store dashboard"
+  })
+}
+
+resource "aws_ssm_parameter" "parameter-repair-tickets-monitor-auto-reply-whitelist" {
+  name        = "/automation-engine/${local.env}/repair-tickets-monitor/auto-reply-white-list"
+  description = "Whitelist of email addresses to which auto-reply. An empty list means all addresses can be auto-replied"
+  type        = "SecureString"
+  value       = "[]"  # to edit go to parameter store dashboard.
+  key_id      =  aws_kms_alias.kms_key.name
+
+  lifecycle {
+    ignore_changes = [
+      value,
+    ]
+  }
+
+  tags = merge(var.common_info, {
+    Name = "AUTO_REPLY_WHITELIST"
+    note = "can be updated from the parameter store dashboard"
+  })
+}

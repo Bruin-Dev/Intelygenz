@@ -149,6 +149,8 @@ REPAIR_TICKETS_MONITOR__MAX_CONCURRENT_EMAILS_FOR_MONITORING = parameters["commo
 REPAIR_TICKETS_MONITOR__MAX_CONCURRENT_CREATED_TICKETS_FOR_FEEDBACK = parameters["common"]["repair-tickets-monitor"]["max-concurrent-created-tickets-for-feedback"]
 REPAIR_TICKETS_MONITOR__MAX_CONCURRENT_CLOSED_TICKETS_FOR_FEEDBACK = parameters["common"]["repair-tickets-monitor"]["max-concurrent-closed-tickets-for-feedback"]
 REPAIR_TICKETS_MONITOR__TAG_IDS_MAPPING = parameters["common"]["repair-tickets-monitor"]["tag-ids-mapping"]
+REPAIR_TICKETS_MONITOR__AUTO_REPLY_ENABLED = parameters["dev"]["repair-tickets-monitor"]["auto-reply-enabled"]
+REPAIR_TICKETS_MONITOR__AUTO_REPLY_WHITELIST = parameters["dev"]["repair-tickets-monitor"]["auto-reply-whitelist"]
 
 # Service Affecting Monitor - Shared variables
 SERVICE_AFFECTING__MONITORED_PRODUCT_CATEGORY = parameters["common"]["service-affecting"]["monitored-product-category"]
@@ -575,6 +577,8 @@ env_dict = {
         f"MAX_CONCURRENT_CREATED_TICKETS_FOR_FEEDBACK={REPAIR_TICKETS_MONITOR__MAX_CONCURRENT_CREATED_TICKETS_FOR_FEEDBACK}",
         f"MAX_CONCURRENT_CLOSED_TICKETS_FOR_FEEDBACK={REPAIR_TICKETS_MONITOR__MAX_CONCURRENT_CLOSED_TICKETS_FOR_FEEDBACK}",
         f"TAG_IDS_MAPPING={REPAIR_TICKETS_MONITOR__TAG_IDS_MAPPING}",
+        f"AUTO_REPLY_ENABLED={REPAIR_TICKETS_MONITOR__AUTO_REPLY_ENABLED}",
+        f"AUTO_REPLY_WHITELIST={REPAIR_TICKETS_MONITOR__AUTO_REPLY_WHITELIST}",
     ],
     os.path.join("services", "lumin-billing-report", "src", "config", "env"): [
         f"LUMIN_URI={LUMIN_URI}",
