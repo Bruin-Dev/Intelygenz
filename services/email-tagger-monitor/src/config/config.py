@@ -37,7 +37,8 @@ MONITOR_CONFIG = {
         "request_api_key": os.environ["API_REQUEST_KEY"],
         "endpoint_prefix": os.environ["API_ENDPOINT_PREFIX"],
     },
-    "reply_email_ttl": int(os.environ["REPLY_EMAIL_TTL"])
+    "reply_email_ttl": int(os.environ["REPLY_EMAIL_TTL"]),
+    "store_replies_enabled": bool(os.environ["STORE_REPLIES_ENABLED"]),
 }
 
 CURRENT_ENVIRONMENT = os.environ["CURRENT_ENVIRONMENT"]

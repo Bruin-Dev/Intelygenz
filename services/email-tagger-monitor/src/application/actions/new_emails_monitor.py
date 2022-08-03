@@ -78,8 +78,9 @@ class NewEmailsMonitor:
             prediction = response.get("body")
             self._logger.info("email_id=%s - Got prediction %s", email_id, prediction)
 
-            # Once KRE was informed, we can make our own logic if the email is not a parent email
-            if parent_id:
+            # Once KRE was informed, we check if the email is a reply
+            store_replies_enabled = self._config.MONITOR_CONFIG["store_replies_enabled"]
+            if parent_id and store_replies_enabled:
                 parent = self._repair_parent_email_storage.find(parent_id)
                 if parent:
                     self._logger.info("email_id=%s is a reply to email %s", email_id, parent_id)

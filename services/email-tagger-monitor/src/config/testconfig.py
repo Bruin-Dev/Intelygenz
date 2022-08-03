@@ -1,6 +1,5 @@
 # You must replicate the structure of config.py, changing os.environ calls for mock values
 import logging
-import os
 import sys
 
 NATS_CONFIG = {
@@ -33,7 +32,8 @@ MONITOR_CONFIG = {
         "request_api_key": "123456",
         "endpoint_prefix": "",
     },
-    "reply_email_ttl": 300
+    "reply_email_ttl": 300,
+    "store_replies_enabled": True,
 }
 
 CURRENT_ENVIRONMENT = "dev"
