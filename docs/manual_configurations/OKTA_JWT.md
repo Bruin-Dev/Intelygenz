@@ -15,18 +15,6 @@ The groups must have the next values:
 
 * Name: IGZ-EXT-DATA-HIGHWAY-API
 * Description: API Data highway access group.
-* 
-## Create authorization policy
-1. Go to "Security/Authentication policies" and click in the button "Add a policy"
-2. A new form will show up. Fill the form with the next information:
-   1. Name: IGZ-DATA-HIGHWAY-API-PASSWORD-POLICY
-   2. Description: API Access to data highway with the password policy.
-3. After having the policy created, click on "Add Policy" and fill the form with the next information:
-   1. Rule Name: IGZ-DATA-HIGHWAY-API-ACCESS-RULE
-   2. User's group membership includes: IGZ-INT-DATA-HIGHWAY-API, IGZ-EXT-DATA-HIGHWAY-API
-   3. User must authenticate with: Password
-   4. Re-authentication frequency is: Never re-authenticate if the session is active
-   5. Click on Save.
 
 ## Create Application server
 1. To create an application destined for the API, we are gonna need to go to "Applications/Applications" and click on create
@@ -78,6 +66,3 @@ app integration
 1. we are going to need to go to "Applications/Applications" and update the configuration of the application "IGZ-DATA-HIGHWAY-API".
    1. Disable User consent in general configurations.
 
-## Update Authorization policy with the application created
-1. Go to "Security/Authentication policies", click on "IGZ-DATA-HIGHWAY-API-PASSWORD-POLICY", select the menu Applications and click on Add APP.
-2. Add the Application "IGZ-DATA-HIGHWAY-API" and close the window.
