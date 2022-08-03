@@ -185,13 +185,13 @@ class TestRepairTicketsMonitor:
         assert list(other_emails)[0] == tagged_emails[1]
 
     @pytest.mark.asyncio
-    async def _get_inference__ok_test(
+    async def _get_parent_email_inference__ok_test(
         self,
         repair_tickets_monitor,
         inference_data_voo_validation_set,
         make_rpc_response,
     ):
-        email = AnyEmail(cc_addresses=["cc1", "cc2"])
+        email = AnyEmail(date=datetime(2000, 1, 1), cc_addresses=["cc1", "cc2"])
         expected_cc = "cc1, cc2"
         rpc_response = make_rpc_response(status=200, body=inference_data_voo_validation_set)
 
@@ -207,10 +207,12 @@ class TestRepairTicketsMonitor:
                 "client_id": email.client_id,
                 "subject": email.subject,
                 "body": email.body,
-                "date": email.date,
+                "date": "2000-01-01T00:00:00",
                 "from_address": email.sender_address,
                 "to": email.recipient_addresses,
                 "cc": expected_cc,
+                "is_auto_reply_answer": False,
+                "auto_reply_answer_delay": None,
             },
             {"tag_probability": email.tag.probability},
         )
@@ -218,17 +220,18 @@ class TestRepairTicketsMonitor:
         assert response == inference_data_voo_validation_set
 
     @pytest.mark.asyncio
-    async def _get_inference__no_cc_test(
+    async def _get_reply_email_inference__ok_test(
         self,
         repair_tickets_monitor,
         inference_data_voo_validation_set,
         make_rpc_response,
-        email_data_full_details,
-        tag_data_repair,
     ):
-        email = AnyEmail(cc_addresses=[])
-        expected_cc = ""
-        tag_info = tag_data_repair
+        email = AnyEmail(
+            date=datetime(2000, 1, 1, 0, 0, 10),
+            cc_addresses=["cc1", "cc2"],
+            parent=AnyEmail(date=datetime(2000, 1, 1, 0, 0, 0)),
+        )
+        expected_cc = "cc1, cc2"
         rpc_response = make_rpc_response(status=200, body=inference_data_voo_validation_set)
 
         repair_tickets_kre_repository = AsyncMock()
@@ -243,10 +246,47 @@ class TestRepairTicketsMonitor:
                 "client_id": email.client_id,
                 "subject": email.subject,
                 "body": email.body,
-                "date": email.date,
+                "date": "2000-01-01T00:00:10",
                 "from_address": email.sender_address,
                 "to": email.recipient_addresses,
                 "cc": expected_cc,
+                "is_auto_reply_answer": True,
+                "auto_reply_answer_delay": 10,
+            },
+            {"tag_probability": email.tag.probability},
+        )
+
+        assert response == inference_data_voo_validation_set
+
+    @pytest.mark.asyncio
+    async def _get_inference__no_cc_test(
+        self,
+        repair_tickets_monitor,
+        inference_data_voo_validation_set,
+        make_rpc_response,
+    ):
+        email = AnyEmail(date=datetime(2000, 1, 1), cc_addresses=[])
+        expected_cc = ""
+        rpc_response = make_rpc_response(status=200, body=inference_data_voo_validation_set)
+
+        repair_tickets_kre_repository = AsyncMock()
+        repair_tickets_kre_repository.get_email_inference = AsyncMock(return_value=rpc_response)
+        repair_tickets_monitor._repair_tickets_kre_repository = repair_tickets_kre_repository
+
+        response = await repair_tickets_monitor._get_inference(email)
+
+        repair_tickets_kre_repository.get_email_inference.assert_awaited_once_with(
+            {
+                "email_id": email.id,
+                "client_id": email.client_id,
+                "subject": email.subject,
+                "body": email.body,
+                "date": "2000-01-01T00:00:00",
+                "from_address": email.sender_address,
+                "to": email.recipient_addresses,
+                "cc": expected_cc,
+                "is_auto_reply_answer": False,
+                "auto_reply_answer_delay": None,
             },
             {"tag_probability": email.tag.probability},
         )

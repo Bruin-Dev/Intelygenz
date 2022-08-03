@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from tests.fixtures.domain import AnyEmail
 
 
@@ -11,3 +13,11 @@ class TestEmail:
 
     def reply_emails_are_properly_detected_test(self):
         assert AnyEmail(parent=AnyEmail()).is_reply_email
+
+    def parent_emails_have_no_reply_interval_test(self):
+        assert not AnyEmail().reply_interval
+
+    def reply_intervals_are_properly_calculated_test(self):
+        parent_date = datetime(2000, 1, 1, 0, 0, 0)
+        reply_date = datetime(2000, 1, 1, 0, 0, 10)
+        assert AnyEmail(date=reply_date, parent=AnyEmail(date=parent_date)).reply_interval == 10

@@ -34,6 +34,14 @@ class Email:
     def is_reply_email(self) -> bool:
         return self.parent is not None
 
+    @property
+    def reply_interval(self) -> Optional[int]:
+        if self.is_parent_email:
+            return None
+
+        interval = self.date - self.parent.date
+        return interval.seconds
+
 
 class EmailStatus(IntEnum):
     NEW = auto()

@@ -145,10 +145,12 @@ class RepairTicketsMonitor:
                 "client_id": email.client_id,
                 "subject": email.subject,
                 "body": email.body,
-                "date": email.date,
+                "date": email.date.isoformat(),
                 "from_address": email.sender_address,
                 "to": email.recipient_addresses,
                 "cc": email.comma_separated_cc_addresses(),
+                "is_auto_reply_answer": email.is_reply_email,
+                "auto_reply_answer_delay": email.reply_interval,
             },
             {
                 "tag_probability": email.tag.probability,
