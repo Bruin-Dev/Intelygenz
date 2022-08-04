@@ -47,7 +47,7 @@ line_length = 120
 [tool.pytest.ini_options]
 addopts = "-vv"
 testpaths = [
-    "src/tests/",
+    "tests/",
 ]
 python_files = "*_test.py"
 python_functions = "*_test"
@@ -57,7 +57,7 @@ asyncio_mode = "auto"
 branch = true
 omit = [
     "*/__init__.py",
-    "src/tests/*",
+    "tests/*",
 ]
 
 [tool.coverage.report]
