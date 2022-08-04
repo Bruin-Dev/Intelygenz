@@ -20,6 +20,7 @@ from application.actions.get_tickets_basic_info import GetTicketsBasicInfo
 from application.actions.link_ticket_to_email import LinkTicketToEmail
 from application.actions.mark_email_as_done import MarkEmailAsDone
 from application.actions.open_ticket import OpenTicket
+from application.actions.post_email_status import PostEmailStatus
 from application.actions.post_email_tag import PostEmailTag
 from application.actions.post_multiple_notes import PostMultipleNotes
 from application.actions.post_note import PostNote
@@ -32,6 +33,7 @@ from application.actions.unpause_ticket import UnpauseTicket
 from application.clients.bruin_client import BruinClient
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.endpoints_usage_repository import EndpointsUsageRepository
+from application.services.sentence_formatter import SentenceFormatter
 from config import config
 from igz.packages.eventbus.action import ActionWrapper
 from igz.packages.eventbus.eventbus import EventBus
@@ -93,6 +95,7 @@ class Container:
         self._subscriber_post_notification_email_milestone = NATSClient(config, self._logger)
         self._subscriber_get_asset_topics = NATSClient(config, self._logger)
         self._subscriber_subscribe_user = NATSClient(config, self._logger)
+        self._subscriber_post_email_status = NATSClient(config, self._logger)
 
         # Add NATS clients as event bus consumers
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
@@ -137,6 +140,7 @@ class Container:
         )
         self._event_bus.add_consumer(self._subscriber_get_asset_topics, consumer_name="get_asset_topics")
         self._event_bus.add_consumer(self._subscriber_subscribe_user, consumer_name="subscribe_user")
+        self._event_bus.add_consumer(self._subscriber_post_email_status, consumer_name="post_email_status")
 
         self._event_bus.set_producer(self._publisher)
 
@@ -177,6 +181,11 @@ class Container:
         )
         self._get_asset_topics = GetAssetTopics(self._logger, self._event_bus, self._bruin_repository)
         self._subscribe_user = SubscribeUser(self._logger, self._event_bus, self._bruin_client)
+
+        self._sentence_formatter = SentenceFormatter(_subject=config.IPA_SYSTEM_USERNAME_IN_BRUIN)
+        self._post_email_status = PostEmailStatus(
+            self._logger, self._event_bus, self._bruin_client, self._sentence_formatter
+        )
 
         # Wrap the actions
         self._report_bruin_ticket = ActionWrapper(
@@ -281,6 +290,9 @@ class Container:
         )
         self._action_subscribe_user = ActionWrapper(
             self._subscribe_user, "subscribe_user", is_async=True, logger=self._logger
+        )
+        self._action_post_email_status = ActionWrapper(
+            self._post_email_status, "post_email_status", is_async=True, logger=self._logger
         )
 
         self._server = QuartServer(config)
@@ -453,6 +465,12 @@ class Container:
             consumer_name="subscribe_user",
             topic="bruin.subscribe.user",
             action_wrapper=self._action_subscribe_user,
+            queue="bruin_bridge",
+        )
+        await self._event_bus.subscribe_consumer(
+            consumer_name="post_email_status",
+            topic="bruin.email.status",
+            action_wrapper=self._action_post_email_status,
             queue="bruin_bridge",
         )
 
