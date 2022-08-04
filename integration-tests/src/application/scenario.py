@@ -5,7 +5,7 @@ from typing import Any, Awaitable, Callable, Optional
 from application.data.bruin import Document, Inventory
 from application.data.bruin.ticket_basic import TicketBasic
 from application.data.bruin.ticket_details import TicketDetails, TicketNote
-from application.handler import Handler, WillReturnJSON
+from application.handler import Handler, WillReturnJSON, WillReturnNothing
 from application.route import Route, Routes
 from dataclasses import dataclass, field
 from starlette.requests import Request
@@ -62,7 +62,7 @@ class Scenario:
         :param resend: a resend method to be used as the default handler
         :return: the request response (either mocked or proxied)
         """
-        log.debug(f"handle_asgi(path={request.url.path}, method={request.method}, resend={resend}")
+        log.debug(f"handle_asgi(path={request.url.path}, method={request.method}, resend={resend})")
         route = self.routes.find(path=request.url.path, method=request.method, default=resend)
         log.debug(f"handle_asgi(): route={route}")
         return await route.handle(request)
@@ -79,7 +79,7 @@ class Scenario:
         :param resend: a resend method to be used as the default handler
         :return: the request response (either mocked or proxied)
         """
-        log.debug(f"handle_grpc(path={path}, request={request}, resend={resend}")
+        log.debug(f"handle_grpc(path={path}, request={request}, resend={resend})")
         route = self.routes.find(path=path, default=resend)
         log.debug(f"handle_grpc(): route={route}")
         return await route.handle(request, context)
@@ -90,19 +90,23 @@ class Scenario:
         :param path: the path to be mocked or proxied
         :param handler: the handler for the path
         """
-        log.debug(f"given(path={path}, handler={handler}")
-        route = self.routes.find(path)
-        route.handler = handler
-        return route
+        log.debug(f"given(path={path}, handler={handler})")
+        return self.routes.set(path, handler)
 
     def route(self, path: str) -> Route:
         """
-        Shorthand to find a route that matched the given path.
+        Shorthand to return a route that matched the given path.
         If no route matches the ones that are defined, a default Route will be returned.
         :param path:
         :return:
         """
-        return self.routes.find(path)
+        log.debug(f"route(path={path})")
+        route_handler = WillReturnNothing()
+        existing_route = self.routes.find(path)
+        if existing_route:
+            route_handler = existing_route.handler
+
+        return self.routes.set(path, route_handler)
 
     def passed(self) -> ScenarioResult:
         """

@@ -2,7 +2,7 @@ import logging
 from typing import Any, Awaitable, Callable, Dict, Optional
 
 from application.conditions import path_was_reached, wait_for_path
-from application.handler import DoNothing, Handler, WillExecute, WillReturn
+from application.handler import Handler, WillExecute, WillReturn, WillReturnNothing
 from dataclasses import dataclass
 from starlette.responses import JSONResponse
 from starlette.routing import Match
@@ -42,11 +42,8 @@ class Route:
         :param path: the path to be matched
         :return: True if the path matches the route, False otherwise
         """
-        if self.matcher:
-            match, scope = self.matcher.matches({"type": "http", "path": path, "method": ""})
-            return match != Match.NONE
-        else:
-            return True
+        match, scope = self.matcher.matches({"type": "http", "path": path, "method": ""})
+        return match != Match.NONE
 
     async def handle(self, *args, **kwargs):
         """
@@ -81,20 +78,36 @@ class Routes(Dict[str, Route]):
     def __init__(self, handlers: Dict[str, Handler]):
         super().__init__({path: Route.build(path, handler) for path, handler in handlers.items()})
 
+    def set(self, path: str, handler: Handler) -> Route:
+        """
+        Sets the handler of the correspoding route of a given path.
+        If the path is not yet known, build a new route.
+        :param path: the path of the Route being set
+        :param handler: the handler to be set
+        :return: the updated route or a new one
+        """
+        if path in self:
+            self[path].handler = handler
+        else:
+            self[path] = Route.build(path, handler)
+
+        return self[path]
+
     def find(
         self,
         path: str,
         method: Optional[str] = None,
         default: Optional[Callable[..., Awaitable[Any]]] = None,
-    ):
+    ) -> Route:
         """
         This method will always return a Route. It can either:
+        - return an exact route for the provided path
         - return a matching route for the provided path
-        - return a new route for any POST requests
-        - return a new route if any default handler is provided
+        - return a new or overriden route for any POST requests
+        - return a new or overriden route if any default handler is provided
         - return a new route with a noop handler
 
-        Route handlers will be overwritten if it has a noop handler and a default handler was provided.
+        New routes being created within this method are transient and won't be stored
 
         :param path: the path of the route
         :param method: an optional REST method (it also finds GRPC requests)
@@ -102,29 +115,46 @@ class Routes(Dict[str, Route]):
         :return: an existing Route or a new one
         """
         log.debug(f"find(path={path}, method={method}, default={default})")
+        route = None
+
+        exact_route = self.get(path)
         matching_routes = [route for route in self.values() if route.matches(path)]
-        if matching_routes:
+
+        if exact_route:
+            route = exact_route
+            log.debug(f"find(): exact_route={route}")
+        elif matching_routes:
             route = matching_routes[0]
             log.debug(f"find(): matching_route={route}")
+
+        # An exact or matching route that actually returns something is a match
+        if route and not route.handler.returns_nothing():
+            return route
+
+        # If not, return a mock response for any state modification request
         elif method in STATE_MODIFICATION_METHODS:
-            # Return a mock response for any state modification request
-            route = Route.build(path, WillReturn(JSONResponse({})))
-            log.debug(f"find(): post_route={route}")
-            self[path] = route
+            if route:
+                route.handler = WillReturn(JSONResponse({}))
+                log.debug(f"find(): override_post_route={route}")
+            else:
+                route = Route.build(path, WillReturn(JSONResponse({})))
+                log.debug(f"find(): new_post_route={route}")
+
+            return route
+
+        # If not, return a default response if it was provided
         elif default:
-            route = Route.build(path, WillExecute(default))
-            log.debug(f"find(): default_route={route}")
-            self[path] = route
-        else:
-            route = Route.build(path, DoNothing())
-            log.debug(f"find(): no_route={route}")
-            self[path] = route
+            if route:
+                route.handler = WillExecute(default)
+                log.debug(f"find(): override_default_route={route}")
+            else:
+                route = Route.build(path, WillExecute(default))
+                log.debug(f"find(): new_default_route={route}")
 
-        if route.handler.noop() and method in STATE_MODIFICATION_METHODS:
-            log.debug(f"find(): override_handler={method}")
-            route.handler = WillReturn(JSONResponse({}))
-        elif route.handler.noop() and default:
-            log.debug(f"find(): override_handler={default}")
-            route.handler = WillExecute(default)
+            return route
 
-        return route
+        # Finally, if nothing matches return a route with a handler that does nothing
+        elif not route:
+            route = Route.build(path, WillReturnNothing())
+            log.debug(f"find(): do_nothing_route={route}")
+            return route
