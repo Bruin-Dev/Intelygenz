@@ -16,6 +16,7 @@ tenacity = "8.0.1"
 shortuuid = "1.0.0"
 redis = "3.3.11"
 blinker = "1.5"
+pydantic = "1.9.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "6.2.5"
