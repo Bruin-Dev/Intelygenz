@@ -147,7 +147,7 @@ class RepairTicketsMonitor:
                 "cc": email.comma_separated_cc_addresses(),
             },
             {
-                "probability": email.tag.probability,
+                "tag_probability": email.tag.probability,
             },
         )
 

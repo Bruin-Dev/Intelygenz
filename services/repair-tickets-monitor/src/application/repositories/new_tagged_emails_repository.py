@@ -19,7 +19,7 @@ class NewTaggedEmailsRepository:
         emails = []
         for raw_email_tag in raw_email_tags:
             email_id = raw_email_tag.get("email_id")
-            raw_email = self.get_email_details(email_id)
+            raw_email = self.get_email_details(email_id).get("email")
             emails.append(self.to_email(raw_email, raw_email_tag))
 
         return emails

@@ -210,7 +210,7 @@ class TestRepairTicketsMonitor:
                 "to": email.recipient_addresses,
                 "cc": expected_cc,
             },
-            {"probability": email.tag.probability},
+            {"tag_probability": email.tag.probability},
         )
 
         assert response == inference_data_voo_validation_set
@@ -246,7 +246,7 @@ class TestRepairTicketsMonitor:
                 "to": email.recipient_addresses,
                 "cc": expected_cc,
             },
-            {"probability": email.tag.probability},
+            {"tag_probability": email.tag.probability},
         )
 
         assert response == inference_data_voo_validation_set
