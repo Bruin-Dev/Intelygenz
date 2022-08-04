@@ -76,7 +76,7 @@ class NewEmailsMonitor:
             # So, always get tag from KRE event if we know the mail is not a parent email.
             response = await self._email_tagger_repository.get_prediction(email_data)
             prediction = response.get("body")
-            self._logger.info("email_id=%s - Got prediction %s", email_id, prediction)
+            self._logger.info("email_id=%s parent_id=%s - Got prediction %s", email_id, parent_id, prediction)
 
             # Once KRE was informed, we check if the email is a reply
             store_replies_enabled = self._config.MONITOR_CONFIG["store_replies_enabled"]

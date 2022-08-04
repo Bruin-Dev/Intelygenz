@@ -14,7 +14,7 @@ from application.repositories.utils_repository import UtilsRepository
 from application.server.api_server import APIServer
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import config
-from framework.storage.model import RepairParentEmailStorage, RepairReplyEmailStorage
+from framework.storage.model import RepairParentEmailStorage
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.Logger.logger_client import LoggerClient
@@ -36,8 +36,7 @@ class Container:
         self._redis_cache_client = redis.Redis(host=config.REDIS_CACHE["host"], port=6379, decode_responses=True)
         self._redis_cache_client.ping()
 
-        self._repair_parent_email_storage = RepairParentEmailStorage(self._redis_client, config.ENVIRONMENT_NAME)
-        self._repair_reply_email_storage = RepairReplyEmailStorage(self._redis_client, config.ENVIRONMENT_NAME)
+        self._repair_parent_email_storage = RepairParentEmailStorage(self._redis_cache_client, config.ENVIRONMENT_NAME)
 
         self._scheduler = AsyncIOScheduler(timezone=timezone(config.TIMEZONE))
 
