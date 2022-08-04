@@ -33,7 +33,7 @@ class RepairEmailOutput:
     Data structure that holds information to be returned to KRE as feedback
     """
 
-    email_id: int
+    email_id: str
     service_numbers_sites_map: Dict[str, str] = field(default_factory=dict)
     validated_tickets: List[Ticket] = field(default_factory=list)
     tickets_created: List["TicketOutput"] = field(default_factory=list)

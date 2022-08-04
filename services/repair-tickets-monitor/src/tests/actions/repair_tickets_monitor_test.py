@@ -16,6 +16,7 @@ from application.exceptions import ResponseException
 from application.rpc import RpcError
 from application.rpc.upsert_outage_ticket_rpc import UpsertedStatus, UpsertedTicket
 from config import testconfig as config
+from tests.fixtures.domain import AnyEmail, AnyEmailTag
 
 
 @pytest.fixture(scope="module")
@@ -170,8 +171,8 @@ class TestRepairTicketsMonitor:
 
     def _triage_emails_by_tag_test(self, repair_tickets_monitor):
         tagged_emails = [
-            {"email_id": 1234, "tag_id": 1},
-            {"email_id": 1234, "tag_id": 2},
+            AnyEmail(tag=AnyEmailTag(type="1")),
+            AnyEmail(tag=AnyEmailTag(type="2")),
         ]
 
         repair_emails, other_emails = repair_tickets_monitor._triage_emails_by_tag(tagged_emails)
@@ -188,29 +189,28 @@ class TestRepairTicketsMonitor:
         email_data_full_details,
         tag_data_repair,
     ):
-        email_data = email_data_full_details["email"]
-        expected_cc = ", ".join(email_data["send_cc"])
-        tag_info = tag_data_repair
+        email = AnyEmail(cc_addresses=["cc1", "cc2"])
+        expected_cc = "cc1, cc2"
         rpc_response = make_rpc_response(status=200, body=inference_data_voo_validation_set)
 
         repair_tickets_kre_repository = AsyncMock()
         repair_tickets_kre_repository.get_email_inference = AsyncMock(return_value=rpc_response)
         repair_tickets_monitor._repair_tickets_kre_repository = repair_tickets_kre_repository
 
-        response = await repair_tickets_monitor._get_inference(email_data, tag_info)
+        response = await repair_tickets_monitor._get_inference(email)
 
         repair_tickets_kre_repository.get_email_inference.assert_awaited_once_with(
             {
-                "email_id": email_data["email_id"],
-                "client_id": email_data["client_id"],
-                "subject": email_data["subject"],
-                "body": email_data["body"],
-                "date": email_data["date"],
-                "from_address": email_data["from_address"],
-                "to": email_data["to_address"],
+                "email_id": email.id,
+                "client_id": email.client_id,
+                "subject": email.subject,
+                "body": email.body,
+                "date": email.date,
+                "from_address": email.sender_address,
+                "to": email.recipient_addresses,
                 "cc": expected_cc,
             },
-            tag_info,
+            {"probability": email.tag.probability},
         )
 
         assert response == inference_data_voo_validation_set
@@ -224,8 +224,7 @@ class TestRepairTicketsMonitor:
         email_data_full_details,
         tag_data_repair,
     ):
-        email_data = email_data_full_details["email"]
-        email_data["send_cc"] = []
+        email = AnyEmail(cc_addresses=[])
         expected_cc = ""
         tag_info = tag_data_repair
         rpc_response = make_rpc_response(status=200, body=inference_data_voo_validation_set)
@@ -234,20 +233,20 @@ class TestRepairTicketsMonitor:
         repair_tickets_kre_repository.get_email_inference = AsyncMock(return_value=rpc_response)
         repair_tickets_monitor._repair_tickets_kre_repository = repair_tickets_kre_repository
 
-        response = await repair_tickets_monitor._get_inference(email_data, tag_info)
+        response = await repair_tickets_monitor._get_inference(email)
 
         repair_tickets_kre_repository.get_email_inference.assert_awaited_once_with(
             {
-                "email_id": email_data["email_id"],
-                "client_id": email_data["client_id"],
-                "subject": email_data["subject"],
-                "body": email_data["body"],
-                "date": email_data["date"],
-                "from_address": email_data["from_address"],
-                "to": email_data["to_address"],
+                "email_id": email.id,
+                "client_id": email.client_id,
+                "subject": email.subject,
+                "body": email.body,
+                "date": email.date,
+                "from_address": email.sender_address,
+                "to": email.recipient_addresses,
                 "cc": expected_cc,
             },
-            tag_info,
+            {"probability": email.tag.probability},
         )
 
         assert response == inference_data_voo_validation_set
@@ -257,18 +256,13 @@ class TestRepairTicketsMonitor:
         self,
         repair_tickets_monitor,
         make_rpc_response,
-        email_data_full_details,
-        tag_data_repair,
     ):
-        email_data = email_data_full_details["email"]
-        tag_info = tag_data_repair
-
         rpc_response = make_rpc_response(status=400, body="Error in data")
         repair_tickets_kre_repository = AsyncMock()
         repair_tickets_kre_repository.get_email_inference = AsyncMock(return_value=rpc_response)
         repair_tickets_monitor._repair_tickets_kre_repository = repair_tickets_kre_repository
 
-        response = await repair_tickets_monitor._get_inference(email_data, tag_info)
+        response = await repair_tickets_monitor._get_inference(AnyEmail())
 
         assert response is None
 
@@ -439,14 +433,12 @@ class TestRepairTicketsMonitor:
 
     @pytest.mark.asyncio
     async def _process_other_tags_email_test(self, repair_tickets_monitor, tag_data_new_order):
-        email_tag_data = tag_data_new_order
+        email = AnyEmail(tag=AnyEmailTag(type="2"))
+        repair_tickets_monitor._new_tagged_emails_repository = Mock()
 
-        new_tagged_emails_repository = Mock()
-        repair_tickets_monitor._new_tagged_emails_repository = new_tagged_emails_repository
+        await repair_tickets_monitor._process_other_tags_email(email)
 
-        await repair_tickets_monitor._process_other_tags_email(email_tag_data)
-
-        new_tagged_emails_repository.mark_complete.assert_called_once_with(email_tag_data["email_id"])
+        repair_tickets_monitor._new_tagged_emails_repository.mark_complete.assert_called_once_with(email.id)
 
     @pytest.mark.asyncio
     async def _process_repair_email__ok_test(
@@ -454,11 +446,9 @@ class TestRepairTicketsMonitor:
         repair_tickets_monitor,
         make_inference_data,
         make_ticket_decamelized,
-        make_email,
     ):
         email_id = "1234"
-        tagged_email = {"email_id": email_id, "tag_id": 1}
-        email = make_email(email_id=email_id)
+        email = AnyEmail(id=email_id)
         inference_data = make_inference_data()
         service_number_site_map = {
             "1234": "site_1",
@@ -474,7 +464,6 @@ class TestRepairTicketsMonitor:
 
         new_tagged_emails_repository = Mock()
         repair_tickets_monitor._new_tagged_emails_repository = new_tagged_emails_repository
-        repair_tickets_monitor._new_tagged_emails_repository.get_email_details.return_value = email
         repair_tickets_monitor._get_inference = AsyncMock(return_value=inference_data)
         repair_tickets_monitor._get_valid_service_numbers_site_map = AsyncMock(return_value=service_number_site_map)
         repair_tickets_monitor._get_tickets = AsyncMock(return_value=[])
@@ -484,17 +473,16 @@ class TestRepairTicketsMonitor:
         repair_tickets_monitor._get_asset_topics_rpc = AsyncMock(return_value=[Topic(call_type="REP", category="VOO")])
         repair_tickets_monitor._bruin_repository.mark_email_as_done = AsyncMock()
 
-        await repair_tickets_monitor._process_repair_email(tagged_email)
+        await repair_tickets_monitor._process_repair_email(email)
 
         repair_tickets_monitor._save_output.assert_awaited_once()
         new_tagged_emails_repository.mark_complete.assert_called_once_with(email_id)
         repair_tickets_monitor._bruin_repository.mark_email_as_done.assert_awaited_once_with(email_id)
 
     @pytest.mark.asyncio
-    async def _process_repair_email__no_inference_data_test(self, repair_tickets_monitor, make_email):
+    async def _process_repair_email__no_inference_data_test(self, repair_tickets_monitor):
         email_id = "1234"
-        tagged_email = {"email_id": email_id, "tag_id": 1}
-        email = make_email(email_id=email_id)
+        email = AnyEmail(id=email_id)
         validated_tickes = {
             "validated_ticket_numbers": ["1234"],
             "bruin_ticket_status_map": [{"1234": "site_1"}],
@@ -504,12 +492,11 @@ class TestRepairTicketsMonitor:
 
         new_tagged_emails_repository = Mock()
         repair_tickets_monitor._new_tagged_emails_repository = new_tagged_emails_repository
-        repair_tickets_monitor._new_tagged_emails_repository.get_email_details.return_value = email
         repair_tickets_monitor._get_tickets = AsyncMock(return_value=validated_tickes)
         repair_tickets_monitor._save_output = AsyncMock(return_value=None)
         repair_tickets_monitor._get_inference = AsyncMock(return_value=None)
 
-        await repair_tickets_monitor._process_repair_email(tagged_email)
+        await repair_tickets_monitor._process_repair_email(email)
         repair_tickets_monitor._save_output.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -519,12 +506,10 @@ class TestRepairTicketsMonitor:
         make_inference_data,
         existing_ticket_data_voo_with_service_numbers,
         resolved_ticket_data_with_cancellation,
-        make_email,
         make_filter_flags,
     ):
         email_id = "1234"
-        tagged_email = {"email_id": email_id, "tag_id": 1}
-        email = make_email(email_id=email_id)
+        email = AnyEmail(id=email_id)
         filter_flags = make_filter_flags(
             tagger_is_below_threshold=True,
             rta_model1_is_below_threshold=True,
@@ -555,8 +540,6 @@ class TestRepairTicketsMonitor:
 
         new_tagged_emails_repository = Mock()
         repair_tickets_monitor._new_tagged_emails_repository = new_tagged_emails_repository
-        repair_tickets_monitor._new_tagged_emails_repository.get_email_details.return_value = email
-
         repair_tickets_monitor._get_inference = AsyncMock(return_value=inference_data)
         repair_tickets_monitor._get_valid_service_numbers_site_map = AsyncMock(return_value=service_number_site_map)
         repair_tickets_monitor._get_tickets = AsyncMock(return_value=validated_tickets)
@@ -566,7 +549,7 @@ class TestRepairTicketsMonitor:
         repair_tickets_monitor._bruin_repository.mark_email_as_done = AsyncMock()
         repair_tickets_monitor._get_asset_topics_rpc = AsyncMock(return_value=[Topic(call_type="REP", category="VOO")])
 
-        await repair_tickets_monitor._process_repair_email(tagged_email)
+        await repair_tickets_monitor._process_repair_email(email)
 
         repair_tickets_monitor._save_output.assert_awaited_once()
         # await_args[0] is args and await_args[1] is kwargs
@@ -586,11 +569,10 @@ class TestRepairTicketsMonitor:
 
     @pytest.mark.asyncio
     async def _process_repair_email__site_map_error_test(
-        self, repair_tickets_monitor, make_email, make_filter_flags, make_inference_data
+        self, repair_tickets_monitor, make_filter_flags, make_inference_data
     ):
         email_id = "1234"
-        tagged_email = {"email_id": email_id, "tag_id": 1}
-        email = make_email(email_id=email_id)
+        email = AnyEmail(id=email_id)
         filter_flags = make_filter_flags(
             tagger_is_below_threshold=True,
             rta_model1_is_below_threshold=True,
@@ -603,23 +585,23 @@ class TestRepairTicketsMonitor:
         response_exception = ResponseException("Error")
         new_tagged_emails_repository = Mock()
         repair_tickets_monitor._new_tagged_emails_repository = new_tagged_emails_repository
-        repair_tickets_monitor._new_tagged_emails_repository.get_email_details.return_value = email
         repair_tickets_monitor._save_output = AsyncMock(return_value=None)
         repair_tickets_monitor._get_inference = AsyncMock(return_value=inference_data)
         repair_tickets_monitor._get_valid_service_numbers_site_map = AsyncMock(side_effect=response_exception)
 
-        await repair_tickets_monitor._process_repair_email(tagged_email)
+        await repair_tickets_monitor._process_repair_email(email)
         repair_tickets_monitor._save_output.assert_awaited_once_with(
-            RepairEmailOutput(email_id=1234, tickets_cannot_be_created=[TicketOutput(reason=str(response_exception))])
+            RepairEmailOutput(
+                email_id=email_id, tickets_cannot_be_created=[TicketOutput(reason=str(response_exception))]
+            )
         )
 
     @pytest.mark.asyncio
     async def _process_repair_email__site_map_error_with_validated_tickets_test(
-        self, repair_tickets_monitor, make_email, make_filter_flags, make_inference_data
+        self, repair_tickets_monitor, make_filter_flags, make_inference_data
     ):
-        email_id = 1234
-        tagged_email = {"email_id": email_id, "tag_id": 1}
-        email = make_email(email_id=email_id)
+        email_id = "1234"
+        email = AnyEmail(id=email_id)
         filter_flags = make_filter_flags(
             tagger_is_below_threshold=True,
             rta_model1_is_below_threshold=True,
@@ -630,9 +612,7 @@ class TestRepairTicketsMonitor:
         inference_data = make_inference_data(potential_tickets_numbers=["1234"], filter_flags=filter_flags)
 
         response_exception = ResponseException("Error")
-        new_tagged_emails_repository = Mock()
-        repair_tickets_monitor._new_tagged_emails_repository = new_tagged_emails_repository
-        repair_tickets_monitor._new_tagged_emails_repository.get_email_details.return_value = email
+        repair_tickets_monitor._new_tagged_emails_repository = Mock()
         repair_tickets_monitor._save_output = AsyncMock(return_value=None)
         repair_tickets_monitor._get_inference = AsyncMock(return_value=inference_data)
         repair_tickets_monitor._get_valid_service_numbers_site_map = AsyncMock(side_effect=response_exception)
@@ -643,10 +623,10 @@ class TestRepairTicketsMonitor:
             }
         )
 
-        await repair_tickets_monitor._process_repair_email(tagged_email)
+        await repair_tickets_monitor._process_repair_email(email)
         repair_tickets_monitor._save_output.assert_awaited_once_with(
             RepairEmailOutput(
-                email_id=1234,
+                email_id=email_id,
                 tickets_cannot_be_created=[TicketOutput(reason=str(response_exception))],
                 validated_tickets=[Ticket(id="1234", status=TicketStatus.IN_PROGRESS, call_type="REP", category="VOO")],
             )
@@ -656,14 +636,12 @@ class TestRepairTicketsMonitor:
     async def _process_repair_email__not_actionable_predicted_other_test(
         self,
         repair_tickets_monitor,
-        make_email,
         make_filter_flags,
         make_inference_data,
         make_ticket_decamelized,
     ):
         email_id = "1234"
-        tagged_email = {"email_id": email_id, "tag_id": 1}
-        email = make_email(email_id=email_id)
+        email = AnyEmail(id=email_id)
         filter_flags = make_filter_flags(
             tagger_is_below_threshold=True,
             rta_model1_is_below_threshold=True,
@@ -687,9 +665,7 @@ class TestRepairTicketsMonitor:
 
         existing_tickets_response = [make_ticket_decamelized()]
 
-        new_tagged_emails_repository = Mock()
-        repair_tickets_monitor._new_tagged_emails_repository = new_tagged_emails_repository
-        repair_tickets_monitor._new_tagged_emails_repository.get_email_details.return_value = email
+        repair_tickets_monitor._new_tagged_emails_repository = Mock()
         repair_tickets_monitor._save_output = AsyncMock(return_value=None)
         repair_tickets_monitor._get_inference = AsyncMock(return_value=inference_data)
         repair_tickets_monitor._get_valid_service_numbers_site_map = AsyncMock(return_value=service_number_site_map)
@@ -697,7 +673,7 @@ class TestRepairTicketsMonitor:
         repair_tickets_monitor._create_tickets = AsyncMock(return_value=create_tickets_output)
         repair_tickets_monitor._get_asset_topics_rpc = AsyncMock(return_value=[Topic(call_type="REP", category="VOO")])
 
-        await repair_tickets_monitor._process_repair_email(tagged_email)
+        await repair_tickets_monitor._process_repair_email(email)
 
         assert (
             repair_tickets_monitor._save_output.call_args_list[0][0][0].tickets_cannot_be_created[0].reason
@@ -1007,15 +983,15 @@ class TestRepairTicketsMonitor:
 
     def _compose_bec_note_text_update_test(self, repair_tickets_monitor):
         body = "<html><body>algo</body></html>"
-        call = {
-            "subject": "Example subject",
-            "from_address": "from@address.com",
-            "body": body,
-            "date": datetime(2022, 1, 11),
-            "is_update_note": True,
-        }
-
-        note_text = repair_tickets_monitor._compose_bec_note_text(**call)
+        note_text = repair_tickets_monitor._compose_bec_note_text(
+            email=AnyEmail(
+                subject="Example subject",
+                sender_address="from@address.com",
+                body=body,
+                date="2022-01-11 00:00:00",
+            ),
+            is_update_note=True,
+        )
 
         expected_body = html2text.html2text(body)
         assert note_text == os.linesep.join(
@@ -1032,16 +1008,12 @@ class TestRepairTicketsMonitor:
         )
 
     def _compose_bec_note_to_ticket_update_test(self, repair_tickets_monitor):
-        call = {
-            "ticket_id": "1234",
-            "service_numbers": ["VC05200011984"],
-            "subject": "Example subject",
-            "from_address": "from@address.com",
-            "body": "<html><body>algo</body></html>",
-            "date": datetime(2022, 1, 11),
-            "is_update_note": True,
-        }
-        notes = repair_tickets_monitor._compose_bec_note_to_ticket(**call)
+        notes = repair_tickets_monitor._compose_bec_note_to_ticket(
+            ticket_id="1234",
+            service_numbers=["VC05200011984"],
+            email=AnyEmail(),
+            is_update_note=True,
+        )
 
         assert all(
             "This note is new commentary from the client and posted via BEC AI engine." in note["text"]
@@ -1051,23 +1023,18 @@ class TestRepairTicketsMonitor:
 
     def _compose_bec_private_note_to_ticket_create_test(self, repair_tickets_monitor):
         # Given
-        call = {
-            "ticket_id": "1234",
-            "service_numbers": ["VC05200011984"],
-            "subject": "Example subject",
-            "from_address": "from@address.com",
-            "body": "<html><body>algo</body></html>",
-            "date": datetime(2022, 1, 11),
-            "is_update_note": False,
-        }
-
-        notes = repair_tickets_monitor._compose_bec_note_to_ticket(**call)
+        notes = repair_tickets_monitor._compose_bec_note_to_ticket(
+            ticket_id="1234",
+            service_numbers=["VC05200011984"],
+            email=AnyEmail(),
+            is_update_note=False,
+        )
 
         assert all("This ticket was opened via MetTel Email Center AI Engine." in note["text"] for note in notes)
         assert all(note["service_number"] == "VC05200011984" for note in notes)
 
     @pytest.mark.asyncio
-    async def _create_tickets_create_test(self, repair_tickets_monitor, email_data):
+    async def _create_tickets_create_test(self, repair_tickets_monitor):
         # given
         site_id = "any_site_id"
         ticket_id = "any_ticket_id"
@@ -1076,7 +1043,7 @@ class TestRepairTicketsMonitor:
         repair_tickets_monitor._subscribe_user_rpc = AsyncMock()
 
         # when
-        response = await repair_tickets_monitor._create_tickets(email_data, {"1": site_id, "6": site_id})
+        response = await repair_tickets_monitor._create_tickets(AnyEmail(), {"1": site_id, "6": site_id})
 
         # then
         repair_tickets_monitor._subscribe_user_rpc.assert_awaited_once_with(ticket_id=ticket_id, user_email=ANY)
@@ -1085,7 +1052,7 @@ class TestRepairTicketsMonitor:
         )
 
     @pytest.mark.asyncio
-    async def _create_tickets_update_test(self, repair_tickets_monitor, email_data):
+    async def _create_tickets_update_test(self, repair_tickets_monitor):
         # given
         site_id = "any_site_id"
         ticket_id = "any_ticket_id"
@@ -1093,7 +1060,7 @@ class TestRepairTicketsMonitor:
         repair_tickets_monitor._upsert_outage_ticket_rpc = AsyncMock(return_value=upserted_ticket)
 
         # when
-        response = await repair_tickets_monitor._create_tickets(email_data, {"1": site_id, "6": site_id})
+        response = await repair_tickets_monitor._create_tickets(AnyEmail(), {"1": site_id, "6": site_id})
 
         # then
         repair_tickets_monitor._subscribe_user_rpc.assert_awaited_once_with(ticket_id=ticket_id, user_email=ANY)
@@ -1106,10 +1073,10 @@ class TestRepairTicketsMonitor:
         )
 
     @pytest.mark.asyncio
-    async def _create_tickets_error_test(self, repair_tickets_monitor, email_data):
+    async def _create_tickets_error_test(self, repair_tickets_monitor):
         repair_tickets_monitor._upsert_outage_ticket_rpc = AsyncMock(side_effect=RpcError)
 
-        response = await repair_tickets_monitor._create_tickets(email_data, {"1": "site_1", "6": "site_1"})
+        response = await repair_tickets_monitor._create_tickets(AnyEmail(), {"1": "site_1", "6": "site_1"})
 
         repair_tickets_monitor._subscribe_user_rpc.assert_not_awaited()
         assert response == CreateTicketsOutput(
@@ -1122,13 +1089,11 @@ class TestRepairTicketsMonitor:
     async def tickets_only_not_actionable_inferences_are_properly_handled_test(
         self,
         repair_tickets_monitor,
-        make_email,
         make_filter_flags,
         make_inference_data,
     ):
         email_id = "1234"
-        email = make_email(email_id=email_id)
-        tagged_email = {"email_id": email_id, "tag_id": 1}
+        email = AnyEmail("1234")
         filter_flags = make_filter_flags(
             tagger_is_below_threshold=True,
             rta_model1_is_below_threshold=True,
@@ -1142,7 +1107,6 @@ class TestRepairTicketsMonitor:
             predicted_class="Other",
         )
         repair_tickets_monitor._new_tagged_emails_repository = Mock()
-        repair_tickets_monitor._new_tagged_emails_repository.get_email_details.return_value = email
         repair_tickets_monitor._save_output = AsyncMock()
         repair_tickets_monitor._get_inference = AsyncMock(return_value=inference_data)
         repair_tickets_monitor._bruin_repository.get_single_ticket_basic_info = AsyncMock(
@@ -1152,10 +1116,10 @@ class TestRepairTicketsMonitor:
             }
         )
 
-        await repair_tickets_monitor._process_repair_email(tagged_email)
+        await repair_tickets_monitor._process_repair_email(email)
 
         expected_output = RepairEmailOutput(
-            email_id=1234,
+            email_id=email_id,
             tickets_could_be_updated=[TicketOutput(ticket_id="1234")],
             validated_tickets=[Ticket(id="1234", status=TicketStatus.IN_PROGRESS, call_type="REP", category="VOO")],
         )
@@ -1165,13 +1129,11 @@ class TestRepairTicketsMonitor:
     async def no_validated_service_numbers_test(
         self,
         repair_tickets_monitor,
-        make_email,
         make_filter_flags,
         make_inference_data,
     ):
         email_id = "1234"
-        email = make_email(email_id=email_id)
-        tagged_email = {"email_id": email_id, "tag_id": 1}
+        email = AnyEmail(id=email_id)
         filter_flags = make_filter_flags(
             tagger_is_below_threshold=True,
             rta_model1_is_below_threshold=True,
@@ -1185,15 +1147,13 @@ class TestRepairTicketsMonitor:
             predicted_class="Other",
         )
         repair_tickets_monitor._get_valid_service_numbers_site_map = AsyncMock(return_value={})
-        repair_tickets_monitor._new_tagged_emails_repository = Mock()
-        repair_tickets_monitor._new_tagged_emails_repository.get_email_details.return_value = email
         repair_tickets_monitor._save_output = AsyncMock()
         repair_tickets_monitor._get_inference = AsyncMock(return_value=inference_data)
 
-        await repair_tickets_monitor._process_repair_email(tagged_email)
+        await repair_tickets_monitor._process_repair_email(email)
 
         expected_output = RepairEmailOutput(
-            email_id=1234, tickets_cannot_be_created=[TicketOutput(reason="No validated service numbers")]
+            email_id=email_id, tickets_cannot_be_created=[TicketOutput(reason="No validated service numbers")]
         )
         repair_tickets_monitor._save_output.assert_awaited_once_with(expected_output)
 

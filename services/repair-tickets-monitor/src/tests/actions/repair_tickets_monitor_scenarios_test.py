@@ -12,6 +12,7 @@ from tests.actions.repair_tickets_monitor_scenarios import (
     RepairTicketsMonitorScenario,
     make_repair_tickets_monitor_scenarios,
 )
+from tests.fixtures.domain import AnyEmail
 
 scenarios = make_repair_tickets_monitor_scenarios()
 
@@ -24,9 +25,8 @@ async def repair_tickets_monitor_scenarios_test(
     repair_ticket_kre_repository,
     bruin_repository,
     inference_data_for,
-    make_email_tag_info,
 ):
-    def append_note_to_ticket_rpc(asset_id: AssetId):
+    def get_asset_topics_effect(asset_id: AssetId):
         return scenario.asset_topics.get(asset_id.service_number, [])
 
     def upsert_outage_ticket_rpc(asset_ids: List[AssetId], contact_email: str):
@@ -38,12 +38,12 @@ async def repair_tickets_monitor_scenarios_test(
             raise RpcFailedError(request=RpcRequest.construct(), response=RpcResponse(status=HTTPStatus.BAD_REQUEST))
 
     repair_tickets_monitor._append_note_to_ticket_rpc = AsyncMock(side_effect=scenario.append_note_to_ticket_effect)
-    repair_tickets_monitor._get_asset_topics_rpc = AsyncMock(side_effect=append_note_to_ticket_rpc)
+    repair_tickets_monitor._get_asset_topics_rpc = AsyncMock(side_effect=get_asset_topics_effect)
     repair_tickets_monitor._upsert_outage_ticket_rpc = AsyncMock(side_effect=upsert_outage_ticket_rpc)
     repair_ticket_kre_repository.get_email_inference = AsyncMock(return_value=inference_data_for(scenario))
     mock_bruin_repository(bruin_repository, scenario)
 
-    await repair_tickets_monitor._process_repair_email(make_email_tag_info())
+    await repair_tickets_monitor._process_repair_email(AnyEmail(id="0"))
 
     if scenario.expected_output is None:
         repair_ticket_kre_repository.save_outputs.assert_not_awaited()

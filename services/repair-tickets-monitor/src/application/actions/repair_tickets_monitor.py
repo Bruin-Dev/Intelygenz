@@ -15,6 +15,7 @@ from framework.nats.client import Client as NatsClient
 from pytz import timezone
 
 from application.domain.asset import Asset, AssetId, Assets
+from application.domain.email import Email
 from application.domain.repair_email_output import (
     CreateTicketsOutput,
     PotentialTicketsOutput,
@@ -99,12 +100,10 @@ class RepairTicketsMonitor:
         start_time = time.time()
 
         log.info("Getting all tagged emails...")
-        tagged_emails_by_stored_key: List[
-            Dict[str, dict]
-        ] = self._new_tagged_emails_repository.get_tagged_pending_emails()
-        log.info(tagged_emails_by_stored_key)
-        repair_emails, other_tags_emails = self._triage_emails_by_tag(tagged_emails_by_stored_key)
-        log.info(f"Got {len(tagged_emails_by_stored_key)} tagged emails.")
+        pending_emails: List[Email] = self._new_tagged_emails_repository.get_tagged_pending_emails()
+        log.info(pending_emails)
+        repair_emails, other_tags_emails = self._triage_emails_by_tag(pending_emails)
+        log.info(f"Got {len(pending_emails)} tagged emails.")
         log.info(f"Got {len(repair_emails)} Repair emails: {repair_emails}")
         log.info(f"Got {len(other_tags_emails)} emails with meaningless tags: {other_tags_emails}")
 
@@ -117,43 +116,45 @@ class RepairTicketsMonitor:
         if any(output):
             log.error("Unexpected output in repair monitor coroutines: %s", output)
 
-    def _triage_emails_by_tag(self, tagged_emails) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    def _triage_emails_by_tag(self, tagged_emails: List[Email]) -> Tuple[List[Email], List[Email]]:
         """Separate between repair emails and non repair emails"""
         repair_tag_id = self._config.MONITOR_CONFIG["tag_ids"]["Repair"]
-        repair_emails = [e for e in tagged_emails if str(e["tag_id"]) == str(repair_tag_id)]
-        other_tags_emails = [e for e in tagged_emails if str(e["tag_id"]) != str(repair_tag_id)]
+        repair_emails = [e for e in tagged_emails if str(e.tag.type) == str(repair_tag_id)]
+        other_tags_emails = [e for e in tagged_emails if str(e.tag.type) != str(repair_tag_id)]
 
         return repair_emails, other_tags_emails
 
-    async def _process_other_tags_email(self, email: Dict[str, Any]):
+    async def _process_other_tags_email(self, email: Email):
         """Process email that are not repair tickets"""
-        tag_id = str(email["tag_id"])
-        tag_name = [tag for tag, id_ in self._config.MONITOR_CONFIG["tag_ids"].items() if str(id_) == str(tag_id)][0]
+        tag_name = [
+            tag for tag, id_ in self._config.MONITOR_CONFIG["tag_ids"].items() if str(id_) == str(email.tag.type)
+        ][0]
 
-        log.info(f"Marking email {email['email_id']} as complete because it's tagged as '{tag_name}'")
-        self._new_tagged_emails_repository.mark_complete(email["email_id"])
+        log.info(f"Marking email {email.id} as complete because it's tagged as '{tag_name}'")
+        self._new_tagged_emails_repository.mark_complete(email.id)
 
-    async def _get_inference(self, email_data, tag_info):
+    async def _get_inference(self, email: Email):
         """Get the models inference for given email data"""
-        cc_addresses = ", ".join(email_data.get("send_cc")) if email_data.get("send_cc") else ""
-        email_id = email_data["email_id"]
         prediction_response = await self._repair_tickets_kre_repository.get_email_inference(
             {
-                "email_id": email_data["email_id"],
-                "client_id": email_data["client_id"],
-                "subject": email_data["subject"],
-                "body": email_data["body"],
-                "date": email_data["date"],
-                "from_address": email_data["from_address"],
-                "to": email_data["to_address"],
-                "cc": cc_addresses,
+                "email_id": email.id,
+                "client_id": email.client_id,
+                "subject": email.subject,
+                "body": email.body,
+                "date": email.date,
+                "from_address": email.sender_address,
+                "to": email.recipient_addresses,
+                "cc": email.comma_separated_cc_addresses(),
             },
-            tag_info,
+            {
+                "probability": email.tag.probability,
+            },
         )
+
         if prediction_response["status"] != 200:
             log.info(
                 "email_id=%s Error prediction response status code %s %s",
-                email_id,
+                email.id,
                 prediction_response["status"],
                 prediction_response["body"],
             )
@@ -196,7 +197,7 @@ class RepairTicketsMonitor:
         return service_number_site_id_map_with_cancellations, service_number_site_id_map_without_cancellations
 
     # To be refactored in an RPC
-    async def _get_tickets(self, email_id: str, tickets_id: List[int]) -> List[Ticket]:
+    async def _get_tickets(self, email_id: str, tickets_id: List[str]) -> List[Ticket]:
         """
         Return the tickets that already exist in Bruin
         """
@@ -227,25 +228,20 @@ class RepairTicketsMonitor:
 
         return validated_tickets
 
-    async def _process_repair_email(self, email_tag_info: Dict[str, Any]):
+    async def _process_repair_email(self, email: Email):
         """
         Process repair emails, verify it's service numbers, created/update tickets,
         and save the result of this operations into KRE.
         """
-        email_id = email_tag_info["email_id"]
+        log.info("email_id=%s Running Repair Email Process", email.id)
 
-        log.info("email_id=%s Running Repair Email Process", email_id)
-        email_data = self._new_tagged_emails_repository.get_email_details(email_id).get("email")
-        email_data["tag"] = email_tag_info
-        client_id = email_data["client_id"]
-
-        output = RepairEmailOutput(email_id=int(email_id))
+        output = RepairEmailOutput(email_id=email.id)
         async with self._semaphore:
             # Ask for potential services numbers to KRE
-            inference_data = await self._get_inference(email_data, email_tag_info)
+            inference_data = await self._get_inference(email)
             if not inference_data:
-                log.error("email_id=%s No inference data. Marking email as complete in Redis", email_id)
-                self._new_tagged_emails_repository.mark_complete(email_id)
+                log.error("email_id=%s No inference data. Marking email as complete in Redis", email.id)
+                self._new_tagged_emails_repository.mark_complete(email.id)
                 return
 
             is_actionable = self._is_inference_actionable(inference_data)
@@ -261,27 +257,27 @@ class RepairTicketsMonitor:
 
             log.info(
                 "email_id=%s inference: potential services numbers=%s potential_tickets_numbers=%s",
-                email_id,
+                email.id,
                 potential_service_numbers,
                 potential_ticket_numbers,
             )
 
-            output.validated_tickets = await self._get_tickets(email_id, potential_ticket_numbers)
+            output.validated_tickets = await self._get_tickets(email.id, potential_ticket_numbers)
 
             try:
                 # Check if the service number is valid against Bruin API
                 service_number_site_map = await self._get_valid_service_numbers_site_map(
-                    client_id, potential_service_numbers
+                    email.client_id, potential_service_numbers
                 )
                 output.service_numbers_sites_map = service_number_site_map
-                log.info("email_id=%s service_numbers_site_map=%s", email_id, service_number_site_map)
+                log.info("email_id=%s service_numbers_site_map=%s", email.id, service_number_site_map)
 
                 # Build the assets list
                 # This logic will be refactored into a new email_service.extract_entities() method
 
                 assets = Assets()
                 for service_number, site_id in service_number_site_map.items():
-                    asset_id = AssetId(client_id=client_id, site_id=site_id, service_number=service_number)
+                    asset_id = AssetId(client_id=email.client_id, site_id=site_id, service_number=service_number)
 
                     try:
                         allowed_asset_topics = await self._get_asset_topics_rpc(asset_id)
@@ -289,7 +285,7 @@ class RepairTicketsMonitor:
                         # TODO: sent slack notification
                         allowed_asset_topics = []
                         log.warning(
-                            f"[email_id={email_id}] _process_repair_email():" f"get_topics_device_rpc({asset_id}): {e}"
+                            f"[email_id={email.id}] _process_repair_email():" f"get_topics_device_rpc({asset_id}): {e}"
                         )
 
                     asset = Asset(id=asset_id, allowed_topics=allowed_asset_topics)
@@ -307,7 +303,7 @@ class RepairTicketsMonitor:
                 allowed_service_number_site_map = {
                     asset.id.service_number: asset.id.site_id for asset in allowed_assets
                 }
-                log.info("email_id=%s allowed_service_numbers_site_map=%s", email_id, allowed_service_number_site_map)
+                log.info("email_id=%s allowed_service_numbers_site_map=%s", email.id, allowed_service_number_site_map)
 
                 if wireless_assets:
                     output.tickets_cannot_be_created.append(TicketOutput(reason="contains_wireless_assets"))
@@ -317,21 +313,21 @@ class RepairTicketsMonitor:
                     output.tickets_cannot_be_created.append(TicketOutput(reason="no_topics_detected"))
 
                 # Gather any existing tickets for the extracted assets
-                existing_tickets = await self._get_existing_tickets(client_id, allowed_service_number_site_map)
-                log.info("email_id=%s existing_tickets=%s", email_id, existing_tickets)
+                existing_tickets = await self._get_existing_tickets(email.client_id, allowed_service_number_site_map)
+                log.info("email_id=%s existing_tickets=%s", email.id, existing_tickets)
             except ResponseException as e:
-                log.error("email_id=%s Error in bruin %s, could not process email", email_id, e)
+                log.error("email_id=%s Error in bruin %s, could not process email", email.id, e)
                 output.tickets_cannot_be_created.append(TicketOutput(reason=str(e)))
                 await self._save_output(output)
 
-                self._new_tagged_emails_repository.mark_complete(email_id)
+                self._new_tagged_emails_repository.mark_complete(email.id)
                 return
 
             # Remove site id with previous cancellations
             site_ids_with_previous_cancellations = self.get_site_ids_with_previous_cancellations(existing_tickets)
             log.info(
                 "email_id=%s Found %s sites with previous cancellations",
-                email_id,
+                email.id,
                 len(site_ids_with_previous_cancellations),
             )
             (
@@ -342,21 +338,21 @@ class RepairTicketsMonitor:
             )
             log.info(
                 "email_id=%s map_with_cancellations=%s map_without_cancellations=%s",
-                email_id,
+                email.id,
                 map_with_cancellations,
                 map_without_cancellations,
             )
 
             log.info(
                 "email_id=%s is_actionable=%s predicted_class=%s",
-                email_id,
+                email.id,
                 is_actionable,
                 inference_data.get("predicted_class"),
             )
 
             if is_actionable:
                 create_tickets_output = await self._create_tickets(
-                    email_data,
+                    email,
                     map_without_cancellations,
                 )
                 output.extend(create_tickets_output)
@@ -384,7 +380,7 @@ class RepairTicketsMonitor:
             if not allowed_service_number_site_map:
                 if is_ticket_actionable:
                     for ticket in operable_tickets:
-                        ticket_updated = await self._update_ticket(ticket, email_id, email_data)
+                        ticket_updated = await self._update_ticket(ticket, email)
                         if ticket_updated:
                             output.tickets_updated.append(
                                 TicketOutput(ticket_id=ticket.id, reason="update_with_ticket_found")
@@ -396,7 +392,7 @@ class RepairTicketsMonitor:
             if not service_number_site_map and not output.tickets_updated and not output.tickets_could_be_updated:
                 output.tickets_cannot_be_created.append(TicketOutput(reason="No validated service numbers"))
 
-            log.info("email_id=%s output_send_to_save=%s", email_id, output)
+            log.info("email_id=%s output_send_to_save=%s", email.id, output)
             await self._save_output(output)
 
             # we only mark the email as done in bruin when at least one ticket has been created or updated,
@@ -404,11 +400,11 @@ class RepairTicketsMonitor:
             tickets_automated = output.tickets_created or output.tickets_updated
             no_tickets_failed = not output.tickets_cannot_be_created
             if tickets_automated and no_tickets_failed and not feedback_not_created_due_cancellations:
-                log.info("email_id=%s Calling bruin to mark email as done", email_id)
-                await self._bruin_repository.mark_email_as_done(email_id)
+                log.info("email_id=%s Calling bruin to mark email as done", email.id)
+                await self._bruin_repository.mark_email_as_done(email.id)
 
-            log.info("email_id=%s Removing email from Redis", email_id)
-            self._new_tagged_emails_repository.mark_complete(email_id)
+            log.info("email_id=%s Removing email from Redis", email.id)
+            self._new_tagged_emails_repository.mark_complete(email.id)
             return
 
     async def _get_valid_service_numbers_site_map(
@@ -455,18 +451,12 @@ class RepairTicketsMonitor:
 
         return tickets_with_site_id
 
-    def _compose_bec_note_text(
-        self,
-        subject: str,
-        from_address: str,
-        body: str,
-        date: datetime,
-        is_update_note: bool = False,
-    ) -> str:
+    @staticmethod
+    def _compose_bec_note_text(email: Email, is_update_note: bool = False) -> str:
         new_ticket_message = "This ticket was opened via MetTel Email Center AI Engine."
         update_ticket_message = "This note is new commentary from the client and posted via BEC AI engine."
         operator_message = update_ticket_message if is_update_note else new_ticket_message
-        body_cleaned = html2text.html2text(body)
+        body_cleaned = html2text.html2text(email.body)
 
         return os.linesep.join(
             [
@@ -474,9 +464,9 @@ class RepairTicketsMonitor:
                 "BEC AI RTA",
                 "",
                 operator_message,
-                "Please review the full narrative provided in the email attached:\n" f"From: {from_address}",
-                f"Date Stamp: {date}",
-                f"Subject: {subject}",
+                "Please review the full narrative provided in the email attached:\n" f"From: {email.sender_address}",
+                f"Date Stamp: {email.date}",
+                f"Subject: {email.subject}",
                 f"Body: \n {body_cleaned}",
             ]
         )
@@ -485,15 +475,10 @@ class RepairTicketsMonitor:
         self,
         ticket_id: str,
         service_numbers: List[str],
-        subject: str,
-        from_address: str,
-        body: str,
-        date: datetime,
+        email: Email,
         is_update_note: bool = False,
     ) -> List[Dict]:
-        note_text = self._compose_bec_note_text(
-            subject=subject, from_address=from_address, body=body, date=date, is_update_note=is_update_note
-        )
+        note_text = self._compose_bec_note_text(email=email, is_update_note=is_update_note)
         notes = [{"text": note_text, "service_number": service_number} for service_number in service_numbers]
         log.info("ticket_id=%s Sending note: %s", ticket_id, notes)
 
@@ -501,19 +486,12 @@ class RepairTicketsMonitor:
 
     async def _create_tickets(
         self,
-        email_data: Dict[str, Any],
+        email: Email,
         service_number_site_map: Dict[str, str],
     ) -> CreateTicketsOutput:
         """
         Try to create tickets for valid service_number
         """
-        email_id = email_data["email_id"]
-        client_id = email_data["client_id"]
-        email_body = email_data["body"]
-        email_subject = email_data["subject"]
-        email_from_address = email_data["from_address"]
-        email_date = email_data["date"]
-
         # Return data
         create_tickets_output = CreateTicketsOutput()
 
@@ -523,15 +501,18 @@ class RepairTicketsMonitor:
 
         for site_id, service_numbers in site_id_sn_buckets.items():
             asset_ids = [
-                AssetId(client_id=client_id, site_id=site_id, service_number=service_number)
+                AssetId(client_id=email.client_id, site_id=site_id, service_number=service_number)
                 for service_number in service_numbers
             ]
 
             try:
-                result = await self._upsert_outage_ticket_rpc(asset_ids=asset_ids, contact_email=email_from_address)
+                result = await self._upsert_outage_ticket_rpc(asset_ids=asset_ids, contact_email=email.sender_address)
             except RpcError:
                 log.exception(
-                    "email_id=%s Error while creating ticket for %s and client %s", email_id, service_numbers, client_id
+                    "email_id=%s Error while creating ticket for %s and client %s",
+                    email.id,
+                    service_numbers,
+                    email.client_id,
                 )
                 create_tickets_output.tickets_cannot_be_created.append(
                     TicketOutput(
@@ -543,13 +524,13 @@ class RepairTicketsMonitor:
                 continue
 
             if result.status == UpsertedStatus.created:
-                log.info("email_id=%s Successfully created outage ticket %s", email_id, result.ticket_id)
+                log.info("email_id=%s Successfully created outage ticket %s", email.id, result.ticket_id)
                 create_tickets_output.tickets_created.append(
                     TicketOutput(ticket_id=result.ticket_id, site_id=site_id, service_numbers=service_numbers)
                 )
 
             elif result.status == UpsertedStatus.updated:
-                log.info("email_id=%s Ticket already present", email_id)
+                log.info("email_id=%s Ticket already present", email.id)
                 create_tickets_output.tickets_updated.append(
                     TicketOutput(
                         ticket_id=result.ticket_id,
@@ -562,19 +543,16 @@ class RepairTicketsMonitor:
             notes_to_append = self._compose_bec_note_to_ticket(
                 ticket_id=result.ticket_id,
                 service_numbers=service_numbers,
-                subject=email_subject,
-                from_address=email_from_address,
-                body=email_body,
-                date=email_date,
+                email=email,
                 is_update_note=result.status == UpsertedStatus.updated,
             )
 
             await self._bruin_repository.append_notes_to_ticket(result.ticket_id, notes_to_append)
-            await self._bruin_repository.link_email_to_ticket(result.ticket_id, email_id)
+            await self._bruin_repository.link_email_to_ticket(result.ticket_id, email.id)
             try:
-                await self._subscribe_user_rpc(ticket_id=result.ticket_id, user_email=email_from_address)
+                await self._subscribe_user_rpc(ticket_id=result.ticket_id, user_email=email.sender_address)
             except RpcError:
-                log.exception(f"email_id={email_id} Error while subscribing user to ticket {result.ticket_id}")
+                log.exception(f"email_id={email.id} Error while subscribing user to ticket {result.ticket_id}")
 
         return create_tickets_output
 
@@ -615,10 +593,8 @@ class RepairTicketsMonitor:
 
         return output
 
-    def _get_class_other_tickets(
-        self,
-        service_number_site_map: Dict[str, str],
-    ) -> List[TicketOutput]:
+    @staticmethod
+    def _get_class_other_tickets(service_number_site_map: Dict[str, str]) -> List[TicketOutput]:
         not_created_tickets = []
         site_ids = set(service_number_site_map.values())
 
@@ -687,14 +663,8 @@ class RepairTicketsMonitor:
             ]
         )
 
-    async def _update_ticket(self, ticket: Ticket, email_id: int, email_data: Dict[str, Any]) -> bool:
-        note = self._compose_bec_note_text(
-            subject=email_data.get("subject"),
-            from_address=email_data.get("from_address"),
-            body=email_data.get("body"),
-            date=email_data.get("date"),
-            is_update_note=True,
-        )
+    async def _update_ticket(self, ticket: Ticket, email: Email) -> bool:
+        note = self._compose_bec_note_text(email=email, is_update_note=True)
 
         try:
             note_appended = await self._append_note_to_ticket_rpc(ticket.id, note)
@@ -702,10 +672,10 @@ class RepairTicketsMonitor:
                 return False
         except RpcError as e:
             # TODO: send notification to slack
-            log.error("email_id=%s append_note_to_ticket_rpc(%s, %s) => %s", email_id, ticket.id, note, e)
+            log.error("email_id=%s append_note_to_ticket_rpc(%s, %s) => %s", email.id, ticket.id, note, e)
             return False
 
-        response = await self._bruin_repository.link_email_to_ticket(ticket.id, email_id)
+        response = await self._bruin_repository.link_email_to_ticket(ticket.id, email.id)
         if response.get("status") != 200:
             return False
         else:
