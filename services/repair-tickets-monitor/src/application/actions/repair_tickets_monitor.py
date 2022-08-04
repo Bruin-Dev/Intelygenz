@@ -413,11 +413,10 @@ class RepairTicketsMonitor:
                     auto_reply_reason = "No validated service numbers. Sent auto-reply"
                     await self._set_email_status_rpc(email.id, EmailStatus.AIQ)
                     await self._send_email_reply_rpc(email.id, resources.AUTO_REPLY_BODY)
-                    self._new_tagged_emails_repository.save_parent_email(email.parent)
+                    self._new_tagged_emails_repository.save_parent_email(email)
                 elif email.is_reply_email:
                     log.info(f"email_id={email.id} Restoring parent_email {email.parent.id}")
                     await self._set_email_status_rpc(email.parent.id, EmailStatus.NEW)
-                    self._new_tagged_emails_repository.remove_parent_email(email.parent)
 
                 output.tickets_cannot_be_created.append(TicketOutput(reason=auto_reply_reason))
 
@@ -431,9 +430,13 @@ class RepairTicketsMonitor:
             if tickets_automated and no_tickets_failed and not feedback_not_created_due_cancellations:
                 log.info("email_id=%s Calling bruin to mark email as done", email.id)
                 await self._bruin_repository.mark_email_as_done(email.id)
+                if email.is_reply_email:
+                    await self._bruin_repository.mark_email_as_done(email.parent.id)
 
             log.info("email_id=%s Removing email from Redis", email.id)
             self._new_tagged_emails_repository.mark_complete(email.id)
+            if email.is_reply_email:
+                self._new_tagged_emails_repository.remove_parent_email(email.parent)
             return
 
     async def _get_valid_service_numbers_site_map(

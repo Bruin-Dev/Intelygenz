@@ -58,6 +58,10 @@ def make_repair_tickets_monitor_scenarios():
     wireless_topic = Topic(call_type="REP", category=Category.WIRELESS_SERVICE_NOT_WORKING.value)
     other_category_topic = Topic(call_type="REP", category="018")
 
+    #
+    # Empty emails
+    #
+
     # check GetPrediction
     empty_reply_email = RepairTicketsMonitorScenario(
         assets={},

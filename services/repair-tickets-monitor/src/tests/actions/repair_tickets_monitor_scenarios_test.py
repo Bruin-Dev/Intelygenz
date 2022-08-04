@@ -76,7 +76,7 @@ async def repair_tickets_monitor_scenarios_test(
         repair_tickets_monitor._send_email_reply_rpc.assert_not_awaited()
 
     if scenario.parent_email_saved:
-        repair_tickets_monitor._new_tagged_emails_repository.save_parent_email.assert_called_once_with(email.parent)
+        repair_tickets_monitor._new_tagged_emails_repository.save_parent_email.assert_called_once_with(email)
     else:
         repair_tickets_monitor._new_tagged_emails_repository.save_parent_email.assert_not_called()
 
