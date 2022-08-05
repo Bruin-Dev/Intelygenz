@@ -12,6 +12,7 @@ class GetEmails:
         response = {"request_id": msg["request_id"], "body": None, "status": None}
 
         if msg.get("body") is None:
+            self._logger.error(f"Cannot get unread emails with {json.dumps(msg)}. Must include body in request")
             response["status"] = 400
             response["body"] = 'Must include "body" in request'
             await self._event_bus.publish_message(msg["response_topic"], response)
