@@ -58,8 +58,9 @@
            10. [Ixia Outage Monitoring](logging/events/10-ixia-outage-monitoring.md)
        3. Bridges
           1. [Bruin Bridge](logging/events/11-bruin-bridge.md)
-          2. [Notifications Bridge](logging/events/13-notifications-bridge.md)
           2. [VeloCloud Bridge](logging/events/12-velocloud-bridge.md)
+          3. [Notifications Bridge](logging/events/13-notifications-bridge.md)
+          4. [Email Bridge](logging/events/14-email-bridge.md)
     2. Infrastructure
         1. [Lambda Parameter-Replicator](lambda/PARAMETER_REPLICATOR.md)
 
