@@ -18,18 +18,25 @@ class EventEdgesForAlert:
         response = {"body": None, "status": None}
 
         if payload.get("body") is None:
+            logger.error(f"Cannot get edge events with {json.dumps(payload)}. JSON malformed")
+
             response["status"] = 400
             response["body"] = 'Must include "body" in request'
             await msg.respond(json.dumps(response).encode())
             return
 
         if not all(key in payload["body"].keys() for key in ("edge", "start_date", "end_date")):
+            logger.error(
+                f'Cannot get edge events with {json.dumps(payload)}. Need parameters "edge", "start_date" and '
+                f'"end_date"'
+            )
+
             response["status"] = 400
             response["body"] = 'Must include "edge", "start_date", "end_date" in request body'
             await msg.respond(json.dumps(response).encode())
             return
 
-        edgeids = payload["body"]["edge"]
+        edge = payload["body"]["edge"]
         start = payload["body"]["start_date"]
         end = payload["body"]["end_date"]
         limit = None
@@ -37,13 +44,15 @@ class EventEdgesForAlert:
 
         if "filter" in payload["body"].keys():
             filter_ = payload["body"]["filter"]
+            logger.info(f"Event types filter {filter_} will be used to get events for edge {edge}")
 
         if "limit" in payload["body"].keys():
             limit = payload["body"]["limit"]
+            logger.info(f"Will fetch up to {limit} events for edge {edge}")
 
-        logger.info(f"Sending events for edge with data {edgeids} for alerts")
+        logger.info(f"Getting events for edge {edge}...")
         events_by_edge = await self._velocloud_repository.get_all_edge_events(
-            edge=edgeids,
+            edge=edge,
             start=start,
             end=end,
             filter_events_status_list=filter_,
@@ -53,6 +62,4 @@ class EventEdgesForAlert:
         response["status"] = events_by_edge["status"]
 
         await msg.respond(json.dumps(response).encode())
-        logger.info(
-            f"Edge events for alerts published for request {json.dumps(payload)}. Message published was {response}"
-        )
+        logger.info(f"Edge events published for request {json.dumps(payload)}. Message published was {response}")

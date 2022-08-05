@@ -679,7 +679,7 @@ class TestVelocloudRepository:
 
         expected = {
             "status": 404,
-            "body": f"No edges found for enterprise ids {enterprise_ids}",
+            "body": f"No edges found for host {velocloud_host} and enterprise ids {enterprise_ids}",
         }
 
         assert response == expected

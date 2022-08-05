@@ -33,18 +33,30 @@ class GetEdgeLinksSeries:
         response = {"body": None, "status": None}
 
         if payload.get("body") is None:
+            logger.error(f"Cannot get edge links series with {json.dumps(payload)}. JSON malformed")
+
             response["status"] = 400
             response["body"] = 'Must include "body" in request'
             await msg.respond(json.dumps(response).encode())
             return
 
         if not all(key in payload["body"].keys() for key in REQUEST_MODEL["body"].keys()):
+            logger.error(
+                f"Cannot get edge links series with {json.dumps(payload)}. Make sure it complies with the shape of "
+                f"{REQUEST_MODEL}"
+            )
+
             response["status"] = 400
             response["body"] = f"Request's should look like {REQUEST_MODEL}"
             await msg.respond(json.dumps(response).encode())
             return
 
         if not all(key in payload["body"]["payload"].keys() for key in PAYLOAD_MODEL.keys()):
+            logger.error(
+                f'Cannot get edge links series with {json.dumps(payload)}. Need parameters "enterpriseId", "edgeId", '
+                f'"interval" and "metrics" under "payload"'
+            )
+
             response["status"] = 400
             response["body"] = f"Request's payload should look like {PAYLOAD_MODEL}"
             await msg.respond(json.dumps(response).encode())
@@ -53,8 +65,10 @@ class GetEdgeLinksSeries:
         host = payload["body"]["host"]
         payload = payload["body"]["payload"]
 
+        logger.info(f"Getting edge links series from host {host} using payload {payload}...")
         response = await self._velocloud_repository.get_edge_links_series(host=host, payload=payload)
         response["status"] = response["status"]
         response["body"] = response["body"]
 
         await msg.respond(json.dumps(response).encode())
+        logger.info(f"Published edge links series for host {host} and payload {payload}")

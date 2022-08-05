@@ -18,6 +18,8 @@ class EnterpriseNameList:
         response = {"body": None, "status": None}
 
         if payload.get("body") is None:
+            logger.error(f"Cannot get enterprise names with {json.dumps(payload)}. JSON malformed")
+
             response["status"] = 400
             response["body"] = 'Must include "body" in request'
             await msg.respond(json.dumps(response).encode())

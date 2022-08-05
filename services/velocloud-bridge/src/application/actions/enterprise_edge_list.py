@@ -18,12 +18,18 @@ class EnterpriseEdgeList:
         response = {"body": None, "status": None}
 
         if payload.get("body") is None:
+            logger.error(f"Cannot get enterprise edges with {json.dumps(payload)}. JSON malformed")
+
             response["status"] = 400
             response["body"] = 'Must include "body" in request'
             await msg.respond(json.dumps(response).encode())
             return
 
         if not all(key in payload["body"].keys() for key in ("host", "enterprise_id")):
+            logger.error(
+                f'Cannot get enterprise edges with {json.dumps(payload)}. Need parameters "host" and "enterprise_id"'
+            )
+
             response["status"] = 400
             response["body"] = 'Must include "host" and "enterprise_id" in request "body"'
             await msg.respond(json.dumps(response).encode())
@@ -32,7 +38,7 @@ class EnterpriseEdgeList:
         host = payload["body"]["host"]
         enterprise_id = payload["body"]["enterprise_id"]
 
-        logger.info("Getting enterprise edge list")
+        logger.info(f"Getting edges for host {host} and enterprise {enterprise_id}...")
         enterprise_edge_list = await self._velocloud_repository.get_enterprise_edges(
             host=host,
             enterprise_id=enterprise_id,

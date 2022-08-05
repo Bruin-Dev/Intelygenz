@@ -14,7 +14,7 @@ class VelocloudRepository:
         await self._velocloud_client.instantiate_and_connect_clients()
 
     async def get_all_edge_events(self, edge, start, end, limit, filter_events_status_list):
-        logger.info(f'Getting events from edge:{edge["edge_id"]} from time:{start} to time:{end}')
+        logger.info(f"Getting events for edge {edge} between {start} and {end}...")
         body = {
             "enterpriseId": edge["enterprise_id"],
             "interval": {"start": start, "end": end},
@@ -24,7 +24,7 @@ class VelocloudRepository:
         return await self._get_all_events(edge["host"], body, filter_events_status_list)
 
     async def get_all_enterprise_events(self, enterprise, host, start, end, limit, filter_events_status_list):
-        logger.info(f"Getting events from enterprise:{enterprise} from time:{start} to time:{end}")
+        logger.info(f"Getting events from enterprise {enterprise} of host {host} between {start} and {end}")
 
         body = {"enterpriseId": enterprise, "interval": {"start": start, "end": end}, "filter": {"limit": limit}}
 
@@ -32,10 +32,14 @@ class VelocloudRepository:
 
     async def _get_all_events(self, host, body, filter_events_status_list):
         if filter_events_status_list is not None:
+            logger.info(f"Using event type filter {filter_events_status_list} to get all events from host {host}")
             body["filter"]["rules"] = [{"field": "event", "op": "is", "values": filter_events_status_list}]
+
+        logger.info(f"Getting all events from host {host} using filters {body}")
         response = await self._velocloud_client.get_all_events(host, body)
 
         if response["status"] not in range(200, 300):
+            logger.error(f"Could not get all events from {host} using filters {body}. Response: {response}")
             return response
 
         full_events = response["body"]
@@ -67,6 +71,10 @@ class VelocloudRepository:
         links_with_edge_info_response = await self._velocloud_client.get_links_with_edge_info(velocloud_host)
 
         if links_with_edge_info_response["status"] not in range(200, 300):
+            logger.error(
+                f"Could not get links with edge info for host {velocloud_host}. Response: "
+                f"{links_with_edge_info_response}"
+            )
             return links_with_edge_info_response
 
         for elem in links_with_edge_info_response["body"]:
@@ -78,6 +86,10 @@ class VelocloudRepository:
         links_metric_info_response = await self._velocloud_client.get_links_metric_info(velocloud_host, interval)
 
         if links_metric_info_response["status"] not in range(200, 300):
+            logger.error(
+                f"Could not get links metric info for host {velocloud_host} and interval {interval}. Response: "
+                f"{links_metric_info_response}"
+            )
             return links_metric_info_response
 
         for elem in links_metric_info_response["body"]:
@@ -93,11 +105,16 @@ class VelocloudRepository:
 
         config_modules_response = await self._velocloud_client.get_edge_configuration_modules(edge_full_id)
         if config_modules_response["status"] not in range(200, 300):
+            logger.error(
+                f"Could not get links configuration for edge {edge_full_id}. Response: {config_modules_response}"
+            )
             return config_modules_response
 
         config_modules = config_modules_response["body"]
         config_wan_module = config_modules.get("WAN")
         if not config_wan_module:
+            logger.warning(f"No WAN module was found for edge {edge_full_id}")
+
             config_response["status"] = 404
             config_response["body"] = f"No WAN module was found for edge {edge_full_id}"
             return config_response
@@ -105,6 +122,8 @@ class VelocloudRepository:
         wan_module_data = config_wan_module["data"]
         links_configuration = wan_module_data.get("links")
         if not links_configuration:
+            logger.warning(f"No links configuration was found in WAN module of edge {edge_full_id}")
+
             config_response["status"] = 404
             config_response["body"] = f"No links configuration was found in WAN module of edge {edge_full_id}"
             return config_response
@@ -122,21 +141,31 @@ class VelocloudRepository:
         enterprise_edges_response = dict.fromkeys(["body", "status"])
 
         if response["status"] not in range(200, 300):
+            logger.error(
+                f"Could not get network enterprise edges for host {host} and enterprises {enterprise_ids}. Response: "
+                f"{enterprise_edges_response}"
+            )
             return response
 
         if not len(response["body"]):
-            enterprise_edges_response["body"] = f"No enterprises found for enterprise ids {enterprise_ids}"
+            logger.warning(f"No enterprises found for host {host} and enterprise ids {enterprise_ids}")
+            enterprise_edges_response[
+                "body"
+            ] = f"No enterprises found for host {host} and enterprise ids {enterprise_ids}"
             enterprise_edges_response["status"] = 404
 
         edges = sum([enterprise_info["edges"] for enterprise_info in response["body"]], [])
 
         if edges:
+            logger.info(f"Found {len(edges)} edges for host {host} and enterprise ids {enterprise_ids}")
+
             for edge in edges:
                 edge["host"] = host
             enterprise_edges_response["body"] = edges
             enterprise_edges_response["status"] = 200
         else:
-            enterprise_edges_response["body"] = f"No edges found for enterprise ids {enterprise_ids}"
+            logger.warning(f"No edges found for host {host} and enterprise ids {enterprise_ids}")
+            enterprise_edges_response["body"] = f"No edges found for host {host} and enterprise ids {enterprise_ids}"
             enterprise_edges_response["status"] = 404
 
         return enterprise_edges_response
@@ -145,6 +174,7 @@ class VelocloudRepository:
         response = await self._velocloud_client.get_network_gateways(host)
 
         if response["status"] not in range(200, 300):
+            logger.error(f"Could not get network gateways for host {host}. Response: {response}")
             return response
 
         gateways = []
