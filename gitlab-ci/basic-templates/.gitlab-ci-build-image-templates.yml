@@ -11,15 +11,16 @@
     - docker:18-dind
   before_script:
     - source ci-utils/environments/environment_assign.sh
-    - $(aws ecr get-login --no-include-email --region us-east-1)
     - pip3 install -r ci-utils/ecr/requirements.txt
   script:
+    - docker login ${CI_REGISTRY} -u ${GITLAB_TOKEN_USER} -p ${GITLAB_TOKEN}
     # GET COSIGNS KEYS
     - aws s3 sync s3://mettel-automation-keys/ . --exclude "*" --include "automation-engine-container-cosign*"
     - docker build --build-arg REPOSITORY_URL="${REPOSITORY_URL}"
       -t ${REPOSITORY_URL}/${MODULE_NAME}:${DOCKER_BUILD_LATEST_TAG}
       -t ${REPOSITORY_URL}/${MODULE_NAME}:${TAG}
       -f services/${MODULE_NAME}/Dockerfile .
+    - $(aws ecr get-login --no-include-email --region us-east-1)
     - docker push ${REPOSITORY_URL}/${MODULE_NAME}:${DOCKER_BUILD_LATEST_TAG}
     - docker push ${REPOSITORY_URL}/${MODULE_NAME}:${TAG}
     # Sign the container and store the signature in the registry (requires COSIGN_PASSWORD variable)
