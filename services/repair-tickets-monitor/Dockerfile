@@ -1,7 +1,7 @@
 #NOTE: This dockerfile is made to be run with context in the root of the monorepo
 ARG REPOSITORY_URL
 ARG DOCKER_BASE_IMAGE_VERSION
-FROM python:3.10.4-alpine3.16
+FROM registry.gitlab.intelygenz.com/mettel/dockers/images/python3.10-base:1.0.0.4-alpine3.16
 
 ENV PYTHONUNBUFFERED 1
 ENV PATH="/root/.local/bin:$PATH"

@@ -1,5 +1,5 @@
 #NOTE: This dockerfile is made to be run with context in the root of the monorepo
-FROM python:3.6-alpine
+FROM registry.gitlab.intelygenz.com/mettel/dockers/images/python3.6-alpine-base:1.0.0
 
 RUN apk --no-cache add curl gcc musl-dev libffi-dev g++
 RUN pip install --upgrade pip

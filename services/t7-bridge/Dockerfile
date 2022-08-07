@@ -1,5 +1,5 @@
 #NOTE: This dockerfile is made to be run with context in the root of the monorepo
-FROM python:3.6
+FROM registry.gitlab.intelygenz.com/mettel/dockers/images/python3.6-base:1.0.0
 
 RUN apt-get update -y
 RUN apt-get install -y curl gcc musl-dev
