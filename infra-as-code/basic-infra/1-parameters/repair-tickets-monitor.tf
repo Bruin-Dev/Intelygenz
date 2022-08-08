@@ -157,7 +157,7 @@ resource "aws_ssm_parameter" "parameter-repair-tickets-monitor-auto-reply-enable
 }
 
 resource "aws_ssm_parameter" "parameter-repair-tickets-monitor-auto-reply-whitelist" {
-  name        = "/automation-engine/${local.env}/repair-tickets-monitor/auto-reply-white-list"
+  name        = "/automation-engine/${local.env}/repair-tickets-monitor/auto-reply-whitelist"
   description = "Whitelist of email addresses to which auto-reply. An empty list means all addresses can be auto-replied"
   type        = "SecureString"
   value       = "[]"  # to edit go to parameter store dashboard.
