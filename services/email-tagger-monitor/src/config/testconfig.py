@@ -32,7 +32,6 @@ MONITOR_CONFIG = {
         "request_api_key": "123456",
         "endpoint_prefix": "",
     },
-    "reply_email_ttl": 300,
     "store_replies_enabled": True,
 }
 
