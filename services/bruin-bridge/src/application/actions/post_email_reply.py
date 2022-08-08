@@ -3,13 +3,13 @@ from logging import Logger
 from typing import Any
 
 from application.clients.bruin_client import BruinClient
-from application.clients.bruin_session import BruinPostBody, BruinPostRequest
+from application.clients.bruin_session import BruinPostRequest
 from dataclasses import dataclass
 from igz.packages.eventbus.eventbus import EventBus
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, ValidationError
 
 # TODO: to be changed to the actual path
-BRUIN_PATH = "/api/Email/{email_id}/reply"
+BRUIN_PATH = "/api/Notification/email/ReplyAll"
 
 
 @dataclass
@@ -33,9 +33,9 @@ class PostEmailReply:
 
         self.logger.info(f"Sending email {message_body.parent_email_id} an auto-reply")
         path = BRUIN_PATH.format(email_id=message_body.parent_email_id)
-        body = PostBody(reply_body=message_body.reply_body)
-        post_request = BruinPostRequest(path=path, body=body)
-
+        post_body = PostBody(content=message_body.reply_body, email_id=message_body.parent_email_id)
+        post_params = PostParams(isContentHTMLEncoded=message_body.html_reply_body)
+        post_request = BruinPostRequest(path=path, params=post_params.dict(), body=post_body)
         response = await self.bruin_client._bruin_session.post(post_request)
 
         if response.status == HTTPStatus.UNAUTHORIZED:
@@ -48,9 +48,15 @@ class PostEmailReply:
 
 
 class MessageBody(BaseModel):
-    parent_email_id: str
+    parent_email_id: int
     reply_body: str
+    html_reply_body: bool = True
 
 
 class PostBody(BaseModel):
-    reply_body: str
+    content: str
+    email_id: int
+
+
+class PostParams(BaseModel):
+    isContentHTMLEncoded: bool
