@@ -57,6 +57,42 @@ class TestNewEmailsRepository:
         storage_repository.save.assert_called_once_with(expected_email_id, email_data)
         assert response is None
 
+    def save_new_parent_email_ok_test(self, logger, notifications_repository, storage_repository):
+        storage_repository.save = Mock()
+        new_emails_repository = NewEmailsRepository(logger, testconfig, notifications_repository, storage_repository)
+
+        expected_email_id = "email_123456"
+        email_data = {
+            "email": {
+                "body": "the issue here",
+                "date": "2021-01-01T08:00:00.001Z",
+                "email_id": "123456",
+                "subject": "the title",
+            }
+        }
+        response = new_emails_repository.save_new_email(email_data)
+
+        storage_repository.save.assert_called_once_with(expected_email_id, email_data)
+        assert response is None
+
+    def save_new_reply_email_ok_test(self, logger, notifications_repository, storage_repository):
+        storage_repository.save = Mock()
+        new_emails_repository = NewEmailsRepository(logger, testconfig, notifications_repository, storage_repository)
+
+        expected_email_id = "email_123456"
+        email_data = {
+            "email": {
+                "body": "the issue here",
+                "date": "2021-01-01T08:00:00.001Z",
+                "email_id": "123456",
+                "subject": "the title",
+            }
+        }
+        response = new_emails_repository.save_new_email(email_data)
+
+        storage_repository.save.assert_called_once_with(expected_email_id, email_data)
+        assert response is None
+
     def mark_complete_ok_test(self, logger, notifications_repository, storage_repository):
         storage_repository.rename = Mock()
         storage_repository.expire = Mock()
