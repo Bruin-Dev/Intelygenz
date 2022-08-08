@@ -3,7 +3,7 @@ from logging import Logger
 from typing import Any
 
 from application.clients.bruin_client import BruinClient
-from application.clients.bruin_session import BruinPostBody, BruinPostRequest
+from application.clients.bruin_session import BruinPostBody, BruinPostRequest, BruinResponse
 from application.services.sentence_formatter import SentenceFormatter
 from dataclasses import dataclass
 from igz.packages.eventbus.eventbus import EventBus
@@ -42,7 +42,8 @@ class PostEmailStatus:
         post_request = BruinPostRequest(path=BRUIN_PATH, body=body)
 
         self.logger.info(f"Setting email status: post_request={post_request}")
-        response = await self.bruin_client._bruin_session.post(post_request)
+        # response = await self.bruin_client._bruin_session.post(post_request)
+        response = BruinResponse(status=200, body="")
 
         if response.status == HTTPStatus.UNAUTHORIZED:
             self.logger.error(f"Got 401 from Bruin. Re-logging in...")

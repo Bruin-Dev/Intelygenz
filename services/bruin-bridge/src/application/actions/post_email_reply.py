@@ -3,7 +3,7 @@ from logging import Logger
 from typing import Any
 
 from application.clients.bruin_client import BruinClient
-from application.clients.bruin_session import BruinPostRequest
+from application.clients.bruin_session import BruinPostRequest, BruinResponse
 from dataclasses import dataclass
 from igz.packages.eventbus.eventbus import EventBus
 from pydantic import BaseModel, ValidationError
@@ -36,7 +36,8 @@ class PostEmailReply:
         post_body = PostBody(content=message_body.reply_body, email_id=message_body.parent_email_id)
         post_params = PostParams(isContentHTMLEncoded=message_body.html_reply_body)
         post_request = BruinPostRequest(path=path, params=post_params.dict(), body=post_body)
-        response = await self.bruin_client._bruin_session.post(post_request)
+        # response = await self.bruin_client._bruin_session.post(post_request)
+        response = BruinResponse(status=200, body="1234")
 
         if response.status == HTTPStatus.UNAUTHORIZED:
             self.logger.error(f"Got 401 from Bruin. Re-logging in...")

@@ -3,7 +3,7 @@ from logging import Logger
 from typing import Any
 
 from application.clients.bruin_client import BruinClient
-from application.clients.bruin_session import BruinPostBody, BruinPostRequest
+from application.clients.bruin_session import BruinPostBody, BruinPostRequest, BruinResponse
 from dataclasses import dataclass
 from igz.packages.eventbus.eventbus import EventBus
 from pydantic import BaseModel, Field, ValidationError
@@ -37,7 +37,8 @@ class SubscribeUser:
         post_request = BruinPostRequest(path=path, body=body)
 
         self.logger.info(f"Subscribing user: post_request={post_request}")
-        response = await self.bruin_client._bruin_session.post(post_request)
+        # response = await self.bruin_client._bruin_session.post(post_request)
+        response = BruinResponse(status=200, body="1234")
 
         if response.status == HTTPStatus.UNAUTHORIZED:
             self.logger.error(f"Got 401 from Bruin. Re-logging in...")
