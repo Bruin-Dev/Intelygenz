@@ -544,7 +544,7 @@ function velocloud_bridge_variables() {
 }
 
 function create_enabled_var_for_each_subchart() {
-  # Create dinamically enabled value for each subchart in an environment variable
+  # Create dynamically enabled value for each subchart in an environment variable
   for environment_var in $(env | grep "_DESIRED"); do
     MODULE_DESIRED_TASKS_NAME=$(echo "${environment_var}" | awk -F "=" '{print $1}')
     MODULE_DESIRED_TASKS_VALUE=$(echo "${environment_var}" | awk -F "=" '{print $2}')

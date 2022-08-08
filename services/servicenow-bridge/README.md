@@ -36,7 +36,7 @@ We then format the API response into a response message and publish it to the re
 ```
 {
     'request_id': msg_dict['request_id'],
-    'body': Result recieved from the servicenow_client,
+    'body': Result received from the servicenow_client,
     'status': 201
 }
 ```

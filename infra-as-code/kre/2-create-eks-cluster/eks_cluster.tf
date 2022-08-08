@@ -122,7 +122,7 @@ module "mettel-automation-eks-cluster" {
       instance_type        = local.special_instance_type
       bootstrap_extra_args = "--kubelet-extra-args '${local.max-pods-per-node} --node-labels=dedicated=mongo --register-with-taints=dedicated=mongo:NoSchedule'"
 
-      # at this moment we only use 1 node, so force to use only one AZ for the EBS storage dependecy
+      # at this moment we only use 1 node, so force to use only one AZ for the EBS storage dependency
       subnet_ids   = [local.subnet_public_1a]
 
       min_size     = local.min-mongo-worker-nodes
@@ -144,7 +144,7 @@ module "mettel-automation-eks-cluster" {
       instance_type        = local.special_instance_type
       bootstrap_extra_args = "--kubelet-extra-args '--max-pods=110 --node-labels=dedicated=influx --register-with-taints=dedicated=influx:NoSchedule'"
 
-      # at this moment we only use 1 node, so force to use only one AZ for the EBS storage dependecy
+      # at this moment we only use 1 node, so force to use only one AZ for the EBS storage dependency
       subnet_ids   = [local.subnet_public_1b]
 
       min_size     = local.min-influx-worker-nodes

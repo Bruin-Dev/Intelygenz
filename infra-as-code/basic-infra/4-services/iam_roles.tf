@@ -87,7 +87,7 @@ resource "aws_iam_role_policy_attachment" "external-secrets-eks-attachment" {
 
 resource "aws_ssm_parameter" "external-secrets-eks-parameter" {
   name        = "/automation-engine/${substr(var.CURRENT_ENVIRONMENT, 0, 3)}/external-secrets/iam-role-arn"
-  description = "The ARN of the AWS IAM role necesary to manage parameter store and secret manager"
+  description = "The ARN of the AWS IAM role necessary to manage parameter store and secret manager"
   type        = "SecureString"
   value       = aws_iam_role.external-secrets-role-eks.arn
 

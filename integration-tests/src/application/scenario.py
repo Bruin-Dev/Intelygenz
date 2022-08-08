@@ -46,7 +46,7 @@ class Scenario:
 
     async def run(self) -> ScenarioResult:
         """
-        This is the main method to be overriden.
+        This is the main method to be overridden.
         Subclasses will fill it with their given, when and then statements.
         :return: the result of the scenario
         """

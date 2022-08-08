@@ -39,7 +39,7 @@ Scenarios will usually look for any route matching a given path and will delegat
 
 ### What is a path?
 A path is a stadard URI path that can be parametrized following [starlette http routing](https://www.starlette.io/routing/#http-routing) 
-(parameters wont be saved).
+(parameters won't be saved).
 
 ### What is a handler?
 A handler is just an `unittest.mock.AsyncMock` wrap.

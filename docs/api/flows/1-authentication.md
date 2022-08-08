@@ -6,7 +6,7 @@ Requisites
 ----------
 - Okta account/user set up
 - AWS login endpoint exposed to internet (Also whitelisted IP?)
-- create a user on okta that has permisions to check the user and the token 
+- create a user on okta that has permissions to check the user and the token 
 Description
 -----------
 As a requirement we need to accomplish centralized users and groups in Okta. We must connect Okta with our 
@@ -16,7 +16,7 @@ authentication workflow.
 Flow
 ----
 1. User will launch a signin call to our API endpoint
-2. Our API endpoint will call to the auth enpoint of okta.
+2. Our API endpoint will call to the auth endpoint of okta.
 3. 
 
 create api token

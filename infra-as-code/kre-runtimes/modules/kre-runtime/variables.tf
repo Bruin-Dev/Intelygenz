@@ -17,7 +17,7 @@ variable "CURRENT_ENVIRONMENT" {
 
 variable "HOSTED_ZONE_DOMAIN_NAME" {
   default = "mettel-automation.net"
-  description = "Name of the commmon domain name used in the project"
+  description = "Name of the common domain name used in the project"
 }
 
 variable "RUNTIME_NAME" {

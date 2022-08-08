@@ -2,7 +2,7 @@
 
 **Status:** Approved
 
-**Decission:** Future is to have an external Grafana that connects to an external Prometheus & InfluxDB 2
+**Decision:** Future is to have an external Grafana that connects to an external Prometheus & InfluxDB 2
 
 Implementation plan as following:
 - Prometheus will be deployed as an AWS Managed Prometheus.

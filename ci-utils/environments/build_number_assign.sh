@@ -5,7 +5,7 @@ function get_latest_docker_images() {
   LATEST_IMAGES_FOR_ECR_REPOSITORIES=$(cat /tmp/latest_images_for_ecr_repositories.json)
 }
 
-# Use JSON result to create dinamically variables for the latest docker image of each repository
+# Use JSON result to create dynamically variables for the latest docker image of each repository
 function declare_variables_for_latest_docker_images() {
   for repository in $(jq -r '.[] | .repository' <<< "${LATEST_IMAGES_FOR_ECR_REPOSITORIES}"); do
       MODULE_NAME="${repository}"

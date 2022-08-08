@@ -59,7 +59,7 @@ self._logger.info(
                 )
   ```
   * [_autoresolve_ticket_detail](_autoresolve_ticket_detail.md)
-  * If autoresolve status is SUCCES:
+  * If autoresolve status is SUCCESS:
     * [post_live_automation_metrics](../repositories/t7_repository/post_live_automation_metrics.md)
   * If autoresolve status is SKIPPED:
     ```

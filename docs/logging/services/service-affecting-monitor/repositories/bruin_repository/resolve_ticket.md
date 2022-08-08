@@ -6,7 +6,7 @@ self._logger.info(f"Resolving detail {detail_id} of ticket {ticket_id}...")
 
 * if `Exception`
   ```
-  self._logger.erorr(f"An error occurred while resolving detail {detail_id} of ticket {ticket_id} -> {e}")
+  self._logger.error(f"An error occurred while resolving detail {detail_id} of ticket {ticket_id} -> {e}")
   ```
 
 * if response_status in range(200, 300)
