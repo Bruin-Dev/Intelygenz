@@ -40,11 +40,13 @@ class RepairTicketClient:
     async def get_email_inference(self, email_data: dict) -> dict:
         try:
             stub = await self._create_stub()
+            self._logger.info(f"email_data={email_data}")
             email_message = Parse(
                 json.dumps({"email": email_data}).encode("utf8"),
                 pb2.PredictionRequest(),
                 ignore_unknown_fields=False,
             )
+            self._logger.info(f"email_message={email_message}")
 
             get_prediction_response = await stub.GetPrediction(
                 email_message,
