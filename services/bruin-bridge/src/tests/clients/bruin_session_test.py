@@ -48,6 +48,31 @@ class TestBruinSession:
         )
 
     @mark.asyncio
+    async def empty_params_get_requests_are_properly_handled_test(
+        self,
+        bruin_session_builder: Callable[..., BruinSession],
+        client_response_builder: Callable[..., ClientResponse],
+    ):
+        url = "any_url"
+        path = "any_path"
+        access_token = "any_access_token"
+        response_status = hash("any_response_status")
+        response_body = "any_response_body"
+        client_response = client_response_builder(response_body=response_body, status=response_status)
+        bruin_session = bruin_session_builder(base_url=url, access_token=access_token)
+        bruin_session.session.get = CoroutineMock(return_value=client_response)
+
+        subject = await bruin_session.get(BruinGetRequest(path=path))
+
+        assert subject == BruinResponse(status=response_status, body=response_body)
+        bruin_session.session.get.assert_awaited_once_with(
+            f"{url}{path}",
+            params={},
+            headers={"authorization": f"Bearer {access_token}", **COMMON_HEADERS},
+            ssl=False,
+        )
+
+    @mark.asyncio
     async def client_connection_error_get_requests_are_properly_handled_test(
         self,
         bruin_session_builder: Callable[..., BruinSession],
@@ -90,6 +115,37 @@ class TestBruinSession:
         client_response = client_response_builder(response_body=response_body, status=response_status)
         bruin_session = bruin_session_builder(base_url=url, access_token=access_token)
         bruin_session.session.post = CoroutineMock(return_value=client_response)
+        params = {"query_param": "value"}
+
+        request = BruinPostRequest(path=path, params=params, body=FooBody(any_parameter="any_value"))
+        subject = await bruin_session.post(request)
+
+        assert subject == BruinResponse(status=response_status, body=response_body)
+        bruin_session.session.post.assert_awaited_once_with(
+            f"{url}{path}",
+            headers={"authorization": f"Bearer {access_token}", **COMMON_HEADERS},
+            params={"QueryParam": "value"},
+            json={"anyParameter": "any_value"},
+            ssl=False,
+        )
+
+    @mark.asyncio
+    async def empty_params_post_requests_are_properly_handled_test(
+        self,
+        bruin_session_builder: Callable[..., BruinSession],
+        client_response_builder: Callable[..., ClientResponse],
+    ):
+        class FooBody(BruinPostBody):
+            any_parameter: str = Field(alias="anyParameter")
+
+        url = "any_url"
+        path = "any_path"
+        access_token = "any_access_token"
+        response_status = hash("any_response_status")
+        response_body = "any_response_body"
+        client_response = client_response_builder(response_body=response_body, status=response_status)
+        bruin_session = bruin_session_builder(base_url=url, access_token=access_token)
+        bruin_session.session.post = CoroutineMock(return_value=client_response)
 
         request = BruinPostRequest(path=path, body=FooBody(any_parameter="any_value"))
         subject = await bruin_session.post(request)
@@ -97,8 +153,9 @@ class TestBruinSession:
         assert subject == BruinResponse(status=response_status, body=response_body)
         bruin_session.session.post.assert_awaited_once_with(
             f"{url}{path}",
-            json={"anyParameter": "any_value"},
             headers={"authorization": f"Bearer {access_token}", **COMMON_HEADERS},
+            params={},
+            json={"anyParameter": "any_value"},
             ssl=False,
         )
 
