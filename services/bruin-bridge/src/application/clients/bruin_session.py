@@ -35,7 +35,8 @@ class BruinSession:
 
         url = f"{self.base_url}{request.path}"
         headers = self.bruin_headers()
-        params = humps.pascalize(request.params)
+        params = request.params if request.params else {}
+        params = humps.pascalize(params)
 
         try:
             client_response = await self.session.get(url, headers=headers, params=params, ssl=False)
@@ -59,10 +60,16 @@ class BruinSession:
 
         url = f"{self.base_url}{request.path}"
         headers = self.bruin_headers()
+        params = request.params if request.params else {}
+        params = humps.pascalize(params)
 
         try:
             client_response = await self.session.post(
-                url, headers=headers, json=request.body.dict(by_alias=True), ssl=False
+                url,
+                headers=headers,
+                params=params,
+                json=request.body.dict(by_alias=True),
+                ssl=False,
             )
             response = await BruinResponse.from_client_response(client_response)
 
@@ -102,10 +109,11 @@ class BruinResponse(BaseModel):
 
 class BruinRequest(BaseModel):
     path: str
+    params: Optional[Dict[str, str]] = None
 
 
 class BruinGetRequest(BruinRequest):
-    params: Dict[str, str]
+    pass
 
 
 class BruinPostRequest(BruinRequest):
