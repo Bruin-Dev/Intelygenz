@@ -46,7 +46,7 @@ class RepairTicketClient:
                 pb2.PredictionRequest(),
                 ignore_unknown_fields=False,
             )
-            self._logger.info(f"email_message={email_message}")
+            self._logger.info(f"email_message={email_message}.")
 
             get_prediction_response = await stub.GetPrediction(
                 email_message,
