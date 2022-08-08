@@ -46,7 +46,7 @@ class PostOutageTicket:
         # outage_ticket = await self._bruin_repository.post_outage_ticket(
         #     client_id, service_number, ticket_contact=ticket_contact
         # )
-        outage_ticket = {"body": "", "status": 200}
+        outage_ticket = {"body": "1234", "status": 200}
 
         self._logger.info(f"Outage ticket posted using parameters {json.dumps(msg)}")
         response["body"] = outage_ticket["body"]
