@@ -445,6 +445,47 @@ fraud-monitor:
       memory: 256Mi
 
 
+# -- gateway-monitor subchart specific configuration
+gateway-monitor:
+  enabled: ${GATEWAY_MONITOR_ENABLED}
+  replicaCount: ${GATEWAY_MONITOR_DESIRED_TASKS}
+  config:
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/gateway-monitor
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ${GATEWAY_MONITOR_BUILD_NUMBER}
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  autoscaling:
+    enabled: ${GATEWAY_MONITOR_ENABLED}
+    minReplicas: ${GATEWAY_MONITOR_DESIRED_TASKS}
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+
+
 # -- hawkeye-affecting-monitor subchart specific configuration
 hawkeye-affecting-monitor:
   enabled: ${HAWKEYE_AFFECTING_MONITOR_ENABLED}
@@ -1223,45 +1264,6 @@ velocloud-bridge:
   autoscaling:
     enabled: ${VELOCLOUD_BRIDGE_ENABLED}
     minReplicas: ${VELOCLOUD_BRIDGE_DESIRED_TASKS}
-    maxReplicas: 3
-    targetCPUUtilizationPercentage: 80
-    targetMemoryUtilizationPercentage: 80
-
-
-# -- gateway-monitor subchart specific configuration
-gateway-monitor:
-  enabled: ${GATEWAY_MONITOR_ENABLED}
-  replicaCount: ${GATEWAY_MONITOR_DESIRED_TASKS}
-  config:
-    metrics:
-      # -- Indicates whether the microservice will expose metrics through prometheus.
-      enabled: true
-      svc:
-        port: 9090
-        name: metrics
-      ## Additional labels for the service monitor
-      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
-      labels: {}
-      #labels:
-      #  servicediscovery: true
-  image:
-    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/gateway-monitor
-    pullPolicy: Always
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: ${GATEWAY_MONITOR_BUILD_NUMBER}
-  service:
-    type: ClusterIP
-    port: 5000
-  resources:
-    limits:
-      cpu: 200m
-      memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
-  autoscaling:
-    enabled: ${GATEWAY_MONITOR_ENABLED}
-    minReplicas: ${GATEWAY_MONITOR_DESIRED_TASKS}
     maxReplicas: 3
     targetCPUUtilizationPercentage: 80
     targetMemoryUtilizationPercentage: 80

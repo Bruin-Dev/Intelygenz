@@ -522,6 +522,8 @@ gateway-monitor:
   # -- Number of replicas of gateway-monitor module
   replicaCount: 1
   config:
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
     metrics:
       # -- Indicates whether the microservice will expose metrics through prometheus.
       enabled: true

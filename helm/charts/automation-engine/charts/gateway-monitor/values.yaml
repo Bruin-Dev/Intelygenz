@@ -36,6 +36,47 @@ global:
     name: "ecr-registry"
 
 config:
+  capabilities_enabled:
+    # -- Indicate if bruin-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # bruin-bridge service responds correctly to healthcheck calls.
+    bruin_bridge: true
+    # -- Indicate if customer-cache is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # customer-cache service responds correctly to healthcheck calls.
+    customer_cache: true
+    # -- Indicate if digi-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # digi-bridge service responds correctly to healthcheck calls.
+    digi_bridge: true
+    # -- Indicate if email-tagger-kre-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # email-tagger-kre-bridge service responds correctly to healthcheck calls.
+    email_tagger_kre_bridge: true
+    # -- Indicate if hawkeye-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # hawkeye-bridge service responds correctly to healthcheck calls.
+    hawkeye_bridge: true
+    # -- Indicate if hawkeye-customer-cache is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # hawkeye-customer-cache service responds correctly to healthcheck calls.
+    hawkeye_customer_cache: true
+    # -- Indicate if notifier is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # notifier service responds correctly to healthcheck calls.
+    notifier: true
+    # -- Indicate if repair-tickets-kre-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # repair-tickets-kre-bridge service responds correctly to healthcheck calls.
+    repair_tickets_kre_bridge: true
+    # -- Indicate if t7-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # t7-bridge service responds correctly to healthcheck calls.
+    t7_bridge: true
+    # -- Indicate if velocloud-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # velocloud-bridge service responds correctly to healthcheck calls.
+    velocloud_bridge: true
   metrics:
     # -- Indicates whether the microservice will expose metrics through prometheus.
     enabled: true
