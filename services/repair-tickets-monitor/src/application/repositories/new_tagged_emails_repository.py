@@ -58,7 +58,9 @@ class NewTaggedEmailsRepository:
                 log.info(f"redis_parent_email={redis_parent_email}")
                 if redis_parent_email:
                     email.parent = self.deserialize_email(redis_parent_email)
+                    log.info(f"email.parent={email.parent}")
 
+            log.info(f"email={email}")
             emails.append(email)
 
         return emails
