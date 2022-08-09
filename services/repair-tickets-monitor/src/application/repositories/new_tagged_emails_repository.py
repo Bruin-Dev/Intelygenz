@@ -42,14 +42,20 @@ class NewTaggedEmailsRepository:
 
         emails = []
         for dict_email_tag in dict_email_tags:
+            log.info(f"dict_email_tag={dict_email_tag}")
             legacy_email_tag = LegacyRedisEmailTag.parse_obj(dict_email_tag)
+            log.info(f"legacy_email_tag={legacy_email_tag}")
             dict_email = self.get_email_details(legacy_email_tag.email_id).get("email")
+            log.info(f"dict_email={dict_email}")
             legacy_email = LegacyRedisEmail.parse_obj(dict_email)
+            log.info(f"legacy_email={legacy_email}")
             redis_email = self.map_legacy_email(legacy_email, legacy_email_tag)
+            log.info(f"redis_email={redis_email}")
 
             email = self.deserialize_email(redis_email)
             if redis_email.parent_id is not None:
                 redis_parent_email = self._parent_email_storage.find(redis_email.parent_id)
+                log.info(f"redis_parent_email={redis_parent_email}")
                 if redis_parent_email:
                     email.parent = self.deserialize_email(redis_parent_email)
 
