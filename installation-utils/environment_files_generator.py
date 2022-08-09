@@ -298,6 +298,7 @@ EMAIL_TAGGER_MONITOR__MAX_CONCURRENT_TICKETS = parameters["common"]["email-tagge
 EMAIL_TAGGER_MONITOR__API_REQUEST_KEY = parameters["dev"]["email-tagger-monitor"]["api-request-key"]
 EMAIL_TAGGER_MONITOR__API_REQUEST_SIGNATURE_SECRET_KEY = parameters["dev"]["email-tagger-monitor"]["api-request-signature-secret-key"]
 EMAIL_TAGGER_MONITOR__API_ENDPOINT_PREFIX = parameters["common"]["email-tagger-monitor"]["api-endpoint-prefix"]
+EMAIL_TAGGER_MONITOR__STORE_REPLIES_ENABLED = parameters["dev"]["email-tagger-monitor"]["store-replies-enabled"]
 
 # Velocloud variables
 VELOCLOUD_CREDENTIALS = parameters["dev"]["velocloud-bridge"]["velocloud-credentials"]
@@ -413,6 +414,7 @@ env_dict = {
         f"NEW_TICKETS_JOB_INTERVAL={EMAIL_TAGGER_MONITOR__NEW_TICKETS_JOB_INTERVAL}",
         f"MAX_CONCURRENT_EMAILS={EMAIL_TAGGER_MONITOR__MAX_CONCURRENT_EMAILS}",
         f"MAX_CONCURRENT_TICKETS={EMAIL_TAGGER_MONITOR__MAX_CONCURRENT_TICKETS}",
+        f"STORE_REPLIES_ENABLED={EMAIL_TAGGER_MONITOR__STORE_REPLIES_ENABLED}",
         f"PAPERTRAIL_ACTIVE={PAPERTRAIL_ACTIVE}",
         f"PAPERTRAIL_HOST={PAPERTRAIL_HOST}",
         f"PAPERTRAIL_PORT={PAPERTRAIL_PORT}",

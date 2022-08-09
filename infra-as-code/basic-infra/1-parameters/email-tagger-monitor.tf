@@ -135,3 +135,21 @@ resource "aws_ssm_parameter" "parameter-email-tagger-monitor-new-tickets-job-int
     note = "can be updated from the parameter store dashboard"
   })
 }
+
+resource "aws_ssm_parameter" "parameter-email-tagger-monitor-store-replies-enabled" {
+  name        = "/automation-engine/${local.env}/email-tagger-monitor/store-replies-enabled"
+  description = "If enabled, stores any valid reply for RTA to process it"
+  type        = "String"
+  value       = "false"  # to edit go to parameter store dashboard.
+
+  lifecycle {
+    ignore_changes = [
+      value,
+    ]
+  }
+
+  tags = merge(var.common_info, {
+    Name = "STORE_REPLIES_ENABLED"
+    note = "can be updated from the parameter store dashboard"
+  })
+}
