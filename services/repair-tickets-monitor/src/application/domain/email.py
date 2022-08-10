@@ -16,11 +16,11 @@ class Email:
     client_id: str
     date: datetime
     subject: str
-    body: str
+    body: str = field(repr=False)
     tag: EmailTag
-    sender_address: str
-    recipient_addresses: List[str] = field(default_factory=list)
-    cc_addresses: List[str] = field(default_factory=list)
+    sender_address: str = field(repr=False)
+    recipient_addresses: List[str] = field(default_factory=list, repr=False)
+    cc_addresses: List[str] = field(default_factory=list, repr=False)
     parent: Optional["Email"] = None
 
     def comma_separated_cc_addresses(self) -> str:
