@@ -21,7 +21,7 @@ class LegacyRedisEmail(BaseModel):
     body: str
     from_address: str
     to_address: List[str]
-    send_cc: List[str]
+    send_cc: Optional[List[str]]
     parent_id: Optional[int]
 
 
@@ -113,6 +113,6 @@ class NewTaggedEmailsRepository:
             body=legacy_email.body,
             sender_address=legacy_email.from_address,
             recipient_addresses=legacy_email.to_address,
-            cc_addresses=legacy_email.send_cc,
+            cc_addresses=legacy_email.send_cc if legacy_email.send_cc else [],
             tag=RedisEmailTag(type=legacy_email_tag.tag_id, probability=legacy_email_tag.tag_probability),
         )
