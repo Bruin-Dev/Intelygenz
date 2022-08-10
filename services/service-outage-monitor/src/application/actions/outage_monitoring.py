@@ -1152,8 +1152,8 @@ class OutageMonitor:
 
         return seconds_elapsed_since_creation >= max_seconds_since_creation
 
-    def _get_target_severity(self, edge_status: dict):
-        if self._outage_repository.is_faulty_edge(edge_status["edgeState"]):
+    def _get_target_severity(self, is_edge_down: bool):
+        if is_edge_down:
             return self._config.MONITOR_CONFIG["severity_by_outage_type"]["edge_down"]
         else:
             return self._config.MONITOR_CONFIG["severity_by_outage_type"]["link_down"]
@@ -1437,7 +1437,8 @@ class OutageMonitor:
         links_configuration = cached_edge["links_configuration"]
         client_id = cached_edge["bruin_client_info"]["client_id"]
         client_name = cached_edge["bruin_client_info"]["client_name"]
-        target_severity = self._get_target_severity(edge_status)
+        is_edge_down = self._outage_repository.is_faulty_edge(edge_status["edgeState"])
+        target_severity = self._get_target_severity(is_edge_down)
         has_faulty_digi_link = self._has_faulty_digi_link(edge_links, logical_id_list)
         has_faulty_byob_link = self._has_faulty_blacklisted_link(edge_links)
         faulty_link_types = self._get_faulty_link_types(edge_links, links_configuration)
