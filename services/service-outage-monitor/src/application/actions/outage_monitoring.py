@@ -639,8 +639,10 @@ class OutageMonitor:
         else:
             return self._config.MONITOR_CONFIG["jobs_intervals"]["forward_to_hnoc_edge_down"]
 
-    def _should_forward_to_hnoc(self, link_data: list) -> bool:
+    def _should_forward_to_hnoc(self, link_data: list, is_edge_down: bool) -> bool:
         if self._config.VELOCLOUD_HOST == "metvco04.mettel.net":
+            return True
+        if is_edge_down:
             return True
         return not self._has_faulty_blacklisted_link(link_data)
 
@@ -1476,7 +1478,7 @@ class OutageMonitor:
                     check_ticket_tasks=False,
                 )
 
-                if self._should_forward_to_hnoc(edge_links):
+                if self._should_forward_to_hnoc(edge_links, is_edge_down):
                     forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, edge)
                     self.schedule_forward_to_hnoc_queue(
                         forward_time,
@@ -1530,7 +1532,7 @@ class OutageMonitor:
                 )
 
                 if change_severity_result is not ChangeTicketSeverityStatus.NOT_CHANGED:
-                    if self._should_forward_to_hnoc(edge_links):
+                    if self._should_forward_to_hnoc(edge_links, is_edge_down):
                         forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, edge)
                         self.schedule_forward_to_hnoc_queue(
                             forward_time,
@@ -1600,7 +1602,7 @@ class OutageMonitor:
                     check_ticket_tasks=True,
                 )
 
-                if self._should_forward_to_hnoc(edge_links):
+                if self._should_forward_to_hnoc(edge_links, is_edge_down):
                     forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, edge)
                     self.schedule_forward_to_hnoc_queue(
                         forward_time,
@@ -1669,7 +1671,7 @@ class OutageMonitor:
                     check_ticket_tasks=True,
                 )
 
-                if self._should_forward_to_hnoc(edge_links):
+                if self._should_forward_to_hnoc(edge_links, is_edge_down):
                     forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, edge)
                     self.schedule_forward_to_hnoc_queue(
                         forward_time,
@@ -1732,7 +1734,7 @@ class OutageMonitor:
                     check_ticket_tasks=False,
                 )
 
-                if self._should_forward_to_hnoc(edge_links):
+                if self._should_forward_to_hnoc(edge_links, is_edge_down):
                     forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, edge)
                     self.schedule_forward_to_hnoc_queue(
                         forward_time,

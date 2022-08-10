@@ -8332,9 +8332,10 @@ class TestServiceOutageMonitor:
                 "linkId": 5293,
             }
         ]
+        is_edge_down = False
 
         with patch.object(outage_monitor._config, "VELOCLOUD_HOST", "metvco04.mettel.net"):
-            result = outage_monitor._should_forward_to_hnoc(link_data)
+            result = outage_monitor._should_forward_to_hnoc(link_data, is_edge_down)
         assert result is True
 
     def should_forward_to_hnoc_non_byob_and_not_faulty_display_name_test(self, outage_monitor):
@@ -8347,9 +8348,11 @@ class TestServiceOutageMonitor:
                 "linkId": 5293,
             }
         ]
+        is_edge_down = False
+
         outage_monitor._outage_repository.is_faulty_link = Mock(return_value=False)
 
-        result = outage_monitor._should_forward_to_hnoc(link_data)
+        result = outage_monitor._should_forward_to_hnoc(link_data, is_edge_down)
         assert result is True
 
     def should_forward_to_hnoc_byob_and_not_faulty_display_name_test(self, outage_monitor):
@@ -8369,8 +8372,9 @@ class TestServiceOutageMonitor:
                 "linkId": 5293,
             },
         ]
+        is_edge_down = False
 
-        result = outage_monitor._should_forward_to_hnoc(link_data)
+        result = outage_monitor._should_forward_to_hnoc(link_data, is_edge_down)
         assert result is True
 
     def should_forward_to_hnoc_byob_link_display_name_test(self, outage_monitor):
@@ -8390,9 +8394,11 @@ class TestServiceOutageMonitor:
                 "linkId": 5293,
             },
         ]
+        is_edge_down = False
+
         outage_monitor._outage_repository.is_faulty_link = Mock(return_value=True)
 
-        result = outage_monitor._should_forward_to_hnoc(link_data)
+        result = outage_monitor._should_forward_to_hnoc(link_data, is_edge_down)
         assert result is False
 
     @pytest.mark.asyncio
