@@ -136,7 +136,7 @@ The following [diagram](https://app.diagrams.net/#G1UztleVULGVS86wYXTEh7efsb2zdB
 
 #### Email bridge microservice
 
-This microservice is in charge of sending emails and SMS.
+This microservice is in charge of sending emails.
 
 It is important to point out that it is not in charge of the composition of the messages to be sent, that is to say, of their content, but only of sending them.
 
@@ -146,7 +146,7 @@ The following [diagram](https://app.diagrams.net/#G19IZI0cCp1odvYIwgMGlrGiQfKYZb
 
 #### Notifications bridge microservice
 
-This microservice is in charge of sending Slack notifications .
+This microservice is in charge of sending notifications to third-party systems.
 
 It is important to point out that it is not in charge of the composition of the messages to be sent, that is to say, of their content, but only of sending them.
 

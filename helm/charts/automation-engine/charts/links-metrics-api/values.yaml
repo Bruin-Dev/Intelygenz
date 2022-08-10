@@ -102,6 +102,14 @@ config:
     # will be created in the microservice deployment that will wait until the
     # velocloud-bridge service responds correctly to healthcheck calls.
     velocloud_bridge: true
+    # -- [NOT USED] Indicate if email-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # email-bridge service responds correctly to healthcheck calls.
+    email_bridge: true
+    # -- [NOT USED] Indicate if notifications-bridge is going to be activated. If it is true an initContainer
+    # will be created in the microservice deployment that will wait until the
+    # notifications-bridge service responds correctly to healthcheck calls.
+    notifications_bridge: true
   metrics:
     # -- Indicates whether the microservice will expose metrics through prometheus.
     enabled: true

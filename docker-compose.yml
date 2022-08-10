@@ -450,6 +450,7 @@ services:
 #      - nats-server
 #      - redis
 #      - "notifications-bridge"
+#      - "email-bridge"
 #    ports:
 #      - <port_mapped_to_quartz>:5000
 #      - <port_mapped_to_metrics_server>:9090
@@ -476,7 +477,6 @@ services:
 #      - nats-server
 #      - redis
 #      - "notifications-bridge"
-#      - "email-bridge"
 #    ports:
 #      - <port_mapped_to_quartz>:5000
 #      - <port_mapped_to_metrics_server>:9090
