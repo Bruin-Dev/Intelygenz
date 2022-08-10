@@ -22,6 +22,8 @@ IPA_SYSTEM_USERNAME_IN_BRUIN = os.environ["IPA_SYSTEM_USERNAME_IN_BRUIN"]
 MONITOR_CONFIG = {
     "max_retries_error_404": 5,
     "tag_ids": json.loads(os.environ["TAG_IDS_MAPPING"]),
+    "auto_reply_enabled": os.environ["AUTO_REPLY_ENABLED"] == "true",
+    "auto_reply_whitelist": json.loads(os.environ["AUTO_REPLY_WHITELIST"]),
     "scheduler_config": {
         "repair_ticket_monitor": int(os.environ["RTA_MONITOR_JOB_INTERVAL"]),
         "new_created_tickets_feedback": int(os.environ["NEW_CREATED_TICKETS_FEEDBACK_JOB_INTERVAL"]),

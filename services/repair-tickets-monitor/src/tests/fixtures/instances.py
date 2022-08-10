@@ -1,8 +1,6 @@
 from unittest.mock import AsyncMock, Mock, create_autospec
 
 import pytest
-from framework.nats.client import Client as NatsClient
-
 from application.actions.new_closed_tickets_feedback import NewClosedTicketsFeedback
 from application.actions.new_created_tickets_feedback import NewCreatedTicketsFeedback
 from application.actions.repair_tickets_monitor import RepairTicketsMonitor
@@ -13,6 +11,8 @@ from application.repositories.notifications_repository import NotificationsRepos
 from application.repositories.repair_ticket_kre_repository import RepairTicketKreRepository
 from application.repositories.storage_repository import StorageRepository
 from config import testconfig as config
+from framework.nats.client import Client as NatsClient
+from framework.storage.model import RepairParentEmailStorage
 from tests.fixtures._helpers import wrap_all_methods
 
 
@@ -63,6 +63,11 @@ def bruin_repository_real(event_bus_real, notifications_repository):
 
 
 @pytest.fixture(scope="function")
+def parent_email_storage(redis):
+    return RepairParentEmailStorage(redis=redis, environment=config.CURRENT_ENVIRONMENT)
+
+
+@pytest.fixture(scope="function")
 def storage_repository(redis):
     instance = StorageRepository(config, redis)
     wrap_all_methods(instance)
@@ -76,11 +81,8 @@ def new_created_tickets_repository(storage_repository):
 
 
 @pytest.fixture(scope="function")
-def new_tagged_emails_repository(storage_repository):
-    return NewTaggedEmailsRepository(
-        config,
-        storage_repository,
-    )
+def new_tagged_emails_repository(storage_repository, parent_email_storage):
+    return NewTaggedEmailsRepository(config, storage_repository, parent_email_storage)
 
 
 @pytest.fixture(scope="function")
@@ -113,6 +115,8 @@ def repair_tickets_monitor(
         bruin_repository_real,
         new_tagged_emails_repository,
         repair_ticket_kre_repository,
+        AsyncMock(),
+        AsyncMock(),
         AsyncMock(),
         AsyncMock(),
         AsyncMock(),

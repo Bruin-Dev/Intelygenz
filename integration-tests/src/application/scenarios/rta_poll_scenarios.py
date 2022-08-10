@@ -10,8 +10,6 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 log = logging.getLogger(__name__)
-RTA_POLLING_TIMEOUT = 5
-EXECUTION_TIMEOUT = 1
 
 
 @dataclass
@@ -41,10 +39,11 @@ class ClosedTicketsFeedback(Scenario):
         # RTA polls for closed tickets
 
         # then
-        timeout = RTA_POLLING_TIMEOUT + EXECUTION_TIMEOUT
+        from application.scenarios import timeout
+
         return await self.check(
             # [rta] konstellation was sent the result of RTA
-            self.route(RtaService.path("SaveClosedTicketsFeedback")).was_reached(timeout),
+            self.route(RtaService.path("SaveClosedTicketsFeedback")).was_reached(timeout.STANDALONE_RTA),
         )
 
 

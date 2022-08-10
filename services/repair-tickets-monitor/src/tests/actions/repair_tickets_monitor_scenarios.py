@@ -1,4 +1,3 @@
-from dataclasses import dataclass, field
 from typing import Any, Dict, List
 
 from application.domain.asset import Topic
@@ -6,6 +5,7 @@ from application.domain.repair_email_output import RepairEmailOutput, TicketOutp
 from application.domain.ticket import Category, Ticket, TicketStatus
 from application.rpc import RpcError
 from application.rpc.upsert_outage_ticket_rpc import UpsertedStatus, UpsertedTicket
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -15,6 +15,7 @@ class RepairTicketsMonitorScenario:
 
     # Existing Bruin tickets
     tickets: List["Ticket"] = field(default_factory=list)
+    is_reply_email: bool = False
 
     # Integration behavior
     assets_actionable: bool = True
@@ -31,6 +32,11 @@ class RepairTicketsMonitorScenario:
     # Expected behavior
     expected_output: RepairEmailOutput = None
     email_processed: bool = True
+    autoreply_sent: bool = False
+    parent_email_hidden: bool = False
+    parent_email_unhidden: bool = False
+    parent_email_saved: bool = False
+    parent_email_removed: bool = False
     # Notes with service number added to a ticket (for asset processing)
     note_added_to: List[str] = field(default_factory=list)
     email_linked_to: List[str] = field(default_factory=list)
@@ -52,12 +58,45 @@ def make_repair_tickets_monitor_scenarios():
     wireless_topic = Topic(call_type="REP", category=Category.WIRELESS_SERVICE_NOT_WORKING.value)
     other_category_topic = Topic(call_type="REP", category="018")
 
-    no_assets_and_no_tickets = RepairTicketsMonitorScenario(
+    #
+    # Empty emails
+    #
+
+    # check GetPrediction
+    empty_reply_email = RepairTicketsMonitorScenario(
+        assets={},
+        tickets=[],
+        is_reply_email=True,
+        email_processed=False,
+        parent_email_removed=True,
+        parent_email_unhidden=True,
+        expected_output=RepairEmailOutput(
+            email_id="0",
+            tickets_cannot_be_created=[TicketOutput(reason="No validated service numbers")],
+        ),
+    )
+
+    empty_non_actionable_parent_email = RepairTicketsMonitorScenario(
+        assets={},
+        tickets=[],
+        assets_actionable=False,
+        email_processed=False,
+        expected_output=RepairEmailOutput(
+            email_id="0",
+            tickets_cannot_be_created=[TicketOutput(reason="No validated service numbers")],
+        ),
+    )
+
+    empty_actionable_parent_email = RepairTicketsMonitorScenario(
         assets={},
         tickets=[],
         email_processed=False,
+        autoreply_sent=True,
+        parent_email_saved=True,
+        parent_email_hidden=True,
         expected_output=RepairEmailOutput(
-            email_id="0", tickets_cannot_be_created=[TicketOutput(reason="No validated service numbers")]
+            email_id="0",
+            tickets_cannot_be_created=[TicketOutput(reason="No validated service numbers. Sent auto-reply")],
         ),
     )
 
@@ -477,8 +516,11 @@ def make_repair_tickets_monitor_scenarios():
     )
 
     return {
+        # Empty emails
+        "empty_reply_email": empty_reply_email,
+        "empty_actionable_parent_email": empty_actionable_parent_email,
+        "empty_non_actionable_parent_email": empty_non_actionable_parent_email,
         # Assets
-        "no_assets_and_no_tickets": no_assets_and_no_tickets,
         "single_unreported_asset": single_unreported_asset,
         "single_reported_asset": single_reported_asset,
         "email_not_actionable_and_single_reported_asset": email_not_actionable_and_single_reported_asset,
@@ -486,7 +528,7 @@ def make_repair_tickets_monitor_scenarios():
         "several_related_reported_assets": several_related_reported_assets,
         "several_unrelated_unreported_assets": several_unrelated_unreported_assets,
         "several_unrelated_reported_assets": several_unrelated_reported_assets,
-        # Topics
+        # Asset topics
         "single_no_topics_asset": single_no_topics_asset,
         "single_wireless_asset": single_wireless_asset,
         "single_other_category_asset": single_other_category_asset,

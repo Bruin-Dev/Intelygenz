@@ -2,12 +2,13 @@ from http import HTTPStatus
 from typing import List
 from unittest.mock import ANY, AsyncMock, Mock
 
-from pytest import fixture, mark
-
+from application import resources
 from application.actions.repair_tickets_monitor import RepairTicketsMonitor
 from application.domain.asset import AssetId
+from application.domain.email import EmailStatus
 from application.rpc import RpcFailedError, RpcRequest, RpcResponse
 from config import testconfig as config
+from pytest import fixture, mark
 from tests.actions.repair_tickets_monitor_scenarios import (
     RepairTicketsMonitorScenario,
     make_repair_tickets_monitor_scenarios,
@@ -40,10 +41,18 @@ async def repair_tickets_monitor_scenarios_test(
     repair_tickets_monitor._append_note_to_ticket_rpc = AsyncMock(side_effect=scenario.append_note_to_ticket_effect)
     repair_tickets_monitor._get_asset_topics_rpc = AsyncMock(side_effect=get_asset_topics_effect)
     repair_tickets_monitor._upsert_outage_ticket_rpc = AsyncMock(side_effect=upsert_outage_ticket_rpc)
+    repair_tickets_monitor._set_email_status_rpc = AsyncMock()
+    repair_tickets_monitor._send_email_reply_rpc = AsyncMock()
+    repair_tickets_monitor._new_tagged_emails_repository.save_parent_email = Mock()
+    repair_tickets_monitor._new_tagged_emails_repository.remove_parent_email = Mock()
     repair_ticket_kre_repository.get_email_inference = AsyncMock(return_value=inference_data_for(scenario))
     mock_bruin_repository(bruin_repository, scenario)
 
-    await repair_tickets_monitor._process_repair_email(AnyEmail(id="0"))
+    email = AnyEmail(id="0")
+    if scenario.is_reply_email:
+        email.parent = AnyEmail(id="1")
+
+    await repair_tickets_monitor._process_repair_email(email)
 
     if scenario.expected_output is None:
         repair_ticket_kre_repository.save_outputs.assert_not_awaited()
@@ -54,6 +63,27 @@ async def repair_tickets_monitor_scenarios_test(
         bruin_repository.mark_email_as_done.assert_awaited_once()
     else:
         bruin_repository.mark_email_as_done.assert_not_awaited()
+
+    if scenario.parent_email_hidden:
+        repair_tickets_monitor._set_email_status_rpc.assert_awaited_once_with(email.id, EmailStatus.AIQ)
+
+    if scenario.parent_email_unhidden:
+        repair_tickets_monitor._set_email_status_rpc.assert_awaited_once_with(email.parent.id, EmailStatus.NEW)
+
+    if scenario.autoreply_sent:
+        repair_tickets_monitor._send_email_reply_rpc.assert_awaited_once_with(email.id, resources.AUTO_REPLY_BODY)
+    else:
+        repair_tickets_monitor._send_email_reply_rpc.assert_not_awaited()
+
+    if scenario.parent_email_saved:
+        repair_tickets_monitor._new_tagged_emails_repository.save_parent_email.assert_called_once_with(email)
+    else:
+        repair_tickets_monitor._new_tagged_emails_repository.save_parent_email.assert_not_called()
+
+    if scenario.parent_email_removed:
+        repair_tickets_monitor._new_tagged_emails_repository.remove_parent_email.assert_called_once_with(email.parent)
+    else:
+        repair_tickets_monitor._new_tagged_emails_repository.remove_parent_email.assert_not_called()
 
     assert bruin_repository.append_notes_to_ticket.await_count == len(scenario.note_added_to)
     for ticket_id in scenario.note_added_to:
@@ -106,6 +136,8 @@ def repair_tickets_monitor(
         bruin_repository,
         new_tagged_emails_repository,
         repair_ticket_kre_repository,
+        AsyncMock(),
+        AsyncMock(),
         AsyncMock(),
         AsyncMock(),
         AsyncMock(),

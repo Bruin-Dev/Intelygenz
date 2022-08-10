@@ -10,7 +10,7 @@ class Handler(AsyncMock):
     CouroutineMock wrapper that handles noop mocks
     """
 
-    def noop(self) -> bool:
+    def returns_nothing(self) -> bool:
         return not self.return_value and not self.side_effect
 
 
@@ -44,7 +44,7 @@ class WillExecute(Handler):
         super().__init__(side_effect=execution)
 
 
-class DoNothing(Handler):
+class WillReturnNothing(Handler):
     """
     Handler expressive shorthand
     """

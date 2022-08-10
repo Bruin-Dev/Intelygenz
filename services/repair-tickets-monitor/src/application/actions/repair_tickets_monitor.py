@@ -3,19 +3,13 @@ import logging
 import os
 import time
 from collections import defaultdict
-from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, DefaultDict, Dict, List, Set, Tuple
 
 import html2text
-from apscheduler.jobstores.base import ConflictingIdError
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.util import undefined
-from framework.nats.client import Client as NatsClient
-from pytz import timezone
-
+from application import resources
 from application.domain.asset import Asset, AssetId, Assets
-from application.domain.email import Email
+from application.domain.email import Email, EmailStatus
 from application.domain.repair_email_output import (
     CreateTicketsOutput,
     PotentialTicketsOutput,
@@ -30,8 +24,16 @@ from application.repositories.repair_ticket_kre_repository import RepairTicketKr
 from application.rpc import RpcError
 from application.rpc.append_note_to_ticket_rpc import AppendNoteToTicketRpc
 from application.rpc.get_asset_topics_rpc import GetAssetTopicsRpc
+from application.rpc.send_email_reply_rpc import SendEmailReplyRpc
+from application.rpc.set_email_status_rpc import SetEmailStatusRpc
 from application.rpc.subscribe_user_rpc import SubscribeUserRpc
-from application.rpc.upsert_outage_ticket_rpc import UpsertedStatus, UpsertOutageTicketRpc
+from application.rpc.upsert_outage_ticket_rpc import UpsertedStatus, UpsertedTicket, UpsertOutageTicketRpc
+from apscheduler.jobstores.base import ConflictingIdError
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.util import undefined
+from dataclasses import dataclass
+from framework.nats.client import Client as NatsClient
+from pytz import timezone
 
 log = logging.getLogger(__name__)
 
@@ -64,6 +66,8 @@ class RepairTicketsMonitor:
     _get_asset_topics_rpc: GetAssetTopicsRpc
     _upsert_outage_ticket_rpc: UpsertOutageTicketRpc
     _subscribe_user_rpc: SubscribeUserRpc
+    _set_email_status_rpc: SetEmailStatusRpc
+    _send_email_reply_rpc: SendEmailReplyRpc
 
     def __post_init__(self):
         self._semaphore = asyncio.BoundedSemaphore(
@@ -141,10 +145,12 @@ class RepairTicketsMonitor:
                 "client_id": email.client_id,
                 "subject": email.subject,
                 "body": email.body,
-                "date": email.date,
+                "date": email.date.isoformat(),
                 "from_address": email.sender_address,
                 "to": email.recipient_addresses,
                 "cc": email.comma_separated_cc_addresses(),
+                "is_auto_reply_answer": email.is_reply_email,
+                "auto_reply_answer_delay": email.reply_interval,
             },
             {
                 "tag_probability": email.tag.probability,
@@ -390,7 +396,29 @@ class RepairTicketsMonitor:
                         output.tickets_could_be_updated.append(TicketOutput(ticket_id=ticket.id))
 
             if not service_number_site_map and not output.tickets_updated and not output.tickets_could_be_updated:
-                output.tickets_cannot_be_created.append(TicketOutput(reason="No validated service numbers"))
+                log.info(f"email_id={email.id} No service number nor ticket actions triggered")
+                auto_reply_reason = "No validated service numbers"
+
+                auto_reply_enabled = self._config.MONITOR_CONFIG["auto_reply_enabled"]
+                log.info(f"email_id={email.id} auto_reply_enabled={auto_reply_enabled}")
+                auto_reply_whitelist = self._config.MONITOR_CONFIG["auto_reply_whitelist"]
+                auto_reply_allowed = True
+                if len(auto_reply_whitelist) > 0:
+                    auto_reply_allowed = email.sender_address in auto_reply_whitelist
+                log.info(f"email_id={email.id} auto_reply_allowed={auto_reply_allowed}")
+
+                send_auto_reply = auto_reply_enabled and auto_reply_allowed
+                if email.is_parent_email and is_actionable and not output.validated_tickets and send_auto_reply:
+                    log.info(f"email_id={email.id} Sending auto-reply")
+                    auto_reply_reason = "No validated service numbers. Sent auto-reply"
+                    await self._set_email_status_rpc(email.id, EmailStatus.AIQ)
+                    await self._send_email_reply_rpc(email.id, resources.AUTO_REPLY_BODY)
+                    self._new_tagged_emails_repository.save_parent_email(email)
+                elif email.is_reply_email:
+                    log.info(f"email_id={email.id} Restoring parent_email {email.parent.id}")
+                    await self._set_email_status_rpc(email.parent.id, EmailStatus.NEW)
+
+                output.tickets_cannot_be_created.append(TicketOutput(reason=auto_reply_reason))
 
             log.info("email_id=%s output_send_to_save=%s", email.id, output)
             await self._save_output(output)
@@ -402,9 +430,13 @@ class RepairTicketsMonitor:
             if tickets_automated and no_tickets_failed and not feedback_not_created_due_cancellations:
                 log.info("email_id=%s Calling bruin to mark email as done", email.id)
                 await self._bruin_repository.mark_email_as_done(email.id)
+                if email.is_reply_email:
+                    await self._bruin_repository.mark_email_as_done(email.parent.id)
 
             log.info("email_id=%s Removing email from Redis", email.id)
             self._new_tagged_emails_repository.mark_complete(email.id)
+            if email.is_reply_email:
+                self._new_tagged_emails_repository.remove_parent_email(email.parent)
             return
 
     async def _get_valid_service_numbers_site_map(
@@ -540,21 +572,27 @@ class RepairTicketsMonitor:
                     )
                 )
 
-            notes_to_append = self._compose_bec_note_to_ticket(
-                ticket_id=result.ticket_id,
-                service_numbers=service_numbers,
-                email=email,
-                is_update_note=result.status == UpsertedStatus.updated,
-            )
+            await self._post_process_upsert(email, result, service_numbers)
+            if email.is_reply_email:
+                await self._post_process_upsert(email.parent, result, service_numbers)
 
-            await self._bruin_repository.append_notes_to_ticket(result.ticket_id, notes_to_append)
-            await self._bruin_repository.link_email_to_ticket(result.ticket_id, email.id)
             try:
                 await self._subscribe_user_rpc(ticket_id=result.ticket_id, user_email=email.sender_address)
             except RpcError:
                 log.exception(f"email_id={email.id} Error while subscribing user to ticket {result.ticket_id}")
 
         return create_tickets_output
+
+    async def _post_process_upsert(self, email: Email, ticket: UpsertedTicket, service_numbers: List[str]):
+        notes_to_append = self._compose_bec_note_to_ticket(
+            ticket_id=ticket.ticket_id,
+            service_numbers=service_numbers,
+            email=email,
+            is_update_note=ticket.status == UpsertedStatus.updated,
+        )
+
+        await self._bruin_repository.append_notes_to_ticket(ticket.ticket_id, notes_to_append)
+        await self._bruin_repository.link_email_to_ticket(ticket.ticket_id, email.id)
 
     def _get_potential_tickets(
         self,

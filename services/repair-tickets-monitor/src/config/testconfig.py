@@ -18,6 +18,8 @@ IPA_SYSTEM_USERNAME_IN_BRUIN = "Intelygenz Ai"
 MONITOR_CONFIG = {
     "max_retries_error_404": 5,
     "tag_ids": {"Repair": 1, "New Order": 2, "Change": 3, "Billing": 4, "Other": 5},
+    "auto_reply_enabled": True,
+    "auto_reply_whitelist": [],
     "scheduler_config": {
         "repair_ticket_monitor": 10,
         "new_created_tickets_feedback": 1,
@@ -34,8 +36,7 @@ MONITOR_CONFIG = {
     },
 }
 
-ENVIRONMENT = "dev"
-
+CURRENT_ENVIRONMENT = "dev"
 ENVIRONMENT_NAME = "dev"
 
 LOG_CONFIG = {

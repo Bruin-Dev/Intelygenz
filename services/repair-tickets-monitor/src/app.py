@@ -1,20 +1,5 @@
 import asyncio
 import logging
-from dataclasses import asdict
-
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from framework.http.server import Config as HealthConfig
-from framework.http.server import Server as HealthServer
-from framework.logging.formatters import Papertrail as PapertrailFormatter
-from framework.logging.formatters import Standard as StandardFormatter
-from framework.logging.handlers import Papertrail as PapertrailHandler
-from framework.logging.handlers import Stdout as StdoutHandler
-from framework.nats.client import Client
-from framework.nats.models import Connection
-from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
-from prometheus_client import start_http_server
-from pytz import timezone
-from redis.client import Redis
 
 from application.actions.new_closed_tickets_feedback import NewClosedTicketsFeedback
 from application.actions.new_created_tickets_feedback import NewCreatedTicketsFeedback
@@ -27,9 +12,26 @@ from application.repositories.repair_ticket_kre_repository import RepairTicketKr
 from application.repositories.storage_repository import StorageRepository
 from application.rpc.append_note_to_ticket_rpc import AppendNoteToTicketRpc
 from application.rpc.get_asset_topics_rpc import GetAssetTopicsRpc
+from application.rpc.send_email_reply_rpc import SendEmailReplyRpc
+from application.rpc.set_email_status_rpc import SetEmailStatusRpc
 from application.rpc.subscribe_user_rpc import SubscribeUserRpc
 from application.rpc.upsert_outage_ticket_rpc import UpsertOutageTicketRpc
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import config
+from dataclasses import asdict
+from framework.http.server import Config as HealthConfig
+from framework.http.server import Server as HealthServer
+from framework.logging.formatters import Papertrail as PapertrailFormatter
+from framework.logging.formatters import Standard as StandardFormatter
+from framework.logging.handlers import Papertrail as PapertrailHandler
+from framework.logging.handlers import Stdout as StdoutHandler
+from framework.nats.client import Client
+from framework.nats.models import Connection
+from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
+from framework.storage.model import RepairParentEmailStorage
+from prometheus_client import start_http_server
+from pytz import timezone
+from redis.client import Redis
 
 # json_formatter = JsonFormatter(
 #     fields={
@@ -93,7 +95,10 @@ class Container:
         self._storage_repository = StorageRepository(config, redis_cache)
         self._notifications_repository = NotificationsRepository(self._nats_client)
         self._bruin_repository = BruinRepository(self._nats_client, config, self._notifications_repository)
-        self._new_tagged_emails_repository = NewTaggedEmailsRepository(config, self._storage_repository)
+        self._repair_parent_email_storage = RepairParentEmailStorage(redis_cache, config.ENVIRONMENT_NAME)
+        self._new_tagged_emails_repository = NewTaggedEmailsRepository(
+            config, self._storage_repository, self._repair_parent_email_storage
+        )
         self._new_tickets_repository = NewCreatedTicketsRepository(config, self._storage_repository)
         self._repair_ticket_repository = RepairTicketKreRepository(
             self._nats_client, config, self._notifications_repository
@@ -112,6 +117,14 @@ class Container:
             _timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"],
         )
         subscribe_user_rpc = SubscribeUserRpc(
+            _nats_client=self._nats_client,
+            _timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"],
+        )
+        set_email_status_rpc = SetEmailStatusRpc(
+            _nats_client=self._nats_client,
+            _timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"],
+        )
+        send_email_reply_rpc = SendEmailReplyRpc(
             _nats_client=self._nats_client,
             _timeout=config.MONITOR_CONFIG["nats_request_timeout"]["bruin_request_seconds"],
         )
@@ -143,6 +156,8 @@ class Container:
             get_asset_topics_rpc,
             upsert_outage_ticket_rpc,
             subscribe_user_rpc,
+            set_email_status_rpc,
+            send_email_reply_rpc,
         )
 
     async def start_server(self):

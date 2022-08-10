@@ -15,7 +15,7 @@ async def notify_ticket(email: Email):
 
 
 async def _notify(url: str, email: Email):
-    payload = email.json()
+    payload = email.json(exclude_none=True)
     signature = _signature_for(payload)
     headers = {"content-type": "application/json", "x-bruin-webhook-signature": signature}
     async with aiohttp.ClientSession() as session:
