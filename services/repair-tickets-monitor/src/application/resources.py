@@ -13,11 +13,11 @@ AUTO_REPLY_BODY = """
 <p><b><u>Circuit/Service In Distress</b></u></p>
 
 <ul>
-  <li style="color:red;">
+  <li style=\"color:red;\">
     Place each service in distress below and please type in your response
     as screenshots do not always come through in emails.
   </li>
-  <li style="color:red;">
+  <li style=\"color:red;\">
     Example(s): POTS Line XXX-XXX-XXXX or DSL Circuit XX.RBDB.XXXXXX or SDWAN Appliance SXXXX
   </li>
 </ul>
