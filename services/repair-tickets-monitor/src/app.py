@@ -168,7 +168,7 @@ class Container:
             self._scheduler,
             config,
             self._repair_parent_email_storage,
-            self._bruin_repository,
+            set_email_status_rpc,
         )
 
     async def start_server(self):

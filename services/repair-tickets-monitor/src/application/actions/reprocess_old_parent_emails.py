@@ -57,6 +57,7 @@ class ReprocessOldParentEmails:
     async def _run_old_email_reprocessing_polling(self):
         log.info("Starting ReprocessOldParentEmails process...")
         old_parent_emails = await self._get_old_parent_emails()
+        log.info(f"Found {len(list(old_parent_emails))} old parent emails")
 
         old_parent_emails_filtered = [
             old_parent_email
@@ -64,6 +65,7 @@ class ReprocessOldParentEmails:
             if (datetime.utcnow() - old_parent_email.metadata.utc_creation_datetime).total_seconds()
             > self._config.MONITOR_CONFIG["old_parent_email_ttl_seconds"]
         ]
+        log.info(f"Found {len(old_parent_emails_filtered)} old parent emails to be discarded")
 
         tasks = [self._prepare_email_to_reprocess(old_parent_email) for old_parent_email in old_parent_emails_filtered]
         await asyncio.gather(*tasks)
@@ -74,6 +76,7 @@ class ReprocessOldParentEmails:
     async def _prepare_email_to_reprocess(self, old_parent_email: Email):
         async with self._semaphore:
             try:
+                log.info(f"Discarding {old_parent_email.id} old parent email")
                 await self._set_email_status_rpc(old_parent_email.id, EmailStatus.NEW)
                 self._remove_email_from_storage(old_parent_email)
             except RpcError as e:
