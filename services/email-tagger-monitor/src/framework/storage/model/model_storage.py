@@ -22,6 +22,10 @@ class ModelStorage(RedisStorage[M]):
 
     def _deserialize(self, data: Optional[str]) -> Optional[M]:
         log.debug(f"_deserialize(data={data})")
+
+        if data is None:
+            return None
+
         try:
             return self.data_type.parse_raw(data)
         except ValidationError as e:

@@ -1,9 +1,10 @@
 import logging
+from dataclasses import dataclass
 from typing import Optional, TypeVar
 
-from dataclasses import dataclass
-from framework.storage import RedisStorage
 from pydantic import BaseModel, ValidationError
+
+from framework.storage import RedisStorage
 
 M = TypeVar("M", bound=BaseModel)
 
@@ -22,6 +23,10 @@ class ModelStorage(RedisStorage[M]):
 
     def _deserialize(self, data: Optional[str]) -> Optional[M]:
         log.debug(f"_deserialize(data={data})")
+
+        if data is None:
+            return None
+
         try:
             return self.data_type.parse_raw(data)
         except ValidationError as e:
