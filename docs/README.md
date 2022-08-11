@@ -41,10 +41,7 @@
 	1. [AWS SSO Okta identity provider](manual_configurations/OKTA_CONFIGURATIONS.md)
 		1. [Revoke Session token](manual_configurations/OKTA_CONFIGURATIONS.md#revoke-permissions)
 	2. [AWS SSO Okta JWT token](manual_configurations/OKTA_JWT.md)
-	3. [Gitlab maintenance](manual_configurations/GITLAB_MAINTENANCE.md)
-9. RECOVERY PROCESSES
-	1. [Gitlab recovery](recovery_processes/GITLAB_RECOVERY.md)
-10. AUDIT EVENTS
+9. AUDIT EVENTS
     1. Automation
        1. Communication between services
           1. [Messages Bus](logging/events/0-messages-bus.md)
