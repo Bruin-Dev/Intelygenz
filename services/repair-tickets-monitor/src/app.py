@@ -1,24 +1,8 @@
 import asyncio
 import logging
-
-from application.actions.new_closed_tickets_feedback import NewClosedTicketsFeedback
-from application.actions.new_created_tickets_feedback import NewCreatedTicketsFeedback
-from application.actions.repair_tickets_monitor import RepairTicketsMonitor
-from application.repositories.bruin_repository import BruinRepository
-from application.repositories.new_created_tickets_repository import NewCreatedTicketsRepository
-from application.repositories.new_tagged_emails_repository import NewTaggedEmailsRepository
-from application.repositories.notifications_repository import NotificationsRepository
-from application.repositories.repair_ticket_kre_repository import RepairTicketKreRepository
-from application.repositories.storage_repository import StorageRepository
-from application.rpc.append_note_to_ticket_rpc import AppendNoteToTicketRpc
-from application.rpc.get_asset_topics_rpc import GetAssetTopicsRpc
-from application.rpc.send_email_reply_rpc import SendEmailReplyRpc
-from application.rpc.set_email_status_rpc import SetEmailStatusRpc
-from application.rpc.subscribe_user_rpc import SubscribeUserRpc
-from application.rpc.upsert_outage_ticket_rpc import UpsertOutageTicketRpc
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from config import config
 from dataclasses import asdict
+
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from framework.http.server import Config as HealthConfig
 from framework.http.server import Server as HealthServer
 from framework.logging.formatters import Papertrail as PapertrailFormatter
@@ -32,6 +16,24 @@ from framework.storage.model import RepairParentEmailStorage
 from prometheus_client import start_http_server
 from pytz import timezone
 from redis.client import Redis
+
+from application.actions.new_closed_tickets_feedback import NewClosedTicketsFeedback
+from application.actions.new_created_tickets_feedback import NewCreatedTicketsFeedback
+from application.actions.repair_tickets_monitor import RepairTicketsMonitor
+from application.actions.reprocess_old_parent_emails import ReprocessOldParentEmails
+from application.repositories.bruin_repository import BruinRepository
+from application.repositories.new_created_tickets_repository import NewCreatedTicketsRepository
+from application.repositories.new_tagged_emails_repository import NewTaggedEmailsRepository
+from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.repair_ticket_kre_repository import RepairTicketKreRepository
+from application.repositories.storage_repository import StorageRepository
+from application.rpc.append_note_to_ticket_rpc import AppendNoteToTicketRpc
+from application.rpc.get_asset_topics_rpc import GetAssetTopicsRpc
+from application.rpc.send_email_reply_rpc import SendEmailReplyRpc
+from application.rpc.set_email_status_rpc import SetEmailStatusRpc
+from application.rpc.subscribe_user_rpc import SubscribeUserRpc
+from application.rpc.upsert_outage_ticket_rpc import UpsertOutageTicketRpc
+from config import config
 
 # json_formatter = JsonFormatter(
 #     fields={
@@ -103,6 +105,8 @@ class Container:
         self._repair_ticket_repository = RepairTicketKreRepository(
             self._nats_client, config, self._notifications_repository
         )
+        # EMAIL STORAGE
+        self._repair_parent_email_storage = RepairParentEmailStorage(redis_cache, config.ENVIRONMENT_NAME)
         # RPCs
         append_note_to_ticket_rpc = AppendNoteToTicketRpc(
             _nats_client=self._nats_client,
@@ -159,6 +163,13 @@ class Container:
             set_email_status_rpc,
             send_email_reply_rpc,
         )
+        self._reprocess_old_parent_emails = ReprocessOldParentEmails(
+            self._nats_client,
+            self._scheduler,
+            config,
+            self._repair_parent_email_storage,
+            self._bruin_repository,
+        )
 
     async def start_server(self):
         await self._server.run()
@@ -172,6 +183,7 @@ class Container:
         await self._new_created_tickets_feedback.start_created_ticket_feedback(exec_on_start=True)
         await self._new_closed_tickets_feedback.start_closed_ticket_feedback(exec_on_start=True)
         await self._repair_tickets_monitor.start_repair_tickets_monitor(exec_on_start=True)
+        await self._reprocess_old_parent_emails.start_old_parent_email_reprocess(exec_on_start=True)
         self._scheduler.start()
 
     @staticmethod

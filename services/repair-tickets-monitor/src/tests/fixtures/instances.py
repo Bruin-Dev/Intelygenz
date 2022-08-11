@@ -1,9 +1,13 @@
 from unittest.mock import AsyncMock, Mock, create_autospec
 
 import pytest
+from framework.nats.client import Client as NatsClient
+from framework.storage.model import RepairParentEmailStorage
+
 from application.actions.new_closed_tickets_feedback import NewClosedTicketsFeedback
 from application.actions.new_created_tickets_feedback import NewCreatedTicketsFeedback
 from application.actions.repair_tickets_monitor import RepairTicketsMonitor
+from application.actions.reprocess_old_parent_emails import ReprocessOldParentEmails
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.new_created_tickets_repository import NewCreatedTicketsRepository
 from application.repositories.new_tagged_emails_repository import NewTaggedEmailsRepository
@@ -11,8 +15,6 @@ from application.repositories.notifications_repository import NotificationsRepos
 from application.repositories.repair_ticket_kre_repository import RepairTicketKreRepository
 from application.repositories.storage_repository import StorageRepository
 from config import testconfig as config
-from framework.nats.client import Client as NatsClient
-from framework.storage.model import RepairParentEmailStorage
 from tests.fixtures._helpers import wrap_all_methods
 
 
@@ -76,6 +78,14 @@ def storage_repository(redis):
 
 
 @pytest.fixture(scope="function")
+def repair_parent_email_storage(redis):
+    instance = RepairParentEmailStorage(redis, config.ENVIRONMENT_NAME)
+    wrap_all_methods(instance)
+
+    return instance
+
+
+@pytest.fixture(scope="function")
 def new_created_tickets_repository(storage_repository):
     return NewCreatedTicketsRepository(config, storage_repository)
 
@@ -101,6 +111,17 @@ def new_created_tickets_feedback(
         new_created_tickets_repository,
         repair_ticket_kre_repository,
         bruin_repository,
+    )
+
+
+@pytest.fixture(scope="function")
+def reprocess_old_parent_emails(event_bus, scheduler, repair_parent_email_storage):
+    return ReprocessOldParentEmails(
+        event_bus,
+        scheduler,
+        config,
+        repair_parent_email_storage,
+        AsyncMock(),
     )
 
 

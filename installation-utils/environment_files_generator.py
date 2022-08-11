@@ -145,12 +145,15 @@ REPAIR_TICKETS_KRE_BRIDGE__KRE_BASE_URL = parameters["dev"]["repair-tickets-kre-
 REPAIR_TICKETS_MONITOR__RTA_MONITOR_JOB_INTERVAL = parameters["common"]["repair-tickets-monitor"]["rta-monitor-job-interval"]
 REPAIR_TICKETS_MONITOR__NEW_CREATED_TICKETS_FEEDBACK_JOB_INTERVAL = parameters["common"]["repair-tickets-monitor"]["new-created-tickets-feedback-job-interval"]
 REPAIR_TICKETS_MONITOR__NEW_CLOSED_TICKETS_FEEDBACK_JOB_INTERVAL = parameters["common"]["repair-tickets-monitor"]["new-closed-tickets-feedback-job-interval"]
+REPAIR_TICKETS_MONITOR__OLD_PARENT_EMAILS_REPROCESSING_JOB_INTERVAL = parameters["dev"]["repair-tickets-monitor"]["old-parent-emails-reprocessing-job-interval"]
 REPAIR_TICKETS_MONITOR__MAX_CONCURRENT_EMAILS_FOR_MONITORING = parameters["common"]["repair-tickets-monitor"]["max-concurrent-emails-for-monitoring"]
 REPAIR_TICKETS_MONITOR__MAX_CONCURRENT_CREATED_TICKETS_FOR_FEEDBACK = parameters["common"]["repair-tickets-monitor"]["max-concurrent-created-tickets-for-feedback"]
 REPAIR_TICKETS_MONITOR__MAX_CONCURRENT_CLOSED_TICKETS_FOR_FEEDBACK = parameters["common"]["repair-tickets-monitor"]["max-concurrent-closed-tickets-for-feedback"]
+REPAIR_TICKETS_MONITOR__MAX_CONCURRENT_OLD_PARENT_EMAILS_REPROCESSING = parameters["dev"]["repair-tickets-monitor"]["max-concurrent-old-parent-emails-reprocessing"]
 REPAIR_TICKETS_MONITOR__TAG_IDS_MAPPING = parameters["common"]["repair-tickets-monitor"]["tag-ids-mapping"]
 REPAIR_TICKETS_MONITOR__AUTO_REPLY_ENABLED = parameters["dev"]["repair-tickets-monitor"]["auto-reply-enabled"]
 REPAIR_TICKETS_MONITOR__AUTO_REPLY_WHITELIST = parameters["dev"]["repair-tickets-monitor"]["auto-reply-whitelist"]
+REPAIR_TICKETS_MONITOR__OLD_PARENT_EMAIL_TTL_SECONDS = parameters["dev"]["repair-tickets-monitor"]["old-parent-email-ttl-seconds"]
 
 # Service Affecting Monitor - Shared variables
 SERVICE_AFFECTING__MONITORED_PRODUCT_CATEGORY = parameters["common"]["service-affecting"]["monitored-product-category"]
@@ -575,12 +578,15 @@ env_dict = {
         f"RTA_MONITOR_JOB_INTERVAL={REPAIR_TICKETS_MONITOR__RTA_MONITOR_JOB_INTERVAL}",
         f"NEW_CREATED_TICKETS_FEEDBACK_JOB_INTERVAL={REPAIR_TICKETS_MONITOR__NEW_CREATED_TICKETS_FEEDBACK_JOB_INTERVAL}",
         f"NEW_CLOSED_TICKETS_FEEDBACK_JOB_INTERVAL={REPAIR_TICKETS_MONITOR__NEW_CLOSED_TICKETS_FEEDBACK_JOB_INTERVAL}",
+        f"OLD_PARENT_EMAILS_REPROCESSING_JOB_INTERVAL={REPAIR_TICKETS_MONITOR__OLD_PARENT_EMAILS_REPROCESSING_JOB_INTERVAL}",
         f"MAX_CONCURRENT_EMAILS_FOR_MONITORING={REPAIR_TICKETS_MONITOR__MAX_CONCURRENT_EMAILS_FOR_MONITORING}",
         f"MAX_CONCURRENT_CREATED_TICKETS_FOR_FEEDBACK={REPAIR_TICKETS_MONITOR__MAX_CONCURRENT_CREATED_TICKETS_FOR_FEEDBACK}",
         f"MAX_CONCURRENT_CLOSED_TICKETS_FOR_FEEDBACK={REPAIR_TICKETS_MONITOR__MAX_CONCURRENT_CLOSED_TICKETS_FOR_FEEDBACK}",
+        f"MAX_CONCURRENT_OLD_PARENT_EMAILS_REPROCESSING={REPAIR_TICKETS_MONITOR__MAX_CONCURRENT_OLD_PARENT_EMAILS_REPROCESSING}",
         f"TAG_IDS_MAPPING={REPAIR_TICKETS_MONITOR__TAG_IDS_MAPPING}",
         f"AUTO_REPLY_ENABLED={REPAIR_TICKETS_MONITOR__AUTO_REPLY_ENABLED}",
         f"AUTO_REPLY_WHITELIST={REPAIR_TICKETS_MONITOR__AUTO_REPLY_WHITELIST}",
+        f"OLD_PARENT_EMAIL_TTL_SECONDS={REPAIR_TICKETS_MONITOR__OLD_PARENT_EMAIL_TTL_SECONDS}",
     ],
     os.path.join("services", "lumin-billing-report", "src", "config", "env"): [
         f"LUMIN_URI={LUMIN_URI}",

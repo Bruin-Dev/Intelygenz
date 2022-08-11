@@ -24,10 +24,12 @@ MONITOR_CONFIG = {
     "tag_ids": json.loads(os.environ["TAG_IDS_MAPPING"]),
     "auto_reply_enabled": os.environ["AUTO_REPLY_ENABLED"] == "true",
     "auto_reply_whitelist": json.loads(os.environ["AUTO_REPLY_WHITELIST"]),
+    "old_parent_email_ttl_seconds": int(os.environ["OLD_PARENT_EMAIL_TTL_SECONDS"]),
     "scheduler_config": {
         "repair_ticket_monitor": int(os.environ["RTA_MONITOR_JOB_INTERVAL"]),
         "new_created_tickets_feedback": int(os.environ["NEW_CREATED_TICKETS_FEEDBACK_JOB_INTERVAL"]),
         "new_closed_tickets_feedback": int(os.environ["NEW_CLOSED_TICKETS_FEEDBACK_JOB_INTERVAL"]),
+        "old_parent_emails_reprocessing": int(os.environ["OLD_PARENT_EMAILS_REPROCESSING_JOB_INTERVAL"]),
     },
     "nats_request_timeout": {
         "kre_seconds": 30,
@@ -37,6 +39,7 @@ MONITOR_CONFIG = {
         "repair_tickets_concurrent": int(os.environ["MAX_CONCURRENT_EMAILS_FOR_MONITORING"]),
         "created_tickets_concurrent": int(os.environ["MAX_CONCURRENT_CREATED_TICKETS_FOR_FEEDBACK"]),
         "closed_tickets_concurrent": int(os.environ["MAX_CONCURRENT_CLOSED_TICKETS_FOR_FEEDBACK"]),
+        "old_parent_emails_reprocessing_concurrent": int(os.environ["MAX_CONCURRENT_OLD_PARENT_EMAILS_REPROCESSING"]),
     },
 }
 
