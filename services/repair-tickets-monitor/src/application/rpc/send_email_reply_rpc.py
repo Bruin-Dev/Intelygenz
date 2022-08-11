@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass, field
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, ValidationError
 
 from application.rpc import Rpc, RpcFailedError, RpcRequest
 
@@ -29,11 +29,16 @@ class SendEmailReplyRpc(Rpc):
 
         log.debug(f"__call__(): response={response}")
         try:
-            return str(int(response.body))
-        except (ValueError, TypeError) as error:
+            body = ResponseBody.parse_obj(response.body)
+            return body.email_id
+        except ValidationError as error:
             raise RpcFailedError(request=request, response=response) from error
 
 
 class RequestBody(BaseModel):
     parent_email_id: str
     reply_body: str
+
+
+class ResponseBody(BaseModel):
+    email_id: str = Field(alias="emailId")

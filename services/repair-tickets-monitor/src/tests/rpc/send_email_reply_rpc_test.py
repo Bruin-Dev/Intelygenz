@@ -14,7 +14,7 @@ class TestSendEmailReplyRpc:
     async def requests_are_properly_built_test(self, make_send_email_rpc):
         parent_email_id = "any_parent_email_id"
         reply_body = "any_body"
-        ok_response = RpcResponse(status=HTTPStatus.OK, body=str(hash("any_reply_email_id")))
+        ok_response = RpcResponse(status=HTTPStatus.OK, body={"emailId": 1234})
         rpc = make_send_email_rpc()
         rpc.send = AsyncMock(return_value=ok_response)
 
@@ -29,14 +29,16 @@ class TestSendEmailReplyRpc:
 
     @mark.asyncio
     async def responses_are_properly_parsed_test(self, make_send_email_rpc):
-        email_id = str(hash("any_reply_email_id"))
-        rpc_response = RpcResponse(status=HTTPStatus.OK, body=email_id)
+        rpc_response = RpcResponse(
+            status=HTTPStatus.OK,
+            body={"emailId": hash("any_email_id"), "historyId": hash("any_history_id"), "jobId": "any_job_id"},
+        )
         rpc = make_send_email_rpc()
         rpc.send = AsyncMock(return_value=rpc_response)
 
         subject = await rpc("any_parent_email_id", "any_body")
 
-        assert subject == email_id
+        assert subject == str(hash("any_email_id"))
 
     @mark.asyncio
     async def unparseable_responses_raise_a_proper_exception_test(self, make_send_email_rpc):
