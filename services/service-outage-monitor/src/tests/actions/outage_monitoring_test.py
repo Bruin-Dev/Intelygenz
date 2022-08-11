@@ -8353,7 +8353,7 @@ class TestServiceOutageMonitor:
         outage_monitor._outage_repository.is_faulty_link = Mock(return_value=False)
 
         result = outage_monitor._should_forward_to_hnoc(link_data, is_edge_down)
-        assert result is True
+        assert result is False
 
     def should_forward_to_hnoc_byob_and_not_faulty_display_name_test(self, outage_monitor):
         link_data = [
@@ -8399,7 +8399,7 @@ class TestServiceOutageMonitor:
         outage_monitor._outage_repository.is_faulty_link = Mock(return_value=True)
 
         result = outage_monitor._should_forward_to_hnoc(link_data, is_edge_down)
-        assert result is False
+        assert result is True
 
     @pytest.mark.asyncio
     async def append_triage_note_with_retrieval_of_edge_events_returning_non_2xx_status_test(self, outage_monitor):

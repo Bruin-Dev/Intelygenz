@@ -644,7 +644,7 @@ class OutageMonitor:
             return True
         if is_edge_down:
             return True
-        return not self._has_faulty_blacklisted_link(link_data)
+        return self._has_faulty_non_blacklisted_link(link_data)
 
     def schedule_forward_to_hnoc_queue(
         self,
@@ -1124,7 +1124,15 @@ class OutageMonitor:
         return any(
             link
             for link in links
-            if link["displayName"] and self._is_link_label_blacklisted_from_hnoc(link["displayName"])
+            if self._is_link_label_blacklisted_from_hnoc(link["displayName"])
+            if self._outage_repository.is_faulty_link(link["linkState"])
+        )
+
+    def _has_faulty_non_blacklisted_link(self, links: List[dict]) -> bool:
+        return any(
+            link
+            for link in links
+            if not self._is_link_label_blacklisted_from_hnoc(link["displayName"])
             if self._outage_repository.is_faulty_link(link["linkState"])
         )
 
