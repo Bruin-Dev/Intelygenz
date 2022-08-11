@@ -3,10 +3,10 @@ from logging import Logger
 from typing import Any
 
 from application.clients.bruin_client import BruinClient
-from application.clients.bruin_session import BruinPostRequest
+from application.clients.bruin_session import BruinPostBody, BruinPostRequest
 from dataclasses import dataclass
 from igz.packages.eventbus.eventbus import EventBus
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, Field, ValidationError
 
 # TODO: to be changed to the actual path
 BRUIN_PATH = "/api/Notification/email/ReplyAll"
@@ -53,9 +53,9 @@ class MessageBody(BaseModel):
     html_reply_body: bool = True
 
 
-class PostBody(BaseModel):
+class PostBody(BruinPostBody):
     content: str
-    email_id: int
+    email_id: int = Field(alias="emailId")
 
 
 class PostParams(BaseModel):
