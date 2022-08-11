@@ -335,7 +335,7 @@ class TestNewEmailsMonitor:
         await new_emails_monitor._process_new_email(email_data)
 
         email_tagger_repository.get_prediction.assert_awaited_once_with(email_data)
-        new_emails_repository.mark_complete.assert_not_called()
+        new_emails_repository.mark_complete.assert_called_once_with(email_id)
         predicted_tag_repository.save_new_tag.assert_not_called()
         bruin_repository.post_email_tag.assert_not_called()
 

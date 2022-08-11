@@ -84,12 +84,10 @@ class NewEmailsMonitor:
                 parent = self._repair_parent_email_storage.find(parent_id)
                 if parent:
                     self._logger.info("email_id=%s is a reply to email %s", email_id, parent_id)
-                    # Remove from email tagger namespace
-                    self._new_emails_repository.mark_complete(email_id)
-
                     # add predicted tag to DB
                     self._predicted_tag_repository.save_new_tag(email_id, parent.tag.type, parent.tag.probability)
 
+                self._new_emails_repository.mark_complete(email_id)
                 return
 
             # If the mail is a reply email, status won't be in the 200~300 range
