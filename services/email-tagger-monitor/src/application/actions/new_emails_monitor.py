@@ -70,11 +70,22 @@ class NewEmailsMonitor:
     async def _process_new_email(self, email_data: dict):
         email_id = email_data["email"]["email_id"]
         parent_id = email_data["email"].get("parent_id", None)
+        from_address = email_data["email"].get("from_address", None)
 
         async with self._semaphore:
             # KRE will fail if the mail is not a parent email, but currently KRE monitors the number of processed emails
             # So, always get tag from KRE event if we know the mail is not a parent email.
-            response = await self._email_tagger_repository.get_prediction(email_data)
+            auto_reply_whitelist = self._config.MONITOR_CONFIG["auto_reply_whitelist"]
+            force_repair_email = True
+            if len(auto_reply_whitelist) > 0:
+                force_repair_email = from_address in auto_reply_whitelist
+            self._logger.info(f"email_id={email_id} force_repair_email={force_repair_email}")
+
+            if force_repair_email:
+                response = {"body": [{"tag_id": 1, "probability": 1.0}], "status": 200}
+            else:
+                response = await self._email_tagger_repository.get_prediction(email_data)
+
             prediction = response.get("body")
             self._logger.info("email_id=%s parent_id=%s - Got prediction %s", email_id, parent_id, prediction)
 

@@ -33,6 +33,7 @@ MONITOR_CONFIG = {
         "endpoint_prefix": "",
     },
     "store_replies_enabled": True,
+    "auto_reply_whitelist": ["some@email.com"],
 }
 
 CURRENT_ENVIRONMENT = "dev"
