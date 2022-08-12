@@ -1,4 +1,6 @@
 import boto3
+from datetime import datetime, timedelta
+from config import config
 
 
 def get_resources_from_describe(ssm_details):
@@ -9,6 +11,8 @@ def get_resources_from_describe(ssm_details):
 
 
 def get_parameter_store(event, context):
+    print("Creating backup file of parameters from the parameter store")
+
     client = boto3.client('ssm')
 
     next_token = ' '
@@ -26,7 +30,10 @@ def get_parameter_store(event, context):
 
     with open('/tmp/ssm_backup.txt', 'w') as ssm_backup:
         for key, value in parameter_dict.items():
-            print('%s:%s\n' % (key, value))
             ssm_backup.write('%s:%s\n' % (key, value))
+
     s3 = boto3.resource('s3')
-    s3.meta.client.upload_file('/tmp/ssm_backup.txt', 'ssmbackupbucket', 'ssm_backup.txt')
+    file_name = f'ssm_backup_{(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")}.txt'
+    s3.meta.client.upload_file('/tmp/ssm_backup.txt', config.SSM_CONFIG["bucket_name"], file_name)
+
+    print(f"File {file_name} uploaded to bucket {config.SSM_CONFIG['bucket_name']}")
