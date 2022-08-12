@@ -3,10 +3,17 @@ import logging
 import os
 import time
 from collections import defaultdict
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, DefaultDict, Dict, List, Set, Tuple
 
 import html2text
+from apscheduler.jobstores.base import ConflictingIdError
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.util import undefined
+from framework.nats.client import Client as NatsClient
+from pytz import timezone
+
 from application import resources
 from application.domain.asset import Asset, AssetId, Assets
 from application.domain.email import Email, EmailStatus
@@ -28,12 +35,6 @@ from application.rpc.send_email_reply_rpc import SendEmailReplyRpc
 from application.rpc.set_email_status_rpc import SetEmailStatusRpc
 from application.rpc.subscribe_user_rpc import SubscribeUserRpc
 from application.rpc.upsert_outage_ticket_rpc import UpsertedStatus, UpsertedTicket, UpsertOutageTicketRpc
-from apscheduler.jobstores.base import ConflictingIdError
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.util import undefined
-from dataclasses import dataclass
-from framework.nats.client import Client as NatsClient
-from pytz import timezone
 
 log = logging.getLogger(__name__)
 
@@ -250,7 +251,16 @@ class RepairTicketsMonitor:
                 self._new_tagged_emails_repository.mark_complete(email.id)
                 return
 
-            is_actionable = self._is_inference_actionable(inference_data)
+            auto_reply_whitelist = self._config.MONITOR_CONFIG["auto_reply_whitelist"]
+            auto_reply_allowed = True
+            if len(auto_reply_whitelist) > 0:
+                auto_reply_allowed = email.sender_address in auto_reply_whitelist
+
+            if auto_reply_allowed:
+                is_actionable = True
+            else:
+                is_actionable = self._is_inference_actionable(inference_data)
+
             is_ticket_actionable = self._is_ticket_actionable(inference_data)
 
             potential_service_numbers = inference_data.get("potential_service_numbers")
@@ -401,10 +411,6 @@ class RepairTicketsMonitor:
 
                 auto_reply_enabled = self._config.MONITOR_CONFIG["auto_reply_enabled"]
                 log.info(f"email_id={email.id} auto_reply_enabled={auto_reply_enabled}")
-                auto_reply_whitelist = self._config.MONITOR_CONFIG["auto_reply_whitelist"]
-                auto_reply_allowed = True
-                if len(auto_reply_whitelist) > 0:
-                    auto_reply_allowed = email.sender_address in auto_reply_whitelist
                 log.info(f"email_id={email.id} auto_reply_allowed={auto_reply_allowed}")
 
                 send_auto_reply = auto_reply_enabled and auto_reply_allowed
