@@ -55,6 +55,7 @@ variables:
   TNBA_MONITOR_DESIRED_TASKS: "1"
   T7_BRIDGE_DESIRED_TASKS: "1"
   VELOCLOUD_BRIDGE_DESIRED_TASKS: "2"
+  FORTICLOUD_BRIDGE_DESIRED_TASKS: "0"
 
 include:
   # Jobs templates used in Gitlab-CI Yml's

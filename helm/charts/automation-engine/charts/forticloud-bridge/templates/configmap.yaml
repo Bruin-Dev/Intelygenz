@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "forticloud-bridge.configmapName" . }}
+  labels:
+    {{- include "forticloud-bridge.labels" . | nindent 4 }}
+  annotations:
+    reloader.stakater.com/match: "true"
+data:
+  CURRENT_ENVIRONMENT: {{ .Values.global.current_environment | quote }}
+  ENVIRONMENT_NAME: {{ .Values.global.environment | quote }}
+  REDIS_HOSTNAME: {{ .Values.global.redis_hostname | quote }}
+  PAPERTRAIL_PREFIX: "{{ include "forticloud-bridge.fullname" . }}-{{ .Values.image.tag }}"

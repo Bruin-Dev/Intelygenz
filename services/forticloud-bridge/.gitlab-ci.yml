@@ -1,0 +1,63 @@
+# ==================================================
+# Linter validation jobs for forticloud-bridge module
+# ==================================================
+forticloud-bridge-linter:
+  variables:
+    MODULE: forticloud-bridge
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+      changes:
+        - services/forticloud-bridge/src/application/**/*
+        - services/forticloud-bridge/src/config/**/*
+        - services/forticloud-bridge/src/app.py
+        - services/forticloud-bridge/Dockerfile
+        - services/forticloud-bridge/pyproject.toml
+        - services/forticloud-bridge/poetry.lock
+        - pyutils_automation/py310/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+  extends: .lint_module
+
+# ===========================================
+# Unit tests jobs for forticloud-bridge module
+# ===========================================
+#forticloud-bridge-test:
+#  variables:
+#    MODULE: forticloud-bridge
+#  rules:
+#    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+#      changes:
+#        - services/forticloud-bridge/src/application/**/*
+#        - services/forticloud-bridge/src/config/**/*
+#        - services/forticloud-bridge/src/app.py
+#        - services/forticloud-bridge/Dockerfile
+#        - services/forticloud-bridge/pyproject.toml
+#        - services/forticloud-bridge/poetry.lock
+#        - pyutils_automation/py310/**/*
+#    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+#  extends: .unittest_module_python_310
+#  needs: ["forticloud-bridge-linter"]
+
+# ==============================================
+# Images builds jobs for forticloud-bridge module
+# ==============================================
+forticloud-bridge-build:
+  stage: build
+  variables:
+    MODULE_NAME: forticloud-bridge
+    MODULE_VERSION: ${CI_PIPELINE_ID}
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $FORTICLOUD_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+      changes:
+        - services/forticloud-bridge/src/application/**/*
+        - services/forticloud-bridge/src/config/**/*
+        - services/forticloud-bridge/src/app.py
+        - services/forticloud-bridge/Dockerfile
+        - services/forticloud-bridge/pyproject.toml
+        - services/forticloud-bridge/poetry.lock
+        - pyutils_automation/py310/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $FORTICLOUD_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
+  extends: .build_app_image
+  needs:
+    # - job: forticloud-bridge-test
+    - job: semantic-release
+      optional: true

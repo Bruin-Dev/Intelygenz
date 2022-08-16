@@ -59,6 +59,9 @@ dependencies:
   - name: fraud-monitor
     version: '*.*.*'
     condition: fraud-monitor.enabled
+  - name: forticloud-bridge
+    version: '*.*.*'
+    condition: forticloud-bridge.enabled
   - name: gateway-monitor
     version: '*.*.*'
     condition: gateway-monitor.enabled
