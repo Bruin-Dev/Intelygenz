@@ -1,0 +1,29 @@
+{
+  "Id": "abeda766-0e2e-4cb7-bdbc-0b0aa67edc5d",
+  "Attempt": 1,
+  "Notification": {
+    "Id": "38ef98a4-55a6-4553-b824-79c9a62a2a6c",
+    "ClientId": 79939,
+    "EntityId": "4403934",
+    "ApplicationName": "NotificationAPI",
+    "Action": "EmailSent",
+    "Body": {
+      "EmailId": 4403934,
+      "ClientId": 79939,
+      "Subject": "Re: Ticket# 1857206 MetTel Esclation - D68v1 | MetTel -Down",
+      "Date": "2022-06-28T05:27:00.293",
+      "Body": "body",
+      "ParentID": 4403908,
+      "PreviousEmailID": 4403908,
+      "TagID": [],
+      "FromAddress": "unitedrentals@mettel.net",
+      "ToAddress": [
+        "nocsupport@ur.com"
+      ],
+      "SendCC": [
+        "sdwan@ur.com",
+        "nocsupport@ur.com"
+      ]
+    }
+  }
+}

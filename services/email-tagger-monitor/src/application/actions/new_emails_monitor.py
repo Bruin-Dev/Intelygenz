@@ -76,7 +76,7 @@ class NewEmailsMonitor:
             # KRE will fail if the mail is not a parent email, but currently KRE monitors the number of processed emails
             # So, always get tag from KRE event if we know the mail is not a parent email.
             auto_reply_whitelist = self._config.MONITOR_CONFIG["auto_reply_whitelist"]
-            force_repair_email = True
+            force_repair_email = False
             if len(auto_reply_whitelist) > 0:
                 force_repair_email = from_address in auto_reply_whitelist
             self._logger.info(f"email_id={email_id} force_repair_email={force_repair_email}")
