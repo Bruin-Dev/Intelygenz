@@ -362,20 +362,26 @@ class ServiceAffectingMonitor:
                     if note["noteValue"] is not None
                 ]
 
+                last_cycle_notes = self._ticket_repository.get_notes_appended_since_latest_reopen_or_ticket_creation(
+                    relevant_notes
+                )
+                affecting_trouble_note = self._ticket_repository.get_affecting_trouble_note(last_cycle_notes)
+                troubles = self._get_troubles_from_ticket_notes(last_cycle_notes)
+                is_byob = self._get_is_byob_from_affecting_trouble_note(affecting_trouble_note)
+                link_type = self._get_link_type_from_affecting_trouble_note(affecting_trouble_note)
+
                 max_seconds_since_last_trouble = self._get_max_seconds_since_last_trouble(edge)
                 last_trouble_was_detected_recently = self._trouble_repository.was_last_trouble_detected_recently(
                     relevant_notes,
                     affecting_ticket_creation_date,
                     max_seconds_since_last_trouble=max_seconds_since_last_trouble,
                 )
-                remove_auto_resolution_restrictions_for_byob = self._ticket_repository.is_ticket_task_in_ipa_queue(
-                    detail_for_ticket_resolution
-                )
-                if remove_auto_resolution_restrictions_for_byob:
+
+                is_task_in_ipa_queue = self._ticket_repository.is_ticket_task_in_ipa_queue(detail_for_ticket_resolution)
+                if is_byob and is_task_in_ipa_queue:
                     self._logger.info(
-                        f"Task for serial {serial_number} in ticket {affecting_ticket_id} is in the IPA Investigate"
-                        f" queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last"
-                        f" documented trouble..."
+                        f"Task for serial {serial_number} in ticket {affecting_ticket_id} is related to a BYOB link "
+                        f"and is in the IPA Investigate queue. Ignoring auto-resolution restrictions..."
                     )
                 else:
                     if not last_trouble_was_detected_recently:
@@ -407,14 +413,6 @@ class ServiceAffectingMonitor:
                         f"{serial_number} since the current environment is {working_environment.upper()}"
                     )
                     continue
-
-                last_cycle_notes = self._ticket_repository.get_notes_appended_since_latest_reopen_or_ticket_creation(
-                    relevant_notes
-                )
-                affecting_trouble_note = self._ticket_repository.get_affecting_trouble_note(last_cycle_notes)
-                troubles = self._get_troubles_from_ticket_notes(last_cycle_notes)
-                is_byob = self._get_is_byob_from_affecting_trouble_note(affecting_trouble_note)
-                link_type = self._get_link_type_from_affecting_trouble_note(affecting_trouble_note)
 
                 self._logger.info(
                     f"Autoresolving detail of ticket {affecting_ticket_id} related to serial number {serial_number}..."

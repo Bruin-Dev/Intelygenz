@@ -3454,6 +3454,7 @@ class TestServiceAffectingMonitor:
         detail_items = make_list_of_detail_items(detail_item)
         notes = make_list_of_ticket_notes()
         ticket_details = make_ticket_details(detail_items=detail_items, notes=notes)
+        service_affecting_monitor._get_is_byob_from_affecting_trouble_note.return_value = True
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.return_value = make_rpc_response(
             body=open_affecting_tickets,
             status=200,
@@ -3476,9 +3477,8 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._ticket_repository.is_ticket_task_in_ipa_queue.assert_called_with(detail_item)
         assert (
             call(
-                f"Task for serial {serial_number} in ticket {ticket_id} is in the IPA Investigate"
-                f" queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last"
-                f" documented trouble..."
+                f"Task for serial {serial_number} in ticket {ticket_id} is related to a BYOB link "
+                f"and is in the IPA Investigate queue. Ignoring auto-resolution restrictions..."
             )
             in service_affecting_monitor._bruin_repository._logger.info.mock_calls
         )
@@ -3544,6 +3544,7 @@ class TestServiceAffectingMonitor:
         )
         notes = make_list_of_ticket_notes(note_1)
         ticket_details = make_ticket_details(detail_items=detail_items, notes=notes)
+        service_affecting_monitor._get_is_byob_from_affecting_trouble_note.return_value = True
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.return_value = make_rpc_response(
             body=open_affecting_tickets,
             status=200,
@@ -3566,9 +3567,8 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._ticket_repository.is_ticket_task_in_ipa_queue.assert_called_with(detail_item)
         assert (
             call(
-                f"Task for serial {serial_number} in ticket {ticket_id} is in the IPA Investigate"
-                f" queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last"
-                f" documented trouble..."
+                f"Task for serial {serial_number} in ticket {ticket_id} is related to a BYOB link "
+                f"and is in the IPA Investigate queue. Ignoring auto-resolution restrictions..."
             )
             in service_affecting_monitor._bruin_repository._logger.info.mock_calls
         )
@@ -3641,6 +3641,7 @@ class TestServiceAffectingMonitor:
         )
         notes = make_list_of_ticket_notes(note_1, note_2, note_3)
         ticket_details = make_ticket_details(detail_items=detail_items, notes=notes)
+        service_affecting_monitor._get_is_byob_from_affecting_trouble_note.return_value = True
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.return_value = make_rpc_response(
             body=open_affecting_tickets,
             status=200,
@@ -3663,9 +3664,8 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._ticket_repository.is_ticket_task_in_ipa_queue.assert_called_with(detail_item)
         assert (
             call(
-                f"Task for serial {serial_number} in ticket {ticket_id} is in the IPA Investigate"
-                f" queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last"
-                f" documented trouble..."
+                f"Task for serial {serial_number} in ticket {ticket_id} is related to a BYOB link "
+                f"and is in the IPA Investigate queue. Ignoring auto-resolution restrictions..."
             )
             in service_affecting_monitor._bruin_repository._logger.info.mock_calls
         )
