@@ -490,10 +490,132 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_7">
+          Manual procedures
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Manual procedures" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_7">
+          <span class="md-nav__icon md-icon"></span>
+          Manual procedures
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../../.." class="md-nav__link">
-        Manual processes
+      <a href="../../../manual_procedures/API_VENDOR_ACCESS/" class="md-nav__link">
+        Vendor access to the API
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION/" class="md-nav__link">
+        Switch Automation Engine region
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_8">
+          Manual configurations
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Manual configurations" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_8">
+          <span class="md-nav__icon md-icon"></span>
+          Manual configurations
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../manual_configurations/INIT_AUTOMATION_PROJECT/" class="md-nav__link">
+        Init Automation Engine project
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../manual_configurations/OKTA_CONFIGURATIONS/" class="md-nav__link">
+        AWS SSO Okta JWT token
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../manual_configurations/OKTA_JWT/" class="md-nav__link">
+        AWS SSO Okta JWT token
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -525,54 +647,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#process-workflows" class="md-nav__link">
-    Process Workflows
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#list-of-decisions-made-by-the-intermapper-system" class="md-nav__link">
-    List of Decisions made by the Intermapper System
-  </a>
-  
-    <nav class="md-nav" aria-label="List of Decisions made by the Intermapper System">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#intermapper-queue" class="md-nav__link">
-    Intermapper queue
-  </a>
-  
-    <nav class="md-nav" aria-label="Intermapper queue">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#start-of-intermapper-workflow" class="md-nav__link">
-    Start of intermapper workflow
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -586,92 +660,165 @@
 
 
 <h1 id="intermapper-event-logging">Intermapper Event Logging</h1>
+<h1 id="description">Description</h1>
+<p>The mission of this service is to analyze InterMapper events sent by one or more InterMapper instances via e-mail, where each
+event refers to a device. The outcome of the analysis will determine whether:
+* A new Bruin ticket is created, if the device is down.
+* An existing Bruin ticket is re-opened, if the device is down and the ticket is resolved.
+* An existing Bruin ticket is auto-resolved, if the device is up and the ticket is open.</p>
+<p>When any of these cases take place, the event information is added to the ticket as a note. In some cases, this note can
+be enriched with information from the DRI system.</p>
+<p>Whatever the outcome of the analysis is, the event is finally marked as processed.</p>
 <h2 id="process-workflows">Process Workflows</h2>
 <p><img alt="" src="../../../images/9-intermapper-monitor.png" /></p>
-<h2 id="list-of-decisions-made-by-the-intermapper-system">List of Decisions made by the Intermapper System</h2>
-<h3 id="intermapper-queue">Intermapper queue</h3>
-<h4 id="start-of-intermapper-workflow">Start of intermapper workflow</h4>
+<h2 id="list-of-decisions-made-by-the-intermapper-monitor">List of Decisions made by the Intermapper Monitor</h2>
+<h3 id="process-e-mail-batch-workflow">Process E-mail Batch workflow</h3>
 <table>
 <thead>
 <tr>
 <th></th>
-<th></th>
-<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>1. Check sender email</td>
-<td>Sender email is noreply@mettel.net</td>
-<td>Sender email is NOT noreply@mettel.net</td>
+<td>1</td>
+<td>Check for Circuit ID existence in e-mail</td>
+<td>Circuit ID is defined</td>
+<td>Circuit ID is undefined</td>
 </tr>
 <tr>
-<td>2. Check for Alpha-numeric-value (Circuit id) from subject within parenthesis</td>
-<td>Alpha-numeric value (Circuit ID) can be parsed from subject between parenthsis to identify inventory</td>
-<td>Alpha-numeric value (Circuit ID) can NOT be parsed from email subject between parenthsis</td>
+<td>2</td>
+<td>Check for Circuit ID being an SD-WAN</td>
+<td>Circuit ID is not SD-WAN</td>
+<td>Circuit ID is SD-WAN</td>
 </tr>
+</tbody>
+</table>
+<h4 id="process-e-mail-workflow">Process E-mail workflow</h4>
+<table>
+<thead>
 <tr>
-<td>3. Check for Warning event type and condition</td>
-<td>Event type is NOT Warning and Condition is NOT "WAN Interface down - Device is running on LTE Interface"</td>
-<td>Event type is Warning and Condition is "WAN Interface down - Device is running on LTE Interface"</td>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+<th>Decision</th>
 </tr>
+</thead>
+<tbody>
 <tr>
-<td>4. Check for event type</td>
-<td>Event type is Alarm, Critical, Warning, or Down</td>
-<td>Event type is Up, OK</td>
+<td>1</td>
+<td>Check for Event Type</td>
+<td>Event type is Alarm, Critical, Warning, Down or Link Warning</td>
+<td>Event type is Up or OK</td>
+<td>Event Type is any other</td>
 </tr>
+</tbody>
+</table>
+<h4 id="ticket-creation-workflow">Ticket Creation workflow</h4>
+<table>
+<thead>
 <tr>
-<td>5. Check probe type</td>
-<td>Probe type is Data Remote</td>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for Probe Type</td>
+<td>Probe Type is Data Remote</td>
 <td>Probe Type is NOT Data Remote</td>
 </tr>
 <tr>
-<td>6. Check to see if we can retrieve data from DRI</td>
-<td>Successfully retrieved data from DRI from Inventory</td>
+<td>2</td>
+<td>Check to see if we can retrieve data from DRI</td>
+<td>Successfully retrieved data from DRI for Inventory</td>
 <td>Could not retrieve any data for inventory from DRI</td>
 </tr>
 <tr>
-<td>7. Checking for non-resolved task for Service Outage ticket</td>
-<td>A non-resolved task exists for the inventory on a Service Outage ticket</td>
-<td>No non-resolved task exists for the inventory on a Service Outage ticket</td>
+<td>3</td>
+<td>Check Probe Type and Condition of event</td>
+<td>Probe Type is Data Remote Probe AND Condition is Device Lost Power - Battery is in use</td>
+<td>Probe Type is NOT Data Remote Probe or Condition is NOT Device Lost Power - Battery is in use</td>
+</tr>
+</tbody>
+</table>
+<h4 id="auto-resolution-workflow">Auto-Resolution workflow</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check to see if ticket's product category is in the whitelist</td>
+<td>Ticket's product category is whitelisted</td>
+<td>Ticket's product category is NOT whitelisted</td>
 </tr>
 <tr>
-<td>8. Checking for time at impacted site</td>
+<td>2</td>
+<td>Check for time at impacted site</td>
 <td>Time at impacted site is between 12am and 6am (NIGHT)</td>
 <td>Time at impacted site is between 6am and 12am (DAY)</td>
 </tr>
 <tr>
-<td>9. Checking if time passed is more or less than 3 hrs</td>
-<td>More than 3 hours has passed since an outage was documented</td>
-<td>Less than 3 hours has passed since an outage was documented</td>
+<td>3</td>
+<td>Check if time passed is more or less than 3 hrs (NIGHT)</td>
+<td>Less than 3 hrs have passed since an outage has been documented</td>
+<td>More than 3 hrs have passed since an outage has been documented</td>
 </tr>
 <tr>
-<td>10. Checking if time passed is more or less than 90 mins</td>
-<td>More than 90 mins has passed since an outage was documented</td>
-<td>Less than 90 mins has passed since an outage was documented</td>
+<td>4</td>
+<td>Check if time passed is more or less than 90 min (DAY)</td>
+<td>Less than 90 min have passed since an outage has been documented</td>
+<td>More than 90 min have passed since an outage has been documented</td>
 </tr>
 <tr>
-<td>11. Checking how mamy time ticket has been autoresolved</td>
-<td>Ticket has been autoresolved less than 3 times</td>
-<td>Ticket has been autoresolved more than 3 times</td>
+<td>5</td>
+<td>Check if max auto-resolves threshold has been exceeded</td>
+<td>Ticket has been auto-resolved less than 3 times</td>
+<td>Ticket has been auto-resolved 3+ times already</td>
 </tr>
 <tr>
-<td>## Event Descriptions</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>### Intermapper queue</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>* <a href="../../services/intermapper-outage-monitor/actions/start_intermapper_outage_monitoring/">start_intermapper_outage_monitoring</a></td>
-<td></td>
-<td></td>
+<td>6</td>
+<td>Check if ticket is resolved</td>
+<td>Ticket is resolved already</td>
+<td>Ticket is not resolved</td>
 </tr>
 </tbody>
 </table>
+<h2 id="event-descriptions">Event Descriptions</h2>
+<h3 id="start-intermapper-outage-monitoring">Start InterMapper Outage Monitoring</h3>
+<ul>
+<li><a href="../../services/intermapper-outage-monitor/actions/start_intermapper_outage_monitoring/">start_intermapper_outage_monitoring</a></li>
+</ul>
+<h3 id="process-e-mail-batch">Process E-mail Batch</h3>
+<ul>
+<li><a href="../../services/intermapper-outage-monitor/actions/_process_email_batch/">_process_email_batch</a></li>
+</ul>
+<h3 id="process-e-mail">Process E-mail</h3>
+<ul>
+<li><a href="../../services/intermapper-outage-monitor/actions/_process_email/">_process_email</a></li>
+</ul>
+<h3 id="ticket-creation">Ticket Creation</h3>
+<ul>
+<li><a href="../../services/intermapper-outage-monitor/actions/_create_outage_ticket/">_create_outage_ticket</a></li>
+</ul>
+<h3 id="auto-resolution">Auto-Resolution</h3>
+<ul>
+<li><a href="../../services/intermapper-outage-monitor/actions/_autoresolve_ticket/">_autoresolve_ticket</a></li>
+</ul>
 
               
             </article>

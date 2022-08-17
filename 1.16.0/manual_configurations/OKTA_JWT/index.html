@@ -15,7 +15,7 @@
     
     
       
-        <title>OKTA JWT - Automation Engine Documentation</title>
+        <title>AWS SSO Okta JWT token - Automation Engine Documentation</title>
       
     
     
@@ -60,6 +60,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#creation-of-oauth-application-for-data-highway-api" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -95,7 +100,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              OKTA JWT
+              AWS SSO Okta JWT token
             
           </span>
         </div>
@@ -167,13 +172,15 @@
         
   
   
+    
+  
 
 
   
   
   
     <li class="md-tabs__item">
-      <a href="../../CONCEPTS/" class="md-tabs__link">
+      <a href="../../CONCEPTS/" class="md-tabs__link md-tabs__link--active">
         Topics
       </a>
     </li>
@@ -233,12 +240,14 @@
 
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
       
       
       
@@ -485,10 +494,210 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_7">
+          Manual procedures
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Manual procedures" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_7">
+          <span class="md-nav__icon md-icon"></span>
+          Manual procedures
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
-        Manual processes
+      <a href="../../manual_procedures/API_VENDOR_ACCESS/" class="md-nav__link">
+        Vendor access to the API
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION/" class="md-nav__link">
+        Switch Automation Engine region
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_8">
+          Manual configurations
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Manual configurations" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_8">
+          <span class="md-nav__icon md-icon"></span>
+          Manual configurations
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../INIT_AUTOMATION_PROJECT/" class="md-nav__link">
+        Init Automation Engine project
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../OKTA_CONFIGURATIONS/" class="md-nav__link">
+        AWS SSO Okta JWT token
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          AWS SSO Okta JWT token
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        AWS SSO Okta JWT token
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pre-requisites" class="md-nav__link">
+    Pre requisites
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#description" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#group-api-access" class="md-nav__link">
+    Group API access
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-application-server" class="md-nav__link">
+    Create Application server
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-authorization-server" class="md-nav__link">
+    Create Authorization server
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#update-application-with-new-parameters" class="md-nav__link">
+    Update Application with new parameters
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -517,6 +726,58 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pre-requisites" class="md-nav__link">
+    Pre requisites
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#description" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#group-api-access" class="md-nav__link">
+    Group API access
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-application-server" class="md-nav__link">
+    Create Application server
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-authorization-server" class="md-nav__link">
+    Create Authorization server
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#update-application-with-new-parameters" class="md-nav__link">
+    Update Application with new parameters
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -530,9 +791,74 @@
                 
 
 
-  <h1>OKTA JWT</h1>
-
-
+<h1 id="creation-of-oauth-application-for-data-highway-api">Creation of Oauth Application for Data Highway API</h1>
+<h2 id="pre-requisites">Pre requisites</h2>
+<ul>
+<li>Okta Account</li>
+<li>AWS Account</li>
+</ul>
+<h2 id="description">Description</h2>
+<p>API needs a way to verify the access of vendors and internal users provided from Okta. They way to do it is about provide
+a JWT from Okta with a company name information on it.</p>
+<h2 id="group-api-access">Group API access</h2>
+<p>First steep is about the creation of a group for the API access, only members with his group will access the API.
+The groups must have the next values:
+* Name: IGZ-INT-DATA-HIGHWAY-API
+* Description: API Data highway access group.</p>
+<ul>
+<li>Name: IGZ-EXT-DATA-HIGHWAY-API</li>
+<li>Description: API Data highway access group.</li>
+</ul>
+<h2 id="create-application-server">Create Application server</h2>
+<ol>
+<li>To create an application destined for the API, we are gonna need to go to "Applications/Applications" and click on create
+app integration
+<img alt="" src="../../img/manual_configurations/okta_jwt/add_api_application.png" /></li>
+<li>A new form will show and we need to fill it with the next information:</li>
+<li>App integration name: IGZ-DATA-HIGHWAY-API</li>
+<li>Grant type: Select "Authorization Code" and "Resource Owner Password"</li>
+<li>Controlled access: Select "Limit access to selected groups"</li>
+<li>Selected groups: IGZ-INT-DATA-HIGHWAY-API, IGZ-EXT-DATA-HIGHWAY-API</li>
+<li>Click Save.</li>
+</ol>
+<h2 id="create-authorization-server">Create Authorization server</h2>
+<ol>
+<li>In the Admin Dashboard, go to security/API and click on add authorization server.
+   <img alt="" src="../../img/manual_configurations/okta_jwt/add-authorization-server.png" /></li>
+<li>We will need to fill the name, audience, and description. the next values are the selected ones:</li>
+<li>Name: API-DATA-HIGHWAY</li>
+<li>Audience: API-DATA-HIGHWAY</li>
+<li>Description: API data highway access.</li>
+</ol>
+<p>After filling this form, click on the save button.
+3. With the Authorization server created, we need to add some extra configurations. Go to the Claims menu following the next image
+<img alt="" src="../../img/manual_configurations/okta_jwt/authorization_server_claims_menu.png" />
+   1. Click on "Add claim"
+   2. Fill the new claim with the next information:
+      1. Name: organization
+      2. Include in token type: "Id Token" - "Always"
+      3. Value type: "Expression"
+      4. Value: user.organization
+      5. Include in: "Any scope"
+4. Go to access policies menu following the next image:
+<img alt="" src="../../img/manual_configurations/okta_jwt/authorization_server_access_policies_menu.png" />
+   1. in this menu click in the button "Add new access policy"
+   2. it will appear a new form, fill it with the next values and click on create policy:
+      1. Name: IGZ-DATA-HIGHWAY-API-JWT-ACCESS-POLICY
+      2. Description: Api JWT access policy.
+      3. Assign to: IGZ-INT-DATA-HIGHWAY-API, IGZ-EXT-DATA-HIGHWAY-API</p>
+<p><img alt="" src="../../img/manual_configurations/okta_jwt/authorization_server_add_new_rule_on_policy.png" />
+   3. After closing the form, select the policy created and click on the "Add rule" button. And fill the form with the next information:
+      1. Rule Name: IGZ-DATA-HIGHWAY-API-ACCESS-RULE
+      2. Grant type is: Select "Client credentials" and "Resource Owner Password"
+      3. Assigned the app and a member of one of the following: Add the groups "IGZ-INT-DATA-HIGHWAY-API, IGZ-EXT-DATA-HIGHWAY-API".
+      4. The following scopes: profiles and openid
+      5. but will expire if not used every: 1 h</p>
+<h2 id="update-application-with-new-parameters">Update Application with new parameters</h2>
+<ol>
+<li>we are going to need to go to "Applications/Applications" and update the configuration of the application "IGZ-DATA-HIGHWAY-API".</li>
+<li>Disable User consent in general configurations.</li>
+</ol>
 
               
             </article>
@@ -542,6 +868,26 @@
       </main>
       
         <footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="../OKTA_CONFIGURATIONS/" class="md-footer__link md-footer__link--prev" aria-label="Previous: AWS SSO Okta JWT token" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              AWS SSO Okta JWT token
+            </div>
+          </div>
+        </a>
+      
+      
+    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">

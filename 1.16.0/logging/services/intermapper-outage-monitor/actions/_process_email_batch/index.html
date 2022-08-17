@@ -61,7 +61,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#process-email-batch" class="md-skip">
+        <a href="#process-e-mail-batch" class="md-skip">
           Skip to content
         </a>
       
@@ -490,10 +490,132 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_7">
+          Manual procedures
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Manual procedures" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_7">
+          <span class="md-nav__icon md-icon"></span>
+          Manual procedures
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../../../../.." class="md-nav__link">
-        Manual processes
+      <a href="../../../../../manual_procedures/API_VENDOR_ACCESS/" class="md-nav__link">
+        Vendor access to the API
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION/" class="md-nav__link">
+        Switch Automation Engine region
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_8">
+          Manual configurations
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Manual configurations" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_8">
+          <span class="md-nav__icon md-icon"></span>
+          Manual configurations
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_configurations/INIT_AUTOMATION_PROJECT/" class="md-nav__link">
+        Init Automation Engine project
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_configurations/OKTA_CONFIGURATIONS/" class="md-nav__link">
+        AWS SSO Okta JWT token
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_configurations/OKTA_JWT/" class="md-nav__link">
+        AWS SSO Okta JWT token
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -530,8 +652,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#process-email-batch" class="md-nav__link">
-    Process email batch
+  <a href="#process-e-mail-batch" class="md-nav__link">
+    Process E-mail batch
   </a>
   
 </li>
@@ -552,27 +674,60 @@
 
   <h1> process email batch</h1>
 
-<h2 id="process-email-batch">Process email batch</h2>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(f&quot;Processing {len(emails)} email(s) with asset_id {asset_id}...&quot;)
+<h2 id="process-e-mail-batch">Process E-mail batch</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">emails</span><span class="p">)</span><span class="si">}</span><span class="s2"> email(s) with circuit ID </span><span class="si">{</span><span class="n">circuit_id</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
 </code></pre></div>
-* If not asset id or asset id = SD-WAN:
-  * for email in emails:
-    * <a href="../../repositories/notifications_repository/mark_email_as_read/">mark email as read</a>
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(f&quot;Invalid asset_id. Skipping emails with asset_id {asset_id}...&quot;)
+<ul>
+<li>
+<p>If Circuit ID is undefined or Circuit ID is <code>SD-WAN</code>:</p>
+<ul>
+<li>For each email in batch:<ul>
+<li><a href="../../repositories/notifications_repository/mark_email_as_read/">mark email as read</a></li>
+</ul>
+</li>
+</ul>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid circuit_id. Skipping emails with circuit_id </span><span class="si">{</span><span class="n">circuit_id</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
 </code></pre></div>
-* <a href="../../repositories/bruin_repository/get_circuit_id/">get_circuit_id</a>
-* If status not Ok:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.error(f&quot;Failed to get circuit id. Skipping emails with asset_id {asset_id}...&quot;)
+END</p>
+</li>
+</ul>
+<p><a href="../../repositories/bruin_repository/get_service_number_by_circuit_id/">get_service_number_by_circuit_id</a></p>
+<ul>
+<li>
+<p>If response status for call to get inventory by circuit ID is not ok:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="sa">f</span><span class="s2">&quot;Failed to get service number by circuit ID. Skipping emails with circuit_id </span><span class="si">{</span><span class="n">circuit_id</span><span class="si">}</span><span class="s2">...&quot;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="p">)</span>
 </code></pre></div>
-* If status = 204:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.error(
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>                  f&quot;Bruin returned a 204 when getting the circuit id of asset_id {asset_id}. &quot;
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>                  f&quot;Marking all emails with this asset_id as read&quot;
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>              )
-</code></pre></div>
-* <a href="../_process_email/">_process_email</a>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.info(f&quot;Finished processing all emails with asset_id {asset_id}!&quot;)
+  END</p>
+</li>
+<li>
+<p>If status = 204:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="sa">f</span><span class="s2">&quot;Bruin returned a 204 when getting the service number for circuit_id </span><span class="si">{</span><span class="n">circuit_id</span><span class="si">}</span><span class="s2">. &quot;</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="sa">f</span><span class="s2">&quot;Marking all emails with this circuit_id as read&quot;</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">)</span>
 </code></pre></div></p>
+<ul>
+<li>For each email in batch:<ul>
+<li>If environment is <code>PRODUCTION</code>:<ul>
+<li><a href="../../repositories/notifications_repository/mark_email_as_read/">mark email as read</a></li>
+</ul>
+</li>
+<li>END</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>For email in batch:</p>
+<ul>
+<li><a href="../_process_email/">_process_email</a></li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Finished processing all emails with circuit_id </span><span class="si">{</span><span class="n">circuit_id</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
+</code></pre></div>
 
               
             </article>

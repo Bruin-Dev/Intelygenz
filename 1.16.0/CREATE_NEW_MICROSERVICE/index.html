@@ -490,10 +490,132 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_7">
+          Manual procedures
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Manual procedures" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_7">
+          <span class="md-nav__icon md-icon"></span>
+          Manual procedures
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
-        Manual processes
+      <a href="../manual_procedures/API_VENDOR_ACCESS/" class="md-nav__link">
+        Vendor access to the API
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION/" class="md-nav__link">
+        Switch Automation Engine region
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_8">
+          Manual configurations
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Manual configurations" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_8">
+          <span class="md-nav__icon md-icon"></span>
+          Manual configurations
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manual_configurations/INIT_AUTOMATION_PROJECT/" class="md-nav__link">
+        Init Automation Engine project
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manual_configurations/OKTA_CONFIGURATIONS/" class="md-nav__link">
+        AWS SSO Okta JWT token
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manual_configurations/OKTA_JWT/" class="md-nav__link">
+        AWS SSO Okta JWT token
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -771,18 +893,17 @@ new microservice repo, by that way we can deploy our microservice later in dev b
 <a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    dockerfile: new-bridge/Dockerfile                                 │
 <a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>    args:                                                             │
 <a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>      REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com    ├──────────────&gt; here!
-<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>      DOCKER_BASE_IMAGE_VERSION: 2.2.0                                │
-<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>  env_file:                                                           │
-<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>    - new-bridge/src/config/env                                       │
-<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>  depends_on:                                                         │
-<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>    - &quot;nats-server&quot;                                                   │
-<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>    - redis                                                           │
-<a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>  ports:                                                              │
-<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>    - 5006:5000                                                      _│
-<a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>
-<a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>notifier:
-<a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a>  build:
-<a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a>...
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>  env_file:                                                           │
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>    - new-bridge/src/config/env                                       │
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>  depends_on:                                                         │
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>    - &quot;nats-server&quot;                                                   │
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>    - redis                                                           │
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>  ports:                                                              │
+<a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>    - 5006:5000                                                      _│
+<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>
+<a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>notifier:
+<a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>  build:
+<a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a>...
 </code></pre></div></li>
 </ul>
 <h2 id="4-add-option-to-enable-or-disable-our-microservice">4. Add option to enable or disable our microservice</h2>
@@ -1109,10 +1230,9 @@ With this, we have the entire template of our new microservice. Now we need to s
 <a id="__codelineno-17-49" name="__codelineno-17-49" href="#__codelineno-17-49"></a>  new_bridge_variables    &lt;─────────────── and here!
 <a id="__codelineno-17-50" name="__codelineno-17-50" href="#__codelineno-17-50"></a>  notifier_variables
 <a id="__codelineno-17-51" name="__codelineno-17-51" href="#__codelineno-17-51"></a>  t7_bridge_variables
-<a id="__codelineno-17-52" name="__codelineno-17-52" href="#__codelineno-17-52"></a>  ticket_collector_variables
-<a id="__codelineno-17-53" name="__codelineno-17-53" href="#__codelineno-17-53"></a>  velocloud_bridge_variables
-<a id="__codelineno-17-54" name="__codelineno-17-54" href="#__codelineno-17-54"></a>}
-<a id="__codelineno-17-55" name="__codelineno-17-55" href="#__codelineno-17-55"></a>...
+<a id="__codelineno-17-52" name="__codelineno-17-52" href="#__codelineno-17-52"></a>  velocloud_bridge_variables
+<a id="__codelineno-17-53" name="__codelineno-17-53" href="#__codelineno-17-53"></a>}
+<a id="__codelineno-17-54" name="__codelineno-17-54" href="#__codelineno-17-54"></a>...
 </code></pre></div></p>
 </li>
 <li>
