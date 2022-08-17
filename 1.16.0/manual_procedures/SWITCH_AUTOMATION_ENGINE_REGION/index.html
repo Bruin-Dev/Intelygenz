@@ -814,7 +814,8 @@ we lost the activity and respondes from AWS resources; we must assume that all r
 It's time to star using the resources in the mirror region(<code>us-west-1</code>) by following the next steps:</p>
 <h2 id="steps">Steps</h2>
 <ul>
-<li>Clone the repository in the mirror region(<code>us-west-1</code>): 
+<li>Verify AWS Health Dashboards to confirm AWS services availabily per region. Confirm that our services in the main region(<code>us-east-1</code>) are unavailable.</li>
+<li>Clone the repository from the mirror region(<code>us-west-1</code>): 
   <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>git clone ssh://git-codecommit.us-west-1.amazonaws.com/v1/repos/fedramp-automation-engine
 </code></pre></div></li>
 <li>Create a new branch with the name <code>switch-automation-engine-region</code>.
