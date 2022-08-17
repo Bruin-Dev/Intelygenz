@@ -802,11 +802,14 @@ This way if we suffer a disaster and lose the main region we can easily deploy t
 this is the goal of this procedure.</p>
 <h2 id="considerations">Considerations</h2>
 <ul>
-<li>Ensure that your AWS credentials have codecommit permission to interact with Automation Engine repository in all available regions.</li>
+<li>Ensure that your AWS credentials have Codecommit permission to interact with Automation Engine repository in all available regions.</li>
 <li>We have configured a git mirroring from <code>pro</code> to <code>mirror</code> environment, by that way we always have updated the repo in the mirror region.</li>
 <li>The actual environments are: <code>pro</code> and <code>mirror</code>, but could be more in the future.</li>
 <li>Master branch is protected, you can't commit directly to it, you must create a new branch and do a pull request.</li>
 <li>An authorized team member must accept your PR once the changes was verified.</li>
+<li>Once the pipeline run, if we check logs, we can verify that is possible that terraform failed the execution of <code>union</code> resources(AWS resources
+that create links between regions), this is originated by AWS unavailability in one region. This behavior is expected since we assume
+that an AWS Region is not working properly; this job is allowed to fail for this reason, if any other task fails the pipeline will end with an error.</li>
 </ul>
 <h2 id="posible-situation">Posible situation</h2>
 <p>We have all active infrastructure and application in <code>pro</code> (<code>us-east-1</code>), then AWS suffer a disaster in Nort Virginia region(<code>us-east-1</code>) and
