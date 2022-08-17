@@ -420,11 +420,19 @@ class OutageMonitor:
                 if serial_number in note["serviceNumber"]
                 if note["noteValue"] is not None
             ]
-            if self._is_ticket_task_in_ipa_queue(detail_for_ticket_resolution):
+
+            last_cycle_notes = self._get_notes_appended_since_latest_reopen_or_ticket_creation(relevant_notes)
+            triage_note = self._get_triage_or_reopen_note(last_cycle_notes)
+            outage_type = self._get_outage_type_from_ticket_notes(last_cycle_notes)
+            has_faulty_digi_link = self._get_has_faulty_digi_link_from_ticket_notes(last_cycle_notes, triage_note)
+            has_faulty_byob_link = self._get_has_faulty_byob_link_from_triage_note(triage_note)
+            faulty_link_types = self._get_faulty_link_types_from_triage_note(triage_note)
+            is_task_in_ipa_queue = self._is_ticket_task_in_ipa_queue(detail_for_ticket_resolution)
+
+            if has_faulty_byob_link and is_task_in_ipa_queue:
                 self._logger.info(
-                    f"Task for serial {serial_number} in ticket {outage_ticket_id} is in the IPA Investigate queue. "
-                    f"Skipping checks for max auto-resolves and grace period to auto-resolve after last documented "
-                    f"outage..."
+                    f"Task for serial {serial_number} in ticket {outage_ticket_id} is related to a BYOB link "
+                    f"and is in the IPA Investigate queue. Ignoring auto-resolution restrictions..."
                 )
 
             else:
@@ -472,13 +480,6 @@ class OutageMonitor:
                     f"current environment is {working_environment.upper()}."
                 )
                 return
-
-            last_cycle_notes = self._get_notes_appended_since_latest_reopen_or_ticket_creation(relevant_notes)
-            triage_note = self._get_triage_or_reopen_note(last_cycle_notes)
-            outage_type = self._get_outage_type_from_ticket_notes(last_cycle_notes)
-            has_faulty_digi_link = self._get_has_faulty_digi_link_from_ticket_notes(last_cycle_notes, triage_note)
-            has_faulty_byob_link = self._get_has_faulty_byob_link_from_triage_note(triage_note)
-            faulty_link_types = self._get_faulty_link_types_from_triage_note(triage_note)
 
             self._logger.info(
                 f"Autoresolving detail {ticket_detail_id} of ticket {outage_ticket_id} linked to edge "

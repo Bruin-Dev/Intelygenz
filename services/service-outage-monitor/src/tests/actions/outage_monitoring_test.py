@@ -3376,6 +3376,7 @@ class TestServiceOutageMonitor:
         outage_monitor._bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
         outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
+        outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._get_max_seconds_since_last_outage = Mock(return_value="")
         outage_monitor._has_last_event_happened_recently = Mock(return_value=False)
@@ -3527,6 +3528,7 @@ class TestServiceOutageMonitor:
         outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         outage_monitor._outage_repository.is_outage_ticket_detail_auto_resolvable = Mock(return_value=False)
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
+        outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._get_max_seconds_since_last_outage = Mock(return_value="")
         outage_monitor._has_last_event_happened_recently = Mock(return_value=True)
@@ -3677,6 +3679,7 @@ class TestServiceOutageMonitor:
         outage_monitor._bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
         outage_monitor._outage_repository.is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
+        outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._get_max_seconds_since_last_outage = Mock(return_value="")
         outage_monitor._has_last_event_happened_recently = Mock(return_value=True)
@@ -3839,6 +3842,7 @@ class TestServiceOutageMonitor:
         outage_monitor._bruin_repository.resolve_ticket = CoroutineMock()
         outage_monitor._bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
+        outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
         outage_monitor._get_max_seconds_since_last_outage = Mock(return_value="")
         outage_monitor._has_last_event_happened_recently = Mock(return_value=True)
@@ -4190,6 +4194,7 @@ class TestServiceOutageMonitor:
         outage_monitor._outage_repository.is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
+        outage_monitor._get_has_faulty_byob_link_from_triage_note = Mock(return_value=True)
         outage_monitor._has_last_event_happened_recently = Mock(return_value=True)
         outage_monitor._is_detail_resolved = Mock(return_value=False)
         outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
