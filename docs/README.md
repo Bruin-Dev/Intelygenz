@@ -36,11 +36,13 @@
 		2. [Add a new provider](snowflake/README.md#3-add-a-new-provider)
 		3. [Rules](snowflake/README.md#4-rules)
 7. MANUAL PROCEDURES
-	1. [Vendor access to the API](procedures/API_VENDOR_ACCESS.md)
+	1. [Vendor access to the API](manual_procedures/API_VENDOR_ACCESS.md)
+	2. [Switch Automation Engine region](manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION.md)
 8. MANUAL CONFIGURATIONS
-	1. [AWS SSO Okta identity provider](manual_configurations/OKTA_CONFIGURATIONS.md)
+	1. [Init Automation Engine project](manual_configurations/INIT_AUTOMATION_PROJECT.md)
+	2. [AWS SSO Okta identity provider](manual_configurations/OKTA_CONFIGURATIONS.md)
 		1. [Revoke Session token](manual_configurations/OKTA_CONFIGURATIONS.md#revoke-permissions)
-	2. [AWS SSO Okta JWT token](manual_configurations/OKTA_JWT.md)
+	3. [AWS SSO Okta JWT token](manual_configurations/OKTA_JWT.md)
 9. AUDIT EVENTS
     1. Automation
        1. Communication between services

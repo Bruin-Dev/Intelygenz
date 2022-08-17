@@ -31,7 +31,13 @@ nav:
     - Work in a local env:
       - Launch docker compose: "kafka/LAUNCH_DOCKER_COMPOSE.md"
     - Datalake: "snowflake/README.md"
-    - Manual processes: "README.md"
+    - Manual procedures:
+      - Vendor access to the API: "manual_procedures/API_VENDOR_ACCESS.md"
+      - Switch Automation Engine region: "manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION.md"
+    - Manual configurations:
+      - Init Automation Engine project: "manual_configurations/INIT_AUTOMATION_PROJECT.md"
+      - AWS SSO Okta JWT token: "manual_configurations/OKTA_CONFIGURATIONS.md"
+      - AWS SSO Okta JWT token: "manual_configurations/OKTA_JWT.md"
 extra:
   version:
     provider: mike
