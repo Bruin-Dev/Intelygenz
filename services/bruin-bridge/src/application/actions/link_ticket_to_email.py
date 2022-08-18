@@ -18,7 +18,7 @@ class LinkTicketToEmail:
             return
 
         if not all(key in body.keys() for key in ("ticket_id", "email_id")):
-            self._logger.error(f"Cannot link ticket to email using {json.dumps(msg)}. " f"JSON malformed")
+            self._logger.error(f"Cannot link ticket to email using {json.dumps(msg)}. JSON malformed")
 
             response["body"] = 'You must include "ticket_id" and "email_id" in the "body" field of the request'
             response["status"] = 400

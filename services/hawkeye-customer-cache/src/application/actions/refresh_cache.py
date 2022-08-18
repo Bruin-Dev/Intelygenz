@@ -115,7 +115,7 @@ class RefreshCache:
                 "subject": f"Serials with multiple inventory items ({now})",
                 "recipient": self._config.REFRESH_CONFIG["email_recipient"],
                 "text": "this is the accessible text for the email",
-                "html": f"In this email you will see the serials with more than one inventory items\n" f"{text}",
+                "html": f"In this email you will see the serials with more than one inventory items\n{text}",
                 "images": [],
                 "attachments": [],
             },

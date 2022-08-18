@@ -299,7 +299,7 @@ class RepairTicketsMonitor:
                         # TODO: sent slack notification
                         allowed_asset_topics = []
                         log.warning(
-                            f"[email_id={email.id}] _process_repair_email():" f"get_topics_device_rpc({asset_id}): {e}"
+                            f"[email_id={email.id}] _process_repair_email():get_topics_device_rpc({asset_id}): {e}"
                         )
 
                     asset = Asset(id=asset_id, allowed_topics=allowed_asset_topics)
@@ -500,7 +500,7 @@ class RepairTicketsMonitor:
                 "BEC AI RTA",
                 "",
                 operator_message,
-                "Please review the full narrative provided in the email attached:\n" f"From: {email.sender_address}",
+                f"Please review the full narrative provided in the email attached:\nFrom: {email.sender_address}",
                 f"Date Stamp: {email.date}",
                 f"Subject: {email.subject}",
                 f"Body: \n {body_cleaned}",

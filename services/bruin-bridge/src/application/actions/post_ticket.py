@@ -12,7 +12,7 @@ class PostTicket:
         payload = msg.get("body")
 
         if payload is None:
-            self._logger.error(f"Cannot create a ticket using {json.dumps(msg)}. " f"JSON malformed")
+            self._logger.error(f"Cannot create a ticket using {json.dumps(msg)}. JSON malformed")
             response["status"] = 400
             response["body"] = (
                 "You must specify " '{.."body":{"clientId", "category", "services", "contacts"}, in the request'

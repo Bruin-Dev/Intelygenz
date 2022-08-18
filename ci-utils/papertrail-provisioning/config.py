@@ -257,7 +257,7 @@ PAPERTRAIL_PROVISIONING = {
                     "search_name": f"[service-outage-monitor] - ticked autoresolved",
                 },
                 {
-                    "query": f"service-outage-monitor AND {ENVIRONMENT_NAME} AND " f'"Triage appended to detail"',
+                    "query": f"service-outage-monitor AND {ENVIRONMENT_NAME} AND Triage appended to detail",
                     "search_name": f"[service-outage-monitor] - triage appended",
                 },
             ],
@@ -270,7 +270,7 @@ PAPERTRAIL_PROVISIONING = {
             "alarms": True,
             "searches": [
                 {
-                    "query": f"bruin-bridge AND {ENVIRONMENT_NAME} AND " f'"ERROR:"',
+                    "query": f"bruin-bridge AND {ENVIRONMENT_NAME} AND ERROR:",
                     "search_name": f"[bruin-bridge] - ERROR messages",
                 },
                 {
@@ -279,11 +279,11 @@ PAPERTRAIL_PROVISIONING = {
                     "search_name": "[email-tagger-monitor] KRE communication error",
                 },
                 {
-                    "query": f"gateway-monitor AND {ENVIRONMENT_NAME} AND " f'"ERROR:"',
+                    "query": f"gateway-monitor AND {ENVIRONMENT_NAME} AND ERROR:",
                     "search_name": f"[gateway-monitor] - ERROR messages",
                 },
                 {
-                    "query": f"tnba-feedback AND {ENVIRONMENT_ID} AND " f'"An error occurred when posting metrics"',
+                    "query": f"tnba-feedback AND {ENVIRONMENT_ID} AND An error occurred when posting metrics",
                     "search_name": f"[tnba-feedback] Search Error saving metrics",
                 },
                 {
@@ -292,15 +292,15 @@ PAPERTRAIL_PROVISIONING = {
                     "search_name": f"[tnba-monitor] GRPC communication error with KRE",
                 },
                 {
-                    "query": f"tnba-monitor AND {ENVIRONMENT_ID} AND " f'"An error occurred when posting live metrics"',
+                    "query": f"tnba-monitor AND {ENVIRONMENT_ID} AND An error occurred when posting live metrics",
                     "search_name": f"[tnba-monitor] Error posting live automation metrics",
                 },
                 {
-                    "query": f"service-outage-monitor AND {ENVIRONMENT_ID} AND " f'"ERROR:"',
+                    "query": f"service-outage-monitor AND {ENVIRONMENT_ID} AND ERROR:",
                     "search_name": f"[service-outage-monitor] - ERROR messages",
                 },
                 {
-                    "query": f"tnba-feedback AND {ENVIRONMENT_ID} AND " f'"An error occurred when posting metrics"',
+                    "query": f"tnba-feedback AND {ENVIRONMENT_ID} AND An error occurred when posting metrics",
                     "search_name": f"[tnba-feedback] Search Error saving metrics",
                 },
                 {
@@ -309,11 +309,11 @@ PAPERTRAIL_PROVISIONING = {
                     "search_name": f"[tnba-monitor] GRPC communication error with KRE",
                 },
                 {
-                    "query": f"tnba-monitor AND {ENVIRONMENT_ID} AND " f'"An error occurred when posting live metrics"',
+                    "query": f"tnba-monitor AND {ENVIRONMENT_ID} AND An error occurred when posting live metrics",
                     "search_name": f"[tnba-monitor] Error posting live automation metrics",
                 },
                 {
-                    "query": f"service-outage-monitor AND {ENVIRONMENT_ID} AND " f'"ERROR:"',
+                    "query": f"service-outage-monitor AND {ENVIRONMENT_ID} AND ERROR:",
                     "search_name": f"[service-outage-monitor] - ERROR messages",
                 },
                 {
@@ -322,15 +322,15 @@ PAPERTRAIL_PROVISIONING = {
                     "search_name": f"[service-outage-monitor] - ticket creation",
                 },
                 {
-                    "query": f"service-outage-monitor AND {ENVIRONMENT_NAME} AND " f'"Triage process finished!"',
+                    "query": f"service-outage-monitor AND {ENVIRONMENT_NAME} AND Triage process finished!",
                     "search_name": f"[triage] Triage finished",
                 },
                 {
-                    "query": f"servicenow-bridge AND {ENVIRONMENT_NAME} AND " f'"ERROR:"',
+                    "query": f"servicenow-bridge AND {ENVIRONMENT_NAME} AND ERROR:",
                     "search_name": f"[servicenow-bridge] - ERROR messages",
                 },
                 {
-                    "query": f"velocloud-bridge AND {ENVIRONMENT_NAME} AND " f'"ERROR:"',
+                    "query": f"velocloud-bridge AND {ENVIRONMENT_NAME} AND ERROR:",
                     "search_name": f"[velocloud-bridge] - ERROR messages",
                 },
                 {

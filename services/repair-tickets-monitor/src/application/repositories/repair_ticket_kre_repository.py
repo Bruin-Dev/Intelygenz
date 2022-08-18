@@ -259,4 +259,4 @@ class RepairTicketKreRepository:
         try:
             return await save_closed_ticket_feedback()
         except Exception as e:
-            log.error(f"Error trying to save closed tickets feedback to KRE " f"[ticket_id='{ticket_id}']: {e}")
+            log.error(f"Error trying to save closed tickets feedback to KRE [ticket_id='{ticket_id}']: {e}")

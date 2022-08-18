@@ -677,7 +677,7 @@ class TestBruinRepository:
         msg_uid = "123456"
         timestamp = datetime.now()
 
-        open_note = "#*MetTel's IPA*#\n" "Possible Fraud Warning\n" "\n" "Email UID: 123456\n" f"TimeStamp: {timestamp}"
+        open_note = f"#*MetTel's IPA*#\nPossible Fraud Warning\n\nEmail UID: 123456\nTimeStamp: {timestamp}"
 
         re_open_note = (
             "#*MetTel's IPA*#\n"

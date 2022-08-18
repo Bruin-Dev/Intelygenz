@@ -338,7 +338,9 @@ class VelocloudClient:
     async def get_edge_links_series(self, velocloud_host: str, payload):
         target_host_client = self._get_header_by_host(velocloud_host)
         result = dict.fromkeys(["body", "status"])
-
+        self._logger.info(
+            f"Trying to get edge links series for payload {payload} and from Velocloud host '{velocloud_host}'..."
+        )
         if target_host_client is None:
             logger.error(f"Cannot find a client to connect to {velocloud_host}")
 

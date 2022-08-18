@@ -28,7 +28,7 @@ class ResolveTicket:
             response["body"] = result["body"]
             response["status"] = result["status"]
         else:
-            self._logger.error(f"Cannot resolve a ticket using {json.dumps(msg)}. " f"JSON malformed")
+            self._logger.error(f"Cannot resolve a ticket using {json.dumps(msg)}. JSON malformed")
 
             response["body"] = "You must include ticket_id and detail_id in the request"
             response["status"] = 400

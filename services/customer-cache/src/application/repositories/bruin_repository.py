@@ -101,7 +101,7 @@ class BruinRepository:
             response = await self._event_bus.rpc_request("bruin.get.site", request, timeout=60)
         except Exception as e:
             err_msg = (
-                f"An error occurred while getting site details of site {site_id} " f"and client {client_id}... -> {e}"
+                f"An error occurred while getting site details of site {site_id} and client {client_id}... -> {e}"
             )
             response = nats_error_response
         else:

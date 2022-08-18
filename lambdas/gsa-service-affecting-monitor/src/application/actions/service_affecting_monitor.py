@@ -419,7 +419,7 @@ class ServiceAffectingMonitor:
         interface = link_data["link_status"]["interface"]
 
         self._logger.info(
-            f"Sending an email to report {trouble.value} trouble " f"on interface {interface} of edge {serial}"
+            f"Sending an email to report {trouble.value} trouble on interface {interface} of edge {serial}"
         )
 
         email = {

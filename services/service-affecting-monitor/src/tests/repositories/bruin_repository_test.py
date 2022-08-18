@@ -1040,7 +1040,7 @@ class TestBruinRepository:
     async def get_ticket_details_401_and_or_403_test(self, service_affecting_monitor_reports, ticket_1):
         response_ticket_details_1 = {"body": "Some error", "status": 401}
         slack_msg = (
-            f"[service-affecting-monitor-reports]" f"Max retries reached getting ticket details {ticket_1['ticketID']}"
+            f"[service-affecting-monitor-reports]Max retries reached getting ticket details {ticket_1['ticketID']}"
         )
         expected_response = None
         service_affecting_monitor_reports._notifications_repository.send_slack_message = CoroutineMock()

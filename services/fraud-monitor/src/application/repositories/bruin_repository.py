@@ -216,7 +216,7 @@ class BruinRepository:
             response = await self._event_bus.rpc_request("bruin.get.site", request, timeout=60)
         except Exception as e:
             err_msg = (
-                f"An error occurred while getting site details of site {site_id} " f"and client {client_id}... -> {e}"
+                f"An error occurred while getting site details of site {site_id} and client {client_id}... -> {e}"
             )
             response = nats_error_response
         else:
@@ -415,7 +415,7 @@ class BruinRepository:
 
         try:
             self._logger.info(
-                f"Changing task result of serial {service_number} in ticket {ticket_id} " f"to {task_result}..."
+                f"Changing task result of serial {service_number} in ticket {ticket_id} to {task_result}..."
             )
             response = await self._event_bus.rpc_request("bruin.ticket.change.work", request, timeout=90)
         except Exception as e:

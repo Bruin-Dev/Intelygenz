@@ -1856,7 +1856,7 @@ class TestBruinRepository:
         current_datetime = datetime.now()
         ticket_id = 11111
         ticket_note = (
-            "#*MetTel's IPA*#\n" f"Auto-resolving detail for serial: {serial_number}\n" f"TimeStamp: {current_datetime}"
+            f"#*MetTel's IPA*#\nAuto-resolving detail for serial: {serial_number}\nTimeStamp: {current_datetime}"
         )
 
         response = {
@@ -1890,7 +1890,7 @@ class TestBruinRepository:
         ticket_id = 11111
         service_number = "VC1234567"
         outage_causes = "Some causes of the outage"
-        ticket_note = "#*MetTel's IPA*#\n" f"Re-opening ticket.\n" f"{outage_causes}\n" f"TimeStamp: {current_datetime}"
+        ticket_note = f"#*MetTel's IPA*#\nRe-opening ticket.\n{outage_causes}\nTimeStamp: {current_datetime}"
 
         response = {
             "request_id": uuid_,

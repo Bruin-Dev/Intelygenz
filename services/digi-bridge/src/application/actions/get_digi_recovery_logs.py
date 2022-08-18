@@ -12,7 +12,7 @@ class DiGiRecoveryLogs:
         response_topic = msg["response_topic"]
         response = {"request_id": request_id, "body": None, "status": None}
         if "body" not in msg.keys():
-            self._logger.error(f"Cannot reboot DiGi client using {json.dumps(msg)}. " f"JSON malformed")
+            self._logger.error(f"Cannot reboot DiGi client using {json.dumps(msg)}. JSON malformed")
             response["status"] = 400
             response["body"] = 'Must include "body" in request'
             await self._event_bus.publish_message(response_topic, response)

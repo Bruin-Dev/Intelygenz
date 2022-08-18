@@ -55,7 +55,7 @@ class DRIRepository:
             return task_id_response
         if task_id_response["body"]["status"] != "SUCCESS":
             self._logger.error(
-                f"Getting task_id of {serial_number} failed. Response returned " f"{task_id_response['body']}"
+                f"Getting task_id of {serial_number} failed. Response returned {task_id_response['body']}"
             )
             task_id_response["status"] = 400
             return task_id_response
@@ -121,6 +121,6 @@ class DRIRepository:
             return pending_task_ids_response
 
         pending_task_ids = [task["Id"] for task in pending_task_ids_response["body"]["data"]["Transactions"]]
-        self._logger.info(f"Pending task ids list from DRI for serial {serial_number} found: " f"{pending_task_ids}")
+        self._logger.info(f"Pending task ids list from DRI for serial {serial_number} found: {pending_task_ids}")
 
         return {"body": pending_task_ids, "status": 200}

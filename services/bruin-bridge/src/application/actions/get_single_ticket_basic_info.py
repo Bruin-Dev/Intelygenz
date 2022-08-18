@@ -26,7 +26,7 @@ class GetSingleTicketBasicInfo:
 
         if ticket_id is missing:
             self._logger.error(
-                f"Cannot get tickets basic info using {json.dumps(msg)}." f" Need a TicketId to keep going."
+                f"Cannot get tickets basic info using {json.dumps(msg)}. Need a TicketId to keep going."
             )
             response_msg["body"] = f'Must specify "ticket_id" in the body of the request'
             response_msg["status"] = 400

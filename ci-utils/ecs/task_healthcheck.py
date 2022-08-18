@@ -38,7 +38,7 @@ class TaskHealthcheck:
             self._print_current_tasks(tasks_info)
         else:
             logging.info(
-                f"Waiting for the following tasks with name {task_name_param} " f"to be RUNNING and with HEALTHY state"
+                f"Waiting for the following tasks with name {task_name_param} to be RUNNING and with HEALTHY state"
             )
             self._print_current_tasks(tasks_info)
             raise Exception
@@ -147,7 +147,7 @@ class TaskHealthcheck:
                     break
         if not container_arns:
             logging.error(
-                f"No containers found in environment {ENVIRONMENT} for task " f"definition {task_definition_arn_p}"
+                f"No containers found in environment {ENVIRONMENT} for task definition {task_definition_arn_p}"
             )
             raise Exception
         return container_arns

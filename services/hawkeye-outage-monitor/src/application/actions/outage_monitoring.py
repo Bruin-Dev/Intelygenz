@@ -249,7 +249,7 @@ class OutageMonitor:
 
     async def _notify_successful_autoresolve(self, ticket_id, detail_id):
         message = (
-            f"Detail {detail_id} of outage ticket {ticket_id} " f"was autoresolved: https://app.bruin.com/t/{ticket_id}"
+            f"Detail {detail_id} of outage ticket {ticket_id} was autoresolved: https://app.bruin.com/t/{ticket_id}"
         )
         await self._notifications_repository.send_slack_message(message)
 

@@ -55,7 +55,7 @@ def check_user_existence():
     for u in get_users():
         try:
             response = requests.get(
-                f"http://admin:admin@localhost:{GF_PORT}" f"/api/users/search?" f'query={u["login"]}',
+                f"http://admin:admin@localhost:{GF_PORT}/api/users/search?query={u['login']}",
                 auth=HTTPBasicAuth(GF_ADMIN, GF_PASS),
             )
 
@@ -80,7 +80,7 @@ def create_user(user):
 
     try:
         response = requests.post(
-            f"http://admin:admin@localhost:{GF_PORT}" f"/api/admin/users",
+            f"http://admin:admin@localhost:{GF_PORT}/api/admin/users",
             data=user_data,
             auth=HTTPBasicAuth(GF_ADMIN, GF_PASS),
         )
@@ -113,7 +113,7 @@ def assign_viewer_permissions(user, user_id):
     else:
         try:
             response = requests.post(
-                f"http://admin:admin@localhost:{GF_PORT}" f"/api/folders/" f"{folder_uid}/permissions",
+                f"http://admin:admin@localhost:{GF_PORT}/api/folders/{folder_uid}/permissions",
                 json=user_data,
                 auth=HTTPBasicAuth(GF_ADMIN, GF_PASS),
             )
@@ -135,7 +135,7 @@ def assign_editor_permissions(user, user_id):
 
     try:
         response = requests.patch(
-            f"http://admin:admin@localhost:{GF_PORT}" f"/api/org/users/{user_id}",
+            f"http://admin:admin@localhost:{GF_PORT}/api/org/users/{user_id}",
             json=user_data,
             auth=HTTPBasicAuth(GF_ADMIN, GF_PASS),
         )
@@ -161,7 +161,7 @@ def get_folder_uid(user_company, main_folder=False):
         folder_name = user_company.split("|")[0].replace(" ", "-").lower()
     try:
         response = requests.get(
-            f"http://admin:admin@localhost:{GF_PORT}" f"/api/folders", auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
+            f"http://admin:admin@localhost:{GF_PORT}/api/folders", auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
         )
         if response.status_code == 200:
             folders = response.json()
@@ -192,7 +192,7 @@ def update_main_folder_permissions():
     else:
         try:
             response = requests.post(
-                f"http://admin:admin@localhost:{GF_PORT}" f"/api/folders/" f"{main_folder_uid}/permissions",
+                f"http://admin:admin@localhost:{GF_PORT}/api/folders/{main_folder_uid}/permissions",
                 json=main_data,
                 auth=HTTPBasicAuth(GF_ADMIN, GF_PASS),
             )

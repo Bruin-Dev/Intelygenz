@@ -153,7 +153,7 @@ class TNBAFeedback:
 
                 if self._redis_client.get(redis_key) is not None:
                     self._logger.info(
-                        f"Task history of ticket id {ticket_id} has already been sent to T7. " f"Skipping ..."
+                        f"Task history of ticket id {ticket_id} has already been sent to T7. Skipping ..."
                     )
                     return
 

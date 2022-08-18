@@ -32,7 +32,7 @@ class HawkeyeRepository:
                 response_details = await self._hawkeye_client.get_test_result_details(test_result_id)
                 if response_details["status"] not in range(200, 300):
                     self._logger.error(
-                        f"Error when calling get_tests_result_details using test result ID" f" {test_result_id})"
+                        f"Error when calling get_tests_result_details using test result ID {test_result_id})"
                     )
                     continue
                 result_details_with_probe[probe_uid].append(

@@ -455,7 +455,7 @@ class TestBruinRepository:
         service_number = "B827EB76A8DE"
 
         note_contents = "XXXX\n" * 200  # 1000 chars
-        triage_note = "*MetTel's IPA*#\n" "Triage (Ixia)\n\n" f"{note_contents}"
+        triage_note = "*MetTel's IPA*#\n" "Triage (Ixia)\n\n{note_contents}"
 
         append_note_response = {
             "body": "Note appended with success",
@@ -485,7 +485,7 @@ class TestBruinRepository:
         service_number = "B827EB76A8DE"
 
         note_contents = "XXXX\n" * 400  # 2000 chars
-        triage_note = "*MetTel's IPA*#\n" "Triage (Ixia)\n\n" f"{note_contents}"
+        triage_note = f"*MetTel's IPA*#\nTriage (Ixia)\n\n{note_contents}"
 
         append_note_response = {
             "body": "Note appended with success",
@@ -515,7 +515,7 @@ class TestBruinRepository:
         service_number = "B827EB76A8DE"
 
         note_contents = "XXXX\n" * 400  # 2000 chars
-        triage_note = "*MetTel's IPA*#\n" "Triage (Ixia)\n\n" f"{note_contents}"
+        triage_note = f"*MetTel's IPA*#\nTriage (Ixia)\n\n{note_contents}"
 
         append_note_success_response = {
             "body": "Note appended with success",

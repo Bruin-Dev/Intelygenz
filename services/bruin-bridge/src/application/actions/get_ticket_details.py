@@ -16,7 +16,7 @@ class GetTicketDetails:
             return
         ticket_id = msg["body"].get("ticket_id")
         if ticket_id is None:
-            self._logger.error(f"Cannot get ticket_details using {json.dumps(msg)}. " f"JSON malformed")
+            self._logger.error(f"Cannot get ticket_details using {json.dumps(msg)}. JSON malformed")
 
             detail_response["body"] = "You must include ticket_id in the request"
             detail_response["status"] = 400

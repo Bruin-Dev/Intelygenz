@@ -145,14 +145,14 @@ class OutageMonitor:
         links_with_edge_info_response = await self._velocloud_repository.get_links_with_edge_info(velocloud_host=host)
         if links_with_edge_info_response["status"] not in range(200, 300):
             self._logger.warning(
-                f"Not found links with edge info for host: {host}. " f"Skipping process velocloud host ..."
+                f"Not found links with edge info for host: {host}. Skipping process velocloud host ..."
             )
             return
 
         network_enterprises_response = await self._velocloud_repository.get_network_enterprises(velocloud_host=host)
         if network_enterprises_response["status"] not in range(200, 300):
             self._logger.warning(
-                f"Not found network enterprises for host: {host}. " f"Skipping process velocloud host ..."
+                f"Not found network enterprises for host: {host}. Skipping process velocloud host ..."
             )
             return
 
@@ -380,7 +380,7 @@ class OutageMonitor:
 
             if not outage_ticket_response_body:
                 self._logger.info(
-                    f"[ticket-autoresolve] No outage ticket found for edge {serial_number}. " f"Skipping autoresolve..."
+                    f"[ticket-autoresolve] No outage ticket found for edge {serial_number}. Skipping autoresolve..."
                 )
                 return
 
@@ -763,7 +763,7 @@ class OutageMonitor:
             )
             await self._notifications_repository.send_slack_message(slack_message)
             self._logger.info(
-                f"Successfully forwarded ticket_id {ticket_id} and " f"serial {serial_number} to {target_queue}."
+                f"Successfully forwarded ticket_id {ticket_id} and serial {serial_number} to {target_queue}."
             )
         else:
             self._logger.error(
@@ -1414,18 +1414,18 @@ class OutageMonitor:
             ticket_id, service_number
         )
         if email_response["status"] not in range(200, 300):
-            self._logger.error(f"Reminder email of edge {service_number} could not be sent for ticket" f" {ticket_id}!")
+            self._logger.error(f"Reminder email of edge {service_number} could not be sent for ticket {ticket_id}!")
             return
 
         append_note_response = await self._append_reminder_note(ticket_id, service_number)
         if append_note_response["status"] not in range(200, 300):
             self._logger.error(
-                f"Reminder note of edge {service_number} could not be appended to ticket" f" {ticket_id}!"
+                f"Reminder note of edge {service_number} could not be appended to ticket {ticket_id}!"
             )
             return
 
         self._logger.info(
-            f"Reminder note of edge {service_number} was successfully appended to ticket" f" {ticket_id}!"
+            f"Reminder note of edge {service_number} was successfully appended to ticket {ticket_id}!"
         )
         await self._notifications_repository.notify_successful_reminder_note_append(ticket_id, service_number)
 

@@ -23,7 +23,7 @@ class MyMongoClient:
             conn_string = f"mongodb://{username}:{password}@{url}:{port}/velocloud?authSource=admin"
 
         self._logger.info(
-            f"Connecting to mongo using: {conn_string}, " f"current environment: {self._config.CURRENT_ENVIRONMENT}"
+            f"Connecting to mongo using: {conn_string}, current environment: {self._config.CURRENT_ENVIRONMENT}"
         )
         try:
             client = MongoClient(conn_string)

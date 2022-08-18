@@ -22,7 +22,7 @@ class UnpauseTicket:
         detail_id = body.get("detail_id")
 
         if not ticket_id or (not serial_number and not detail_id):
-            self._logger.error(f"Cannot unpause a ticket using {json.dumps(msg)}. " f"JSON malformed")
+            self._logger.error(f"Cannot unpause a ticket using {json.dumps(msg)}. JSON malformed")
             response["body"] = "You must include ticket_id and service_number or detail_id in the request"
             response["status"] = 400
             await self._event_bus.publish_message(msg["response_topic"], response)

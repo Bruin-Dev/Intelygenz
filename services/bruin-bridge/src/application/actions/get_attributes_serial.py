@@ -14,7 +14,7 @@ class GetAttributeSerial:
 
         filters = msg.get("body")
         if "body" not in msg.keys():
-            self._logger.error(f"Cannot get attribute's serial number using {json.dumps(msg)}. " f"JSON malformed")
+            self._logger.error(f"Cannot get attribute's serial number using {json.dumps(msg)}. JSON malformed")
             response["status"] = 400
             response["body"] = (
                 "You must specify " '{.."body":{"client_id", "status", "service_number"}...} in the request'

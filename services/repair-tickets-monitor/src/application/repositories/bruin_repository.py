@@ -201,7 +201,7 @@ class BruinRepository:
                 response = json.loads(response.data)
             except Exception as e:
                 err_msg = (
-                    f"An error occurred when requesting ticket details " f"from Bruin API for ticket {ticket_id} -> {e}"
+                    f"An error occurred when requesting ticket details from Bruin API for ticket {ticket_id} -> {e}"
                 )
                 response = nats_error_response
             else:
@@ -244,7 +244,7 @@ class BruinRepository:
             response = await self._event_bus.request("bruin.get.site", to_json_bytes(request), timeout=15)
             response = json.loads(response.data)
         except Exception as e:
-            err_msg = f"An error occurred while getting site for site_id {site_id} " f"Error: {e} "
+            err_msg = f"An error occurred while getting site for site_id {site_id} Error: {e} "
             response = nats_error_response
         else:
             response_body = response["body"]
@@ -393,7 +393,7 @@ class BruinRepository:
 
             try:
                 log.info(
-                    f"Getting all tickets with any status of {ticket_statuses}," f"with keyword arguments {kwargs}"
+                    f"Getting all tickets with any status of {ticket_statuses},with keyword arguments {kwargs}"
                 )
                 response = await self._event_bus.request(
                     "bruin.ticket.basic.request", to_json_bytes(request), timeout=self._timeout

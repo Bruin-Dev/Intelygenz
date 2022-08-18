@@ -18,7 +18,7 @@ class PostNote:
             return
 
         if not all(key in body.keys() for key in ("ticket_id", "note")):
-            self._logger.error(f"Cannot post a note to ticket using {json.dumps(msg)}. " f"JSON malformed")
+            self._logger.error(f"Cannot post a note to ticket using {json.dumps(msg)}. JSON malformed")
 
             response["body"] = 'You must include "ticket_id" and "note" in the "body" field of the response request'
             response["status"] = 400

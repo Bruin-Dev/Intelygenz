@@ -942,14 +942,14 @@ class ServiceAffectingMonitor:
             )
             if email_response["status"] not in range(200, 300):
                 self._logger.error(
-                    f"Reminder email of edge {serial_number} could not be sent for ticket" f" {ticket_id}!"
+                    f"Reminder email of edge {serial_number} could not be sent for ticket {ticket_id}!"
                 )
                 return
 
             append_note_response = await self._append_reminder_note(ticket_id, serial_number)
             if append_note_response["status"] not in range(200, 300):
                 self._logger.error(
-                    f"Reminder note of edge {serial_number} could not be appended to ticket" f" {ticket_id}!"
+                    f"Reminder note of edge {serial_number} could not be appended to ticket {ticket_id}!"
                 )
                 return
 
@@ -1025,14 +1025,14 @@ class ServiceAffectingMonitor:
                 )
                 if email_response["status"] not in range(200, 300):
                     self._logger.error(
-                        f"Reminder email of edge {serial_number} could not be sent for ticket" f" {ticket_id}!"
+                        f"Reminder email of edge {serial_number} could not be sent for ticket {ticket_id}!"
                     )
                     return
 
                 append_note_response = await self._append_reminder_note(ticket_id, serial_number)
                 if append_note_response["status"] not in range(200, 300):
                     self._logger.error(
-                        f"Reminder note of edge {serial_number} could not be appended to ticket" f" {ticket_id}!"
+                        f"Reminder note of edge {serial_number} could not be appended to ticket {ticket_id}!"
                     )
                     return
 
@@ -1139,7 +1139,7 @@ class ServiceAffectingMonitor:
 
         if link_interface_type != "WIRED":
             self._logger.info(
-                f"Link {interface} is of type {link_interface_type} and not WIRED. Attempting to forward " f"to HNOC..."
+                f"Link {interface} is of type {link_interface_type} and not WIRED. Attempting to forward to HNOC..."
             )
             await self._forward_ticket_to_hnoc_queue(ticket_id, serial_number, link_data, trouble)
             return
@@ -1185,7 +1185,7 @@ class ServiceAffectingMonitor:
 
         if other_troubles_in_ticket:
             self._logger.info(
-                f"Other service affecting troubles were found in ticket id {ticket_id}. Skipping forward" f"to asr..."
+                f"Other service affecting troubles were found in ticket id {ticket_id}. Skipping forwardto asr..."
             )
             return
 
@@ -1336,18 +1336,18 @@ class ServiceAffectingMonitor:
             ticket_id, service_number
         )
         if email_response["status"] not in range(200, 300):
-            self._logger.error(f"Reminder email of edge {service_number} could not be sent for ticket" f" {ticket_id}!")
+            self._logger.error(f"Reminder email of edge {service_number} could not be sent for ticket {ticket_id}!")
             return
 
         append_note_response = await self._append_reminder_note(ticket_id, service_number)
         if append_note_response["status"] not in range(200, 300):
             self._logger.error(
-                f"Reminder note of edge {service_number} could not be appended to ticket" f" {ticket_id}!"
+                f"Reminder note of edge {service_number} could not be appended to ticket {ticket_id}!"
             )
             return
 
         self._logger.info(
-            f"Reminder note of edge {service_number} was successfully appended to ticket" f" {ticket_id}!"
+            f"Reminder note of edge {service_number} was successfully appended to ticket {ticket_id}!"
         )
         await self._notifications_repository.notify_successful_reminder_note_append(ticket_id, service_number)
 

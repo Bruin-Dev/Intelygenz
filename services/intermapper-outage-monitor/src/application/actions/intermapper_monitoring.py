@@ -437,7 +437,7 @@ class InterMapperMonitor:
             return False
         if dri_parameters:
             self._logger.info(
-                f"Appending InterMapper note to ticket id {ticket_id} with dri parameters: " f"{dri_parameters}"
+                f"Appending InterMapper note to ticket id {ticket_id} with dri parameters: {dri_parameters}"
             )
             append_dri_note_response = await self._bruin_repository.append_dri_note(
                 ticket_id, dri_parameters, parsed_email_dict

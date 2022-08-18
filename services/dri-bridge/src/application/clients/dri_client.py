@@ -149,7 +149,7 @@ class DRIClient:
             return return_response
         except Exception as err:
             self._logger.error(
-                f"An error occurred while getting list of pending task ids for " f"serial number {serial_number}"
+                f"An error occurred while getting list of pending task ids for serial number {serial_number}"
             )
             self._logger.error(f"Error: {err}")
             return {"body": err.args[0], "status": 500}

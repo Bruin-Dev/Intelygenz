@@ -52,7 +52,7 @@ class AWSNukeConfigurationGenerator:
         aws_services_ecs_cluster_rules = self._generate_ecs_cluster_for_environment_rules(environment_name)
         if len(aws_services_discovery_rules) > 0:
             logging.info(
-                f"Generated aws-nuke filters for {', '.join(_aws_service_discovery_resources_list)}" f" AWS resources"
+                f"Generated aws-nuke filters for {', '.join(_aws_service_discovery_resources_list)} AWS resources"
             )
             specific_rules_list.extend(aws_services_discovery_rules)
         if len(aws_services_ecs_cluster_rules) > 0:

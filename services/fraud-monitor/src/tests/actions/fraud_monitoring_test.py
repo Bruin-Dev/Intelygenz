@@ -198,7 +198,7 @@ class TestFraudMonitor:
 
         body = "Possible Fraud Warning with the following information:\n" "DID: 12345678\n"
 
-        full_body = "Network,\n" "\n" f"{body}\n" "\n" "Thanks,\n" "Fraud Detection System"
+        full_body = f"Network,\n\n{body}\n\nThanks,\nFraud Detection System"
 
         ticket = make_ticket()
         detail_info = make_detail_item_with_notes_and_ticket_info()
@@ -225,7 +225,7 @@ class TestFraudMonitor:
 
         body = "Possible Fraud Warning with the following information:\n" "DID: 12345678\n"
 
-        full_body = "Network,\n" "\n" f"{body}\n" "\n" "Thanks,\n" "Fraud Detection System"
+        full_body = f"Network,\n\n{body}\n\nThanks,\nFraud Detection System"
 
         ticket = make_ticket()
         detail_info = make_detail_item_with_notes_and_ticket_info()
@@ -255,7 +255,7 @@ class TestFraudMonitor:
 
         body = "Possible Fraud Warning with the following information:\n" "DID: 12345678\n"
 
-        full_body = "Network,\n" "\n" f"{body}\n" "\n" "Thanks,\n" "Fraud Detection System"
+        full_body = f"Network,\n\n{body}\n\nThanks,\nFraud Detection System"
 
         ticket = make_ticket()
         detail_info = make_detail_item_with_notes_and_ticket_info()
@@ -281,7 +281,7 @@ class TestFraudMonitor:
 
         body = "Possible Fraud Warning with the following information:\n" "DID: 12345678\n"
 
-        full_body = "Network,\n" "\n" f"{body}\n" "\n" "Thanks,\n" "Fraud Detection System"
+        full_body = f"Network,\n\n{body}\n\nThanks,\nFraud Detection System"
 
         fraud_monitor._bruin_repository.get_client_info_by_did.return_value = make_get_client_info_by_did_response()
         fraud_monitor._bruin_repository.get_open_fraud_tickets.return_value = make_get_tickets_response()
@@ -304,7 +304,7 @@ class TestFraudMonitor:
 
         body = "Possible Fraud Warning with the following information:\n" "DID: 12345678\n"
 
-        full_body = "Network,\n" "\n" f"{body}\n" "\n" "Thanks,\n" "Fraud Detection System"
+        full_body = f"Network,\n\n{body}\n\nThanks,\nFraud Detection System"
 
         fraud_monitor._bruin_repository.get_client_info_by_did.return_value = bruin_500_response
         fraud_monitor._bruin_repository.get_open_fraud_tickets.return_value = make_get_tickets_response()

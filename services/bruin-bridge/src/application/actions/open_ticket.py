@@ -21,7 +21,7 @@ class OpenTicket:
         detail_id = body.get("detail_id")
 
         if not ticket_id or not detail_id:
-            self._logger.error(f"Cannot open a ticket using {json.dumps(msg)}. " f"JSON malformed")
+            self._logger.error(f"Cannot open a ticket using {json.dumps(msg)}. JSON malformed")
             response["body"] = "You must include ticket_id and detail_id in the request"
             response["status"] = 400
             await self._event_bus.publish_message(msg["response_topic"], response)

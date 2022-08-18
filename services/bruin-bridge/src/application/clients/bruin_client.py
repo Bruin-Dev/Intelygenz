@@ -259,7 +259,7 @@ class BruinClient:
 
             if response.status == 404:
                 self._logger.error(
-                    f"Got 404 from Bruin, resource not posted for ticket_id {ticket_id} with " f"payload {payload}"
+                    f"Got 404 from Bruin, resource not posted for ticket_id {ticket_id} with payload {payload}"
                 )
                 return_response["body"] = "Resource not found"
                 return_response["status"] = 404
@@ -318,7 +318,7 @@ class BruinClient:
 
             if response.status == 404:
                 self._logger.error(
-                    f"Got 404 from Bruin, resources not posted for ticket_id {ticket_id} with " f"payload {payload}"
+                    f"Got 404 from Bruin, resources not posted for ticket_id {ticket_id} with payload {payload}"
                 )
                 return_response["body"] = "Resource not found"
                 return_response["status"] = 404
@@ -576,9 +576,9 @@ class BruinClient:
                 return_response["status"] = response.status
 
             if status_code == 403:
-                return_response["body"] = (
-                    "Permissions to create a new outage ticket with payload " f"{json.dumps(payload)} were not granted"
-                )
+                return_response[
+                    "body"
+                ] = f"Permissions to create a new outage ticket with payload {json.dumps(payload)} were not granted"
                 return_response["status"] = status_code
                 self._logger.error(
                     "Got HTTP 403 from Bruin. Bruin client doesn't have permissions to post a new outage ticket with "
@@ -914,14 +914,14 @@ class BruinClient:
 
             if response.status == 404:
                 self._logger.error(
-                    f"Got 404 from Bruin, resource not posted for email_id {email_id} with " f"tag_id {tag_id}"
+                    f"Got 404 from Bruin, resource not posted for email_id {email_id} with tag_id {tag_id}"
                 )
                 return_response["body"] = "Resource not found"
                 return_response["status"] = 404
 
             if response.status == 409:
                 self._logger.error(
-                    f"Got 409 from Bruin, resource not posted for email_id {email_id} with " f"tag_id {tag_id}"
+                    f"Got 409 from Bruin, resource not posted for email_id {email_id} with tag_id {tag_id}"
                 )
                 return_response["body"] = f"Tag with ID {tag_id} already present in e-mail with ID {email_id}"
                 return_response["status"] = 409

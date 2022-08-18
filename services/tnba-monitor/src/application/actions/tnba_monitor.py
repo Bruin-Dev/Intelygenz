@@ -254,7 +254,7 @@ class TNBAMonitor:
                     ticket_details_list = ticket_details_response_body["ticketDetails"]
                     if not ticket_details_list:
                         self._logger.info(
-                            f"Ticket {ticket_id} doesn't have any detail under ticketDetails key. " f"Skipping..."
+                            f"Ticket {ticket_id} doesn't have any detail under ticketDetails key. Skipping..."
                         )
                         continue
 

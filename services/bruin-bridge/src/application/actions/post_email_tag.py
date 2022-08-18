@@ -18,7 +18,7 @@ class PostEmailTag:
             return
 
         if not all(key in body.keys() for key in ("email_id", "tag_id")):
-            self._logger.error(f"Cannot add a tag to email using {json.dumps(msg)}. " f"JSON malformed")
+            self._logger.error(f"Cannot add a tag to email using {json.dumps(msg)}. JSON malformed")
 
             response["body"] = 'You must include "email_id" and "tag_id" in the "body" field of the response request'
             response["status"] = 400

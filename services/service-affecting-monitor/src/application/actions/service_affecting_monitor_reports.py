@@ -126,7 +126,7 @@ class ServiceAffectingMonitorReports:
 
             if not final_report_list:
                 self._logger.info(
-                    f"No report for client {client_id} will be sent as there is no info " f"to put in the report"
+                    f"No report for client {client_id} will be sent as there is no info to put in the report"
                 )
                 continue
 
