@@ -303,7 +303,7 @@ class VelocloudClient:
         target_host_client = self._get_header_by_host(velocloud_host)
         result = dict.fromkeys(["body", "status"])
         self._logger.info(
-            f"Trying to get edge links series for payload {payload} and" f' from Velocloud host "{velocloud_host}"...'
+            f"Trying to get edge links series for payload {payload} and from Velocloud host '{velocloud_host}'..."
         )
         if target_host_client is None:
             await self._relogin_client(velocloud_host)

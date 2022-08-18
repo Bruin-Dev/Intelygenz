@@ -55,7 +55,7 @@ def check_user_existence():
     for u in get_users():
         try:
             response = requests.get(
-                f"http://admin:admin@localhost:{GF_PORT}" f"/api/users/search?" f'query={u["login"]}',
+                f"http://admin:admin@localhost:{GF_PORT}" f"/api/users/search?query={u['login']}",
                 auth=HTTPBasicAuth(GF_ADMIN, GF_PASS),
             )
 

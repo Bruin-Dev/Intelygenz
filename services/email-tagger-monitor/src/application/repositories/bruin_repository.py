@@ -89,7 +89,7 @@ class BruinRepository:
                 )
             except Exception as err:
                 err_msg = (
-                    f"An error occurred when getting basic info from Bruin, " f'for ticket_id "{ticket_id}" -> {err}'
+                    f"An error occurred when getting basic info from Bruin, for ticket_id '{ticket_id}' -> {err}"
                 )
                 response = nats_error_response
             else:

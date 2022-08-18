@@ -46,5 +46,5 @@ class GetEmails:
         response["body"] = unread_messages_response["body"]
         response["status"] = unread_messages_response["status"]
 
-        self._logger.info(f"Received the following from the gmail account {email_account}: " f'{response["body"]}')
+        self._logger.info(f"Received the following from the gmail account {email_account}: {response['body']}")
         await self._event_bus.publish_message(msg["response_topic"], response)

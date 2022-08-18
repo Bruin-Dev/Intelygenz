@@ -24,7 +24,7 @@ class SaveMetrics:
 
         if not all(key in msg_body.keys() for key in ("original_email", "ticket")):
             self._logger.error(
-                f"Cannot save metrics using {json.dumps(msg_body)}. " f'Need parameter "original_email" and "ticket"'
+                f"Cannot save metrics using {json.dumps(msg_body)}. Need parameter 'original_email' and 'ticket'"
             )
             response["body"] = err_body
             response["status"] = 400

@@ -21,7 +21,7 @@ class GetTicketTaskHistory:
         filters = msg["body"]
 
         if "ticket_id" not in filters.keys():
-            self._logger.info(f"Cannot get get ticket task history using {json.dumps(filters)}. " f'Need "ticket_id"')
+            self._logger.info(f"Cannot get get ticket task history using {json.dumps(filters)}. Need 'ticket_id'")
             response["status"] = 400
             response["body"] = 'You must specify "ticket_id" in the body'
             await self._event_bus.publish_message(response_topic, response)
