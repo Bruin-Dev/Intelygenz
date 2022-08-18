@@ -1,16 +1,18 @@
+import logging
+from dataclasses import dataclass
 from http import HTTPStatus
-from logging import Logger
 from typing import Any, Dict
 
 import aiohttp
 from aiohttp import ClientSession
 from aiohttp.client_reqrep import ClientResponse
-from dataclasses import dataclass
 from pydantic import BaseModel
 
 COMMON_HEADERS = {
     "Content-Type": "application/json",
 }
+
+logger = logging.getLogger(__name__)
 
 
 class SlackResponse(BaseModel):
@@ -30,36 +32,39 @@ class SlackResponse(BaseModel):
         return self.status == HTTPStatus.OK
 
 
+def slack_headers() -> Dict[str, str]:
+    return {**COMMON_HEADERS}
+
+
 @dataclass
 class SlackClient:
     config: Dict
-    logger: Logger
     url: str = None
-    session: ClientSession = aiohttp.ClientSession()
+    session: ClientSession = None
+
+    async def create_session(self):
+        self.session: ClientSession = aiohttp.ClientSession()
 
     def __post_init__(self):
         self.url = self.config["webhook"]
 
     async def send_to_slack(self, msg) -> SlackResponse:
-        headers = self.slack_headers()
+        headers = slack_headers()
         try:
             client_response = await self.session.post(self.url, headers=headers, json=msg, ssl=False)
             response = await SlackResponse.from_client_response(client_response)
 
             if not response.ok():
-                self.logger.warning(f"post(send_to_slack) => response={response}")
+                logger.warning(f"post(send_to_slack) => response={response}")
             else:
-                self.logger.info(response)
+                logger.info(response)
 
             return response
 
         except aiohttp.ClientConnectionError as e:
-            self.logger.error(f"post(send_to_slack) => ClientConnectionError: {e}")
+            logger.error(f"post(send_to_slack) => ClientConnectionError: {e}")
             return SlackResponse(body=f"ClientConnectionError: {e}", status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
         except Exception as e:
-            self.logger.error(f"post(send_to_slack) => UnexpectedError: {e}")
+            logger.error(f"post(send_to_slack) => UnexpectedError: {e}")
             return SlackResponse(body=f"Unexpected error: {e}", status=HTTPStatus.INTERNAL_SERVER_ERROR)
-
-    def slack_headers(self) -> Dict[str, str]:
-        return {**COMMON_HEADERS}

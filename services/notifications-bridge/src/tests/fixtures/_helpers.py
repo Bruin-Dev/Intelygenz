@@ -1,9 +1,7 @@
 import asyncio
 import types
 from typing import Any, List
-from unittest.mock import Mock
-
-from asynctest import CoroutineMock
+from unittest.mock import AsyncMock, Mock
 
 
 def wrap_all_methods(instance: Any, *, excluded_methods: List[str] = None):
@@ -22,6 +20,6 @@ def wrap_all_methods(instance: Any, *, excluded_methods: List[str] = None):
         method = getattr(instance, method_name)
 
         if asyncio.iscoroutinefunction(method):
-            setattr(instance, method_name, CoroutineMock(wraps=method))
+            setattr(instance, method_name, AsyncMock(wraps=method))
         else:
             setattr(instance, method_name, Mock(wraps=method))

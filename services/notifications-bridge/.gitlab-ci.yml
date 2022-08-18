@@ -11,8 +11,9 @@ notifications-bridge-linter:
         - services/notifications-bridge/src/config/**/*
         - services/notifications-bridge/src/app.py
         - services/notifications-bridge/Dockerfile
-        - services/notifications-bridge/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/notifications-bridge/pyproject.toml
+        - services/notifications-bridge/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
@@ -29,10 +30,11 @@ notifications-bridge-test:
         - services/notifications-bridge/src/config/**/*
         - services/notifications-bridge/src/app.py
         - services/notifications-bridge/Dockerfile
-        - services/notifications-bridge/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/notifications-bridge/pyproject.toml
+        - services/notifications-bridge/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
-  extends: .unittest_module_python_36_alpine
+  extends: .unittest_module_python_310
   needs: ["notifications-bridge-linter"]
 
 # ======================================
@@ -50,8 +52,9 @@ notifications-bridge-build:
         - services/notifications-bridge/src/config/**/*
         - services/notifications-bridge/src/app.py
         - services/notifications-bridge/Dockerfile
-        - services/notifications-bridge/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/notifications-bridge/pyproject.toml
+        - services/notifications-bridge/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $NOTIFICATIONS_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:
