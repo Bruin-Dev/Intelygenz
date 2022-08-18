@@ -129,13 +129,13 @@ class Container:
             bail_out()
 
     async def start(self):
-        # Setup NATS
-        await self._init_nats_conn()
-        await self._init_subscriptions()
-
         # Setup VeloCloud HTTP session
         await self._velocloud_client.create_session()
         await self._velocloud_repository.connect_to_all_servers()
+
+        # Setup NATS
+        await self._init_nats_conn()
+        await self._init_subscriptions()
 
         # Setup scheduler
         self._scheduler.start()
