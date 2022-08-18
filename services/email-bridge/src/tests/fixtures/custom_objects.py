@@ -1,8 +1,8 @@
 from typing import Any
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 from aiohttp import ClientResponse
-from asynctest import CoroutineMock, Mock
 
 
 # Factories
@@ -10,7 +10,7 @@ from asynctest import CoroutineMock, Mock
 def client_response() -> ClientResponse:
     def _inner(*, body: Any, status: int):
         client_response = Mock(ClientResponse)
-        client_response.json = CoroutineMock(return_value=body)
+        client_response.json = AsyncMock(return_value=body)
         client_response.status = status
 
         return client_response

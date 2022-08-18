@@ -2,22 +2,23 @@ import asyncio
 import email
 import email.header
 import imaplib
+import logging
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from email.header import decode_header, make_header
 from typing import Dict, List
 
+logger = logging.getLogger(__name__)
 
+
+@dataclass
 class EmailReaderClient:
-    def __init__(self, config, logger):
-        self._config = config
-        self._logger = logger
-
     def _create_connection(self):
         try:
             email_server = imaplib.IMAP4_SSL("imap.gmail.com")
             return email_server
         except Exception as err:
-            self._logger.error(f"There was an error trying to create the connection to the inbox: {err}")
+            logger.error(f"There was an error trying to create the connection to the inbox: {err}")
             return None
 
     def _login(self, email_account, email_password):
@@ -25,39 +26,37 @@ class EmailReaderClient:
         try:
             email_server = self._create_connection()
             if email_server is None:
-                self._logger.error("Cannot login due to current email server being None")
+                logger.error("Cannot login due to current email server being None")
                 return None
             email_server.login(email_account, email_password)
             resp, _ = email_server.select(recipient_folder)
             if resp != "OK":
-                self._logger.error(f"Unable to open the {recipient_folder} folder")
+                logger.error(f"Unable to open the {recipient_folder} folder")
                 return None
-            self._logger.info(f"Logged in to Gmail mailbox!")
+            logger.info(f"Logged in to Gmail mailbox!")
             return email_server
         except imaplib.IMAP4_SSL.error as err:
-            self._logger.error(f"There was an error trying to login into the inbox: {err}")
+            logger.error(f"There was an error trying to login into the inbox: {err}")
             return None
 
     def _logout(self, email_server):
         if email_server is None:
-            self._logger.error(f"Cannot log out due to current email server being None")
+            logger.error(f"Cannot log out due to current email server being None")
             return
         try:
             email_server.close()
             email_server.logout()
         except Exception as err:
-            self._logger.error(
-                f"Cannot close connection due to {err} of type {type(err).__name__}. Proceeding to logout..."
-            )
+            logger.error(f"Cannot close connection due to {err} of type {type(err).__name__}. Proceeding to logout...")
 
-        self._logger.info(f"Logged out from Gmail!")
+        logger.info(f"Logged out from Gmail!")
 
     async def get_unread_messages(
         self, email_account: str, email_password: str, email_filter: List[str], lookup_days: int
     ) -> List[Dict[str, str]]:
         email_server = self._login(email_account, email_password)
         if email_server is None:
-            self._logger.error(
+            logger.error(
                 f"Cannot obtain unread messages due to current email server being None. "
                 f"Returning empty list of unread messages"
             )
@@ -84,9 +83,9 @@ class EmailReaderClient:
                         {"message": msg.as_string(), "subject": subject, "body": body, "msg_uid": msg_uid}
                     )
             else:
-                self._logger.error(f"Error while getting unread messages: FETCH response code is not OK")
+                logger.error(f"Error while getting unread messages: FETCH response code is not OK")
         else:
-            self._logger.info("No unread messages found")
+            logger.info("No unread messages found")
         self._logout(email_server)
         return unread_messages
 
@@ -101,14 +100,14 @@ class EmailReaderClient:
             )
             await asyncio.sleep(0)
             messages = messages[0].split()
-            self._logger.info(f"Search resp code: {search_resp_code}. Number of unseen messages: {len(messages)}")
+            logger.info(f"Search resp code: {search_resp_code}. Number of unseen messages: {len(messages)}")
         except Exception as err:
-            self._logger.error(f"Unable to access the unread mails due to {err}")
+            logger.error(f"Unable to access the unread mails due to {err}")
             return []
         if search_resp_code != "OK":
-            self._logger.error(f"Unable to access the unread mails")
+            logger.error(f"Unable to access the unread mails")
             return []
-        self._logger.info(f"Messages to process in next batch: {messages}")
+        logger.info(f"Messages to process in next batch: {messages}")
         return messages
 
     def _get_body(self, msg):
@@ -129,21 +128,21 @@ class EmailReaderClient:
                 else:
                     body = msg.get_payload()
         except Exception as err:
-            self._logger.error(f"Error getting body from message {msg}  due to {err}")
+            logger.error(f"Error getting body from message {msg}  due to {err}")
 
         return "\n".join(body.splitlines())
 
     async def mark_as_read(self, msg_uid, email_account, email_password):
         email_server = self._login(email_account, email_password)
         if email_server is None:
-            self._logger.error(f"Cannot mark email {msg_uid} as read due to email server being None")
+            logger.error(f"Cannot mark email {msg_uid} as read due to email server being None")
             return False
         try:
             response, _ = email_server.uid("STORE", msg_uid, "+FLAGS", r"(\Seen)")
             await asyncio.sleep(0)
             self._logout(email_server)
         except Exception as err:
-            self._logger.error(f"Error marking message {msg_uid} as read due to {err}")
+            logger.error(f"Error marking message {msg_uid} as read due to {err}")
             return False
 
         if response != "OK":

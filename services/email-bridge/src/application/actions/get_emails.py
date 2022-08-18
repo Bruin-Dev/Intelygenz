@@ -1,39 +1,52 @@
 import json
+import logging
+
+from nats.aio.msg import Msg
+
+from ..repositories.email_reader_repository import EmailReaderRepository
+
+logger = logging.getLogger(__name__)
 
 
 class GetEmails:
-    def __init__(self, config, event_bus, logger, email_reader_repository):
-        self._config = config
-        self._event_bus = event_bus
-        self._logger = logger
+    def __init__(self, email_reader_repository: EmailReaderRepository):
         self._email_reader_repository = email_reader_repository
 
-    async def get_unread_emails(self, msg):
-        response = {"request_id": msg["request_id"], "body": None, "status": None}
+    async def __call__(self, msg: Msg):
+        payload = json.loads(msg.data)
 
-        if msg.get("body") is None:
-            self._logger.error(f"Cannot get unread emails with {json.dumps(msg)}. Must include body in request")
+        response = {"request_id": payload["request_id"], "body": None, "status": None}
+
+        if payload.get("body") is None:
+            logger.error(f"Cannot get unread emails with {json.dumps(payload)}. Must include body in request")
             response["status"] = 400
             response["body"] = 'Must include "body" in request'
-            await self._event_bus.publish_message(msg["response_topic"], response)
+            await msg.respond(json.dumps(response).encode())
             return
-        payload = msg["body"]
-        if not all(key in payload.keys() for key in ("email_account", "email_filter", "lookup_days")):
-            self._logger.error(f"Cannot get unread emails with {json.dumps(msg)}. JSON malformed")
 
+        if not all(
+            key in payload["body"].keys()
+            for key in (
+                "email_account",
+                "email_filter",
+                "lookup_days",
+            )
+        ):
+            logger.error(f"Cannot get unread emails with {json.dumps(payload)}. JSON malformed")
+
+            response["status"] = 400
             response["body"] = (
                 'You must include "email_account", "email_filter" and "lookup_days" '
                 'in the "body" field of the response request'
             )
-            response["status"] = 400
-            await self._event_bus.publish_message(msg["response_topic"], response)
+            await msg.respond(json.dumps(response).encode())
             return
 
-        email_account = payload["email_account"]
-        email_filter = payload["email_filter"]
-        lookup_days = payload["lookup_days"]
+        email_account = payload["body"]["email_account"]
+        email_filter = payload["body"]["email_filter"]
+        lookup_days = payload["body"]["lookup_days"]
 
-        self._logger.info(
+        logger.info(
             f"Attempting to get all unread messages from email account {email_account} from the past {lookup_days} "
             f"days coming from {email_filter}"
         )
@@ -46,5 +59,5 @@ class GetEmails:
         response["body"] = unread_messages_response["body"]
         response["status"] = unread_messages_response["status"]
 
-        self._logger.info(f"Received the following from the gmail account {email_account}: {response['body']}")
-        await self._event_bus.publish_message(msg["response_topic"], response)
+        logger.info(f"Received the following from the gmail account {email_account}: " f'{response["body"]}')
+        await msg.respond(json.dumps(response).encode())

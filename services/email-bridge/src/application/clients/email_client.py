@@ -1,33 +1,37 @@
 import base64
+import logging
 import smtplib
+from dataclasses import dataclass
 from email.charset import BASE64, Charset
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.nonmultipart import MIMENonMultipart
 from email.mime.text import MIMEText
+from typing import Dict
+
+logger = logging.getLogger(__name__)
 
 
+@dataclass
 class EmailClient:
-    def __init__(self, config, logger):
-        self._config = config
-        self._logger = logger
-        self._email_server = None
-        self.EMAIL_SEPARATOR = ", "
+    config: Dict
+    email_server: smtplib.SMTP = None
+    EMAIL_SEPARATOR = ", "
 
     def email_login(self):
         self._email_server = smtplib.SMTP("smtp.gmail.com:587")
         self._email_server.ehlo()
         self._email_server.starttls()
         self._email_server.login(
-            self._config.EMAIL_DELIVERY_CONFIG["email"],
-            self._config.EMAIL_DELIVERY_CONFIG["password"],
+            self.config.EMAIL_DELIVERY_CONFIG["email"],
+            self.config.EMAIL_DELIVERY_CONFIG["password"],
         )
 
     def send_to_email(self, msg):
         try:
             self.email_login()
             mime_msg = MIMEMultipart("related")
-            mime_msg["From"] = self._config.EMAIL_DELIVERY_CONFIG["email"]
+            mime_msg["From"] = self.config.EMAIL_DELIVERY_CONFIG["email"]
             mime_msg["To"] = msg["recipient"]
             mime_msg["Subject"] = msg["subject"]
 
@@ -54,15 +58,15 @@ class EmailClient:
                 mime_msg.attach(attachment)
 
             self._email_server.sendmail(
-                self._config.EMAIL_DELIVERY_CONFIG["email"],
+                self.config.EMAIL_DELIVERY_CONFIG["email"],
                 msg["recipient"].split(self.EMAIL_SEPARATOR),
                 mime_msg.as_string(),
             )
 
-            self._logger.info("Success: Email sent!")
+            logger.info("Success: Email sent!")
             self._email_server.quit()
             return 200
 
         except Exception:
-            self._logger.exception("Error: Email not sent")
+            logger.exception("Error: Email not sent")
             return 500

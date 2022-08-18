@@ -11,8 +11,9 @@ email-bridge-linter:
         - services/email-bridge/src/config/**/*
         - services/email-bridge/src/app.py
         - services/email-bridge/Dockerfile
-        - services/email-bridge/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/email-bridge/pyproject.toml
+        - services/email-bridge/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
@@ -29,10 +30,11 @@ email-bridge-test:
         - services/email-bridge/src/config/**/*
         - services/email-bridge/src/app.py
         - services/email-bridge/Dockerfile
-        - services/email-bridge/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/email-bridge/pyproject.toml
+        - services/email-bridge/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
-  extends: .unittest_module_python_36_alpine
+  extends: .unittest_module_python_310
   needs: ["email-bridge-linter"]
 
 # ======================================
@@ -50,8 +52,9 @@ email-bridge-build:
         - services/email-bridge/src/config/**/*
         - services/email-bridge/src/app.py
         - services/email-bridge/Dockerfile
-        - services/email-bridge/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/email-bridge/pyproject.toml
+        - services/email-bridge/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $EMAIL_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:
