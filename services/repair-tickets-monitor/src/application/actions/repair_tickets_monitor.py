@@ -254,13 +254,11 @@ class RepairTicketsMonitor:
             auto_reply_whitelist = self._config.MONITOR_CONFIG["auto_reply_whitelist"]
             auto_reply_allowed = False
             if len(auto_reply_whitelist) > 0:
-                auto_reply_allowed = email.sender_address in auto_reply_whitelist
+                auto_reply_allowed = any(
+                    recipient_email.lower() in auto_reply_whitelist for recipient_email in email.recipient_addresses
+                )
 
-            if auto_reply_allowed:
-                is_actionable = True
-            else:
-                is_actionable = self._is_inference_actionable(inference_data)
-
+            is_actionable = self._is_inference_actionable(inference_data)
             is_ticket_actionable = self._is_ticket_actionable(inference_data)
 
             potential_service_numbers = inference_data.get("potential_service_numbers")
