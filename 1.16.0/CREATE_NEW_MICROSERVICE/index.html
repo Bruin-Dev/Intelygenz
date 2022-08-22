@@ -490,132 +490,10 @@
   
   
   
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_2_7">
-          Manual procedures
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Manual procedures" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_7">
-          <span class="md-nav__icon md-icon"></span>
-          Manual procedures
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
     <li class="md-nav__item">
-      <a href="../manual_procedures/API_VENDOR_ACCESS/" class="md-nav__link">
-        Vendor access to the API
+      <a href=".." class="md-nav__link">
+        Manual processes
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION/" class="md-nav__link">
-        Switch Automation Engine region
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_2_8">
-          Manual configurations
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Manual configurations" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_8">
-          <span class="md-nav__icon md-icon"></span>
-          Manual configurations
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../manual_configurations/INIT_AUTOMATION_PROJECT/" class="md-nav__link">
-        Init Automation Engine project
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../manual_configurations/OKTA_CONFIGURATIONS/" class="md-nav__link">
-        AWS SSO Okta JWT token
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../manual_configurations/OKTA_JWT/" class="md-nav__link">
-        AWS SSO Okta JWT token
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
     </li>
   
 
@@ -793,10 +671,9 @@ new microservice repo, by that way we can deploy our microservice later in dev b
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  - local: &#39;services/links-metrics-collector/.gitlab-ci.yml&#39;
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>  - local: &#39;services/lumin-billing-report/.gitlab-ci.yml&#39;
 <a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>  - local: &#39;services/new-bridge/.gitlab-ci.yml&#39;    &lt;─────────────── here!
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>  - local: &#39;services/notifier/.gitlab-ci.yml&#39;
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>  - local: &#39;services/service-affecting-monitor/.gitlab-ci.yml&#39;
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>  - local: &#39;services/service-outage-monitor/.gitlab-ci.yml&#39;
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>...
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>  - local: &#39;services/service-affecting-monitor/.gitlab-ci.yml&#39;
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>  - local: &#39;services/service-outage-monitor/.gitlab-ci.yml&#39;
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>...
 </code></pre></div>
   Now in the same file, let's define the "desired_tasks" variable for this new micro (do it respecting the alphabetical order):
   <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>...
@@ -804,10 +681,9 @@ new microservice repo, by that way we can deploy our microservice later in dev b
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  NATS_SERVER_1_DESIRED_TASKS: &quot;1&quot;
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>  NATS_SERVER_2_DESIRED_TASKS: &quot;1&quot;
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>  NEW_BRIDGE_DESIRED_TASKS: &quot;1&quot;    &lt;─────────────── here!
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>  NOTIFIER_DESIRED_TASKS: &quot;1&quot;
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>  SERVICE_AFFECTING_MONITOR_DESIRED_TASKS: &quot;1&quot;
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>  SERVICE_OUTAGE_MONITOR_1_DESIRED_TASKS: &quot;1&quot;
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>...
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>  SERVICE_AFFECTING_MONITOR_DESIRED_TASKS: &quot;1&quot;
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>  SERVICE_OUTAGE_MONITOR_1_DESIRED_TASKS: &quot;1&quot;
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>...
 </code></pre></div></p>
 <h2 id="3-configure-semantic-release">3. Configure semantic-release</h2>
 <p>We need to edit two files, one in the new micro path and other in the root of the repo:
@@ -827,10 +703,9 @@ new microservice repo, by that way we can deploy our microservice later in dev b
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    &quot;./services/links-metrics-collector&quot;,
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    &quot;./services/lumin-billing-report&quot;,
 <a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    &quot;./services/new-bridge&quot;,    &lt;─────────────── here!
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    &quot;./services/notifier&quot;,
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    &quot;./services/service-affecting-monitor&quot;,
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    &quot;./services/service-outage-monitor&quot;,
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>...
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    &quot;./services/service-affecting-monitor&quot;,
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    &quot;./services/service-outage-monitor&quot;,
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>...
 </code></pre></div></p>
 <h2 id="3-configure-logs">3. Configure logs</h2>
 <p>We use 2 systems to storage logs, papertrail for 3 days and cloudwath for 1 month. Let's add those config in:
@@ -847,12 +722,7 @@ new microservice repo, by that way we can deploy our microservice later in dev b
 <a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>                    &quot;search_name&quot;: f&quot;[new-bridge] - logs&quot;,                               ├──────────────&gt; here!
 <a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>                    &quot;repository&quot;: &quot;new-bridge&quot;,                                          │
 <a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>                },                                                                      _│
-<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>                {
-<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>                    &quot;query&quot;: f&quot;notifier AND {ENVIRONMENT_NAME} AND &lt;BUILD_NUMBER&gt;&quot;,
-<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>                    &quot;search_name&quot;: f&quot;[notifier] - logs&quot;,
-<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>                    &quot;repository&quot;: &quot;notifier&quot;,
-<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>                },
-<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>...
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>...
 </code></pre></div></p>
 <ul>
 <li><code>helm/charts/fluent-bit-custom/templates/configmap.yaml</code>
@@ -872,14 +742,7 @@ new microservice repo, by that way we can deploy our microservice later in dev b
 <a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>        log_group_name      {{ .Values.config.logGroupName }}      │
 <a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>        log_stream_name     new-bridge                             │
 <a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>        auto_create_group   true                                  _│
-<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>    [OUTPUT]
-<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a>        Name                cloudwatch
-<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a>        Match               kube.var.log.containers.notifier*
-<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>        region              {{ .Values.config.region }}
-<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a>        log_group_name      {{ .Values.config.logGroupName }}
-<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a>        log_stream_name     notifier
-<a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a>        auto_create_group   true
-<a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a>...
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>...
 </code></pre></div></li>
 </ul>
 <h2 id="3-update-docker-compose-to-enable-local-deployments">3. Update docker-compose to enable local deployments</h2>
@@ -900,10 +763,7 @@ new microservice repo, by that way we can deploy our microservice later in dev b
 <a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>    - redis                                                           │
 <a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>  ports:                                                              │
 <a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>    - 5006:5000                                                      _│
-<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>
-<a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>notifier:
-<a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>  build:
-<a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a>...
+<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>...
 </code></pre></div></li>
 </ul>
 <h2 id="4-add-option-to-enable-or-disable-our-microservice">4. Add option to enable or disable our microservice</h2>
@@ -916,10 +776,7 @@ new microservice repo, by that way we can deploy our microservice later in dev b
 <a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>- name: new-bridge                          ¯│
 <a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>  version: &#39;*.*.*&#39;                           ├──────────────&gt; here!
 <a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>  condition: new-bridge.enabled             _│
-<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>- name: notifier
-<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>  version: &#39;*.*.*&#39;
-<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>  condition: notifier.enabled
-<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>...
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>...
 </code></pre></div></li>
 </ul>
 <h2 id="5-helm-templates-and-variables">5. Helm templates and variables</h2>
@@ -948,7 +805,7 @@ new microservice repo, by that way we can deploy our microservice later in dev b
 <a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>                name: {{ include &quot;new-bridge.configmapName&quot; . }}
 <a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>...
 </code></pre></div>
-  We can add or remove all the init containers we want. Even, it is very possible that all the dependencies that we need already have the microservice that we use as a base or some other microservice already developed. So we can navigate through the folders of the rest of the microservices and copy any other dependency check and use it in ours. I will add a new dependency for <code>notifier</code> copied from other microservice, and my file will look like the following:
+  We can add or remove all the init containers we want. Even, it is very possible that all the dependencies that we need already have the microservice that we use as a base or some other microservice already developed. So we can navigate through the folders of the rest of the microservices and copy any other dependency check and use it in ours. I will add a new dependency for <code>notifications-bridge</code> copied from other microservice, and my file will look like the following:
   <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>...
 <a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>      initContainers:
 <a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>        - name: wait-nats-server
@@ -960,14 +817,14 @@ new microservice repo, by that way we can deploy our microservice later in dev b
 <a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>          envFrom:
 <a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>            - configMapRef:
 <a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>                name: {{ include &quot;new-bridge.configmapName&quot; . }}
-<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>        {{- if .Values.config.capabilities_enabled.notifier }}                                                                        ¯│                                                                     
-<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>        - name: wait-notifier                                                                                                          │
-<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>          image: busybox:1.28                                                                                                          ├──────────────&gt; here!
-<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>          command: [&#39;sh&#39;, &#39;-c&#39;, &#39;until wget --spider -S http://notifier:5000/_health; do echo waiting for notifier; sleep 2; done&#39;]    │
-<a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a>        {{- end }}                                                                                                                    _│
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>        {{- if .Values.config.capabilities_enabled.notifications_bridge }}                                                                                    ¯│                                                                     
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>        - name: wait-notifications-bridge                                                                                                                      │
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>          image: busybox:1.28                                                                                                                                  ├──────────────&gt; here!
+<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>          command: [&#39;sh&#39;, &#39;-c&#39;, &#39;until wget --spider -S http://notifications-bridge:5000/_health; do echo waiting for notifications-bridge; sleep 2; done&#39;]    │
+<a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a>        {{- end }}                                                                                                                                            _│
 <a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a>...
 </code></pre></div>
-  Note that we have a <code>if</code> condition. You will see this in some check, we use this because if we deploy only some microservices, we must contemplate this. If the notifier not exist, the check will not be created. Nats and Redis are always required, that's wy don't have the conditional.</p>
+  Note that we have a <code>if</code> condition. You will see this in some check, we use this because if we deploy only some microservices, we must contemplate this. If the notifications-bridge does not exist, the check will not be created. Nats and Redis are always required, that's wy don't have the conditional.</p>
 </li>
 <li>
 <p>VARIABLES: time to update the variables that will use our microservice, this involves various files:</p>
@@ -1076,23 +933,7 @@ Check that we only define the variable but no put any value, although we can als
 <a id="__codelineno-15-57" name="__codelineno-15-57" href="#__codelineno-15-57"></a>    requests:                                                              │
 <a id="__codelineno-15-58" name="__codelineno-15-58" href="#__codelineno-15-58"></a>      cpu: 100m                                                            │
 <a id="__codelineno-15-59" name="__codelineno-15-59" href="#__codelineno-15-59"></a>      memory: 128Mi                                                       _│
-<a id="__codelineno-15-60" name="__codelineno-15-60" href="#__codelineno-15-60"></a>
-<a id="__codelineno-15-61" name="__codelineno-15-61" href="#__codelineno-15-61"></a>
-<a id="__codelineno-15-62" name="__codelineno-15-62" href="#__codelineno-15-62"></a># -- notifier subchart specific configuration
-<a id="__codelineno-15-63" name="__codelineno-15-63" href="#__codelineno-15-63"></a>notifier:
-<a id="__codelineno-15-64" name="__codelineno-15-64" href="#__codelineno-15-64"></a>  # -- Field to indicate if the notifier module is going to be deployed
-<a id="__codelineno-15-65" name="__codelineno-15-65" href="#__codelineno-15-65"></a>  enabled: true
-<a id="__codelineno-15-66" name="__codelineno-15-66" href="#__codelineno-15-66"></a>  # -- Number of replicas of notifier module
-<a id="__codelineno-15-67" name="__codelineno-15-67" href="#__codelineno-15-67"></a>  replicaCount: 1
-<a id="__codelineno-15-68" name="__codelineno-15-68" href="#__codelineno-15-68"></a>  # -- notifier image details
-<a id="__codelineno-15-69" name="__codelineno-15-69" href="#__codelineno-15-69"></a>  image:
-<a id="__codelineno-15-70" name="__codelineno-15-70" href="#__codelineno-15-70"></a>    # -- notifier repository for docker images
-<a id="__codelineno-15-71" name="__codelineno-15-71" href="#__codelineno-15-71"></a>    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/notifier
-<a id="__codelineno-15-72" name="__codelineno-15-72" href="#__codelineno-15-72"></a>    pullPolicy: Always
-<a id="__codelineno-15-73" name="__codelineno-15-73" href="#__codelineno-15-73"></a>    # -- notifier tag of docker image
-<a id="__codelineno-15-74" name="__codelineno-15-74" href="#__codelineno-15-74"></a>    tag: &quot;&quot;
-<a id="__codelineno-15-75" name="__codelineno-15-75" href="#__codelineno-15-75"></a>  # -- notifier Service Configuration
-<a id="__codelineno-15-76" name="__codelineno-15-76" href="#__codelineno-15-76"></a>...
+<a id="__codelineno-15-60" name="__codelineno-15-60" href="#__codelineno-15-60"></a>...
 </code></pre></div>
 Things to check: first the indentation!!.. second, the "global" config is not set here; it is defined at the beginning of the values file and is common for all microservices. and finally, we remove blank and default configurations to get a shorter file (things removed: autoscaling, the default is false, so we can omit it. nodeSelector. tolerations and affinity). PD: You can keep autoscaling if you will enable it.</p>
 </li>
@@ -1156,24 +997,7 @@ Things to check: first the indentation!!.. second, the "global" config is not se
 <a id="__codelineno-16-56" name="__codelineno-16-56" href="#__codelineno-16-56"></a>    requests:                                                              │
 <a id="__codelineno-16-57" name="__codelineno-16-57" href="#__codelineno-16-57"></a>      cpu: 100m                                                            │
 <a id="__codelineno-16-58" name="__codelineno-16-58" href="#__codelineno-16-58"></a>      memory: 128Mi                                                       _│
-<a id="__codelineno-16-59" name="__codelineno-16-59" href="#__codelineno-16-59"></a>
-<a id="__codelineno-16-60" name="__codelineno-16-60" href="#__codelineno-16-60"></a>
-<a id="__codelineno-16-61" name="__codelineno-16-61" href="#__codelineno-16-61"></a># -- notifier subchart specific configuration
-<a id="__codelineno-16-62" name="__codelineno-16-62" href="#__codelineno-16-62"></a>notifier:
-<a id="__codelineno-16-63" name="__codelineno-16-63" href="#__codelineno-16-63"></a>  enabled: ${NOTIFIER_ENABLED}
-<a id="__codelineno-16-64" name="__codelineno-16-64" href="#__codelineno-16-64"></a>  replicaCount: ${NOTIFIER_DESIRED_TASKS}
-<a id="__codelineno-16-65" name="__codelineno-16-65" href="#__codelineno-16-65"></a>  # -- notifier image details
-<a id="__codelineno-16-66" name="__codelineno-16-66" href="#__codelineno-16-66"></a>  image:
-<a id="__codelineno-16-67" name="__codelineno-16-67" href="#__codelineno-16-67"></a>    # -- notifier repository for docker images
-<a id="__codelineno-16-68" name="__codelineno-16-68" href="#__codelineno-16-68"></a>    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/notifier
-<a id="__codelineno-16-69" name="__codelineno-16-69" href="#__codelineno-16-69"></a>    pullPolicy: Always
-<a id="__codelineno-16-70" name="__codelineno-16-70" href="#__codelineno-16-70"></a>    # -- notifier tag of docker image
-<a id="__codelineno-16-71" name="__codelineno-16-71" href="#__codelineno-16-71"></a>    tag: ${NOTIFIER_BUILD_NUMBER}
-<a id="__codelineno-16-72" name="__codelineno-16-72" href="#__codelineno-16-72"></a>  # -- notifier Service Configuration
-<a id="__codelineno-16-73" name="__codelineno-16-73" href="#__codelineno-16-73"></a>  service:
-<a id="__codelineno-16-74" name="__codelineno-16-74" href="#__codelineno-16-74"></a>    type: ClusterIP
-<a id="__codelineno-16-75" name="__codelineno-16-75" href="#__codelineno-16-75"></a>    port: 5000
-<a id="__codelineno-16-76" name="__codelineno-16-76" href="#__codelineno-16-76"></a>...
+<a id="__codelineno-16-59" name="__codelineno-16-59" href="#__codelineno-16-59"></a>...
 </code></pre></div>
 With this, we have the entire template of our new microservice. Now we need to set in the pipeline the variables that we just created.</p>
 </li>
@@ -1201,38 +1025,27 @@ With this, we have the entire template of our new microservice. Now we need to s
 <a id="__codelineno-17-20" name="__codelineno-17-20" href="#__codelineno-17-20"></a>    export NEW_BRIDGE_NEW_SENSITIVE_VARIABLE=${NEW_BRIDGE_NEW_SENSITIVE_VARIABLE_PRO}    │
 <a id="__codelineno-17-21" name="__codelineno-17-21" href="#__codelineno-17-21"></a>  fi                                                                                     │
 <a id="__codelineno-17-22" name="__codelineno-17-22" href="#__codelineno-17-22"></a>}                                                                                       _│ 
-<a id="__codelineno-17-23" name="__codelineno-17-23" href="#__codelineno-17-23"></a>
-<a id="__codelineno-17-24" name="__codelineno-17-24" href="#__codelineno-17-24"></a>function notifier_variables() {
-<a id="__codelineno-17-25" name="__codelineno-17-25" href="#__codelineno-17-25"></a>  if [[ &quot;${CI_COMMIT_REF_SLUG}&quot; != &quot;master&quot; ]]; then
-<a id="__codelineno-17-26" name="__codelineno-17-26" href="#__codelineno-17-26"></a>    # notifier environment variables for ephemeral environments
-<a id="__codelineno-17-27" name="__codelineno-17-27" href="#__codelineno-17-27"></a>    export NOTIFIER_SLACK_URL=${SLACK_URL_DEV}
-<a id="__codelineno-17-28" name="__codelineno-17-28" href="#__codelineno-17-28"></a>  else
-<a id="__codelineno-17-29" name="__codelineno-17-29" href="#__codelineno-17-29"></a>    # notifier environment variables for production environment
-<a id="__codelineno-17-30" name="__codelineno-17-30" href="#__codelineno-17-30"></a>    export NOTIFIER_SLACK_URL=${SLACK_URL_PRO}
-<a id="__codelineno-17-31" name="__codelineno-17-31" href="#__codelineno-17-31"></a>  fi
-<a id="__codelineno-17-32" name="__codelineno-17-32" href="#__codelineno-17-32"></a>}                                _│
-<a id="__codelineno-17-33" name="__codelineno-17-33" href="#__codelineno-17-33"></a>...
-<a id="__codelineno-17-34" name="__codelineno-17-34" href="#__codelineno-17-34"></a>function environments_assign() {
-<a id="__codelineno-17-35" name="__codelineno-17-35" href="#__codelineno-17-35"></a>  # assign enabled variable for each subchart
-<a id="__codelineno-17-36" name="__codelineno-17-36" href="#__codelineno-17-36"></a>  create_enabled_var_for_each_subchart
-<a id="__codelineno-17-37" name="__codelineno-17-37" href="#__codelineno-17-37"></a>  # assign common environment variables for each environment
-<a id="__codelineno-17-38" name="__codelineno-17-38" href="#__codelineno-17-38"></a>  common_variables_by_environment
-<a id="__codelineno-17-39" name="__codelineno-17-39" href="#__codelineno-17-39"></a>  # assign specific environment variables for each subchart
-<a id="__codelineno-17-40" name="__codelineno-17-40" href="#__codelineno-17-40"></a>  bruin_bridge_variables
-<a id="__codelineno-17-41" name="__codelineno-17-41" href="#__codelineno-17-41"></a>  cts_bridge_variables
-<a id="__codelineno-17-42" name="__codelineno-17-42" href="#__codelineno-17-42"></a>  digi_bridge_variables
-<a id="__codelineno-17-43" name="__codelineno-17-43" href="#__codelineno-17-43"></a>  digi_reboot_report_variables
-<a id="__codelineno-17-44" name="__codelineno-17-44" href="#__codelineno-17-44"></a>  email_tagger_monitor_variables
-<a id="__codelineno-17-45" name="__codelineno-17-45" href="#__codelineno-17-45"></a>  hawkeye_bridge_variables
-<a id="__codelineno-17-46" name="__codelineno-17-46" href="#__codelineno-17-46"></a>  links_metrics_api_variables
-<a id="__codelineno-17-47" name="__codelineno-17-47" href="#__codelineno-17-47"></a>  lit_bridge_variables
-<a id="__codelineno-17-48" name="__codelineno-17-48" href="#__codelineno-17-48"></a>  lumin_billing_report_variables
-<a id="__codelineno-17-49" name="__codelineno-17-49" href="#__codelineno-17-49"></a>  new_bridge_variables    &lt;─────────────── and here!
-<a id="__codelineno-17-50" name="__codelineno-17-50" href="#__codelineno-17-50"></a>  notifier_variables
-<a id="__codelineno-17-51" name="__codelineno-17-51" href="#__codelineno-17-51"></a>  t7_bridge_variables
-<a id="__codelineno-17-52" name="__codelineno-17-52" href="#__codelineno-17-52"></a>  velocloud_bridge_variables
-<a id="__codelineno-17-53" name="__codelineno-17-53" href="#__codelineno-17-53"></a>}
-<a id="__codelineno-17-54" name="__codelineno-17-54" href="#__codelineno-17-54"></a>...
+<a id="__codelineno-17-23" name="__codelineno-17-23" href="#__codelineno-17-23"></a>...
+<a id="__codelineno-17-24" name="__codelineno-17-24" href="#__codelineno-17-24"></a>function environments_assign() {
+<a id="__codelineno-17-25" name="__codelineno-17-25" href="#__codelineno-17-25"></a>  # assign enabled variable for each subchart
+<a id="__codelineno-17-26" name="__codelineno-17-26" href="#__codelineno-17-26"></a>  create_enabled_var_for_each_subchart
+<a id="__codelineno-17-27" name="__codelineno-17-27" href="#__codelineno-17-27"></a>  # assign common environment variables for each environment
+<a id="__codelineno-17-28" name="__codelineno-17-28" href="#__codelineno-17-28"></a>  common_variables_by_environment
+<a id="__codelineno-17-29" name="__codelineno-17-29" href="#__codelineno-17-29"></a>  # assign specific environment variables for each subchart
+<a id="__codelineno-17-30" name="__codelineno-17-30" href="#__codelineno-17-30"></a>  bruin_bridge_variables
+<a id="__codelineno-17-31" name="__codelineno-17-31" href="#__codelineno-17-31"></a>  cts_bridge_variables
+<a id="__codelineno-17-32" name="__codelineno-17-32" href="#__codelineno-17-32"></a>  digi_bridge_variables
+<a id="__codelineno-17-33" name="__codelineno-17-33" href="#__codelineno-17-33"></a>  digi_reboot_report_variables
+<a id="__codelineno-17-34" name="__codelineno-17-34" href="#__codelineno-17-34"></a>  email_tagger_monitor_variables
+<a id="__codelineno-17-35" name="__codelineno-17-35" href="#__codelineno-17-35"></a>  hawkeye_bridge_variables
+<a id="__codelineno-17-36" name="__codelineno-17-36" href="#__codelineno-17-36"></a>  links_metrics_api_variables
+<a id="__codelineno-17-37" name="__codelineno-17-37" href="#__codelineno-17-37"></a>  lit_bridge_variables
+<a id="__codelineno-17-38" name="__codelineno-17-38" href="#__codelineno-17-38"></a>  lumin_billing_report_variables
+<a id="__codelineno-17-39" name="__codelineno-17-39" href="#__codelineno-17-39"></a>  new_bridge_variables    &lt;─────────────── and here!
+<a id="__codelineno-17-40" name="__codelineno-17-40" href="#__codelineno-17-40"></a>  t7_bridge_variables
+<a id="__codelineno-17-41" name="__codelineno-17-41" href="#__codelineno-17-41"></a>  velocloud_bridge_variables
+<a id="__codelineno-17-42" name="__codelineno-17-42" href="#__codelineno-17-42"></a>}
+<a id="__codelineno-17-43" name="__codelineno-17-43" href="#__codelineno-17-43"></a>...
 </code></pre></div></p>
 </li>
 <li>

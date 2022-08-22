@@ -490,132 +490,10 @@
   
   
   
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_2_7">
-          Manual procedures
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Manual procedures" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_7">
-          <span class="md-nav__icon md-icon"></span>
-          Manual procedures
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
     <li class="md-nav__item">
-      <a href="../../manual_procedures/API_VENDOR_ACCESS/" class="md-nav__link">
-        Vendor access to the API
+      <a href="../.." class="md-nav__link">
+        Manual processes
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION/" class="md-nav__link">
-        Switch Automation Engine region
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_2_8">
-          Manual configurations
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Manual configurations" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_8">
-          <span class="md-nav__icon md-icon"></span>
-          Manual configurations
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../manual_configurations/INIT_AUTOMATION_PROJECT/" class="md-nav__link">
-        Init Automation Engine project
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../manual_configurations/OKTA_CONFIGURATIONS/" class="md-nav__link">
-        AWS SSO Okta JWT token
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../manual_configurations/OKTA_JWT/" class="md-nav__link">
-        AWS SSO Okta JWT token
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
     </li>
   
 
@@ -664,8 +542,8 @@
 </div>
 
 <h1 id="1-summary">1. Summary</h1>
-<p>Parameter Store is a capability of AWS Systems Manager that provides secure, hierarchical storage for configuration data management and secrets management. This service is only available in the region where is deployed. We use it to set configuration of Automation-Engine app. But if a desaster occurs in the main region we need to have the parameters replicated en the stand-by region to redeploy the app.</p>
-<p>Parameter-replicator is a phython lambda that replicate parameters from one region to another. If any parameter change, that change will be replicated in the other region, by this way we have a configuration ready to run the application in the mirror region. This lambda also run ones a day to create a parameter backup and store in S3.</p>
+<p>Parameter Store is a capability of AWS Systems Manager that provides secure, hierarchical storage for configuration data management and secrets management. This service is only available in the region where is deployed. We use it to set configuration of Automation-Engine app. But if a disaster occurs in the main region we need to have the parameters replicated en the stand-by region to redeploy the app.</p>
+<p>Parameter-replicator is a python lambda that replicate parameters from one region to another. If any parameter change, that change will be replicated in the other region, by this way we have a configuration ready to run the application in the mirror region. This lambda also run ones a day to create a parameter backup and store in S3.</p>
 <h1 id="1-diagram">1. Diagram</h1>
 <p><a href="../diagrams/parameter-replicator.drawio.svg">parameter-replicator.drawio.svg</a></p>
 

@@ -490,132 +490,10 @@
   
   
   
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_2_7">
-          Manual procedures
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Manual procedures" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_7">
-          <span class="md-nav__icon md-icon"></span>
-          Manual procedures
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
     <li class="md-nav__item">
-      <a href="../../manual_procedures/API_VENDOR_ACCESS/" class="md-nav__link">
-        Vendor access to the API
+      <a href="../.." class="md-nav__link">
+        Manual processes
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION/" class="md-nav__link">
-        Switch Automation Engine region
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_2_8">
-          Manual configurations
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Manual configurations" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_8">
-          <span class="md-nav__icon md-icon"></span>
-          Manual configurations
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../manual_configurations/INIT_AUTOMATION_PROJECT/" class="md-nav__link">
-        Init Automation Engine project
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../manual_configurations/OKTA_CONFIGURATIONS/" class="md-nav__link">
-        AWS SSO Okta JWT token
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../manual_configurations/OKTA_JWT/" class="md-nav__link">
-        AWS SSO Okta JWT token
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
     </li>
   
 
@@ -975,14 +853,14 @@
 <td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/nats/endpoint-url/description?region=us-east-1&amp;tab=Table</td>
 </tr>
 <tr>
-<td>/automation-engine/common/notifier/email-account-for-message-delivery-password</td>
+<td>/automation-engine/common/email-bridge/email-account-for-message-delivery-password</td>
 <td>Email account used to send messages to other accounts (password)</td>
-<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/notifier/email-account-for-message-delivery-password/description?region=us-east-1&amp;tab=Table</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/email-bridge/email-account-for-message-delivery-password/description?region=us-east-1&amp;tab=Table</td>
 </tr>
 <tr>
-<td>/automation-engine/common/notifier/email-account-for-message-delivery-username</td>
+<td>/automation-engine/common/email-bridge/email-account-for-message-delivery-username</td>
 <td>Email account used to send messages to other accounts (username)</td>
-<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/notifier/email-account-for-message-delivery-username/description?region=us-east-1&amp;tab=Table</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/email-bridge/email-account-for-message-delivery-username/description?region=us-east-1&amp;tab=Table</td>
 </tr>
 <tr>
 <td>/automation-engine/common/papertrail/host</td>
@@ -1416,7 +1294,7 @@
 </tr>
 <tr>
 <td>/automation-engine/dev/external-secrets/iam-role-arn</td>
-<td>The ARN of the AWS IAM role necesary to manage parameter store and secret manager</td>
+<td>The ARN of the AWS IAM role necessary to manage parameter store and secret manager</td>
 <td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/external-secrets/iam-role-arn/description?region=us-east-1&amp;tab=Table</td>
 </tr>
 <tr>
@@ -1450,14 +1328,14 @@
 <td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/last-contact-report/report-recipient/description?region=us-east-1&amp;tab=Table</td>
 </tr>
 <tr>
-<td>/automation-engine/dev/notifier/monitorable-email-accounts</td>
+<td>/automation-engine/dev/email-bridge/monitorable-email-accounts</td>
 <td>Mapping of e-mail addresses and passwords whose inboxes can be read for later analysis</td>
-<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/notifier/monitorable-email-accounts/description?region=us-east-1&amp;tab=Table</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/email-bridge/monitorable-email-accounts/description?region=us-east-1&amp;tab=Table</td>
 </tr>
 <tr>
-<td>/automation-engine/dev/notifier/slack-webhook-url</td>
+<td>/automation-engine/dev/notifications-bridge/slack-webhook-url</td>
 <td>Slack webhook to send messages</td>
-<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/notifier/slack-webhook-url/description?region=us-east-1&amp;tab=Table</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/notifications-bridge/slack-webhook-url/description?region=us-east-1&amp;tab=Table</td>
 </tr>
 <tr>
 <td>/automation-engine/dev/papertrail/enabled</td>
@@ -1671,7 +1549,7 @@
 </tr>
 <tr>
 <td>/automation-engine/pro/external-secrets/iam-role-arn</td>
-<td>The ARN of the AWS IAM role necesary to manage parameter store and secret manager</td>
+<td>The ARN of the AWS IAM role necessary to manage parameter store and secret manager</td>
 <td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/external-secrets/iam-role-arn/description?region=us-east-1&amp;tab=Table</td>
 </tr>
 <tr>
@@ -1705,14 +1583,14 @@
 <td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/last-contact-report/report-recipient/description?region=us-east-1&amp;tab=Table</td>
 </tr>
 <tr>
-<td>/automation-engine/pro/notifier/monitorable-email-accounts</td>
+<td>/automation-engine/pro/email-bridge/monitorable-email-accounts</td>
 <td></td>
-<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/notifier/monitorable-email-accounts/description?region=us-east-1&amp;tab=Table</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/email-bridge/monitorable-email-accounts/description?region=us-east-1&amp;tab=Table</td>
 </tr>
 <tr>
-<td>/automation-engine/pro/notifier/slack-webhook-url</td>
+<td>/automation-engine/pro/notifications-bridge/slack-webhook-url</td>
 <td></td>
-<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/notifier/slack-webhook-url/description?region=us-east-1&amp;tab=Table</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/notifications-bridge/slack-webhook-url/description?region=us-east-1&amp;tab=Table</td>
 </tr>
 <tr>
 <td>/automation-engine/pro/papertrail/enabled</td>

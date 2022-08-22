@@ -490,132 +490,10 @@
   
   
   
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_2_7">
-          Manual procedures
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Manual procedures" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_7">
-          <span class="md-nav__icon md-icon"></span>
-          Manual procedures
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
     <li class="md-nav__item">
-      <a href="../manual_procedures/API_VENDOR_ACCESS/" class="md-nav__link">
-        Vendor access to the API
+      <a href=".." class="md-nav__link">
+        Manual processes
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION/" class="md-nav__link">
-        Switch Automation Engine region
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_2_8">
-          Manual configurations
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Manual configurations" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_8">
-          <span class="md-nav__icon md-icon"></span>
-          Manual configurations
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../manual_configurations/INIT_AUTOMATION_PROJECT/" class="md-nav__link">
-        Init Automation Engine project
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../manual_configurations/OKTA_CONFIGURATIONS/" class="md-nav__link">
-        AWS SSO Okta JWT token
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../manual_configurations/OKTA_JWT/" class="md-nav__link">
-        AWS SSO Okta JWT token
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
     </li>
   
 
@@ -739,8 +617,15 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#notifier-microservice" class="md-nav__link">
-    Notifier microservice
+  <a href="#email-bridge-microservice" class="md-nav__link">
+    Email bridge microservice
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notifications-bridge-microservice" class="md-nav__link">
+    Notifications bridge microservice
   </a>
   
 </li>
@@ -1027,7 +912,8 @@
 <li><code>cts-bridge</code></li>
 <li><code>hawkeye-bridge</code></li>
 <li><code>lit-bridge</code></li>
-<li><code>notifier</code></li>
+<li><code>email-bridge</code></li>
+<li><code>notifications-bridge</code></li>
 <li><code>t7-bridge</code></li>
 </ul>
 </li>
@@ -1103,11 +989,16 @@
 <p>When another microservice requests LIT data, it will be in charge of making response messages to the same and never of request, that is to say, it will always be a producer within a NATS topic and never a consumer.</p>
 <p>The following <a href="https://app.diagrams.net/#G1UztleVULGVS86wYXTEh7efsb2zdBWNJy">diagram</a> shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.</p>
 <p><img alt="IMAGE: lit-bridge_microservice_relationships" src="../img/system_overview/capabilities/lit-bridge_microservice_relationships.png" /></p>
-<h4 id="notifier-microservice">Notifier microservice</h4>
-<p>This microservice is in charge of sending emails, Slack notifications and SMS.</p>
+<h4 id="email-bridge-microservice">Email bridge microservice</h4>
+<p>This microservice is in charge of sending emails.</p>
 <p>It is important to point out that it is not in charge of the composition of the messages to be sent, that is to say, of their content, but only of sending them.</p>
 <p>The following <a href="https://app.diagrams.net/#G19IZI0cCp1odvYIwgMGlrGiQfKYZbedx2">diagram</a> shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.</p>
-<p><img alt="IMAGE: notifier_microservice_relationships" src="../img/system_overview/capabilities/notifier_microservice_relationships.png" /></p>
+<p><img alt="IMAGE: email_bridge_microservice_relationships" src="img/system_overview/capabilities/email_bridge_microservice_relationships.png" /></p>
+<h4 id="notifications-bridge-microservice">Notifications bridge microservice</h4>
+<p>This microservice is in charge of sending notifications to third-party systems.</p>
+<p>It is important to point out that it is not in charge of the composition of the messages to be sent, that is to say, of their content, but only of sending them.</p>
+<p>The following <a href="https://app.diagrams.net/#G19IZI0cCp1odvYIwgMGlrGiQfKYZbedx2">diagram</a> shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.</p>
+<p><img alt="IMAGE: notifications_bridge_microservice_relationships" src="img/system_overview/capabilities/notifications_bridge_microservice_relationships.png" /></p>
 <h4 id="t7-bridge-microservice">T7-bridge microservice</h4>
 <p>The function of this microservice is to embed in the notes of a ticket the prediction calculated by T7, this prediction will store information on the recommendations actions for the ticket.</p>
 <p>In order to carry out the mentioned actions, it communicates with the API of T7 to obtain the information about the prediction, as it can be seen in the following <a href="https://app.diagrams.net/#G18eBQnyAJwUxAAME2gKjxb9NCVbeCVzWt">diagram</a>.</p>
@@ -1148,14 +1039,14 @@ will be taken.</p>
 <p>The <em>last-contact-report</em> microservice communicates with the <em>velocloud-bridge</em> microservice to obtain events from an edge.</p>
 </li>
 <li>
-<p>Once the events are obtained from an edge, it communicates with the <em>notifier</em> microservice to send an email with this information.</p>
+<p>Once the events are obtained from an edge, it communicates with the <em>email-bridge</em> microservice to send an email with this information.</p>
 </li>
 </ol>
 <p>It is possible to see the relations between the mentioned services for the flow in the following <a href="https://app.diagrams.net/#G13QWoYPfjPgxZ0Mp1Nl7SDZVonzUj2tIS">diagram</a>.
 <img alt="IMAGE: last-contact-report_microservice_relationships" src="../img/system_overview/use_cases/last-contact-report_microservice_relationships.png" /></p>
 <h4 id="service-affecting-monitor-microservice">Service-affecting-monitor microservice</h4>
 <p>In this microservice are defined a series of scales and thresholds, the function of this will be to check if there is loss of packages, latencies or jitter measurements that exceed the thresholds defined.</p>
-<p>In case the thresholds are exceeded, it will communicate with the notifier service to send a notification by email and slack, by means of which it will warn of the problems detected on a specific edge.</p>
+<p>In case the thresholds are exceeded, it will communicate with the email-bridge service to send a notification by email and the notifications service to send a notification by slack, by means of which it will warn of the problems detected on a specific edge.</p>
 <p>This microservice also communicates with the bruin-bridge microservice to create tickets or add notes to an existing one, including in this information about the routers for which a problem is detected.</p>
 <p>In the following <a href="https://app.diagrams.net/#G1iwUTk1QGrLi2OKuKHpIB6K0KJ1s2W87e">diagram</a> it's possible see the relationships between this microservice and the others.</p>
 <p><img alt="IMAGE: service-affecting-monitor_microservice_relationships" src="../img/system_overview/use_cases/service-affecting-monitor_microservice_relationships.png" /></p>
