@@ -11,14 +11,10 @@ NATS_CONFIG = {
 TIMEZONE = "US/Eastern"
 
 FORTICLOUD_CONFIG = {
-    "verify_ssl": True,
-    "servers": [
-        {
-            "url": "someurl",
-            "username": "someusername",
-            "password": "somepassword",
-        }
-    ],
+    "base_url": "base_url",
+    "client_id": "client_id",
+    "username": "username",
+    "password": "password",
 }
 
 LOG_CONFIG = {
