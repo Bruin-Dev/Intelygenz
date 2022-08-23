@@ -15,14 +15,12 @@ NATS_CONFIG = {
 }
 
 
-def parse_forticloud_config():
-    credential_blocks = os.environ["FORTICLOUD_CREDENTIALS"].split(";")
-    credential_blocks_splitted = [credential_block.split("+") for credential_block in credential_blocks]
-    return [
-        {"url": cred_block[0], "username": cred_block[1], "password": cred_block[2]}
-        for cred_block in credential_blocks_splitted
-    ]
-
+FORTICLOUD_CONFIG = {
+    "base_url": os.environ["FORTICLOUD_BASE_URL"],
+    "username": os.environ["FORTICLOUD_USERNAME"],
+    "password": os.environ["FORTICLOUD_PASSWORD"],
+    "client_id": os.environ["FORTICLOUD_CLIENT_ID"],
+}
 
 TIMEZONE = os.environ["TIMEZONE"]
 
