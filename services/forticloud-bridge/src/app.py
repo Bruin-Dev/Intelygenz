@@ -3,7 +3,6 @@ import sys
 from dataclasses import asdict
 
 import redis
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from framework.http.server import Config as QuartConfig
 from framework.http.server import Server as QuartServer
 from framework.logging.formatters import Papertrail as PapertrailFormatter
@@ -63,9 +62,7 @@ class Container:
         tmp_redis_storage = RedisStorage(storage_client=redis_client)
         self._nats_client = Client(temp_payload_storage=tmp_redis_storage)
 
-        self._scheduler = AsyncIOScheduler(timezone=config.TIMEZONE)
-
-        self._forticloud_client = ForticloudClient()
+        self._forticloud_client = ForticloudClient(config)
         self._forticloud_repository = ForticloudRepository()
 
         self._server = QuartServer(QuartConfig(port=config.QUART_CONFIG["port"]))
@@ -89,15 +86,12 @@ class Container:
             bail_out()
 
     async def start(self):
+        # Setup FortiCloud HTTP session
+        await self._forticloud_client.create_session()
+
         # Setup NATS
         await self._init_nats_conn()
         await self._init_subscriptions()
-
-        # Setup FortiCloud HTTP session
-        # await self._forticloud_client.create_session()
-
-        # Setup scheduler
-        self._scheduler.start()
 
     @staticmethod
     def _start_prometheus_metrics_server():

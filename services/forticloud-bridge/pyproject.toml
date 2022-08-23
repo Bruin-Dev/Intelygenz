@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "forticloud-bridge"
 version = "1.0.0"
-description = "MetTel's Automation bridge for FortiCloud"
+description = "MetTel's Automation bridge for Forticloud"
 authors = ["Intelygenz"]
 
 [tool.poetry.dependencies]
