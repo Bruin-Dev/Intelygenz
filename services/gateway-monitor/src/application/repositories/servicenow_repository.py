@@ -1,6 +1,8 @@
 import os
 from datetime import datetime
+from typing import List
 
+from application import Troubles
 from pytz import timezone
 from shortuuid import uuid
 
@@ -14,27 +16,36 @@ class ServiceNowRepository:
 
     @staticmethod
     def _build_incident_summary(gateway: dict) -> str:
-        return f"{gateway['name']}: Medium: VCG Tunnel Count Threshold Violation"
+        if gateway["trouble"] == Troubles.TUNNEL_COUNT:
+            return f"{gateway['name']}: VCG Tunnel Count Threshold Violation"
 
     def _build_incident_note(self, gateway: dict) -> str:
         current_datetime_tz_aware = datetime.now(timezone(self._config.TIMEZONE))
-        lookup_interval = self._config.MONITOR_CONFIG["gateway_metrics_lookup_interval"]
-        tunnel_count_threshold = self._config.MONITOR_CONFIG["thresholds"]["tunnel_count"]
-        tunnel_count = gateway["metrics"]["tunnelCount"]
+        trouble_note_lines = self._get_trouble_note_lines(gateway)
 
         note_lines = [
             f"VCO: {gateway['host']}",
             f"VCG: {gateway['name']}",
             "",
-            f"Condition: Over {tunnel_count_threshold}% reduction in tunnel count compared to average",
-            f"Minimum Tunnel Count: {tunnel_count['min']}",
-            f"Average Tunnel Count: {tunnel_count['average']}",
-            f"Scan Interval: {lookup_interval // 60} minutes",
+            *trouble_note_lines,
             "",
             f"TimeStamp: {current_datetime_tz_aware}",
         ]
 
         return os.linesep.join(note_lines)
+
+    def _get_trouble_note_lines(self, gateway: dict) -> List[str]:
+        if gateway["trouble"] == Troubles.TUNNEL_COUNT:
+            lookup_interval = self._config.MONITOR_CONFIG["gateway_metrics_lookup_interval"]
+            tunnel_count_threshold = self._config.MONITOR_CONFIG["thresholds"][Troubles.TUNNEL_COUNT]
+            tunnel_count = gateway["metrics"]["tunnelCount"]
+
+            return [
+                f"Condition: Over {tunnel_count_threshold}% reduction in tunnel count compared to average",
+                f"Minimum Tunnel Count: {tunnel_count['min']}",
+                f"Average Tunnel Count: {tunnel_count['average']}",
+                f"Scan Interval: {lookup_interval // 60} minutes",
+            ]
 
     @staticmethod
     def _build_incident_link(gateway: dict) -> str:
@@ -56,7 +67,8 @@ class ServiceNowRepository:
 
         try:
             self._logger.info(
-                f"Reporting incident to ServiceNow for host {gateway['host']} and gateway {gateway['name']}..."
+                f"Reporting {gateway['trouble'].value} incident to ServiceNow "
+                f"for host {gateway['host']} and gateway {gateway['name']}..."
             )
             response = await self._event_bus.rpc_request("servicenow.incident.report.request", request, timeout=30)
         except Exception as e:
@@ -68,12 +80,14 @@ class ServiceNowRepository:
 
             if response_status in range(200, 300):
                 self._logger.info(
-                    f"Reported incident to ServiceNow for host {gateway['host']} and gateway {gateway['name']}!"
+                    f"Reported {gateway['trouble'].value} incident to ServiceNow "
+                    f"for host {gateway['host']} and gateway {gateway['name']}!"
                 )
             else:
                 environment = self._config.ENVIRONMENT_NAME.upper()
                 err_msg = (
-                    f"Error while reporting incident to ServiceNow in {environment} environment: "
+                    f"Failed to report {gateway['trouble'].value} incident to ServiceNow "
+                    f"for host {gateway['host']} and gateway {gateway['name']} in {environment} environment: "
                     f"Error {response_status} - {response_body}"
                 )
 

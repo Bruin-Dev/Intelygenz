@@ -3,6 +3,8 @@ import logging
 import os
 import sys
 
+from application import Troubles
+
 ENVIRONMENT_NAME = os.environ["ENVIRONMENT_NAME"]
 CURRENT_ENVIRONMENT = os.environ["CURRENT_ENVIRONMENT"]
 
@@ -44,6 +46,6 @@ MONITOR_CONFIG = {
     "monitored_velocloud_hosts": json.loads(os.environ["MONITORED_VELOCLOUD_HOSTS"]),
     "gateway_metrics_lookup_interval": int(os.environ["GATEWAY_METRICS_LOOKUP_INTERVAL"]),
     "thresholds": {
-        "tunnel_count": int(os.environ["TUNNEL_COUNT_THRESHOLD"]),
+        Troubles.TUNNEL_COUNT: int(os.environ["TUNNEL_COUNT_THRESHOLD"]),
     },
 }

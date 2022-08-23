@@ -2,6 +2,7 @@ import time
 from datetime import datetime
 from typing import List
 
+from application import Troubles
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from pytz import timezone
@@ -66,8 +67,8 @@ class Monitor:
 
     async def _process_host(self, host: str):
         self._logger.info(f"Processing Velocloud host {host}...")
-        network_gateway_list_response = await self._velocloud_repository.get_network_gateway_list(host)
 
+        network_gateway_list_response = await self._velocloud_repository.get_network_gateway_list(host)
         if network_gateway_list_response["status"] not in range(200, 300):
             return
 
@@ -78,9 +79,7 @@ class Monitor:
             except Exception as e:
                 self._logger.exception(e)
 
-        gateways = self._filter_gateways_with_metrics(gateways)
         unhealthy_gateways = self._get_unhealthy_gateways(gateways)
-
         if unhealthy_gateways:
             self._logger.info(f"{len(unhealthy_gateways)} unhealthy gateway(s) found for host {host}")
             for gateway in unhealthy_gateways:
@@ -105,11 +104,6 @@ class Monitor:
         report_incident_response = await self._servicenow_repository.report_incident(gateway)
 
         if report_incident_response["status"] not in range(200, 300):
-            message = (
-                f"Failed to report incident to ServiceNow for host {gateway['host']} and gateway {gateway['name']}"
-            )
-            self._logger.error(message)
-            await self._notifications_repository.send_slack_message(message)
             return
 
         result = report_incident_response["body"]["result"]
@@ -119,7 +113,7 @@ class Monitor:
                 f"A new incident with ID {result['number']} was created in ServiceNow "
                 f"for host {gateway['host']} and gateway {gateway['name']}"
             )
-            self._metrics_repository.increment_tasks_created(host=gateway["host"])
+            self._metrics_repository.increment_tasks_created(host=gateway["host"], trouble=gateway["trouble"].value)
             self._logger.info(message)
             await self._notifications_repository.send_slack_message(message)
         elif result["state"] == "ignored":
@@ -134,20 +128,23 @@ class Monitor:
                 f"A resolved incident with ID {result['number']} was reopened in ServiceNow "
                 f"for host {gateway['host']} and gateway {gateway['name']}"
             )
-            self._metrics_repository.increment_tasks_reopened(host=gateway["host"])
+            self._metrics_repository.increment_tasks_reopened(host=gateway["host"], trouble=gateway["trouble"].value)
             self._logger.info(message)
             await self._notifications_repository.send_slack_message(message)
 
-    def _filter_gateways_with_metrics(self, gateways: List[dict]) -> List[dict]:
-        filtered_gateways = []
+    def _get_unhealthy_gateways(self, gateways: List[dict]) -> List[dict]:
+        unhealthy_gateways = []
 
         for gateway in gateways:
-            if self._has_metrics(gateway):
-                filtered_gateways.append(gateway)
-            else:
+            if not self._has_metrics(gateway):
                 self._logger.warning(f"Gateway {gateway['name']} from host {gateway['host']} has missing metrics")
+                continue
 
-        return filtered_gateways
+            if not self._is_tunnel_count_within_threshold(gateway):
+                gateway["trouble"] = Troubles.TUNNEL_COUNT
+                unhealthy_gateways.append(gateway)
+
+        return unhealthy_gateways
 
     @staticmethod
     def _has_metrics(gateway: dict) -> bool:
@@ -162,10 +159,7 @@ class Monitor:
 
         return True
 
-    def _get_unhealthy_gateways(self, gateways: List[dict]) -> List[dict]:
-        return [gw for gw in gateways if not self._is_tunnel_count_within_threshold(gw)]
-
     def _is_tunnel_count_within_threshold(self, gateway: dict) -> bool:
         tunnel_count = gateway["metrics"]["tunnelCount"]
         percentage_decrease = (1 - (tunnel_count["min"] / tunnel_count["average"])) * 100
-        return percentage_decrease < self._config.MONITOR_CONFIG["thresholds"]["tunnel_count"]
+        return percentage_decrease < self._config.MONITOR_CONFIG["thresholds"][Troubles.TUNNEL_COUNT]

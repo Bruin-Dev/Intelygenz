@@ -2,6 +2,8 @@
 import logging
 import sys
 
+from application import Troubles
+
 ENVIRONMENT_NAME = "dev"
 CURRENT_ENVIRONMENT = "dev"
 
@@ -35,6 +37,6 @@ MONITOR_CONFIG = {
     "monitored_velocloud_hosts": ["mettel.velocloud.net"],
     "gateway_metrics_lookup_interval": 3600,
     "thresholds": {
-        "tunnel_count": 20,
+        Troubles.TUNNEL_COUNT: 20,
     },
 }

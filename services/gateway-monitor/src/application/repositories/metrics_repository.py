@@ -10,7 +10,7 @@ class MetricsRepository:
     _tasks_reopened = Counter("tasks_reopened", "Tasks reopened", COMMON_LABELS + REOPEN_LABELS)
 
     def __init__(self):
-        self._STATIC_LABELS = {"feature": "Gateway Monitor", "system": "VeloCloud", "trouble": "Tunnel Count"}
+        self._STATIC_LABELS = {"feature": "Gateway Monitor", "system": "VeloCloud"}
 
     def increment_tasks_created(self, **labels):
         labels = {**labels, **self._STATIC_LABELS}

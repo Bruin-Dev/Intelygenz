@@ -143,13 +143,13 @@ class TestMonitor:
         assert monitor._servicenow_repository.report_incident.call_count == len(responses)
         assert monitor._notifications_repository.send_slack_message.call_count == len(responses)
 
-    def filter_gateways_with_metrics_test(self, monitor, make_gateway_with_metrics):
+    def get_gateways_with_metrics_test(self, monitor, make_gateway_with_metrics):
         gateway_1 = make_gateway_with_metrics(id=1, tunnel_count={"average": 100, "min": 100})
         gateway_2 = make_gateway_with_metrics(id=2)
         gateways = [gateway_1, gateway_2]
         expected_result = [gateway_1]
 
-        result = monitor._filter_gateways_with_metrics(gateways)
+        result = monitor._get_gateways_with_metrics(gateways)
         assert result == expected_result
 
     def has_metrics_test(self, monitor, make_gateway_with_metrics):
