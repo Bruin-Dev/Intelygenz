@@ -252,7 +252,7 @@ class RepairTicketsMonitor:
                 return
 
             auto_reply_whitelist = self._config.MONITOR_CONFIG["auto_reply_whitelist"]
-            auto_reply_allowed = False
+            auto_reply_allowed = True
             if len(auto_reply_whitelist) > 0:
                 auto_reply_allowed = any(
                     recipient_email.lower() in auto_reply_whitelist for recipient_email in email.recipient_addresses
