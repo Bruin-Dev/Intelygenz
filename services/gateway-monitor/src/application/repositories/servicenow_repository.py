@@ -16,6 +16,9 @@ class ServiceNowRepository:
 
     @staticmethod
     def _build_incident_summary(gateway: dict) -> str:
+        if gateway["trouble"] == Troubles.OFFLINE:
+            return f"{gateway['name']}: VCG Offline"
+
         if gateway["trouble"] == Troubles.TUNNEL_COUNT:
             return f"{gateway['name']}: VCG Tunnel Count Threshold Violation"
 
@@ -35,6 +38,9 @@ class ServiceNowRepository:
         return os.linesep.join(note_lines)
 
     def _get_trouble_note_lines(self, gateway: dict) -> List[str]:
+        if gateway["trouble"] == Troubles.OFFLINE:
+            return ["Condition: Gateway is offline"]
+
         if gateway["trouble"] == Troubles.TUNNEL_COUNT:
             lookup_interval = self._config.MONITOR_CONFIG["gateway_metrics_lookup_interval"]
             tunnel_count_threshold = self._config.MONITOR_CONFIG["thresholds"][Troubles.TUNNEL_COUNT]

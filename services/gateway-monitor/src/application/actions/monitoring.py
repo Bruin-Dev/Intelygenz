@@ -136,6 +136,10 @@ class Monitor:
         unhealthy_gateways = []
 
         for gateway in gateways:
+            if self._is_offline(gateway):
+                gateway["trouble"] = Troubles.OFFLINE
+                unhealthy_gateways.append(gateway)
+
             if not self._has_metrics(gateway):
                 self._logger.warning(f"Gateway {gateway['name']} from host {gateway['host']} has missing metrics")
                 continue
@@ -145,6 +149,10 @@ class Monitor:
                 unhealthy_gateways.append(gateway)
 
         return unhealthy_gateways
+
+    @staticmethod
+    def _is_offline(gateway: dict) -> bool:
+        return gateway["status"] == "OFFLINE"
 
     @staticmethod
     def _has_metrics(gateway: dict) -> bool:

@@ -184,6 +184,7 @@ class VelocloudRepository:
                     "host": host,
                     "id": gateway["id"],
                     "name": gateway["name"],
+                    "status": gateway["gatewayState"],
                 }
             )
         response["body"] = gateways
