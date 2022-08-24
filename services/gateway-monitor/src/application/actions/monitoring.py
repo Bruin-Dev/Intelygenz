@@ -134,19 +134,22 @@ class Monitor:
 
     def _get_unhealthy_gateways(self, gateways: List[dict]) -> List[dict]:
         unhealthy_gateways = []
+        troubles_enabled = self._config.MONITOR_CONFIG["troubles_enabled"]
 
         for gateway in gateways:
-            if self._is_offline(gateway):
-                gateway["trouble"] = Troubles.OFFLINE
-                unhealthy_gateways.append(gateway)
+            if troubles_enabled[Troubles.OFFLINE]:
+                if self._is_offline(gateway):
+                    gateway["trouble"] = Troubles.OFFLINE
+                    unhealthy_gateways.append(gateway)
 
             if not self._has_metrics(gateway):
                 self._logger.warning(f"Gateway {gateway['name']} from host {gateway['host']} has missing metrics")
                 continue
 
-            if not self._is_tunnel_count_within_threshold(gateway):
-                gateway["trouble"] = Troubles.TUNNEL_COUNT
-                unhealthy_gateways.append(gateway)
+            if troubles_enabled[Troubles.TUNNEL_COUNT]:
+                if not self._is_tunnel_count_within_threshold(gateway):
+                    gateway["trouble"] = Troubles.TUNNEL_COUNT
+                    unhealthy_gateways.append(gateway)
 
         return unhealthy_gateways
 

@@ -48,4 +48,8 @@ MONITOR_CONFIG = {
     "thresholds": {
         Troubles.TUNNEL_COUNT: int(os.environ["TUNNEL_COUNT_THRESHOLD"]),
     },
+    "troubles_enabled": {
+        Troubles.OFFLINE: os.environ["OFFLINE_TROUBLE_ENABLED"] == "true",
+        Troubles.TUNNEL_COUNT: os.environ["TUNNEL_COUNT_TROUBLE_ENABLED"] == "true",
+    },
 }

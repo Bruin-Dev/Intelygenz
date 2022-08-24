@@ -252,6 +252,8 @@ TNBA_MONITOR__MIN_REQUIRED_CONFIDENCE_FOR_REQUEST_AND_REPAIR_COMPLETED_PREDICTIO
 GATEWAY_MONITOR__MONITORED_VELOCLOUD_HOSTS = json.dumps(json.loads(parameters["dev"]["gateway-monitor"]["monitored-velocloud-hosts"]))
 GATEWAY_MONITOR__MONITORING_JOB_INTERVAL = parameters["common"]["gateway-monitor"]["monitoring-job-interval"]
 GATEWAY_MONITOR__GATEWAY_METRICS_LOOKUP_INTERVAL = parameters["common"]["gateway-monitor"]["gateway-metrics-lookup-interval"]
+GATEWAY_MONITOR__OFFLINE_TROUBLE_ENABLED = parameters["common"]["gateway-monitor"]["offline-trouble-enabled"]
+GATEWAY_MONITOR__TUNNEL_COUNT_TROUBLE_ENABLED = parameters["common"]["gateway-monitor"]["tunnel-count-trouble-enabled"]
 GATEWAY_MONITOR__TUNNEL_COUNT_THRESHOLD = parameters["common"]["gateway-monitor"]["tunnel-count-threshold"]
 
 # Lumin Billing Report variables
@@ -700,6 +702,8 @@ env_dict = {
         f"MONITORED_VELOCLOUD_HOSTS={GATEWAY_MONITOR__MONITORED_VELOCLOUD_HOSTS}",
         f"MONITORING_JOB_INTERVAL={GATEWAY_MONITOR__MONITORING_JOB_INTERVAL}",
         f"GATEWAY_METRICS_LOOKUP_INTERVAL={GATEWAY_MONITOR__GATEWAY_METRICS_LOOKUP_INTERVAL}",
+        f"OFFLINE_TROUBLE_ENABLED={GATEWAY_MONITOR__OFFLINE_TROUBLE_ENABLED}",
+        f"TUNNEL_COUNT_TROUBLE_ENABLED={GATEWAY_MONITOR__TUNNEL_COUNT_TROUBLE_ENABLED}",
         f"TUNNEL_COUNT_THRESHOLD={GATEWAY_MONITOR__TUNNEL_COUNT_THRESHOLD}",
     ],
     os.path.join("services", "links-metrics-collector", "src", "config", "env"): [

@@ -39,4 +39,8 @@ MONITOR_CONFIG = {
     "thresholds": {
         Troubles.TUNNEL_COUNT: 20,
     },
+    "troubles_enabled": {
+        Troubles.OFFLINE: True,
+        Troubles.TUNNEL_COUNT: True,
+    },
 }

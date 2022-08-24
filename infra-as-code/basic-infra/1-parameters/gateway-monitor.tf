@@ -57,10 +57,50 @@ resource "aws_ssm_parameter" "parameter-gateway-monitor-gateway-metrics-lookup-i
   })
 }
 
+resource "aws_ssm_parameter" "parameter-gateway-monitor-offline-trouble-enabled" {
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  name        = "/automation-engine/common/gateway-monitor/offline-trouble-enabled"
+  description = "Enable or disable the offline trouble check"
+  type        = "SecureString"
+  value       = "-"  # to edit go to parameter store dashboard.
+  key_id      =  aws_kms_alias.kms_key.name
+
+  lifecycle {
+    ignore_changes = [
+      value,
+    ]
+  }
+
+  tags = merge(var.common_info, {
+    Name = "OFFLINE_TROUBLE_ENABLED"
+    note = "can be updated from the parameter store dashboard"
+  })
+}
+
+resource "aws_ssm_parameter" "parameter-gateway-monitor-tunnel-count-trouble-enabled" {
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  name        = "/automation-engine/common/gateway-monitor/tunnel-count-trouble-enabled"
+  description = "Enable or disable the tunnel count trouble check"
+  type        = "SecureString"
+  value       = "-"  # to edit go to parameter store dashboard.
+  key_id      =  aws_kms_alias.kms_key.name
+
+  lifecycle {
+    ignore_changes = [
+      value,
+    ]
+  }
+
+  tags = merge(var.common_info, {
+    Name = "TUNNEL_COUNT_TROUBLE_ENABLED"
+    note = "can be updated from the parameter store dashboard"
+  })
+}
+
 resource "aws_ssm_parameter" "parameter-gateway-monitor-tunnel-count-threshold" {
   count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/gateway-monitor/tunnel-count-threshold"
-  description = "Lookup interval for gateway status metrics"
+  description = "Threshold for tunnel count troubles"
   type        = "SecureString"
   value       = "-"  # to edit go to parameter store dashboard.
   key_id      =  aws_kms_alias.kms_key.name
