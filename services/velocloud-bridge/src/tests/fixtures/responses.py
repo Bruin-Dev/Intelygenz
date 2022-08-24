@@ -155,6 +155,7 @@ def make_network_gateways_body():
                 "host": host,
                 "id": gateway_id,
                 "name": f"vcg-test-{gateway_id}",
+                "gatewayState": "CONNECTED",
             }
             body.append(gateway)
 

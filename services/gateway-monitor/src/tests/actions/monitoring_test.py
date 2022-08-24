@@ -3,6 +3,7 @@ from http import HTTPStatus
 from unittest.mock import Mock, patch
 
 import pytest
+from application import Troubles
 from application.actions import monitoring as monitoring_module
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
@@ -120,7 +121,9 @@ class TestMonitor:
     async def report_servicenow_incident_test(
         self, monitor, make_gateway_with_metrics, make_rpc_response, make_report_incident_response
     ):
-        gateway = make_gateway_with_metrics(id=1, tunnel_count={"average": 100, "min": 50})
+        gateway = make_gateway_with_metrics(
+            id=1, tunnel_count={"average": 100, "min": 50}, trouble=Troubles.TUNNEL_COUNT
+        )
 
         body_1 = make_report_incident_response(state="inserted")
         body_2 = make_report_incident_response(state="ignored")
@@ -140,17 +143,28 @@ class TestMonitor:
         await monitor._report_servicenow_incident(gateway)
         await monitor._report_servicenow_incident(gateway)
 
-        assert monitor._servicenow_repository.report_incident.call_count == len(responses)
-        assert monitor._notifications_repository.send_slack_message.call_count == len(responses)
+        assert monitor._servicenow_repository.report_incident.call_count == 4
+        assert monitor._logger.info.call_count == 3
 
-    def get_gateways_with_metrics_test(self, monitor, make_gateway_with_metrics):
-        gateway_1 = make_gateway_with_metrics(id=1, tunnel_count={"average": 100, "min": 100})
-        gateway_2 = make_gateway_with_metrics(id=2)
-        gateways = [gateway_1, gateway_2]
-        expected_result = [gateway_1]
+    def get_unhealthy_gateways_test(self, monitor, make_gateway_with_metrics):
+        gateway_1 = make_gateway_with_metrics(id=1)
+        gateway_2 = make_gateway_with_metrics(id=2, status="OFFLINE")
+        gateway_3 = make_gateway_with_metrics(id=3, tunnel_count={"average": 100, "min": 100})
+        gateway_4 = make_gateway_with_metrics(id=4, tunnel_count={"average": 100, "min": 50})
+        gateways = [gateway_1, gateway_2, gateway_3, gateway_4]
+        expected_result = [gateway_2, gateway_4]
 
-        result = monitor._get_gateways_with_metrics(gateways)
+        result = monitor._get_unhealthy_gateways(gateways)
         assert result == expected_result
+
+    def is_offline_test(self, monitor, make_gateway):
+        gateway = make_gateway(id=1)
+        result = monitor._is_offline(gateway)
+        assert result is False
+
+        gateway = make_gateway(id=2, status="OFFLINE")
+        result = monitor._is_offline(gateway)
+        assert result is True
 
     def has_metrics_test(self, monitor, make_gateway_with_metrics):
         gateway = make_gateway_with_metrics(id=1, tunnel_count={"average": 100, "min": 100})
@@ -168,15 +182,6 @@ class TestMonitor:
         gateway = make_gateway_with_metrics(id=4)
         result = monitor._has_metrics(gateway)
         assert result is False
-
-    def get_unhealthy_gateways_test(self, monitor, make_gateway_with_metrics):
-        gateway_1 = make_gateway_with_metrics(id=1, tunnel_count={"average": 100, "min": 100})
-        gateway_2 = make_gateway_with_metrics(id=2, tunnel_count={"average": 100, "min": 50})
-        gateways = [gateway_1, gateway_2]
-        expected_result = [gateway_2]
-
-        result = monitor._get_unhealthy_gateways(gateways)
-        assert result == expected_result
 
     def is_tunnel_count_within_threshold_test(self, monitor, make_gateway_with_metrics):
         gateway = make_gateway_with_metrics(id=1, tunnel_count={"average": 100, "min": 100})

@@ -3,6 +3,7 @@ from http import HTTPStatus
 from unittest.mock import patch
 
 import pytest
+from application import Troubles
 from application.repositories import servicenow_repository as servicenow_repository_module
 from asynctest import CoroutineMock, Mock
 from config import testconfig
@@ -21,14 +22,20 @@ class TestServiceNowRepository:
         assert servicenow_repository._config is testconfig
 
     def build_incident_summary_test(self, servicenow_repository, make_gateway):
-        gateway = make_gateway(id=1)
+        gateway = make_gateway(id=1, trouble=Troubles.OFFLINE)
         result = servicenow_repository._build_incident_summary(gateway)
-        assert result == "vcg-test-1: Medium: VCG Tunnel Count Threshold Violation"
+        assert result == "vcg-test-1: VCG Offline"
 
-    def build_incident_note_test(self, servicenow_repository, make_gateway_with_metrics):
-        gateway = make_gateway_with_metrics(id=1, tunnel_count={"average": 100, "min": 50})
+        gateway = make_gateway(id=2, trouble=Troubles.TUNNEL_COUNT)
+        result = servicenow_repository._build_incident_summary(gateway)
+        assert result == "vcg-test-2: VCG Tunnel Count Threshold Violation"
+
+    def build_incident_note_test(self, servicenow_repository, make_gateway):
+        gateway = make_gateway(id=1)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=CURRENT_DATETIME)
+
+        servicenow_repository._get_trouble_note_lines.return_value = ["Condition: Test"]
 
         with patch.object(servicenow_repository_module, "datetime", new=datetime_mock):
             note = servicenow_repository._build_incident_note(gateway)
@@ -38,14 +45,29 @@ class TestServiceNowRepository:
                 f"VCO: mettel.velocloud.net",
                 f"VCG: vcg-test-1",
                 "",
-                f"Condition: Over 20% reduction in tunnel count compared to average",
-                f"Minimum Tunnel Count: 50",
-                f"Average Tunnel Count: 100",
-                f"Scan Interval: 60 minutes",
+                f"Condition: Test",
                 "",
                 f"TimeStamp: {CURRENT_DATETIME}",
             ]
         )
+
+    def get_trouble_note_lines_test(self, servicenow_repository, make_gateway_with_metrics):
+        gateway = make_gateway_with_metrics(id=1, trouble=Troubles.OFFLINE)
+        result = servicenow_repository._get_trouble_note_lines(gateway)
+        assert result == [
+            f"Condition: Gateway is offline",
+        ]
+
+        gateway = make_gateway_with_metrics(
+            id=2, tunnel_count={"average": 100, "min": 50}, trouble=Troubles.TUNNEL_COUNT
+        )
+        result = servicenow_repository._get_trouble_note_lines(gateway)
+        assert result == [
+            f"Condition: Over 20% reduction in tunnel count compared to average",
+            f"Minimum Tunnel Count: 50",
+            f"Average Tunnel Count: 100",
+            f"Scan Interval: 60 minutes",
+        ]
 
     def build_incident_link_test(self, servicenow_repository, make_gateway):
         gateway = make_gateway(id=1)
@@ -60,7 +82,11 @@ class TestServiceNowRepository:
         make_rpc_request,
         make_rpc_response,
     ):
-        gateway = make_gateway_with_metrics(id=1, tunnel_count={"average": 100, "min": 50})
+        gateway = make_gateway_with_metrics(
+            id=1,
+            tunnel_count={"average": 100, "min": 50},
+            trouble=Troubles.TUNNEL_COUNT,
+        )
         summary = "Test summary"
         note = "Test note"
         link = "https://mettel.velocloud.net/#!/operator/admin/gateways/1/monitor/"
