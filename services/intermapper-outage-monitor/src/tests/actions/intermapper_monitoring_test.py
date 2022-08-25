@@ -21,7 +21,6 @@ class TestInterMapperMonitor:
     def instance_test(
         self,
         intermapper_monitor,
-        logger,
         scheduler,
         utils_repository,
         metrics_repository,
@@ -30,7 +29,6 @@ class TestInterMapperMonitor:
         bruin_repository,
         dri_repository,
     ):
-        assert intermapper_monitor._logger == logger
         assert intermapper_monitor._scheduler == scheduler
         assert intermapper_monitor._config == testconfig
         assert intermapper_monitor._utils_repository == utils_repository
@@ -42,8 +40,6 @@ class TestInterMapperMonitor:
 
     @pytest.mark.asyncio
     async def start_intermapper_outage_monitoring_with_no_exec_on_start_test(self):
-        logger = Mock()
-
         scheduler = Mock()
         scheduler.add_job = Mock()
 
@@ -57,7 +53,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -81,8 +76,6 @@ class TestInterMapperMonitor:
 
     @pytest.mark.asyncio
     async def start_intermapper_outage_monitoring_with_exec_on_start_test(self):
-        logger = Mock()
-
         scheduler = Mock()
         scheduler.add_job = Mock()
 
@@ -96,7 +89,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -127,8 +119,6 @@ class TestInterMapperMonitor:
     async def start_intermapper_outage_monitoring_with_job_id_already_executing_test(self):
         job_id = "some-duplicated-id"
         exception_instance = ConflictingIdError(job_id)
-
-        logger = Mock()
         scheduler = Mock()
         scheduler.add_job = Mock(side_effect=exception_instance)
 
@@ -142,7 +132,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -185,8 +174,6 @@ class TestInterMapperMonitor:
             "body": emails,
             "status": 200,
         }
-
-        logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
         config = testconfig
@@ -200,7 +187,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -239,8 +225,6 @@ class TestInterMapperMonitor:
             circuit_id_1: [email_1, email_2],
             circuit_id_2: [email_3],
         }
-
-        logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
         utils_repository = Mock()
@@ -251,7 +235,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -282,8 +265,6 @@ class TestInterMapperMonitor:
             f"Name: OReilly-HotSpringsAR({circuit_id})-Site803",
         }
         emails = [email_1, email_2]
-
-        logger = Mock()
         scheduler = Mock()
         utils_repository = Mock()
         metrics_repository = Mock()
@@ -305,7 +286,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -342,8 +322,6 @@ class TestInterMapperMonitor:
             f"Name: OReilly-HotSpringsAR({circuit_id})-Site803",
         }
         emails = [email_1, email_2]
-
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
 
@@ -359,7 +337,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -396,8 +373,6 @@ class TestInterMapperMonitor:
             f"Name: OReilly-HotSpringsAR({circuit_id})-Site803",
         }
         emails = [email_1, email_2]
-
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
 
@@ -418,7 +393,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -450,8 +424,6 @@ class TestInterMapperMonitor:
             f"Name: OReilly-HotSpringsAR({circuit_id})-Site803",
         }
         emails = [email_1, email_2]
-
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
 
@@ -472,7 +444,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -505,8 +476,6 @@ class TestInterMapperMonitor:
             "subject": "",
             "body": "Event: Down",
         }
-
-        logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
         config = testconfig
@@ -520,7 +489,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -534,7 +502,6 @@ class TestInterMapperMonitor:
         with config_mock:
             await intermapper_monitor._process_email(email, circuit_id, client_id)
 
-        intermapper_monitor._logger.error.assert_called_once()
         intermapper_monitor._email_repository.mark_email_as_read.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -553,8 +520,6 @@ class TestInterMapperMonitor:
         }
 
         response = {"body": None, "status": 204}
-
-        logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
         config = testconfig
@@ -568,7 +533,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -615,8 +579,6 @@ class TestInterMapperMonitor:
         }
 
         response = {"body": None, "status": 204}
-
-        logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
         config = testconfig
@@ -630,7 +592,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -667,8 +628,6 @@ class TestInterMapperMonitor:
         }
 
         response = {"body": None, "status": 204}
-
-        logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
         config = testconfig
@@ -682,7 +641,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -714,8 +672,6 @@ class TestInterMapperMonitor:
         }
 
         response = {"body": None, "status": 204}
-
-        logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
         config = testconfig
@@ -729,7 +685,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -760,8 +715,6 @@ class TestInterMapperMonitor:
             "subject": "",
             "body": "01/19 19:35:31: Message from InterMapper 6.1.5\nEvent: Up",
         }
-
-        logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
         config = testconfig
@@ -775,7 +728,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -793,7 +745,6 @@ class TestInterMapperMonitor:
         intermapper_monitor._email_repository.mark_email_as_read.assert_not_awaited()
 
     def parse_email_body_test(self):
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         utils_repository = Mock()
@@ -833,7 +784,6 @@ class TestInterMapperMonitor:
         }
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -848,7 +798,6 @@ class TestInterMapperMonitor:
         assert email_body == expected_dict
 
     def parse_email_body_no_condition_test(self):
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         utils_repository = Mock()
@@ -888,7 +837,6 @@ class TestInterMapperMonitor:
         }
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -903,7 +851,6 @@ class TestInterMapperMonitor:
         assert email_body == expected_dict
 
     def parse_email_body_missing_section_test(self):
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         utils_repository = Mock()
@@ -941,7 +888,6 @@ class TestInterMapperMonitor:
             "up_time": "209 days, 10 hours, 44 minutes, 16 seconds",
         }
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -956,7 +902,6 @@ class TestInterMapperMonitor:
         assert email_body == expected_dict
 
     def extract_value_from_field_same_ending_and_starting_char_test(self):
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         utils_repository = Mock()
@@ -970,7 +915,6 @@ class TestInterMapperMonitor:
         client_id_str = f"O Reilly Auto Parts - South East |{expected_client_id}| Platinum Monitoring"
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -984,7 +928,6 @@ class TestInterMapperMonitor:
         assert client_id == str(expected_client_id)
 
     def extract_value_from_field_different_ending_and_starting_char_test(self):
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         utils_repository = Mock()
@@ -998,7 +941,6 @@ class TestInterMapperMonitor:
         client_id_str = f"O Reilly Auto Parts - South East [{expected_client_id}] Platinum Monitoring"
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -1012,7 +954,6 @@ class TestInterMapperMonitor:
         assert client_id == str(expected_client_id)
 
     def extract_value_from_field_missing_ending_and_starting_char_test(self):
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         utils_repository = Mock()
@@ -1026,7 +967,6 @@ class TestInterMapperMonitor:
         client_id_str = f"O Reilly Auto Parts - South East [{expected_client_id}] Platinum Monitoring"
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -1124,8 +1064,6 @@ class TestInterMapperMonitor:
         )
 
         post_ticket_response = {"body": "success", "status": 200}
-
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
 
@@ -1143,7 +1081,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -1185,8 +1122,6 @@ class TestInterMapperMonitor:
         circuit_id = 3214
         ticket_id = 321
         outage_ticket_response = {"body": ticket_id, "status": 400}
-
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
 
@@ -1204,7 +1139,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -1252,8 +1186,6 @@ class TestInterMapperMonitor:
         )
 
         post_ticket_response = {"body": "failed", "status": 400}
-
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
 
@@ -1271,7 +1203,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -1326,8 +1257,6 @@ class TestInterMapperMonitor:
         )
 
         post_ticket_response = {"body": "failed", "status": 400}
-
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
 
@@ -1345,7 +1274,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -1543,8 +1471,6 @@ class TestInterMapperMonitor:
             "body": [],
             "status": 200,
         }
-
-        logger = Mock()
         scheduler = Mock()
         utils_repository = Mock()
         metrics_repository = Mock()
@@ -1564,7 +1490,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -1614,8 +1539,6 @@ class TestInterMapperMonitor:
             "body": "Failed RPC",
             "status": 400,
         }
-
-        logger = Mock()
         scheduler = Mock()
         utils_repository = Mock()
         metrics_repository = Mock()
@@ -1635,7 +1558,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -1698,8 +1620,6 @@ class TestInterMapperMonitor:
         }
 
         append_intermapper_up_response = {"body": "KO", "status": 400}
-
-        logger = Mock()
         scheduler = Mock()
         utils_repository = Mock()
         metrics_repository = Mock()
@@ -1720,7 +1640,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -1791,8 +1710,6 @@ class TestInterMapperMonitor:
         }
 
         append_intermapper_up_response = {"body": "OK", "status": 200}
-
-        logger = Mock()
         scheduler = Mock()
         utils_repository = Mock()
         metrics_repository = Mock()
@@ -1813,7 +1730,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -1885,8 +1801,6 @@ class TestInterMapperMonitor:
         }
 
         append_intermapper_up_response = {"body": "OK", "status": 200}
-
-        logger = Mock()
         scheduler = Mock()
         utils_repository = Mock()
         metrics_repository = Mock()
@@ -1907,7 +1821,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -1974,8 +1887,6 @@ class TestInterMapperMonitor:
         }
 
         append_intermapper_up_response = {"body": "OK", "status": 200}
-
-        logger = Mock()
         scheduler = Mock()
         utils_repository = Mock()
         metrics_repository = Mock()
@@ -1996,7 +1907,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -2068,8 +1978,6 @@ class TestInterMapperMonitor:
         }
 
         append_intermapper_up_response = {"body": "OK", "status": 200}
-
-        logger = Mock()
         scheduler = Mock()
         utils_repository = Mock()
         metrics_repository = Mock()
@@ -2090,7 +1998,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -2223,8 +2130,6 @@ class TestInterMapperMonitor:
         }
 
         append_intermapper_up_response = {"body": "OK", "status": 200}
-
-        logger = Mock()
         scheduler = Mock()
         utils_repository = Mock()
         metrics_repository = Mock()
@@ -2245,7 +2150,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -2379,8 +2283,6 @@ class TestInterMapperMonitor:
         }
 
         append_intermapper_up_response = {"body": "OK", "status": 200}
-
-        logger = Mock()
         scheduler = Mock()
         utils_repository = Mock()
         metrics_repository = Mock()
@@ -2401,7 +2303,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -2603,8 +2504,6 @@ class TestInterMapperMonitor:
 
         attribute_serial = "705286"
         attribute_serial_response = {"body": attribute_serial, "status": 200}
-
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         utils_repository = Mock()
@@ -2619,7 +2518,6 @@ class TestInterMapperMonitor:
         dri_repository.get_dri_parameters = AsyncMock(return_value=dri_parameters_response)
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -2641,8 +2539,6 @@ class TestInterMapperMonitor:
 
         attribute_serial = "Failed"
         attribute_serial_response = {"body": attribute_serial, "status": 400}
-
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         utils_repository = Mock()
@@ -2657,7 +2553,6 @@ class TestInterMapperMonitor:
         dri_repository.get_dri_parameters = AsyncMock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -2689,8 +2584,6 @@ class TestInterMapperMonitor:
 
         attribute_serial = None
         attribute_serial_response = {"body": attribute_serial, "status": 200}
-
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         utils_repository = Mock()
@@ -2705,7 +2598,6 @@ class TestInterMapperMonitor:
         dri_repository.get_dri_parameters = AsyncMock(return_value=dri_parameters_response)
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -2730,8 +2622,6 @@ class TestInterMapperMonitor:
 
         dri_parameters_response_body = f"DRI task was rejected for serial {attribute_serial}"
         dri_parameters_response = {"body": dri_parameters_response_body, "status": 403}
-
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         utils_repository = Mock()
@@ -2746,7 +2636,6 @@ class TestInterMapperMonitor:
         dri_repository.get_dri_parameters = AsyncMock(return_value=dri_parameters_response)
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -2765,8 +2654,6 @@ class TestInterMapperMonitor:
         ticket_creation_date = "9/25/2020 6:31:54 AM"
         ticket_notes = []
         parsed_email_dict = {"name": ""}
-
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         utils_repository = Mock()
@@ -2777,7 +2664,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -2842,8 +2728,6 @@ class TestInterMapperMonitor:
         ]
 
         parsed_email_dict = {"name": ""}
-
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         utils_repository = Mock()
@@ -2854,7 +2738,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -2909,8 +2792,6 @@ class TestInterMapperMonitor:
         ]
 
         parsed_email_dict = {"name": ""}
-
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         utils_repository = Mock()
@@ -2921,7 +2802,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -3097,8 +2977,6 @@ class TestInterMapperMonitor:
                 ],
             },
         ]
-
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         utils_repository = Mock()
@@ -3109,7 +2987,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -3141,8 +3018,6 @@ class TestInterMapperMonitor:
     @pytest.mark.asyncio
     async def mark_email_as_read_test(self):
         msg_uid = 123
-
-        logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
         config = testconfig
@@ -3158,7 +3033,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -3172,13 +3046,10 @@ class TestInterMapperMonitor:
         await intermapper_monitor._mark_email_as_read(msg_uid)
 
         intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(msg_uid)
-        intermapper_monitor._logger.error.assert_not_called()
 
     @pytest.mark.asyncio
     async def mark_email_as_read_non_2xx_test(self):
         msg_uid = 123
-
-        logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
         config = testconfig
@@ -3194,7 +3065,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -3208,10 +3078,8 @@ class TestInterMapperMonitor:
         await intermapper_monitor._mark_email_as_read(msg_uid)
 
         intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(msg_uid)
-        intermapper_monitor._logger.error.assert_called_once()
 
     def get_tz_offset_test(self):
-        logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
         utils_repository = Mock()
@@ -3225,7 +3093,6 @@ class TestInterMapperMonitor:
         datetime_mock.now.side_effect = lambda tz: tz.localize(datetime.now().replace(month=1))
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,
@@ -3245,7 +3112,6 @@ class TestInterMapperMonitor:
             intermapper_monitor._zip_db.get.assert_called_once_with("95014")
 
     def get_max_seconds_since_last_outage_test(self):
-        logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
         utils_repository = Mock()
@@ -3256,7 +3122,6 @@ class TestInterMapperMonitor:
         config = testconfig
 
         intermapper_monitor = InterMapperMonitor(
-            logger,
             scheduler,
             config,
             utils_repository,

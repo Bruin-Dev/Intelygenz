@@ -14,8 +14,7 @@ uuid_mock = patch.object(email_repository_module, "uuid", return_value=uuid_)
 
 
 class TestEmailRepository:
-    def instance_test(self, email_repository, nats_client, logger, notifications_repository):
-        assert email_repository._logger is logger
+    def instance_test(self, email_repository, nats_client, notifications_repository):
         assert email_repository._nats_client is nats_client
         assert email_repository._config is testconfig
         assert email_repository._notifications_repository is notifications_repository
@@ -62,8 +61,6 @@ class TestEmailRepository:
 
     @pytest.mark.asyncio
     async def get_unread_emails_failing_rpc_test(self, email_repository):
-        email_repository._logger.error = Mock()
-
         request = {
             "request_id": uuid_,
             "body": {
@@ -81,13 +78,10 @@ class TestEmailRepository:
             result = await email_repository.get_unread_emails()
         email_repository._nats_client.request.assert_awaited_once_with("get.email.request", encoded_request, timeout=90)
         email_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        email_repository._logger.error.assert_called_once()
         assert result == nats_error_response
 
     @pytest.mark.asyncio
     async def get_unread_emails_non_2xx_test(self, email_repository):
-        email_repository._logger.error = Mock()
-
         request = {
             "request_id": uuid_,
             "body": {
@@ -110,7 +104,6 @@ class TestEmailRepository:
             result = await email_repository.get_unread_emails()
         email_repository._nats_client.request.assert_awaited_once_with("get.email.request", encoded_request, timeout=90)
         email_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        email_repository._logger.error.assert_called_once()
         assert result == response
 
     @pytest.mark.asyncio
@@ -154,7 +147,6 @@ class TestEmailRepository:
             "mark.email.read.request", encoded_request, timeout=90
         )
         email_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        email_repository._logger.error.assert_called_once()
         assert result == nats_error_response
 
     @pytest.mark.asyncio
@@ -180,5 +172,4 @@ class TestEmailRepository:
             "mark.email.read.request", encoded_request, timeout=90
         )
         email_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        email_repository._logger.error.assert_called_once()
         assert result == response

@@ -75,14 +75,13 @@ class Container:
 
         # REPOSITORIES
         self._utils_repository = UtilsRepository()
-        self._notifications_repository = NotificationsRepository(app_logger, self._nats_client, config)
-        self._email_repository = EmailRepository(app_logger, self._nats_client, config, self._notifications_repository)
-        self._dri_repository = DRIRepository(self._nats_client, app_logger, config, self._notifications_repository)
-        self._bruin_repository = BruinRepository(self._nats_client, app_logger, config, self._notifications_repository)
+        self._notifications_repository = NotificationsRepository(self._nats_client, config)
+        self._email_repository = EmailRepository(self._nats_client, config, self._notifications_repository)
+        self._dri_repository = DRIRepository(self._nats_client, config, self._notifications_repository)
+        self._bruin_repository = BruinRepository(self._nats_client, config, self._notifications_repository)
 
         # ACTIONS
         self._intermapper_monitoring = InterMapperMonitor(
-            app_logger,
             self._scheduler,
             config,
             self._utils_repository,

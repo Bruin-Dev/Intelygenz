@@ -1,14 +1,16 @@
 import json
+import logging
 
 from shortuuid import uuid
 
 from application.repositories import nats_error_response
 from application.repositories.utils_repository import to_json_bytes
 
+logger = logging.getLogger(__name__)
+
 
 class EmailRepository:
-    def __init__(self, logger, nats_client, config, notifications_repository):
-        self._logger = logger
+    def __init__(self, nats_client, config, notifications_repository):
         self._nats_client = nats_client
         self._config = config
         self._notifications_repository = notifications_repository
@@ -29,7 +31,7 @@ class EmailRepository:
         }
 
         try:
-            self._logger.info(
+            logger.info(
                 f"Getting the unread emails from the inbox of {email_account} sent from the users: "
                 f"{email_filter} in the last {lookup_days} days"
             )
@@ -43,7 +45,7 @@ class EmailRepository:
             response_status = response["status"]
 
             if response_status in range(200, 300):
-                self._logger.info(f"Got the unread emails from the inbox of {email_account}")
+                logger.info(f"Got the unread emails from the inbox of {email_account}")
             else:
                 err_msg = (
                     f"Error getting the unread emails from the inbox of {email_account} in "
@@ -52,7 +54,7 @@ class EmailRepository:
                 )
 
         if err_msg:
-            self._logger.error(err_msg)
+            logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response
@@ -66,7 +68,7 @@ class EmailRepository:
         }
 
         try:
-            self._logger.info(f"Marking message {msg_uid} from the inbox of {email_account} as read")
+            logger.info(f"Marking message {msg_uid} from the inbox of {email_account} as read")
             response = await self._nats_client.request("mark.email.read.request", to_json_bytes(request), timeout=90)
             response = json.loads(response.data)
         except Exception as e:
@@ -77,7 +79,7 @@ class EmailRepository:
             response_status = response["status"]
 
             if response_status in range(200, 300):
-                self._logger.info(f"Marked message {msg_uid} as read")
+                logger.info(f"Marked message {msg_uid} as read")
             else:
                 err_msg = (
                     f"Error marking message {msg_uid} as read in "
@@ -86,7 +88,7 @@ class EmailRepository:
                 )
 
         if err_msg:
-            self._logger.error(err_msg)
+            logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response

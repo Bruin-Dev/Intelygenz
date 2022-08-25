@@ -15,9 +15,8 @@ uuid_mock = patch.object(dri_repository_module, "uuid", return_value=uuid_)
 
 
 class TestDRIRepository:
-    def instance_test(self, dri_repository, nats_client, notifications_repository, logger):
+    def instance_test(self, dri_repository, nats_client, notifications_repository):
         assert dri_repository._nats_client is nats_client
-        assert dri_repository._logger is logger
         assert dri_repository._config is testconfig
         assert dri_repository._notifications_repository is notifications_repository
 
@@ -64,11 +63,10 @@ class TestDRIRepository:
         nats_client = Mock()
         nats_client.request = AsyncMock(return_value=response_msg)
 
-        logger = Mock()
         config = testconfig
         notifications_repository = Mock()
 
-        dri_repository = DRIRepository(nats_client, logger, config, notifications_repository)
+        dri_repository = DRIRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
             result = await dri_repository.get_dri_parameters(serial)
@@ -102,14 +100,11 @@ class TestDRIRepository:
         nats_client = Mock()
         nats_client.request = AsyncMock(side_effect=Exception)
 
-        logger = Mock()
-        logger.error = Mock()
-
         config = testconfig
         notifications_repository = Mock()
         notifications_repository.send_slack_message = AsyncMock()
 
-        dri_repository = DRIRepository(nats_client, logger, config, notifications_repository)
+        dri_repository = DRIRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
             result = await dri_repository.get_dri_parameters(serial)
@@ -152,14 +147,11 @@ class TestDRIRepository:
         nats_client = Mock()
         nats_client.request = AsyncMock(return_value=response_msg)
 
-        logger = Mock()
-        logger.error = Mock()
-
         config = testconfig
         notifications_repository = Mock()
         notifications_repository.send_slack_message = AsyncMock()
 
-        dri_repository = DRIRepository(nats_client, logger, config, notifications_repository)
+        dri_repository = DRIRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
             result = await dri_repository.get_dri_parameters(serial)
@@ -205,12 +197,11 @@ class TestDRIRepository:
         nats_client = Mock()
         nats_client.request = AsyncMock(return_value=response_msg)
 
-        logger = Mock()
         config = testconfig
         notifications_repository = Mock()
         notifications_repository.send_slack_message = AsyncMock()
 
-        dri_repository = DRIRepository(nats_client, logger, config, notifications_repository)
+        dri_repository = DRIRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
             result = await dri_repository.get_dri_parameters(serial)

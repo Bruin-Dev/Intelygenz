@@ -13,8 +13,7 @@ uuid_mock = patch.object(notifications_repository_module, "uuid", return_value=u
 
 
 class TestNotificationsRepository:
-    def instance_test(self, notifications_repository, nats_client, logger):
-        assert notifications_repository._logger is logger
+    def instance_test(self, notifications_repository, nats_client):
         assert notifications_repository._nats_client is nats_client
         assert notifications_repository._config is testconfig
 

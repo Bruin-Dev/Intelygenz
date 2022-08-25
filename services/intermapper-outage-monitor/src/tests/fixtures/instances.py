@@ -15,12 +15,6 @@ from tests.fixtures._helpers import wrap_all_methods
 
 
 @pytest.fixture(scope="function")
-def logger():
-    # Let's suppress all logs in tests
-    return Mock()
-
-
-@pytest.fixture(scope="function")
 def metrics_repository():
     # Let's fake this repository so we don't depend on a metrics server to write stuff for Prometheus
     return Mock()
@@ -37,17 +31,17 @@ def scheduler():
 
 
 @pytest.fixture(scope="function")
-def notifications_repository(nats_client, logger):
-    instance = NotificationsRepository(nats_client=nats_client, logger=logger, config=config)
+def notifications_repository(nats_client):
+    instance = NotificationsRepository(nats_client=nats_client, config=config)
     wrap_all_methods(instance)
 
     return instance
 
 
 @pytest.fixture(scope="function")
-def email_repository(nats_client, logger, notifications_repository):
+def email_repository(nats_client, notifications_repository):
     instance = EmailRepository(
-        nats_client=nats_client, logger=logger, config=config, notifications_repository=notifications_repository
+        nats_client=nats_client, config=config, notifications_repository=notifications_repository
     )
     wrap_all_methods(instance)
 
@@ -55,9 +49,8 @@ def email_repository(nats_client, logger, notifications_repository):
 
 
 @pytest.fixture(scope="function")
-def bruin_repository(logger, nats_client, notifications_repository):
+def bruin_repository(nats_client, notifications_repository):
     instance = BruinRepository(
-        logger=logger,
         nats_client=nats_client,
         notifications_repository=notifications_repository,
         config=config,
@@ -76,9 +69,8 @@ def utils_repository():
 
 
 @pytest.fixture(scope="function")
-def dri_repository(logger, nats_client, notifications_repository):
+def dri_repository(nats_client, notifications_repository):
     instance = DRIRepository(
-        logger=logger,
         nats_client=nats_client,
         notifications_repository=notifications_repository,
         config=config,
@@ -91,7 +83,6 @@ def dri_repository(logger, nats_client, notifications_repository):
 @pytest.fixture(scope="function")
 def intermapper_monitor(
     nats_client,
-    logger,
     scheduler,
     bruin_repository,
     notifications_repository,
@@ -101,7 +92,6 @@ def intermapper_monitor(
     utils_repository,
 ):
     instance = InterMapperMonitor(
-        logger=logger,
         scheduler=scheduler,
         config=config,
         bruin_repository=bruin_repository,
