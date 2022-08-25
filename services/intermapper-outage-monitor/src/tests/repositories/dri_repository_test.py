@@ -1,20 +1,22 @@
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from nats.aio.msg import Msg
+from shortuuid import uuid
+
 from application.repositories import dri_repository as dri_repository_module
 from application.repositories import nats_error_response
 from application.repositories.dri_repository import DRIRepository
-from asynctest import CoroutineMock
+from application.repositories.utils_repository import to_json_bytes
 from config import testconfig
-from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(dri_repository_module, "uuid", return_value=uuid_)
 
 
 class TestDRIRepository:
-    def instance_test(self, dri_repository, event_bus, notifications_repository, logger):
-        assert dri_repository._event_bus is event_bus
+    def instance_test(self, dri_repository, nats_client, notifications_repository, logger):
+        assert dri_repository._nats_client is nats_client
         assert dri_repository._logger is logger
         assert dri_repository._config is testconfig
         assert dri_repository._notifications_repository is notifications_repository
@@ -40,6 +42,7 @@ class TestDRIRepository:
                 },
             },
         }
+        encoded_request = to_json_bytes(request)
 
         mac_add = "8C:19:2D:23:30:69"
         response = {
@@ -55,23 +58,26 @@ class TestDRIRepository:
             "status": 200,
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+
+        nats_client = Mock()
+        nats_client.request = AsyncMock(return_value=response_msg)
 
         logger = Mock()
         config = testconfig
         notifications_repository = Mock()
 
-        dri_repository = DRIRepository(event_bus, logger, config, notifications_repository)
+        dri_repository = DRIRepository(nats_client, logger, config, notifications_repository)
 
         with uuid_mock:
             result = await dri_repository.get_dri_parameters(serial)
 
-        event_bus.rpc_request.assert_awaited_once_with("dri.parameters.request", request, timeout=120)
+        nats_client.request.assert_awaited_once_with("dri.parameters.request", encoded_request, timeout=120)
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_dri_parameters_rpc_request_failed_test(self):
+    async def get_dri_parameters_request_failed_test(self):
         serial = "70059"
 
         request = {
@@ -91,23 +97,24 @@ class TestDRIRepository:
                 },
             },
         }
+        encoded_request = to_json_bytes(request)
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=Exception)
+        nats_client = Mock()
+        nats_client.request = AsyncMock(side_effect=Exception)
 
         logger = Mock()
         logger.error = Mock()
 
         config = testconfig
         notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
-        dri_repository = DRIRepository(event_bus, logger, config, notifications_repository)
+        dri_repository = DRIRepository(nats_client, logger, config, notifications_repository)
 
         with uuid_mock:
             result = await dri_repository.get_dri_parameters(serial)
 
-        event_bus.rpc_request.assert_awaited_once_with("dri.parameters.request", request, timeout=120)
+        nats_client.request.assert_awaited_once_with("dri.parameters.request", encoded_request, timeout=120)
         assert result == nats_error_response
 
     @pytest.mark.asyncio
@@ -131,6 +138,7 @@ class TestDRIRepository:
                 },
             },
         }
+        encoded_request = to_json_bytes(request)
 
         response = {
             "request_id": uuid_,
@@ -138,22 +146,25 @@ class TestDRIRepository:
             "status": 400,
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+
+        nats_client = Mock()
+        nats_client.request = AsyncMock(return_value=response_msg)
 
         logger = Mock()
         logger.error = Mock()
 
         config = testconfig
         notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
-        dri_repository = DRIRepository(event_bus, logger, config, notifications_repository)
+        dri_repository = DRIRepository(nats_client, logger, config, notifications_repository)
 
         with uuid_mock:
             result = await dri_repository.get_dri_parameters(serial)
 
-        event_bus.rpc_request.assert_awaited_once_with("dri.parameters.request", request, timeout=120)
+        nats_client.request.assert_awaited_once_with("dri.parameters.request", encoded_request, timeout=120)
         assert result == response
 
     @pytest.mark.asyncio
@@ -177,6 +188,7 @@ class TestDRIRepository:
                 },
             },
         }
+        encoded_request = to_json_bytes(request)
 
         msg = f"Data is still being fetched from DRI for serial {serial}"
         err_msg = f"Max retries reached when getting dri parameters - exception: Error: {msg}"
@@ -187,19 +199,22 @@ class TestDRIRepository:
             "status": 204,
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+
+        nats_client = Mock()
+        nats_client.request = AsyncMock(return_value=response_msg)
 
         logger = Mock()
         config = testconfig
         notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
-        dri_repository = DRIRepository(event_bus, logger, config, notifications_repository)
+        dri_repository = DRIRepository(nats_client, logger, config, notifications_repository)
 
         with uuid_mock:
             result = await dri_repository.get_dri_parameters(serial)
 
-        event_bus.rpc_request.assert_awaited_once_with("dri.parameters.request", request, timeout=120)
+        nats_client.request.assert_awaited_once_with("dri.parameters.request", encoded_request, timeout=120)
         notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
         assert result == {"body": err_msg, "status": 400}

@@ -1,11 +1,15 @@
-from application.repositories import nats_error_response
+import json
+
 from shortuuid import uuid
+
+from application.repositories import nats_error_response
+from application.repositories.utils_repository import to_json_bytes
 
 
 class NotificationsRepository:
-    def __init__(self, logger, event_bus, config):
+    def __init__(self, logger, nats_client, config):
         self._logger = logger
-        self._event_bus = event_bus
+        self._nats_client = nats_client
         self._config = config
 
     async def send_slack_message(self, message: str):
@@ -13,7 +17,7 @@ class NotificationsRepository:
             "request_id": uuid(),
             "message": f"[{self._config.LOG_CONFIG['name']}]: {message}",
         }
-        await self._event_bus.rpc_request("notification.slack.request", message, timeout=10)
+        await self._nats_client.request("notification.slack.request", to_json_bytes(message), timeout=10)
 
     async def get_unread_emails(self):
         err_msg = None
@@ -35,7 +39,8 @@ class NotificationsRepository:
                 f"Getting the unread emails from the inbox of {email_account} sent from the users: "
                 f"{email_filter} in the last {lookup_days} days"
             )
-            response = await self._event_bus.rpc_request("get.email.request", request, timeout=90)
+            response = await self._nats_client.request("get.email.request", to_json_bytes(request), timeout=90)
+            response = json.loads(response.data)
         except Exception as e:
             err_msg = f"An error occurred while getting the unread emails from the inbox of {email_account} -> {e}"
             response = nats_error_response
@@ -68,7 +73,8 @@ class NotificationsRepository:
 
         try:
             self._logger.info(f"Marking message {msg_uid} from the inbox of {email_account} as read")
-            response = await self._event_bus.rpc_request("mark.email.read.request", request, timeout=90)
+            response = await self._nats_client.request("mark.email.read.request", to_json_bytes(request), timeout=90)
+            response = json.loads(response.data)
         except Exception as e:
             err_msg = f"An error occurred while marking message {msg_uid} as read -> {e}"
             response = nats_error_response

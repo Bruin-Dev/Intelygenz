@@ -1,16 +1,16 @@
 from unittest.mock import Mock
 
 import pytest
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from framework.nats.client import Client as NatsClient
+
 from application.actions.intermapper_monitoring import InterMapperMonitor
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.dri_repository import DRIRepository
 from application.repositories.email_repository import EmailRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.utils_repository import UtilsRepository
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from asynctest import create_autospec
 from config import testconfig as config
-from igz.packages.eventbus.eventbus import EventBus
 from tests.fixtures._helpers import wrap_all_methods
 
 
@@ -27,27 +27,27 @@ def metrics_repository():
 
 
 @pytest.fixture(scope="function")
-def event_bus():
-    return create_autospec(EventBus)
+def nats_client():
+    return Mock(spec_set=NatsClient)
 
 
 @pytest.fixture(scope="function")
 def scheduler():
-    return create_autospec(AsyncIOScheduler)
+    return Mock(spec_set=AsyncIOScheduler)
 
 
 @pytest.fixture(scope="function")
-def notifications_repository(event_bus, logger):
-    instance = NotificationsRepository(event_bus=event_bus, logger=logger, config=config)
+def notifications_repository(nats_client, logger):
+    instance = NotificationsRepository(nats_client=nats_client, logger=logger, config=config)
     wrap_all_methods(instance)
 
     return instance
 
 
 @pytest.fixture(scope="function")
-def email_repository(event_bus, logger, notifications_repository):
+def email_repository(nats_client, logger, notifications_repository):
     instance = EmailRepository(
-        event_bus=event_bus, logger=logger, config=config, notifications_repository=notifications_repository
+        nats_client=nats_client, logger=logger, config=config, notifications_repository=notifications_repository
     )
     wrap_all_methods(instance)
 
@@ -55,10 +55,10 @@ def email_repository(event_bus, logger, notifications_repository):
 
 
 @pytest.fixture(scope="function")
-def bruin_repository(logger, event_bus, notifications_repository):
+def bruin_repository(logger, nats_client, notifications_repository):
     instance = BruinRepository(
         logger=logger,
-        event_bus=event_bus,
+        nats_client=nats_client,
         notifications_repository=notifications_repository,
         config=config,
     )
@@ -76,10 +76,10 @@ def utils_repository():
 
 
 @pytest.fixture(scope="function")
-def dri_repository(logger, event_bus, notifications_repository):
+def dri_repository(logger, nats_client, notifications_repository):
     instance = DRIRepository(
         logger=logger,
-        event_bus=event_bus,
+        nats_client=nats_client,
         notifications_repository=notifications_repository,
         config=config,
     )
@@ -90,7 +90,7 @@ def dri_repository(logger, event_bus, notifications_repository):
 
 @pytest.fixture(scope="function")
 def intermapper_monitor(
-    event_bus,
+    nats_client,
     logger,
     scheduler,
     bruin_repository,
@@ -101,7 +101,6 @@ def intermapper_monitor(
     utils_repository,
 ):
     instance = InterMapperMonitor(
-        event_bus=event_bus,
         logger=logger,
         scheduler=scheduler,
         config=config,

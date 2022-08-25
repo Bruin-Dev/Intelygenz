@@ -1,14 +1,17 @@
+import json
 import os
 from datetime import datetime
 
-from application.repositories import nats_error_response
 from pytz import timezone
 from shortuuid import uuid
 
+from application.repositories import nats_error_response
+from application.repositories.utils_repository import to_json_bytes
+
 
 class BruinRepository:
-    def __init__(self, event_bus, logger, config, notifications_repository):
-        self._event_bus = event_bus
+    def __init__(self, nats_client, logger, config, notifications_repository):
+        self._nats_client = nats_client
         self._logger = logger
         self._config = config
         self._notifications_repository = notifications_repository
@@ -28,7 +31,10 @@ class BruinRepository:
 
         try:
             self._logger.info(f"Appending note to ticket {ticket_id}... Note contents: {note}")
-            response = await self._event_bus.rpc_request("bruin.ticket.note.append.request", request, timeout=60)
+            response = await self._nats_client.request(
+                "bruin.ticket.note.append.request", to_json_bytes(request), timeout=60
+            )
+            response = json.loads(response.data)
         except Exception as e:
             err_msg = (
                 f"An error occurred when appending a ticket note to ticket {ticket_id}. "
@@ -66,7 +72,8 @@ class BruinRepository:
 
         try:
             self._logger.info(f"Getting the translation to service number for circuit_id {circuit_id}")
-            response = await self._event_bus.rpc_request("bruin.get.circuit.id", request, timeout=60)
+            response = await self._nats_client.request("bruin.get.circuit.id", to_json_bytes(request), timeout=60)
+            response = json.loads(response.data)
         except Exception as e:
             err_msg = f"Getting the translation to service number for circuit_id {circuit_id} Error: {e}"
             response = nats_error_response
@@ -102,7 +109,10 @@ class BruinRepository:
             self._logger.info(
                 f"Creating outage ticket for device {service_number} that belongs to client {client_id}..."
             )
-            response = await self._event_bus.rpc_request("bruin.ticket.creation.outage.request", request, timeout=30)
+            response = await self._nats_client.request(
+                "bruin.ticket.creation.outage.request", to_json_bytes(request), timeout=30
+            )
+            response = json.loads(response.data)
             self._logger.info(f"Outage ticket for device {service_number} that belongs to client {client_id} created!")
         except Exception as e:
             err_msg = (
@@ -145,7 +155,10 @@ class BruinRepository:
                 f"Getting inventory attributes' serial number for service number {service_number} and client ID"
                 f" {client_id}"
             )
-            response = await self._event_bus.rpc_request("bruin.inventory.attributes.serial", request, timeout=60)
+            response = await self._nats_client.request(
+                "bruin.inventory.attributes.serial", to_json_bytes(request), timeout=60
+            )
+            response = json.loads(response.data)
         except Exception as e:
             err_msg = (
                 f"Error while getting inventory attributes' serial number for service number {service_number} and "
@@ -320,7 +333,8 @@ class BruinRepository:
 
         try:
             self._logger.info(f"Unpausing detail {detail_id} (serial {service_number}) of ticket {ticket_id}...")
-            response = await self._event_bus.rpc_request("bruin.ticket.unpause", request, timeout=30)
+            response = await self._nats_client.request("bruin.ticket.unpause", to_json_bytes(request), timeout=30)
+            response = json.loads(response.data)
         except Exception as e:
             err_msg = (
                 f"An error occurred when unpausing detail {detail_id} (serial {service_number}) of ticket {ticket_id}. "
@@ -359,7 +373,10 @@ class BruinRepository:
 
         try:
             self._logger.info(f"Resolving ticket {ticket_id} (affected detail ID: {detail_id})...")
-            response = await self._event_bus.rpc_request("bruin.ticket.status.resolve", request, timeout=15)
+            response = await self._nats_client.request(
+                "bruin.ticket.status.resolve", to_json_bytes(request), timeout=15
+            )
+            response = json.loads(response.data)
             self._logger.info(f"Ticket {ticket_id} resolved!")
         except Exception as e:
             err_msg = f"An error occurred when resolving ticket {ticket_id} -> {e}"
@@ -401,7 +418,8 @@ class BruinRepository:
                 f"VOO, service number {service_number} and belonging to client {client_id} from Bruin..."
             )
 
-            response = await self._event_bus.rpc_request("bruin.ticket.basic.request", request, timeout=90)
+            response = await self._nats_client.request("bruin.ticket.basic.request", to_json_bytes(request), timeout=90)
+            response = json.loads(response.data)
         except Exception as e:
             err_msg = (
                 f"An error occurred when requesting tickets  basic info from Bruin API with any status"
@@ -449,7 +467,8 @@ class BruinRepository:
         try:
             self._logger.info(f"Getting all tickets of ticket id {ticket_id} from Bruin...")
 
-            response = await self._event_bus.rpc_request("bruin.ticket.request", request, timeout=90)
+            response = await self._nats_client.request("bruin.ticket.request", to_json_bytes(request), timeout=90)
+            response = json.loads(response.data)
         except Exception as e:
             err_msg = f"An error occurred when requesting all tickets of ticket id {ticket_id} from Bruin API -> {e}"
             response = nats_error_response
@@ -482,7 +501,10 @@ class BruinRepository:
 
         try:
             self._logger.info(f"Getting details of ticket {ticket_id} from Bruin...")
-            response = await self._event_bus.rpc_request("bruin.ticket.details.request", request, timeout=15)
+            response = await self._nats_client.request(
+                "bruin.ticket.details.request", to_json_bytes(request), timeout=15
+            )
+            response = json.loads(response.data)
             self._logger.info(f"Got details of ticket {ticket_id} from Bruin!")
         except Exception as e:
             err_msg = f"An error occurred when requesting ticket details from Bruin API for ticket {ticket_id} -> {e}"
@@ -514,9 +536,9 @@ class BruinRepository:
         request = {
             "request_id": uuid(),
             "body": {
+                "notification_type": notification_type,
                 "ticket_id": ticket_id,
                 "service_number": service_number,
-                "notification_type": notification_type,
             },
         }
 
@@ -526,7 +548,10 @@ class BruinRepository:
                 f"service_number {service_number} "
                 f"and notification type {notification_type}..."
             )
-            response = await self._event_bus.rpc_request("bruin.notification.email.milestone", request, timeout=90)
+            response = await self._nats_client.request(
+                "bruin.notification.email.milestone", to_json_bytes(request), timeout=90
+            )
+            response = json.loads(response.data)
         except Exception as e:
             err_msg = (
                 f"An error occurred when sending email for ticket id {ticket_id}, "
@@ -574,7 +599,8 @@ class BruinRepository:
             self._logger.info(
                 f"Changing task result for ticket {ticket_id} for device {serial_number} to {task_result}..."
             )
-            response = await self._event_bus.rpc_request("bruin.ticket.change.work", request, timeout=90)
+            response = await self._nats_client.request("bruin.ticket.change.work", to_json_bytes(request), timeout=90)
+            response = json.loads(response.data)
         except Exception as e:
             err_msg = f"An error occurred when changing task result for ticket {ticket_id} and serial {serial_number}"
             response = nats_error_response

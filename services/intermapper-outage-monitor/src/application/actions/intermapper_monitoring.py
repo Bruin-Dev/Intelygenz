@@ -4,6 +4,13 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Callable, Dict, List, Optional
 
+from apscheduler.jobstores.base import ConflictingIdError
+from apscheduler.util import undefined
+from dateutil.parser import parse
+from pytz import timezone, utc
+from pyzipcode import ZipCodeDatabase
+from tenacity import retry, stop_after_delay, wait_exponential
+
 from application import (
     AUTORESOLVE_REGEX,
     EVENT_REGEX,
@@ -14,18 +21,11 @@ from application import (
     ZIP_CODE_REGEX,
     ForwardQueues,
 )
-from apscheduler.jobstores.base import ConflictingIdError
-from apscheduler.util import undefined
-from dateutil.parser import parse
-from pytz import timezone, utc
-from pyzipcode import ZipCodeDatabase
-from tenacity import retry, stop_after_delay, wait_exponential
 
 
 class InterMapperMonitor:
     def __init__(
         self,
-        event_bus,
         logger,
         scheduler,
         config,
@@ -36,7 +36,6 @@ class InterMapperMonitor:
         bruin_repository,
         dri_repository,
     ):
-        self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
         self._config = config

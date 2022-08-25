@@ -1,11 +1,15 @@
-from application.repositories import nats_error_response
+import json
+
 from shortuuid import uuid
 from tenacity import retry, stop_after_attempt, wait_exponential
 
+from application.repositories import nats_error_response
+from application.repositories.utils_repository import to_json_bytes
+
 
 class DRIRepository:
-    def __init__(self, event_bus, logger, config, notifications_repository):
-        self._event_bus = event_bus
+    def __init__(self, nats_client, logger, config, notifications_repository):
+        self._nats_client = nats_client
         self._logger = logger
         self._config = config
         self._notifications_repository = notifications_repository
@@ -33,7 +37,10 @@ class DRIRepository:
 
             try:
                 self._logger.info(f"Getting DRI parameters of serial number {serial_number}")
-                response = await self._event_bus.rpc_request("dri.parameters.request", request, timeout=120)
+                response = await self._nats_client.request(
+                    "dri.parameters.request", to_json_bytes(request), timeout=120
+                )
+                response = json.loads(response.data)
             except Exception as e:
                 err_msg = f"An error occurred while getting DRI parameter for serial number {serial_number}. Error: {e}"
                 response = nats_error_response

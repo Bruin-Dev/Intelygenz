@@ -1,17 +1,17 @@
 import os
 from datetime import datetime, timedelta
-from unittest.mock import Mock, call, patch
+from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
+from apscheduler.jobstores.base import ConflictingIdError
+from apscheduler.util import undefined
+from dateutil.parser import parse
+from pytz import utc
+
 from application import FORWARD_TICKET_TO_QUEUE_JOB_ID, ForwardQueues
 from application.actions import intermapper_monitoring as intermapper_monitor_module
 from application.actions.intermapper_monitoring import InterMapperMonitor
-from apscheduler.jobstores.base import ConflictingIdError
-from apscheduler.util import undefined
-from asynctest import CoroutineMock
 from config import testconfig
-from dateutil.parser import parse
-from pytz import utc
 from tests.fixtures._constants import CURRENT_DATETIME
 
 config_mock = patch.object(testconfig, "CURRENT_ENVIRONMENT", "production")
@@ -21,7 +21,6 @@ class TestInterMapperMonitor:
     def instance_test(
         self,
         intermapper_monitor,
-        event_bus,
         logger,
         scheduler,
         utils_repository,
@@ -31,7 +30,6 @@ class TestInterMapperMonitor:
         bruin_repository,
         dri_repository,
     ):
-        assert intermapper_monitor._event_bus == event_bus
         assert intermapper_monitor._logger == logger
         assert intermapper_monitor._scheduler == scheduler
         assert intermapper_monitor._config == testconfig
@@ -44,7 +42,6 @@ class TestInterMapperMonitor:
 
     @pytest.mark.asyncio
     async def start_intermapper_outage_monitoring_with_no_exec_on_start_test(self):
-        event_bus = Mock()
         logger = Mock()
 
         scheduler = Mock()
@@ -60,7 +57,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -85,7 +81,6 @@ class TestInterMapperMonitor:
 
     @pytest.mark.asyncio
     async def start_intermapper_outage_monitoring_with_exec_on_start_test(self):
-        event_bus = Mock()
         logger = Mock()
 
         scheduler = Mock()
@@ -101,7 +96,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -134,7 +128,6 @@ class TestInterMapperMonitor:
         job_id = "some-duplicated-id"
         exception_instance = ConflictingIdError(job_id)
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         scheduler.add_job = Mock(side_effect=exception_instance)
@@ -149,7 +142,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -194,7 +186,6 @@ class TestInterMapperMonitor:
             "status": 200,
         }
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
@@ -204,12 +195,11 @@ class TestInterMapperMonitor:
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        email_repository.get_unread_emails = CoroutineMock(return_value=response)
+        email_repository.get_unread_emails = AsyncMock(return_value=response)
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -220,7 +210,7 @@ class TestInterMapperMonitor:
             bruin_repository,
             dri_repository,
         )
-        intermapper_monitor._process_email_batch = CoroutineMock()
+        intermapper_monitor._process_email_batch = AsyncMock()
 
         await intermapper_monitor._intermapper_monitoring_process()
 
@@ -250,7 +240,6 @@ class TestInterMapperMonitor:
             circuit_id_2: [email_3],
         }
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
@@ -262,7 +251,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -295,7 +283,6 @@ class TestInterMapperMonitor:
         }
         emails = [email_1, email_2]
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         utils_repository = Mock()
@@ -313,12 +300,11 @@ class TestInterMapperMonitor:
         }
 
         bruin_repository = Mock()
-        bruin_repository.get_service_number_by_circuit_id = CoroutineMock(return_value=response)
+        bruin_repository.get_service_number_by_circuit_id = AsyncMock(return_value=response)
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -329,7 +315,7 @@ class TestInterMapperMonitor:
             bruin_repository,
             dri_repository,
         )
-        intermapper_monitor._process_email = CoroutineMock()
+        intermapper_monitor._process_email = AsyncMock()
 
         await intermapper_monitor._process_email_batch(emails, circuit_id)
 
@@ -357,7 +343,6 @@ class TestInterMapperMonitor:
         }
         emails = [email_1, email_2]
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -366,15 +351,14 @@ class TestInterMapperMonitor:
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        email_repository.mark_email_as_read = CoroutineMock()
+        email_repository.mark_email_as_read = AsyncMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_service_number_by_circuit_id = CoroutineMock()
+        bruin_repository.get_service_number_by_circuit_id = AsyncMock()
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -413,7 +397,6 @@ class TestInterMapperMonitor:
         }
         emails = [email_1, email_2]
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -424,18 +407,17 @@ class TestInterMapperMonitor:
         }
 
         bruin_repository = Mock()
-        bruin_repository.get_service_number_by_circuit_id = CoroutineMock(return_value=response)
+        bruin_repository.get_service_number_by_circuit_id = AsyncMock(return_value=response)
 
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        email_repository.mark_email_as_read = CoroutineMock()
+        email_repository.mark_email_as_read = AsyncMock()
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -469,7 +451,6 @@ class TestInterMapperMonitor:
         }
         emails = [email_1, email_2]
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -480,18 +461,17 @@ class TestInterMapperMonitor:
         }
 
         bruin_repository = Mock()
-        bruin_repository.get_service_number_by_circuit_id = CoroutineMock(return_value=response)
+        bruin_repository.get_service_number_by_circuit_id = AsyncMock(return_value=response)
 
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        email_repository.mark_email_as_read = CoroutineMock()
+        email_repository.mark_email_as_read = AsyncMock()
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -526,7 +506,6 @@ class TestInterMapperMonitor:
             "body": "Event: Down",
         }
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
@@ -536,12 +515,11 @@ class TestInterMapperMonitor:
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        email_repository.mark_email_as_read = CoroutineMock()
+        email_repository.mark_email_as_read = AsyncMock()
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -576,7 +554,6 @@ class TestInterMapperMonitor:
 
         response = {"body": None, "status": 204}
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
@@ -586,12 +563,11 @@ class TestInterMapperMonitor:
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        email_repository.mark_email_as_read = CoroutineMock(return_value=response)
+        email_repository.mark_email_as_read = AsyncMock(return_value=response)
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -602,8 +578,8 @@ class TestInterMapperMonitor:
             bruin_repository,
             dri_repository,
         )
-        intermapper_monitor._create_outage_ticket = CoroutineMock(return_value=True)
-        intermapper_monitor._get_dri_parameters = CoroutineMock(return_value=dri_parameters)
+        intermapper_monitor._create_outage_ticket = AsyncMock(return_value=True)
+        intermapper_monitor._get_dri_parameters = AsyncMock(return_value=dri_parameters)
 
         parsed_email_dict = intermapper_monitor._parse_email_body(email["body"])
 
@@ -640,7 +616,6 @@ class TestInterMapperMonitor:
 
         response = {"body": None, "status": 204}
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
@@ -650,12 +625,11 @@ class TestInterMapperMonitor:
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        email_repository.mark_email_as_read = CoroutineMock(return_value=response)
+        email_repository.mark_email_as_read = AsyncMock(return_value=response)
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -666,8 +640,8 @@ class TestInterMapperMonitor:
             bruin_repository,
             dri_repository,
         )
-        intermapper_monitor._create_outage_ticket = CoroutineMock(return_value=True)
-        intermapper_monitor._get_dri_parameters = CoroutineMock(return_value=dri_parameters)
+        intermapper_monitor._create_outage_ticket = AsyncMock(return_value=True)
+        intermapper_monitor._get_dri_parameters = AsyncMock(return_value=dri_parameters)
 
         parsed_email_dict = intermapper_monitor._parse_email_body(email["body"])
 
@@ -694,7 +668,6 @@ class TestInterMapperMonitor:
 
         response = {"body": None, "status": 204}
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
@@ -704,12 +677,11 @@ class TestInterMapperMonitor:
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        email_repository.mark_email_as_read = CoroutineMock(return_value=response)
+        email_repository.mark_email_as_read = AsyncMock(return_value=response)
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -720,7 +692,7 @@ class TestInterMapperMonitor:
             bruin_repository,
             dri_repository,
         )
-        intermapper_monitor._autoresolve_ticket = CoroutineMock(return_value=True)
+        intermapper_monitor._autoresolve_ticket = AsyncMock(return_value=True)
         parsed_email_dict = intermapper_monitor._parse_email_body(email["body"])
 
         with config_mock:
@@ -743,7 +715,6 @@ class TestInterMapperMonitor:
 
         response = {"body": None, "status": 204}
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
@@ -753,12 +724,11 @@ class TestInterMapperMonitor:
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        email_repository.mark_email_as_read = CoroutineMock(return_value=response)
+        email_repository.mark_email_as_read = AsyncMock(return_value=response)
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -769,8 +739,8 @@ class TestInterMapperMonitor:
             bruin_repository,
             dri_repository,
         )
-        intermapper_monitor._create_outage_ticket = CoroutineMock()
-        intermapper_monitor._autoresolve_ticket = CoroutineMock()
+        intermapper_monitor._create_outage_ticket = AsyncMock()
+        intermapper_monitor._autoresolve_ticket = AsyncMock()
 
         with config_mock:
             await intermapper_monitor._process_email(email, circuit_id, client_id)
@@ -791,7 +761,6 @@ class TestInterMapperMonitor:
             "body": "01/19 19:35:31: Message from InterMapper 6.1.5\nEvent: Up",
         }
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
@@ -801,12 +770,11 @@ class TestInterMapperMonitor:
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        email_repository.mark_email_as_read = CoroutineMock()
+        email_repository.mark_email_as_read = AsyncMock()
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -817,7 +785,7 @@ class TestInterMapperMonitor:
             bruin_repository,
             dri_repository,
         )
-        intermapper_monitor._autoresolve_ticket = CoroutineMock(return_value=False)
+        intermapper_monitor._autoresolve_ticket = AsyncMock(return_value=False)
 
         with config_mock:
             await intermapper_monitor._process_email(email, circuit_id, client_id)
@@ -825,7 +793,6 @@ class TestInterMapperMonitor:
         intermapper_monitor._email_repository.mark_email_as_read.assert_not_awaited()
 
     def parse_email_body_test(self):
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -866,7 +833,6 @@ class TestInterMapperMonitor:
         }
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -882,7 +848,6 @@ class TestInterMapperMonitor:
         assert email_body == expected_dict
 
     def parse_email_body_no_condition_test(self):
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -923,7 +888,6 @@ class TestInterMapperMonitor:
         }
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -939,7 +903,6 @@ class TestInterMapperMonitor:
         assert email_body == expected_dict
 
     def parse_email_body_missing_section_test(self):
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -978,7 +941,6 @@ class TestInterMapperMonitor:
             "up_time": "209 days, 10 hours, 44 minutes, 16 seconds",
         }
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -994,7 +956,6 @@ class TestInterMapperMonitor:
         assert email_body == expected_dict
 
     def extract_value_from_field_same_ending_and_starting_char_test(self):
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -1009,7 +970,6 @@ class TestInterMapperMonitor:
         client_id_str = f"O Reilly Auto Parts - South East |{expected_client_id}| Platinum Monitoring"
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -1024,7 +984,6 @@ class TestInterMapperMonitor:
         assert client_id == str(expected_client_id)
 
     def extract_value_from_field_different_ending_and_starting_char_test(self):
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -1039,7 +998,6 @@ class TestInterMapperMonitor:
         client_id_str = f"O Reilly Auto Parts - South East [{expected_client_id}] Platinum Monitoring"
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -1054,7 +1012,6 @@ class TestInterMapperMonitor:
         assert client_id == str(expected_client_id)
 
     def extract_value_from_field_missing_ending_and_starting_char_test(self):
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -1069,7 +1026,6 @@ class TestInterMapperMonitor:
         client_id_str = f"O Reilly Auto Parts - South East [{expected_client_id}] Platinum Monitoring"
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -1109,14 +1065,14 @@ class TestInterMapperMonitor:
         )
 
         post_ticket_response = {"body": "success", "status": 200}
-        intermapper_monitor._notifications_repository.send_slack_message = CoroutineMock()
-        intermapper_monitor._bruin_repository.create_outage_ticket = CoroutineMock(return_value=outage_ticket_response)
-        intermapper_monitor._bruin_repository.append_intermapper_note = CoroutineMock(return_value=post_ticket_response)
-        intermapper_monitor._bruin_repository.append_dri_note = CoroutineMock()
+        intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
+        intermapper_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.append_intermapper_note = AsyncMock(return_value=post_ticket_response)
+        intermapper_monitor._bruin_repository.append_dri_note = AsyncMock()
         intermapper_monitor._should_forward_to_ipa_queue.return_value = True
         intermapper_monitor._schedule_forward_to_queue = Mock()
         post_send_email_response = {"body": "success", "status": 200}
-        intermapper_monitor._bruin_repository.send_forward_email_milestone_notification = CoroutineMock(
+        intermapper_monitor._bruin_repository.send_forward_email_milestone_notification = AsyncMock(
             return_value=post_send_email_response
         )
 
@@ -1169,7 +1125,6 @@ class TestInterMapperMonitor:
 
         post_ticket_response = {"body": "success", "status": 200}
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -1178,17 +1133,16 @@ class TestInterMapperMonitor:
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
         bruin_repository = Mock()
-        bruin_repository.create_outage_ticket = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.append_intermapper_note = CoroutineMock()
-        bruin_repository.append_dri_note = CoroutineMock(return_value=post_ticket_response)
+        bruin_repository.create_outage_ticket = AsyncMock(return_value=outage_ticket_response)
+        bruin_repository.append_intermapper_note = AsyncMock()
+        bruin_repository.append_dri_note = AsyncMock(return_value=post_ticket_response)
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -1199,7 +1153,7 @@ class TestInterMapperMonitor:
             bruin_repository,
             dri_repository,
         )
-        intermapper_monitor._process_dri_email = CoroutineMock(return_value=True)
+        intermapper_monitor._process_dri_email = AsyncMock(return_value=True)
 
         with config_mock:
             response = await intermapper_monitor._create_outage_ticket(
@@ -1232,7 +1186,6 @@ class TestInterMapperMonitor:
         ticket_id = 321
         outage_ticket_response = {"body": ticket_id, "status": 400}
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -1241,17 +1194,16 @@ class TestInterMapperMonitor:
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
         bruin_repository = Mock()
-        bruin_repository.create_outage_ticket = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.append_intermapper_note = CoroutineMock()
-        bruin_repository.append_dri_note = CoroutineMock()
+        bruin_repository.create_outage_ticket = AsyncMock(return_value=outage_ticket_response)
+        bruin_repository.append_intermapper_note = AsyncMock()
+        bruin_repository.append_dri_note = AsyncMock()
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -1301,7 +1253,6 @@ class TestInterMapperMonitor:
 
         post_ticket_response = {"body": "failed", "status": 400}
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -1310,17 +1261,16 @@ class TestInterMapperMonitor:
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
         bruin_repository = Mock()
-        bruin_repository.create_outage_ticket = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.append_intermapper_note = CoroutineMock(return_value=post_ticket_response)
-        bruin_repository.append_dri_note = CoroutineMock()
+        bruin_repository.create_outage_ticket = AsyncMock(return_value=outage_ticket_response)
+        bruin_repository.append_intermapper_note = AsyncMock(return_value=post_ticket_response)
+        bruin_repository.append_dri_note = AsyncMock()
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -1377,7 +1327,6 @@ class TestInterMapperMonitor:
 
         post_ticket_response = {"body": "failed", "status": 400}
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -1386,17 +1335,16 @@ class TestInterMapperMonitor:
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
         bruin_repository = Mock()
-        bruin_repository.create_outage_ticket = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.append_intermapper_note = CoroutineMock()
-        bruin_repository.append_dri_note = CoroutineMock(return_value=post_ticket_response)
+        bruin_repository.create_outage_ticket = AsyncMock(return_value=outage_ticket_response)
+        bruin_repository.append_intermapper_note = AsyncMock()
+        bruin_repository.append_dri_note = AsyncMock(return_value=post_ticket_response)
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -1407,7 +1355,7 @@ class TestInterMapperMonitor:
             bruin_repository,
             dri_repository,
         )
-        intermapper_monitor._process_dri_email = CoroutineMock(return_value=True)
+        intermapper_monitor._process_dri_email = AsyncMock(return_value=True)
 
         with config_mock:
             response = await intermapper_monitor._create_outage_ticket(
@@ -1534,19 +1482,17 @@ class TestInterMapperMonitor:
         )
 
         append_intermapper_up_response = {"body": "OK", "status": 200}
-        intermapper_monitor._bruin_repository.get_ticket_basic_info = CoroutineMock(return_value=outage_ticket_response)
-        intermapper_monitor._bruin_repository.get_tickets = CoroutineMock(return_value=outage_ticket_response)
-        intermapper_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-        intermapper_monitor._bruin_repository.unpause_ticket_detail = CoroutineMock(
+        intermapper_monitor._bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_tickets = AsyncMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
+        intermapper_monitor._bruin_repository.unpause_ticket_detail = AsyncMock(
             return_value=unpause_ticket_detail_response
         )
-        intermapper_monitor._bruin_repository.resolve_ticket = CoroutineMock(
-            return_value=resolve_outage_ticket_response
-        )
-        intermapper_monitor._bruin_repository.append_intermapper_up_note = CoroutineMock(
+        intermapper_monitor._bruin_repository.resolve_ticket = AsyncMock(return_value=resolve_outage_ticket_response)
+        intermapper_monitor._bruin_repository.append_intermapper_up_note = AsyncMock(
             return_value=append_intermapper_up_response
         )
-        intermapper_monitor._bruin_repository.append_autoresolve_note = CoroutineMock()
+        intermapper_monitor._bruin_repository.append_autoresolve_note = AsyncMock()
         intermapper_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
         intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
@@ -1598,28 +1544,26 @@ class TestInterMapperMonitor:
             "status": 200,
         }
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_basic_info = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_tickets = CoroutineMock()
-        bruin_repository.get_ticket_details = CoroutineMock()
-        bruin_repository.resolve_ticket = CoroutineMock()
-        bruin_repository.append_autoresolve_note = CoroutineMock()
+        bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
+        bruin_repository.get_tickets = AsyncMock()
+        bruin_repository.get_ticket_details = AsyncMock()
+        bruin_repository.resolve_ticket = AsyncMock()
+        bruin_repository.append_autoresolve_note = AsyncMock()
 
         config = testconfig
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -1671,28 +1615,26 @@ class TestInterMapperMonitor:
             "status": 400,
         }
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_basic_info = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_tickets = CoroutineMock()
-        bruin_repository.get_ticket_details = CoroutineMock()
-        bruin_repository.resolve_ticket = CoroutineMock()
-        bruin_repository.append_autoresolve_note = CoroutineMock()
+        bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
+        bruin_repository.get_tickets = AsyncMock()
+        bruin_repository.get_ticket_details = AsyncMock()
+        bruin_repository.resolve_ticket = AsyncMock()
+        bruin_repository.append_autoresolve_note = AsyncMock()
 
         config = testconfig
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -1757,29 +1699,27 @@ class TestInterMapperMonitor:
 
         append_intermapper_up_response = {"body": "KO", "status": 400}
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_basic_info = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_tickets = CoroutineMock()
-        bruin_repository.get_ticket_details = CoroutineMock()
-        bruin_repository.resolve_ticket = CoroutineMock()
-        bruin_repository.append_intermapper_up_note = CoroutineMock(return_value=append_intermapper_up_response)
-        bruin_repository.append_autoresolve_note = CoroutineMock()
+        bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
+        bruin_repository.get_tickets = AsyncMock()
+        bruin_repository.get_ticket_details = AsyncMock()
+        bruin_repository.resolve_ticket = AsyncMock()
+        bruin_repository.append_intermapper_up_note = AsyncMock(return_value=append_intermapper_up_response)
+        bruin_repository.append_autoresolve_note = AsyncMock()
 
         config = testconfig
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -1852,29 +1792,27 @@ class TestInterMapperMonitor:
 
         append_intermapper_up_response = {"body": "OK", "status": 200}
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_basic_info = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_tickets = CoroutineMock(return_value=product_category_response)
-        bruin_repository.get_ticket_details = CoroutineMock()
-        bruin_repository.resolve_ticket = CoroutineMock()
-        bruin_repository.append_intermapper_up_note = CoroutineMock(return_value=append_intermapper_up_response)
-        bruin_repository.append_autoresolve_note = CoroutineMock()
+        bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
+        bruin_repository.get_tickets = AsyncMock(return_value=product_category_response)
+        bruin_repository.get_ticket_details = AsyncMock()
+        bruin_repository.resolve_ticket = AsyncMock()
+        bruin_repository.append_intermapper_up_note = AsyncMock(return_value=append_intermapper_up_response)
+        bruin_repository.append_autoresolve_note = AsyncMock()
 
         config = testconfig
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -1948,29 +1886,27 @@ class TestInterMapperMonitor:
 
         append_intermapper_up_response = {"body": "OK", "status": 200}
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_basic_info = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_tickets = CoroutineMock(return_value=product_category_response)
-        bruin_repository.get_ticket_details = CoroutineMock()
-        bruin_repository.resolve_ticket = CoroutineMock()
-        bruin_repository.append_intermapper_up_note = CoroutineMock(return_value=append_intermapper_up_response)
-        bruin_repository.append_autoresolve_note = CoroutineMock()
+        bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
+        bruin_repository.get_tickets = AsyncMock(return_value=product_category_response)
+        bruin_repository.get_ticket_details = AsyncMock()
+        bruin_repository.resolve_ticket = AsyncMock()
+        bruin_repository.append_intermapper_up_note = AsyncMock(return_value=append_intermapper_up_response)
+        bruin_repository.append_autoresolve_note = AsyncMock()
 
         config = testconfig
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -2039,29 +1975,27 @@ class TestInterMapperMonitor:
 
         append_intermapper_up_response = {"body": "OK", "status": 200}
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_basic_info = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_tickets = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_ticket_details = CoroutineMock()
-        bruin_repository.resolve_ticket = CoroutineMock()
-        bruin_repository.append_intermapper_up_note = CoroutineMock(return_value=append_intermapper_up_response)
-        bruin_repository.append_autoresolve_note = CoroutineMock()
+        bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
+        bruin_repository.get_tickets = AsyncMock(return_value=outage_ticket_response)
+        bruin_repository.get_ticket_details = AsyncMock()
+        bruin_repository.resolve_ticket = AsyncMock()
+        bruin_repository.append_intermapper_up_note = AsyncMock(return_value=append_intermapper_up_response)
+        bruin_repository.append_autoresolve_note = AsyncMock()
 
         config = testconfig
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -2135,29 +2069,27 @@ class TestInterMapperMonitor:
 
         append_intermapper_up_response = {"body": "OK", "status": 200}
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_basic_info = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_tickets = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-        bruin_repository.resolve_ticket = CoroutineMock()
-        bruin_repository.append_intermapper_up_note = CoroutineMock(return_value=append_intermapper_up_response)
-        bruin_repository.append_autoresolve_note = CoroutineMock()
+        bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
+        bruin_repository.get_tickets = AsyncMock(return_value=outage_ticket_response)
+        bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
+        bruin_repository.resolve_ticket = AsyncMock()
+        bruin_repository.append_intermapper_up_note = AsyncMock(return_value=append_intermapper_up_response)
+        bruin_repository.append_autoresolve_note = AsyncMock()
 
         config = testconfig
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -2292,29 +2224,27 @@ class TestInterMapperMonitor:
 
         append_intermapper_up_response = {"body": "OK", "status": 200}
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_basic_info = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_tickets = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-        bruin_repository.resolve_ticket = CoroutineMock(return_value=resolve_outage_ticket_response)
-        bruin_repository.append_intermapper_up_note = CoroutineMock(return_value=append_intermapper_up_response)
-        bruin_repository.append_autoresolve_note = CoroutineMock()
+        bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
+        bruin_repository.get_tickets = AsyncMock(return_value=outage_ticket_response)
+        bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
+        bruin_repository.resolve_ticket = AsyncMock(return_value=resolve_outage_ticket_response)
+        bruin_repository.append_intermapper_up_note = AsyncMock(return_value=append_intermapper_up_response)
+        bruin_repository.append_autoresolve_note = AsyncMock()
 
         config = testconfig
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -2450,29 +2380,27 @@ class TestInterMapperMonitor:
 
         append_intermapper_up_response = {"body": "OK", "status": 200}
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         utils_repository = Mock()
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_basic_info = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_tickets = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-        bruin_repository.resolve_ticket = CoroutineMock(return_value=resolve_outage_ticket_response)
-        bruin_repository.append_intermapper_up_note = CoroutineMock(return_value=append_intermapper_up_response)
-        bruin_repository.append_autoresolve_note = CoroutineMock()
+        bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
+        bruin_repository.get_tickets = AsyncMock(return_value=outage_ticket_response)
+        bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
+        bruin_repository.resolve_ticket = AsyncMock(return_value=resolve_outage_ticket_response)
+        bruin_repository.append_intermapper_up_note = AsyncMock(return_value=append_intermapper_up_response)
+        bruin_repository.append_autoresolve_note = AsyncMock()
 
         config = testconfig
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -2615,26 +2543,24 @@ class TestInterMapperMonitor:
         }
 
         append_intermapper_up_response = {"body": "OK", "status": 200}
-        intermapper_monitor._notifications_repository.send_slack_message = CoroutineMock()
-        intermapper_monitor._bruin_repository.get_ticket_basic_info = CoroutineMock(return_value=outage_ticket_response)
-        intermapper_monitor._bruin_repository.get_tickets = CoroutineMock(return_value=outage_ticket_response)
-        intermapper_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-        intermapper_monitor._bruin_repository.unpause_ticket_detail = CoroutineMock(
+        intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
+        intermapper_monitor._bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_tickets = AsyncMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
+        intermapper_monitor._bruin_repository.unpause_ticket_detail = AsyncMock(
             return_value=unpause_ticket_detail_response
         )
-        intermapper_monitor._bruin_repository.resolve_ticket = CoroutineMock(
-            return_value=resolve_outage_ticket_response
-        )
-        intermapper_monitor._bruin_repository.append_intermapper_up_note = CoroutineMock(
+        intermapper_monitor._bruin_repository.resolve_ticket = AsyncMock(return_value=resolve_outage_ticket_response)
+        intermapper_monitor._bruin_repository.append_intermapper_up_note = AsyncMock(
             return_value=append_intermapper_up_response
         )
-        intermapper_monitor._bruin_repository.append_autoresolve_note = CoroutineMock()
+        intermapper_monitor._bruin_repository.append_autoresolve_note = AsyncMock()
         intermapper_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
         intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         intermapper_monitor._schedule_forward_to_queue = Mock()
         post_send_email_response = {"body": "success", "status": 200}
-        intermapper_monitor._bruin_repository.send_forward_email_milestone_notification = CoroutineMock(
+        intermapper_monitor._bruin_repository.send_forward_email_milestone_notification = AsyncMock(
             return_value=post_send_email_response
         )
 
@@ -2678,7 +2604,6 @@ class TestInterMapperMonitor:
         attribute_serial = "705286"
         attribute_serial_response = {"body": attribute_serial, "status": 200}
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -2688,13 +2613,12 @@ class TestInterMapperMonitor:
         email_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_serial_attribute_from_inventory = CoroutineMock(return_value=attribute_serial_response)
+        bruin_repository.get_serial_attribute_from_inventory = AsyncMock(return_value=attribute_serial_response)
 
         dri_repository = Mock()
-        dri_repository.get_dri_parameters = CoroutineMock(return_value=dri_parameters_response)
+        dri_repository.get_dri_parameters = AsyncMock(return_value=dri_parameters_response)
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -2718,7 +2642,6 @@ class TestInterMapperMonitor:
         attribute_serial = "Failed"
         attribute_serial_response = {"body": attribute_serial, "status": 400}
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -2728,13 +2651,12 @@ class TestInterMapperMonitor:
         email_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_serial_attribute_from_inventory = CoroutineMock(return_value=attribute_serial_response)
+        bruin_repository.get_serial_attribute_from_inventory = AsyncMock(return_value=attribute_serial_response)
 
         dri_repository = Mock()
-        dri_repository.get_dri_parameters = CoroutineMock()
+        dri_repository.get_dri_parameters = AsyncMock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -2768,7 +2690,6 @@ class TestInterMapperMonitor:
         attribute_serial = None
         attribute_serial_response = {"body": attribute_serial, "status": 200}
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -2778,13 +2699,12 @@ class TestInterMapperMonitor:
         email_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_serial_attribute_from_inventory = CoroutineMock(return_value=attribute_serial_response)
+        bruin_repository.get_serial_attribute_from_inventory = AsyncMock(return_value=attribute_serial_response)
 
         dri_repository = Mock()
-        dri_repository.get_dri_parameters = CoroutineMock(return_value=dri_parameters_response)
+        dri_repository.get_dri_parameters = AsyncMock(return_value=dri_parameters_response)
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -2811,7 +2731,6 @@ class TestInterMapperMonitor:
         dri_parameters_response_body = f"DRI task was rejected for serial {attribute_serial}"
         dri_parameters_response = {"body": dri_parameters_response_body, "status": 403}
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -2821,13 +2740,12 @@ class TestInterMapperMonitor:
         email_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_serial_attribute_from_inventory = CoroutineMock(return_value=attribute_serial_response)
+        bruin_repository.get_serial_attribute_from_inventory = AsyncMock(return_value=attribute_serial_response)
 
         dri_repository = Mock()
-        dri_repository.get_dri_parameters = CoroutineMock(return_value=dri_parameters_response)
+        dri_repository.get_dri_parameters = AsyncMock(return_value=dri_parameters_response)
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -2848,7 +2766,6 @@ class TestInterMapperMonitor:
         ticket_notes = []
         parsed_email_dict = {"name": ""}
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -2860,7 +2777,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -2927,7 +2843,6 @@ class TestInterMapperMonitor:
 
         parsed_email_dict = {"name": ""}
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -2939,7 +2854,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -2996,7 +2910,6 @@ class TestInterMapperMonitor:
 
         parsed_email_dict = {"name": ""}
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -3008,7 +2921,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -3186,7 +3098,6 @@ class TestInterMapperMonitor:
             },
         ]
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -3198,7 +3109,6 @@ class TestInterMapperMonitor:
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -3232,7 +3142,6 @@ class TestInterMapperMonitor:
     async def mark_email_as_read_test(self):
         msg_uid = 123
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
@@ -3244,12 +3153,11 @@ class TestInterMapperMonitor:
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        email_repository.mark_email_as_read = CoroutineMock(return_value=response)
+        email_repository.mark_email_as_read = AsyncMock(return_value=response)
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -3270,7 +3178,6 @@ class TestInterMapperMonitor:
     async def mark_email_as_read_non_2xx_test(self):
         msg_uid = 123
 
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
@@ -3282,12 +3189,11 @@ class TestInterMapperMonitor:
         metrics_repository = Mock()
         notifications_repository = Mock()
         email_repository = Mock()
-        email_repository.mark_email_as_read = CoroutineMock(return_value=response)
+        email_repository.mark_email_as_read = AsyncMock(return_value=response)
 
         dri_repository = Mock()
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -3305,7 +3211,6 @@ class TestInterMapperMonitor:
         intermapper_monitor._logger.error.assert_called_once()
 
     def get_tz_offset_test(self):
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
@@ -3320,7 +3225,6 @@ class TestInterMapperMonitor:
         datetime_mock.now.side_effect = lambda tz: tz.localize(datetime.now().replace(month=1))
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -3341,7 +3245,6 @@ class TestInterMapperMonitor:
             intermapper_monitor._zip_db.get.assert_called_once_with("95014")
 
     def get_max_seconds_since_last_outage_test(self):
-        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         bruin_repository = Mock()
@@ -3353,7 +3256,6 @@ class TestInterMapperMonitor:
         config = testconfig
 
         intermapper_monitor = InterMapperMonitor(
-            event_bus,
             logger,
             scheduler,
             config,
@@ -3552,11 +3454,11 @@ class TestInterMapperMonitor:
             "body": "ok",
             "status": 200,
         }
-        intermapper_monitor._notifications_repository.send_slack_message = CoroutineMock()
-        intermapper_monitor._bruin_repository.change_detail_work_queue = CoroutineMock(
+        intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
+        intermapper_monitor._bruin_repository.change_detail_work_queue = AsyncMock(
             return_value=change_queue_ticket_response
         )
-        intermapper_monitor._bruin_repository.send_forward_email_milestone_notification = CoroutineMock()
+        intermapper_monitor._bruin_repository.send_forward_email_milestone_notification = AsyncMock()
         next_run_time = CURRENT_DATETIME
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
@@ -3583,8 +3485,8 @@ class TestInterMapperMonitor:
             "body": "ko",
             "status": 400,
         }
-        intermapper_monitor._notifications_repository.send_slack_message = CoroutineMock()
-        intermapper_monitor._bruin_repository.change_detail_work_queue = CoroutineMock(
+        intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
+        intermapper_monitor._bruin_repository.change_detail_work_queue = AsyncMock(
             return_value=change_queue_ticket_response
         )
         next_run_time = CURRENT_DATETIME
@@ -3610,8 +3512,8 @@ class TestInterMapperMonitor:
         is_piab = True
         event = "example"
         change_detail_work_queue_response = {"body": "Success", "status": 200}
-        intermapper_monitor._notifications_repository.send_slack_message = CoroutineMock()
-        intermapper_monitor._bruin_repository.change_detail_work_queue = CoroutineMock(
+        intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
+        intermapper_monitor._bruin_repository.change_detail_work_queue = AsyncMock(
             return_value=change_detail_work_queue_response
         )
 
@@ -3636,8 +3538,8 @@ class TestInterMapperMonitor:
         is_piab = True
         event = "example"
         change_detail_work_queue_response = {"body": "Failed", "status": 400}
-        intermapper_monitor._notifications_repository.send_slack_message = CoroutineMock()
-        intermapper_monitor._bruin_repository.change_detail_work_queue = CoroutineMock(
+        intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
+        intermapper_monitor._bruin_repository.change_detail_work_queue = AsyncMock(
             return_value=change_detail_work_queue_response
         )
 
@@ -3769,19 +3671,17 @@ class TestInterMapperMonitor:
         )
 
         append_intermapper_up_response = {"body": "OK", "status": 200}
-        intermapper_monitor._bruin_repository.get_ticket_basic_info = CoroutineMock(return_value=outage_ticket_response)
-        intermapper_monitor._bruin_repository.get_tickets = CoroutineMock(return_value=outage_ticket_response)
-        intermapper_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-        intermapper_monitor._bruin_repository.unpause_ticket_detail = CoroutineMock(
+        intermapper_monitor._bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_tickets = AsyncMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
+        intermapper_monitor._bruin_repository.unpause_ticket_detail = AsyncMock(
             return_value=unpause_ticket_detail_response
         )
-        intermapper_monitor._bruin_repository.resolve_ticket = CoroutineMock(
-            return_value=resolve_outage_ticket_response
-        )
-        intermapper_monitor._bruin_repository.append_intermapper_up_note = CoroutineMock(
+        intermapper_monitor._bruin_repository.resolve_ticket = AsyncMock(return_value=resolve_outage_ticket_response)
+        intermapper_monitor._bruin_repository.append_intermapper_up_note = AsyncMock(
             return_value=append_intermapper_up_response
         )
-        intermapper_monitor._bruin_repository.append_autoresolve_note = CoroutineMock()
+        intermapper_monitor._bruin_repository.append_autoresolve_note = AsyncMock()
         intermapper_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
         intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])

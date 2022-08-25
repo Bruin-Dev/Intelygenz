@@ -1,3 +1,0 @@
-APScheduler==3.6.0
-prometheus_client==0.6.0
-pyzipcode==3.0.1
