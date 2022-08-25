@@ -88,9 +88,7 @@ class BruinRepository:
                     "bruin.single_ticket.basic.request", request_msg, timeout=self._timeout
                 )
             except Exception as err:
-                err_msg = (
-                    f"An error occurred when getting basic info from Bruin, for ticket_id '{ticket_id}' -> {err}"
-                )
+                err_msg = f"An error occurred when getting basic info from Bruin, for ticket_id '{ticket_id}' -> {err}"
                 response = nats_error_response
             else:
                 response_body = response["body"]

@@ -80,7 +80,7 @@ class Routes(Dict[str, Route]):
 
     def set(self, path: str, handler: Handler) -> Route:
         """
-        Sets the handler of the correspoding route of a given path.
+        Sets the handler of the corresponding route of a given path.
         If the path is not yet known, build a new route.
         :param path: the path of the Route being set
         :param handler: the handler to be set
@@ -103,8 +103,8 @@ class Routes(Dict[str, Route]):
         This method will always return a Route. It can either:
         - return an exact route for the provided path
         - return a matching route for the provided path
-        - return a new or overriden route for any POST requests
-        - return a new or overriden route if any default handler is provided
+        - return a new or override route for any POST requests
+        - return a new or override route if any default handler is provided
         - return a new route with a noop handler
 
         New routes being created within this method are transient and won't be stored

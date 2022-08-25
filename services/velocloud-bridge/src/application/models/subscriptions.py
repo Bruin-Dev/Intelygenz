@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-
 from framework.nats.models import Subscription
 
 

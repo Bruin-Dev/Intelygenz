@@ -1,7 +1,8 @@
-from dataclasses import dataclass, field
 from datetime import datetime
 from enum import IntEnum, auto
 from typing import List, Optional
+
+from dataclasses import dataclass, field
 
 
 @dataclass

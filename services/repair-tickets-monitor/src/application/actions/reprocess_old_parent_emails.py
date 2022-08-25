@@ -1,19 +1,18 @@
 import asyncio
 import logging
-from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any, Iterator
-
-from apscheduler.jobstores.base import ConflictingIdError
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.util import undefined
-from framework.nats.client import Client as NatsClient
-from framework.storage.model.email_storage import Email, RepairParentEmailStorage
-from pytz import timezone
 
 from application.domain.email import EmailStatus
 from application.rpc import RpcError
 from application.rpc.set_email_status_rpc import SetEmailStatusRpc
+from apscheduler.jobstores.base import ConflictingIdError
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.util import undefined
+from dataclasses import dataclass
+from framework.nats.client import Client as NatsClient
+from framework.storage.model.email_storage import Email, RepairParentEmailStorage
+from pytz import timezone
 
 log = logging.getLogger(__name__)
 

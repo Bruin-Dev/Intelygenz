@@ -1,14 +1,13 @@
 import logging
-from dataclasses import dataclass
 from typing import Any, List, Optional
 
+from application.domain.email import Email, EmailTag
+from application.repositories.storage_repository import StorageRepository
+from dataclasses import dataclass
 from framework.storage.model import RepairParentEmailStorage
 from framework.storage.model.email_storage import Email as RedisEmail
 from framework.storage.model.email_storage import EmailTag as RedisEmailTag
 from pydantic import BaseModel
-
-from application.domain.email import Email, EmailTag
-from application.repositories.storage_repository import StorageRepository
 
 log = logging.getLogger(__name__)
 

@@ -1,9 +1,8 @@
 import logging
-from dataclasses import dataclass, field
-
-from pydantic import BaseModel, Field, ValidationError
 
 from application.rpc import Rpc, RpcFailedError, RpcRequest
+from dataclasses import dataclass, field
+from pydantic import BaseModel, Field, ValidationError
 
 log = logging.getLogger(__name__)
 

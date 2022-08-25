@@ -40,9 +40,7 @@ class TestVelocloudRepository:
         host = "mettel.velocloud.net"
         response_status = 400
         response_body = []
-        error_msg = (
-            f"Error while retrieving edges links in DEV environment: Error {response_status} - {response_body}"
-        )
+        error_msg = f"Error while retrieving edges links in DEV environment: Error {response_status} - {response_body}"
         edge_request = {"request_id": request_id, "body": response_body, "status": response_status}
         velocloud_repository._event_bus.rpc_request = CoroutineMock(return_value=edge_request)
 

@@ -2,13 +2,6 @@ from datetime import datetime, timezone
 from typing import List
 from unittest.mock import Mock, patch
 
-from framework.storage.model.email_storage import Email as RedisEmail
-from framework.storage.model.email_storage import EmailTag as RedisEmailTag
-from framework.storage.model.email_storage import RepairParentEmailStorage
-from framework.testing import given
-from pydantic import Field
-from pytz import UTC
-
 from application.domain.email import Email, EmailTag
 from application.repositories.new_tagged_emails_repository import (
     LegacyRedisEmail,
@@ -17,6 +10,12 @@ from application.repositories.new_tagged_emails_repository import (
 )
 from application.repositories.storage_repository import StorageRepository
 from config import testconfig as config
+from framework.storage.model.email_storage import Email as RedisEmail
+from framework.storage.model.email_storage import EmailTag as RedisEmailTag
+from framework.storage.model.email_storage import RepairParentEmailStorage
+from framework.testing import given
+from pydantic import Field
+from pytz import UTC
 from tests.fixtures.domain import AnyEmail
 
 

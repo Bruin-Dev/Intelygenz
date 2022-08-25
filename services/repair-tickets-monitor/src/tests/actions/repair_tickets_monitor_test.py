@@ -7,8 +7,6 @@ from unittest.mock import ANY, AsyncMock, Mock, call, patch
 
 import html2text
 import pytest
-from framework.testing import case, given
-
 from application.actions.repair_tickets_monitor import RepairTicketsMonitor, get_feedback_not_created_due_cancellations
 from application.domain.asset import Topic
 from application.domain.repair_email_output import CreateTicketsOutput, RepairEmailOutput, TicketOutput
@@ -18,6 +16,7 @@ from application.repositories.bruin_repository import BruinRepository
 from application.rpc import RpcError
 from application.rpc.upsert_outage_ticket_rpc import UpsertedStatus, UpsertedTicket
 from config import testconfig as config
+from framework.testing import case, given
 from tests.fixtures.domain import AnyEmail, AnyEmailTag
 
 

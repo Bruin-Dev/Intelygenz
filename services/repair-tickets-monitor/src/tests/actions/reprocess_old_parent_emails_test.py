@@ -3,15 +3,14 @@ from typing import List
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from application.domain.email import EmailStatus
+from application.rpc import RpcError
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
+from config import testconfig as config
 from framework.storage.model import Email, EmailMetadata, EmailTag
 from pydantic import Field
 from shortuuid import uuid
-
-from application.domain.email import EmailStatus
-from application.rpc import RpcError
-from config import testconfig as config
 
 uuid_ = uuid()
 uuid_mock = patch("application.actions.reprocess_old_parent_emails.uuid", return_value=uuid_)

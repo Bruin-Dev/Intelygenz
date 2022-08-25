@@ -151,9 +151,7 @@ class OutageMonitor:
 
         network_enterprises_response = await self._velocloud_repository.get_network_enterprises(velocloud_host=host)
         if network_enterprises_response["status"] not in range(200, 300):
-            self._logger.warning(
-                f"Not found network enterprises for host: {host}. Skipping process velocloud host ..."
-            )
+            self._logger.warning(f"Not found network enterprises for host: {host}. Skipping process velocloud host ...")
             return
 
         links_with_edge_info: list = links_with_edge_info_response["body"]
@@ -1419,14 +1417,10 @@ class OutageMonitor:
 
         append_note_response = await self._append_reminder_note(ticket_id, service_number)
         if append_note_response["status"] not in range(200, 300):
-            self._logger.error(
-                f"Reminder note of edge {service_number} could not be appended to ticket {ticket_id}!"
-            )
+            self._logger.error(f"Reminder note of edge {service_number} could not be appended to ticket {ticket_id}!")
             return
 
-        self._logger.info(
-            f"Reminder note of edge {service_number} was successfully appended to ticket {ticket_id}!"
-        )
+        self._logger.info(f"Reminder note of edge {service_number} was successfully appended to ticket {ticket_id}!")
         await self._notifications_repository.notify_successful_reminder_note_append(ticket_id, service_number)
 
     async def _append_reminder_note(self, ticket_id: int, service_number: str):

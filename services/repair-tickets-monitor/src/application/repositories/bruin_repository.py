@@ -392,9 +392,7 @@ class BruinRepository:
             }
 
             try:
-                log.info(
-                    f"Getting all tickets with any status of {ticket_statuses},with keyword arguments {kwargs}"
-                )
+                log.info(f"Getting all tickets with any status of {ticket_statuses},with keyword arguments {kwargs}")
                 response = await self._event_bus.request(
                     "bruin.ticket.basic.request", to_json_bytes(request), timeout=self._timeout
                 )

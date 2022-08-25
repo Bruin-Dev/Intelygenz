@@ -1,8 +1,8 @@
 import json
 import logging
-from dataclasses import dataclass
 from http import HTTPStatus
 
+from dataclasses import dataclass
 from nats.aio.msg import Msg
 from pydantic import BaseModel, ValidationError
 

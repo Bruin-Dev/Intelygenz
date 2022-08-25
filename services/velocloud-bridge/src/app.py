@@ -1,21 +1,7 @@
 import logging
 import sys
-from dataclasses import asdict
 
 import redis
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from framework.http.server import Config as QuartConfig
-from framework.http.server import Server as QuartServer
-from framework.logging.formatters import Papertrail as PapertrailFormatter
-from framework.logging.formatters import Standard as StandardFormatter
-from framework.logging.handlers import Papertrail as PapertrailHandler
-from framework.logging.handlers import Stdout as StdoutHandler
-from framework.nats.client import Client
-from framework.nats.exceptions import NatsException
-from framework.nats.models import *
-from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
-from prometheus_client import start_http_server
-
 from application.actions.edge_events_for_alert import EventEdgesForAlert
 from application.actions.enterprise_edge_list import EnterpriseEdgeList
 from application.actions.enterprise_events_for_alert import EventEnterpriseForAlert
@@ -30,7 +16,20 @@ from application.actions.network_gateway_list import NetworkGatewayList
 from application.clients.velocloud_client import VelocloudClient
 from application.models import subscriptions
 from application.repositories.velocloud_repository import VelocloudRepository
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import config
+from dataclasses import asdict
+from framework.http.server import Config as QuartConfig
+from framework.http.server import Server as QuartServer
+from framework.logging.formatters import Papertrail as PapertrailFormatter
+from framework.logging.formatters import Standard as StandardFormatter
+from framework.logging.handlers import Papertrail as PapertrailHandler
+from framework.logging.handlers import Stdout as StdoutHandler
+from framework.nats.client import Client
+from framework.nats.exceptions import NatsException
+from framework.nats.models import *
+from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
+from prometheus_client import start_http_server
 
 base_handler = StdoutHandler()
 base_handler.setFormatter(StandardFormatter(environment_name=config.ENVIRONMENT_NAME))
