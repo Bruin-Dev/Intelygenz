@@ -1,7 +1,7 @@
 ## Forward ticket to queue
 
 ```python
-self._logger.info(
+logger.info(
     f"Checking if ticket_id {ticket_id} for serial {serial_number} is resolved before "
     f"attempting to forward to {target_queue} queue..."
 )
@@ -12,7 +12,7 @@ self._logger.info(
 
 * If the maximum number of retries was exceeded:
   ```python
-  self._logger.error(
+  logger.error(
       f"An error occurred while trying to forward ticket_id {ticket_id} for serial {serial_number} to"
       f" {target_queue} queue -> {e}"
   )

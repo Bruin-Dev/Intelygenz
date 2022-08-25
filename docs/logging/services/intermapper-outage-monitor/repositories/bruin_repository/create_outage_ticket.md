@@ -1,7 +1,7 @@
 ## Create outage ticket
 
 ```python
-self._logger.info(f"Creating outage ticket for device {service_number} that belongs to client {client_id}...")
+logger.info(f"Creating outage ticket for device {service_number} that belongs to client {client_id}...")
 ```
 
 * If there's an error while posting the data to the `bruin-bridge`:
@@ -11,12 +11,12 @@ self._logger.info(f"Creating outage ticket for device {service_number} that belo
       f"{client_id} -> {e}"
   )
   [...]
-  self._logger.error(err_msg)
+  logger.error(err_msg)
   ```
   END
 
 ```python
-self._logger.info(f"Outage ticket for device {service_number} that belongs to client {client_id} created!")
+logger.info(f"Outage ticket for device {service_number} that belongs to client {client_id} created!")
 ```
 
 * If response status for get serial attribute from inventory is not ok, or is `409`, `471`, `472` or `473`:

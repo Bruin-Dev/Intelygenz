@@ -1,15 +1,15 @@
 ## Process E-mail batch
 
 ```python
-self._logger.info(f"Processing {len(emails)} email(s) with circuit ID {circuit_id}...")
+logger.info(f"Processing {len(emails)} email(s) with circuit ID {circuit_id}...")
 ```
 
 * If Circuit ID is undefined or Circuit ID is `SD-WAN`:
     * For each email in batch:
-        * [mark email as read](../repositories/notifications_repository/mark_email_as_read.md)
+        * [mark email as read](../repositories/email_repository/mark_email_as_read.md)
   
     ```python
-    self._logger.info(f"Invalid circuit_id. Skipping emails with circuit_id {circuit_id}...")
+    logger.info(f"Invalid circuit_id. Skipping emails with circuit_id {circuit_id}...")
     ```
     END
 
@@ -17,7 +17,7 @@ self._logger.info(f"Processing {len(emails)} email(s) with circuit ID {circuit_i
 
 * If response status for call to get inventory by circuit ID is not ok:
   ```python
-  self._logger.error(
+  logger.error(
       f"Failed to get service number by circuit ID. Skipping emails with circuit_id {circuit_id}..."
   )
   ```
@@ -25,19 +25,19 @@ self._logger.info(f"Processing {len(emails)} email(s) with circuit ID {circuit_i
 
   * If status = 204:
     ```python
-    self._logger.error(
+    logger.error(
         f"Bruin returned a 204 when getting the service number for circuit_id {circuit_id}. "
         f"Marking all emails with this circuit_id as read"
     )
     ```
     * For each email in batch:
         * If environment is `PRODUCTION`:
-            * [mark email as read](../repositories/notifications_repository/mark_email_as_read.md)
+            * [mark email as read](../repositories/email_repository/mark_email_as_read.md)
         * END
 
 * For email in batch:
     * [_process_email](_process_email.md)
 
 ```python
-self._logger.info(f"Finished processing all emails with circuit_id {circuit_id}!")
+logger.info(f"Finished processing all emails with circuit_id {circuit_id}!")
 ```

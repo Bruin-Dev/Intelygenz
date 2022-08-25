@@ -1,7 +1,7 @@
 ## Get unread emails
 
 ```python
-self._logger.info(
+logger.info(
     f"Getting the unread emails from the inbox of {email_account} sent from the users: "
     f"{email_filter} in the last {lookup_days} days"
 )
@@ -11,7 +11,7 @@ self._logger.info(
   ```python
   err_msg = f"An error occurred while getting the unread emails from the inbox of {email_account} -> {e}"
   [...]
-  self._logger.error(err_msg)
+  logger.error(err_msg)
   ```
   END
 
@@ -23,9 +23,9 @@ self._logger.info(
       f"Error {response_status} - {response_body}"
   )
   [...]
-  self._logger.error(err_msg)
+  logger.error(err_msg)
   ```
 * Otherwise:
   ```python
-  self._logger.info(f"Got the unread emails from the inbox of {email_account}")
+  logger.info(f"Got the unread emails from the inbox of {email_account}")
   ```

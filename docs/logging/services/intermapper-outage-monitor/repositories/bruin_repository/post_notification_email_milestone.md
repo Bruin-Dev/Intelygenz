@@ -1,7 +1,7 @@
 ## Post notification email milestone
 
 ```python
-self._logger.info(
+logger.info(
     f"Sending email for ticket id {ticket_id}, "
     f"service_number {service_number} "
     f"and notification type {notification_type}..."
@@ -16,13 +16,13 @@ self._logger.info(
       f"and notification type {notification_type}...-> {e}"
   )
   [...]
-  self._logger.error(err_msg)
+  logger.error(err_msg)
   ```
   END
 
 * If response status for post notification email milestone is ok:
   ```python
-  self._logger.info(
+  logger.info(
       f"Email sent for ticket {ticket_id}, service number {service_number} "
       f"and notification type {notification_type}!"
   )
@@ -36,5 +36,5 @@ self._logger.info(
       f"Error {response_status} - {response_body}"
   )
   [...]
-  self._logger.error(err_msg)
+  logger.error(err_msg)
   ```

@@ -2,17 +2,17 @@
 
 * If message is undefined or its UID is `-1`:
   ```python
-  self._logger.error(f"Invalid message: {email}")
+  logger.error(f"Invalid message: {email}")
   ```
   END
 
 ```python
-self._logger.info(f"Processing email with msg_uid: {msg_uid} and subject: {subject}")
+logger.info(f"Processing email with msg_uid: {msg_uid} and subject: {subject}")
 ```
 
 * If e-mail represents an UP event:
   ```python
-  self._logger.info(
+  logger.info(
       f'Event from InterMapper was {parsed_email_dict["event"]}, there is no need to create '
       f"a new ticket. Checking for autoresolve ..."
   )
@@ -21,7 +21,7 @@ self._logger.info(f"Processing email with msg_uid: {msg_uid} and subject: {subje
 
 * If e-mail represents a DOWN event:
   ```python
-  self._logger.info(
+  logger.info(
       f'Event from InterMapper was {parsed_email_dict["event"]}, '
       f'condition was {parsed_email_dict["condition"]}. Checking for ticket creation ...'
   )
@@ -29,7 +29,7 @@ self._logger.info(f"Processing email with msg_uid: {msg_uid} and subject: {subje
 
     * If device is a PIAB:
       ```python
-      self._logger.info(
+      logger.info(
           f"The probe type from Intermapper is {parsed_email_dict['probe_type']}."
           f"Attempting to get additional parameters from DRI..."
       )
@@ -40,7 +40,7 @@ self._logger.info(f"Processing email with msg_uid: {msg_uid} and subject: {subje
 
 * If e-mail represents any other kind of event:
   ```python
-  self._logger.info(
+  logger.info(
       f'Event from InterMapper was {parsed_email_dict["event"]}, '
       f"so no further action is needs to be taken"
   )
@@ -51,11 +51,11 @@ self._logger.info(f"Processing email with msg_uid: {msg_uid} and subject: {subje
 
 * If event was processed successfully:
   ```python
-  self._logger.info(f"Processed email: {msg_uid}")
+  logger.info(f"Processed email: {msg_uid}")
   ```
 * Otherwise:
   ```python
-  self._logger.error(
+  logger.error(
       f"Email with msg_uid: {msg_uid} and subject: {subject} "
       f"related to service number: {service_number} could not be processed"
   )

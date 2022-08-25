@@ -1,7 +1,7 @@
 ## Append note to ticket
 
 ```python
-self._logger.info(f"Appending note to ticket {ticket_id}... Note contents: {note}")
+logger.info(f"Appending note to ticket {ticket_id}... Note contents: {note}")
 ```
 
 * If there's an error while posting the data to the `bruin-bridge`:
@@ -11,7 +11,7 @@ self._logger.info(f"Appending note to ticket {ticket_id}... Note contents: {note
       f"Ticket note: {note}. Error: {e}"
   )
   [...]
-  self._logger.error(err_msg)
+  logger.error(err_msg)
   ```
   END
 
@@ -23,9 +23,9 @@ self._logger.info(f"Appending note to ticket {ticket_id}... Note contents: {note
       f"Error {response_status} - {response_body}"
   )
   [...]
-  self._logger.error(err_msg)
+  logger.error(err_msg)
   ```
 * Otherwise:
   ```python
-  self._logger.info(f"Note appended to ticket {ticket_id}!")
+  logger.info(f"Note appended to ticket {ticket_id}!")
   ```

@@ -1,7 +1,7 @@
 ## Unpause ticket detail
 
 ```python
-self._logger.info(f"Unpausing detail {detail_id} (serial {service_number}) of ticket {ticket_id}...")
+logger.info(f"Unpausing detail {detail_id} (serial {service_number}) of ticket {ticket_id}...")
 ```
 
 * If there's an error while posting the data to the `bruin-bridge`:
@@ -11,7 +11,7 @@ self._logger.info(f"Unpausing detail {detail_id} (serial {service_number}) of ti
       f"Error: {e}"
   )
   [...]
-  self._logger.error(err_msg)
+  logger.error(err_msg)
   ```
   END
 
@@ -23,9 +23,9 @@ self._logger.info(f"Unpausing detail {detail_id} (serial {service_number}) of ti
       f"Error: Error {response_status} - {response_body}"
   )
   [...]
-  self._logger.error(err_msg)
+  logger.error(err_msg)
   ```
 * Otherwise:
   ```python
-  self._logger.info(f"Detail {detail_id} (serial {service_number}) of ticket {ticket_id} was unpaused!")
+  logger.info(f"Detail {detail_id} (serial {service_number}) of ticket {ticket_id} was unpaused!")
   ```

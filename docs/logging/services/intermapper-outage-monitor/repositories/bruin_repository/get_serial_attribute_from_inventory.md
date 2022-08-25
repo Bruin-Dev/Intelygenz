@@ -1,7 +1,7 @@
 ## Get serial attribute from inventory
 
 ```python
-self._logger.info(
+logger.info(
     f"Getting inventory attributes' serial number for service number {service_number} and client ID"
     f" {client_id}"
 )
@@ -14,7 +14,7 @@ self._logger.info(
       f"client ID {client_id}: {e}"
   )
   [...]
-  self._logger.error(err_msg)
+  logger.error(err_msg)
   ```
   END
 
@@ -26,11 +26,11 @@ self._logger.info(
       f"Error {response_status} - {response_body}"
   )
   [...]
-  self._logger.error(err_msg)
+  logger.error(err_msg)
   ```
 * Otherwise:
   ```python
-  self._logger.info(
+  logger.info(
       f"Got inventory attributes' serial number for service number {service_number} and client ID "
       f"{client_id}"
   )

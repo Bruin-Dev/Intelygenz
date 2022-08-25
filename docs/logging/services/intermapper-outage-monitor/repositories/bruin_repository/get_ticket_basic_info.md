@@ -1,6 +1,6 @@
 ## Get ticket basic info
 ```python
-self._logger.info(
+logger.info(
     f"Getting all tickets basic info with any status of {ticket_statuses}, with ticket topic "
     f"VOO, service number {service_number} and belonging to client {client_id} from Bruin..."
 )
@@ -13,7 +13,7 @@ self._logger.info(
       f" of {ticket_statuses}, with ticket topic VOO and belonging to client {client_id} -> {e}"
   )
   [...]
-  self._logger.error(err_msg)
+  logger.error(err_msg)
   ```
   END
 
@@ -26,11 +26,11 @@ self._logger.info(
       f"Error {response_status} - {response_body}"
   )
   [...]
-  self._logger.error(err_msg)
+  logger.error(err_msg)
   ```
 * Otherwise:
   ```python
-  self._logger.info(
+  logger.info(
       f"Got all tickets basic info with any status of {ticket_statuses}, with ticket topic "
       f"VOO, service number {service_number} and belonging to client "
       f"{client_id} from Bruin!"

@@ -1,14 +1,14 @@
 ## Get DRI parameters
 
 ```python
-self._logger.info(f"Getting DRI parameters of serial number {serial_number}")
+logger.info(f"Getting DRI parameters of serial number {serial_number}")
 ```
 
 * If there's an error while asking for the data to the `dri-bridge`:
   ```python
   err_msg = f"An error occurred while getting DRI parameter for serial number {serial_number}. Error: {e}"
   [...]
-  self._logger.error(err_msg)
+  logger.error(err_msg)
   ```
   END
 
@@ -20,9 +20,9 @@ self._logger.info(f"Getting DRI parameters of serial number {serial_number}")
       f"Error {response_status} - {response_body}"
   )
   [...]
-  self._logger.error(err_msg)
+  logger.error(err_msg)
   ```
 * Otherwise:
   ```python
-  self._logger.info(f"Got DRI parameter of serial number {serial_number}!")
+  logger.info(f"Got DRI parameter of serial number {serial_number}!")
   ```
