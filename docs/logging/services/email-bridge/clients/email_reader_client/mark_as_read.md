@@ -4,7 +4,7 @@
 
 * If there is an error while connecting to the email server:
   ```python
-  self._logger.error(f"Cannot mark email {msg_uid} as read due to email server being None")
+  logger.error(f"Cannot mark email {msg_uid} as read due to email server being None")
   ```
   END
   
@@ -12,7 +12,7 @@ Mark email related to the given identifier `msg_uid` as read
 
 * If there is an error while marking the email as read:
   ```python
-  self._logger.error(f"Error marking message {msg_uid} as read due to {err}")
+  logger.error(f"Error marking message {msg_uid} as read due to {err}")
   ```
   END
 

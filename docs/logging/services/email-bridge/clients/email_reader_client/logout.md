@@ -2,7 +2,7 @@
 
 * If there is not a server connection:
   ```python
-  self._logger.error(f"Cannot log out due to current email server being None")
+  logger.error(f"Cannot log out due to current email server being None")
   ```
   END
 
@@ -13,5 +13,5 @@
   END
 
 ```python
-self._logger.info("Logged out from Gmail!")
+logger.info("Logged out from Gmail!")
 ```

@@ -3,7 +3,7 @@
 * If there is not a matching password for the given email account:
   ```python
   unread_emails = f"Email account {email_account}'s password is not in our MONITORABLE_EMAIL_ACCOUNTS dict"
-  self._logger.error(unread_emails)
+  logger.error(unread_emails)
   ```
   END
 
