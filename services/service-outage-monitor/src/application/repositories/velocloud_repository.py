@@ -212,6 +212,13 @@ class VelocloudRepository:
                 )
                 continue
 
+            if link["interface"] is None:
+                self._logger.info(
+                    f"Link from edge {edge_name} in host {velocloud_host} and enterprise {enterprise_name} "
+                    f"(ID: {enterprise_id}) has a null interface. Skipping..."
+                )
+                continue
+
             edges_by_serial_number.setdefault(
                 serial_number,
                 {

@@ -765,6 +765,36 @@ class TestVelocloudRepository:
             "linkId": 5293,
             "linkIpAddress": "70.59.5.185",
         }
+        link_with_invalid_interface = {
+            "host": "mettel.velocloud.net",
+            "enterpriseName": "Sarif Industries",
+            "enterpriseId": 2,
+            "enterpriseProxyId": None,
+            "enterpriseProxyName": None,
+            "edgeName": "Travis Touchdown",
+            "edgeState": "NEVER_ACTIVATED",
+            "edgeSystemUpSince": "2020-09-14T05:07:40.000Z",
+            "edgeServiceUpSince": "2020-09-14T05:08:22.000Z",
+            "edgeLastContact": "2020-09-29T04:48:55.000Z",
+            "edgeId": 1,
+            "edgeSerialNumber": serial_number_3,
+            "edgeHASerialNumber": None,
+            "edgeModelNumber": "edge520",
+            "edgeLatitude": None,
+            "edgeLongitude": None,
+            "displayName": None,
+            "isp": None,
+            "interface": None,
+            "internalId": None,
+            "linkState": None,
+            "linkLastActive": None,
+            "linkVpnState": None,
+            "linkId": None,
+            "linkIpAddress": None,
+            "linkIpV6Address": None,
+            "linkMode": None,
+            "linkBackupState": None,
+        }
 
         links_with_edge_info = [
             link_1_with_edge_1_info,
@@ -773,6 +803,7 @@ class TestVelocloudRepository:
             link_2_with_edge_2_info,
             invalid_link_with_edge_info,
             link_with_never_activated_edge_info,
+            link_with_invalid_interface,
         ]
 
         logger = Mock()
