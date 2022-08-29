@@ -13,7 +13,6 @@ from framework.nats.client import Client
 from framework.nats.models import Connection
 from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
 from prometheus_client import start_http_server
-from pytz import timezone
 from redis.client import Redis
 
 from application.actions.intermapper_monitoring import InterMapperMonitor
@@ -25,6 +24,7 @@ from application.repositories.notifications_repository import NotificationsRepos
 from application.repositories.utils_repository import UtilsRepository
 from config import config
 
+# Standard output logging
 base_handler = StdoutHandler()
 base_handler.setFormatter(StandardFormatter(environment_name=config.ENVIRONMENT_NAME))
 
@@ -36,6 +36,7 @@ framework_logger = logging.getLogger("framework")
 framework_logger.setLevel(logging.DEBUG)
 framework_logger.addHandler(base_handler)
 
+# Papertrail logging
 if config.LOG_CONFIG["papertrail"]["active"]:
     pt_handler = PapertrailHandler(
         host=config.LOG_CONFIG["papertrail"]["host"],
@@ -49,6 +50,11 @@ if config.LOG_CONFIG["papertrail"]["active"]:
     )
     app_logger.addHandler(pt_handler)
     framework_logger.addHandler(pt_handler)
+
+# APScheduler logging
+apscheduler_logger = logging.getLogger("apscheduler")
+apscheduler_logger.setLevel(logging.DEBUG)
+apscheduler_logger.addHandler(base_handler)
 
 
 class Container:
