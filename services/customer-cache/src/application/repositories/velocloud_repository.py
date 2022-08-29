@@ -199,6 +199,13 @@ class VelocloudRepository:
                 )
                 continue
 
+            if link["interface"] is None:
+                self._logger.info(
+                    f"Link from edge {edge_name} in host {velocloud_host} and enterprise {enterprise_name} "
+                    f"(ID: {enterprise_id}) has a null interface. Skipping..."
+                )
+                continue
+
             edge_full_id = {"host": link["host"], "enterprise_id": enterprise_id, "edge_id": link["edgeId"]}
             blacklist_edges = self._config.REFRESH_CONFIG["blacklisted_edges"]
             if edge_full_id in blacklist_edges:
