@@ -15,3 +15,11 @@
                     f"has never been activated. Skipping..."
                 )
     ```
+
+  * If link interface is not valid (i.e. `null`):
+    ```
+    self._logger.info(
+        f"Link from edge {edge_name} in host {velocloud_host} and enterprise {enterprise_name} "
+        f"(ID: {enterprise_id}) has a null interface, so it might have been decommissioned. Skipping..."
+    )
+    ```
