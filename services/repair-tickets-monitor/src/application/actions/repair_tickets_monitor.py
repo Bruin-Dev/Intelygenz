@@ -251,13 +251,6 @@ class RepairTicketsMonitor:
                 self._new_tagged_emails_repository.mark_complete(email.id)
                 return
 
-            auto_reply_whitelist = self._config.MONITOR_CONFIG["auto_reply_whitelist"]
-            auto_reply_allowed = True
-            if len(auto_reply_whitelist) > 0:
-                auto_reply_allowed = any(
-                    recipient_email.lower() in auto_reply_whitelist for recipient_email in email.recipient_addresses
-                )
-
             is_actionable = self._is_inference_actionable(inference_data)
             is_ticket_actionable = self._is_ticket_actionable(inference_data)
 
@@ -409,6 +402,10 @@ class RepairTicketsMonitor:
 
                 auto_reply_enabled = self._config.MONITOR_CONFIG["auto_reply_enabled"]
                 log.info(f"email_id={email.id} auto_reply_enabled={auto_reply_enabled}")
+                auto_reply_whitelist = self._config.MONITOR_CONFIG["auto_reply_whitelist"]
+                auto_reply_allowed = True
+                if len(auto_reply_whitelist) > 0:
+                    auto_reply_allowed = email.sender_address in auto_reply_whitelist
                 log.info(f"email_id={email.id} auto_reply_allowed={auto_reply_allowed}")
 
                 send_auto_reply = auto_reply_enabled and auto_reply_allowed
