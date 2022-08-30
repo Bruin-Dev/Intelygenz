@@ -1,0 +1,1864 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://docs.mettel-automation.net/1.143.2/parameters/parameters/">
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
+    
+    
+      
+        <title>Parameter Store parameters - Automation Engine Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.8c5ef100.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.9647289d.min.css">
+        
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#parameter-store-parameters" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        <aside class="md-banner md-banner--warning">
+          
+        </aside>
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Automation Engine Documentation" class="md-header__button md-logo" aria-label="Automation Engine Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Automation Engine Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Parameter Store parameters
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../.." class="md-tabs__link">
+      Home
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../CONCEPTS/" class="md-tabs__link">
+        Topics
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Automation Engine Documentation" class="md-nav__button md-logo" aria-label="Automation Engine Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Automation Engine Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Topics
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Topics" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Topics
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../CONCEPTS/" class="md-nav__link">
+        Concepts
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_2" type="checkbox" id="__nav_2_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_2">
+          Pipelines
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Pipelines" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_2">
+          <span class="md-nav__icon md-icon"></span>
+          Pipelines
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline/BASIC_CI_CONFIGURATION/" class="md-nav__link">
+        Basic configurations
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline/PIPELINE_RULES/" class="md-nav__link">
+        Pipeline rules
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_3" type="checkbox" id="__nav_2_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_3">
+          Documentation
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Documentation" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_3">
+          <span class="md-nav__icon md-icon"></span>
+          Documentation
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DOCUMENTATION/" class="md-nav__link">
+        Organization
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../decisions/" class="md-nav__link">
+        MetTel decisions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../metrics-definitions/" class="md-nav__link">
+        Metrics definitions
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Development rules
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_5" type="checkbox" id="__nav_2_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_5">
+          Work in a local env
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Work in a local env" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_5">
+          <span class="md-nav__icon md-icon"></span>
+          Work in a local env
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kafka/LAUNCH_DOCKER_COMPOSE/" class="md-nav__link">
+        Launch docker compose
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../snowflake/" class="md-nav__link">
+        Datalake
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Manual processes
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+
+
+<h1 id="parameter-store-parameters">Parameter Store parameters</h1>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Link to AWS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/automation-engine/common/autoresolve-day-end-hour</td>
+<td>Defines the hour at which the day ends and the night starts for dynamic auto-resolution times</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/autoresolve-day-end-hour/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/autoresolve-day-start-hour</td>
+<td>Defines the hour at which the night ends and the day starts for dynamic auto-resolution times</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/autoresolve-day-start-hour/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/bruin-ipa-system-username</td>
+<td>Name of the user that performs operations in Bruin on behalf of the IPA system</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/bruin-ipa-system-username/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/customer-cache/refresh-check-interval</td>
+<td>Defines how often the next refresh flag is checked to decide if it's time to refresh the cache or not</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/customer-cache/refresh-check-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/customer-cache/refresh-job-interval</td>
+<td>Defines how often the cache is refreshed</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/customer-cache/refresh-job-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/customer-cache/whitelisted-management-statuses</td>
+<td>Management statuses that should be considered in the caching process</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/customer-cache/whitelisted-management-statuses/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/digi-bridge/digi-headers</td>
+<td>List of possible headers included in all DiGi links</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/digi-bridge/digi-headers/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/digi-bridge/digi-reboot-api-token-ttl</td>
+<td>Auth tokens TTL</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/digi-bridge/digi-reboot-api-token-ttl/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/digi-reboot-report/logs-lookup-interval</td>
+<td>Defines how much time back to look for DiGi Reboot logs</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/digi-reboot-report/logs-lookup-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/digi-reboot-report/report-job-interval</td>
+<td>Defines how often the report is built and sent</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/digi-reboot-report/report-job-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/dri-bridge/base-url</td>
+<td>Base URL for DRI API</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/dri-bridge/base-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/dri-bridge/dri-data-redis-ttl</td>
+<td>Defines how much time the data retrieved from DRI for a specific device can be stored and served from Redis</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/dri-bridge/dri-data-redis-ttl/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/dri-bridge/password</td>
+<td>Password to log into DRI API</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/dri-bridge/password/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/dri-bridge/username</td>
+<td>Username to log into DRI API</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/dri-bridge/username/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/email-tagger-monitor/api-endpoint-prefix</td>
+<td>API server endpoint prefix for incoming requests</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/email-tagger-monitor/api-endpoint-prefix/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/email-tagger-monitor/max-concurrent-emails</td>
+<td>Defines how many simultaneous emails are processed</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/email-tagger-monitor/max-concurrent-emails/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/email-tagger-monitor/new-emails-job-interval</td>
+<td>Defines how often new emails received from Bruin are processed</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/email-tagger-monitor/new-emails-job-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/email-tagger-monitor/new-tickets-job-interval</td>
+<td>Defines how often new tickets received from Bruin are sent to the KRE to train the AI model</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/email-tagger-monitor/new-tickets-job-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/email-tagger-monitor/reply-email-ttl</td>
+<td>Reply emails time to live (in milliseconds) when storing them to Redis</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/email-tagger-monitor/reply-email-ttl/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/fraud-monitor/alerts-lookup-days</td>
+<td>How many days to look back for Fraud alerts in the desired e-mail inbox</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/fraud-monitor/alerts-lookup-days/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/fraud-monitor/default-client-info-for-did-without-inventory</td>
+<td>Default client info used when the DID device in the Fraud alert does not have an inventory assigned in Bruin</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/fraud-monitor/default-client-info-for-did-without-inventory/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/fraud-monitor/default-contact-for-new-tickets</td>
+<td>Default contact details used when a Fraud is reported as a Service Affecting ticket</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/fraud-monitor/default-contact-for-new-tickets/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/fraud-monitor/monitoring-job-interval</td>
+<td>Defines how often Fraud e-mails are checked to report them as Service Affecting tickets</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/fraud-monitor/monitoring-job-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/fraud-monitor/observed-inbox-senders</td>
+<td>Senders addresses whose e-mail messages represent Fraud alerts</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/fraud-monitor/observed-inbox-senders/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/gateway-monitor/first-gateway-lookup-interval</td>
+<td>Lookup interval for the first time gateway statuses are retrieved</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/gateway-monitor/first-gateway-lookup-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/gateway-monitor/monitoring-job-interval</td>
+<td>Defines how often gateways are checked to find and report incidents</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/gateway-monitor/monitoring-job-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/gateway-monitor/second-gateway-lookup-interval</td>
+<td>Lookup interval for the second time gateway statuses are retrieved</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/gateway-monitor/second-gateway-lookup-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/gateway-monitor/tunnel-count-threshold</td>
+<td>Threshold for tunnel count incidents</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/gateway-monitor/tunnel-count-threshold/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/hawkeye-affecting-monitor/monitored-product-category</td>
+<td>Bruin's product category under monitoring</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/hawkeye-affecting-monitor/monitored-product-category/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/hawkeye-affecting-monitor/monitoring-job-interval</td>
+<td>Defines how often devices are checked to find and report issues</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/hawkeye-affecting-monitor/monitoring-job-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/hawkeye-affecting-monitor/probes-tests-results-lookup-interval</td>
+<td>Defines how much time back to look for probes' tests results</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/hawkeye-affecting-monitor/probes-tests-results-lookup-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/hawkeye-bridge/base-url</td>
+<td>Base URL to access Hawkeye API</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/hawkeye-bridge/base-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/hawkeye-bridge/client-password</td>
+<td>Client password to log into Hawkeye API</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/hawkeye-bridge/client-password/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/hawkeye-bridge/client-username</td>
+<td>Client username to log into Hawkeye API</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/hawkeye-bridge/client-username/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/hawkeye-customer-cache/refresh-job-interval</td>
+<td>Defines how often the cache is refreshed</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/hawkeye-customer-cache/refresh-job-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/hawkeye-customer-cache/whitelisted-management-statuses</td>
+<td>Management statuses that should be considered in the caching process</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/hawkeye-customer-cache/whitelisted-management-statuses/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/hawkeye-outage-monitor/grace-period-to-autoresolve-after-last-documented-outage</td>
+<td>Defines for how long a ticket can be auto-resolved after the last documented outage</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/hawkeye-outage-monitor/grace-period-to-autoresolve-after-last-documented-outage/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/hawkeye-outage-monitor/monitored-product-category</td>
+<td>Bruin's product category under monitoring</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/hawkeye-outage-monitor/monitored-product-category/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/hawkeye-outage-monitor/monitoring-job-interval</td>
+<td>Defines how often devices are checked to find and report issues</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/hawkeye-outage-monitor/monitoring-job-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/hawkeye-outage-monitor/quarantine-for-devices-in-outage</td>
+<td>Defines how much time to wait before checking if a particular device is still in outage state</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/hawkeye-outage-monitor/quarantine-for-devices-in-outage/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/intermapper-outage-monitor/dri-parameters-for-piab-notes</td>
+<td>Parameters to fetch from DRI to include them in InterMapper notes for PIAB devices</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/intermapper-outage-monitor/dri-parameters-for-piab-notes/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/intermapper-outage-monitor/grace-period-to-autoresolve-after-last-documented-outage-day-time</td>
+<td>Defines for how long a ticket can be auto-resolved after the last documented trouble during the day</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/intermapper-outage-monitor/grace-period-to-autoresolve-after-last-documented-outage-day-time/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/intermapper-outage-monitor/grace-period-to-autoresolve-after-last-documented-outage-night-time</td>
+<td>Defines for how long a ticket can be auto-resolved after the last documented trouble during the night</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/intermapper-outage-monitor/grace-period-to-autoresolve-after-last-documented-outage-night-time/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/intermapper-outage-monitor/max-autoresolves-per-ticket</td>
+<td>Defines how many times a ticket can be auto-resolved</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/intermapper-outage-monitor/max-autoresolves-per-ticket/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/intermapper-outage-monitor/max-concurrent-email-batches</td>
+<td>Defines how many simultaneous email batches related to the same InterMapper asset are processed</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/intermapper-outage-monitor/max-concurrent-email-batches/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/intermapper-outage-monitor/monitored-up-events</td>
+<td>InterMapper events considered as UP</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/intermapper-outage-monitor/monitored-up-events/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/intermapper-outage-monitor/monitoring-job-interval</td>
+<td>Defines how often InterMapper events are checked to find and report issues</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/intermapper-outage-monitor/monitoring-job-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/intermapper-outage-monitor/observed-inbox-senders</td>
+<td>Senders addresses whose e-mail messages represent InterMapper events</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/intermapper-outage-monitor/observed-inbox-senders/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/timezone</td>
+<td>Timezone used for periodic jobs, timestamps, etc</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/timezone/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/intermapper-outage-monitor/events-lookup-days</td>
+<td>How many days to look back for InterMapper events in the desired e-mail inbox</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/intermapper-outage-monitor/events-lookup-days/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/intermapper-outage-monitor/monitored-down-events</td>
+<td>InterMapper events considered as DOWN</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/intermapper-outage-monitor/monitored-down-events/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/intermapper-outage-monitor/whitelisted-product-categories-for-autoresolve</td>
+<td>Defines which Bruin product categories are taken into account when auto-resolving tickets</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/intermapper-outage-monitor/whitelisted-product-categories-for-autoresolve/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/link-labels-blacklisted-from-asr-forwards</td>
+<td>List of link labels that are excluded from forwards to the ASR queue</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/link-labels-blacklisted-from-asr-forwards/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/link-labels-blacklisted-from-hnoc-forwards</td>
+<td>List of link labels that are excluded from forwards to the HNOC queue</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/link-labels-blacklisted-from-hnoc-forwards/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/lumin-billing-report/access-token</td>
+<td>Access token for Lumin's Billing API</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/lumin-billing-report/access-token/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/lumin-billing-report/customer-name</td>
+<td>Name of the customer for which the Billing Report will be generated</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/lumin-billing-report/customer-name/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/lumin-billing-report/email-account-for-message-delivery-password</td>
+<td>Email account used to send messages to other accounts (password)</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/lumin-billing-report/email-account-for-message-delivery-password/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/lumin-billing-report/lumin-billing-api-base-url</td>
+<td>Base URL for Lumin's Billing API</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/lumin-billing-report/lumin-billing-api-base-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/lumin-billing-report/recipient</td>
+<td>Email address to send the report to</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/lumin-billing-report/recipient/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/metrics/relevant-clients</td>
+<td>List of relevant client names to use on Prometheus metrics labels</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/metrics/relevant-clients/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/nats/endpoint-url</td>
+<td>Nats endpoint URL for messaging</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/nats/endpoint-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/email-bridge/email-account-for-message-delivery-password</td>
+<td>Email account used to send messages to other accounts (password)</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/email-bridge/email-account-for-message-delivery-password/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/email-bridge/email-account-for-message-delivery-username</td>
+<td>Email account used to send messages to other accounts (username)</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/email-bridge/email-account-for-message-delivery-username/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/papertrail/host</td>
+<td>Papertrail host to send logs</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/papertrail/host/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/papertrail/port</td>
+<td>Papertrail port to send logs</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/papertrail/port/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/repair-tickets-monitor/max-concurrent-closed-tickets-for-feedback</td>
+<td>Defines how many simultaneous new closed tickets are sent to the KRE to train the AI model</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/repair-tickets-monitor/max-concurrent-closed-tickets-for-feedback/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/repair-tickets-monitor/max-concurrent-created-tickets-for-feedback</td>
+<td>Defines how many simultaneous new created tickets are sent to the KRE to train the AI model</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/repair-tickets-monitor/max-concurrent-created-tickets-for-feedback/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/repair-tickets-monitor/max-concurrent-emails-for-monitoring</td>
+<td>Defines how many simultaneous tagged emails are processed</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/repair-tickets-monitor/max-concurrent-emails-for-monitoring/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/repair-tickets-monitor/new-closed-tickets-feedback-job-interval</td>
+<td>Defines how often new closed tickets fetched from Bruin are sent to the KRE to train the AI model</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/repair-tickets-monitor/new-closed-tickets-feedback-job-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/repair-tickets-monitor/new-created-tickets-feedback-job-interval</td>
+<td>Defines how often new created tickets fetched from Bruin are sent to the KRE to train the AI model</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/repair-tickets-monitor/new-created-tickets-feedback-job-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/repair-tickets-monitor/rta-monitor-job-interval</td>
+<td>Defines how often new emails tagged by the E-mail Tagger are processed</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/repair-tickets-monitor/rta-monitor-job-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/repair-tickets-monitor/tag-ids-mapping</td>
+<td>Mapping of tag names and their corresponding numeric ID, as defined in the AI model</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/repair-tickets-monitor/tag-ids-mapping/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/daily-bandwidth-report/enabled-customers-per-host</td>
+<td>Mapping of VeloCloud hosts and Bruin customer IDs for whom this report will trigger periodically</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/daily-bandwidth-report/enabled-customers-per-host/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/daily-bandwidth-report/execution-cron-expression</td>
+<td>Cron expression that determines when to build and deliver this report</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/daily-bandwidth-report/execution-cron-expression/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/daily-bandwidth-report/lookup-interval</td>
+<td>Defines how much time back to look for bandwidth metrics and Bruin tickets</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/daily-bandwidth-report/lookup-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/daily-bandwidth-report/recipients</td>
+<td>List of recipients that will get these reports</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/daily-bandwidth-report/recipients/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/monitor/autoresolve-lookup-interval</td>
+<td>Defines how much time back to look for all kinds of metrics while running auto-resolves</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/autoresolve-lookup-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/monitor/bandwidth-over-utilization-monitoring-lookup-interval</td>
+<td>Defines how much time back to look for Bandwidth metrics in Bandwidth Over Utilization checks</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/bandwidth-over-utilization-monitoring-lookup-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/monitor/bandwidth-over-utilization-monitoring-threshold</td>
+<td>Threshold for Bandwidth Over Utilization troubles</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/bandwidth-over-utilization-monitoring-threshold/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/monitor/circuit-instability-autoresolve-threshold</td>
+<td>Max DOWN events allowed in Circuit Instability checks while auto-resolving tickets</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/circuit-instability-autoresolve-threshold/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/monitor/circuit-instability-monitoring-lookup-interval</td>
+<td>Defines how much time back to look for DOWN events in Circuit Instability checks</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/circuit-instability-monitoring-lookup-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/monitor/circuit-instability-monitoring-threshold</td>
+<td>Threshold for Circuit Instability troubles</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/circuit-instability-monitoring-threshold/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/monitor/customers-to-always-use-default-contact-info</td>
+<td>[Monitoring] List Bruin customers that should always use the default contact info</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/customers-to-always-use-default-contact-info/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/monitor/customers-with-bandwidth-over-utilization-monitoring</td>
+<td>List of client IDs for which Bandwidth Over Utilization checks are enabled</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/customers-with-bandwidth-over-utilization-monitoring/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/monitor/default-contact-info-per-customer</td>
+<td>Mapping of VeloCloud hosts, Bruin customers and default contact info</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/default-contact-info-per-customer/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/monitor/grace-period-to-autoresolve-after-last-documented-trouble-day-time</td>
+<td>Defines for how long a ticket can be auto-resolved after the last documented trouble during the day</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/grace-period-to-autoresolve-after-last-documented-trouble-day-time/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/monitor/grace-period-to-autoresolve-after-last-documented-trouble-night-time</td>
+<td>Defines for how long a ticket can be auto-resolved after the last documented trouble during the night</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/grace-period-to-autoresolve-after-last-documented-trouble-night-time/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/monitor/jitter-monitoring-lookup-interval</td>
+<td>Defines how much time back to look for Jitter metrics in Jitter checks</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/jitter-monitoring-lookup-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/monitor/jitter-monitoring-threshold</td>
+<td>Threshold for Jitter troubles</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/jitter-monitoring-threshold/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/monitor/latency-monitoring-lookup-interval</td>
+<td>Defines how much time back to look for Latency metrics in Latency checks</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/latency-monitoring-lookup-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/monitor/latency-monitoring-threshold</td>
+<td>Threshold for Latency troubles</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/latency-monitoring-threshold/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/monitor/max-autoresolves-per-ticket</td>
+<td>Defines how many times a ticket can be auto-resolved</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/max-autoresolves-per-ticket/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/monitor/monitoring-job-interval</td>
+<td>Defines how often devices are checked to find and report issues</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/monitoring-job-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/monitor/packet-loss-monitoring-lookup-interval</td>
+<td>Defines how much time back to look for Packet Loss metrics in Packet Loss checks</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/packet-loss-monitoring-lookup-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/monitor/packet-loss-monitoring-threshold</td>
+<td>Threshold for Packet Loss troubles</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/packet-loss-monitoring-threshold/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/monitor/wait-time-before-sending-new-milestone-reminder</td>
+<td>How long we need to wait for the milestone reminder email to be sent</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/wait-time-before-sending-new-milestone-reminder/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/monitored-product-category</td>
+<td>Bruin's product category under monitoring</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitored-product-category/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/reoccurring-trouble-report/recipients-per-host-and-customer</td>
+<td>Mapping of VeloCloud hosts, Bruin customer IDs and recipients of these reports</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/reoccurring-trouble-report/recipients-per-host-and-customer/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/reoccurring-trouble-report/reported-troubles</td>
+<td>Troubles that will be reported</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/reoccurring-trouble-report/reported-troubles/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/reoccurring-trouble-report/default-contacts</td>
+<td>List of default contacts to whom this report will always be delivered to</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/reoccurring-trouble-report/default-contacts/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/reoccurring-trouble-report/execution-cron-expression</td>
+<td>Cron expression that determines when to build and deliver this report</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/reoccurring-trouble-report/execution-cron-expression/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/reoccurring-trouble-report/reoccurring-trouble-tickets-threshold</td>
+<td>Number of different tickets a trouble must appear in for a particular edge and interface to include it in the report</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/reoccurring-trouble-report/reoccurring-trouble-tickets-threshold/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-affecting/reoccurring-trouble-report/tickets-lookup-interval</td>
+<td>Defines how much time back to look for Bruin tickets</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/reoccurring-trouble-report/tickets-lookup-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-outage/monitor/business-grade-link-labels</td>
+<td>List of labels that define a link as business grade</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-outage/monitor/business-grade-link-labels/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-outage/monitor/grace-period-before-attempting-new-digi-reboots</td>
+<td>Defines for how long the monitor will wait before attempting a new DiGi Reboot on an edge</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-outage/monitor/grace-period-before-attempting-new-digi-reboots/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-outage/monitor/grace-period-to-autoresolve-after-last-documented-outage-day-time</td>
+<td>Defines for how long a ticket can be auto-resolved after the last documented trouble during the day</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-outage/monitor/grace-period-to-autoresolve-after-last-documented-outage-day-time/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-outage/monitor/grace-period-to-autoresolve-after-last-documented-outage-night-time</td>
+<td>Defines for how long a ticket can be auto-resolved after the last documented trouble during the night</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-outage/monitor/grace-period-to-autoresolve-after-last-documented-outage-night-time/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-outage/monitor/max-autoresolves-per-ticket</td>
+<td>Defines how many times a ticket can be auto-resolved</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-outage/monitor/max-autoresolves-per-ticket/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-outage/monitor/missing-edges-from-cache-report-recipient</td>
+<td>E-mail address that will receive a tiny report showing which edges from VeloCloud responses are not in the cache of customers</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-outage/monitor/missing-edges-from-cache-report-recipient/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-outage/monitor/monitoring-job-interval</td>
+<td>Defines how often devices are checked to find and report issues</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-outage/monitor/monitoring-job-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-outage/monitor/quarantine-for-edges-in-ha-hard-down-outage</td>
+<td>Defines how much time to wait before re-checking an edge currently in Hard Down (HA) state</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-outage/monitor/quarantine-for-edges-in-ha-hard-down-outage/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-outage/monitor/quarantine-for-edges-in-ha-link-down-outage</td>
+<td>Defines how much time to wait before re-checking an edge currently in Link Down (HA) state</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-outage/monitor/quarantine-for-edges-in-ha-link-down-outage/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-outage/monitor/quarantine-for-edges-in-ha-soft-down-outage</td>
+<td>Defines how much time to wait before re-checking an edge currently in Soft Down (HA) state</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-outage/monitor/quarantine-for-edges-in-ha-soft-down-outage/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-outage/monitor/quarantine-for-edges-in-hard-down-outage</td>
+<td>Defines how much time to wait before re-checking an edge currently in Hard Down state</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-outage/monitor/quarantine-for-edges-in-hard-down-outage/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-outage/monitor/quarantine-for-edges-in-link-down-outage</td>
+<td>Defines how much time to wait before re-checking an edge currently in Link Down state</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-outage/monitor/quarantine-for-edges-in-link-down-outage/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-outage/monitor/severity-for-edge-down-outages</td>
+<td>Severity level for Edge Down outages</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-outage/monitor/severity-for-edge-down-outages/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-outage/monitor/severity-for-link-down-outages</td>
+<td>Severity level for Link Down outages</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-outage/monitor/severity-for-link-down-outages/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-outage/monitor/wait-time-before-sending-new-milestone-reminder</td>
+<td>How long we need to wait for the milestone reminder email to be sent</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-outage/monitor/wait-time-before-sending-new-milestone-reminder/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-outage/monitored-product-category</td>
+<td>Bruin's product category under monitoring</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-outage/monitored-product-category/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-outage/triage/last-note-interval</td>
+<td>Defines how long the last note on a ticket is considered recent</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-outage/triage/last-note-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-outage/triage/max-events-per-event-note</td>
+<td>Defines how many events will be included in events notes</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-outage/triage/max-events-per-event-note/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/service-outage/triage/monitoring-job-interval</td>
+<td>Defines how often tickets are checked to see if it needs an initial triage or events note</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-outage/triage/monitoring-job-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/tnba-feedback/feedback-job-interval</td>
+<td>Defines how often tickets are pulled from Bruin and sent to the KRE to train the predictive model</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/tnba-feedback/feedback-job-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/tnba-feedback/grace-period-before-resending-tickets</td>
+<td>Defines for how long a ticket needs to wait before being re-sent to the KRE</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/tnba-feedback/grace-period-before-resending-tickets/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/tnba-feedback/monitored-product-category</td>
+<td>Bruin's product category under monitoring</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/tnba-feedback/monitored-product-category/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/tnba-monitor/grace-period-before-appending-new-tnba-notes</td>
+<td>Defines for how long a ticket needs to wait since it was opened before appending a new TNBA note</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/tnba-monitor/grace-period-before-appending-new-tnba-notes/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/tnba-monitor/grace-period-before-monitoring-tickets-based-on-last-documented-outage</td>
+<td>Defines for how long a Service Outage ticket needs to wait after the last documented outage to get a new TNBA note appended</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/tnba-monitor/grace-period-before-monitoring-tickets-based-on-last-documented-outage/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/tnba-monitor/min-required-confidence-for-request-and-repair-completed-predictions</td>
+<td>Defines the minimum confidence level required to consider a Request Completed / Repair Completed prediction accurate in TNBA auto-resolves</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/tnba-monitor/min-required-confidence-for-request-and-repair-completed-predictions/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/tnba-monitor/monitored-product-category</td>
+<td>Bruin's product category under monitoring</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/tnba-monitor/monitored-product-category/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/common/tnba-monitor/monitoring-job-interval</td>
+<td>Defines how often tickets are checked to see if they need a new TNBA note</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/tnba-monitor/monitoring-job-interval/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/bruin-bridge/base-url</td>
+<td>Base URL for Bruin's DEV API</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/bruin-bridge/base-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/bruin-bridge/client-id</td>
+<td>Client ID credential to authenticate against Bruin's DEV API</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/bruin-bridge/client-id/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/bruin-bridge/client-secret</td>
+<td>Client secret credential to authenticate against Bruin's DEV API</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/bruin-bridge/client-secret/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/bruin-bridge/login-url</td>
+<td>Login URL for Bruin's DEV API</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/bruin-bridge/login-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/bruin-bridge/test-base-url</td>
+<td>Base URL for Bruin's TEST API</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/bruin-bridge/test-base-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/bruin-bridge/test-client-id</td>
+<td>Client ID credential to authenticate against Bruin's TEST API</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/bruin-bridge/test-client-id/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/bruin-bridge/test-client-secret</td>
+<td>Client secret credential to authenticate against Bruin's TEST API</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/bruin-bridge/test-client-secret/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/bruin-bridge/test-login-url</td>
+<td>Login URL for Bruin's TEST API</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/bruin-bridge/test-login-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/customer-cache/blacklisted-clients-with-pending-status</td>
+<td>Client IDs whose edges have Pending management status that should be ignored in the caching process</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/customer-cache/blacklisted-clients-with-pending-status/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/customer-cache/blacklisted-edges</td>
+<td>VeloCloud edges that should be ignored in the caching process</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/customer-cache/blacklisted-edges/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/customer-cache/duplicate-inventories-recipient</td>
+<td>E-mail address that will get e-mails with a relation of service numbers that have multiple Bruin inventories</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/customer-cache/duplicate-inventories-recipient/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/customer-cache/velocloud-hosts</td>
+<td>VeloCloud hosts whose edges will be stored to the cache</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/customer-cache/velocloud-hosts/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/digi-bridge/digi-reboot-api-base-url</td>
+<td>Base URL for Digi API</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/digi-bridge/digi-reboot-api-base-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/digi-bridge/digi-reboot-api-client-id</td>
+<td>Client ID credentials for Digi API</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/digi-bridge/digi-reboot-api-client-id/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/digi-bridge/digi-reboot-api-client-secret</td>
+<td>Client Secret credentials for Digi API</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/digi-bridge/digi-reboot-api-client-secret/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/digi-reboot-report/report-recipient</td>
+<td>Email address to send the report to</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/digi-reboot-report/report-recipient/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/email-tagger-kre-bridge/kre-base-url</td>
+<td>Base URL for E-mail Tagger's KRE</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/email-tagger-kre-bridge/kre-base-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/email-tagger-monitor/api-request-key</td>
+<td>API request key for incoming requests</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/email-tagger-monitor/api-request-key/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/email-tagger-monitor/api-request-signature-secret-key</td>
+<td>API signature secret key for incoming requests</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/email-tagger-monitor/api-request-signature-secret-key/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/external-secrets/iam-role-arn</td>
+<td>The ARN of the AWS IAM role necessary to manage parameter store and secret manager</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/external-secrets/iam-role-arn/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/fraud-monitor/observed-inbox-email-address</td>
+<td>E-mail account that receives Fraud e-mails for later analysis</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/fraud-monitor/observed-inbox-email-address/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/gateway-monitor/monitored-velocloud-hosts</td>
+<td>VeloCloud hosts whose gateways will be monitored</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/gateway-monitor/monitored-velocloud-hosts/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/hawkeye-customer-cache/duplicate-inventories-recipient</td>
+<td>E-mail address that will get e-mails with a relation of service numbers that have multiple Bruin inventories</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/hawkeye-customer-cache/duplicate-inventories-recipient/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/intermapper-outage-monitor/observed-inbox-email-address</td>
+<td>E-mail account that receives InterMapper events for later analysis</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/intermapper-outage-monitor/observed-inbox-email-address/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/last-contact-report/monitored-velocloud-hosts</td>
+<td>VeloCloud hosts whose edges will be used to build the report</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/last-contact-report/monitored-velocloud-hosts/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/last-contact-report/report-recipient</td>
+<td>Email address to send the report to</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/last-contact-report/report-recipient/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/email-bridge/monitorable-email-accounts</td>
+<td>Mapping of e-mail addresses and passwords whose inboxes can be read for later analysis</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/email-bridge/monitorable-email-accounts/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/notifications-bridge/slack-webhook-url</td>
+<td>Slack webhook to send messages</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/notifications-bridge/slack-webhook-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/papertrail/enabled</td>
+<td>Enable/Disable Papertrail logs</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/papertrail/enabled/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/redis/customer-cache-hostname</td>
+<td>Customer Cache Redis hostname</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/redis/customer-cache-hostname/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/redis/email-tagger-hostname</td>
+<td>Email Tagger Redis Hostname</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/redis/email-tagger-hostname/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/redis/main-hostname</td>
+<td>Main Redis server for Automation-Engine</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/redis/main-hostname/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/redis/tnba-feedback-hostname</td>
+<td>TNBA Feedback hostname</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/redis/tnba-feedback-hostname/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/repair-tickets-kre-bridge/kre-base-url</td>
+<td>Base URL for RTA's KRE</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/repair-tickets-kre-bridge/kre-base-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/service-affecting/monitor/monitored-velocloud-hosts</td>
+<td>VeloCloud hosts whose edges will be monitored</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/service-affecting/monitor/monitored-velocloud-hosts/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/service-outage/monitor/blacklisted-edges</td>
+<td>List of edges that are excluded from Service Outage monitoring</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/service-outage/monitor/blacklisted-edges/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/service-outage/monitor/monitored-velocloud-hosts</td>
+<td>VeloCloud hosts whose edges will be monitored</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/service-outage/monitor/monitored-velocloud-hosts/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/service-outage/triage/monitored-velocloud-hosts</td>
+<td>VeloCloud hosts whose edges will be monitored</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/service-outage/triage/monitored-velocloud-hosts/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/servicenow-bridge/base-url</td>
+<td>Base URL for the ServiceNow API</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/servicenow-bridge/base-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/servicenow-bridge/client-id</td>
+<td>OAuth client ID for the ServiceNow API</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/servicenow-bridge/client-id/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/servicenow-bridge/client-secret</td>
+<td>OAuth client secret for the ServiceNow API</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/servicenow-bridge/client-secret/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/servicenow-bridge/password</td>
+<td>Password for the ServiceNow API</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/servicenow-bridge/password/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/servicenow-bridge/username</td>
+<td>Username for the ServiceNow API</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/servicenow-bridge/username/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/t7-bridge/kre-base-url</td>
+<td>Base URL for TNBA's KRE</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/t7-bridge/kre-base-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/tnba-feedback/monitored-velocloud-hosts</td>
+<td>VeloCloud hosts whose edges will be monitored</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/tnba-feedback/monitored-velocloud-hosts/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/tnba-monitor/blacklisted-edges</td>
+<td>List of edges that are excluded from TNBA monitoring</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/tnba-monitor/blacklisted-edges/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/tnba-monitor/monitored-velocloud-hosts</td>
+<td>VeloCloud hosts whose edges will be monitored</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/tnba-monitor/monitored-velocloud-hosts/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/dev/velocloud-bridge/velocloud-credentials</td>
+<td>Velocloud credentials</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/dev/velocloud-bridge/velocloud-credentials/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/bruin-bridge/base-url</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/bruin-bridge/base-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/bruin-bridge/client-id</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/bruin-bridge/client-id/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/bruin-bridge/client-secret</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/bruin-bridge/client-secret/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/bruin-bridge/login-url</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/bruin-bridge/login-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/bruin-bridge/test-base-url</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/bruin-bridge/test-base-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/bruin-bridge/test-client-id</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/bruin-bridge/test-client-id/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/bruin-bridge/test-client-secret</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/bruin-bridge/test-client-secret/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/bruin-bridge/test-login-url</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/bruin-bridge/test-login-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/customer-cache/blacklisted-clients-with-pending-status</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/customer-cache/blacklisted-clients-with-pending-status/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/customer-cache/blacklisted-edges</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/customer-cache/blacklisted-edges/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/customer-cache/duplicate-inventories-recipient</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/customer-cache/duplicate-inventories-recipient/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/customer-cache/velocloud-hosts</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/customer-cache/velocloud-hosts/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/digi-bridge/digi-reboot-api-base-url</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/digi-bridge/digi-reboot-api-base-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/digi-bridge/digi-reboot-api-client-id</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/digi-bridge/digi-reboot-api-client-id/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/digi-bridge/digi-reboot-api-client-secret</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/digi-bridge/digi-reboot-api-client-secret/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/digi-reboot-report/report-recipient</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/digi-reboot-report/report-recipient/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/email-tagger-kre-bridge/kre-base-url</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/email-tagger-kre-bridge/kre-base-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/digi-bridge/digi-reboot-api-base-url</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/digi-bridge/digi-reboot-api-base-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/digi-reboot-report/report-recipient</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/digi-reboot-report/report-recipient/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/email-tagger-kre-bridge/kre-base-url</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/email-tagger-kre-bridge/kre-base-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/email-tagger-monitor/api-request-key</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/email-tagger-monitor/api-request-key/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/email-tagger-monitor/api-request-signature-secret-key</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/email-tagger-monitor/api-request-signature-secret-key/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/external-secrets/iam-role-arn</td>
+<td>The ARN of the AWS IAM role necessary to manage parameter store and secret manager</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/external-secrets/iam-role-arn/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/fraud-monitor/observed-inbox-email-address</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/fraud-monitor/observed-inbox-email-address/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/gateway-monitor/monitored-velocloud-hosts</td>
+<td>VeloCloud hosts whose gateways will be monitored</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/gateway-monitor/monitored-velocloud-hosts/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/hawkeye-customer-cache/duplicate-inventories-recipient</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/hawkeye-customer-cache/duplicate-inventories-recipient/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/intermapper-outage-monitor/observed-inbox-email-address</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/intermapper-outage-monitor/observed-inbox-email-address/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/last-contact-report/monitored-velocloud-hosts</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/last-contact-report/monitored-velocloud-hosts/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/last-contact-report/report-recipient</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/last-contact-report/report-recipient/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/email-bridge/monitorable-email-accounts</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/email-bridge/monitorable-email-accounts/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/notifications-bridge/slack-webhook-url</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/notifications-bridge/slack-webhook-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/papertrail/enabled</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/papertrail/enabled/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/redis/customer-cache-hostname</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/redis/customer-cache-hostname/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/redis/email-tagger-hostname</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/redis/email-tagger-hostname/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/redis/main-hostname</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/redis/main-hostname/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/redis/tnba-feedback-hostname</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/redis/tnba-feedback-hostname/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/repair-tickets-kre-bridge/kre-base-url</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/repair-tickets-kre-bridge/kre-base-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/service-affecting/monitor/monitored-velocloud-hosts</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/service-affecting/monitor/monitored-velocloud-hosts/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/service-outage/monitor/blacklisted-edges</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/service-outage/monitor/blacklisted-edges/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/service-outage/monitor/monitored-velocloud-hosts</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/service-outage/monitor/monitored-velocloud-hosts/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/service-outage/triage/monitored-velocloud-hosts</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/service-outage/triage/monitored-velocloud-hosts/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/t7-bridge/kre-base-url</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/t7-bridge/kre-base-url/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/tnba-feedback/monitored-velocloud-hosts</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/tnba-feedback/monitored-velocloud-hosts/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/tnba-monitor/blacklisted-edges</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/tnba-monitor/blacklisted-edges/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/tnba-monitor/monitored-velocloud-hosts</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/tnba-monitor/monitored-velocloud-hosts/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/automation-engine/pro/velocloud-bridge/velocloud-credentials</td>
+<td></td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/pro/velocloud-bridge/velocloud-credentials/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/develop/metrics-velocloud-api/ALLOW_ORIGINS</td>
+<td>Metrics allow origins</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/metrics-velocloud-api/ALLOW_ORIGINS/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/develop/metrics-velocloud-api/WAREHOUSE</td>
+<td>Metrics velocloud api snowflake warehouse to execute the queries</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/metrics-velocloud-api/WAREHOUSE/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/develop/shared/SECRET_JWT</td>
+<td>Velocloud hosts to fetch data from</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/shared/SECRET_JWT/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/develop/velocloud-fetcher/BLACKLISTED_VENDORS</td>
+<td>Blacklisted vendors</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/BLACKLISTED_VENDORS/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/develop/velocloud-fetcher/BOOTSTRAP_SERVERS</td>
+<td>Bootstrap servers</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/BOOTSTRAP_SERVERS/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/develop/velocloud-fetcher/KAFKA_PASSWORD</td>
+<td>Kafka develop password to publish velocloud data on Kafka</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/KAFKA_PASSWORD/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/develop/velocloud-fetcher/KAFKA_REGISTRY_SCHEMA_CREDENTIALS</td>
+<td>Kafka registry credential</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/KAFKA_REGISTRY_SCHEMA_CREDENTIALS/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/develop/velocloud-fetcher/KAFKA_REGISTRY_SCHEMA_URL</td>
+<td>Kafka registry URL</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/KAFKA_REGISTRY_SCHEMA_URL/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/develop/velocloud-fetcher/KAFKA_SSL_CA_FILE</td>
+<td>Kafka develop ssl ca path of Kafka</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/KAFKA_SSL_CA_FILE/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/develop/velocloud-fetcher/KAFKA_USERNAME</td>
+<td>Kafka develop username to publish velocloud data on kafka</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/KAFKA_USERNAME/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/develop/velocloud-fetcher/METRICS_LIST</td>
+<td>Metrics list</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/METRICS_LIST/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/develop/velocloud-fetcher/VELOCLOUD_CREDENTIALS</td>
+<td>Velocloud hosts credentials</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/VELOCLOUD_CREDENTIALS/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_BYPASS_AVRO_ENFORCEMENT_FOR_SCHEMAS</td>
+<td>Bypass velocloud pruner for schemas</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_BYPASS_AVRO_ENFORCEMENT_FOR_SCHEMAS/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_BYPASS_PRUNER_FOR_SCHEMAS</td>
+<td>Metrics list</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/VELOCLOUD_FETCHER_BYPASS_PRUNER_FOR_SCHEMAS/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/develop/velocloud-fetcher/VELOCLOUD_HOSTS</td>
+<td>Velocloud hosts to fetch data from</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/VELOCLOUD_HOSTS/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/develop/velocloud-fetcher/VELOCLOUD_VERIFY_SSL</td>
+<td>Velocloud verify ssl</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/develop/velocloud-fetcher/VELOCLOUD_VERIFY_SSL/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/master/metrics-velocloud-api/ALLOW_ORIGINS</td>
+<td>Metrics allow origins</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/master/metrics-velocloud-api/ALLOW_ORIGINS/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/master/metrics-velocloud-api/WAREHOUSE</td>
+<td>Metrics velocloud api snowflake warehouse to execute the queries</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/master/metrics-velocloud-api/WAREHOUSE/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/master/shared/SECRET_JWT</td>
+<td>Velocloud hosts to fetch data from</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/master/shared/SECRET_JWT/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/master/velocloud-fetcher/BOOTSTRAP_SERVERS</td>
+<td>Bootstrap servers</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/master/velocloud-fetcher/BOOTSTRAP_SERVERS/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/master/velocloud-fetcher/ENTERPRISES_ID</td>
+<td>Enterprises IDs</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/master/velocloud-fetcher/ENTERPRISES_ID/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/master/velocloud-fetcher/KAFKA_PASSWORD</td>
+<td>Kafka master password to publish velocloud data on Kafka</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/master/velocloud-fetcher/KAFKA_PASSWORD/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/master/velocloud-fetcher/KAFKA_REGISTRY_SCHEMA_CREDENTIALS</td>
+<td>Kafka registry credential</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/master/velocloud-fetcher/KAFKA_REGISTRY_SCHEMA_CREDENTIALS/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/master/velocloud-fetcher/KAFKA_REGISTRY_SCHEMA_URL</td>
+<td>Kafka registry URL</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/master/velocloud-fetcher/KAFKA_REGISTRY_SCHEMA_URL/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/master/velocloud-fetcher/KAFKA_SSL_CA_FILE</td>
+<td>Kafka master ssl ca path of Kafka</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/master/velocloud-fetcher/KAFKA_SSL_CA_FILE/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/master/velocloud-fetcher/KAFKA_USERNAME</td>
+<td>Kafka master username to publish velocloud data on kafka</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/master/velocloud-fetcher/KAFKA_USERNAME/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/master/velocloud-fetcher/VELOCLOUD_CREDENTIALS</td>
+<td>Velocloud hosts credentials</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/master/velocloud-fetcher/VELOCLOUD_CREDENTIALS/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/master/velocloud-fetcher/VELOCLOUD_FETCHER_BYPASS_AVRO_ENFORCEMENT_FOR_SCHEMAS</td>
+<td>Bypass velocloud pruner for schemas</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/master/velocloud-fetcher/VELOCLOUD_FETCHER_BYPASS_AVRO_ENFORCEMENT_FOR_SCHEMAS/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/master/velocloud-fetcher/VELOCLOUD_FETCHER_BYPASS_PRUNER_FOR_SCHEMAS</td>
+<td>Metrics list</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/master/velocloud-fetcher/VELOCLOUD_FETCHER_BYPASS_PRUNER_FOR_SCHEMAS/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/master/velocloud-fetcher/VELOCLOUD_HOSTS</td>
+<td>Velocloud hosts to fetch data from</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/master/velocloud-fetcher/VELOCLOUD_HOSTS/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+<tr>
+<td>/data-highway/master/velocloud-fetcher/VELOCLOUD_VERIFY_SSL</td>
+<td>Velocloud verify ssl</td>
+<td>https://us-east-1.console.aws.amazon.com/systems-manager/parameters/data-highway/master/velocloud-fetcher/VELOCLOUD_VERIFY_SSL/description?region=us-east-1&amp;tab=Table</td>
+</tr>
+</tbody>
+</table>
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs"], "search": "../../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.748e2769.min.js"></script>
+      
+    
+  </body>
+</html>
