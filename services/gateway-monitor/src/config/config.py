@@ -45,6 +45,7 @@ MONITOR_CONFIG = {
     "monitoring_job_interval": int(os.environ["MONITORING_JOB_INTERVAL"]),
     "monitored_velocloud_hosts": json.loads(os.environ["MONITORED_VELOCLOUD_HOSTS"]),
     "gateway_metrics_lookup_interval": int(os.environ["GATEWAY_METRICS_LOOKUP_INTERVAL"]),
+    "blacklisted_gateways": json.loads(os.environ["BLACKLISTED_GATEWAYS"]),
     "thresholds": {
         Troubles.TUNNEL_COUNT: int(os.environ["TUNNEL_COUNT_THRESHOLD"]),
     },

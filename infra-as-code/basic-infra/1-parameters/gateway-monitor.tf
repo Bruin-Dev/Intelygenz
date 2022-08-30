@@ -57,6 +57,26 @@ resource "aws_ssm_parameter" "parameter-gateway-monitor-gateway-metrics-lookup-i
   })
 }
 
+resource "aws_ssm_parameter" "parameter-gateway-monitor-blacklisted-gateways" {
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  name        = "/automation-engine/common/gateway-monitor/blacklisted-gateways"
+  description = "List of gateway names that are excluded from gateway monitoring"
+  type        = "SecureString"
+  value       = "-"  # to edit go to parameter store dashboard.
+  key_id      =  aws_kms_alias.kms_key.name
+
+  lifecycle {
+    ignore_changes = [
+      value,
+    ]
+  }
+
+  tags = merge(var.common_info, {
+    Name = "BLACKLISTED_GATEWAYS"
+    note = "can be updated from the parameter store dashboard"
+  })
+}
+
 resource "aws_ssm_parameter" "parameter-gateway-monitor-offline-trouble-enabled" {
   count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/gateway-monitor/offline-trouble-enabled"

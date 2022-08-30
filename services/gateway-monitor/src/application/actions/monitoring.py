@@ -72,7 +72,7 @@ class Monitor:
         if network_gateway_list_response["status"] not in range(200, 300):
             return
 
-        gateways = network_gateway_list_response["body"]
+        gateways = self._filter_blacklisted_gateways(network_gateway_list_response["body"])
         for gateway in gateways:
             try:
                 gateway["metrics"] = await self._get_gateway_metrics(gateway)
@@ -131,6 +131,12 @@ class Monitor:
             self._metrics_repository.increment_tasks_reopened(host=gateway["host"], trouble=gateway["trouble"].value)
             self._logger.info(message)
             await self._notifications_repository.send_slack_message(message)
+
+    def _filter_blacklisted_gateways(self, gateways: List[dict]) -> List[dict]:
+        return [gw for gw in gateways if not self._is_blacklisted(gw)]
+
+    def _is_blacklisted(self, gateway: dict) -> bool:
+        return gateway["name"] in self._config.MONITOR_CONFIG["blacklisted_gateways"]
 
     def _get_unhealthy_gateways(self, gateways: List[dict]) -> List[dict]:
         unhealthy_gateways = []

@@ -36,6 +36,7 @@ MONITOR_CONFIG = {
     "monitoring_job_interval": 60,
     "monitored_velocloud_hosts": ["mettel.velocloud.net"],
     "gateway_metrics_lookup_interval": 3600,
+    "blacklisted_gateways": ["vcg-test-0"],
     "thresholds": {
         Troubles.TUNNEL_COUNT: 20,
     },
