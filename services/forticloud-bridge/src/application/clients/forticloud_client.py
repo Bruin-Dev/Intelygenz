@@ -62,12 +62,23 @@ class ForticloudClient:
         except Exception as e:
             logger.exception(e)
 
-    async def template_endpoint(self, payload):
-        logger.info(f"Doing something with payload: {payload}")
+    async def get_ap_data(self, payload):
+        logger.info(f"Getting AP data for payload: {payload}")
 
         response = await self._request(
-            method="POST",
-            url=f"{self._base_url}/api/v1/endpoint",
+            method="GET",
+            url="https://api.fortigate.forticloud.com/forticloudapi/api/v2/",
+            json=payload,
+        )
+
+        return response
+
+    async def get_switches_data(self, payload):
+        logger.info(f"Getting switches data for payload: {payload}")
+
+        response = await self._request(
+            method="GET",
+            url="https://api.fortigate.forticloud.com/forticloudapi/api/v2/",
             json=payload,
         )
 

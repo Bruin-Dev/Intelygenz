@@ -134,7 +134,6 @@ class TestGetAccessToken:
         response.status = status
         response.json = AsyncMock(return_value=body)
 
-        forticloud_client._session = Mock()
         forticloud_client._session.request = AsyncMock(return_value=response)
 
         assert forticloud_client._access_token == ""
@@ -150,7 +149,6 @@ class TestGetAccessToken:
         response = Mock()
         response.status = 401
 
-        forticloud_client._session = Mock()
         forticloud_client._session.request = AsyncMock(return_value=response)
 
         await forticloud_client._get_access_token()
@@ -160,7 +158,6 @@ class TestGetAccessToken:
 
     @pytest.mark.asyncio
     async def get_access_token_exception_test(self, forticloud_client):
-        forticloud_client._session = Mock()
         forticloud_client._session.request = AsyncMock(return_value=Exception)
 
         await forticloud_client._get_access_token()

@@ -7,7 +7,6 @@ authors = ["Intelygenz"]
 [tool.poetry.dependencies]
 python = "3.10.4"
 aiohttp = "3.8.0"
-APScheduler = "3.6.0"
 prometheus_client = "0.6.0"
 redis = "3.3.11"
 framework = {path = "../../pyutils_automation/py310", develop = false}
