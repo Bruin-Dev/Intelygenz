@@ -15,9 +15,10 @@ from framework.nats.models import *
 from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
 from prometheus_client import start_http_server
 
+from application.actions.get_ap_data import GetApData
+from application.actions.get_switches_data import GetSwitchesData
 from application.clients.forticloud_client import ForticloudClient
 from application.models import subscriptions
-from application.models.subscriptions import TemplateExample
 from application.repositories.forticloud_repository import ForticloudRepository
 from config import config
 
@@ -63,7 +64,7 @@ class Container:
         self._nats_client = Client(temp_payload_storage=tmp_redis_storage)
 
         self._forticloud_client = ForticloudClient(config)
-        self._forticloud_repository = ForticloudRepository()
+        self._forticloud_repository = ForticloudRepository(self._forticloud_client)
 
         self._server = QuartServer(QuartConfig(port=config.QUART_CONFIG["port"]))
 
@@ -79,8 +80,11 @@ class Container:
     async def _init_subscriptions(self):
         try:
             # NOTE: Using dataclasses::asdict() throws a pickle error, so we need to use <dataclass>.__dict__ instead
-            cb = TemplateExample()
-            await self._nats_client.subscribe(**subscriptions.TemplateExample(cb=cb).__dict__)
+            cb = GetApData(self._forticloud_repository)
+            await self._nats_client.subscribe(**subscriptions.GetApData(cb=cb).__dict__)
+
+            cb = GetSwitchesData(self._forticloud_repository)
+            await self._nats_client.subscribe(**subscriptions.GetSwitchesData(cb=cb).__dict__)
         except NatsException as e:
             app_logger.exception(e)
             bail_out()
