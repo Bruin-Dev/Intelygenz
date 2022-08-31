@@ -15,7 +15,7 @@ class TestSendToEmail:
         request_id = "123"
         response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
         msg_body = "Failed Edges to be emailed"
-        payload = {"request_id": request_id, "response_topic": response_topic, "body": {"email_data": msg_body}}
+        payload = {"request_id": request_id, "response_topic": response_topic, "email_data": msg_body}
         msg_mock = Mock(spec_set=Msg)
         msg_mock.data = json.dumps(payload).encode()
         send_to_email_action._email_repository.send_to_email = Mock(return_value=msg_delivery_status)
@@ -29,7 +29,7 @@ class TestSendToEmail:
         request_id = "123"
         response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1c"
         msg_body = ""
-        payload = {"request_id": request_id, "response_topic": response_topic, "body": {"email_data": msg_body}}
+        payload = {"request_id": request_id, "response_topic": response_topic, "email_data": msg_body}
         msg_mock = Mock(spec_set=Msg)
         msg_mock.data = json.dumps(payload).encode()
         send_to_email_action._email_repository.send_to_email = Mock()
