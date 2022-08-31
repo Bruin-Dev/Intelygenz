@@ -1,7 +1,6 @@
 # In order to work, this module must be executed in an environment with the environment variables referenced set.
 # use source env in this directory.
 # If you dont have any env files, ask for one they are not in VCS
-import json
 import logging
 import os
 import sys
@@ -39,7 +38,6 @@ MONITOR_CONFIG = {
         "endpoint_prefix": os.environ["API_ENDPOINT_PREFIX"],
     },
     "store_replies_enabled": os.environ["STORE_REPLIES_ENABLED"] == "true",
-    "auto_reply_whitelist": json.loads(os.environ["AUTO_REPLY_WHITELIST"]),
 }
 
 CURRENT_ENVIRONMENT = os.environ["CURRENT_ENVIRONMENT"]

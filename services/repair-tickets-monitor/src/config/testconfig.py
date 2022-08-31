@@ -19,7 +19,7 @@ MONITOR_CONFIG = {
     "max_retries_error_404": 5,
     "tag_ids": {"Repair": 1, "New Order": 2, "Change": 3, "Billing": 4, "Other": 5},
     "auto_reply_enabled": True,
-    "auto_reply_whitelist": ["some@email.com"],
+    "auto_reply_whitelist": [],
     "old_parent_email_ttl_seconds": 3600,
     "scheduler_config": {
         "repair_ticket_monitor": 10,
