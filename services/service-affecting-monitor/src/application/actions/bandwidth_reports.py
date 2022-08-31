@@ -53,6 +53,7 @@ class BandwidthReports:
         if customer_cache_response["status"] not in range(200, 300) or customer_cache_response["status"] == 202:
             self._logger.error("[bandwidth-reports] Error getting customer cache. Process cannot keep going.")
             return
+
         enterprise_id_edge_id_relation = self.get_enterprise_id_and_edge_id_relation_from_customer_cache_response(
             customer_cache_body, clients, velocloud_host)
 
