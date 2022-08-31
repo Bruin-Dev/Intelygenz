@@ -18,9 +18,7 @@ class TestSendToSlack:
         payload = {
             "request_id": request_id,
             "response_topic": response_topic,
-            "body": {
-                "message": msg,
-            },
+            "message": msg,
         }
         msg_mock = Mock(spec_set=Msg)
         msg_mock.data = json.dumps(payload).encode()

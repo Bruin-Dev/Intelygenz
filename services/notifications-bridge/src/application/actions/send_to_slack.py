@@ -17,15 +17,7 @@ class SendToSlack:
 
         response = {"body": None, "status": None}
 
-        if payload.get("body") is None:
-            logger.error(f"Cannot send to slack with {json.dumps(payload)}. JSON malformed")
-
-            response["status"] = 400
-            response["body"] = 'Must include "body" in request'
-            await msg.respond(json.dumps(response).encode())
-            return
-
-        if not all(key in payload["body"].keys() for key in ("message",)):
+        if "message" not in payload.keys():
             logger.error(f'Cannot send to slack with {json.dumps(payload)}. Need parameters "message"')
 
             response["status"] = 400
@@ -33,8 +25,7 @@ class SendToSlack:
             await msg.respond(json.dumps(response).encode())
             return
 
-        message = payload["body"]["message"]
-
+        message = payload["message"]
         logger.info(f"Sending msg {message} to slack...")
         slack_response = await self._slack_repository.send_to_slack(message)
         response["body"] = slack_response.body
