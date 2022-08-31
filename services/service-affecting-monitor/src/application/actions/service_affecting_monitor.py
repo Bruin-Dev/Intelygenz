@@ -1227,6 +1227,8 @@ class ServiceAffectingMonitor:
 
     @staticmethod
     def _is_link_label_blacklisted(link_label: str, blacklisted_link_labels: List[str]) -> bool:
+        if not link_label:
+            return False
         return any(label for label in blacklisted_link_labels if label.lower() in link_label.lower())
 
     def _is_link_label_blacklisted_from_asr(self, link_label: str):
