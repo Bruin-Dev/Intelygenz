@@ -17,17 +17,17 @@ datetime_mock.utcnow = Mock(return_value=frozen_datetime)
 
 class TestBandwidthReports:
     def instance_test(
-        self,
-        bandwidth_reports,
-        logger,
-        scheduler,
-        velocloud_repository,
-        bruin_repository,
-        trouble_repository,
-        customer_cache_repository,
-        email_repository,
-        utils_repository,
-        template_repository,
+            self,
+            bandwidth_reports,
+            logger,
+            scheduler,
+            velocloud_repository,
+            bruin_repository,
+            trouble_repository,
+            customer_cache_repository,
+            email_repository,
+            utils_repository,
+            template_repository,
     ):
         assert bandwidth_reports._logger is logger
         assert bandwidth_reports._scheduler is scheduler
@@ -56,20 +56,21 @@ class TestBandwidthReports:
 
     @pytest.mark.asyncio
     async def bandwidth_reports_job_test(
-        self,
-        bandwidth_reports,
-        make_bruin_client_info,
-        make_cached_edge,
-        make_customer_cache,
-        make_metrics_for_link,
-        make_rpc_response,
+            self,
+            bandwidth_reports,
+            make_bruin_client_info,
+            make_cached_edge,
+            make_customer_cache,
+            make_metrics_for_link,
+            make_rpc_response,
     ):
         client_id = 9994
         client_name = "MetTel"
         serial_number = "VC1234567"
+        edge = {'host': 'test', 'edge_id': 1, 'enterprise_id': 2}
 
         bruin_client_info = make_bruin_client_info(client_id=client_id, client_name=client_name)
-        cached_edge = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
+        cached_edge = make_cached_edge(full_id=edge, serial_number=serial_number, bruin_client_info=bruin_client_info)
         customer_cache = make_customer_cache(cached_edge)
 
         link_metrics = make_metrics_for_link()
@@ -79,33 +80,32 @@ class TestBandwidthReports:
         response_2 = make_rpc_response(body=links_metrics, status=200)
 
         bandwidth_reports._customer_cache_repository.get_cache_for_affecting_monitoring.return_value = response_1
-        bandwidth_reports._velocloud_repository.get_links_metrics_for_bandwidth_reports.return_value = response_2
+        bandwidth_reports._velocloud_repository.get_edge_link_series_for_bandwidth_reports.return_value = response_2
         bandwidth_reports._generate_bandwidth_report_for_client = CoroutineMock()
 
         await bandwidth_reports._bandwidth_reports_job()
 
         bandwidth_reports._customer_cache_repository.get_cache_for_affecting_monitoring.assert_awaited_once()
-        bandwidth_reports._velocloud_repository.get_links_metrics_for_bandwidth_reports.assert_awaited_once()
         bandwidth_reports._generate_bandwidth_report_for_client.assert_awaited_once_with(
-            client_id, client_name, {serial_number}, links_metrics, customer_cache
+            client_id, client_name, {serial_number}, links_metrics
         )
 
     @pytest.mark.asyncio
     async def generate_bandwidth_report_for_client_test(
-        self,
-        bandwidth_reports,
-        make_edge_full_id,
-        make_bruin_client_info,
-        make_cached_edge,
-        make_customer_cache,
-        make_link,
-        make_edge,
-        make_link_with_edge_info,
-        make_metrics_for_link,
-        make_ticket,
-        make_detail_item,
-        make_ticket_note,
-        make_ticket_details,
+            self,
+            bandwidth_reports,
+            make_edge_full_id,
+            make_bruin_client_info,
+            make_cached_edge,
+            make_customer_cache,
+            make_link,
+            make_edge,
+            make_link_with_edge_info,
+            make_metrics_for_link,
+            make_ticket,
+            make_detail_item,
+            make_ticket_note,
+            make_ticket_details,
     ):
         host = "mettel.velocloud.net"
         enterprise_id = 1
@@ -129,8 +129,94 @@ class TestBandwidthReports:
             host=host, enterprise_id=enterprise_id, id_=edge_id, serial_number=serial_number, name=edge_name
         )
         link_with_edge = make_link_with_edge_info(link_info=link, edge_info=edge)
-        link_metrics = make_metrics_for_link(link_with_edge_info=link_with_edge)
-        links_metrics = [link_metrics]
+        # link_metrics = make_metrics_for_link(link_with_edge_info=link_with_edge)
+        # links_metrics = [link_metrics]
+        link_series = [
+            {
+                "series": [
+                    {
+                        "metric": "bytesRx",
+                        "startTime": 1659636000000,
+                        "tickInterval": 300000,
+                        "data": [
+                            0.0
+                        ],
+                        "total": 0.0,
+                        "min": 0.0,
+                        "max": 0.0
+                    },
+                    {
+                        "metric": "bytesTx",
+                        "startTime": 1659636000000,
+                        "tickInterval": 300000,
+                        "data": [
+                            0.0
+                        ],
+                        "total": 0.0,
+                        "min": 0.0,
+                        "max": 0.0
+                    },
+                    {
+                        "metric": "bpsOfBestPathRx",
+                        "startTime": 1659636000000,
+                        "tickInterval": 300000,
+                        "data": [
+                            0.0
+                        ],
+                        "total": 0.0,
+                        "min": 0.0,
+                        "max": 0.0
+                    },
+                    {
+                        "metric": "bpsOfBestPathTx",
+                        "startTime": 1659636000000,
+                        "tickInterval": 300000,
+                        "data": [
+                            0.0
+                        ],
+                        "total": 0.0,
+                        "min": 0.0,
+                        "max": 0.0
+                    }
+                ],
+                "linkId": 9388,
+                "edgeId": 2800,
+                "serial_number": serial_number,
+                "edge_name": edge_name,
+                "link": {
+                    "id": 9388,
+                    "created": "2019-03-28T18:34:00.000Z",
+                    "edgeId": 2800,
+                    "logicalId": "00:14:3e:44:41:6f:0000",
+                    "internalId": "00000003-9e57-4087-a20f-1af16190cd15",
+                    "interface": interface,
+                    "macAddress": None,
+                    "overlayType": "IPv4",
+                    "ipAddress": "63.43.3.127",
+                    "ipV6Address": None,
+                    "netmask": None,
+                    "networkSide": "WAN",
+                    "networkType": "ETHERNET",
+                    "displayName": "Verizon Wireless( MTL- 544825157)",
+                    "userOverride": 0,
+                    "isp": "Verizon Wireless",
+                    "org": "Verizon Wireless",
+                    "lat": 37.750999,
+                    "lon": -97.821999,
+                    "lastActive": "2022-08-30T12:04:42.000Z",
+                    "state": "STABLE",
+                    "backupState": "UNCONFIGURED",
+                    "linkMode": "ACTIVE",
+                    "vpnState": "STABLE",
+                    "lastEvent": "2022-08-06T05:27:54.000Z",
+                    "lastEventState": "STABLE",
+                    "alertsEnabled": 1,
+                    "operatorAlertsEnabled": 1,
+                    "serviceState": "IN_SERVICE",
+                    "modified": "2022-08-30T12:04:42.000Z"
+                }
+            }
+        ]
 
         ticket = make_ticket(ticket_id=ticket_id)
         detail_item = make_detail_item(value=serial_number)
@@ -150,7 +236,7 @@ class TestBandwidthReports:
 
         with patch.object(bandwidth_reports._config, "CURRENT_ENVIRONMENT", "production"):
             await bandwidth_reports._generate_bandwidth_report_for_client(
-                client_id, client_name, {serial_number}, links_metrics, customer_cache
+                client_id, client_name, {serial_number}, link_series
             )
 
         report_items = [
@@ -158,7 +244,15 @@ class TestBandwidthReports:
                 "serial_number": serial_number,
                 "edge_name": edge_name,
                 "interface": interface,
-                "bandwidth": "0.0 bps",
+                "avg_bandwidth": "0.0 bps",
+                "down_bytes_total": "0.0 bps",
+                "up_bytes_total": "0.0 bps",
+                "measured_bandwidth_down": "0.0 bps",
+                "measured_bandwidth_up": "0.0 bps",
+                "peak_bytes_down": "0.0 bps",
+                "peak_bytes_up": "0.0 bps",
+                "peak_percent_down": 0.0,
+                "peak_percent_up": 0.0,
                 "threshold_exceeded": 1,
                 "ticket_ids": {ticket_id},
             }
@@ -170,14 +264,99 @@ class TestBandwidthReports:
         bandwidth_reports._email_repository.send_email.assert_awaited_once()
 
     def add_bandwidth_to_links_metrics_test(self, bandwidth_reports, make_metrics):
-        bytes_rx = 9_600_000
-        bytes_tx = 12_000_000
-        link_metrics = make_metrics(bytes_rx=bytes_rx, bytes_tx=bytes_tx)
-        links_metrics = [link_metrics]
+        serial_number = "VC1234567"
+        edge_name = "Test Edge"
+        interface = "GE1"
+        link_series = [
+            {
+                "series": [
+                    {
+                        "metric": "bytesRx",
+                        "startTime": 1659636000000,
+                        "tickInterval": 300000,
+                        "data": [
+                            0.0
+                        ],
+                        "total": 0.0,
+                        "min": 0.0,
+                        "max": 0.0
+                    },
+                    {
+                        "metric": "bytesTx",
+                        "startTime": 1659636000000,
+                        "tickInterval": 300000,
+                        "data": [
+                            0.0
+                        ],
+                        "total": 0.0,
+                        "min": 0.0,
+                        "max": 0.0
+                    },
+                    {
+                        "metric": "bpsOfBestPathRx",
+                        "startTime": 1659636000000,
+                        "tickInterval": 300000,
+                        "data": [
+                            0.0
+                        ],
+                        "total": 0.0,
+                        "min": 0.0,
+                        "max": 0.0
+                    },
+                    {
+                        "metric": "bpsOfBestPathTx",
+                        "startTime": 1659636000000,
+                        "tickInterval": 300000,
+                        "data": [
+                            0.0
+                        ],
+                        "total": 0.0,
+                        "min": 0.0,
+                        "max": 0.0
+                    }
+                ],
+                "linkId": 9388,
+                "edgeId": 2800,
+                "serial_number": serial_number,
+                "edge_name": edge_name,
+                "link": {
+                    "id": 9388,
+                    "created": "2019-03-28T18:34:00.000Z",
+                    "edgeId": 2800,
+                    "logicalId": "00:14:3e:44:41:6f:0000",
+                    "internalId": "00000003-9e57-4087-a20f-1af16190cd15",
+                    "interface": interface,
+                    "macAddress": None,
+                    "overlayType": "IPv4",
+                    "ipAddress": "63.43.3.127",
+                    "ipV6Address": None,
+                    "netmask": None,
+                    "networkSide": "WAN",
+                    "networkType": "ETHERNET",
+                    "displayName": "Verizon Wireless( MTL- 544825157)",
+                    "userOverride": 0,
+                    "isp": "Verizon Wireless",
+                    "org": "Verizon Wireless",
+                    "lat": 37.750999,
+                    "lon": -97.821999,
+                    "lastActive": "2022-08-30T12:04:42.000Z",
+                    "state": "STABLE",
+                    "backupState": "UNCONFIGURED",
+                    "linkMode": "ACTIVE",
+                    "vpnState": "STABLE",
+                    "lastEvent": "2022-08-06T05:27:54.000Z",
+                    "lastEventState": "STABLE",
+                    "alertsEnabled": 1,
+                    "operatorAlertsEnabled": 1,
+                    "serviceState": "IN_SERVICE",
+                    "modified": "2022-08-30T12:04:42.000Z"
+                }
+            }
+        ]
 
         bandwidth_reports._utils_repository.humanize_bps.side_effect = lambda bps: bps
-        result = bandwidth_reports._add_bandwidth_to_links_metrics(links_metrics)
-        assert result[0]["avgBandwidth"] == 1_000
+        result = bandwidth_reports._add_bandwidth_to_links_metrics(link_series)
+        assert result[0]["average_bandwidth"] == 0.0
 
     def get_start_date_test(self, bandwidth_reports):
         with patch.object(bandwidth_reports_module, "datetime", new=datetime_mock):
@@ -188,3 +367,193 @@ class TestBandwidthReports:
         with patch.object(bandwidth_reports_module, "datetime", new=datetime_mock):
             result = bandwidth_reports._get_end_date()
         assert result == "2021-12-20T00:00:00Z"
+
+    def add_bandwidth_to_links_metrics_not_none_test(self, bandwidth_reports, make_metrics):
+        serial_number = "VC1234567"
+        edge_name = "Test Edge"
+        interface = "GE1"
+        link_series = [
+            {
+                "series": [
+                    {
+                        "metric": "bytesRx",
+                        "startTime": 1659636000000,
+                        "tickInterval": 300000,
+                        "data": [
+                            0.0
+                        ],
+                        "total": 0.0,
+                        "min": 0.0,
+                        "max": 0.0
+                    },
+                    {
+                        "metric": "bytesTx",
+                        "startTime": 1659636000000,
+                        "tickInterval": 300000,
+                        "data": [
+                            0.0
+                        ],
+                        "total": 0.0,
+                        "min": 0.0,
+                        "max": 0.0
+                    },
+                    {
+                        "metric": "bpsOfBestPathRx",
+                        "startTime": 1659636000000,
+                        "tickInterval": 300000,
+                        "data": [
+                            0.0
+                        ],
+                        "total": 0.0,
+                        "min": 0.0,
+                        "max": 0.0
+                    },
+                    {
+                        "metric": "bpsOfBestPathTx",
+                        "startTime": 1659636000000,
+                        "tickInterval": 300000,
+                        "data": [
+                            0.0
+                        ],
+                        "total": 0.0,
+                        "min": 0.0,
+                        "max": 0.0
+                    }
+                ],
+                "linkId": 9388,
+                "edgeId": 2800,
+                "serial_number": serial_number,
+                "edge_name": edge_name,
+                "link": {
+                    "id": 9388,
+                    "created": "2019-03-28T18:34:00.000Z",
+                    "edgeId": 2800,
+                    "logicalId": "00:14:3e:44:41:6f:0000",
+                    "internalId": "00000003-9e57-4087-a20f-1af16190cd15",
+                    "interface": interface,
+                    "macAddress": None,
+                    "overlayType": "IPv4",
+                    "ipAddress": "63.43.3.127",
+                    "ipV6Address": None,
+                    "netmask": None,
+                    "networkSide": "WAN",
+                    "networkType": "ETHERNET",
+                    "displayName": "Verizon Wireless( MTL- 544825157)",
+                    "userOverride": 0,
+                    "isp": "Verizon Wireless",
+                    "org": "Verizon Wireless",
+                    "lat": 37.750999,
+                    "lon": -97.821999,
+                    "lastActive": "2022-08-30T12:04:42.000Z",
+                    "state": "STABLE",
+                    "backupState": "UNCONFIGURED",
+                    "linkMode": "ACTIVE",
+                    "vpnState": "STABLE",
+                    "lastEvent": "2022-08-06T05:27:54.000Z",
+                    "lastEventState": "STABLE",
+                    "alertsEnabled": 1,
+                    "operatorAlertsEnabled": 1,
+                    "serviceState": "IN_SERVICE",
+                    "modified": "2022-08-30T12:04:42.000Z"
+                }
+            }
+        ]
+        bandwidth_reports._utils_repository.humanize_bps.side_effect = lambda bps: bps
+        result = bandwidth_reports._add_bandwidth_to_links_metrics(
+            link_series)
+        assert result is not None
+
+    def add_bandwidth_to_links_metrics_is_dict_test(self, bandwidth_reports, make_metrics):
+        serial_number = "VC1234567"
+        edge_name = "Test Edge"
+        interface = "GE1"
+        link_series = [
+            {
+                "series": [
+                    {
+                        "metric": "bytesRx",
+                        "startTime": 1659636000000,
+                        "tickInterval": 300000,
+                        "data": [
+                            0.0
+                        ],
+                        "total": 0.0,
+                        "min": 0.0,
+                        "max": 0.0
+                    },
+                    {
+                        "metric": "bytesTx",
+                        "startTime": 1659636000000,
+                        "tickInterval": 300000,
+                        "data": [
+                            0.0
+                        ],
+                        "total": 0.0,
+                        "min": 0.0,
+                        "max": 0.0
+                    },
+                    {
+                        "metric": "bpsOfBestPathRx",
+                        "startTime": 1659636000000,
+                        "tickInterval": 300000,
+                        "data": [
+                            0.0
+                        ],
+                        "total": 0.0,
+                        "min": 0.0,
+                        "max": 0.0
+                    },
+                    {
+                        "metric": "bpsOfBestPathTx",
+                        "startTime": 1659636000000,
+                        "tickInterval": 300000,
+                        "data": [
+                            0.0
+                        ],
+                        "total": 0.0,
+                        "min": 0.0,
+                        "max": 0.0
+                    }
+                ],
+                "linkId": 9388,
+                "edgeId": 2800,
+                "serial_number": serial_number,
+                "edge_name": edge_name,
+                "link": {
+                    "id": 9388,
+                    "created": "2019-03-28T18:34:00.000Z",
+                    "edgeId": 2800,
+                    "logicalId": "00:14:3e:44:41:6f:0000",
+                    "internalId": "00000003-9e57-4087-a20f-1af16190cd15",
+                    "interface": interface,
+                    "macAddress": None,
+                    "overlayType": "IPv4",
+                    "ipAddress": "63.43.3.127",
+                    "ipV6Address": None,
+                    "netmask": None,
+                    "networkSide": "WAN",
+                    "networkType": "ETHERNET",
+                    "displayName": "Verizon Wireless( MTL- 544825157)",
+                    "userOverride": 0,
+                    "isp": "Verizon Wireless",
+                    "org": "Verizon Wireless",
+                    "lat": 37.750999,
+                    "lon": -97.821999,
+                    "lastActive": "2022-08-30T12:04:42.000Z",
+                    "state": "STABLE",
+                    "backupState": "UNCONFIGURED",
+                    "linkMode": "ACTIVE",
+                    "vpnState": "STABLE",
+                    "lastEvent": "2022-08-06T05:27:54.000Z",
+                    "lastEventState": "STABLE",
+                    "alertsEnabled": 1,
+                    "operatorAlertsEnabled": 1,
+                    "serviceState": "IN_SERVICE",
+                    "modified": "2022-08-30T12:04:42.000Z"
+                }
+            }
+        ]
+        bandwidth_reports._utils_repository.humanize_bps.side_effect = lambda bps: bps
+        result = bandwidth_reports._add_bandwidth_to_links_metrics(
+            link_series)
+        assert isinstance(result, list)

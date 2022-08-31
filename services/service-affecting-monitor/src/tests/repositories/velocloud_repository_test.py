@@ -22,12 +22,12 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_links_metrics_by_host__metrics_retrieved_test(
-        self,
-        velocloud_repository,
-        make_get_links_metrics_request,
-        make_metrics_for_link,
-        make_list_of_link_metrics,
-        make_rpc_response,
+            self,
+            velocloud_repository,
+            make_get_links_metrics_request,
+            make_metrics_for_link,
+            make_list_of_link_metrics,
+            make_rpc_response,
     ):
         velocloud_host = "mettel.velocloud.net"
         interval = {
@@ -62,7 +62,7 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_links_metrics_by_host__rpc_request_failing_test(
-        self, velocloud_repository, make_get_links_metrics_request
+            self, velocloud_repository, make_get_links_metrics_request
     ):
         velocloud_host = "mettel.velocloud.net"
         interval = {
@@ -91,7 +91,7 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_links_metrics_by_host__rpc_request_has_not_2xx_status_test(
-        self, velocloud_repository, make_get_links_metrics_request, velocloud_500_response
+            self, velocloud_repository, make_get_links_metrics_request, velocloud_500_response
     ):
         velocloud_host = "mettel.velocloud.net"
         interval = {
@@ -120,7 +120,7 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_all_links_metrics__all_rpc_requests_have_not_2xx_status_test(
-        self, velocloud_repository, make_list_of_link_metrics, make_rpc_response, velocloud_500_response
+            self, velocloud_repository, make_list_of_link_metrics, make_rpc_response, velocloud_500_response
     ):
         velocloud_host_1 = "mettel.velocloud.net"
         velocloud_host_2 = "metvco03.mettel.net"
@@ -159,7 +159,7 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_all_links_metrics__all_rpc_requests_succeed_test(
-        self, velocloud_repository, make_metrics_for_link, make_list_of_link_metrics, make_rpc_response
+            self, velocloud_repository, make_metrics_for_link, make_list_of_link_metrics, make_rpc_response
     ):
         velocloud_host_1 = "mettel.velocloud.net"
         velocloud_host_2 = "metvco02.mettel.net"
@@ -345,13 +345,14 @@ class TestVelocloudRepository:
         }
 
         with patch.object(velocloud_repository_module, "datetime", new=frozen_datetime):
-            await velocloud_repository.get_links_metrics_for_bandwidth_reports()
+            await velocloud_repository.get_edge_link_series_for_bandwidth_reports(interval=interval,
+                                                                                  enterprise_id_edge_id_relation=[])
 
-        velocloud_repository.get_all_links_metrics.assert_awaited_once_with(interval=interval)
+        velocloud_repository.get_all_links_metrics.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def get_enterprise_events__events_retrieved_test(
-        self, velocloud_repository, frozen_datetime, make_get_enterprise_events_request, make_rpc_response
+            self, velocloud_repository, frozen_datetime, make_get_enterprise_events_request, make_rpc_response
     ):
         host = "mettel.velocloud.net"
         enterprise_id = 1
@@ -390,7 +391,7 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_enterprise_events__rpc_request_failing_test(
-        self, velocloud_repository, frozen_datetime, make_get_enterprise_events_request
+            self, velocloud_repository, frozen_datetime, make_get_enterprise_events_request
     ):
         host = "mettel.velocloud.net"
         enterprise_id = 1
@@ -426,7 +427,7 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_enterprise_events__rpc_request_has_not_2xx_status_test(
-        self, velocloud_repository, frozen_datetime, make_get_enterprise_events_request, velocloud_500_response
+            self, velocloud_repository, frozen_datetime, make_get_enterprise_events_request, velocloud_500_response
     ):
         host = "mettel.velocloud.net"
         enterprise_id = 1
@@ -462,7 +463,7 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_events_by_serial_and_interface__all_rpc_requests_have_not_2xx_status_test(
-        self, velocloud_repository, make_edge_full_id, make_cached_edge, make_customer_cache, velocloud_500_response
+            self, velocloud_repository, make_edge_full_id, make_cached_edge, make_customer_cache, velocloud_500_response
     ):
         host_1 = "mettel.velocloud.net"
         host_2 = "metvco03.mettel.net"
@@ -495,13 +496,13 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_events_by_serial_and_interface__all_rpc_requests_succeed_test(
-        self,
-        velocloud_repository,
-        make_event,
-        make_edge_full_id,
-        make_cached_edge,
-        make_customer_cache,
-        make_rpc_response,
+            self,
+            velocloud_repository,
+            make_event,
+            make_edge_full_id,
+            make_cached_edge,
+            make_customer_cache,
+            make_rpc_response,
     ):
         edge_name_1 = "Edge 1"
         edge_name_2 = "Edge 2"
@@ -553,7 +554,7 @@ class TestVelocloudRepository:
         assert result == expected
 
     def structure_edges_by_host_and_enterprise_test(
-        self, velocloud_repository, make_edge_full_id, make_cached_edge, make_customer_cache
+            self, velocloud_repository, make_edge_full_id, make_cached_edge, make_customer_cache
     ):
         edge_1_full_id = make_edge_full_id(host="mettel.velocloud.net", enterprise_id=1)
         edge_2_full_id = make_edge_full_id(host="mettel.velocloud.net", enterprise_id=2)
@@ -581,14 +582,14 @@ class TestVelocloudRepository:
         assert result == expected
 
     def filter_links_metrics_by_client_test(
-        self,
-        velocloud_repository,
-        make_edge,
-        make_metrics_for_link,
-        make_edge_full_id,
-        make_bruin_client_info,
-        make_cached_edge,
-        make_customer_cache,
+            self,
+            velocloud_repository,
+            make_edge,
+            make_metrics_for_link,
+            make_edge_full_id,
+            make_bruin_client_info,
+            make_cached_edge,
+            make_customer_cache,
     ):
         host = "mettel.velocloud.net"
         enterprise_id = 123

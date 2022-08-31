@@ -23,7 +23,7 @@ class BruinRepository:
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_REPORT_CONFIG["semaphore"])
 
     async def get_tickets(
-        self, client_id: int, ticket_topic: str, ticket_statuses: list, *, service_number: str = None
+            self, client_id: int, ticket_topic: str, ticket_statuses: list, *, service_number: str = None
     ):
         err_msg = None
 
@@ -293,7 +293,7 @@ class BruinRepository:
         return response
 
     async def change_detail_work_queue(
-        self, ticket_id: int, task_result: str, *, service_number: str = None, detail_id: int = None
+            self, ticket_id: int, task_result: str, *, service_number: str = None, detail_id: int = None
     ):
         err_msg = None
 
@@ -536,7 +536,7 @@ class BruinRepository:
             return None
 
     async def get_all_affecting_tickets(
-        self, client_id=None, serial=None, start_date=None, end_date=None, ticket_statuses=None
+            self, client_id=None, serial=None, start_date=None, end_date=None, ticket_statuses=None
     ):
         @retry(
             wait=wait_fixed(self._config.MONITOR_REPORT_CONFIG["wait_fixed"]),
@@ -722,29 +722,56 @@ class BruinRepository:
         report_items = []
 
         for link_metrics in links_metrics:
-            serial_number = link_metrics["link"]["edgeSerialNumber"]
-            edge_name = link_metrics["link"]["edgeName"]
-            interface = link_metrics["link"]["interface"]
-            bandwidth = link_metrics["avgBandwidth"]
-            ticket_details = grouped_ticket_details[serial_number][interface]
+            serial_number = link_metrics["serial_number"]
+            interface = link_metrics["interface"]
             report_item = self.build_bandwidth_report_item(
                 serial_number=serial_number,
-                edge_name=edge_name,
+                edge_name=link_metrics["edge_name"],
                 interface=interface,
-                bandwidth=bandwidth,
-                ticket_details=ticket_details,
+                avg_bandwidth=link_metrics["average_bandwidth"],
+                ticket_details=grouped_ticket_details[serial_number][interface],
+                down_bytes_total=link_metrics['down_bytes_total'],
+                up_bytes_total=link_metrics['up_bytes_total'],
+                measured_bandwidth_down=link_metrics['measured_bandwidth_down'],
+                measured_bandwidth_up=link_metrics['measured_bandwidth_up'],
+                peak_bytes_down=link_metrics['peak_bytes_down'],
+                peak_bytes_up=link_metrics['peak_bytes_up'],
+                peak_percent_down=link_metrics['peak_percent_down'],
+                peak_percent_up=link_metrics['peak_percent_up']
             )
             report_items.append(report_item)
 
         return report_items
 
     @staticmethod
-    def build_bandwidth_report_item(serial_number, edge_name, interface, bandwidth, ticket_details):
+    def build_bandwidth_report_item(
+            serial_number,
+            edge_name,
+            interface,
+            avg_bandwidth,
+            ticket_details,
+            down_bytes_total,
+            up_bytes_total,
+            measured_bandwidth_down,
+            measured_bandwidth_up,
+            peak_bytes_down,
+            peak_bytes_up,
+            peak_percent_down,
+            peak_percent_up
+    ):
         return {
             "serial_number": serial_number,
             "edge_name": edge_name,
             "interface": interface,
-            "bandwidth": bandwidth,
+            "avg_bandwidth": avg_bandwidth,
+            "down_bytes_total": down_bytes_total,
+            "up_bytes_total": up_bytes_total,
+            "measured_bandwidth_down": measured_bandwidth_down,
+            "measured_bandwidth_up": measured_bandwidth_up,
+            "peak_bytes_down": peak_bytes_down,
+            "peak_bytes_up": peak_bytes_up,
+            "peak_percent_down": peak_percent_down,
+            "peak_percent_up": peak_percent_up,
             "threshold_exceeded": len(ticket_details),
             "ticket_ids": set(detail["ticket_id"] for detail in ticket_details),
         }
@@ -767,8 +794,8 @@ class BruinRepository:
                     for ticket_note in detail_object["ticket_notes"]
                     if ticket_note["noteValue"]
                     if (
-                        "#*Automation Engine*#" in ticket_note["noteValue"]
-                        or "#*MetTel's IPA*#" in ticket_note["noteValue"]
+                            "#*Automation Engine*#" in ticket_note["noteValue"]
+                            or "#*MetTel's IPA*#" in ticket_note["noteValue"]
                     )
                     if f"Trouble: {trouble}" in ticket_note["noteValue"]
                 ]

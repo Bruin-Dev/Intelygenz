@@ -122,8 +122,16 @@ class TemplateRepository:
             "Edge Name",
             "Interface",
             "Average Bandwidth",
+            "Total bytes Down",
+            "Total bytes up",
+            "Measured bytes down",
+            "Measured bytes upd",
+            "Peak bytes Down",
+            "Peak bytes Up",
+            "% peak percent down",
+            "% peak percent up",
             "Bandwidth Trouble Threshold Exceeded",
-            "Bandwidth Trouble Tickets",
+            "Bandwidth Trouble Tickets"
         ]
         centered_headers = [3, 4, 5]
 
@@ -133,7 +141,15 @@ class TemplateRepository:
                     item["serial_number"],
                     item["edge_name"],
                     item["interface"],
-                    item["bandwidth"],
+                    item["avg_bandwidth"],
+                    item["down_bytes_total"],
+                    item["up_bytes_total"],
+                    item["measured_bandwidth_down"],
+                    item["measured_bandwidth_up"],
+                    item["peak_bytes_down"],
+                    item["peak_bytes_up"],
+                    item["peak_percent_down"],
+                    item["peak_percent_up"],
                     item["threshold_exceeded"],
                     ",<br>".join([str(_id) for _id in item["ticket_ids"]]),
                 ]
