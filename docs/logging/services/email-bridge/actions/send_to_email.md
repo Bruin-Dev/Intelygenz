@@ -2,13 +2,7 @@
 
 _Message arrives at subject_
 
-* If message doesn't have a body:
-  ```python
-  logger.error(f"Cannot send to email with {json.dumps(payload)}. Must include body in request")
-  ```
-  END
-
-* If message body does not contain `email_data`:
+* If message does not contain `email_data`:
   ```python
   logger.error(f'Cannot send to email with {json.dumps(payload)}. JSON malformed"')
   END
