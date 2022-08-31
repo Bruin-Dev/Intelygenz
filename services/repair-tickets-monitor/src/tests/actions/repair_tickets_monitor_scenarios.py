@@ -1,3 +1,4 @@
+from dataclasses import dataclass, field
 from typing import Any, Dict, List
 
 from application.domain.asset import Topic
@@ -5,7 +6,6 @@ from application.domain.repair_email_output import RepairEmailOutput, TicketOutp
 from application.domain.ticket import Category, Ticket, TicketStatus
 from application.rpc import RpcError
 from application.rpc.upsert_outage_ticket_rpc import UpsertedStatus, UpsertedTicket
-from dataclasses import dataclass, field
 
 
 @dataclass
@@ -303,6 +303,17 @@ def make_repair_tickets_monitor_scenarios():
             tickets_cannot_be_created=[TicketOutput(reason="contains_wireless_assets")],
         ),
     )
+    wireless_and_not_actionable = RepairTicketsMonitorScenario(
+        assets={"asset_1": "site_1"},
+        asset_topics={"asset_1": [wireless_topic]},
+        email_processed=False,
+        assets_actionable=False,
+        expected_output=RepairEmailOutput(
+            email_id="0",
+            service_numbers_sites_map={"asset_1": "site_1"},
+            tickets_cannot_be_created=[TicketOutput(reason="contains_wireless_assets")],
+        ),
+    )
     voo_and_wireless_category_assets = RepairTicketsMonitorScenario(
         assets={"asset_1": "site_1", "asset_2": "site_1"},
         upserted_tickets={"asset_1": CreatedTicket(ticket_id="site_1_ticket")},
@@ -516,40 +527,48 @@ def make_repair_tickets_monitor_scenarios():
     )
 
     return {
-        # Empty emails
-        "empty_reply_email": empty_reply_email,
-        "empty_actionable_parent_email": empty_actionable_parent_email,
-        "empty_non_actionable_parent_email": empty_non_actionable_parent_email,
-        # Assets
-        "single_unreported_asset": single_unreported_asset,
-        "single_reported_asset": single_reported_asset,
-        "email_not_actionable_and_single_reported_asset": email_not_actionable_and_single_reported_asset,
-        "several_related_unreported_assets": several_related_unreported_assets,
-        "several_related_reported_assets": several_related_reported_assets,
-        "several_unrelated_unreported_assets": several_unrelated_unreported_assets,
-        "several_unrelated_reported_assets": several_unrelated_reported_assets,
-        # Asset topics
-        "single_no_topics_asset": single_no_topics_asset,
-        "single_wireless_asset": single_wireless_asset,
-        "single_other_category_asset": single_other_category_asset,
-        "several_wireless_assets": several_wireless_assets,
-        "several_other_category_assets": several_other_category_assets,
-        "wireless_and_no_topic_assets": wireless_and_no_topic_assets,
-        "wireless_and_other_category_assets": wireless_and_other_category_assets,
-        "voo_and_wireless_category_assets": voo_and_wireless_category_assets,
-        "voo_and_other_category_assets": voo_and_other_category_assets,
-        "voo_wireless_and_other_category_assets": voo_wireless_and_other_category_assets,
-        "several_sites_mixed_category_assets": several_sites_mixed_category_assets,
-        # Tickets
-        "single_operable_ticket": single_operable_ticket,
-        "single_inoperable_ticket": single_inoperable_ticket,
-        "multiple_operable_tickets": multiple_operable_tickets,
-        "multiple_inoperable_tickets": multiple_inoperable_tickets,
-        "multiple_mixed_operability_tickets": multiple_mixed_operability_tickets,
-        "append_global_note_not_ok": append_global_note_not_ok,
-        "append_global_note_error": append_global_note_error,
-        "link_email_not_ok": link_email_not_ok,
-        "email_not_actionable_and_single_operable_ticket": email_not_actionable_and_single_operable_ticket,
-        "single_reported_asset_single_operable_ticket": single_reported_asset_single_operable_ticket,
-        "single_no_voo_asset_single_operable_ticket": single_no_voo_asset_single_operable_ticket,
+        "wireless_and_not_actionable": wireless_and_not_actionable,
+        # "voo_and_wireless_category_assets": voo_and_wireless_category_assets,
+        # "voo_and_other_category_assets": voo_and_other_category_assets,
+        # "voo_wireless_and_other_category_assets": voo_wireless_and_other_category_assets,
+        # "several_sites_mixed_category_assets": several_sites_mixed_category_assets,
+        # # Tickets
+        # "single_operable_ticket": single_operable_ticket,
+        # # Empty emails
+        # "empty_reply_email": empty_reply_email,
+        # "empty_actionable_parent_email": empty_actionable_parent_email,
+        # "empty_non_actionable_parent_email": empty_non_actionable_parent_email,
+        # # Assets
+        # "single_unreported_asset": single_unreported_asset,
+        # "single_reported_asset": single_reported_asset,
+        # "email_not_actionable_and_single_reported_asset": email_not_actionable_and_single_reported_asset,
+        # "several_related_unreported_assets": several_related_unreported_assets,
+        # "several_related_reported_assets": several_related_reported_assets,
+        # "several_unrelated_unreported_assets": several_unrelated_unreported_assets,
+        # "several_unrelated_reported_assets": several_unrelated_reported_assets,
+        # # Asset topics
+        # "single_no_topics_asset": single_no_topics_asset,
+        # "single_wireless_asset": single_wireless_asset,
+        # "single_other_category_asset": single_other_category_asset,
+        # "several_wireless_assets": several_wireless_assets,
+        # "several_other_category_assets": several_other_category_assets,
+        # "wireless_and_no_topic_assets": wireless_and_no_topic_assets,
+        # "wireless_and_other_category_assets": wireless_and_other_category_assets,
+        # "wireless_and_not_actionable": wireless_and_not_actionable,
+        # "voo_and_wireless_category_assets": voo_and_wireless_category_assets,
+        # "voo_and_other_category_assets": voo_and_other_category_assets,
+        # "voo_wireless_and_other_category_assets": voo_wireless_and_other_category_assets,
+        # "several_sites_mixed_category_assets": several_sites_mixed_category_assets,
+        # # Tickets
+        # "single_operable_ticket": single_operable_ticket,
+        # "single_inoperable_ticket": single_inoperable_ticket,
+        # "multiple_operable_tickets": multiple_operable_tickets,
+        # "multiple_inoperable_tickets": multiple_inoperable_tickets,
+        # "multiple_mixed_operability_tickets": multiple_mixed_operability_tickets,
+        # "append_global_note_not_ok": append_global_note_not_ok,
+        # "append_global_note_error": append_global_note_error,
+        # "link_email_not_ok": link_email_not_ok,
+        # "email_not_actionable_and_single_operable_ticket": email_not_actionable_and_single_operable_ticket,
+        # "single_reported_asset_single_operable_ticket": single_reported_asset_single_operable_ticket,
+        # "single_no_voo_asset_single_operable_ticket": single_no_voo_asset_single_operable_ticket,
     }
