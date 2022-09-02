@@ -13,7 +13,7 @@ class ForticloudClient:
         self._access_token = ""
 
     async def create_session(self):
-        self._session = aiohttp.ClientSession()
+        self._session = aiohttp.ClientSession(trace_configs=self._config.AIOHTTP_CONFIG["tracers"])
 
     def __del__(self):
         asyncio.get_event_loop().run_until_complete(self._session.close())

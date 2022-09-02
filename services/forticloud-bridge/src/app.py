@@ -19,6 +19,7 @@ from application.actions.get_ap_data import GetApData
 from application.actions.get_switches_data import GetSwitchesData
 from application.clients.forticloud_client import ForticloudClient
 from application.models import subscriptions
+from application.repositories.endpoints_usage_repository import EndpointsUsageRepository
 from application.repositories.forticloud_repository import ForticloudRepository
 from config import config
 
@@ -60,6 +61,12 @@ class Container:
         redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         redis_client.ping()
 
+        # Prepare tracers to be used when making HTTP requests
+        self._endpoints_usage_repository = EndpointsUsageRepository()
+        config.generate_aio_tracers(
+            endpoints_usage_repository=self._endpoints_usage_repository,
+        )
+
         tmp_redis_storage = RedisStorage(storage_client=redis_client)
         self._nats_client = Client(temp_payload_storage=tmp_redis_storage)
 
@@ -92,6 +99,9 @@ class Container:
     async def start(self):
         # Setup FortiCloud HTTP session
         await self._forticloud_client.create_session()
+
+        # Setup Prometheus
+        self._start_prometheus_metrics_server()
 
         # Setup NATS
         await self._init_nats_conn()

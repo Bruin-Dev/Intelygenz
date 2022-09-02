@@ -5,6 +5,23 @@ import logging
 import os
 import sys
 
+from aiohttp import TraceConfig
+
+
+def generate_aio_tracers(**kwargs):
+    usage_repository = kwargs["endpoints_usage_repository"]
+
+    async def bruin_usage_on_request_cb(session, trace_config_ctx, params):
+        usage_repository.increment_usage(params.method, params.url.path, params.response.status)
+
+    bruin_api_usage = TraceConfig()
+    bruin_api_usage.on_request_end.append(bruin_usage_on_request_cb)
+
+    AIOHTTP_CONFIG["tracers"] = [
+        bruin_api_usage,
+    ]
+
+
 NATS_CONFIG = {
     "servers": [os.environ["NATS_SERVER1"]],
     "subscriber": {"pending_limits": 65536},
@@ -38,6 +55,8 @@ LOG_CONFIG = {
         "port": int(os.environ["PAPERTRAIL_PORT"]),
     },
 }
+
+AIOHTTP_CONFIG = {"tracers": []}
 
 QUART_CONFIG = {"title": "forticloud-bridge", "port": 5000}
 

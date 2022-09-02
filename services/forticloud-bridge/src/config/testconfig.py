@@ -24,4 +24,6 @@ LOG_CONFIG = {
     "format": "%(asctime)s: %(module)s: %(levelname)s: %(message)s",
 }
 
+AIOHTTP_CONFIG = {"tracers": []}
+
 METRICS_SERVER_CONFIG = {"port": 9090}
