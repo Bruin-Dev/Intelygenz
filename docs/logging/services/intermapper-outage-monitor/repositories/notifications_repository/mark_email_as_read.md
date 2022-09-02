@@ -4,7 +4,7 @@
 self._logger.info(f"Marking message {msg_uid} from the inbox of {email_account} as read")
 ```
 
-* If there's an error while posting the data to the `notifier`:
+* If there's an error while posting the data to the `email-bridge`:
   ```python
   err_msg = f"An error occurred while marking message {msg_uid} as read -> {e}"
   [...]
