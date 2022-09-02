@@ -61,6 +61,7 @@
           2. [VeloCloud Bridge](logging/events/12-velocloud-bridge.md)
           3. [Notifications Bridge](logging/events/13-notifications-bridge.md)
           4. [Email Bridge](logging/events/14-email-bridge.md)
+          5. [Forticloud Bridge](logging/events/15-forticloud-bridge.md)
     2. Infrastructure
         1. [Lambda Parameter-Replicator](lambda/PARAMETER_REPLICATOR.md)
 
