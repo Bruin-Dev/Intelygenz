@@ -9,9 +9,9 @@ services:
   repair-tickets-kre-bridge:
     environment:
       KRE_BASE_URL: integration-tests:50002
-  notifier:
+  email-bridge:
     environment:
-      # Prevent notifier thread to hang up when retrieving emails for intermapper-outage-monitor
+      # Prevent email-bridge thread to hang up when retrieving emails for intermapper-outage-monitor
       MONITORABLE_EMAIL_ACCOUNTS: "{}"
   email-tagger-monitor:
     environment:

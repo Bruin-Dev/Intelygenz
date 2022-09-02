@@ -7,7 +7,7 @@ self._logger.info(
 )
 ```
 
-* If there's an error while asking for the data to the `notifier`:
+* If there's an error while asking for the data to the `email-bridge`:
   ```python
   err_msg = f"An error occurred while getting the unread emails from the inbox of {email_account} -> {e}"
   [...]

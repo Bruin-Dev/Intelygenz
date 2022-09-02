@@ -125,7 +125,7 @@ Any line of the commit message cannot be longer than 50 characters.
   │                          digi-reboot-report|email-tagger-kre-bridge|email-tagger-kre-monitor|
   │                          hawkeye-affecting-monitor|hawkeye-bridge|hawkeye-customer-cache|
   │                          hawkeye-outage-monitor|intermapper-outage-monitor|last-contact-report|links-metrics-api|
-  │                          links-metrics-collector|lumin-billing-report|notifier|service-affecting-monitor|
+  │                          links-metrics-collector|lumin-billing-report|email-bridge|notifications-bridge|service-affecting-monitor|
   │                          service-outage-monitor|t7-bridge|tnba-feedback|tnba-monitor|velocloud-bridge
   │
   └─⫸ Commit Type: build|ci|docs|feat|fix|perf|refactor|test
