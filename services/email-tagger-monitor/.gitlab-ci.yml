@@ -9,10 +9,12 @@ email-tagger-monitor-linter:
       changes:
         - services/email-tagger-monitor/src/application/**/*
         - services/email-tagger-monitor/src/config/**/*
+        - services/email-tagger-monitor/src/tests/**/*
         - services/email-tagger-monitor/src/app.py
         - services/email-tagger-monitor/Dockerfile
-        - services/email-tagger-monitor/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/email-tagger-monitor/pyproject.toml
+        - services/email-tagger-monitor/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
@@ -27,12 +29,14 @@ email-tagger-monitor-test:
       changes:
         - services/email-tagger-monitor/src/application/**/*
         - services/email-tagger-monitor/src/config/**/*
+        - services/email-tagger-monitor/src/tests/**/*
         - services/email-tagger-monitor/src/app.py
         - services/email-tagger-monitor/Dockerfile
-        - services/email-tagger-monitor/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/email-tagger-monitor/pyproject.toml
+        - services/email-tagger-monitor/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
-  extends: .unittest_module_python_36
+  extends: .unittest_module_python_310
   needs: ["email-tagger-monitor-linter"]
 
 # ================================================
@@ -48,10 +52,12 @@ email-tagger-monitor-build:
       changes:
         - services/email-tagger-monitor/src/application/**/*
         - services/email-tagger-monitor/src/config/**/*
+        - services/email-tagger-monitor/src/tests/**/*
         - services/email-tagger-monitor/src/app.py
         - services/email-tagger-monitor/Dockerfile
-        - services/email-tagger-monitor/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/email-tagger-monitor/pyproject.toml
+        - services/email-tagger-monitor/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $EMAIL_TAGGER_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:

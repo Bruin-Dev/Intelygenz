@@ -1,14 +1,21 @@
-from typing import List
+import logging
+from dataclasses import dataclass
+from typing import Any, List
+
+from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.storage_repository import StorageRepository
+
+log = logging.getLogger(__name__)
 
 
+@dataclass
 class NewTicketsRepository:
-    def __init__(self, logger, config, notifications_repository, storage_repository):
-        self._logger = logger
-        self._config = config
-        self._notifications_repository = notifications_repository
-        self._storage_repository = storage_repository
+    _config: Any
+    _notifications_repository: NotificationsRepository
+    _storage_repository: StorageRepository
 
-    def validate_ticket(self, ticket: dict) -> bool:
+    @staticmethod
+    def validate_ticket(ticket: dict) -> bool:
         if not ticket:
             return False
         elif "email" not in ticket or not ticket["email"] or "ticket" not in ticket or not ticket["ticket"]:
@@ -37,7 +44,7 @@ class NewTicketsRepository:
         Returns:
             [int]: Incremented value
         """
-        self._logger.info(f"increasing error={error_code} for ticket id={ticket_id}")
+        log.info(f"increasing error={error_code} for ticket id={ticket_id}")
         key = f"error_{error_code}_ticket_{ticket_id}"
         return self._storage_repository.increment(key)
 
@@ -48,24 +55,24 @@ class NewTicketsRepository:
             ticket_id (int): [description]
             error_code (int): [description]
         """
-        self._logger.info(f"removing counter for error={error_code} for ticket id={ticket_id}")
+        log.info(f"removing counter for error={error_code} for ticket id={ticket_id}")
         key = f"error_{error_code}_ticket_{ticket_id}"
         self._storage_repository.remove(key)
 
     def delete_ticket(self, email_id: str, ticket_id: int):
-        self._logger.info(f"deleting ticket_id={ticket_id}")
+        log.info(f"deleting ticket_id={ticket_id}")
         key = f"ticket_{email_id}_{ticket_id}"
         self._storage_repository.remove(key)
 
     def save_new_ticket(self, email_data: dict, ticket_data: dict):
         email_id = email_data["email"]["email_id"]
         ticket_id = ticket_data["ticket_id"]
-        self._logger.info(f"adding email data '{email_id}' and '{ticket_id}'")
+        log.info(f"adding email data '{email_id}' and '{ticket_id}'")
         key = f"ticket_{email_id}_{ticket_id}"
         self._storage_repository.save(key, {"email": email_data, "ticket": ticket_data})
 
     def mark_complete(self, email_id: str, ticket_id: str):
-        self._logger.info(f"marking email complete '{email_id}' and '{ticket_id}' ")
+        log.info(f"marking email complete '{email_id}' and '{ticket_id}' ")
         key = f"ticket_{email_id}_{ticket_id}"
         archive_key = f"archived_ticket_{email_id}_{ticket_id}"
         self._storage_repository.rename(key, archive_key)

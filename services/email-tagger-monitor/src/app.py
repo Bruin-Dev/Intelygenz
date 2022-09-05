@@ -1,6 +1,17 @@
 import asyncio
+import logging
+from dataclasses import asdict
 
 import redis
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from framework.logging.formatters import Standard as StandardFormatter
+from framework.logging.handlers import Stdout as StdoutHandler
+from framework.nats.client import Client
+from framework.nats.models import Connection
+from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
+from prometheus_client import start_http_server
+from pytz import timezone
+
 from application.actions.new_emails_monitor import NewEmailsMonitor
 from application.actions.new_tickets_monitor import NewTicketsMonitor
 from application.repositories.bruin_repository import BruinRepository
@@ -12,25 +23,23 @@ from application.repositories.predicted_tags_repository import PredictedTagsRepo
 from application.repositories.storage_repository import StorageRepository
 from application.repositories.utils_repository import UtilsRepository
 from application.server.api_server import APIServer
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import config
 from framework.storage.model import RepairParentEmailStorage
-from igz.packages.eventbus.eventbus import EventBus
-from igz.packages.eventbus.storage_managers import RedisStorageManager
-from igz.packages.Logger.logger_client import LoggerClient
-from igz.packages.nats.clients import NATSClient
-from prometheus_client import start_http_server
-from pytz import timezone
+
+log = logging.getLogger("application")
+log.setLevel(logging.DEBUG)
+base_handler = StdoutHandler()
+base_handler.setFormatter(StandardFormatter(environment_name=config.ENVIRONMENT_NAME))
+log.addHandler(base_handler)
 
 
 class Container:
     def __init__(self):
-        self._logger = LoggerClient(config).get_logger()
-        self._logger.info("Email Tagger Monitor starting...")
+        log.info("Email Tagger Monitor starting...")
 
         self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._redis_client.ping()
-        self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
+        self._message_storage_manager = RedisStorage(self._redis_client)
 
         # Redis for data storage
         self._redis_cache_client = redis.Redis(host=config.REDIS_CACHE["host"], port=6379, decode_responses=True)
@@ -40,30 +49,25 @@ class Container:
 
         self._scheduler = AsyncIOScheduler(timezone=timezone(config.TIMEZONE))
 
-        self._publisher = NATSClient(config, logger=self._logger)
-        self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
-        self._event_bus.set_producer(self._publisher)
+        self._event_bus = Client(temp_payload_storage=self._message_storage_manager)
 
         self._utils_repository = UtilsRepository()
-        self._storage_repository = StorageRepository(config, self._logger, self._redis_cache_client)
+        self._storage_repository = StorageRepository(config, self._redis_cache_client)
         self._notifications_repository = NotificationsRepository(self._event_bus)
         self._new_emails_repository = NewEmailsRepository(
-            self._logger, config, self._notifications_repository, self._storage_repository
+            config, self._notifications_repository, self._storage_repository
         )
         self._new_tickets_repository = NewTicketsRepository(
-            self._logger, config, self._notifications_repository, self._storage_repository
+            config, self._notifications_repository, self._storage_repository
         )
-        self._email_tagger_repository = EmailTaggerRepository(
-            self._event_bus, self._logger, config, self._notifications_repository
-        )
-        self._bruin_repository = BruinRepository(self._event_bus, self._logger, config, self._notifications_repository)
+        self._email_tagger_repository = EmailTaggerRepository(self._event_bus, config, self._notifications_repository)
+        self._bruin_repository = BruinRepository(self._event_bus, config, self._notifications_repository)
         self._predicted_tag_repository = PredictedTagsRepository(
-            self._logger, config, self._notifications_repository, self._storage_repository
+            config, self._notifications_repository, self._storage_repository
         )
 
         self._new_emails_monitor = NewEmailsMonitor(
             self._event_bus,
-            self._logger,
             self._scheduler,
             config,
             self._predicted_tag_repository,
@@ -75,7 +79,6 @@ class Container:
 
         self._new_tickets_monitor = NewTicketsMonitor(
             self._event_bus,
-            self._logger,
             self._scheduler,
             config,
             self._new_tickets_repository,
@@ -84,7 +87,6 @@ class Container:
         )
 
         self._api_server = APIServer(
-            self._logger,
             config,
             self._new_emails_repository,
             self._new_tickets_repository,
@@ -95,7 +97,8 @@ class Container:
     async def _start(self):
         self._start_prometheus_metrics_server()
 
-        await self._event_bus.connect()
+        conn = Connection(servers=config.NATS_CONFIG["servers"])
+        await self._event_bus.connect(**asdict(conn))
 
         await self._new_emails_monitor.start_email_events_monitor(exec_on_start=True)
         await self._new_tickets_monitor.start_ticket_events_monitor(exec_on_start=True)

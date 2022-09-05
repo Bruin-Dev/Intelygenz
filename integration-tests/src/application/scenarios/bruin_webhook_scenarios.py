@@ -185,19 +185,15 @@ class AutoReply(Scenario):
         rta_prediction = rta.prediction_response(potential_service_numbers=[])
         self.given(RtaService.path("GetPrediction"), WillReturn(rta_prediction))
 
-        # - a reply was made
-        parent_email = Email()
-        reply_id = hash("any_auto_reply_id")
-        parent_email_id = parent_email.Notification.Body.EmailId
-        self.given(f"/api/Email/{parent_email_id}/reply", WillReturn(JSONResponse(reply_id))),
-
         # - parent email is received
+        parent_email = Email()
+        parent_email_id = parent_email.Notification.Body.EmailId
         await bruin.notify_email(parent_email)
 
         result = await self.check(
             self.route(RtaService.path("SaveOutputs")).was_reached(timeout.RTA),
             self.route("/api/Email/status").was_reached(timeout.RTA),
-            self.route(f"/api/Email/{parent_email_id}/reply").was_reached(timeout.RTA),
+            self.route(f"/api/Notification/email/ReplyAll").was_reached(timeout.RTA),
         )
 
         if not result.passed:

@@ -1,12 +1,14 @@
 import hashlib
 import hmac
 import json
+import logging
 import os
 import re
 import time
+from dataclasses import dataclass
 from functools import wraps
 from http import HTTPStatus
-from typing import List
+from typing import Any, List
 
 import jsonschema
 from hypercorn.asyncio import serve
@@ -16,48 +18,46 @@ from quart import jsonify, request
 from quart_openapi import Pint
 from swagger_ui import quart_api_doc
 
+from application.repositories.new_emails_repository import NewEmailsRepository
+from application.repositories.new_tickets_repository import NewTicketsRepository
+from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.utils_repository import UtilsRepository
+
 MEGABYTE: int = 1024 * 1024
 MAX_CONTENT_LENGTH = 4 * MEGABYTE  # 4mb
 SHA256_PREFIX = re.compile(r"^sha256=")
 
+log = logging.getLogger(__name__)
 
+
+@dataclass
 class APIServer:
-    _title = None
-    _port = None
-    _hypercorn_config = None
-    _new_bind = None
+    _config: Any
+    _new_emails_repository: NewEmailsRepository
+    _new_tickets_repository: NewTicketsRepository
+    _notifications_repository: NotificationsRepository
+    _utils: UtilsRepository
 
-    def __init__(
-        self, logger, config, new_emails_repository, new_tickets_repository, notifications_repository, utils_repository
-    ):
-        self._config = config
-        self._logger = logger
-        self._new_emails_repository = new_emails_repository
-        self._new_tickets_repository = new_tickets_repository
-        self._notifications_repository = notifications_repository
-        self._utils = utils_repository
-
+    def __post_init__(self):
         self._max_content_length = MAX_CONTENT_LENGTH
-        self._title = config.QUART_CONFIG["title"]
-        self._port = config.QUART_CONFIG["port"]
-        self._use_request_api_key_header = config.MONITOR_CONFIG["api_server"]["use_request_api_key_header"]
-
-        self._endpoint_prefix = config.MONITOR_CONFIG["api_server"]["endpoint_prefix"]
+        self._title = self._config.QUART_CONFIG["title"]
+        self._port = self._config.QUART_CONFIG["port"]
+        self._use_request_api_key_header = self._config.MONITOR_CONFIG["api_server"]["use_request_api_key_header"]
+        self._endpoint_prefix = self._config.MONITOR_CONFIG["api_server"]["endpoint_prefix"]
 
         self._hypercorn_config = HyperCornConfig()
-
-        self._logger.info(f"env: {os.environ}")
+        log.info(f"env: {os.environ}")
         self._new_bind = f"0.0.0.0:{self._port}"
         self._app = Pint(
             __name__,
             title=self._title,
             no_openapi=True,
-            base_model_schema=config.MONITOR_CONFIG["api_server"]["schema_path"],
+            base_model_schema=self._config.MONITOR_CONFIG["api_server"]["schema_path"],
         )
 
         self.attach_swagger()
         self.register_endpoints()
-        with open(config.MONITOR_CONFIG["api_server"]["schema_path"], "r") as f:
+        with open(self._config.MONITOR_CONFIG["api_server"]["schema_path"], "r") as f:
             schema_data = f.read()
         self._schema = json.loads(schema_data)
         self._create_schema = self._app.create_ref_validator("new_email_tagger_validator", "schemas")
@@ -86,6 +86,7 @@ class APIServer:
 
     # Middleware decorators
 
+    @staticmethod
     def validate_api_key(func):
         @wraps(func)
         async def decorated(_self):
@@ -96,14 +97,14 @@ class APIServer:
 
             if not api_key:
                 err_msg = f"Missing api-key header"
-                _self._logger.error(err_msg)
+                log.error(err_msg)
                 return_response = {"code": "MissingAPIKey", "message": err_msg}
                 return jsonify(return_response), HTTPStatus.BAD_REQUEST, None
 
             valid = _self._is_valid_api_key(api_key)
             if not valid:
                 err_msg = f"Invalid api-key header"
-                _self._logger.error(err_msg)
+                log.error(err_msg)
                 return_response = {"code": "InvalidAPIKeyHeader", "message": err_msg}
                 return jsonify(return_response), HTTPStatus.BAD_REQUEST, None
 
@@ -111,6 +112,7 @@ class APIServer:
 
         return decorated
 
+    @staticmethod
     def verify_signature(func):
         @wraps(func)
         async def decorated(_self):
@@ -126,7 +128,7 @@ class APIServer:
             valid = _self._is_valid_signature(body, header_signature)
             if not valid:
                 err_msg = f"Invalid body signature"
-                _self._logger.error(err_msg)
+                log.error(err_msg)
                 return_response = {"code": "InvalidSignature", "message": err_msg}
 
                 return jsonify(return_response), HTTPStatus.BAD_REQUEST, None
@@ -146,10 +148,10 @@ class APIServer:
         signature_to_verify = SHA256_PREFIX.sub("", signature_to_verify)
         signature_to_verify = signature_to_verify.upper()
 
-        self._logger.info(f"Key: \n>>>>{secret_key}<<<<<<\n")
-        self._logger.info(f"Request RAW body: \n>>>>{content}<<<<<<\n")
-        self._logger.info(f"Signature: IGZ  [{calculated_signature}]")
-        self._logger.info(f"Signature: BRUIN[{signature_to_verify}]")
+        log.info(f"Key: \n>>>>{secret_key}<<<<<<\n")
+        log.info(f"Request RAW body: \n>>>>{content}<<<<<<\n")
+        log.info(f"Signature: IGZ  [{calculated_signature}]")
+        log.info(f"Signature: BRUIN[{signature_to_verify}]")
 
         # Use try/except because compare_digest may be disabled
         try:
@@ -158,14 +160,15 @@ class APIServer:
             return calculated_signature == signature_to_verify
 
     # Endpoints
-    def _health(self):
+    @staticmethod
+    def _health():
         return jsonify(None), HTTPStatus.OK, None
 
     @validate_api_key
     @verify_signature
     # New Email Notification [POST] /email
     async def _post_email(self):
-        self._logger.info(f"[EmailWebhook] new email received")
+        log.info(f"[EmailWebhook] new email received")
         start_time = time.time()
 
         notification_data = await request.get_json()
@@ -174,27 +177,27 @@ class APIServer:
         try:
             validate(email_data, self._schema["components"]["schemas"])
         except jsonschema.exceptions.ValidationError as ve:
-            self._logger.error(ve)
+            log.error(ve)
             error_message = "email data not valid."
-            self._logger.error(error_message)
+            log.error(error_message)
             error_response = {"code": HTTPStatus.BAD_REQUEST, "message": ve.message}
             return jsonify(error_response), HTTPStatus.BAD_REQUEST, None
 
         try:
             self._new_emails_repository.save_new_email(self._convert_email_input_body(email_data))
         except Exception as e:
-            self._logger.error(f"Error saving new email: {e}")
+            log.error(f"Error saving new email: {e}")
             error_response = {"code": "InternalServerError", "message": "Error saving new email."}
             return jsonify(error_response), HTTPStatus.INTERNAL_SERVER_ERROR, None
 
-        self._logger.info("[EmailWebhook] Saved - took {:.3f}s".format(time.time() - start_time))
+        log.info("[EmailWebhook] Saved - took {:.3f}s".format(time.time() - start_time))
         return "", HTTPStatus.NO_CONTENT, None
 
     @validate_api_key
     @verify_signature
     # New Ticket for Email Notification [POST] /ticket
     async def _post_ticket(self):
-        self._logger.info(f"[EmailWebhook] new ticket received")
+        log.info(f"[EmailWebhook] new ticket received")
         start_time = time.time()
 
         notification_data = await request.get_json()
@@ -203,13 +206,13 @@ class APIServer:
         try:
             validate(email_ticket_data, self._schema["components"]["schemas"])
         except jsonschema.exceptions.ValidationError as ve:
-            self._logger.error(ve)
+            log.error(ve)
             error_message = "email ticket data not valid."
-            self._logger.error(error_message)
+            log.error(error_message)
             error_response = {"code": HTTPStatus.BAD_REQUEST, "message": ve.message}
             return jsonify(error_response), HTTPStatus.BAD_REQUEST, None
 
-        self._logger.info(f"[EmailWebhook] payload: {email_ticket_data}")
+        log.info(f"[EmailWebhook] payload: {email_ticket_data}")
 
         try:
             data = self._convert_ticket_input_body(email_ticket_data)
@@ -217,11 +220,11 @@ class APIServer:
             ticket_data = data["ticket"]
             self._new_tickets_repository.save_new_ticket(email_data, ticket_data)
         except Exception as e:
-            self._logger.error(f"Error saving new ticket: {e}")
+            log.error(f"Error saving new ticket: {e}")
             error_response = {"code": "InternalServerError", "message": "Error saving new email."}
             return jsonify(error_response), HTTPStatus.INTERNAL_SERVER_ERROR, None
 
-        self._logger.info("[TicketWebhook] Saved - took {:.3f}s".format(time.time() - start_time))
+        log.info("[TicketWebhook] Saved - took {:.3f}s".format(time.time() - start_time))
 
         return "", HTTPStatus.NO_CONTENT, None
 
@@ -248,7 +251,8 @@ class APIServer:
 
         return {"original_email": {"email": email, "tag_ids": tag_ids}, "ticket": ticket}
 
-    def _convert_to_str(self, data: dict, keys: List[str]) -> dict:
+    @staticmethod
+    def _convert_to_str(data: dict, keys: List[str]) -> dict:
         data_keys = data.keys()
         for k in keys:
             if k in data_keys:

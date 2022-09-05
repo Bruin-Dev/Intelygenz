@@ -8,12 +8,10 @@ from config import testconfig
 class TestStorageRepository:
     def instance_test(self):
         config = testconfig
-        logger = Mock()
         redis = Mock()
-        storage_repo = StorageRepository(config, logger, redis)
+        storage_repo = StorageRepository(config, redis)
 
         assert storage_repo._config == config
-        assert storage_repo._logger == logger
         assert storage_repo._redis == redis
 
     def get_exist_test(self, storage_repository):

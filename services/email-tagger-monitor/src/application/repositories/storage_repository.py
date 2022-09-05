@@ -1,12 +1,17 @@
 import json
+from dataclasses import dataclass
+from typing import Any
+
+from redis import Redis
 
 
+@dataclass
 class StorageRepository:
-    def __init__(self, config, logger, redis):
-        self._config = config
-        self._logger = logger
-        self._redis = redis
-        self._redis_key_prefix = config.ENVIRONMENT_NAME
+    _config: Any
+    _redis: Redis
+
+    def __post_init__(self):
+        self._redis_key_prefix = self._config.ENVIRONMENT_NAME
 
     def get(self, key):
         key = f"{self._redis_key_prefix}-{key}"

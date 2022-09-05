@@ -1,13 +1,13 @@
 import datetime as dt
 from datetime import datetime
-from unittest.mock import Mock, call, patch
+from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
+from shortuuid import uuid
+
 from application.actions import new_tickets_monitor as new_tickets_monitor_module
 from application.actions.new_tickets_monitor import NewTicketsMonitor
-from asynctest import CoroutineMock
 from config import testconfig
-from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(new_tickets_monitor_module, "uuid", return_value=uuid_)
@@ -16,32 +16,39 @@ uuid_mock = patch.object(new_tickets_monitor_module, "uuid", return_value=uuid_)
 @pytest.fixture
 def new_tickets_monitor():
     event_bus = Mock()
-    logger = Mock()
     scheduler = Mock()
     config = testconfig
     bruin_repository = Mock()
     new_tickets_repository = Mock()
     email_tagger_repository = Mock()
     return NewTicketsMonitor(
-        event_bus, logger, scheduler, config, new_tickets_repository, email_tagger_repository, bruin_repository
+        event_bus,
+        scheduler,
+        config,
+        new_tickets_repository,
+        email_tagger_repository,
+        bruin_repository,
     )
 
 
 class TestNewTicketsMonitor:
     def instance_test(self):
         event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         bruin_repository = Mock()
         new_tickets_repository = Mock()
         email_tagger_repository = Mock()
         new_tickets_monitor = NewTicketsMonitor(
-            event_bus, logger, scheduler, config, new_tickets_repository, email_tagger_repository, bruin_repository
+            event_bus,
+            scheduler,
+            config,
+            new_tickets_repository,
+            email_tagger_repository,
+            bruin_repository,
         )
 
         assert new_tickets_monitor._event_bus is event_bus
-        assert new_tickets_monitor._logger is logger
         assert new_tickets_monitor._scheduler is scheduler
         assert new_tickets_monitor._config is config
         assert new_tickets_monitor._bruin_repository is bruin_repository
@@ -51,14 +58,18 @@ class TestNewTicketsMonitor:
     @pytest.mark.asyncio
     async def start_new_tickets_monitor_job_with_exec_on_start_test(self):
         event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         bruin_repository = Mock()
         new_tickets_repository = Mock()
         email_tagger_repository = Mock()
         new_tickets_monitor = NewTicketsMonitor(
-            event_bus, logger, scheduler, config, new_tickets_repository, email_tagger_repository, bruin_repository
+            event_bus,
+            scheduler,
+            config,
+            new_tickets_repository,
+            email_tagger_repository,
+            bruin_repository,
         )
         added_seconds = dt.timedelta(0, 5)
         next_run_time = datetime.now()
@@ -80,14 +91,18 @@ class TestNewTicketsMonitor:
     @pytest.mark.asyncio
     async def new_tickets_monitor_process_ok_test(self):
         event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         bruin_repository = Mock()
         new_tickets_repository = Mock()
         email_tagger_repository = Mock()
         new_tickets_monitor = NewTicketsMonitor(
-            event_bus, logger, scheduler, config, new_tickets_repository, email_tagger_repository, bruin_repository
+            event_bus,
+            scheduler,
+            config,
+            new_tickets_repository,
+            email_tagger_repository,
+            bruin_repository,
         )
 
         pending_tickets = [
@@ -107,8 +122,8 @@ class TestNewTicketsMonitor:
 
         new_tickets_monitor._new_tickets_repository.get_pending_tickets = Mock(return_value=pending_tickets)
         new_tickets_monitor._new_tickets_repository.validate_ticket = Mock(side_effect=expected_validations)
-        new_tickets_monitor._email_tagger_repository.save_metrics = CoroutineMock(return_value={"status": 200})
-        new_tickets_monitor._bruin_repository.get_single_ticket_basic_info = CoroutineMock(
+        new_tickets_monitor._email_tagger_repository.save_metrics = AsyncMock(return_value={"status": 200})
+        new_tickets_monitor._bruin_repository.get_single_ticket_basic_info = AsyncMock(
             return_value={"status": 200, "body": ticket_basic_info}
         )
         new_tickets_monitor._new_tickets_repository.mark_complete = Mock()
@@ -124,8 +139,8 @@ class TestNewTicketsMonitor:
         )
         new_tickets_monitor._new_tickets_repository.mark_complete.assert_has_calls(
             [
-                call(pending_tickets[0]["email"]["email"]["email_id"], pending_tickets[0]["ticket"]["ticket_id"]),
-                call(pending_tickets[1]["email"]["email"]["email_id"], pending_tickets[1]["ticket"]["ticket_id"]),
+                call(pending_tickets[0]["email"]["email"]["email_id"], str(pending_tickets[0]["ticket"]["ticket_id"])),
+                call(pending_tickets[1]["email"]["email"]["email_id"], str(pending_tickets[1]["ticket"]["ticket_id"])),
             ],
             any_order=True,
         )
@@ -137,14 +152,18 @@ class TestNewTicketsMonitor:
     @pytest.mark.asyncio
     async def _save_metrics_ok_test(self):
         event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         bruin_repository = Mock()
         new_tickets_repository = Mock()
         email_tagger_repository = Mock()
         new_tickets_monitor = NewTicketsMonitor(
-            event_bus, logger, scheduler, config, new_tickets_repository, email_tagger_repository, bruin_repository
+            event_bus,
+            scheduler,
+            config,
+            new_tickets_repository,
+            email_tagger_repository,
+            bruin_repository,
         )
 
         email_id = "100"
@@ -154,8 +173,8 @@ class TestNewTicketsMonitor:
         ticket_data = {"ticket_id": "200"}
         ticket_basic_info = {"ticket_id": ticket_id, "ticket_type": "BIL"}
 
-        new_tickets_monitor._email_tagger_repository.save_metrics = CoroutineMock(return_value={"status": 200})
-        new_tickets_monitor._bruin_repository.get_single_ticket_basic_info = CoroutineMock(
+        new_tickets_monitor._email_tagger_repository.save_metrics = AsyncMock(return_value={"status": 200})
+        new_tickets_monitor._bruin_repository.get_single_ticket_basic_info = AsyncMock(
             return_value={"status": 200, "body": ticket_basic_info}
         )
         new_tickets_monitor._new_tickets_repository.mark_complete = Mock()
@@ -166,7 +185,7 @@ class TestNewTicketsMonitor:
         new_tickets_monitor._email_tagger_repository.save_metrics.assert_awaited_once_with(
             email_data, ticket_basic_info
         )
-        new_tickets_monitor._new_tickets_repository.mark_complete.assert_called_once_with(email_id, ticket_id)
+        new_tickets_monitor._new_tickets_repository.mark_complete.assert_called_once_with(email_id, str(ticket_id))
 
     @pytest.mark.asyncio
     async def _save_metrics_404_error(self, new_tickets_monitor):
@@ -178,8 +197,8 @@ class TestNewTicketsMonitor:
         ticket_data = {"ticket_id": "200"}
         ticket_basic_info = {"ticket_id": ticket_id, "ticket_type": "BIL"}
 
-        new_tickets_monitor._email_tagger_repository.save_metrics = CoroutineMock(return_value={"status": 200})
-        new_tickets_monitor._bruin_repository.get_single_ticket_basic_info = CoroutineMock(
+        new_tickets_monitor._email_tagger_repository.save_metrics = AsyncMock(return_value={"status": 200})
+        new_tickets_monitor._bruin_repository.get_single_ticket_basic_info = AsyncMock(
             return_value={"status": error_code, "body": ticket_basic_info}
         )
         new_tickets_monitor._new_tickets_repository.mark_complete = Mock()

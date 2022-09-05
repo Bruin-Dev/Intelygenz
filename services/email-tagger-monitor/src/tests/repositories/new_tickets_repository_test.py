@@ -1,36 +1,34 @@
 from unittest.mock import Mock
 
 import pytest
+
 from application.repositories.new_tickets_repository import NewTicketsRepository
 from config import testconfig
 
 
 @pytest.fixture
 def new_emails_repository():
-    logger = Mock()
     config = testconfig
     notifications_repository = Mock()
     storage_repository = Mock()
 
-    return NewTicketsRepository(logger, config, notifications_repository, storage_repository)
+    return NewTicketsRepository(config, notifications_repository, storage_repository)
 
 
 class TestNewTicketsRepository:
     def instance_test(self):
-        logger = Mock()
         config = testconfig
         notifications_repository = Mock()
         storage_repository = Mock()
 
-        new_emails_repository = NewTicketsRepository(logger, config, notifications_repository, storage_repository)
+        new_emails_repository = NewTicketsRepository(config, notifications_repository, storage_repository)
 
-        assert new_emails_repository._logger is logger
         assert new_emails_repository._config is config
         assert new_emails_repository._notifications_repository is notifications_repository
         assert new_emails_repository._storage_repository is storage_repository
 
-    def validate_ticket_test(self, logger, notifications_repository, storage_repository):
-        new_tickets_repository = NewTicketsRepository(testconfig, logger, notifications_repository, storage_repository)
+    def validate_ticket_test(self, notifications_repository, storage_repository):
+        new_tickets_repository = NewTicketsRepository(testconfig, notifications_repository, storage_repository)
 
         pending_tickets = [
             {"email": {"email": {"email_id": "100", "client_id": "333"}}, "ticket": {"ticket_id": 200}},
@@ -47,18 +45,18 @@ class TestNewTicketsRepository:
         for expected_validation, ticket in zip(expected_validations, pending_tickets):
             assert new_tickets_repository.validate_ticket(ticket) == expected_validation
 
-    def get_pending_emails_ok_test(self, logger, notifications_repository, storage_repository):
+    def get_pending_emails_ok_test(self, notifications_repository, storage_repository):
         storage_repository.find_all = Mock(return_value=[])
-        new_emails_repository = NewTicketsRepository(testconfig, logger, notifications_repository, storage_repository)
+        new_emails_repository = NewTicketsRepository(testconfig, notifications_repository, storage_repository)
 
         actual = new_emails_repository.get_pending_tickets()
 
         storage_repository.find_all.assert_called_once()
         assert actual == []
 
-    def save_new_email_ok_test(self, logger, notifications_repository, storage_repository):
+    def save_new_email_ok_test(self, notifications_repository, storage_repository):
         storage_repository.save = Mock()
-        new_emails_repository = NewTicketsRepository(logger, testconfig, notifications_repository, storage_repository)
+        new_emails_repository = NewTicketsRepository(testconfig, notifications_repository, storage_repository)
 
         expected_id = "ticket_12345_67890"
         email_data = {
@@ -81,11 +79,11 @@ class TestNewTicketsRepository:
         storage_repository.save.assert_called_once_with(expected_id, {"email": email_data, "ticket": ticket_data})
         assert response is None
 
-    def mark_complete_ok_test(self, logger, notifications_repository, storage_repository):
+    def mark_complete_ok_test(self, notifications_repository, storage_repository):
         storage_repository.rename = Mock()
         storage_repository.expire = Mock()
 
-        new_emails_repository = NewTicketsRepository(logger, testconfig, notifications_repository, storage_repository)
+        new_emails_repository = NewTicketsRepository(testconfig, notifications_repository, storage_repository)
 
         email_id = "12345"
         ticket_id = "67890"

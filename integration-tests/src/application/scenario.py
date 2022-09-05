@@ -3,6 +3,7 @@ import logging
 from typing import Any, Awaitable, Callable, Optional
 
 from application.data.bruin import Document, Inventory
+from application.data.bruin.reply_response import ReplyResponse
 from application.data.bruin.ticket_basic import TicketBasic
 from application.data.bruin.ticket_details import TicketDetails, TicketNote
 from application.handler import Handler, WillReturnJSON, WillReturnNothing
@@ -25,6 +26,7 @@ DEFAULT_ROUTES = {
     "/api/Inventory": WillReturnJSON(Inventory(documents=[Document()])),
     "/api/Email/{email_id}/link/ticket/{ticket_id}": WillReturnJSON({"success": "success"}),
     "/api/Email/status": WillReturnJSON({"success": "success"}),
+    "/api/Notification/email/ReplyAll": WillReturnJSON(ReplyResponse()),
 }
 
 

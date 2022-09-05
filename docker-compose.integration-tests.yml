@@ -9,7 +9,7 @@ services:
   repair-tickets-kre-bridge:
     environment:
       KRE_BASE_URL: integration-tests:50002
-  notifier:
+  email-bridge:
     environment:
       # Prevent notifier thread to hang up when retrieving emails for intermapper-outage-monitor
       MONITORABLE_EMAIL_ACCOUNTS: "{}"
@@ -17,8 +17,10 @@ services:
     environment:
       NEW_EMAILS_JOB_INTERVAL: 5
       NEW_TICKETS_JOB_INTERVAL: 5
+      STORE_REPLIES_ENABLED: true
   repair-tickets-monitor:
     environment:
       RTA_MONITOR_JOB_INTERVAL: 5
       NEW_CREATED_TICKETS_FEEDBACK_JOB_INTERVAL: 5
       NEW_CLOSED_TICKETS_FEEDBACK_JOB_INTERVAL: 5
+      AUTO_REPLY_ENABLED: true

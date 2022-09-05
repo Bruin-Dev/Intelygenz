@@ -1,22 +1,21 @@
 import hashlib
 import hmac
 from http import HTTPStatus
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
+from hypercorn.config import Config as HyperCornConfig
+from quart import Quart
 
 import application
 import application.server.api_server as api_server_module
-import pytest
 from application.repositories.utils_repository import UtilsRepository
 from application.server.api_server import APIServer
-from asynctest import CoroutineMock
 from config import testconfig
-from hypercorn.config import Config as HyperCornConfig
-from quart import Quart
 
 
 class TestApiServer:
     def instance_test(self):
-        logger = Mock()
         new_emails_repository = Mock()
         new_tickets_repository = Mock()
 
@@ -24,7 +23,6 @@ class TestApiServer:
         utils_repository = Mock()
 
         api_server_test = APIServer(
-            logger,
             testconfig,
             new_emails_repository,
             new_tickets_repository,
@@ -32,7 +30,6 @@ class TestApiServer:
             utils_repository,
         )
 
-        assert api_server_test._logger is logger
         assert api_server_test._new_emails_repository is new_emails_repository
         assert api_server_test._notifications_repository is notifications_repository
 
@@ -45,13 +42,13 @@ class TestApiServer:
 
     @pytest.mark.asyncio
     async def run_server_test(self, api_server_test):
-        with patch.object(application.server.api_server, "serve", new=CoroutineMock()) as mock_serve:
+        with patch.object(application.server.api_server, "serve", new=AsyncMock()) as mock_serve:
             await api_server_test.run_server()
             assert api_server_test._hypercorn_config.bind == [api_server_test._new_bind]
             assert mock_serve.called
 
     def attach_swagger_test(self, api_server_test):
-        with patch.object(api_server_module, "quart_api_doc", new=CoroutineMock()) as quart_api_doc_mock:
+        with patch.object(api_server_module, "quart_api_doc", new=AsyncMock()) as quart_api_doc_mock:
             api_server_test.attach_swagger()
             quart_api_doc_mock.assert_called_once()
 
@@ -100,7 +97,6 @@ class TestApiServer:
         response = await client.post(f"/email", json=payload, headers=headers)
 
         api_server_test._new_emails_repository.save_new_email.assert_called_once_with(email_data)
-        api_server_test._logger.info.assert_called()
 
         assert response.status_code == HTTPStatus.NO_CONTENT
 
@@ -146,7 +142,6 @@ class TestApiServer:
         response = await client.post(f"/ticket", json=payload, headers=headers)
 
         api_server_test._new_tickets_repository.save_new_ticket.assert_called_once_with(email_data, ticket_data)
-        api_server_test._logger.info.assert_called()
 
         assert response.status_code == HTTPStatus.NO_CONTENT
 
