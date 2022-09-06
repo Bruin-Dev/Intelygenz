@@ -490,10 +490,132 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_7">
+          Manual procedures
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Manual procedures" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_7">
+          <span class="md-nav__icon md-icon"></span>
+          Manual procedures
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../../../../.." class="md-nav__link">
-        Manual processes
+      <a href="../../../../../manual_procedures/API_VENDOR_ACCESS/" class="md-nav__link">
+        Vendor access to the API
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION/" class="md-nav__link">
+        Switch Automation Engine region
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_8">
+          Manual configurations
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Manual configurations" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_8">
+          <span class="md-nav__icon md-icon"></span>
+          Manual configurations
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_configurations/INIT_AUTOMATION_PROJECT/" class="md-nav__link">
+        Init Automation Engine project
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_configurations/OKTA_CONFIGURATIONS/" class="md-nav__link">
+        AWS SSO Okta JWT token
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_configurations/OKTA_JWT/" class="md-nav__link">
+        AWS SSO Okta JWT token
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -553,13 +675,13 @@
   <h1> create outage ticket</h1>
 
 <h2 id="create-outage-ticket">Create outage ticket</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="sa">f</span><span class="s2">&quot;Attempting outage ticket creation for client_id </span><span class="si">{</span><span class="n">client_id</span><span class="si">}</span><span class="s2"> and service_number </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2">&quot;</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span>
 </code></pre></div>
 <ul>
 <li>If environment is not <code>PRODUCTION</code>:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="sa">f</span><span class="s2">&quot;No outage ticket will be created for client_id </span><span class="si">{</span><span class="n">client_id</span><span class="si">}</span><span class="s2"> and circuit_id </span><span class="si">{</span><span class="n">circuit_id</span><span class="si">}</span><span class="s2"> &quot;</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="sa">f</span><span class="s2">&quot;since the current environment is not production&quot;</span>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="p">)</span>
@@ -567,19 +689,19 @@
   END</li>
 </ul>
 <p><a href="../../repositories/bruin_repository/create_outage_ticket/">create_outage_ticket</a></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="sa">f</span><span class="s2">&quot;Bruin response for ticket creation for service number </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">outage_ticket_response</span><span class="si">}</span><span class="s2">&quot;</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="p">)</span>
 </code></pre></div>
 <ul>
 <li>
 <p>If response status for ticket creation is ok:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Successfully created outage ticket with ticket_id </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Successfully created outage ticket with ticket_id </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div></p>
 </li>
 <li>
 <p>If response status for ticket creation is a Bruin custom status (<code>409</code>, <code>472</code> or <code>473</code>):
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="sa">f</span><span class="s2">&quot;Ticket for service number </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2"> already exists with ticket_id </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">.&quot;</span>
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="sa">f</span><span class="s2">&quot;Status returned was </span><span class="si">{</span><span class="n">outage_ticket_status</span><span class="si">}</span><span class="s2">&quot;</span>
 <a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="p">)</span>
@@ -587,24 +709,24 @@
 <ul>
 <li>
 <p>If response status for ticket creation is <code>409</code>:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;In Progress ticket exists for location of service number </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;In Progress ticket exists for location of service number </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div></p>
 </li>
 <li>
 <p>If response status for ticket creation is <code>472</code>:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Resolved ticket exists for service number </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Resolved ticket exists for service number </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div></p>
 </li>
 <li>
 <p>If response status for ticket creation is <code>473</code>:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Resolved ticket exists for location of service number </span><span class="si">{</span><span class="n">service_number</span><span class="s2">&quot;)</span>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Resolved ticket exists for location of service number </span><span class="si">{</span><span class="n">service_number</span><span class="s2">&quot;)</span>
 </code></pre></div></p>
 </li>
 </ul>
 </li>
 <li>
 <p>If additional data exists in the DRI system for service number:
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
 <a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>    <span class="sa">f</span><span class="s2">&quot;Appending InterMapper note to ticket id </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> with dri parameters: &quot;</span>
 <a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dri_parameters</span><span class="si">}</span><span class="s2">&quot;</span>
 <a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="p">)</span>
@@ -612,7 +734,7 @@
     <a href="../../repositories/bruin_repository/append_dri_note/">append_dri_note</a></p>
 <ul>
 <li>If response status for append DRI note to ticket is not ok:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad status calling append dri note. Skipping create outage ticket ...&quot;</span><span class="p">)</span>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad status calling append dri note. Skipping create outage ticket ...&quot;</span><span class="p">)</span>
 </code></pre></div></li>
 <li>
 <p>Otherwise:</p>
@@ -622,12 +744,12 @@
 </li>
 <li>
 <p>Otherwise:
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Appending InterMapper note to ticket id </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Appending InterMapper note to ticket id </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
     <a href="../../repositories/bruin_repository/append_intermapper_note/">append_intermapper_note</a></p>
 <ul>
 <li>If response status of append InterMapper note is not ok:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad status calling append intermapper note. Skipping create outage ticket ...&quot;</span><span class="p">)</span>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad status calling append intermapper note. Skipping create outage ticket ...&quot;</span><span class="p">)</span>
 </code></pre></div>
   END</li>
 </ul>

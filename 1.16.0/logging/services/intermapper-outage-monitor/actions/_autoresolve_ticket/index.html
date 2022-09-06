@@ -490,10 +490,132 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_7">
+          Manual procedures
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Manual procedures" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_7">
+          <span class="md-nav__icon md-icon"></span>
+          Manual procedures
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../../../../.." class="md-nav__link">
-        Manual processes
+      <a href="../../../../../manual_procedures/API_VENDOR_ACCESS/" class="md-nav__link">
+        Vendor access to the API
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION/" class="md-nav__link">
+        Switch Automation Engine region
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_8">
+          Manual configurations
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Manual configurations" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_8">
+          <span class="md-nav__icon md-icon"></span>
+          Manual configurations
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_configurations/INIT_AUTOMATION_PROJECT/" class="md-nav__link">
+        Init Automation Engine project
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_configurations/OKTA_CONFIGURATIONS/" class="md-nav__link">
+        AWS SSO Okta JWT token
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_configurations/OKTA_JWT/" class="md-nav__link">
+        AWS SSO Okta JWT token
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -553,23 +675,23 @@
   <h1> autoresolve ticket</h1>
 
 <h2 id="autoresolve-ticket">Autoresolve ticket</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting the autoresolve process&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting the autoresolve process&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p><a href="../../repositories/bruin_repository/get_ticket_basic_info/">get_ticket_basic_info</a></p>
 <ul>
 <li>If response status for get tickets basic info is not ok:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad status calling to get ticket basic info for client id:  </span><span class="si">{</span><span class="n">client_id</span><span class="si">}</span><span class="s2">.&quot;</span>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad status calling to get ticket basic info for client id:  </span><span class="si">{</span><span class="n">client_id</span><span class="si">}</span><span class="s2">.&quot;</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>                     <span class="sa">f</span><span class="s2">&quot;Skipping autoresolve ticket ...&quot;</span><span class="p">)</span>
 </code></pre></div></li>
 </ul>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tickets_body</span><span class="p">)</span><span class="si">}</span><span class="s2"> tickets for service number </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2"> from bruin: </span><span class="si">{</span><span class="n">tickets_body</span><span class="si">}</span><span class="s2">&quot;</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="p">)</span>
 </code></pre></div>
 <ul>
 <li>
 <p>For ticket in tickets:
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="sa">f</span><span class="s2">&quot;Posting InterMapper UP note to task of ticket id </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> &quot;</span>
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="sa">f</span><span class="s2">&quot;related to service number </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2">...&quot;</span>
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">)</span>
@@ -577,7 +699,7 @@
     <a href="../../repositories/bruin_repository/append_intermapper_up_note/">_append_intermapper_up_note</a></p>
 <ul>
 <li>If response status for append InterMapper UP note is not ok:
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad status calling to append intermapper note to ticket id: </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">.&quot;</span>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad status calling to append intermapper note to ticket id: </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">.&quot;</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>                     <span class="sa">f</span><span class="s2">&quot;Skipping autoresolve ticket ....&quot;</span><span class="p">)</span>
 </code></pre></div>
   END</li>
@@ -586,23 +708,23 @@
 <ul>
 <li>
 <p>If response status for get tickets is not ok:
-      <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad status calling to get ticket for client id: </span><span class="si">{</span><span class="n">client_id</span><span class="si">}</span><span class="s2"> and &quot;</span>
+      <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad status calling to get ticket for client id: </span><span class="si">{</span><span class="n">client_id</span><span class="si">}</span><span class="s2"> and &quot;</span>
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>                     <span class="sa">f</span><span class="s2">&quot;ticket id: </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">. Skipping autoresolve ticket ...&quot;</span><span class="p">)</span>
 </code></pre></div>
       END</p>
 </li>
 <li>
 <p>If there's no ticket data:
-      <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> couldn&#39;t be found in Bruin. Skipping autoresolve...&quot;</span><span class="p">)</span>
+      <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> couldn&#39;t be found in Bruin. Skipping autoresolve...&quot;</span><span class="p">)</span>
 </code></pre></div>
       <em>Continue with next ticket</em></p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Product category of ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> from bruin is </span><span class="si">{</span><span class="n">product_category</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Product category of ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> from bruin is </span><span class="si">{</span><span class="n">product_category</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
 <ul>
 <li>If ticket's product category is not whitelisted:
-      <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+      <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
 <a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>    <span class="sa">f</span><span class="s2">&quot;At least one product category of ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> from the &quot;</span>
 <a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="sa">f</span><span class="s2">&quot;following list is not one of the whitelisted categories for &quot;</span>
 <a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="sa">f</span><span class="s2">&quot;auto-resolve: </span><span class="si">{</span><span class="n">product_category</span><span class="si">}</span><span class="s2">. Skipping autoresolve ...&quot;</span>
@@ -610,13 +732,13 @@
 </code></pre></div>
       <em>Continue with next ticket</em></li>
 </ul>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Checking to see if ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> can be autoresolved&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Checking to see if ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> can be autoresolved&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p><a href="../../repositories/bruin_repository/get_ticket_details/">get_ticket_details</a></p>
 <ul>
 <li>
 <p>If response status for get ticket details is not ok:
-      <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+      <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
 <a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>    <span class="sa">f</span><span class="s2">&quot;Bad status calling get ticket details to ticket id: </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">. Skipping autoresolve ...&quot;</span>
 <a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="p">)</span>
 </code></pre></div>
@@ -624,7 +746,7 @@
 </li>
 <li>
 <p>If last outage hasn't been detected recently:
-      <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+      <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
 <a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>    <span class="sa">f</span><span class="s2">&quot;Edge has been in outage state for a long time, so detail </span><span class="si">{</span><span class="n">ticket_detail_id</span><span class="si">}</span><span class="s2"> &quot;</span>
 <a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>    <span class="sa">f</span><span class="s2">&quot;(service number </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2">) of ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> will not be autoresolved. Skipping &quot;</span>
 <a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>    <span class="sa">f</span><span class="s2">&quot;autoresolve...&quot;</span>
@@ -634,7 +756,7 @@
 </li>
 <li>
 <p>If max auto-resolves threshold has been exceeded:
-      <div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+      <div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
 <a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>    <span class="sa">f</span><span class="s2">&quot;Limit to autoresolve detail </span><span class="si">{</span><span class="n">ticket_detail_id</span><span class="si">}</span><span class="s2"> (service number </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2">) &quot;</span>
 <a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>    <span class="sa">f</span><span class="s2">&quot;of ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> has been maxed out already. &quot;</span>
 <a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>    <span class="s2">&quot;Skipping autoresolve...&quot;</span>
@@ -644,7 +766,7 @@
 </li>
 <li>
 <p>If ticket task is resolved already:
-      <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+      <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
 <a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>    <span class="sa">f</span><span class="s2">&quot;Detail </span><span class="si">{</span><span class="n">ticket_detail_id</span><span class="si">}</span><span class="s2"> (service number </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2">) of ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> is already &quot;</span>
 <a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>    <span class="s2">&quot;resolved. Skipping autoresolve...&quot;</span>
 <a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="p">)</span>
@@ -653,7 +775,7 @@
 </li>
 <li>
 <p>If environment is not <code>PRODUCTION</code>:
-      <div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+      <div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
 <a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>    <span class="sa">f</span><span class="s2">&quot;Skipping autoresolve for service number </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2"> &quot;</span>
 <a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>    <span class="sa">f</span><span class="s2">&quot;since the current environment is not production&quot;</span>
 <a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="p">)</span>
@@ -665,17 +787,17 @@
 <p><a href="../../repositories/bruin_repository/resolve_ticket/">resolve_ticket</a></p>
 <ul>
 <li>If response status for resolve ticket is not ok:
-      <div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad status calling to resolve ticket: </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">. Skipping autoresolve ...&quot;</span><span class="p">)</span>
+      <div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad status calling to resolve ticket: </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">. Skipping autoresolve ...&quot;</span><span class="p">)</span>
 </code></pre></div>
       END</li>
 </ul>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
 <a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>    <span class="sa">f</span><span class="s2">&quot;Outage ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> for service_number </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2"> was autoresolved through InterMapper &quot;</span>
 <a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>    <span class="sa">f</span><span class="s2">&quot;emails. Ticket details at https://app.bruin.com/t/</span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">.&quot;</span>
 <a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="p">)</span>
 </code></pre></div>
 <a href="../../repositories/bruin_repository/append_autoresolve_note_to_ticket/">append_autoresolve_note_to_ticket</a></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
 <a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>    <span class="sa">f</span><span class="s2">&quot;Detail </span><span class="si">{</span><span class="n">ticket_detail_id</span><span class="si">}</span><span class="s2"> (service number </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2">) of ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> was autoresolved!&quot;</span>
 <a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="p">)</span>
 </code></pre></div>
