@@ -185,6 +185,7 @@ This is the algorithm implemented to carry out the triage process of edges:
 - [Velocloud bridge](../velocloud-bridge/README.md)
 - [Bruin bridge](../bruin-bridge/README.md)
 - [Notifications bridge](../notifications-bridge/README.md)
+- [Email bridge](../email-bridge/README.md)
 
 # Running in docker-compose
 

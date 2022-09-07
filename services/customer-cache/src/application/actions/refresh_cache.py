@@ -16,16 +16,16 @@ from tenacity import retry, stop_after_delay, wait_exponential, wait_random
 
 class RefreshCache:
     def __init__(
-        self,
-        config,
-        event_bus,
-        logger,
-        scheduler,
-        storage_repository,
-        bruin_repository,
-        velocloud_repository,
-        notifications_repository,
-        email_repository,
+            self,
+            config,
+            event_bus,
+            logger,
+            scheduler,
+            storage_repository,
+            bruin_repository,
+            velocloud_repository,
+            notifications_repository,
+            email_repository,
     ):
         self._config = config
         self._event_bus = event_bus
@@ -140,7 +140,7 @@ class RefreshCache:
                 f" Check if Bruin is returning errors when asking for management statuses of the host"
             )
             self._logger.error(error_msg)
-            await self._event_bus.rpc_request("notification.slack.request", error_msg, timeout=10)
+            self._notifications_repository.send_slack_message(error_msg)
         else:
             stored_cache = self._storage_repository.get_cache(host)
 
@@ -238,8 +238,8 @@ class RefreshCache:
                     return
                 else:
                     if (
-                        management_status_response_body == "Pending"
-                        and client_id in self._config.REFRESH_CONFIG["blacklisted_client_ids"]
+                            management_status_response_body == "Pending"
+                            and client_id in self._config.REFRESH_CONFIG["blacklisted_client_ids"]
                     ):
                         self._logger.info(
                             f"Edge ({serial_number}) has management_status: Pending and has a blacklisted"
@@ -279,7 +279,7 @@ class RefreshCache:
     async def _send_email_snapshot(self, host, old_cache, new_cache):
         self._logger.info("Sending email with snapshots of cache...")
         email_obj = self._format_email_object(host, old_cache, new_cache)
-        response = await self._event_bus.rpc_request("notification.email.request", email_obj, timeout=60)
+        response = await self._email_repository.send_email(email_obj)
         self._logger.info(f"Response from sending email: {json.dumps(response)}")
 
     async def _send_email_multiple_inventories(self):
@@ -289,7 +289,8 @@ class RefreshCache:
             self._logger.info(message)
             email_obj = self._format_alert_email_object()
             self._logger.info(
-                f"Sending mail with serials having multiples inventories to  {email_obj['email_data']['recipient']}"
+                f"Sending mail with serials having multiples inventories to  "
+                f"{email_obj['body']['email_data']['recipient']}"
             )
             response = await self._email_repository.send_email(email_obj)
             self._logger.info(
@@ -302,21 +303,22 @@ class RefreshCache:
         new_cache_csv = self._generate_csv_bytes_from_cache(f"new_cache_{host}.csv", new_cache)
         return {
             "request_id": uuid(),
-            "email_data": {
-                "subject": f"Customer cache snapshots. Environment: {self._config.ENVIRONMENT_NAME}. Host: {host}. "
-                f"{now}",
-                "recipient": self._config.REFRESH_CONFIG["email_recipient"],
-                "text": "this is the accessible text for the email",
-                "html": f"In this email you will see attached 2 CSV files: the prior and current status of the "
-                f"customer cache for the host {host}."
-                f"Please note that timestamps in the files and in the subject are in UTC.",
-                "images": [],
-                "attachments": [
-                    {"name": f"old_customer_cache_{host}_{now}.csv", "data": old_cache_csv},
-                    {"name": f"new_customer_cache_{host}_{now}.csv", "data": new_cache_csv},
-                ],
-            },
-        }
+            "body": {
+                "email_data": {
+                    "subject": f"Customer cache snapshots. Environment: {self._config.ENVIRONMENT_NAME}. Host: {host}. "
+                               f"{now}",
+                    "recipient": self._config.REFRESH_CONFIG["email_recipient"],
+                    "text": "this is the accessible text for the email",
+                    "html": f"In this email you will see attached 2 CSV files: the prior and current status of the "
+                            f"customer cache for the host {host}."
+                            f"Please note that timestamps in the files and in the subject are in UTC.",
+                    "images": [],
+                    "attachments": [
+                        {"name": f"old_customer_cache_{host}_{now}.csv", "data": old_cache_csv},
+                        {"name": f"new_customer_cache_{host}_{now}.csv", "data": new_cache_csv},
+                    ],
+                },
+            }}
 
     def _format_alert_email_object(self):
         now = datetime.utcnow().strftime("%B %d %Y - %H:%M:%S")
@@ -325,14 +327,16 @@ class RefreshCache:
             text += f"<p>Serial: {serial} and items: {self._serials_with_multiple_inventories[serial]}<p></br>"
         return {
             "request_id": uuid(),
-            "email_data": {
-                "subject": f"Serials with multiple inventory items ({now})",
-                "recipient": self._config.REFRESH_CONFIG["email_recipient"],
-                "text": "this is the accessible text for the email",
-                "html": f"<p>In this email you will see the serials with more than one inventory items</p></br>"
-                f"{text}",
-                "images": [],
-                "attachments": [],
+            "body": {
+                "email_data": {
+                    "subject": f"Serials with multiple inventory items ({now})",
+                    "recipient": self._config.REFRESH_CONFIG["email_recipient"],
+                    "text": "this is the accessible text for the email",
+                    "html": f"<p>In this email you will see the serials with more than one inventory items</p></br>"
+                            f"{text}",
+                    "images": [],
+                    "attachments": [],
+                }
             },
         }
 

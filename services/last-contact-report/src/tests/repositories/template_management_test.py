@@ -24,9 +24,9 @@ class TestTemplateRenderer:
         ]
         email = template_renderer.compose_email_object(edges_to_report)
 
-        assert "Last contact edges" in email["email_data"]["subject"]
-        assert config["recipient"] in email["email_data"]["recipient"]
-        assert "<!DOCTYPE html" in email["email_data"]["html"]
+        assert "Last contact edges" in email["body"]["email_data"]["subject"]
+        assert config["recipient"] in email["body"]["email_data"]["recipient"]
+        assert "<!DOCTYPE html" in email["body"]["email_data"]["html"]
 
     def compose_email_object_html_elements_test(self):
         base = "src/templates/images/{}"
@@ -42,13 +42,13 @@ class TestTemplateRenderer:
         file_csv = base64.b64encode(file_csv.encode("utf-8"))
         email = test_repo.compose_email_object(edges_to_report, **kwargs)
 
-        assert email["email_data"]["images"][0]["data"] == base64.b64encode(
+        assert email["body"]["email_data"]["images"][0]["data"] == base64.b64encode(
             open(base.format(kwargs["logo"]), "rb").read()
         ).decode("utf-8")
-        assert email["email_data"]["images"][1]["data"] == base64.b64encode(
+        assert email["body"]["email_data"]["images"][1]["data"] == base64.b64encode(
             open(base.format(kwargs["header"]), "rb").read()
         ).decode("utf-8")
-        assert email["email_data"]["attachments"][0]["data"] == file_csv.decode("utf-8")
+        assert email["body"]["email_data"]["attachments"][0]["data"] == file_csv.decode("utf-8")
 
     def compose_email_test(self):
         event_bus = Mock()
@@ -64,6 +64,6 @@ class TestTemplateRenderer:
         ]
         email = template_renderer.compose_email_object(edges_to_report)
 
-        assert "Last contact edges" in email["email_data"]["subject"]
-        assert config["recipient"] in email["email_data"]["recipient"]
-        assert "<!DOCTYPE html" in email["email_data"]["html"]
+        assert "Last contact edges" in email["body"]["email_data"]["subject"]
+        assert config["recipient"] in email["body"]["email_data"]["recipient"]
+        assert "<!DOCTYPE html" in email["body"]["email_data"]["html"]

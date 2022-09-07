@@ -50,7 +50,7 @@ def notifications_repository(event_bus):
 
 @pytest.fixture(scope="function")
 def email_repository(event_bus):
-    instance = EmailRepository(event_bus=event_bus, config=config)
+    instance = EmailRepository(event_bus=event_bus)
     wrap_all_methods(instance)
 
     return instance

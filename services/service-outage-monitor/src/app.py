@@ -9,6 +9,7 @@ from application.repositories.digi_repository import DiGiRepository
 from application.repositories.ha_repository import HaRepository
 from application.repositories.metrics_repository import MetricsRepository
 from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.email_repository import EmailRepository
 from application.repositories.outage_repository import OutageRepository
 from application.repositories.triage_repository import TriageRepository
 from application.repositories.utils_repository import UtilsRepository
@@ -49,6 +50,7 @@ class Container:
 
         # REPOSITORIES
         self._notifications_repository = NotificationsRepository(event_bus=self._event_bus)
+        self._email_repository = EmailRepository(event_bus=self._event_bus)
         self._velocloud_repository = VelocloudRepository(
             event_bus=self._event_bus,
             logger=self._logger,
@@ -114,6 +116,7 @@ class Container:
                 self._metrics_repository,
                 self._digi_repository,
                 self._ha_repository,
+                self._email_repository,
             )
 
     async def _start(self):

@@ -16,7 +16,15 @@ class SendToEmail:
         payload = json.loads(msg.data)
         response = {"request_id": payload["request_id"], "body": None, "status": None}
 
-        if "email_data" not in payload.keys():
+        if payload.get("body") is None:
+            logger.error(f"Cannot send to email with {json.dumps(payload)}. Must include body in request")
+
+            response["status"] = 400
+            response["body"] = 'Must include "body" in request'
+            await msg.respond(json.dumps(response).encode())
+            return
+
+        if not all(key in payload["body"].keys() for key in ("email_data",)):
             logger.error(f"Cannot send to email with {json.dumps(payload)}. JSON malformed")
 
             response["status"] = 400
@@ -24,7 +32,7 @@ class SendToEmail:
             await msg.respond(json.dumps(response).encode())
             return
 
-        email_data = payload["email_data"]
+        email_data = payload["body"]["email_data"]
         if email_data == "":
             logger.error(f'Cannot send to email with {json.dumps(payload)}. Parameter "email_data" cannot be empty')
 

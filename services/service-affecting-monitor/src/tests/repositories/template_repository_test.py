@@ -17,5 +17,5 @@ class TestTemplateRepository:
                 subject=subject, recipients=recipients, template_name="test.html", template_vars={}
             )
 
-        assert result["email_data"]["subject"] == subject
-        assert result["email_data"]["recipient"] == "a@mettel.com, b@mettel.com"
+        assert result["body"]["email_data"]["subject"] == subject
+        assert result["body"]["email_data"]["recipient"] == "a@mettel.com, b@mettel.com"

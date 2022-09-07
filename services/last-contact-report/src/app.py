@@ -36,7 +36,7 @@ class Container:
         self._event_bus.add_consumer(self.subscriber_alert, consumer_name="sub-alert")
         self._event_bus.set_producer(self._publisher)
         self._notifications_repository = NotificationsRepository(event_bus=self._event_bus, config=config)
-        self._email_repository = EmailRepository(event_bus=self._event_bus, config=config)
+        self._email_repository = EmailRepository(event_bus=self._event_bus)
         self._velocloud_repository = VelocloudRepository(
             self._event_bus, self._logger, config, self._notifications_repository
         )

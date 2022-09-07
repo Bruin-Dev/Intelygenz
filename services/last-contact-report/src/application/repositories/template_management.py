@@ -43,15 +43,17 @@ class TemplateRenderer:
 
         return {
             "request_id": uuid(),
-            "email_data": {
-                "subject": f'Last contact edges ({datetime.now().strftime("%Y-%m-%d")})',
-                "recipient": self._config["recipient"],
-                "text": "this is the accessible text for the email",
-                "html": email_html,
-                "images": [
-                    {"name": "logo", "data": base64.b64encode(open(logo, "rb").read()).decode("utf-8")},
-                    {"name": "header", "data": base64.b64encode(open(header, "rb").read()).decode("utf-8")},
-                ],
-                "attachments": [{"name": csv, "data": file_csv.decode("utf-8")}],
+            "body": {
+                "email_data": {
+                    "subject": f'Last contact edges ({datetime.now().strftime("%Y-%m-%d")})',
+                    "recipient": self._config["recipient"],
+                    "text": "this is the accessible text for the email",
+                    "html": email_html,
+                    "images": [
+                        {"name": "logo", "data": base64.b64encode(open(logo, "rb").read()).decode("utf-8")},
+                        {"name": "header", "data": base64.b64encode(open(header, "rb").read()).decode("utf-8")},
+                    ],
+                    "attachments": [{"name": csv, "data": file_csv.decode("utf-8")}],
+                }
             },
         }

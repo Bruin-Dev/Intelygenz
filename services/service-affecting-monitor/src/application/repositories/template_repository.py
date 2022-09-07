@@ -34,22 +34,26 @@ class TemplateRepository:
 
         return {
             "request_id": uuid(),
-            "email_data": {
-                "subject": subject,
-                "recipient": ", ".join(recipients),
-                "text": "",
-                "html": template.render(**template_vars),
-                "images": [
-                    {
-                        "name": "logo",
-                        "data": base64.b64encode(open("src/templates/images/logo.png", "rb").read()).decode("utf-8"),
-                    },
-                    {
-                        "name": "header",
-                        "data": base64.b64encode(open("src/templates/images/header.jpg", "rb").read()).decode("utf-8"),
-                    },
-                ],
-                "attachments": attachments,
+            "body": {
+                "email_data": {
+                    "subject": subject,
+                    "recipient": ", ".join(recipients),
+                    "text": "",
+                    "html": template.render(**template_vars),
+                    "images": [
+                        {
+                            "name": "logo",
+                            "data": base64.b64encode(open("src/templates/images/logo.png", "rb").read()).decode(
+                                "utf-8"),
+                        },
+                        {
+                            "name": "header",
+                            "data": base64.b64encode(open("src/templates/images/header.jpg", "rb").read()).decode(
+                                "utf-8"),
+                        },
+                    ],
+                    "attachments": attachments,
+                }
             },
         }
 

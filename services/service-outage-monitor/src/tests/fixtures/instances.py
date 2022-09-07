@@ -12,6 +12,7 @@ from application.repositories.outage_repository import OutageRepository
 from application.repositories.triage_repository import TriageRepository
 from application.repositories.utils_repository import UtilsRepository
 from application.repositories.velocloud_repository import VelocloudRepository
+from application.repositories.email_repository import EmailRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from asynctest import create_autospec
 from config import testconfig as config
@@ -44,6 +45,14 @@ def scheduler():
 @pytest.fixture(scope="function")
 def notifications_repository(event_bus):
     instance = NotificationsRepository(event_bus=event_bus)
+    wrap_all_methods(instance)
+
+    return instance
+
+
+@pytest.fixture(scope="function")
+def email_repository(event_bus):
+    instance = EmailRepository(event_bus=event_bus)
     wrap_all_methods(instance)
 
     return instance
@@ -205,6 +214,7 @@ def outage_monitor(
         utils_repository=utils_repository,
         digi_repository=digi_repository,
         ha_repository=ha_repository,
+        email_repository=email_repository,
     )
     wrap_all_methods(instance)
 

@@ -2,7 +2,6 @@ from unittest.mock import patch
 
 import pytest
 from application.repositories import email_repository as email_repository_module
-from config import testconfig
 from shortuuid import uuid
 
 uuid_ = uuid()

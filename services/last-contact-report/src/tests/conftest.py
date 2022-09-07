@@ -43,7 +43,7 @@ def notifications_repository(event_bus):
 
 @pytest.fixture(scope="function")
 def email_repository(event_bus):
-    return EmailRepository(event_bus, testconfig)
+    return EmailRepository(event_bus)
 
 
 @pytest.fixture(scope="function")
@@ -160,17 +160,19 @@ def email_obj():
     email_html = "<html>html</html>"
     return {
         "request_id": uuid(),
-        "email_data": {
-            "subject": f'Last contact edges ({datetime.now().strftime("%Y-%m-%d")})',
-            "recipient": testconfig.REPORT_CONFIG["recipient"],
-            "text": "this is the accessible text for the email",
-            "html": email_html,
-            "images": [
-                {"name": "logo", "data": "LOGOBASE64"},
-                {"name": "header", "data": "HEADERBASE64"},
-            ],
-            "attachments": [{"name": "CSV", "data": "DATACSV"}],
-        },
+        "body": {
+            "email_data": {
+                "subject": f'Last contact edges ({datetime.now().strftime("%Y-%m-%d")})',
+                "recipient": testconfig.REPORT_CONFIG["recipient"],
+                "text": "this is the accessible text for the email",
+                "html": email_html,
+                "images": [
+                    {"name": "logo", "data": "LOGOBASE64"},
+                    {"name": "header", "data": "HEADERBASE64"},
+                ],
+                "attachments": [{"name": "CSV", "data": "DATACSV"}],
+            },
+        }
     }
 
 

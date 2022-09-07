@@ -53,5 +53,6 @@ class TestEmailRepository:
                 await email_repository.send_email("test.csv")
 
         assert event_bus.rpc_request.call_args[0][0] == "notification.email.request"
-        assert event_bus.rpc_request.call_args[0][1]["email_data"]["html"] == html
-        assert event_bus.rpc_request.call_args[0][1]["email_data"]["attachments"][0]["name"] == "digi_reboot_report.csv"
+        assert event_bus.rpc_request.call_args[0][1]["body"]["email_data"]["html"] == html
+        expected_name = event_bus.rpc_request.call_args[0][1]["body"]["email_data"]["attachments"][0]["name"]
+        assert expected_name == "digi_reboot_report.csv"

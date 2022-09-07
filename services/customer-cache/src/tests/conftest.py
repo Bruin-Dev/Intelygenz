@@ -61,7 +61,7 @@ def instance_notifications_repository(mock_event_bus):
 
 @pytest.fixture(scope="function")
 def instance_email_repository(mock_event_bus):
-    return EmailRepository(mock_event_bus, config)
+    return EmailRepository(mock_event_bus)
 
 
 @pytest.fixture(scope="function")

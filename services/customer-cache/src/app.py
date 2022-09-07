@@ -52,7 +52,7 @@ class Container:
 
         # REPOSITORIES
         self._notifications_repository = NotificationsRepository(event_bus=self._event_bus, config=config)
-        self._email_repository = EmailRepository(event_bus=self._event_bus, config=config)
+        self._email_repository = EmailRepository(event_bus=self._event_bus)
         self._bruin_repository = BruinRepository(
             event_bus=self._event_bus,
             logger=self._logger,

@@ -35,6 +35,7 @@ class TestServiceOutageMonitor:
         digi_repository,
         ha_repository,
         utils_repository,
+        email_repository,
     ):
 
         assert outage_monitor._event_bus is event_bus
@@ -51,6 +52,7 @@ class TestServiceOutageMonitor:
         assert outage_monitor._digi_repository is digi_repository
         assert outage_monitor._ha_repository is ha_repository
         assert outage_monitor._utils_repository is utils_repository
+        assert outage_monitor._email_repository is email_repository
         assert outage_monitor._autoresolve_serials_whitelist == set()
 
     @pytest.mark.asyncio

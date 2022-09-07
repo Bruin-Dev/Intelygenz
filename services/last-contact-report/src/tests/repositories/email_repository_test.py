@@ -1,17 +1,27 @@
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 import pytest
 from application.repositories import email_repository as email_repository_module
-from config import testconfig
 from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(email_repository_module, "uuid", return_value=uuid_)
 
 
+@pytest.fixture(scope="function")
+def mock_event_bus():
+    event_bus = Mock()
+    return event_bus
+
+
+@pytest.fixture(scope="function")
+def instance_email_repository(mock_event_bus):
+    return email_repository_module(mock_event_bus)
+
+
 class TestEmailRepository:
-    def instance_test(self, email_repository, event_bus):
-        assert email_repository._event_bus is event_bus
+    def instance_test(self, instance_email_repository, mock_event_bus):
+        assert instance_email_repository._event_bus is mock_event_bus
 
     @pytest.mark.asyncio
     async def send_email_test(self, email_repository):

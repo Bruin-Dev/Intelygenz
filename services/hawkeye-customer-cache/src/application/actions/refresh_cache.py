@@ -97,7 +97,8 @@ class RefreshCache:
             self._logger.info(message)
             email_obj = self._format_alert_email_object()
             self._logger.info(
-                f"Sending mail with serials having multiples inventories to  {email_obj['email_data']['recipient']}"
+                f"Sending mail with serials having multiples inventories to  "
+                f"{email_obj['body']['email_data']['recipient']}"
             )
             response = await self._email_repository.send_email(email_obj)
             self._logger.info(
@@ -111,13 +112,15 @@ class RefreshCache:
             text += f"Serial: {serial} and items: {self._bruin_repository._serials_with_multiple_inventories[serial]}\n"
         return {
             "request_id": uuid(),
-            "email_data": {
-                "subject": f"Serials with multiple inventory items ({now})",
-                "recipient": self._config.REFRESH_CONFIG["email_recipient"],
-                "text": "this is the accessible text for the email",
-                "html": f"In this email you will see the serials with more than one inventory items\n{text}",
-                "images": [],
-                "attachments": [],
+            "body": {
+                "email_data": {
+                    "subject": f"Serials with multiple inventory items ({now})",
+                    "recipient": self._config.REFRESH_CONFIG["email_recipient"],
+                    "text": "this is the accessible text for the email",
+                    "html": f"In this email you will see the serials with more than one inventory items\n{text}",
+                    "images": [],
+                    "attachments": [],
+                }
             },
         }
 
