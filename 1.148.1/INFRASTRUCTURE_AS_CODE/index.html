@@ -1,0 +1,770 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://docs.mettel-automation.net/1.148.1/INFRASTRUCTURE_AS_CODE/">
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
+    
+    
+      
+        <title>INFRASTRUCTURE AS CODE - Automation Engine Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.8c5ef100.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.9647289d.min.css">
+        
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#infrastructure-as-code" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        <aside class="md-banner md-banner--warning">
+          
+        </aside>
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Automation Engine Documentation" class="md-header__button md-logo" aria-label="Automation Engine Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Automation Engine Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              INFRASTRUCTURE AS CODE
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href=".." class="md-tabs__link">
+      Home
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../CONCEPTS/" class="md-tabs__link">
+        Topics
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Automation Engine Documentation" class="md-nav__button md-logo" aria-label="Automation Engine Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Automation Engine Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Topics
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Topics" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Topics
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CONCEPTS/" class="md-nav__link">
+        Concepts
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_2" type="checkbox" id="__nav_2_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_2">
+          Pipelines
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Pipelines" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_2">
+          <span class="md-nav__icon md-icon"></span>
+          Pipelines
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pipeline/BASIC_CI_CONFIGURATION/" class="md-nav__link">
+        Basic configurations
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pipeline/PIPELINE_RULES/" class="md-nav__link">
+        Pipeline rules
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_3" type="checkbox" id="__nav_2_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_3">
+          Documentation
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Documentation" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_3">
+          <span class="md-nav__icon md-icon"></span>
+          Documentation
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DOCUMENTATION/" class="md-nav__link">
+        Organization
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decisions/" class="md-nav__link">
+        MetTel decisions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../metrics-definitions/" class="md-nav__link">
+        Metrics definitions
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Development rules
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_5" type="checkbox" id="__nav_2_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_5">
+          Work in a local env
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Work in a local env" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_5">
+          <span class="md-nav__icon md-icon"></span>
+          Work in a local env
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kafka/LAUNCH_DOCKER_COMPOSE/" class="md-nav__link">
+        Launch docker compose
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../snowflake/" class="md-nav__link">
+        Datalake
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Manual processes
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iac-in-mettel-automation" class="md-nav__link">
+    IaC in MetTel Automation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#folder-structure" class="md-nav__link">
+    Folder structure
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+
+
+<div align="center">
+<img src="https://media.licdn.com/dms/image/C4E0BAQHrME9aCW6ulg/company-logo_200_200/0?e=2159024400&v=beta&t=6xMNS1zK1F8asBlM16EzbJ4Im7SlQ8L7a7sgcaNzZQE"  width="200" height="200">
+</div>
+
+<h1 id="infrastructure-as-code">INFRASTRUCTURE AS CODE</h1>
+<blockquote>
+<p>Infrastructure as Code (IaC) is the management of infrastructure (networks, virtual machines, load balancers, 
+and connection topology) in a descriptive model, using the same versioning as DevOps team uses for source code. 
+Like the principle that the same source code generates the same binary, an IaC model generates the same environment 
+every time it is applied. IaC is a key DevOps practice and is used in conjunction with continuous delivery.
+<a href="https://docs.microsoft.com/en-us/azure/devops/learn/what-is-infrastructure-as-code">Azure</a></p>
+</blockquote>
+<h2 id="introduction">Introduction</h2>
+<p>Infrastructure as Code enables DevOps to test the deployment of environments before use it in production. IaC can deliver 
+stable environments rapidly and at scale. Avoiding manual configuration of environments and enforce consistency by representing
+ the desired state of their environments via code. This technique improves the automatic deployments in automation-engine, each time 
+ the pipelines launch the <a href="../PIPELINES/##continuous-delivery-cd">Continuous delivery</a> will create, update or destroy 
+ the infrastructure if it's necessary. </p>
+<h2 id="iac-in-mettel-automation">IaC in MetTel Automation</h2>
+<p>Automation-engine runs IaC with <a href="https://www.terraform.io/">terraform</a>, this task is/will be included in the automation <a href="../PIPELINES/##Pipelines">pipelines</a>.
+Terraform save the state of the infrastructure in a storage, these files have the extension <strong>.tfstate</strong>. In MetTel Automation we
+saves these files in a protected Cloud storage to centralize the states and be accessible each time the pipeline needs to deploy/update
+the infrastructure.</p>
+<h2 id="folder-structure">Folder structure</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>infra-as-code/
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── basic-infra             <span class="c1"># basic infrastructure in AWS</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>└── data-collector          <span class="c1"># data-collector infrastructre in AWS</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>└── dev                     <span class="c1"># AWS resources for each environment (ECS Cluster, ElastiCache Cluster, etc.)</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>└── kre                     <span class="c1"># kre infrastructure</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  └── <span class="m">0</span>-create-bucket       <span class="c1"># bucket to store EKS information</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  └── <span class="m">1</span>-eks-roles           <span class="c1"># IAM roles infrastructure for EKS cluster</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>  └── <span class="m">2</span>-smtp                <span class="c1"># SES infrastructure folder</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>└── kre-runtimes            <span class="c1"># kre runtimes infrastructure</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>  └── modules               <span class="c1"># custom terraform modules folders used for create KRE infrastructure</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>  └── runtimes              <span class="c1"># KRE runtimes folders</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>└── network-resources       <span class="c1"># network resources infrastructure in AWS</span>
+</code></pre></div>
+<p>Al terraform files are located inside <code>./infra-as-code</code>, in this folder there are four additional folders, <code>basic-infra</code>, <code>dev</code>, <code>ecs-services</code> and <code>network-resources</code>.</p>
+<ol>
+<li>
+<p><code>basic-infra</code>: there are the necessary terraform files to create the Docker images repositories in ECS, and the roles and policies necessary for use these.</p>
+</li>
+<li>
+<p><code>data-collector</code>: there are the necessary terraform files to create a Lambda, a DocumentDB Cluster, as well as an API Gateway to call the necessary and all the necessary resources to perform the conexion between these elements.</p>
+<blockquote>
+<p>These resources will only be created for production environment</p>
+</blockquote>
+</li>
+<li>
+<p><code>dev</code>: there are the necessary terraform files for create the resources used for each environment in AWS, these are as follows</p>
+<ul>
+<li>
+<p>An <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ECS_clusters.html">ECS Cluster</a>, the <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html">ECS Services</a> and its <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/example_task_definitions.html">Task Definition</a> for all the microservices present in the project</p>
+</li>
+<li>
+<p>Three <a href="https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/WhatIs.html">ElastiCache Redis Clusters</a></p>
+</li>
+<li>
+<p>An <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html">ALB</a></p>
+</li>
+<li>
+<p>A <a href="https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/rrsets-working-with.html">record</a> in <a href="https://aws.amazon.com/route53/features/">Route53</a></p>
+</li>
+<li>
+<p>A <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CloudWatchLogsConcepts.html">CloudWatch Log Group</a></p>
+</li>
+<li>
+<p>An <a href="https://aws.amazon.com/blogs/aws/amazon-ecs-service-discovery/">Service Discovery Service</a> for each ECS Service of the ECS Cluster created for this environment and a <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-discovery.html">Service Discovery Namespace</a> to logically group these <em>Service Discovery Services</em>.</p>
+</li>
+<li>
+<p>A set of resources related to the metrics of the environment:</p>
+<ul>
+<li>
+<p><a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html">CloudWatch Alarms</a></p>
+</li>
+<li>
+<p><a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html">CloudWatch Dashboard</a></p>
+</li>
+<li>
+<p><a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html">CloudWatch Log Filters</a></p>
+</li>
+</ul>
+</li>
+<li>
+<p>A <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html">CloudFormation Stack</a> for create the <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-sns-topic.html">SNS topic</a> that will be used by <em>CloudWatch Alarms</em> notifications of this environment</p>
+</li>
+<li>
+<p>A set of <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-security-groups.html">Security Groups</a> for all the resources created by the terraform files present in this folder</p>
+</li>
+<li>
+<p>A set of <a href="https://www.terraform.io/docs/providers/null/resource.html">null_resource</a> <em>Terraform</em> type resources to execute the <a href="../ci-utils/ecs/task_healthcheck.py">python script in charge of health checking the task instances</a> created in the deployment of capabilities microservices.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>kre</code>: there are the necessary terraform files for create the infrastructure for the <a href="https://github.com/konstellation-io/kre">kre</a> component of <a href="https://konstellation-io.github.io/website/">konstellation</a>, as well as all the components it needs at AWS.</p>
+<p>There is a series of folders with terraform code that have a number in their names, these will be used to deploy the components in a certain order and are detailed below:</p>
+<ul>
+<li>
+<p><code>0-create-bucket</code>: In this folder the terraform code is available to create a bucket for each environment and save information about the cluster, such as the SSH key to connect to the worker nodes of the EKS cluster that is going to be created.</p>
+</li>
+<li>
+<p><code>1-eks-roles</code>: In this folder the terraform code is available to create different IAM roles to map with EKS users and assign specific permissions for each one, for this purpose, a <a href="../ci-utils/eks/iam-to-eks-roles/README.md">cli</a> will be used later.</p>
+</li>
+<li>
+<p><code>2-create-eks-cluster</code>: In this folder the terraform code is available to create the following resources</p>
+<ul>
+<li>
+<p>An <a href="https://docs.aws.amazon.com/eks/latest/userguide/clusters.html">EKS cluster</a> to be able to deploy the different kre components designed for Kubernetes</p>
+</li>
+<li>
+<p>An <a href="https://docs.aws.amazon.com/autoscaling/ec2/userguide/AutoScalingGroup.html">AutoScaling Group</a> to have the desired number of Kubernetes worker nodes</p>
+</li>
+<li>
+<p>A hosted zone on <a href="https://aws.amazon.com/route53/faqs/?nc1=h_ls">Route53</a> for the corresponding kre environment</p>
+</li>
+<li>
+<p>A SSH key to connect to any worker node of EKS</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>3-smtp</code>: In this folder the terraform code to create a SMTP service through <a href="https://aws.amazon.com/ses/">Amazon SES</a> and all the necessary components of it.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>kre-runtimes</code>: there are the necessary terraform files for create the infrastructure needed by a KRE runtime:</p>
+<ul>
+<li>
+<p><code>modules</code>: Contains the terraform code for custom modules created for provision a KRE runtimes. It will create the following for each KRE runtime:</p>
+<ul>
+<li>A Route53 Hosted Zone in <code>mettel-automation.net</code> domain.</li>
+</ul>
+</li>
+<li>
+<p><code>runtimes</code>: Contains the terraform code files for deploy KRE runtimes used the custom module located in <code>modules</code> folder.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>network-resources</code>: there are the necessary terraform files for create the <a href="https://aws.amazon.com/vpc/">VPC</a> and all related resources in the environment used for deployment, these being the following:</p>
+<ul>
+<li>
+<p><a href="https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html">Internet Gateway</a></p>
+</li>
+<li>
+<p><a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html">Elastic IP Addresses</a></p>
+</li>
+<li>
+<p><a href="https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html">NAT Gateways</a></p>
+</li>
+<li>
+<p><a href="https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html">Subnets</a></p>
+</li>
+<li>
+<p><a href="https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html">Route tables</a> for the created subnets</p>
+</li>
+<li>
+<p>A set of <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-security-groups.html">Security Groups</a> for all the resources created by the terraform files present in this folder</p>
+</li>
+</ul>
+</li>
+</ol>
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs"], "search": "../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.748e2769.min.js"></script>
+      
+    
+  </body>
+</html>
