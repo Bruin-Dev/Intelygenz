@@ -48,7 +48,7 @@
     <bpmn:textAnnotation id="TextAnnotation_13xmaud">
       <bpmn:text>{
     "request_id": &lt;str&gt;
-    "body": {"message": &lt;str&gt;}
+    "message": &lt;str&gt;
 }</bpmn:text>
     </bpmn:textAnnotation>
     <bpmn:association id="Association_1fqmpgb" sourceRef="StartEvent_1" targetRef="TextAnnotation_13xmaud" />
