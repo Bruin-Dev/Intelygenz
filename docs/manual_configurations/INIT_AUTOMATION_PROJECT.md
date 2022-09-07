@@ -7,7 +7,7 @@
 The Automation Engine project at this moment is deployed in AWS infrastructure with all [FEDRAMP](https://www.fedramp.gov/)
 requirements meet, this is the reason why we select the CI/CD tool of AWS to manage the application life cycle; to take advantage of the
 OKTA and AWS SSO access, permission and logs of every action in the Automation APP.
-To init the project and be able to start using these CI/CD tool we need to follow a manual steps. 
+To init the project and be able to start using these CI/CD tool we need to follow some manual steps/configurations. 
 
 
 ## Considerations
@@ -52,7 +52,7 @@ To init the project and be able to start using these CI/CD tool we need to follo
   ```
 
 ## Application results
-Afther terraform apply of all environments, the pipelines will be configured in each separated region and will be prepared to mange
+Afther terraform apply of all environments, the pipelines will be configured in each separated region and will be prepared to manage
 Automation Engine application life cycle.
 This terraform project will create the follow resources in each environment:
 
