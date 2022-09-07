@@ -71,6 +71,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://docs.mettel-automation.net/1.16.0/backups/ECR_RECOVERY_PLAN/</loc>
+         <lastmod>2022-09-07</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://docs.mettel-automation.net/1.16.0/backups/EKS_SSH_RECOVERY_PLAN/</loc>
          <lastmod>2022-09-07</lastmod>
          <changefreq>daily</changefreq>
