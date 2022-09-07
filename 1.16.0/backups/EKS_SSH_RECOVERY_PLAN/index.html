@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/procedures/API_VENDOR_ACCESS/">
+        <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/backups/EKS_SSH_RECOVERY_PLAN/">
       
       <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
     
     
       
-        <title>API VENDOR ACCESS - Automation Engine Documentation</title>
+        <title>EKS SSH RECOVERY PLAN - Automation Engine Documentation</title>
       
     
     
@@ -100,7 +100,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              API VENDOR ACCESS
+              EKS SSH RECOVERY PLAN
             
           </span>
         </div>
@@ -490,10 +490,132 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_7">
+          Manual procedures
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Manual procedures" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_7">
+          <span class="md-nav__icon md-icon"></span>
+          Manual procedures
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
-        Manual processes
+      <a href="../../manual_procedures/API_VENDOR_ACCESS/" class="md-nav__link">
+        Vendor access to the API
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION/" class="md-nav__link">
+        Switch Automation Engine region
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_8">
+          Manual configurations
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Manual configurations" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_8">
+          <span class="md-nav__icon md-icon"></span>
+          Manual configurations
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../manual_configurations/INIT_AUTOMATION_PROJECT/" class="md-nav__link">
+        Init Automation Engine project
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../manual_configurations/OKTA_CONFIGURATIONS/" class="md-nav__link">
+        AWS SSO Okta JWT token
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../manual_configurations/OKTA_JWT/" class="md-nav__link">
+        AWS SSO Okta JWT token
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -544,22 +666,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#vendor-requirements" class="md-nav__link">
-    Vendor requirements
+  <a href="#backup-plan" class="md-nav__link">
+    Backup Plan
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#mettel-configurations" class="md-nav__link">
-    MetTel configurations
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#api-gateway-configurations" class="md-nav__link">
-    API gateway configurations
+  <a href="#recovery-plan" class="md-nav__link">
+    Recovery Plan
   </a>
   
 </li>
@@ -578,30 +693,26 @@
                 
 
 
-  <h1>API VENDOR ACCESS</h1>
+  <h1>EKS SSH RECOVERY PLAN</h1>
 
 <h2 id="pre-requisites">Pre requisites</h2>
 <ul>
-<li>Okta Account</li>
-<li>AWS Account</li>
+<li><a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html">AWS user credentials</a></li>
+<li><a href="https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-ssh-unixes.html">AWS SSH keys credentials</a></li>
 </ul>
 <h2 id="description">Description</h2>
-<p>This procedure explains how to give access to a specific vendor to the data highway API.</p>
-<h2 id="vendor-requirements">Vendor requirements</h2>
-<ul>
-<li>Provide a static trusted IP of the vendor</li>
-</ul>
-<h2 id="mettel-configurations">MetTel configurations</h2>
-<p>MetTel needs to do these next steps:</p>
-<ul>
-<li>The Okta vendor account into OKTA group DATA-HIGHWAY-API</li>
-<li>Vendor profile filled with the organization name of their company.</li>
-</ul>
-<h2 id="api-gateway-configurations">API gateway configurations</h2>
-<p>On the data highway team:</p>
-<ul>
-<li>Add the trusted static IP on the API gateway access policy.</li>
-</ul>
+<p>The project at this moment is deployed in AWS infrastructure with all <a href="https://www.fedramp.gov/">FEDRAMP</a>
+requirements meet. To acompish this requirements the SSH keys generated to access the EKS cluster need a backup plan and a recovery plan.</p>
+<p><img alt="" src="../../diagrams/workflows/backups/eks-ssh-keys.drawio.svg" /></p>
+<h2 id="backup-plan">Backup Plan</h2>
+<p>Each region generate the SSH keys crendentials for their specific region, when pasive is activated will have diferent SSH keys to avoid the reuse of these keys.
+The backup is executed at the moment the terraform runs in the pipeline in a normal execution to deploy the infrastructure and software for the FEDRAMP environment.
+<strong>The Tertiary region only contains backups of the secundary region.</strong> Also it's important to notice that the ssh keys only get generated in case of the activation of a region</p>
+<h2 id="recovery-plan">Recovery Plan</h2>
+<p>To recovery a SSH key in case is lost/deleted follow the next steps:
+- Identify the Activated region, if the region is the primary, the backup region will located in the secundary and if the region is the secundary the backup region will be at the Tertiary.
+- Download the key from the backup S3 called eks-ssh-keys-<region>-backup
+- Upload the key to the S3 called eks-ssh-keys-<region> of the activated region.</p>
 
               
             </article>
