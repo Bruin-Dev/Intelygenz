@@ -23,7 +23,7 @@ class TestNotificationsRepository:
 
         request = {
             "request_id": uuid_,
-            "message": f"[{notifications_repository._config.LOG_CONFIG['name']}]: {message}",
+            "body": {"message": f"[{notifications_repository._config.LOG_CONFIG['name']}]: {message}"},
         }
         encoded_request = to_json_bytes(request)
 

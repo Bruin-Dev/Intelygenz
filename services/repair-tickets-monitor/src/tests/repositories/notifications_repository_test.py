@@ -27,7 +27,7 @@ class TestNotificationsRepository:
             to_json_bytes(
                 {
                     "request_id": uuid_,
-                    "message": f"[repair-tickets-monitor] {message}",
+                    "body": {"message": f"[repair-tickets-monitor] {message}"},
                 }
             ),
             timeout=10,

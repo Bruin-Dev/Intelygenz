@@ -36,7 +36,7 @@ class TestNotificationsRepository:
             to_json_bytes(
                 {
                     "request_id": uuid_,
-                    "message": f"[email-tagger-monitor] {message}",
+                    "body": {"message": f"[email-tagger-monitor] {message}"},
                 }
             ),
             timeout=10,

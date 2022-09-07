@@ -26,7 +26,7 @@ class TestNotificationsRepository:
             "notification.slack.request",
             {
                 "request_id": uuid_,
-                "message": f"{message}",
+                "body": {"message": f"{message}"},
             },
             timeout=10,
         )

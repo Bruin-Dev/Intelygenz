@@ -29,7 +29,7 @@ class TestNotificationsRepository:
             "notification.slack.request",
             {
                 "request_id": uuid_,
-                "message": f"[{prefix}] {message}",
+                "body": {"message": f"[{prefix}] {message}"},
             },
             timeout=10,
         )
