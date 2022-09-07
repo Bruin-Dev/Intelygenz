@@ -32,11 +32,18 @@ nav:
       - Launch docker compose: "kafka/LAUNCH_DOCKER_COMPOSE.md"
     - Datalake: "snowflake/README.md"
     - Manual procedures:
+      - Emergency recovery plan: "manual_procedures/EMERGENCY_PLAN.md"
       - Vendor access to the API: "manual_procedures/API_VENDOR_ACCESS.md"
       - Switch Automation Engine region: "manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION.md"
+    - Backups Recovery plans:
+      - ECR backup recovery: "backups/ECR_RECOVERY_PLAN.md"
+      - EKS SSH recovery: "backups/EKS_SSH_RECOVERY_PLAN.md"
+      - GIT recovery: "backups/GIT_RECOVERY_PLAN.md"
+      - Prometheus recovery: "backups/PROMETHEUS_RECOVERY_PLAN.md"
+      - Terraform recovery: "backups/TERRAFORM_RECOVERY_PLAN.md"
     - Manual configurations:
       - Init Automation Engine project: "manual_configurations/INIT_AUTOMATION_PROJECT.md"
-      - AWS SSO Okta JWT token: "manual_configurations/OKTA_CONFIGURATIONS.md"
+      - AWS SSO Okta configurations: "manual_configurations/OKTA_CONFIGURATIONS.md"
       - AWS SSO Okta JWT token: "manual_configurations/OKTA_JWT.md"
 extra:
   version:
