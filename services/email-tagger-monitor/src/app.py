@@ -4,11 +4,14 @@ from dataclasses import asdict
 
 import redis
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from framework.logging.formatters import Papertrail as PapertrailFormatter
 from framework.logging.formatters import Standard as StandardFormatter
+from framework.logging.handlers import Papertrail as PapertrailHandler
 from framework.logging.handlers import Stdout as StdoutHandler
 from framework.nats.client import Client
 from framework.nats.models import Connection
 from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
+from framework.storage.model import RepairParentEmailStorage
 from prometheus_client import start_http_server
 from pytz import timezone
 
@@ -24,13 +27,25 @@ from application.repositories.storage_repository import StorageRepository
 from application.repositories.utils_repository import UtilsRepository
 from application.server.api_server import APIServer
 from config import config
-from framework.storage.model import RepairParentEmailStorage
 
 log = logging.getLogger("application")
 log.setLevel(logging.DEBUG)
 base_handler = StdoutHandler()
 base_handler.setFormatter(StandardFormatter(environment_name=config.ENVIRONMENT_NAME))
 log.addHandler(base_handler)
+
+if config.LOG_CONFIG["papertrail"]["active"]:
+    pt_handler = PapertrailHandler(
+        host=config.LOG_CONFIG["papertrail"]["host"],
+        port=config.LOG_CONFIG["papertrail"]["port"],
+    )
+    pt_handler.setFormatter(
+        PapertrailFormatter(
+            environment_name=config.ENVIRONMENT_NAME,
+            papertrail_prefix=config.LOG_CONFIG["papertrail"]["prefix"],
+        )
+    )
+    log.addHandler(pt_handler)
 
 
 class Container:
