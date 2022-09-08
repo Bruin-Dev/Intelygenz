@@ -51,6 +51,21 @@ logger.info(
       logger.info(f"Resolved ticket exists for location of service number {service_number")
       ```
 
+* If response status for get ticket details is not ok:
+    ```python
+    logger.warning(
+        f"Bad status calling get ticket details to ticket id: {ticket_id}. Skipping append note to ticket..."
+    )
+    ```
+    
+* If current condition has already been reported on the ticket:
+    ```python
+    logger.info(
+        f"Current condition has already been reported on ticket id {ticket_id}. "
+        f"Skipping append note to ticket..."
+    )
+    ```
+
 * If additional data exists in the DRI system for service number:
     ```python
     logger.info(
@@ -61,7 +76,7 @@ logger.info(
     [append_dri_note](../repositories/bruin_repository/append_dri_note.md)
     * If response status for append DRI note to ticket is not ok:
       ```python
-      logger.warning(f"Bad status calling append dri note. Skipping create outage ticket ...")
+      logger.warning(f"Bad status calling append dri note. Skipping append note to ticket...")
       ```
     * Otherwise:
 
@@ -74,7 +89,7 @@ logger.info(
     [append_intermapper_note](../repositories/bruin_repository/append_intermapper_note.md)
     * If response status of append InterMapper note is not ok:
       ```python
-      logger.warning(f"Bad status calling append intermapper note. Skipping create outage ticket ...")
+      logger.warning(f"Bad status calling append intermapper note. Skipping append note to ticket...")
       ```
       END
 

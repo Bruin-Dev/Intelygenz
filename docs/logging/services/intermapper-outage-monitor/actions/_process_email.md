@@ -13,8 +13,7 @@ logger.info(f"Processing email with msg_uid: {msg_uid} and subject: {subject}")
 * If e-mail represents an UP event:
   ```python
   logger.info(
-      f'Event from InterMapper was {parsed_email_dict["event"]}, there is no need to create '
-      f"a new ticket. Checking for autoresolve ..."
+      f'Event from InterMapper was {parsed_email_dict["event"]}, there is no need to create a new ticket"
   )
   ```
   [_autoresolve_ticket](_autoresolve_ticket.md)
@@ -22,8 +21,9 @@ logger.info(f"Processing email with msg_uid: {msg_uid} and subject: {subject}")
 * If e-mail represents a DOWN event:
   ```python
   logger.info(
-      f'Event from InterMapper was {parsed_email_dict["event"]}, '
-      f'condition was {parsed_email_dict["condition"]}. Checking for ticket creation ...'
+      f'Event: {parsed_email_dict["event"]} - '
+      f'Condition: {parsed_email_dict["condition"]} - '
+      f'Document: {parsed_email_dict["document"]}'
   )
   ```
 
