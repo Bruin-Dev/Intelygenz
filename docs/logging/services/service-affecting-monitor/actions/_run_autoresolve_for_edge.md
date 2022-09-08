@@ -27,9 +27,8 @@ self._logger.info(f"Starting autoresolve for edge {serial_number}...")
   * if remove_auto_resolution_restrictions_for_byob
     ```
     self._logger.info(
-                      f"Task for serial {serial_number} in ticket {affecting_ticket_id} is in the IPA Investigate"
-                      f" queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last"
-                      f" documented trouble..."
+                      f"Task for serial {serial_number} in ticket {affecting_ticket_id} is related to a BYOB link "
+                      f"and is in the IPA Investigate queue. Ignoring auto-resolution restrictions..."
                     )
     ```
   * else
