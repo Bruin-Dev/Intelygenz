@@ -161,14 +161,14 @@ class InterMapperMonitor:
 
         if parsed_email_dict["event"] in self._config.INTERMAPPER_CONFIG["intermapper_up_events"]:
             logger.info(
-                f'Event from InterMapper was {parsed_email_dict["event"]}, there is no need to create '
-                f"a new ticket. Checking for autoresolve ..."
+                f'Event from InterMapper was {parsed_email_dict["event"]}, there is no need to create a new ticket'
             )
             event_processed_successfully = await self._autoresolve_ticket(service_number, client_id, parsed_email_dict)
         elif parsed_email_dict["event"] in self._config.INTERMAPPER_CONFIG["intermapper_down_events"]:
             logger.info(
-                f'Event from InterMapper was {parsed_email_dict["event"]}, '
-                f'condition was {parsed_email_dict["condition"]}. Checking for ticket creation ...'
+                f'Event: {parsed_email_dict["event"]} - '
+                f'Condition: {parsed_email_dict["condition"]} - '
+                f'Document: {parsed_email_dict["document"]}'
             )
             dri_parameters = None
             if self._is_piab_device(parsed_email_dict):
@@ -463,28 +463,29 @@ class InterMapperMonitor:
                 ticket_id, dri_parameters, parsed_email_dict
             )
             if append_dri_note_response["status"] not in range(200, 300):
-                logger.warning(f"Bad status calling append dri note. Skipping create outage ticket ...")
+                logger.warning(f"Bad status calling append dri note. Skipping append note to ticket...")
                 return False
             return True
-        logger.info(f"Appending InterMapper note to ticket id {ticket_id}")
-        append_intermapper_note_response = await self._bruin_repository.append_intermapper_note(
-            ticket_id, parsed_email_dict, self._is_piab_device(parsed_email_dict)
-        )
-        if append_intermapper_note_response["status"] not in range(200, 300):
-            logger.warning(f"Bad status calling append intermapper note. Skipping create outage ticket ...")
-            return False
-
-        if self._should_forward_to_ipa_queue(parsed_email_dict) and outage_ticket_status in (200, 471, 472, 473):
-            ipa_forward_time = self._config.INTERMAPPER_CONFIG["forward_to_ipa_job_interval"]
-            self._schedule_forward_to_queue(
-                ticket_id, service_number, ForwardQueues.IPA.value, ipa_forward_time, is_piab, event
+        else:
+            logger.info(f"Appending InterMapper note to ticket id {ticket_id}")
+            append_intermapper_note_response = await self._bruin_repository.append_intermapper_note(
+                ticket_id, parsed_email_dict, self._is_piab_device(parsed_email_dict)
             )
+            if append_intermapper_note_response["status"] not in range(200, 300):
+                logger.warning(f"Bad status calling append intermapper note. Skipping append note to ticket...")
+                return False
 
-            hnoc_forward_time = self._config.INTERMAPPER_CONFIG["forward_to_hnoc_job_interval"]
-            self._schedule_forward_to_queue(
-                ticket_id, service_number, ForwardQueues.HNOC.value, hnoc_forward_time, is_piab, event
-            )
-        return True
+            if self._should_forward_to_ipa_queue(parsed_email_dict) and outage_ticket_status in (200, 471, 472, 473):
+                ipa_forward_time = self._config.INTERMAPPER_CONFIG["forward_to_ipa_job_interval"]
+                self._schedule_forward_to_queue(
+                    ticket_id, service_number, ForwardQueues.IPA.value, ipa_forward_time, is_piab, event
+                )
+
+                hnoc_forward_time = self._config.INTERMAPPER_CONFIG["forward_to_hnoc_job_interval"]
+                self._schedule_forward_to_queue(
+                    ticket_id, service_number, ForwardQueues.HNOC.value, hnoc_forward_time, is_piab, event
+                )
+            return True
 
     async def _get_dri_parameters(self, service_number, client_id):
         attributes_serial_response = await self._bruin_repository.get_serial_attribute_from_inventory(
