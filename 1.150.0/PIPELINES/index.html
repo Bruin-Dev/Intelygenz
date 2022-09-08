@@ -1,0 +1,1101 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://docs.mettel-automation.net/1.150.0/PIPELINES/">
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
+    
+    
+      
+        <title>PIPELINES - Automation Engine Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.8c5ef100.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.9647289d.min.css">
+        
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#pipelines" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        <aside class="md-banner md-banner--warning">
+          
+        </aside>
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Automation Engine Documentation" class="md-header__button md-logo" aria-label="Automation Engine Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Automation Engine Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              PIPELINES
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href=".." class="md-tabs__link">
+      Home
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../CONCEPTS/" class="md-tabs__link">
+        Topics
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Automation Engine Documentation" class="md-nav__button md-logo" aria-label="Automation Engine Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Automation Engine Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Topics
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Topics" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Topics
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CONCEPTS/" class="md-nav__link">
+        Concepts
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_2" type="checkbox" id="__nav_2_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_2">
+          Pipelines
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Pipelines" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_2">
+          <span class="md-nav__icon md-icon"></span>
+          Pipelines
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pipeline/BASIC_CI_CONFIGURATION/" class="md-nav__link">
+        Basic configurations
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pipeline/PIPELINE_RULES/" class="md-nav__link">
+        Pipeline rules
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_3" type="checkbox" id="__nav_2_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_3">
+          Documentation
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Documentation" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_3">
+          <span class="md-nav__icon md-icon"></span>
+          Documentation
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DOCUMENTATION/" class="md-nav__link">
+        Organization
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decisions/" class="md-nav__link">
+        MetTel decisions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../metrics-definitions/" class="md-nav__link">
+        Metrics definitions
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Development rules
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_5" type="checkbox" id="__nav_2_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_5">
+          Work in a local env
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Work in a local env" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_5">
+          <span class="md-nav__icon md-icon"></span>
+          Work in a local env
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kafka/LAUNCH_DOCKER_COMPOSE/" class="md-nav__link">
+        Launch docker compose
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../snowflake/" class="md-nav__link">
+        Datalake
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Manual processes
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#launch-all-jobs-in-a-pipeline" class="md-nav__link">
+    Launch all jobs in a pipeline
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environments" class="md-nav__link">
+    Environments
+  </a>
+  
+    <nav class="md-nav" aria-label="Environments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#microservices-environments" class="md-nav__link">
+    Microservices Environments
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kre-environments" class="md-nav__link">
+    KRE Environments
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#continuous-integration-ci" class="md-nav__link">
+    Continuous integration (CI)
+  </a>
+  
+    <nav class="md-nav" aria-label="Continuous integration (CI)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#validation-steps" class="md-nav__link">
+    Validation steps
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unit-tests-steps" class="md-nav__link">
+    Unit tests steps
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#continuous-delivery-cd" class="md-nav__link">
+    Continuous delivery (CD)
+  </a>
+  
+    <nav class="md-nav" aria-label="Continuous delivery (CD)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic_infra-steps" class="md-nav__link">
+    Basic_infra steps
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basic_infra_kre-steps" class="md-nav__link">
+    Basic_infra_kre steps
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deploy_kre_runtimes-steps" class="md-nav__link">
+    Deploy_kre_runtimes steps
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-steps" class="md-nav__link">
+    Build steps
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deploy-steps" class="md-nav__link">
+    Deploy steps
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#destroy-steps" class="md-nav__link">
+    Destroy steps
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+
+
+<div align="center">
+<img src="https://media.licdn.com/dms/image/C4E0BAQHrME9aCW6ulg/company-logo_200_200/0?e=2159024400&v=beta&t=6xMNS1zK1F8asBlM16EzbJ4Im7SlQ8L7a7sgcaNzZQE"  width="200" height="200">
+</div>
+
+<h1 id="pipelines">Pipelines</h1>
+<p>In this project is implemented Software delivery with total automation, thus avoiding manual intervention and therefore human errors in our product.</p>
+<p>Human error can and does occur when carrying out these boring and repetitive tasks manually and ultimately does affect the ability to meet deliverables.</p>
+<p>All of the automation is made with Gitlab CI technology, taking advantage of all the tools that Gitlab has.
+We separate the automatation in two parts, <a href="#continuous-integration-ci">continuous integration</a> and <a href="#continuous-delivery-cd">continuous delivery</a>, that are explained in the next sections.</p>
+<p>To improve the speed and optimization of the pipelines, <strong>only the jobs and stages will be executed on those modules that change in each commit</strong>.</p>
+<h2 id="launch-all-jobs-in-a-pipeline">Launch all jobs in a pipeline</h2>
+<p><strong>Exceptionally, it is possible to launch a pipeline with all the jobs and stages on a branch using the web interface, as shown in the following image</strong>. To do so, the following steps must be followed:</p>
+<ol>
+<li>
+<p>From the project repository select the <code>CI/CD</code> option in the left sidebar and this <code>Pipelines</code>, as shown in the following image where these options are marked in red.
+   <img alt="IMAGE: Select_CI_option" src="../img/pipelines/Select_CI_option.png" /></p>
+</li>
+<li>
+<p>Choose the <code>Run Pipeline</code> option, as shown in the image below in red.
+   <img alt="IMAGE: select_run_pipeline" src="../img/pipelines/select_run_pipeline.png" /></p>
+</li>
+<li>
+<p>Indicate the branch where you want to run the pipeline in the <code>Run for</code> box and then click on <code>Run pipeline</code>. It's possible see an example in the following image, where the box <code>Run for</code> is shown in green and <code>Run pipeline</code> is shown in red.
+   <img alt="IMAGE: select_run_pipeline_branch" src="../img/pipelines/select_run_pipeline_branch.png" /></p>
+</li>
+</ol>
+<blockquote>
+<p>It is important to note that due to the extra time added by the tests of the <code>dispacth-portal-frontend</code> microservice, the tests of this one will only be executed when any of the files within it change or a pipeline with the Gitlab variable <code>TEST_DISPATCH_PORTAL_FRONTEND</code> with value <code>true</code> is executed.</p>
+</blockquote>
+<h2 id="environments">Environments</h2>
+<h3 id="microservices-environments">Microservices Environments</h3>
+<p>For the microservices there are the following environments</p>
+<ul>
+<li>
+<p><strong>Production</strong>: The environment is related to everything currently running in AWS related to the latest version of the <code>master</code> branch of the repository.</p>
+</li>
+<li>
+<p><strong>Ephemerals</strong>: These environments are created from branches that start with name <code>dev/feature</code> or <code>dev/fix</code>.</p>
+</li>
+</ul>
+<blockquote>
+<p>The name of any environment, regardless of the type, will identify all the resources created in the deployment process. The names for environments are <code>automation-master</code> for production, as well as <code>automation-&lt;branch_identifier&gt;</code> for ephemeral environments, being <code>branch_identifier</code> the result of applying <code>echo -n "&lt;branch_name&gt;" | sha256sum | cut -c1-8</code> on the branch name related to the ephemeral environment. These names will identify all the resources created in AWS during the <a href="#continuous-delivery-cd">continuous delivery</a> process, explained in the following sections.</p>
+</blockquote>
+<h3 id="kre-environments">KRE Environments</h3>
+<p>For <a href="https://konstellation-io.github.io/website/">KRE</a> component there are the following environments: </p>
+<ul>
+<li>
+<p><strong>dev</strong>: This will be used for the various tests and calls made from the project's microservices in any <strong>ephemeral environment</strong>, ie from the microservices deployed in the ECS cluster with name <code>automation-&lt;environment_id&gt;</code>.</p>
+</li>
+<li>
+<p><strong>production</strong>: This will be used for the different calls made from the project's microservices in the <strong>production environment</strong>, that is, from the microservices deployed in the ECS cluster with the name <code>automation-master</code>.</p>
+</li>
+</ul>
+<h2 id="continuous-integration-ci">Continuous integration (CI)</h2>
+<blockquote>
+<p>Continuous Integration (CI) is a development practice where developers integrate code into a shared repository frequently, preferably several times a day. Each integration can then be verified by an automated build and automated tests. While automated testing is not strictly part of CI it is typically implied.
+<a href="https://codeship.com/continuous-integration-essentials">Codeship</a></p>
+</blockquote>
+<p><img alt="IMAGE: CI_MetTel_Automation.png" src="../img/pipelines/CI_MetTel_Automation.png" /></p>
+<h3 id="validation-steps">Validation steps</h3>
+<p>This stage checks the following:</p>
+<ul>
+<li>
+<p>All python microservices comply with the rules of <a href="https://www.python.org/dev/peps/pep-0008/#package-and-module-names">PEP8</a></p>
+</li>
+<li>
+<p>Terraform files used to configure the infrastructure are valid from a syntactic point of view.</p>
+</li>
+<li>
+<p>The frontend modules comply with the linter configured for them</p>
+</li>
+</ul>
+<h3 id="unit-tests-steps">Unit tests steps</h3>
+<p>All the available unit tests for each service should be run in this stage of the CI process.</p>
+<p>If the coverage obtained from these tests for a service is not greater than or equal to 80%, it will cause this phase to fail, this will mean that the steps of the next stage will not be executed and the process will fail.</p>
+<p>In cases in which a module does not reach the minimum coverage mentioned above, a message like the following will be seen in the step executed for that module.</p>
+<p><img alt="IMAGE: unit_test_coverage_not_reach_minimum.png" src="../img/pipelines/unit_test_coverage_not_reach_minimum.png" /></p>
+<h2 id="continuous-delivery-cd">Continuous delivery (CD)</h2>
+<blockquote>
+<p>Continuous deployment is the next step of continuous delivery: Every change that passes the automated tests is deployed to production automatically. Continuous deployment should be the goal of most companies that are not constrained by regulatory or other requirements.
+<a href="https://puppet.com/blog/continuous-delivery-vs-continuous-deployment-what-s-diff">Puppet.com</a></p>
+</blockquote>
+<p><img alt="IMAGE: CD_MetTel_Automation.png" src="../img/pipelines/CD_MetTel_Automation.png" /></p>
+<h3 id="basic_infra-steps">Basic_infra steps</h3>
+<p>This area covers the checking and creation, if necessary, of all the basic resources for the subsequent deployment, these being the specific image repositories in <a href="https://aws.amazon.com/ecr">ECR Docker Container Registry</a>, as well as the roles necessary in AWS to be able to display these images in <a href="https://aws.amazon.com/ecs/">ECS Container Orchestrator</a>.</p>
+<p>In this stage there is also a job that must be executed manually if necessary, this is responsible for checking and creating if necessary network resources for the production environment or ephemeral environments.</p>
+<p>In this stage is also checked whether there are enough free resources in ECS to carry out the deployment with success or not.</p>
+<p><strong>It's necessary run the <code>basic-infra</code> job the first time a new microservice is created in the project</strong></p>
+<blockquote>
+<p>This has been done because ECR repositories are global resources and are stored in the same <code>tfstate</code> file, thus avoiding that when a microservice that creates a repository is created, it is not deleted by other branches that do not have it added.</p>
+</blockquote>
+<h3 id="basic_infra_kre-steps">Basic_infra_kre steps</h3>
+<p>In this stage will be the following jobs:
+* <code>deploy-basic-infra-kre-dev</code> for ephemeral environments and <code>deploy-basic-infra-kre-production</code> for the production environment, <strong>these are executed optionally manually</strong>.</p>
+<p>This job is responsible of checking and creation, if necessary, of the EKS cluster used by KRE in each environment and all the necessary resources related (RBAC configuration, helm charts needed for the KRE runtimes, etc)</p>
+<p>The process followed in this job is as follows:</p>
+<ol>
+<li>
+<p>The necessary infrastructure is created in AWS for KRE, creating for them the following components:</p>
+<ul>
+<li>
+<p>An S3 bucket for each environment and save information about the cluster, such as the SSH key to connect to the nodes.</p>
+</li>
+<li>
+<p>An <a href="https://docs.aws.amazon.com/eks/latest/userguide/clusters.html">EKS cluster</a> to be able to deploy the different KRE components designed for Kubernetes</p>
+</li>
+<li>
+<p>An <a href="https://docs.aws.amazon.com/autoscaling/ec2/userguide/AutoScalingGroup.html">AutoScaling Group</a> to have the desired number of Kubernetes worker nodes</p>
+</li>
+<li>
+<p>A SMTP service through <a href="https://aws.amazon.com/ses/">Amazon SES</a> and all the necessary components of it</p>
+</li>
+<li>
+<p>A set of IAM roles, one for each user with access to the project. These will be used to assign subsequent permissions in the Kubernetes cluster according to the role they belong to. These are stored as terraform <a href="https://www.terraform.io/docs/configuration/outputs.html">output values</a>, saving the list of user roles belonging to each role in their corresponding variable.</p>
+</li>
+</ul>
+<p>Below is an example of a pipeline execution where it's possible see the IAM roles of users generated for each role in the project:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Outputs:
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a> <span class="nv">eks_developer_ops_privileged_roles</span> <span class="o">=</span> <span class="o">[</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>   <span class="s2">&quot;arn:aws:iam::374050862540:role/eks-developer-ops-mettel-automation-kre-xisco.capllonch&quot;</span>,
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>   <span class="s2">&quot;arn:aws:iam::374050862540:role/eks-developer-ops-mettel-automation-kre-xoan.mallon.developer&quot;</span>,
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a> <span class="o">]</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a> <span class="nv">eks_developer_roles</span> <span class="o">=</span> <span class="o">[</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>   <span class="s2">&quot;arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-brandon.samudio&quot;</span>,
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>   <span class="s2">&quot;arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-daniel.fernandez&quot;</span>,
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>   <span class="s2">&quot;arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-joseluis.vega&quot;</span>,
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>   <span class="s2">&quot;arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-marc.vivancos&quot;</span>,
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a> <span class="o">]</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a> <span class="nv">eks_devops_roles</span> <span class="o">=</span> <span class="o">[</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>   <span class="s2">&quot;arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-alberto.iglesias&quot;</span>,
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>   <span class="s2">&quot;arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-angel.costales&quot;</span>,
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>   <span class="s2">&quot;arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-angel.luis.piquero&quot;</span>,
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a> <span class="o">]</span>
+</code></pre></div>
+<ul>
+<li>
+<p>A set of helm charts necessary for any KRE runtime:</p>
+<ol>
+<li>
+<p><strong>external-dns</strong>, using the helm chart from <a href="https://charts.bitnami.com/bitnami">bitnami repository</a></p>
+<p><code>external-dns</code> is a Kubernetes addon that configures public DNS servers with information about exposed Kubernetes services to make them discoverable. It allows in a simple way that through the creation of an ingress in AWS you can create an entry in Route53 of type alias so that the calls to that ingress redirect to the value configured for the alias, being the most typical the DNS of the balancer created by the ingress.</p>
+</li>
+<li>
+<p><strong>cert-mananger</strong>, using the helm chart from <a href="https://charts.jetstack.io">jetstack repository</a>.</p>
+<p>This component automate the management lifecycle of all required certificates used by the KRE component in each environment.</p>
+</li>
+<li>
+<p><strong>nginx ingress controller</strong>, using the helm chart from <a href="https://kubernetes.github.io/ingress-nginx">ingress-nginx repository</a>.</p>
+<p>A series of configurations are provided so that the IP of clients in Kubernetes services can be known, since by default it will always use the internal IP in EKS of the load balancer for requests made from the Internet.</p>
+<p>A list of allowed IPs is also provided in the chart configuration through a specific configuration key, thus restricting access to the cluster's microservices.</p>
+<p>This component will create a <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/introduction.html">Classic Load Balancer</a> in AWS to expose nginx ingress component.</p>
+</li>
+<li>
+<p><strong>hostpath provisioner</strong>, using the helm chart from <a href="https://charts.rimusz.net">rimusz repository</a> </p>
+</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>
+<p>Using a <em>Python</em> <a href="../ci-utils/eks/iam-to-eks-roles/README.md">cli</a>, permissions are assigned in Kubernetes Cluster created for KRE for each of the IAM roles created in the previous step. </p>
+</li>
+</ol>
+<h3 id="deploy_kre_runtimes-steps">Deploy_kre_runtimes steps</h3>
+<p>In this stage the KRE runtimes will be deployed in the corresponding environment, creating the necessary infrastructure and resources:</p>
+<ul>
+<li>
+<p>A Hosted Zone in Route53 for the runtime in the specified environment using the <code>mettel-automation.net</code> domain name</p>
+</li>
+<li>
+<p>The kre helm chart with the necessary values for the environment creating a specific namespace in the EKS cluster for deploy the helm chart</p>
+</li>
+</ul>
+<h3 id="build-steps">Build steps</h3>
+<p>This area will cover all build steps of all necessary modules to deploy the app to the selected environment. It's typical to build the docker images and push to the repository in this step.</p>
+<h3 id="deploy-steps">Deploy steps</h3>
+<p>In this stage there are one job:</p>
+<ul>
+<li>
+<p><code>deploy-branches</code> for ephemeral environments and <code>deploy-master</code> for the production environment, <strong>these are executed automatically</strong>. In which <em>MetTel Automation</em> modules in the monorepo will be deployed to the selected environment, as well as all the resources associated to that environment in AWS. The deploy steps will deploy the following in AWS:</p>
+</li>
+<li>
+<p>An <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ECS_clusters.html">ECS Cluster</a> will be created for the environment with a set of resources</p>
+<ul>
+<li>
+<p>An <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html">ECS Service</a> that will use the new Docker image uploaded for each service of the project, being these services the specified below:</p>
+</li>
+<li>
+<p><a href="../bruin-bridge">bruin-bridge</a></p>
+</li>
+<li>
+<p><a href="../cts-bridge">cts-bridge</a></p>
+</li>
+<li>
+<p><a href="../customer-cache">customer-cache</a></p>
+</li>
+<li>
+<p><a href="../dispatch-portal-backend">dispatch-portal-backend</a></p>
+</li>
+<li>
+<p><a href="../dispatch-portal-frontend">dispatch-portal-frontend</a></p>
+</li>
+<li>
+<p><a href="../last-contact-report">last-contact-report</a></p>
+</li>
+<li>
+<p><a href="../lit-bridge">lit-bridge</a></p>
+</li>
+<li>
+<p><a href="../lumin-billing-report">lumin-billing-report</a></p>
+</li>
+<li>
+<p><a href="../metrics-dashboard/grafana">metrics-prometheus</a></p>
+</li>
+<li>
+<p><a href="../nats-server">nats-server, nats-server-1, nats-server-2</a></p>
+</li>
+<li>
+<p><a href="../email-bridge">email-bridge</a></p>
+</li>
+<li>
+<p><a href="../notifications-bridge">notifications-bridge</a></p>
+</li>
+<li>
+<p><a href="../service-affecting-monitor">service-affecting-monitor</a></p>
+</li>
+<li>
+<p><a href="../service-dispatch-monitor">service-dispatch-monitor</a></p>
+</li>
+<li>
+<p><a href="../service-outage-monitor">service-outage-monitor-1, service-outage-monitor-2, service-outage-monitor-3, service-outage-monitor-4, service-outage-monitor-triage</a></p>
+</li>
+<li>
+<p><a href="../t7-bridge">t7-bridge</a></p>
+</li>
+<li>
+<p><a href="../tnba-feedback">tnba-feedback</a></p>
+</li>
+<li>
+<p><a href="../tnba-monitor">tnba-monitor</a></p>
+</li>
+<li>
+<p><a href="../velocloud-bridge">velocloud-bridge</a></p>
+</li>
+<li>
+<p>A <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/example_task_definitions.html">Task Definition</a> for each of the above <em>ECS Services</em></p>
+</li>
+</ul>
+</li>
+</ul>
+<p>In this process, a series of resources will also be created in AWS for the selected environment, as follows:</p>
+<ul>
+<li>
+<p>Three <a href="https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/WhatIs.html">ElastiCache Redis Clusters</a>, which are detailed below:</p>
+<ul>
+<li>
+<p><code>&lt;environment&gt;</code>: used to save some data about dispatches, as well as to skip the limitation of messages of more than 1MB when passing them to NATS.</p>
+</li>
+<li>
+<p><code>&lt;environment&gt;-customer-cache-redis</code>: used to save the mappings between Bruin clients and Velocloud edges, being able to use them between restarts if any occurs.</p>
+</li>
+<li>
+<p><code>&lt;environment&gt;-tnba-feedback-cache-redis</code>: used to save ticket metrics sent to T7, so <code>tnba-feedback</code> can avoid sending them again afterwards.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>An <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html">ALB</a></p>
+</li>
+<li>
+<p>A <a href="https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/rrsets-working-with.html">record</a> in <a href="https://aws.amazon.com/route53/features/">Route53</a></p>
+</li>
+<li>
+<p>A <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CloudWatchLogsConcepts.html">CloudWatch Log Group</a></p>
+</li>
+<li>
+<p>An <a href="https://aws.amazon.com/blogs/aws/amazon-ecs-service-discovery/">Service Discovery Service</a> for each ECS Service of the ECS Cluster created for this environment and a <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-discovery.html">Service Discovery Namespace</a> to logically group these <em>Service Discovery Services</em>.</p>
+</li>
+<li>
+<p>A set of resources related to the metrics of the environment:</p>
+<ul>
+<li>
+<p><a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html">CloudWatch Alarms</a></p>
+</li>
+<li>
+<p><a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html">CloudWatch Dashboard</a></p>
+</li>
+<li>
+<p><a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html">CloudWatch Log Filters</a></p>
+</li>
+</ul>
+</li>
+<li>
+<p>A <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html">CloudFormation Stack</a> for create the <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-sns-topic.html">SNS topic</a> that will be used by <em>CloudWatch Alarms</em> notifications of this environment</p>
+</li>
+<li>
+<p>A <a href="https://docs.aws.amazon.com/AmazonS3/latest/gsg/GetStartedWithS3.html">S3 bucket</a> to store the content of the metrics obtained by <a href="https://thanos.io/">Thanos</a> and displayed through <a href="https://grafana.com/">Grafana</a>.</p>
+</li>
+</ul>
+<p>Also, resources of type <a href="https://www.terraform.io/docs/providers/null/resource.html">null_resource</a> are created to execute some Python scripts:</p>
+<ol>
+<li>
+<p>The creation of <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html">ECS Services</a> starts only if a Python script launched as a <code>null_resource</code> finishes with success. </p>
+<p>This script checks that the last ECS service created for NATS is running in <code>HEALTHY</code> state.</p>
+</li>
+<li>
+<p>If the previous step succeeded then ECS services related to capabilities microservices are created, with these being the following:</p>
+<ul>
+<li><code>bruin-bridge</code></li>
+<li><code>cts-bridge</code></li>
+<li><code>lit-bridge</code></li>
+<li><code>email-bridge</code></li>
+<li><code>notifications-bridge</code></li>
+<li><code>prometheus</code></li>
+<li><code>t7-bridge</code></li>
+<li><code>velocloud-bridge</code> </li>
+<li><code>hawkeye-bridge</code></li>
+</ul>
+<p>Once created, the script used for NATS is launched through <code>null_resource</code> to check that the task instances for each of these ECS services were created successfully and are in <code>RUNNING</code> and <code>HEALTHY</code> status.</p>
+</li>
+<li>
+<p>Once all the scripts for the capabilities microservices have finished successfully, ECS services for the use-cases microservices are all created, with these being the following:</p>
+<ul>
+<li><code>customer-cache</code></li>
+<li><code>dispatch-portal-backend</code></li>
+<li><code>hawkeye-customer-cache</code></li>
+<li><code>hawkeye-outage-monitor</code></li>
+<li><code>last-contact-report</code></li>
+<li><code>lumin-billing-report</code></li>
+<li><code>service-affecting-monitor</code></li>
+<li><code>service-dispatch-monitor</code></li>
+<li><code>service-outage-monitor-1</code></li>
+<li><code>service-outage-monitor-2</code></li>
+<li><code>service-outage-monitor-3</code></li>
+<li><code>service-outage-monitor-4</code></li>
+<li><code>service-outage-monitor-triage</code></li>
+<li><code>tnba-feedback</code></li>
+<li><code>tnba-monitor</code></li>
+</ul>
+<p>This is achieved by defining explicit dependencies between the ECS services for the capabilities microservices and the set of null resources that perform the healthcheck of the capabilities microservices.​</p>
+<p>The following is an example of a definition for the use-case microservice <code>service-affecting-monitor</code> using <a href="https://www.terraform.io/"><em>Terraform</em></a>. Here, the dependency between the corresponding <code>null_resource</code> type resources in charge of performing the health check of the different capabilities microservices in Terraform code for this microservice is established.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;aws_ecs_service&quot;</span><span class="w"> </span><span class="nv">&quot;automation-service-affecting-monitor&quot;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">   </span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="w"></span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">     </span><span class="na">depends_on</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="nv">null_resource.bruin-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">                    </span><span class="nv">null_resource.cts-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">                    </span><span class="nv">null_resource.lit-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">                    </span><span class="nv">null_resource.velocloud-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">                    </span><span class="nv">null_resource.hawkeye-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">                    </span><span class="nv">null_resource.t7-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">                    </span><span class="nv">null_resource.email-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">                    </span><span class="nv">null_resource.notifications-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">                    </span><span class="nv">null_resource.metrics-prometheus-healthcheck</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">   </span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="w"></span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<blockquote>
+<p>This procedure has been done to ensure that use case microservices are not created in ECS until new versions of the capability-type microservices are properly deployed, as use case microservices need to use capability-type microservices.</p>
+</blockquote>
+</li>
+<li>
+<p>Following the same procedure as in the previous step, a dependency is established between the microservice <code>dispatch-portal-frontend</code> and <code>dispatch-portal-backend</code>. </p>
+<p>The reason for this is that the <code>dispatch-portal-frontend</code> microservice needs to know the corresponding IP with the DNS entry in Route53 for the <code>dispatch-portal-backend</code> microservice, since if the previous deployment is saved, the new IP corresponding to the DNS entry is not updated.</p>
+<p>The following is the configuration in the terraform code of the service in ECS for the <code>dispatch-portal-frontend</code> microservice, where the necessary configuration to comply with this restriction can be seen.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;aws_ecs_service&quot;</span><span class="w"> </span><span class="nv">&quot;automation-dispatch-portal-frontend&quot;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">   </span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="w"></span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">     </span><span class="na">depends_on</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="nv">null_resource.bruin-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">                    </span><span class="nv">null_resource.cts-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">                    </span><span class="nv">null_resource.lit-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">                    </span><span class="nv">null_resource.velocloud-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">                    </span><span class="nv">null_resource.hawkeye-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">                    </span><span class="nv">null_resource.t7-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">                    </span><span class="nv">null_resource.email-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">                    </span><span class="nv">null_resource.notifications-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">                    </span><span class="nv">null_resource.metrics-prometheus-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">                    </span><span class="nv">null_resource.dispatch-portal-backend-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">                    </span><span class="nv">aws_lb.automation-alb</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+</li>
+<li>
+<p>The provisioning of the different groups and the searches included in each one of them is done through a <a href="../ci-utils/papertrail-provisioning">python utility</a>, this makes calls to the util <a href="https://github.com/xoanmm/go-papertrail-cli">go-papertrail-cli</a> who is in charge of the provisioning of the elements mentioned in <a href="https://papertrailapp.com/">Papertrail</a>.</p>
+</li>
+</ol>
+<h3 id="destroy-steps">Destroy steps</h3>
+<p>In this stage a series of manual jobs are available to destroy what was created in the previous stage, both for <a href="https://github.com/konstellation-io/kre">KRE</a> and for the microservices of the repository in AWS. These are detailed below:</p>
+<ul>
+<li>
+<p><code>destroy-branches</code> for ephemeral environments or <code>destroy-master</code> for the production environment: This job will destroy everything created by Terraform in the previous stage by the job <code>deploy-branches</code> or <code>deploy-master</code> depending on the environment.</p>
+</li>
+<li>
+<p><code>destroy-branches-aws-nuke</code>: This job is only available for ephemeral environments, it generates a <code>yml</code> file using a <a href="../ci-utils/aws-nuke/aws_nuke_conf_generator.py">specific script</a> to be used by <a href="https://github.com/rebuy-de/aws-nuke">aws-nuke</a> to destroy all the infrastructure created for an ephemeral environment in AWS. This job should only be used when the `destroy-branches' job fails.</p>
+</li>
+<li>
+<p><code>destroy-basic-infra-kre-dev</code> for ephemeral environments or <code>destroy-basic-infra-kre-production</code> for the production environment: This job will destroy everything created by Terraform in the previous stage by the job <code>deploy-kre-dev</code> or <code>deploy-kre-production</code> depending on the environment.</p>
+</li>
+</ul>
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs"], "search": "../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.748e2769.min.js"></script>
+      
+    
+  </body>
+</html>
