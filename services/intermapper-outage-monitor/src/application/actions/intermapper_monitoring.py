@@ -14,6 +14,7 @@ from tenacity import retry, stop_after_delay, wait_exponential
 
 from application import (
     AUTORESOLVE_REGEX,
+    CONDITION_REGEX,
     EVENT_REGEX,
     EVENT_TIME_REGEX,
     FORWARD_TICKET_TO_QUEUE_JOB_ID,
@@ -429,6 +430,33 @@ class InterMapperMonitor:
                 self._metrics_repository.increment_tasks_reopened(event=event, is_piab=is_piab)
         else:
             return False
+
+        ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
+        ticket_details_body = ticket_details_response["body"]
+        ticket_details_status = ticket_details_response["status"]
+        if ticket_details_status not in range(200, 300):
+            logger.warning(
+                f"Bad status calling get ticket details to ticket id: {ticket_id}. Skipping append note to ticket..."
+            )
+            return False
+
+        notes_from_outage_ticket = ticket_details_body["ticketNotes"]
+        relevant_notes = [
+            note
+            for note in notes_from_outage_ticket
+            if note["serviceNumber"] is not None
+            if service_number in note["serviceNumber"]
+            if note["noteValue"] is not None
+        ]
+        last_cycle_notes = self._get_notes_appended_since_latest_reopen_or_ticket_creation(relevant_notes)
+
+        if self._is_condition_already_reported(last_cycle_notes, parsed_email_dict):
+            logger.info(
+                f"Current condition has already been reported on ticket id {ticket_id}. "
+                f"Skipping append note to ticket..."
+            )
+            return True
+
         if dri_parameters:
             logger.info(f"Appending InterMapper note to ticket id {ticket_id} with dri parameters: {dri_parameters}")
             append_dri_note_response = await self._bruin_repository.append_dri_note(
@@ -488,6 +516,14 @@ class InterMapperMonitor:
             return None
 
         return dri_parameters_response["body"]
+
+    @staticmethod
+    def _is_condition_already_reported(ticket_notes: list, parsed_email_dict: dict) -> bool:
+        for note in ticket_notes:
+            match = CONDITION_REGEX.search(note["noteValue"])
+            if match and match.group("condition") == parsed_email_dict["condition"]:
+                return True
+        return False
 
     def _was_last_outage_detected_recently(
         self, ticket_notes: list, ticket_creation_date: str, parsed_email_dict: dict

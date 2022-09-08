@@ -17,6 +17,7 @@ TRIAGE_NOTE_REGEX = re.compile(r"^#\*(MetTel's IPA)\*#\nInterMapper Triage")
 REOPEN_NOTE_REGEX = re.compile(r"^#\*(MetTel's IPA)\*#\nRe-opening")
 EVENT_REGEX = re.compile(r"Event:\s*(?P<event>\w+)")
 EVENT_TIME_REGEX = re.compile(r"(?P<time>^.*): Message from InterMapper (?P<version>.*)")
+CONDITION_REGEX = re.compile("^CONDITION: (?P<condition>.*)", re.MULTILINE)
 AUTORESOLVE_REGEX = re.compile(r"^#\*(MetTel's IPA)\*#\nAuto-resolving task for")
 
 FORWARD_TICKET_TO_QUEUE_JOB_ID = "_forward_ticket_{ticket_id}_{serial_number}_to_{target_queue}"
