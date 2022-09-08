@@ -28,11 +28,10 @@ self._logger.info(f"[ticket-autoresolve] Starting autoresolve for edge {serial_n
   self._logger.info(f"Bad status calling get ticket details for outage ticket: {outage_ticket_id}. "
                     f"Skipping autoresolve ...")
   ```
-* If is ticket task in ipa queue:
+* If has faulty BYOB link and is ticket task in ipa queue:
   ```
-  self._logger.info(f"Task for serial {serial_number} in ticket {outage_ticket_id} is in the IPA Investigate queue. "
-                    f"Skipping checks for max auto-resolves and grace period to auto-resolve after last documented "
-                    f"outage...")
+  self._logger.info(f"Task for serial {serial_number} in ticket {outage_ticket_id} is related to a BYOB link "
+                    f"and is in the IPA Investigate queue. Ignoring auto-resolution restrictions...")
   ```
 * Else:
     * If was last outage detect recently:
