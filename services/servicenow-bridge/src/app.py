@@ -5,7 +5,9 @@ from dataclasses import asdict
 
 from framework.http.server import Config as HealthConfig
 from framework.http.server import Server as HealthServer
+from framework.logging.formatters import Papertrail as PapertrailFormatter
 from framework.logging.formatters import Standard as StandardFormatter
+from framework.logging.handlers import Papertrail as PapertrailHandler
 from framework.logging.handlers import Stdout as StdoutHandler
 from framework.nats.client import Client as NatsClient
 from framework.nats.exceptions import NatsException
@@ -25,6 +27,19 @@ log.setLevel(logging.DEBUG)
 base_handler = StdoutHandler()
 base_handler.setFormatter(StandardFormatter(environment_name=config.ENVIRONMENT_NAME))
 log.addHandler(base_handler)
+
+if config.LOG_CONFIG["papertrail"]["active"]:
+    pt_handler = PapertrailHandler(
+        host=config.LOG_CONFIG["papertrail"]["host"],
+        port=config.LOG_CONFIG["papertrail"]["port"],
+    )
+    pt_handler.setFormatter(
+        PapertrailFormatter(
+            environment_name=config.ENVIRONMENT_NAME,
+            papertrail_prefix=config.LOG_CONFIG["papertrail"]["prefix"],
+        )
+    )
+    log.addHandler(pt_handler)
 
 
 def bail_out():
@@ -71,6 +86,7 @@ class Container:
             bail_out()
 
     async def start(self):
+        # Setup prometheus
         self._start_prometheus_metrics_server()
 
         # Setup NATS
