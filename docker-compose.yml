@@ -752,15 +752,3 @@ services:
     ports:
       - '8081:8081'
     restart: always
-
-  integration-tests:
-    build:
-      context: .
-      dockerfile: integration-tests/Dockerfile
-    ports:
-      - 8001:8001
-      - 8002:8002
-      - 50001:50001
-      - 50002:50002
-    volumes:
-      - ./integration-tests:/service/app

@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, Optional
 from unittest.mock import AsyncMock
 
 from pydantic import BaseModel
@@ -19,8 +19,8 @@ class WillReturn(Handler):
     Handler expressive shorthand
     """
 
-    def __init__(self, return_value: Any):
-        super().__init__(return_value=return_value)
+    def __init__(self, return_value: Any, headers: Optional[Dict] = None):
+        super().__init__(return_value=return_value, headers=headers)
 
 
 class WillReturnJSON(WillReturn):
@@ -28,11 +28,11 @@ class WillReturnJSON(WillReturn):
     Handler expressive shorthand
     """
 
-    def __init__(self, return_value: BaseModel | Dict[str, Any]):
+    def __init__(self, return_value: BaseModel | Any, headers: Optional[Dict] = None):
         if isinstance(return_value, BaseModel):
-            super().__init__(return_value=JSONResponse(return_value.dict()))
+            super().__init__(return_value=JSONResponse(return_value.dict(), headers=headers))
         else:
-            super().__init__(return_value=JSONResponse(return_value))
+            super().__init__(return_value=JSONResponse(return_value, headers=headers))
 
 
 class WillExecute(Handler):

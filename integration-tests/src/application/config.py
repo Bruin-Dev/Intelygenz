@@ -8,9 +8,15 @@ from pydantic.env_settings import BaseSettings
 # http proxies dict. It maps a port to an optional host.
 # If any host was declared, unhandled requests will be proxied to the declared host.
 # Otherwise, a default or crafted response will be returned, depending of the scenario implementation.
-http_proxies: Dict[int, Optional[str]] = {
-    8001: None,
-    8002: None,
+insecure_http_proxies: Dict[int, Optional[str]] = {
+    8000: None,  # Generic port
+    8001: None,  # Bruin login
+    8002: None,  # Bruin base url
+    8003: None,  # Service now base url
+}
+
+secure_http_proxies: Dict[int, Optional[str]] = {
+    8004: None,  # Velocloud host
 }
 
 # grpc proxies dict. It maps a port to an optional host.

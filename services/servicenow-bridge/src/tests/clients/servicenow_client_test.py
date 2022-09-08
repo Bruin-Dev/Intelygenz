@@ -1,22 +1,19 @@
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+
 from application.clients.servicenow_client import ServiceNowClient
-from asynctest import CoroutineMock
 from config import testconfig as config
 
 
 class TestServiceNowClient:
     def instance_test(self):
-        logger = Mock()
-        servicenow_client = ServiceNowClient(logger, config)
+        servicenow_client = ServiceNowClient(config)
 
-        assert servicenow_client._logger is logger
         assert servicenow_client._config is config
 
     def get_request_headers_test(self):
-        logger = Mock()
-        servicenow_client = ServiceNowClient(logger, config)
+        servicenow_client = ServiceNowClient(config)
         servicenow_client._access_token = "token"
 
         expected_result = {
@@ -41,12 +38,11 @@ class TestRequest:
 
         response = Mock()
         response.status = status
-        response.json = CoroutineMock(return_value=body)
+        response.json = AsyncMock(return_value=body)
 
-        request = CoroutineMock(return_value=response)
+        request = AsyncMock(return_value=response)
 
-        logger = Mock()
-        servicenow_client = ServiceNowClient(logger, config)
+        servicenow_client = ServiceNowClient(config)
         servicenow_client._get_request_headers = Mock(return_value=headers)
 
         with patch.object(servicenow_client._client, "request", new=request):
@@ -71,18 +67,17 @@ class TestRequest:
 
         first_response = Mock()
         first_response.status = first_status
-        first_response.json = CoroutineMock(return_value=body)
+        first_response.json = AsyncMock(return_value=body)
 
         second_response = Mock()
         second_response.status = second_status
-        second_response.json = CoroutineMock(return_value=body)
+        second_response.json = AsyncMock(return_value=body)
 
-        request = CoroutineMock(side_effect=[first_response, second_response])
+        request = AsyncMock(side_effect=[first_response, second_response])
 
-        logger = Mock()
-        servicenow_client = ServiceNowClient(logger, config)
+        servicenow_client = ServiceNowClient(config)
         servicenow_client._get_request_headers = Mock(return_value=headers)
-        servicenow_client._get_access_token = CoroutineMock()
+        servicenow_client._get_access_token = AsyncMock()
 
         with patch.object(servicenow_client._client, "request", new=request):
             result = await servicenow_client._request(method=method, url=url)
@@ -103,10 +98,9 @@ class TestRequest:
             "Authorization": "Bearer token",
         }
 
-        request = CoroutineMock(return_value=Exception)
+        request = AsyncMock(return_value=Exception)
 
-        logger = Mock()
-        servicenow_client = ServiceNowClient(logger, config)
+        servicenow_client = ServiceNowClient(config)
         servicenow_client._get_request_headers = Mock(return_value=headers)
 
         with patch.object(servicenow_client._client, "request", new=request):
@@ -115,7 +109,6 @@ class TestRequest:
         expected_result = {"status": 500}
         servicenow_client._get_request_headers.assert_called_once()
         request.assert_called_once_with(method=method, url=url, headers=headers)
-        servicenow_client._logger.exception.assert_called_once()
         assert result == expected_result
 
 
@@ -136,12 +129,11 @@ class TestGetAccessToken:
 
         response = Mock()
         response.status = status
-        response.json = CoroutineMock(return_value=body)
+        response.json = AsyncMock(return_value=body)
 
-        logger = Mock()
-        servicenow_client = ServiceNowClient(logger, config)
+        servicenow_client = ServiceNowClient(config)
         servicenow_client._client = Mock()
-        servicenow_client._client.request = CoroutineMock(return_value=response)
+        servicenow_client._client.request = AsyncMock(return_value=response)
 
         assert servicenow_client._access_token == ""
         await servicenow_client._get_access_token()
@@ -156,29 +148,25 @@ class TestGetAccessToken:
         response = Mock()
         response.status = 401
 
-        logger = Mock()
-        servicenow_client = ServiceNowClient(logger, config)
+        servicenow_client = ServiceNowClient(config)
         servicenow_client._client = Mock()
-        servicenow_client._client.request = CoroutineMock(return_value=response)
+        servicenow_client._client.request = AsyncMock(return_value=response)
 
         await servicenow_client._get_access_token()
 
         assert servicenow_client._access_token == ""
         servicenow_client._client.request.assert_awaited_once()
-        servicenow_client._logger.error.assert_called_once()
 
     @pytest.mark.asyncio
     async def get_access_token_exception_test(self):
-        logger = Mock()
-        servicenow_client = ServiceNowClient(logger, config)
+        servicenow_client = ServiceNowClient(config)
         servicenow_client._client = Mock()
-        servicenow_client._client.request = CoroutineMock(return_value=Exception)
+        servicenow_client._client.request = AsyncMock(return_value=Exception)
 
         await servicenow_client._get_access_token()
 
         assert servicenow_client._access_token == ""
         servicenow_client._client.request.assert_awaited_once()
-        servicenow_client._logger.exception.assert_called_once()
 
 
 class TestReportIncident:
@@ -190,11 +178,10 @@ class TestReportIncident:
 
         response = Mock()
         response.status = status
-        response.json = CoroutineMock(return_value=response_body)
+        response.json = AsyncMock(return_value=response_body)
 
-        logger = Mock()
-        servicenow_client = ServiceNowClient(logger, config)
-        servicenow_client._request = CoroutineMock(return_value=response)
+        servicenow_client = ServiceNowClient(config)
+        servicenow_client._request = AsyncMock(return_value=response)
 
         result = await servicenow_client.report_incident(request_body)
 

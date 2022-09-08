@@ -3,9 +3,9 @@ from ssl import VerifyMode
 from typing import Dict, List, Optional
 
 import aiohttp
-from application.config import http_proxies
+from application.config import insecure_http_proxies, secure_http_proxies
 from application.scenario import Scenario, clear_current_scenario, get_current_scenario, set_current_scenario
-from application.scenarios import bruin_webhook_scenarios, rta_poll_scenarios
+from application.scenarios import bruin_webhook_scenarios, gateway_monitor_scenarios, rta_poll_scenarios
 from fastapi import FastAPI
 from hypercorn import Config
 from hypercorn.asyncio import serve
@@ -15,27 +15,38 @@ from starlette.responses import JSONResponse, Response
 log = logging.getLogger(__name__)
 
 # Scenarios to be executed
-scenarios: List[Scenario] = [*bruin_webhook_scenarios, *rta_poll_scenarios]
+scenarios: List[Scenario] = [
+    *bruin_webhook_scenarios,
+    *rta_poll_scenarios,
+    *gateway_monitor_scenarios,
+]
 
 http = FastAPI()
 HTTP_METHODS = ["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"]
 
 
-async def start(proxies: Dict[int, Optional[str]]):
+async def start(secure_proxies: Dict[int, Optional[str]], insecure_proxies: Dict[int, Optional[str]]):
     """
     Starts an hypercorn server that binds to any port declared in the proxies configuration.
-    :param proxies: proxies to be binded
+    :param secure_proxies: secure proxies to be binded
+    :param insecure_proxies: insecure proxies to be binded
     """
-    log.info(f"Starting ASGI server on ports {[port for port in proxies.keys()]}...")
-
     config = Config()
     config.loglevel = "ERROR"
     config.use_reloader = True
     config.verify_mode = VerifyMode.CERT_NONE
-    config.bind = [f"0.0.0.0:{port}" for port in proxies.keys()]
+    config.bind = [f"0.0.0.0:{port}" for port in secure_proxies.keys()]
+    config.insecure_bind = [f"0.0.0.0:{port}" for port in insecure_proxies.keys()]
+    config.certfile = "certs/server.crt"
+    config.keyfile = "certs/server.key"
 
-    log.info(f"ASGI server started on ports {[port for port in proxies.keys()]}")
-    await serve(http, config)
+    log.info(f"HTTP server listening on ports {[port for port in insecure_proxies.keys()]}")
+    log.info(f"HTTPS server listening on ports {[port for port in secure_proxies.keys()]}")
+    log.info(f"To run the server scenarios run the following command: curl -X PUT http://localhost:8000/_run_scenarios")
+    try:
+        await serve(http, config)
+    except Exception as e:
+        log.error(e)
 
 
 @http.put("/_run_scenarios", status_code=200)
@@ -76,7 +87,9 @@ async def resend(request: Request) -> Response:
     :return: a proxied or empty response
     """
     log.info(f"resend(request.path={request.url.path})")
-    proxied_address = http_proxies.get(request.url.port, None)
+    secure_proxy = secure_http_proxies.get(request.url.port, None)
+    insecure_proxy = insecure_http_proxies.get(request.url.port, None)
+    proxied_address = secure_proxy or insecure_proxy
     if not proxied_address:
         return JSONResponse({})
 

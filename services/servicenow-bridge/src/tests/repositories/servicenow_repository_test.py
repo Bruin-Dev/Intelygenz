@@ -1,8 +1,8 @@
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
+
 from application.repositories.servicenow_repository import ServiceNowRepository
-from asynctest import CoroutineMock
 
 
 class TestServiceNowRepository:
@@ -31,7 +31,7 @@ class TestServiceNowRepository:
         response = {}
 
         servicenow_client = Mock()
-        servicenow_client.report_incident = CoroutineMock(return_value=response)
+        servicenow_client.report_incident = AsyncMock(return_value=response)
 
         servicenow_repository = ServiceNowRepository(servicenow_client)
         result = await servicenow_repository.report_incident(host, gateway, summary, note, link)

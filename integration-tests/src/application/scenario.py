@@ -6,6 +6,7 @@ from application.data.bruin import Document, Inventory
 from application.data.bruin.reply_response import ReplyResponse
 from application.data.bruin.ticket_basic import TicketBasic
 from application.data.bruin.ticket_details import TicketDetails, TicketNote
+from application.data.servicenow.incident_response import IncidentResponse
 from application.handler import Handler, WillReturnJSON, WillReturnNothing
 from application.route import Route, Routes
 from dataclasses import dataclass, field
@@ -17,6 +18,7 @@ log = logging.getLogger(__name__)
 
 # These are the default routes for any scenario. It can be expected for this dict to grow on any iteration.
 DEFAULT_ROUTES = {
+    # Bruin default routes
     "/login/identity/connect/token": WillReturnJSON({"access_token": "token"}),
     "/api/Ticket/basic": WillReturnJSON(TicketBasic()),
     "/api/Ticket/{ticket_id}/notes/advanced": WillReturnJSON({"ticketNotes": []}),
@@ -27,6 +29,11 @@ DEFAULT_ROUTES = {
     "/api/Email/{email_id}/link/ticket/{ticket_id}": WillReturnJSON({"success": "success"}),
     "/api/Email/status": WillReturnJSON({"success": "success"}),
     "/api/Notification/email/ReplyAll": WillReturnJSON(ReplyResponse()),
+    # Velocloud default routes
+    "/portal/rest/login/operatorLogin": WillReturnJSON({}, {"Set-Cookie": "velocloud.session=any_token"}),
+    # Service now default routes
+    "/oauth_token.do": WillReturnJSON({"access_token": "token"}),
+    "/api/g_mtcm/intelygenz": WillReturnJSON(IncidentResponse()),
 }
 
 

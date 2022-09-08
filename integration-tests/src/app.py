@@ -2,7 +2,7 @@ import asyncio
 import logging
 import sys
 
-from application.config import grpc_servers, http_proxies
+from application.config import grpc_servers, insecure_http_proxies, secure_http_proxies
 from application.servers.http import http
 
 root = logging.getLogger()
@@ -22,7 +22,7 @@ log.addHandler(handler)
 
 async def start():
     # Add ASGI server task
-    tasks = [http.start(http_proxies)]
+    tasks = [http.start(secure_http_proxies, insecure_http_proxies)]
 
     # Add a task for each GRPC server
     for port, server in grpc_servers.items():

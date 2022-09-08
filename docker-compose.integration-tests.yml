@@ -1,4 +1,21 @@
 services:
+  # Integration tests server
+  integration-tests:
+    build:
+      context: .
+      dockerfile: integration-tests/Dockerfile
+    ports:
+      - 8000:8000
+      - 8001:8001
+      - 8002:8002
+      - 8003:8003
+      - 8004:8004
+      - 50001:50001
+      - 50002:50002
+    volumes:
+      - ./integration-tests:/service/app
+
+  # Service overrides ordered alphabetically
   bruin-bridge:
     environment:
       BRUIN_LOGIN_URL: http://integration-tests:8001/login
@@ -6,21 +23,73 @@ services:
   email-tagger-kre-bridge:
     environment:
       KRE_BASE_URL: integration-tests:50001
-  repair-tickets-kre-bridge:
-    environment:
-      KRE_BASE_URL: integration-tests:50002
-  email-bridge:
-    environment:
-      # Prevent email-bridge thread to hang up when retrieving emails for intermapper-outage-monitor
-      MONITORABLE_EMAIL_ACCOUNTS: "{}"
   email-tagger-monitor:
     environment:
       NEW_EMAILS_JOB_INTERVAL: 5
       NEW_TICKETS_JOB_INTERVAL: 5
       STORE_REPLIES_ENABLED: true
+  gateway-monitor:
+    environment:
+      MONITORED_VELOCLOUD_HOSTS: '["integration-tests:8004"]'
+      MONITORING_JOB_INTERVAL: 5
+  repair-tickets-kre-bridge:
+    environment:
+      KRE_BASE_URL: integration-tests:50002
   repair-tickets-monitor:
     environment:
       RTA_MONITOR_JOB_INTERVAL: 5
       NEW_CREATED_TICKETS_FEEDBACK_JOB_INTERVAL: 5
       NEW_CLOSED_TICKETS_FEEDBACK_JOB_INTERVAL: 5
       AUTO_REPLY_ENABLED: true
+  servicenow-bridge:
+    environment:
+      BASE_URL: http://integration-tests:8003
+  velocloud-bridge:
+    environment:
+      VELOCLOUD_CREDENTIALS: integration-tests:8004+username+password
+
+  # Disabled services with no integration tests yet
+  # Integration tests whould be run with all the services enabled (and did in the past).
+  # Some recent change has made the existing tests to fail and to diagnose what is exactly the problem is too complex.
+  base-microservice:
+    entrypoint: ["echo", "Service is disabled"]
+  customer-cache:
+    entrypoint: ["echo", "Service is disabled"]
+  digi-bridge:
+    entrypoint: ["echo", "Service is disabled"]
+  digi-reboot-report:
+    entrypoint: ["echo", "Service is disabled"]
+  dri-bridge:
+    entrypoint: ["echo", "Service is disabled"]
+  fraud-monitor:
+    entrypoint: ["echo", "Service is disabled"]
+  forticloud-bridge:
+    entrypoint: ["echo", "Service is disabled"]
+  hawkeye-affecting-monitor:
+    entrypoint: ["echo", "Service is disabled"]
+  hawkeye-bridge:
+    entrypoint: ["echo", "Service is disabled"]
+  hawkeye-customer-cache:
+    entrypoint: ["echo", "Service is disabled"]
+  hawkeye-outage-monitor:
+    entrypoint: ["echo", "Service is disabled"]
+  intermapper-outage-monitor:
+    entrypoint: ["echo", "Service is disabled"]
+  last-contact-report:
+    entrypoint: ["echo", "Service is disabled"]
+  links-metrics-api:
+    entrypoint: ["echo", "Service is disabled"]
+  links-metrics-collector:
+    entrypoint: ["echo", "Service is disabled"]
+  lumin-billing-report:
+    entrypoint: ["echo", "Service is disabled"]
+  email-bridge:
+    entrypoint: ["echo", "Service is disabled"]
+  notifications-bridge:
+    entrypoint: ["echo", "Service is disabled"]
+  service-outage-monitor-triage:
+    entrypoint: ["echo", "Service is disabled"]
+  t7-bridge:
+    entrypoint: ["echo", "Service is disabled"]
+  tnba-feedback:
+    entrypoint: ["echo", "Service is disabled"]

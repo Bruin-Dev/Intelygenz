@@ -1,24 +1,23 @@
-from unittest.mock import Mock
+import json
+from unittest.mock import AsyncMock, Mock
 
 import pytest
+
 from application.actions.report_incident import ReportIncident
-from asynctest import CoroutineMock
 
 
 class TestReportIncident:
     def instance_test(self):
-        logger = Mock()
-        event_bus = Mock()
+        nats_client = Mock()
         servicenow_repository = Mock()
 
-        action = ReportIncident(logger, event_bus, servicenow_repository)
+        action = ReportIncident(nats_client, servicenow_repository)
 
-        assert action._logger is logger
-        assert action._event_bus is event_bus
+        assert action._event_bus is nats_client
         assert action._servicenow_repository is servicenow_repository
 
     @pytest.mark.asyncio
-    async def report_incident_ok_test(self):
+    async def report_incident_ok_test(self, make_msg, nats_client):
         host = "mettel.velocloud.net"
         gateway = "vcg-test-1"
         summary = "Test summary"
@@ -33,24 +32,23 @@ class TestReportIncident:
             "link": link,
         }
 
-        request = {"request_id": 1, "body": msg_body, "response_topic": "some.topic"}
+        request = {"request_id": 1, "body": msg_body}
         response = {"body": {}, "status": 200}
 
-        logger = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
         servicenow_repository = Mock()
 
-        action = ReportIncident(logger, event_bus, servicenow_repository)
-        action._servicenow_repository.report_incident = CoroutineMock(return_value=response)
+        action = ReportIncident(nats_client, servicenow_repository)
+        action._servicenow_repository.report_incident = AsyncMock(return_value=response)
 
-        await action.report_incident(request)
+        msg = make_msg(request)
+        msg.respond = AsyncMock()
+        await action(msg)
         servicenow_repository.report_incident.assert_awaited_once_with(host, gateway, summary, note, link)
-        event_bus.publish_message.assert_awaited_once_with("some.topic", response)
+        msg.respond.assert_awaited_once_with(json.dumps(response).encode())
 
     @pytest.mark.asyncio
-    async def report_incident_400_no_body_test(self):
-        request = {"request_id": 1, "response_topic": "some.topic"}
+    async def report_incident_400_no_body_test(self, make_msg, nats_client):
+        request = {"request_id": 1}
 
         response = {
             "request_id": 1,
@@ -58,19 +56,17 @@ class TestReportIncident:
             "status": 400,
         }
 
-        logger = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
         servicenow_repository = Mock()
+        action = ReportIncident(nats_client, servicenow_repository)
 
-        action = ReportIncident(logger, event_bus, servicenow_repository)
-
-        await action.report_incident(request)
-        event_bus.publish_message.assert_awaited_once_with("some.topic", response)
+        msg = make_msg(request)
+        msg.respond = AsyncMock()
+        await action(msg)
+        msg.respond.assert_awaited_once_with(json.dumps(response).encode())
 
     @pytest.mark.asyncio
-    async def report_incident_400_body_with_missing_fields_test(self):
-        request = {"request_id": 1, "response_topic": "some.topic", "body": {}}
+    async def report_incident_400_body_with_missing_fields_test(self, make_msg, nats_client):
+        request = {"request_id": 1, "body": {}}
 
         response = {
             "request_id": 1,
@@ -78,12 +74,11 @@ class TestReportIncident:
             "status": 400,
         }
 
-        logger = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
         servicenow_repository = Mock()
 
-        action = ReportIncident(logger, event_bus, servicenow_repository)
+        action = ReportIncident(nats_client, servicenow_repository)
 
-        await action.report_incident(request)
-        event_bus.publish_message.assert_awaited_once_with("some.topic", response)
+        msg = make_msg(request)
+        msg.respond = AsyncMock()
+        await action(msg)
+        msg.respond.assert_awaited_once_with(json.dumps(response).encode())

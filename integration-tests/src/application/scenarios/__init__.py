@@ -1,2 +1,3 @@
-from application.scenarios.bruin_webhook_scenarios import bruin_webhook_scenarios
-from application.scenarios.rta_poll_scenarios import rta_poll_scenarios
+from .bruin_webhook_scenarios import bruin_webhook_scenarios
+from .gateway_monitor_scenarios import gateway_monitor_scenarios
+from .rta_poll_scenarios import rta_poll_scenarios

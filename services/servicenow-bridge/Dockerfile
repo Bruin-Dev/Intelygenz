@@ -1,17 +1,22 @@
 #NOTE: This dockerfile is made to be run with context in the root of the monorepo
-FROM registry.gitlab.intelygenz.com/mettel/dockers/images/python3.6-alpine-base:1.0.0
+ARG REPOSITORY_URL
+ARG DOCKER_BASE_IMAGE_VERSION
+FROM registry.gitlab.intelygenz.com/mettel/dockers/images/python3.10-alpine-base:1.0.0
 
-RUN apk --no-cache add curl gcc musl-dev
-RUN pip install --upgrade pip
+ENV PYTHONUNBUFFERED 1
+ENV PATH="/root/.local/bin:$PATH"
+ENV POETRY_VIRTUALENVS_CREATE=false
 
-COPY pyutils_automation/py36 /pyutils_automation/py36
-WORKDIR /pyutils_automation/py36
-RUN python setup.py install
+RUN apk add gcc libffi-dev musl-dev git
+RUN wget https://install.python-poetry.org -O poetry-install.py
+RUN python poetry-install.py
+
+COPY pyutils_automation/py310 /pyutils_automation/py310
+WORKDIR /pyutils_automation/py310
+RUN poetry install --no-dev
 
 COPY services/servicenow-bridge/ /service/app
 WORKDIR /service/app
-RUN pip install -r requirements.txt
-
-ENV PYTHONUNBUFFERED 1
+RUN poetry install --no-dev
 
 CMD ["python3", "-u", "src/app.py"]
