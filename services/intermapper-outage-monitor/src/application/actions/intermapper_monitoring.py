@@ -250,22 +250,46 @@ class InterMapperMonitor:
         logger.info(f"Found {len(tickets_body)} tickets for service number {service_number} from bruin: {tickets_body}")
 
         for ticket in tickets_body:
-
             ticket_id = ticket["ticketID"]
 
-            logger.info(
-                f"Posting InterMapper UP note to task of ticket id {ticket_id} "
-                f"related to service number {service_number}..."
-            )
-            up_note_response = await self._bruin_repository.append_intermapper_up_note(
-                ticket_id, service_number, parsed_email_dict, is_piab
-            )
-            if up_note_response["status"] not in range(200, 300):
+            ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
+            ticket_details_body = ticket_details_response["body"]
+            ticket_details_status = ticket_details_response["status"]
+            if ticket_details_status not in range(200, 300):
                 logger.warning(
-                    f"Bad status calling to append intermapper note to ticket id: {ticket_id}."
-                    f"Skipping autoresolve ticket ...."
+                    f"Bad status calling get ticket details to ticket id: {ticket_id}. Skipping autoresolve ..."
                 )
                 return False
+
+            notes_from_outage_ticket = ticket_details_body["ticketNotes"]
+            relevant_notes = [
+                note
+                for note in notes_from_outage_ticket
+                if note["serviceNumber"] is not None
+                if service_number in note["serviceNumber"]
+                if note["noteValue"] is not None
+            ]
+            last_cycle_notes = self._get_notes_appended_since_latest_reopen_or_ticket_creation(relevant_notes)
+
+            if self._is_condition_already_reported(last_cycle_notes, parsed_email_dict):
+                logger.info(
+                    f"Current condition has already been reported on ticket id {ticket_id}. "
+                    f"Skipping append note to ticket..."
+                )
+            else:
+                logger.info(
+                    f"Posting InterMapper UP note to task of ticket id {ticket_id} "
+                    f"related to service number {service_number}..."
+                )
+                up_note_response = await self._bruin_repository.append_intermapper_up_note(
+                    ticket_id, service_number, parsed_email_dict, is_piab
+                )
+                if up_note_response["status"] not in range(200, 300):
+                    logger.warning(
+                        f"Bad status calling to append intermapper note to ticket id: {ticket_id}."
+                        f"Skipping autoresolve ticket ...."
+                    )
+                    return False
 
             product_category_response = await self._bruin_repository.get_tickets(client_id, ticket_id)
             product_category_response_body = product_category_response["body"]
@@ -292,18 +316,7 @@ class InterMapperMonitor:
                 )
                 continue
 
-            outage_ticket_creation_date = ticket["createDate"]
-
             logger.info(f"Checking to see if ticket {ticket_id} can be autoresolved")
-
-            ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
-            ticket_details_body = ticket_details_response["body"]
-            ticket_details_status = ticket_details_response["status"]
-            if ticket_details_status not in range(200, 300):
-                logger.warning(
-                    f"Bad status calling get ticket details to ticket id: {ticket_id}. Skipping autoresolve ..."
-                )
-                return False
 
             details_from_ticket = ticket_details_body["ticketDetails"]
             detail_for_ticket_resolution = self._get_first_element_matching(
@@ -311,15 +324,7 @@ class InterMapperMonitor:
                 lambda detail: detail["detailValue"] == service_number,
             )
             ticket_detail_id = detail_for_ticket_resolution["detailID"]
-
-            notes_from_outage_ticket = ticket_details_body["ticketNotes"]
-            relevant_notes = [
-                note
-                for note in notes_from_outage_ticket
-                if note["serviceNumber"] is not None
-                if service_number in note["serviceNumber"]
-                if note["noteValue"] is not None
-            ]
+            outage_ticket_creation_date = ticket["createDate"]
 
             if not self._was_last_outage_detected_recently(
                 relevant_notes, outage_ticket_creation_date, parsed_email_dict
@@ -356,9 +361,6 @@ class InterMapperMonitor:
                 )
                 continue
 
-            last_cycle_notes = self._get_notes_appended_since_latest_reopen_or_ticket_creation(relevant_notes)
-            event = self._get_event_from_ticket_notes(last_cycle_notes)
-
             await self._bruin_repository.unpause_ticket_detail(
                 ticket_id, service_number=service_number, detail_id=ticket_detail_id
             )
@@ -372,6 +374,7 @@ class InterMapperMonitor:
                 f"Autoresolve was successful for task of ticket {ticket_id} related to "
                 f"service number {service_number}. Posting autoresolve note..."
             )
+            event = self._get_event_from_ticket_notes(last_cycle_notes)
             self._metrics_repository.increment_tasks_autoresolved(event=event, is_piab=is_piab)
             await self._bruin_repository.append_autoresolve_note(ticket_id, service_number)
             slack_message = (

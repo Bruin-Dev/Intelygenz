@@ -1630,6 +1630,11 @@ class TestInterMapperMonitor:
             "status": 200,
         }
 
+        get_ticket_details_response = {
+            "body": {"ticketNotes": []},
+            "status": 200,
+        }
+
         append_intermapper_up_response = {"body": "KO", "status": 400}
         scheduler = Mock()
         utils_repository = Mock()
@@ -1641,7 +1646,7 @@ class TestInterMapperMonitor:
         bruin_repository = Mock()
         bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
         bruin_repository.get_tickets = AsyncMock()
-        bruin_repository.get_ticket_details = AsyncMock()
+        bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_details_response)
         bruin_repository.resolve_ticket = AsyncMock()
         bruin_repository.append_intermapper_up_note = AsyncMock(return_value=append_intermapper_up_response)
         bruin_repository.append_autoresolve_note = AsyncMock()
@@ -1660,6 +1665,7 @@ class TestInterMapperMonitor:
             bruin_repository,
             dri_repository,
         )
+        intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         intermapper_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
 
@@ -1671,7 +1677,7 @@ class TestInterMapperMonitor:
             outage_ticket_1_id, circuit_id, parsed_email_dict, False
         )
         bruin_repository.get_tickets.assert_not_awaited()
-        bruin_repository.get_ticket_details.assert_not_awaited()
+        bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         intermapper_monitor._was_last_outage_detected_recently.assert_not_called()
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_not_called()
 
@@ -1715,6 +1721,11 @@ class TestInterMapperMonitor:
             "status": 200,
         }
 
+        get_ticket_details_response = {
+            "body": {"ticketNotes": []},
+            "status": 200,
+        }
+
         product_category_response = {
             "body": "Failed RPC",
             "status": 400,
@@ -1731,7 +1742,7 @@ class TestInterMapperMonitor:
         bruin_repository = Mock()
         bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
         bruin_repository.get_tickets = AsyncMock(return_value=product_category_response)
-        bruin_repository.get_ticket_details = AsyncMock()
+        bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_details_response)
         bruin_repository.resolve_ticket = AsyncMock()
         bruin_repository.append_intermapper_up_note = AsyncMock(return_value=append_intermapper_up_response)
         bruin_repository.append_autoresolve_note = AsyncMock()
@@ -1750,6 +1761,7 @@ class TestInterMapperMonitor:
             bruin_repository,
             dri_repository,
         )
+        intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         intermapper_monitor._was_last_outage_detected_recently = Mock()
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock()
 
@@ -1761,7 +1773,7 @@ class TestInterMapperMonitor:
             outage_ticket_1_id, circuit_id, parsed_email_dict, False
         )
         bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
-        bruin_repository.get_ticket_details.assert_not_awaited()
+        bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         intermapper_monitor._was_last_outage_detected_recently.assert_not_called()
 
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_not_called()
@@ -1806,6 +1818,11 @@ class TestInterMapperMonitor:
             "status": 200,
         }
 
+        get_ticket_details_response = {
+            "body": {"ticketNotes": []},
+            "status": 200,
+        }
+
         product_category_response = {
             "body": [],
             "status": 200,
@@ -1822,7 +1839,7 @@ class TestInterMapperMonitor:
         bruin_repository = Mock()
         bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
         bruin_repository.get_tickets = AsyncMock(return_value=product_category_response)
-        bruin_repository.get_ticket_details = AsyncMock()
+        bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_details_response)
         bruin_repository.resolve_ticket = AsyncMock()
         bruin_repository.append_intermapper_up_note = AsyncMock(return_value=append_intermapper_up_response)
         bruin_repository.append_autoresolve_note = AsyncMock()
@@ -1841,6 +1858,7 @@ class TestInterMapperMonitor:
             bruin_repository,
             dri_repository,
         )
+        intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         intermapper_monitor._was_last_outage_detected_recently = Mock()
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock()
 
@@ -1852,7 +1870,7 @@ class TestInterMapperMonitor:
             outage_ticket_1_id, circuit_id, parsed_email_dict, False
         )
         bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
-        bruin_repository.get_ticket_details.assert_not_awaited()
+        bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         intermapper_monitor._was_last_outage_detected_recently.assert_not_called()
 
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_not_called()
@@ -1897,6 +1915,11 @@ class TestInterMapperMonitor:
             "status": 200,
         }
 
+        get_ticket_details_response = {
+            "body": {"ticketNotes": []},
+            "status": 200,
+        }
+
         append_intermapper_up_response = {"body": "OK", "status": 200}
         scheduler = Mock()
         utils_repository = Mock()
@@ -1908,7 +1931,7 @@ class TestInterMapperMonitor:
         bruin_repository = Mock()
         bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
         bruin_repository.get_tickets = AsyncMock(return_value=outage_ticket_response)
-        bruin_repository.get_ticket_details = AsyncMock()
+        bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_details_response)
         bruin_repository.resolve_ticket = AsyncMock()
         bruin_repository.append_intermapper_up_note = AsyncMock(return_value=append_intermapper_up_response)
         bruin_repository.append_autoresolve_note = AsyncMock()
@@ -1927,6 +1950,7 @@ class TestInterMapperMonitor:
             bruin_repository,
             dri_repository,
         )
+        intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         intermapper_monitor._was_last_outage_detected_recently = Mock()
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock()
 
@@ -1938,7 +1962,7 @@ class TestInterMapperMonitor:
             outage_ticket_1_id, circuit_id, parsed_email_dict, False
         )
         bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
-        bruin_repository.get_ticket_details.assert_not_awaited()
+        bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         intermapper_monitor._was_last_outage_detected_recently.assert_not_called()
 
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_not_called()
@@ -1988,7 +2012,6 @@ class TestInterMapperMonitor:
             "status": 400,
         }
 
-        append_intermapper_up_response = {"body": "OK", "status": 200}
         scheduler = Mock()
         utils_repository = Mock()
         metrics_repository = Mock()
@@ -1998,10 +2021,10 @@ class TestInterMapperMonitor:
 
         bruin_repository = Mock()
         bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
-        bruin_repository.get_tickets = AsyncMock(return_value=outage_ticket_response)
+        bruin_repository.get_tickets = AsyncMock()
         bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         bruin_repository.resolve_ticket = AsyncMock()
-        bruin_repository.append_intermapper_up_note = AsyncMock(return_value=append_intermapper_up_response)
+        bruin_repository.append_intermapper_up_note = AsyncMock()
         bruin_repository.append_autoresolve_note = AsyncMock()
 
         config = testconfig
@@ -2025,10 +2048,8 @@ class TestInterMapperMonitor:
             response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, parsed_email_dict)
 
         bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
-        bruin_repository.append_intermapper_up_note.assert_awaited_once_with(
-            outage_ticket_1_id, circuit_id, parsed_email_dict, False
-        )
-        bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
+        bruin_repository.append_intermapper_up_note.assert_not_awaited()
+        bruin_repository.get_tickets.assert_not_awaited()
         bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         intermapper_monitor._was_last_outage_detected_recently.assert_not_called()
 
@@ -2170,6 +2191,7 @@ class TestInterMapperMonitor:
             bruin_repository,
             dri_repository,
         )
+        intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         intermapper_monitor._was_last_outage_detected_recently = Mock(return_value=False)
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
 
@@ -2323,6 +2345,7 @@ class TestInterMapperMonitor:
             bruin_repository,
             dri_repository,
         )
+        intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         intermapper_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock(return_value=False)
 

@@ -19,6 +19,14 @@ logger.info(
 ```
 
 * For ticket in tickets:
+    * If current condition has already been reported on the ticket:
+    ```python
+    logger.info(
+        f"Current condition has already been reported on ticket id {ticket_id}. "
+        f"Skipping append note to ticket..."
+    )
+    ```
+    * Else:
     ```python
     logger.info(
         f"Posting InterMapper UP note to task of ticket id {ticket_id} "
