@@ -1007,6 +1007,8 @@ class TestInterMapperMonitor:
         post_ticket_response = {"body": "success", "status": 200}
         intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
         intermapper_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=outage_ticket_response)
+        get_ticket_details_response = {"body": {"ticketNotes": []}, "status": 200}
+        intermapper_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_details_response)
         intermapper_monitor._bruin_repository.append_intermapper_note = AsyncMock(return_value=post_ticket_response)
         intermapper_monitor._bruin_repository.append_dri_note = AsyncMock()
         intermapper_monitor._should_forward_to_ipa_queue.return_value = True
@@ -1064,6 +1066,7 @@ class TestInterMapperMonitor:
         )
 
         post_ticket_response = {"body": "success", "status": 200}
+        get_ticket_details_response = {"body": {"ticketNotes": []}, "status": 200}
         scheduler = Mock()
         config = testconfig
 
@@ -1075,6 +1078,7 @@ class TestInterMapperMonitor:
 
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = AsyncMock(return_value=outage_ticket_response)
+        bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_details_response)
         bruin_repository.append_intermapper_note = AsyncMock()
         bruin_repository.append_dri_note = AsyncMock(return_value=post_ticket_response)
 
@@ -1091,6 +1095,7 @@ class TestInterMapperMonitor:
             dri_repository,
         )
         intermapper_monitor._process_dri_email = AsyncMock(return_value=True)
+        intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
 
         with config_mock:
             response = await intermapper_monitor._create_outage_ticket(
@@ -1186,6 +1191,7 @@ class TestInterMapperMonitor:
         )
 
         post_ticket_response = {"body": "failed", "status": 400}
+        get_ticket_details_response = {"body": {"ticketNotes": []}, "status": 200}
         scheduler = Mock()
         config = testconfig
 
@@ -1197,6 +1203,7 @@ class TestInterMapperMonitor:
 
         bruin_repository = Mock()
         bruin_repository.create_outage_ticket = AsyncMock(return_value=outage_ticket_response)
+        bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_details_response)
         bruin_repository.append_intermapper_note = AsyncMock(return_value=post_ticket_response)
         bruin_repository.append_dri_note = AsyncMock()
 
@@ -1212,6 +1219,7 @@ class TestInterMapperMonitor:
             bruin_repository,
             dri_repository,
         )
+        intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
 
         with config_mock:
             response = await intermapper_monitor._create_outage_ticket(
@@ -1257,6 +1265,7 @@ class TestInterMapperMonitor:
         )
 
         post_ticket_response = {"body": "failed", "status": 400}
+        get_ticket_details_response = {"body": {"ticketNotes": []}, "status": 200}
         scheduler = Mock()
         config = testconfig
 
@@ -1267,6 +1276,7 @@ class TestInterMapperMonitor:
         notifications_repository.send_slack_message = AsyncMock()
 
         bruin_repository = Mock()
+        bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_details_response)
         bruin_repository.create_outage_ticket = AsyncMock(return_value=outage_ticket_response)
         bruin_repository.append_intermapper_note = AsyncMock()
         bruin_repository.append_dri_note = AsyncMock(return_value=post_ticket_response)
@@ -1284,6 +1294,7 @@ class TestInterMapperMonitor:
             dri_repository,
         )
         intermapper_monitor._process_dri_email = AsyncMock(return_value=True)
+        intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
 
         with config_mock:
             response = await intermapper_monitor._create_outage_ticket(
