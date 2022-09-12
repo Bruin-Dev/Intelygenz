@@ -52,6 +52,7 @@
 - **topic:** VOO
 - **severity:** 2
 - **event:** <event\>
+- **condition:** <condition\>
 - **is_piab:** [True | False]
 - **target_queue:** [HNOC Investigate | IPA Investigate]
 

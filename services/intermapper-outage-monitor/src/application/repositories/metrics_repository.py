@@ -1,6 +1,6 @@
 from prometheus_client import Counter
 
-COMMON_LABELS = ["feature", "system", "topic", "severity", "event", "is_piab"]
+COMMON_LABELS = ["feature", "system", "topic", "severity", "event", "is_piab", "condition"]
 CREATE_LABELS = []
 REOPEN_LABELS = []
 FORWARD_LABELS = ["target_queue"]

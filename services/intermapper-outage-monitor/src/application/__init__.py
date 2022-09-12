@@ -16,6 +16,7 @@ ZIP_CODE_REGEX = re.compile(rf"{US_STATES_PATTERN},? (?P<zip_code>\d{{5}})")
 TRIAGE_NOTE_REGEX = re.compile(r"^#\*(MetTel's IPA)\*#\nInterMapper Triage")
 REOPEN_NOTE_REGEX = re.compile(r"^#\*(MetTel's IPA)\*#\nRe-opening")
 EVENT_REGEX = re.compile(r"Event:\s*(?P<event>\w+)")
+CONDITION_REGEX = re.compile(r"Condition:\s*(?P<condition>\w+)")
 EVENT_TIME_REGEX = re.compile(r"(?P<time>^.*): Message from InterMapper (?P<version>.*)")
 AUTORESOLVE_REGEX = re.compile(r"^#\*(MetTel's IPA)\*#\nAuto-resolving task for")
 

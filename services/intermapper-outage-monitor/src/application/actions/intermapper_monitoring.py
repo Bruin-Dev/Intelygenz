@@ -15,6 +15,7 @@ from tenacity import retry, stop_after_delay, wait_exponential
 from application import (
     AUTORESOLVE_REGEX,
     EVENT_REGEX,
+    CONDITION_REGEX,
     EVENT_TIME_REGEX,
     FORWARD_TICKET_TO_QUEUE_JOB_ID,
     REOPEN_NOTE_REGEX,
@@ -357,6 +358,7 @@ class InterMapperMonitor:
 
             last_cycle_notes = self._get_notes_appended_since_latest_reopen_or_ticket_creation(relevant_notes)
             event = self._get_event_from_ticket_notes(last_cycle_notes)
+            condition = self._get_condition_from_ticket_notes(last_cycle_notes)
 
             await self._bruin_repository.unpause_ticket_detail(
                 ticket_id, service_number=service_number, detail_id=ticket_detail_id
@@ -371,7 +373,7 @@ class InterMapperMonitor:
                 f"Autoresolve was successful for task of ticket {ticket_id} related to "
                 f"service number {service_number}. Posting autoresolve note..."
             )
-            self._metrics_repository.increment_tasks_autoresolved(event=event, is_piab=is_piab)
+            self._metrics_repository.increment_tasks_autoresolved(event=event, is_piab=is_piab, condition=condition)
             await self._bruin_repository.append_autoresolve_note(ticket_id, service_number)
             slack_message = (
                 f"Outage ticket {ticket_id} for service_number {service_number} was autoresolved through InterMapper "
@@ -388,6 +390,7 @@ class InterMapperMonitor:
 
     async def _create_outage_ticket(self, service_number, client_id, parsed_email_dict, dri_parameters):
         event = parsed_email_dict["event"]
+        condition = parsed_email_dict["condition"]
         is_piab = self._is_piab_device(parsed_email_dict)
 
         logger.info(f"Attempting outage ticket creation for client_id {client_id} and service_number {service_number}")
@@ -408,7 +411,7 @@ class InterMapperMonitor:
 
         if outage_ticket_status in range(200, 300):
             logger.info(f"Successfully created outage ticket with ticket_id {ticket_id}")
-            self._metrics_repository.increment_tasks_created(event=event, is_piab=is_piab)
+            self._metrics_repository.increment_tasks_created(event=event, is_piab=is_piab, condition=condition)
             slack_message = (
                 f"Outage ticket created through InterMapper emails for service_number {service_number}. Ticket "
                 f"details at https://app.bruin.com/t/{ticket_id}."
@@ -423,10 +426,10 @@ class InterMapperMonitor:
                 logger.info(f"In Progress ticket exists for location of service number {service_number}")
             if outage_ticket_status == 472:
                 logger.info(f"Resolved ticket exists for service number {service_number}")
-                self._metrics_repository.increment_tasks_reopened(event=event, is_piab=is_piab)
+                self._metrics_repository.increment_tasks_reopened(event=event, is_piab=is_piab, condition=condition)
             if outage_ticket_status == 473:
                 logger.info(f"Resolved ticket exists for location of service number {service_number}")
-                self._metrics_repository.increment_tasks_reopened(event=event, is_piab=is_piab)
+                self._metrics_repository.increment_tasks_reopened(event=event, is_piab=is_piab, condition=condition)
         else:
             return False
         if dri_parameters:
@@ -449,12 +452,12 @@ class InterMapperMonitor:
         if self._should_forward_to_ipa_queue(parsed_email_dict) and outage_ticket_status in (200, 471, 472, 473):
             ipa_forward_time = self._config.INTERMAPPER_CONFIG["forward_to_ipa_job_interval"]
             self._schedule_forward_to_queue(
-                ticket_id, service_number, ForwardQueues.IPA.value, ipa_forward_time, is_piab, event
+                ticket_id, service_number, ForwardQueues.IPA.value, ipa_forward_time, is_piab, event, condition
             )
 
             hnoc_forward_time = self._config.INTERMAPPER_CONFIG["forward_to_hnoc_job_interval"]
             self._schedule_forward_to_queue(
-                ticket_id, service_number, ForwardQueues.HNOC.value, hnoc_forward_time, is_piab, event
+                ticket_id, service_number, ForwardQueues.HNOC.value, hnoc_forward_time, is_piab, event, condition
             )
         return True
 
@@ -619,6 +622,13 @@ class InterMapperMonitor:
             if match:
                 return match.group("event")
 
+    @staticmethod
+    def _get_condition_from_ticket_notes(ticket_notes: List[dict]) -> Optional[str]:
+        for note in ticket_notes:
+            match = CONDITION_REGEX.search(note["noteValue"])
+            if match:
+                return match.group("condition")
+
     def _is_battery_alert_probe_type(self, probe_type: str) -> bool:
         battery_alert_probe_types = self._config.INTERMAPPER_CONFIG["battery_alert_probe_types"]
         return any(pt for pt in battery_alert_probe_types if pt in probe_type)
@@ -640,6 +650,7 @@ class InterMapperMonitor:
         forward_time: float,
         is_piab: bool,
         event: str,
+        condition: str,
     ):
         tz = timezone(self._config.TIMEZONE)
         current_datetime = datetime.now(tz)
@@ -663,6 +674,7 @@ class InterMapperMonitor:
                 "target_queue": target_queue,
                 "is_piab": is_piab,
                 "event": event,
+                "condition": condition,
             },
             run_date=forward_task_run_date,
             replace_existing=False,
@@ -678,6 +690,7 @@ class InterMapperMonitor:
         target_queue: str,
         is_piab: bool,
         event: str,
+        condition: str,
     ):
         @retry(
             wait=wait_exponential(
@@ -697,6 +710,7 @@ class InterMapperMonitor:
                 target_queue=target_queue,
                 is_piab=is_piab,
                 event=event,
+                condition=condition,
             )
 
         try:
@@ -708,7 +722,7 @@ class InterMapperMonitor:
             )
 
     async def change_detail_work_queue(
-        self, ticket_id: int, serial_number: str, target_queue: str, is_piab: bool, event: str
+        self, ticket_id: int, serial_number: str, target_queue: str, is_piab: bool, event: str, condition: str
     ):
         change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
             serial_number=serial_number, ticket_id=ticket_id, task_result=target_queue
@@ -718,7 +732,12 @@ class InterMapperMonitor:
             logger.info(
                 f"Successfully forwarded ticket_id {ticket_id} and serial {serial_number} to {target_queue} queue."
             )
-            self._metrics_repository.increment_tasks_forwarded(event=event, is_piab=is_piab, target_queue=target_queue)
+            self._metrics_repository.increment_tasks_forwarded(
+                event=event,
+                is_piab=is_piab,
+                condition=condition,
+                target_queue=target_queue,
+            )
 
             slack_message = (
                 f"Detail of ticket {ticket_id} related to serial {serial_number} was successfully forwarded "

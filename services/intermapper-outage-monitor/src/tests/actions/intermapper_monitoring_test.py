@@ -3264,6 +3264,7 @@ class TestInterMapperMonitor:
         ticket_id = 12345
         is_piab = True
         event = "example"
+        condition = "any_condition"
         target_queue = ForwardQueues.HNOC.value
         forward_time = testconfig.INTERMAPPER_CONFIG["forward_to_hnoc_job_interval"]
         forward_task_run_date = CURRENT_DATETIME + timedelta(
@@ -3285,6 +3286,7 @@ class TestInterMapperMonitor:
                     forward_time=forward_time,
                     is_piab=is_piab,
                     event=event,
+                    condition=condition,
                 )
 
         intermapper_monitor._scheduler.add_job.assert_called_once_with(
@@ -3296,6 +3298,7 @@ class TestInterMapperMonitor:
                 "target_queue": target_queue,
                 "is_piab": is_piab,
                 "event": event,
+                "condition": condition,
             },
             run_date=forward_task_run_date,
             replace_existing=False,
@@ -3310,6 +3313,7 @@ class TestInterMapperMonitor:
         ticket_id = 12345
         is_piab = True
         event = "example"
+        condition = "any_condition"
         target_queue = ForwardQueues.HNOC.value
         slack_message = (
             f"Detail of ticket {ticket_id} related to serial {serial_number}"
@@ -3331,7 +3335,12 @@ class TestInterMapperMonitor:
         with patch.object(intermapper_monitor_module, "datetime", new=datetime_mock):
             with patch.object(intermapper_monitor_module, "timezone", new=Mock()):
                 await intermapper_monitor.change_detail_work_queue(
-                    ticket_id, serial_number, target_queue, is_piab, event
+                    ticket_id,
+                    serial_number,
+                    target_queue,
+                    is_piab,
+                    event,
+                    condition,
                 )
 
         intermapper_monitor._bruin_repository.change_detail_work_queue.assert_called_once_with(
@@ -3345,6 +3354,7 @@ class TestInterMapperMonitor:
         ticket_id = 12345
         is_piab = True
         event = "example"
+        condition = "any_condition"
         target_queue = ForwardQueues.HNOC.value
         change_queue_ticket_response = {
             "body": "ko",
@@ -3361,7 +3371,7 @@ class TestInterMapperMonitor:
         with patch.object(intermapper_monitor_module, "datetime", new=datetime_mock):
             with patch.object(intermapper_monitor_module, "timezone", new=Mock()):
                 await intermapper_monitor.change_detail_work_queue(
-                    ticket_id, serial_number, target_queue, is_piab, event
+                    ticket_id, serial_number, target_queue, is_piab, event, condition
                 )
 
         intermapper_monitor._bruin_repository.change_detail_work_queue.assert_called_once_with(
@@ -3376,6 +3386,7 @@ class TestInterMapperMonitor:
         target_queue = ForwardQueues.HNOC.value
         is_piab = True
         event = "example"
+        condition = "any_condition"
         change_detail_work_queue_response = {"body": "Success", "status": 200}
         intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
         intermapper_monitor._bruin_repository.change_detail_work_queue = AsyncMock(
@@ -3388,6 +3399,7 @@ class TestInterMapperMonitor:
             target_queue,
             is_piab,
             event,
+            condition,
         )
 
         intermapper_monitor._bruin_repository.change_detail_work_queue.assert_awaited_once_with(
@@ -3402,6 +3414,7 @@ class TestInterMapperMonitor:
         target_queue = ForwardQueues.HNOC.value
         is_piab = True
         event = "example"
+        condition = "any_condition"
         change_detail_work_queue_response = {"body": "Failed", "status": 400}
         intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
         intermapper_monitor._bruin_repository.change_detail_work_queue = AsyncMock(
@@ -3414,6 +3427,7 @@ class TestInterMapperMonitor:
             target_queue,
             is_piab,
             event,
+            condition,
         )
 
         intermapper_monitor._bruin_repository.change_detail_work_queue.assert_awaited_once_with(
