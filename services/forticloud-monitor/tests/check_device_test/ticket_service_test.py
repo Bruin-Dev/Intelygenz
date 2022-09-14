@@ -1,21 +1,16 @@
-import pytest
-from check_device_test.fixtures import AnyDevice
+from check_device_test.fixtures import AnyDevice, AnyDeviceId
 
 from check_device.ticket import Ticket
-from check_device.ticket_service import TicketService
+from check_device.ticket_service import build_ticket_for
 
 
-def tickets_are_properly_built_test(tickets_service: TicketService):
+def tickets_are_properly_built_test():
     # given
-    a_device = AnyDevice()
+    a_device_id = AnyDeviceId(client_id="any_client_id", service_number="any_service_number")
+    a_device = AnyDevice(id=a_device_id)
 
     # when
-    built_ticket = tickets_service.build_ticket_for(a_device)
+    built_ticket = build_ticket_for(a_device)
 
     # then
-    assert built_ticket == Ticket(client_id=a_device.id.client_id, service_number=a_device.id.service_number)
-
-
-@pytest.fixture
-def tickets_service() -> TicketService:
-    return TicketService()
+    assert built_ticket == Ticket(client_id="any_client_id", service_number="any_service_number")

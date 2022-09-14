@@ -41,13 +41,14 @@ class NatsClient:
     A framework nats client wrapper to deal with payload and response parsing.
     """
 
+    settings: Settings
     framework_client: Client
 
     async def request(
         self,
         subject: str,
         payload: Any,
-        response_body_type: Type[R],
+        response_body_type: Type[R] = Any,
     ) -> NatsResponse[R]:
         """
         A request wrapper that deals with serializing and deserializing requests and responses.
@@ -61,12 +62,13 @@ class NatsClient:
         log.debug(f"request(subject={subject}, payload={payload}, response_body_type={response_body_type})")
         nats_payload = NatsRequest(body=payload).serialize()
 
-        log.debug(f"request():framework_client.request(subject={subject}, nats_payload={nats_payload})")
         response = await self.framework_client.request(subject, nats_payload)
         log.debug(f"request():framework_client.request()={response}")
 
         nats_response = NatsResponse.parse_raw(response.data)
-        if issubclass(response_body_type, BaseModel):
+        if response_body_type == Any:
+            pass
+        elif issubclass(response_body_type, BaseModel):
             nats_response.body = response_body_type.parse_obj(nats_response.body)
         else:
             nats_response.body = response_body_type(nats_response.body)
