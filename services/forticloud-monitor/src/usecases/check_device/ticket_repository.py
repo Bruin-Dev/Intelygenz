@@ -3,7 +3,8 @@ from dataclasses import dataclass
 
 from pydantic import BaseModel, BaseSettings
 
-from .nats_client import NatsClient
+from components import NatsClient
+
 from .ticket import Ticket
 
 log = logging.getLogger(__name__)

@@ -1,11 +1,11 @@
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-from check_device_test.fixtures import AnyTicket, CustomException
 from pydantic import ValidationError
+from usecases_tests.check_device.data import AnyTicket, CustomException
 
-from check_device.nats_client import NatsClient
-from check_device.ticket_repository import Request, Settings, TicketRepository
+from components import NatsClient
+from usecases.check_device import Request, Settings, TicketRepository
 
 
 async def tickets_are_properly_stored_test(repository_builder):

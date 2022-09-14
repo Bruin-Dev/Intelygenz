@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 
 @dataclass
-class CheckDevice:
+class Usecase:
     device_repository: DeviceRepository
     ticket_repository: TicketRepository
 

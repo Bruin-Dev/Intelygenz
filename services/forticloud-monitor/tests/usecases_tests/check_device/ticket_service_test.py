@@ -1,7 +1,6 @@
-from check_device_test.fixtures import AnyDevice, AnyDeviceId
+from usecases_tests.check_device.data import AnyDevice, AnyDeviceId
 
-from check_device.ticket import Ticket
-from check_device.ticket_service import build_ticket_for
+from usecases.check_device import Ticket, build_ticket_for
 
 
 def tickets_are_properly_built_test():
