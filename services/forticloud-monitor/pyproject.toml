@@ -41,7 +41,7 @@ pythonpath = ["src"]
 addopts = ["-vv"]
 #testpaths = ["tests/"]
 #python_files = "*_test.py"
-python_functions = "test_*"
+python_functions = "*_test"
 asyncio_mode = "auto"
 
 [tool.coverage.run]

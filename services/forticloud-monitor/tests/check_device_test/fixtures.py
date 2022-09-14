@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 
 from check_device.device import Device, DeviceId, DeviceStatus, DeviceType
 from check_device.ticket import Ticket
-from check_device.ticket_repository import Request
 
 
 @dataclass
@@ -21,6 +20,20 @@ class AnyDevice(Device):
 
 
 @dataclass
+class AnyOnlineDevice(AnyDevice):
+    pass
+
+
+@dataclass
+class AnyOfflineDevice(AnyDevice):
+    status: DeviceStatus = DeviceStatus.OFFLINE
+
+
+@dataclass
 class AnyTicket(Ticket):
     client_id: str = str(hash("any_client_id"))
     service_number: str = str(hash("any_service_number"))
+
+
+class CustomException(Exception):
+    pass
