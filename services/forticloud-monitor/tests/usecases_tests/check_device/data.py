@@ -22,7 +22,3 @@ class AnyDevice(Device):
 class AnyTicket(Ticket):
     client_id: str = str(hash("any_client_id"))
     service_number: str = str(hash("any_service_number"))
-
-
-class CustomException(Exception):
-    pass

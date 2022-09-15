@@ -1,8 +1,9 @@
 from unittest.mock import AsyncMock, Mock
 
 import pytest
+from conftest import CustomException
 from pydantic import ValidationError
-from usecases_tests.check_device.data import AnyTicket, CustomException
+from usecases_tests.check_device.data import AnyTicket
 
 from components import NatsClient
 from usecases.check_device import Request, Settings, TicketRepository

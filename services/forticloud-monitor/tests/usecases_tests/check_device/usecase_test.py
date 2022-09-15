@@ -2,7 +2,8 @@ from unittest import mock
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-from usecases_tests.check_device.data import AnyDevice, AnyDeviceId, AnyTicket, CustomException
+from conftest import CustomException
+from usecases_tests.check_device.data import AnyDevice, AnyDeviceId, AnyTicket
 
 from usecases.check_device import CheckDevice, DeviceRepository, DeviceStatus, TicketRepository
 
