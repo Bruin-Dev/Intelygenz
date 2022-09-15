@@ -56,6 +56,7 @@
            8. [Service affecting](logging/events/8-service-affecting.md)
            9. [InterMapper Outage Monitoring](logging/events/9-intermapper-monitor.md)
            10. [Ixia Outage Monitoring](logging/events/10-ixia-outage-monitoring.md)
+           11. [Gateway Monitoring](logging/events/15-gateway-monitor.md)
        3. Bridges
           1. [Bruin Bridge](logging/events/11-bruin-bridge.md)
           2. [VeloCloud Bridge](logging/events/12-velocloud-bridge.md)
