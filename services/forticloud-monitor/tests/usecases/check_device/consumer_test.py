@@ -2,7 +2,6 @@ from unittest import mock
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-from conftest import CustomException, LoggerMock
 from framework.nats.models import Subscription
 from nats.aio.msg import Msg
 
@@ -17,7 +16,7 @@ def subcriptions_are_properly_built_test(consumer_builder):
     consumer = consumer_builder(settings=Settings(queue="any_queue", subject="any_subject"))
 
     # then
-    assert consumer.subscription == Subscription(queue="any_queue", subject="any_subject", cb=consumer)
+    assert consumer.subscription() == Subscription(queue="any_queue", subject="any_subject", cb=consumer)
 
 
 async def messages_are_properly_consumed_test(consumer_builder):
@@ -59,26 +58,26 @@ async def messages_are_properly_consumed_test(consumer_builder):
 )
 async def parsing_errors_are_properly_reported_test(serialized_message: bytes, consumer_builder):
     # given
-    exception = Mock()
-    consumer = consumer_builder(logger=LoggerMock(exception=exception))
+    exception_log = Mock()
+    consumer = consumer_builder(exception_log=exception_log)
 
     # when
     await consumer(Msg(Mock(), data=serialized_message))
 
     # then
-    exception.assert_called_once()
+    exception_log.assert_called_once()
 
 
-async def usecase_errors_are_properly_reported_test(consumer_builder):
+async def usecase_errors_are_properly_reported_test(consumer_builder, any_exception):
     # given
-    exception = Mock()
-    consumer = consumer_builder(usecase=AsyncMock(side_effect=CustomException), logger=LoggerMock(exception=exception))
+    exception_log = Mock()
+    consumer = consumer_builder(usecase=AsyncMock(side_effect=any_exception), exception_log=exception_log)
 
     # then
     await consumer(Msg(Mock(), data=any_serialized_message))
 
     # then
-    exception.assert_called_once()
+    exception_log.assert_called_once()
 
 
 @pytest.fixture
@@ -92,9 +91,9 @@ def consumer_builder(log):
     def builder(
         usecase: AsyncMock = AsyncMock(),
         settings: Settings = Settings(),
-        logger: LoggerMock = LoggerMock(),
+        exception_log: Mock = Mock(),
     ):
-        logger.configure(log)
-        return Consumer(settings, usecase)
+        log.exception = exception_log
+        return Consumer(usecase, settings)
 
     return builder

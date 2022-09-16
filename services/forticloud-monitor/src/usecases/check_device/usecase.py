@@ -19,5 +19,6 @@ class Usecase:
         device = await self.device_repository.get(device_id)
 
         if device.is_offline:
+            log.debug("device.is_offline")
             ticket = build_ticket_for(device)
             await self.ticket_repository.store(ticket)

@@ -1,9 +1,10 @@
 import logging
-from dataclasses import dataclass
-from typing import Any, Generic, Type, TypeVar
+from dataclasses import asdict, dataclass, field
+from typing import Any, Generic, List, Protocol, Type, TypeVar
 
 from framework.nats.client import Client
-from pydantic import BaseModel, Field
+from framework.nats.models import Subscription
+from pydantic import BaseModel, BaseSettings, Field
 from pydantic.generics import GenericModel
 from shortuuid import uuid
 
@@ -12,6 +13,10 @@ R = TypeVar("R")
 
 
 log = logging.getLogger(__name__)
+
+
+class NatsSettings(BaseSettings):
+    servers: List[str] = Field(..., env="NATS_SERVERS")
 
 
 class NatsResponse(GenericModel, Generic[R]):
@@ -35,14 +40,20 @@ class NatsRequest(BaseModel):
         return self.json(separators=(",", ":")).encode()
 
 
+class NatsConsumer(Protocol):
+    def subscription(self) -> Subscription:
+        pass
+
+
 @dataclass
 class NatsClient:
     """
     A framework nats client wrapper to deal with payload and response parsing.
     """
 
-    settings: Settings
     framework_client: Client
+    settings: NatsSettings = NatsSettings()
+    is_connected: bool = field(init=False, default=False)
 
     async def request(
         self,
@@ -74,3 +85,15 @@ class NatsClient:
             nats_response.body = response_body_type(nats_response.body)
 
         return nats_response
+
+    async def add(self, consumer: NatsConsumer):
+        log.debug(f"add(consumer={consumer})")
+        if not self.is_connected:
+            await self.connect()
+            self.is_connected = True
+
+        await self.framework_client.subscribe(**asdict(consumer.subscription()))
+
+    async def connect(self):
+        log.debug("_connect()")
+        await self.framework_client.connect(servers=self.settings.servers)

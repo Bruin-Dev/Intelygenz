@@ -1,20 +1,19 @@
 import logging
-from dataclasses import dataclass, field
+import os
 from unittest.mock import Mock
 
+import pytest
 import shortuuid
 
 shortuuid.uuid = Mock(return_value="any_uuid")
 logging.getLogger = Mock()
 
 
-@dataclass
-class LoggerMock:
-    exception: Mock = field(default_factory=Mock)
-
-    def configure(self, log: Mock):
-        log.exception = self.exception
+os.environ["NATS_SERVERS"] = '["any_server"]'
 
 
-class CustomException(Exception):
-    pass
+@pytest.fixture
+def any_exception():
+    class AnyException(Exception):
+        pass
+    return AnyException

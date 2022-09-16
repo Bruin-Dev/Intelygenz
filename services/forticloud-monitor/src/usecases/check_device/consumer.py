@@ -27,8 +27,8 @@ class DeviceMessage(BaseModel):
 
 @dataclass
 class Consumer:
-    settings: Settings
     usecase: Usecase
+    settings: Settings = Settings()
 
     async def __call__(self, msg: Msg):
         log.debug(f"(msg={msg})")
@@ -39,7 +39,6 @@ class Consumer:
         except:
             log.exception("Error consuming message")
 
-    @property
     def subscription(self) -> Subscription:
         return Subscription(queue=self.settings.queue, subject=self.settings.subject, cb=self)
 

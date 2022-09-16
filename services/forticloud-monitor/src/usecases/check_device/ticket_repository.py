@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from pydantic import BaseModel, BaseSettings
 
-from components import NatsClient
+from clients import NatsClient
 
 from .ticket import Ticket
 
@@ -16,8 +16,8 @@ class Settings(BaseSettings):
 
 @dataclass
 class TicketRepository:
-    settings: Settings
     nats_client: NatsClient
+    settings: Settings = Settings()
 
     async def store(self, ticket: Ticket):
         log.debug(f"store(ticket={ticket})")

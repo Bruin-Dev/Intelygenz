@@ -2,17 +2,11 @@ from unittest import mock
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-from conftest import CustomException
-from usecases_tests.check_device.data import AnyDevice, AnyDeviceId, AnyTicket
 
-from usecases.check_device import CheckDevice, DeviceRepository, DeviceStatus, TicketRepository
-
-any_device_id = AnyDeviceId()
-any_online_device = AnyDevice(status=DeviceStatus.ONLINE)
-any_offline_device = AnyDevice(status=DeviceStatus.OFFLINE)
+from usecases.check_device import CheckDevice, DeviceRepository, TicketRepository
 
 
-async def online_devices_have_no_ticket_stored_test(usecase_builder):
+async def online_devices_have_no_ticket_stored_test(usecase_builder, any_online_device, any_device_id):
     # given
     store_ticket = AsyncMock()
     usecase = usecase_builder(
@@ -27,7 +21,7 @@ async def online_devices_have_no_ticket_stored_test(usecase_builder):
     store_ticket.assert_not_awaited()
 
 
-async def offline_devices_have_a_ticket_stored_test(usecase_builder):
+async def offline_devices_have_a_ticket_stored_test(usecase_builder, any_offline_device, any_device_id):
     # given
     store_ticket = AsyncMock()
     usecase = usecase_builder(
@@ -42,45 +36,55 @@ async def offline_devices_have_a_ticket_stored_test(usecase_builder):
     store_ticket.assert_awaited_once()
 
 
-async def device_repository_errors_are_properly_propagated_test(usecase_builder):
+async def device_repository_errors_are_properly_propagated_test(usecase_builder, any_device_id, any_exception):
     # given
-    usecase = usecase_builder(get_device=AsyncMock(side_effect=CustomException))
+    usecase = usecase_builder(get_device=AsyncMock(side_effect=any_exception))
 
     # then
-    with pytest.raises(CustomException):
+    with pytest.raises(any_exception):
         await usecase(any_device_id)
 
 
-async def ticket_building_errors_are_properly_propagated_test(usecase_builder):
+async def ticket_building_errors_are_properly_propagated_test(
+    usecase_builder,
+    any_offline_device,
+    any_device_id,
+    any_exception,
+):
     # given
     usecase = usecase_builder(
         get_device=AsyncMock(return_value=any_offline_device),
-        build_ticket=Mock(side_effect=CustomException),
+        build_ticket=Mock(side_effect=any_exception),
     )
 
     # then
-    with pytest.raises(CustomException):
+    with pytest.raises(any_exception):
         await usecase(any_device_id)
 
 
-async def ticket_repository_errors_are_properly_propagated_test(usecase_builder):
+async def ticket_repository_errors_are_properly_propagated_test(
+    usecase_builder,
+    any_offline_device,
+    any_device_id,
+    any_exception,
+):
     # given
     usecase = usecase_builder(
         get_device=AsyncMock(return_value=any_offline_device),
-        store_ticket=AsyncMock(side_effect=CustomException),
+        store_ticket=AsyncMock(side_effect=any_exception),
     )
 
     # then
-    with pytest.raises(CustomException):
+    with pytest.raises(any_exception):
         await usecase(any_device_id)
 
 
 @pytest.fixture
-def usecase_builder(build_ticket_for):
+def usecase_builder(build_ticket_for, any_device, any_ticket):
     def builder(
-        get_device: AsyncMock = AsyncMock(return_value=AnyDevice()),
+        get_device: AsyncMock = AsyncMock(return_value=any_device),
         store_ticket: AsyncMock = AsyncMock(),
-        build_ticket: Mock = Mock(return_value=AnyTicket()),
+        build_ticket: Mock = Mock(return_value=any_ticket),
     ):
         build_ticket_for.return_value = build_ticket.return_value
         build_ticket_for.side_effect = build_ticket.side_effect
