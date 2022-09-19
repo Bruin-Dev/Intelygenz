@@ -5,21 +5,20 @@ import pytest
 from framework.nats.models import Subscription
 from nats.aio.msg import Msg
 
-from usecases.check_device import DeviceId, DeviceType
-from usecases.check_device.consumer import Consumer, Settings
+from usecases.check_device import DeviceConsumer, DeviceConsumerSettings, DeviceId, DeviceType
 
 any_serialized_message = b'{"device_id":1,device_network_id":1,"client_id":1,"service_number":1,"type":"AP"}"'
 
 
-def subcriptions_are_properly_built_test(consumer_builder):
+def subcriptions_are_properly_built_test(scenario):
     # given
-    consumer = consumer_builder(settings=Settings(queue="any_queue", subject="any_subject"))
+    consumer = scenario(settings=DeviceConsumerSettings(queue="any_queue", subject="any_subject"))
 
     # then
     assert consumer.subscription() == Subscription(queue="any_queue", subject="any_subject", cb=consumer)
 
 
-async def messages_are_properly_consumed_test(consumer_builder):
+async def messages_are_properly_consumed_test(scenario):
     # given
     usecase = AsyncMock()
     serialized_message = (
@@ -31,7 +30,7 @@ async def messages_are_properly_consumed_test(consumer_builder):
         b'"type":"AP"'
         b"}"
     )
-    consumer = consumer_builder(usecase=usecase)
+    consumer = scenario(usecase=usecase)
 
     # when
     await consumer(Msg(Mock(), data=serialized_message))
@@ -56,10 +55,10 @@ async def messages_are_properly_consumed_test(consumer_builder):
         b'{"type":"wrong_type","device_id":1,"device_network_id":1,"client_id":1,"service_number":1}',
     ],
 )
-async def parsing_errors_are_properly_reported_test(serialized_message: bytes, consumer_builder):
+async def parsing_errors_are_properly_reported_test(serialized_message: bytes, scenario):
     # given
     exception_log = Mock()
-    consumer = consumer_builder(exception_log=exception_log)
+    consumer = scenario(exception_log=exception_log)
 
     # when
     await consumer(Msg(Mock(), data=serialized_message))
@@ -68,10 +67,10 @@ async def parsing_errors_are_properly_reported_test(serialized_message: bytes, c
     exception_log.assert_called_once()
 
 
-async def usecase_errors_are_properly_reported_test(consumer_builder, any_exception):
+async def usecase_errors_are_properly_reported_test(scenario, any_exception):
     # given
     exception_log = Mock()
-    consumer = consumer_builder(usecase=AsyncMock(side_effect=any_exception), exception_log=exception_log)
+    consumer = scenario(usecase=AsyncMock(side_effect=any_exception), exception_log=exception_log)
 
     # then
     await consumer(Msg(Mock(), data=any_serialized_message))
@@ -82,18 +81,23 @@ async def usecase_errors_are_properly_reported_test(consumer_builder, any_except
 
 @pytest.fixture
 def log():
-    with mock.patch("usecases.check_device.consumer.log") as log:
+    with mock.patch("usecases.check_device.device_consumer.log") as log:
         yield log
 
 
 @pytest.fixture
-def consumer_builder(log):
+def scenario(log, any_settings):
     def builder(
         usecase: AsyncMock = AsyncMock(),
-        settings: Settings = Settings(),
+        settings: DeviceConsumerSettings = any_settings,
         exception_log: Mock = Mock(),
     ):
         log.exception = exception_log
-        return Consumer(usecase, settings)
+        return DeviceConsumer(settings, usecase)
 
     return builder
+
+
+@pytest.fixture
+def any_settings():
+    return DeviceConsumerSettings(queue="any_queue", subject="any_subject")

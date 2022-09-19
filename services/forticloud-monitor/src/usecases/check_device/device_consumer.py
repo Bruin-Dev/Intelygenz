@@ -4,17 +4,18 @@ from typing import Literal
 
 from framework.nats.models import Subscription
 from nats.aio.msg import Msg
-from pydantic import BaseModel, BaseSettings
+from pydantic import BaseModel
 
 from .device import DeviceId, DeviceType
-from .usecase import Usecase
+from .usecase import CheckDevice
 
 log = logging.getLogger(__name__)
 
 
-class Settings(BaseSettings):
-    queue: str = "forticloud-producer"
-    subject: str = "forticloud-producer.monitored-devices"
+@dataclass
+class DeviceConsumerSettings:
+    queue: str
+    subject: str
 
 
 class DeviceMessage(BaseModel):
@@ -26,9 +27,9 @@ class DeviceMessage(BaseModel):
 
 
 @dataclass
-class Consumer:
-    usecase: Usecase
-    settings: Settings = Settings()
+class DeviceConsumer:
+    settings: DeviceConsumerSettings
+    usecase: CheckDevice
 
     async def __call__(self, msg: Msg):
         log.debug(f"(msg={msg})")

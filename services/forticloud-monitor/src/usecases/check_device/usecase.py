@@ -1,24 +1,25 @@
 import logging
 from dataclasses import dataclass
 
+from .build_ticket import BuildTicket
 from .device import DeviceId
-from .device_repository import DeviceRepository
-from .ticket_repository import TicketRepository
-from .ticket_service import build_ticket_for
+from .get_device import GetDevice
+from .store_ticket import StoreTicket
 
 log = logging.getLogger(__name__)
 
 
 @dataclass
-class Usecase:
-    device_repository: DeviceRepository
-    ticket_repository: TicketRepository
+class CheckDevice:
+    get_device: GetDevice
+    store_ticket: StoreTicket
+    build_ticket: BuildTicket
 
     async def __call__(self, device_id: DeviceId):
         log.debug(f"check_device(device_id={device_id}")
-        device = await self.device_repository.get(device_id)
+        device = await self.get_device(device_id)
 
         if device.is_offline:
             log.debug("device.is_offline")
-            ticket = build_ticket_for(device)
-            await self.ticket_repository.store(ticket)
+            ticket = self.build_ticket(device)
+            await self.store_ticket(ticket)

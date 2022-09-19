@@ -1,5 +1,8 @@
+import logging
 from dataclasses import dataclass
 from enum import IntEnum
+
+log = logging.getLogger(__name__)
 
 
 class DeviceType(IntEnum):
@@ -29,3 +32,10 @@ class Device:
     @property
     def is_offline(self):
         return self.status == DeviceStatus.OFFLINE
+
+
+@dataclass
+class GetDevice:
+    def __call__(self, device_id: DeviceId) -> Device:  # pragma: no cover
+        log.debug(f"get(device_id={device_id}")
+        return Device(id=device_id, status=DeviceStatus.OFFLINE)

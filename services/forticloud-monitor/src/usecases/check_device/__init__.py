@@ -1,7 +1,7 @@
-from .consumer import Consumer as CheckDeviceConsumer
+from .build_ticket import *
 from .device import *
-from .device_repository import *
+from .device_consumer import *
+from .get_device import *
+from .store_ticket import *
 from .ticket import *
-from .ticket_repository import *
-from .ticket_service import *
-from .usecase import Usecase as CheckDevice
+from .usecase import *
