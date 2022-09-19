@@ -64,7 +64,7 @@ class TestServiceAffectingMonitorReports:
         )
         service_affecting_monitor_reports._email_repository.send_email = CoroutineMock()
 
-        service_affecting_monitor_reports._customer_cache_repository.get_cache_for_affecting_monitoring = CoroutineMock(
+        service_affecting_monitor_reports._customer_cache_repository.get_cache = CoroutineMock(
             return_value=response_customer_cache
         )
 
@@ -88,7 +88,7 @@ class TestServiceAffectingMonitorReports:
         datetime_mock.now = Mock(return_value=end_date)
 
         service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report = CoroutineMock()
-        service_affecting_monitor_reports._customer_cache_repository.get_cache_for_affecting_monitoring = CoroutineMock(
+        service_affecting_monitor_reports._customer_cache_repository.get_cache = CoroutineMock(
             return_value=response_empty_customer_cache
         )
         with patch.object(service_affecting_monitor_module, "datetime", new=datetime_mock):
@@ -106,7 +106,7 @@ class TestServiceAffectingMonitorReports:
         datetime_mock.now = Mock(return_value=end_date)
 
         service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report = CoroutineMock()
-        service_affecting_monitor_reports._customer_cache_repository.get_cache_for_affecting_monitoring = CoroutineMock(
+        service_affecting_monitor_reports._customer_cache_repository.get_cache = CoroutineMock(
             return_value=response_bad_status_customer_cache
         )
         with patch.object(service_affecting_monitor_module, "datetime", new=datetime_mock):
@@ -115,7 +115,7 @@ class TestServiceAffectingMonitorReports:
 
     @pytest.mark.asyncio
     async def service_affecting_monitor_report_bandwidth_over_utilization_no_items_for_report_test(
-        self, service_affecting_monitor_reports, report, response_bruin_with_all_tickets
+        self, service_affecting_monitor_reports, response_bruin_with_all_tickets, response_empty_customer_cache
     ):
         end_date = datetime.utcnow().replace(tzinfo=tz.utc)
 
@@ -123,8 +123,8 @@ class TestServiceAffectingMonitorReports:
         datetime_mock.utcnow = Mock(return_value=end_date)
         datetime_mock.now = Mock(return_value=end_date)
 
-        service_affecting_monitor_reports._customer_cache_repository.get_cache_for_affecting_monitoring = CoroutineMock(
-            []
+        service_affecting_monitor_reports._customer_cache_repository.get_cache = CoroutineMock(
+            return_value=response_empty_customer_cache
         )
         service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report = CoroutineMock(
             side_effect=[response_bruin_with_all_tickets, None]
@@ -137,7 +137,7 @@ class TestServiceAffectingMonitorReports:
         with patch.object(service_affecting_monitor_module, "datetime", new=datetime_mock):
             await service_affecting_monitor_reports.monitor_reports()
 
-        service_affecting_monitor_reports._customer_cache_repository.get_cache_for_affecting_monitoring.assert_awaited()
+        service_affecting_monitor_reports._customer_cache_repository.get_cache.assert_awaited()
         template_repository = service_affecting_monitor_reports._template_repository
         template_repository.compose_email_bandwidth_over_utilization_report_object.assert_not_called()
         service_affecting_monitor_reports._email_repository.send_email.assert_not_awaited()
@@ -164,7 +164,7 @@ class TestServiceAffectingMonitorReports:
         template_repository = service_affecting_monitor_reports._template_repository
         template_repository.compose_email_bandwidth_over_utilization_report_object = Mock()
         service_affecting_monitor_reports._email_repository.send_email = CoroutineMock()
-        service_affecting_monitor_reports._customer_cache_repository.get_cache_for_affecting_monitoring = CoroutineMock(
+        service_affecting_monitor_reports._customer_cache_repository.get_cache = CoroutineMock(
             return_value=response_customer_cache
         )
 
@@ -179,7 +179,7 @@ class TestServiceAffectingMonitorReports:
         service_affecting_monitor_reports._bruin_repository.prepare_items_for_report.assert_not_called()
         template_repository = service_affecting_monitor_reports._template_repository
         template_repository.compose_email_bandwidth_over_utilization_report_object.assert_not_called()
-        service_affecting_monitor_reports._email_repository.send_email.assert_not_called()
+        service_affecting_monitor_reports._email_repository.send_email.assert_called()
 
     @pytest.mark.asyncio
     async def service_affecting_monitor_reports_utilization_with_exception_test(
@@ -196,7 +196,7 @@ class TestServiceAffectingMonitorReports:
         )
         service_affecting_monitor_reports._email_repository.send_email = CoroutineMock()
 
-        service_affecting_monitor_reports._customer_cache_repository.get_cache_for_affecting_monitoring = CoroutineMock(
+        service_affecting_monitor_reports._customer_cache_repository.get_cache = CoroutineMock(
             return_value=response_customer_cache
         )
         with patch.object(service_affecting_monitor_module, "datetime", new=datetime_mock):
@@ -204,3 +204,99 @@ class TestServiceAffectingMonitorReports:
 
         service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report.assert_awaited()
         service_affecting_monitor_reports._email_repository.send_email.assert_awaited()
+
+    def get_clients_names_and_ids_for_client_not_return_none_test(
+        self, service_affecting_monitor_reports, customer_cache
+    ):
+        result = service_affecting_monitor_reports.get_clients_names_and_ids_for_client(customer_cache)
+        assert result is not None
+
+    def get_clients_names_and_ids_for_client_return_dict_test(self, service_affecting_monitor_reports, customer_cache):
+        result = service_affecting_monitor_reports.get_clients_names_and_ids_for_client(customer_cache)
+        assert type(result) is dict
+
+    def get_clients_names_and_ids_for_client_return_some_values_test(
+        self, service_affecting_monitor_reports, customer_cache
+    ):
+        result = service_affecting_monitor_reports.get_clients_names_and_ids_for_client(customer_cache)
+        assert len(result.keys()) > 0
+
+    def get_clients_names_and_ids_for_client_return_client_id_values_test(
+        self, service_affecting_monitor_reports, customer_cache
+    ):
+        result = service_affecting_monitor_reports.get_clients_names_and_ids_for_client(customer_cache)
+        assert 85134 in result and 9994 in result
+
+    def get_rounded_date_return_not_none_test(self, service_affecting_monitor_reports):
+        result = service_affecting_monitor_reports.get_rounded_date(datetime.now())
+        assert result is not None
+
+    def get_rounded_date_return_datetime_test(self, service_affecting_monitor_reports):
+        result = service_affecting_monitor_reports.get_rounded_date(datetime.now())
+        assert type(result) is datetime
+
+    def get_rounded_date_return_rounded_datetime_test(
+        self,
+        service_affecting_monitor_reports,
+    ):
+        result = service_affecting_monitor_reports.get_rounded_date(datetime.now())
+        assert result.hour == 0 and result.minute == 0 and result.second == 0 and result.microsecond == 0
+
+    def get_trailing_interval_for_date_return_not_none_test(
+        self,
+        service_affecting_monitor_reports,
+    ):
+        result = service_affecting_monitor_reports.get_trailing_interval_for_date(datetime.now())
+        assert result is not None
+
+    def get_trailing_interval_for_date_return_a_dict_test(
+        self,
+        service_affecting_monitor_reports,
+    ):
+        result = service_affecting_monitor_reports.get_trailing_interval_for_date(datetime.now())
+        assert type(result) is dict
+
+    def get_trailing_interval_for_date_return_start_and_end_test(
+        self,
+        service_affecting_monitor_reports,
+    ):
+        result = service_affecting_monitor_reports.get_trailing_interval_for_date(datetime.now())
+        assert "start" in result and "end" in result
+
+    def get_format_to_string_date_return_not_none_test(
+        self,
+        service_affecting_monitor_reports,
+    ):
+        result = service_affecting_monitor_reports.get_format_to_string_date(datetime.now())
+        assert result is not None
+
+    def get_format_to_string_date_return_string_test(
+        self,
+        service_affecting_monitor_reports,
+    ):
+        result = service_affecting_monitor_reports.get_format_to_string_date(datetime.now())
+        assert type(result) is str
+
+    def get_serial_and_name_for_cached_edges_with_client_id_return_not_none_test(
+        self, service_affecting_monitor_reports, customer_cache
+    ):
+        result = service_affecting_monitor_reports.get_serial_and_name_for_cached_edges_with_client_id(
+            customer_cache=customer_cache, clients_id=[9994]
+        )
+        assert result is not None
+
+    def get_serial_and_name_for_cached_edges_with_client_id_return_dict_test(
+        self, service_affecting_monitor_reports, customer_cache
+    ):
+        result = service_affecting_monitor_reports.get_serial_and_name_for_cached_edges_with_client_id(
+            customer_cache=customer_cache, clients_id=[9994]
+        )
+        assert type(result) is dict
+
+    def get_serial_and_name_for_cached_edges_with_client_id_return_not_empty_dict_test(
+        self, service_affecting_monitor_reports, customer_cache
+    ):
+        result = service_affecting_monitor_reports.get_serial_and_name_for_cached_edges_with_client_id(
+            customer_cache=customer_cache, clients_id=[9994]
+        )
+        assert "VC05200085763" in result

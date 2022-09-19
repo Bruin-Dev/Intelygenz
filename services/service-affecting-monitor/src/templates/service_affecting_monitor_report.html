@@ -328,6 +328,7 @@ font-family: Arial, sans-serif;
     {% set odd_row_bg_color = '#EDEFF0' %}
     {% set even_row_bg_color = '#FFFFFF' %}
 	<!-- START DATA TABLE -->
+    {% if not __EMPTY_CSV__ %}
       <!--[if mso | IE]><table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" align="center" style="width:600px;"><tr><td style="line-height:0px;font-size:0px;mso-line-height-rule:exactly;"><![endif]-->
       <div style="margin:0px auto;background:#ffffff;">
         <table role="presentation" cellpadding="0" cellspacing="0" style="font-size:0px;width:100%;background:#ffffff;max-width:765px" align="center" border="0">
@@ -366,6 +367,14 @@ font-family: Arial, sans-serif;
           </tbody>
         </table>
       </div>
+    {% else %}
+        <div style="margin:0px auto;background:#ffffff">
+            <h3 style="text-align:center">
+                <i>This Reoccurring Service Affecting Trouble Report does not have any locations/interface that met the
+                    criteria</i>
+            </h3>
+        </div>
+    {% endif %}
       <!--[if mso | IE]></td></tr></table><![endif]-->
 	<!-- END DATA TABLE -->
 
@@ -418,6 +427,7 @@ font-family: Arial, sans-serif;
           </tbody>
         </table>
       </div>
+
       <!--[if mso | IE]>      </td></tr></table>      <![endif]-->
       <!--[if mso | IE]>      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" align="center" style="width:600px;">        <tr>          <td style="line-height:0px;font-size:0px;mso-line-height-rule:exactly;">      <![endif]-->
       <!--[if mso | IE]></td></tr></table><![endif]-->

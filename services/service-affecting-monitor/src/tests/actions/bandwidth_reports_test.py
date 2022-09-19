@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest.mock import Mock, patch
 
 import pytest
@@ -68,6 +68,16 @@ class TestBandwidthReports:
         client_name = "MetTel"
         serial_number = "VC1234567"
 
+        rounded_now = bandwidth_reports.get_rounded_date(datetime.now())
+        interval_for_metrics = {
+            "start": (
+                rounded_now
+                - timedelta(hours=bandwidth_reports._config.BANDWIDTH_REPORT_CONFIG["lookup_interval_hours"])
+            ).isoformat()
+            + "Z",
+            "end": rounded_now.isoformat() + "Z",
+        }
+
         bruin_client_info = make_bruin_client_info(client_id=client_id, client_name=client_name)
         cached_edge = make_cached_edge(serial_number=serial_number, bruin_client_info=bruin_client_info)
         customer_cache = make_customer_cache(cached_edge)
@@ -78,16 +88,21 @@ class TestBandwidthReports:
         response_1 = make_rpc_response(body=customer_cache, status=200)
         response_2 = make_rpc_response(body=links_metrics, status=200)
 
-        bandwidth_reports._customer_cache_repository.get_cache_for_affecting_monitoring.return_value = response_1
-        bandwidth_reports._velocloud_repository.get_links_metrics_for_bandwidth_reports.return_value = response_2
+        bandwidth_reports._customer_cache_repository.get_cache.return_value = response_1
+        bandwidth_reports._velocloud_repository.get_links_metrics_by_host.return_value = response_2
         bandwidth_reports._generate_bandwidth_report_for_client = CoroutineMock()
 
         await bandwidth_reports._bandwidth_reports_job()
 
-        bandwidth_reports._customer_cache_repository.get_cache_for_affecting_monitoring.assert_awaited_once()
-        bandwidth_reports._velocloud_repository.get_links_metrics_for_bandwidth_reports.assert_awaited_once()
+        bandwidth_reports._customer_cache_repository.get_cache.assert_awaited_once()
+        bandwidth_reports._velocloud_repository.get_links_metrics_by_host.assert_awaited_once()
         bandwidth_reports._generate_bandwidth_report_for_client.assert_awaited_once_with(
-            client_id, client_name, {serial_number}, links_metrics, customer_cache
+            client_id=client_id,
+            client_name=client_name,
+            serial_numbers=[serial_number],
+            links_metrics=links_metrics,
+            customer_cache=customer_cache,
+            interval_for_metrics=interval_for_metrics,
         )
 
     @pytest.mark.asyncio
@@ -117,6 +132,15 @@ class TestBandwidthReports:
         edge_name = "Test Edge"
         interface = "GE1"
 
+        rounded_now = bandwidth_reports.get_rounded_date(datetime.now())
+        interval_for_metrics = {
+            "start": (
+                rounded_now
+                - timedelta(hours=bandwidth_reports._config.BANDWIDTH_REPORT_CONFIG["lookup_interval_hours"])
+            ).isoformat()
+            + "Z",
+            "end": rounded_now.isoformat() + "Z",
+        }
         edge_full_id = make_edge_full_id(host=host, enterprise_id=enterprise_id, edge_id=edge_id)
         bruin_client_info = make_bruin_client_info(client_id=client_id, client_name=client_name)
         cached_edge = make_cached_edge(
@@ -150,7 +174,7 @@ class TestBandwidthReports:
 
         with patch.object(bandwidth_reports._config, "CURRENT_ENVIRONMENT", "production"):
             await bandwidth_reports._generate_bandwidth_report_for_client(
-                client_id, client_name, {serial_number}, links_metrics, customer_cache
+                client_id, client_name, {serial_number}, links_metrics, customer_cache, interval_for_metrics
             )
 
         report_items = [
@@ -165,7 +189,10 @@ class TestBandwidthReports:
         ]
 
         bandwidth_reports._template_repository.compose_bandwidth_report_email.assert_called_once_with(
-            client_id=client_id, client_name=client_name, report_items=report_items
+            client_id=client_id,
+            client_name=client_name,
+            report_items=report_items,
+            interval_for_metrics=interval_for_metrics,
         )
         bandwidth_reports._email_repository.send_email.assert_awaited_once()
 
@@ -179,12 +206,14 @@ class TestBandwidthReports:
         result = bandwidth_reports._add_bandwidth_to_links_metrics(links_metrics)
         assert result[0]["avgBandwidth"] == 1_000
 
-    def get_start_date_test(self, bandwidth_reports):
-        with patch.object(bandwidth_reports_module, "datetime", new=datetime_mock):
-            result = bandwidth_reports._get_start_date()
-        assert result == "2021-12-19T00:00:00Z"
+    def get_rounded_date_dont_return_none_test(self, bandwidth_reports):
+        result = bandwidth_reports.get_rounded_date(datetime.now())
+        assert result is not None
 
-    def get_end_date_test(self, bandwidth_reports):
-        with patch.object(bandwidth_reports_module, "datetime", new=datetime_mock):
-            result = bandwidth_reports._get_end_date()
-        assert result == "2021-12-20T00:00:00Z"
+    def get_rounded_date_return_datetime_test(self, bandwidth_reports):
+        result = bandwidth_reports.get_rounded_date(datetime.now())
+        assert type(result) == datetime
+
+    def get_rounded_date_return_a_rounded_datetime_test(self, bandwidth_reports):
+        result = bandwidth_reports.get_rounded_date(datetime.now())
+        assert result.hour == 0 and result.minute == 0 and result.second == 0 and result.microsecond == 0

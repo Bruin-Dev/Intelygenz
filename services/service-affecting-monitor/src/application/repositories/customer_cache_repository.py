@@ -25,10 +25,7 @@ class CustomerCacheRepository:
         }
 
         try:
-            if velo_filter:
-                self._logger.info(f"Getting customer cache for Velocloud host(s) {', '.join(velo_filter.keys())}...")
-            else:
-                self._logger.info(f"Getting customer cache for all Velocloud hosts...")
+            self._logger.info(f"Getting customer cache for Velocloud host(s) {', '.join(velo_filter.keys())}...")
             response = await self._event_bus.rpc_request("customer.cache.get", request, timeout=60)
         except Exception as e:
             err_msg = f"An error occurred when requesting customer cache -> {e}"
@@ -40,10 +37,7 @@ class CustomerCacheRepository:
             if response_status == 202:
                 err_msg = response_body
             else:
-                if velo_filter:
-                    self._logger.info(f"Got customer cache for Velocloud host(s) {', '.join(velo_filter.keys())}!")
-                else:
-                    self._logger.info(f"Got customer cache for all Velocloud hosts!")
+                self._logger.info(f"Got customer cache for Velocloud host(s) {', '.join(velo_filter.keys())}!")
 
         if err_msg:
             self._logger.error(err_msg)

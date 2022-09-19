@@ -14,7 +14,7 @@ class TestTemplateRepository:
 
         with patch.object(jinja2, "FileSystemLoader"):
             result = template_repository._build_email(
-                subject=subject, recipients=recipients, template="test.html", template_vars={}
+                subject=subject, recipients=recipients, template_name="test.html", template_vars={}
             )
 
         assert result["email_data"]["subject"] == subject

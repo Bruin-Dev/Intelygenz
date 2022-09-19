@@ -590,12 +590,14 @@ class BruinRepository:
             reraise=True,
         )
         async def get_affecting_ticket_for_report():
-            ticket_statuses = ["New", "InProgress", "Draft", "Resolved", "Closed"]
 
             self._logger.info(f"Retrieving affecting tickets between start date: {start_date} and end date: {end_date}")
 
             response = await self.get_all_affecting_tickets(
-                client_id=client_id, start_date=start_date, end_date=end_date, ticket_statuses=ticket_statuses
+                client_id=client_id,
+                start_date=start_date,
+                end_date=end_date,
+                ticket_statuses=["New", "InProgress", "Draft", "Resolved", "Closed"],
             )
 
             if not response:
@@ -683,17 +685,17 @@ class BruinRepository:
                 )
         return result
 
-    def prepare_items_for_monitor_report(self, all_serials, cached_info_by_serial):
+    def prepare_items_for_monitor_report(self, ticket_details_by_serial, cached_names_by_serial):
         items_for_report = []
-        for serial, ticket_details in all_serials.items():
+        for serial, ticket_details in ticket_details_by_serial.items():
             interfaces_by_trouble = self.search_interfaces_and_count_in_details(ticket_details)
-            cached_info = cached_info_by_serial[serial]
             for trouble in interfaces_by_trouble.keys():
                 for interface, ticket_ids in interfaces_by_trouble[trouble].items():
                     self._logger.info(f"--> {serial} : {len(ticket_details)} tickets")
                     item_report = self.build_monitor_report_item(
                         ticket_details=ticket_details,
-                        cached_info=cached_info,
+                        serial_number=serial,
+                        edge_name=cached_names_by_serial[serial],
                         number_of_tickets=len(ticket_ids),
                         interface=interface,
                         trouble=trouble,
@@ -703,15 +705,15 @@ class BruinRepository:
         return items_for_report
 
     @staticmethod
-    def build_monitor_report_item(ticket_details, cached_info, number_of_tickets, interface, trouble):
+    def build_monitor_report_item(ticket_details, edge_name, serial_number, number_of_tickets, interface, trouble):
         return {
             "customer": {
                 "client_id": ticket_details[0]["ticket"]["clientID"],
                 "client_name": ticket_details[0]["ticket"]["clientName"],
             },
             "location": ticket_details[0]["ticket"]["address"],
-            "edge_name": cached_info.get("edge_name"),
-            "serial_number": cached_info["serial_number"],
+            "edge_name": edge_name,
+            "serial_number": serial_number,
             "number_of_tickets": number_of_tickets,
             "bruin_tickets_id": set(detail_object["ticket_id"] for detail_object in ticket_details),
             "interfaces": interface,
@@ -750,11 +752,11 @@ class BruinRepository:
         }
 
     @staticmethod
-    def filter_ticket_details_by_serials(ticket_details, list_cache_serials):
+    def filter_ticket_details_by_serials(ticket_details, cached_names_by_serial):
         return [
             detail_object
             for detail_object in ticket_details
-            if detail_object["ticket_detail"]["detailValue"] in list_cache_serials
+            if detail_object["ticket_detail"]["detailValue"] in cached_names_by_serial
         ]
 
     @staticmethod

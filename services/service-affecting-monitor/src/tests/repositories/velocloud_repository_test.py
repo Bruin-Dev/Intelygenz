@@ -337,7 +337,7 @@ class TestVelocloudRepository:
     @pytest.mark.asyncio
     async def get_links_metrics_for_bandwidth_reports_test(self, velocloud_repository, frozen_datetime):
         current_datetime = frozen_datetime.now()
-
+        host = velocloud_repository._config.VELOCLOUD_HOST
         lookup_interval = velocloud_repository._config.BANDWIDTH_REPORT_CONFIG["lookup_interval_hours"]
         interval = {
             "start": current_datetime - timedelta(hours=lookup_interval),
@@ -345,7 +345,7 @@ class TestVelocloudRepository:
         }
 
         with patch.object(velocloud_repository_module, "datetime", new=frozen_datetime):
-            await velocloud_repository.get_links_metrics_for_bandwidth_reports()
+            await velocloud_repository.get_all_links_metrics(interval=interval)
 
         velocloud_repository.get_all_links_metrics.assert_awaited_once_with(interval=interval)
 
@@ -608,3 +608,19 @@ class TestVelocloudRepository:
         result = velocloud_repository.filter_links_metrics_by_client(links_metrics, client_id, customer_cache)
         expected = [link_1_metrics]
         assert result == expected
+
+    def get_interval_for_bandwidth_reports_return_not_none_test(self, velocloud_repository):
+        result = velocloud_repository.get_interval_for_bandwidth_reports(datetime.now())
+        assert result is not None
+
+    def get_interval_for_bandwidth_reports_return_dict_test(self, velocloud_repository):
+        result = velocloud_repository.get_interval_for_bandwidth_reports(datetime.now())
+        assert type(result) is dict
+
+    def get_interval_for_bandwidth_reports_return_start_and_end_test(self, velocloud_repository):
+        result = velocloud_repository.get_interval_for_bandwidth_reports(datetime.now())
+        assert "start" in result and "end" in result
+
+    def get_interval_for_bandwidth_reports_return_start_and_end_with_string_values_test(self, velocloud_repository):
+        result = velocloud_repository.get_interval_for_bandwidth_reports(datetime.now())
+        assert type(result["start"]) is str and type(result["end"]) is str

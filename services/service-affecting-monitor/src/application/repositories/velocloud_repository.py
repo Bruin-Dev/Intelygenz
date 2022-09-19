@@ -140,15 +140,14 @@ class VelocloudRepository:
         }
         return await self.get_all_links_metrics(interval=interval_for_metrics)
 
-    async def get_links_metrics_for_bandwidth_reports(self) -> dict:
-        now = datetime.now(utc)
-        past_moment = now - timedelta(hours=self._config.BANDWIDTH_REPORT_CONFIG["lookup_interval_hours"])
-
-        interval_for_metrics = {
-            "start": past_moment,
-            "end": now,
+    def get_interval_for_bandwidth_reports(self, rounded_now) -> dict:
+        return {
+            "start": (
+                rounded_now - timedelta(hours=self._config.BANDWIDTH_REPORT_CONFIG["lookup_interval_hours"])
+            ).isoformat()
+            + "Z",
+            "end": rounded_now.isoformat() + "Z",
         }
-        return await self.get_all_links_metrics(interval=interval_for_metrics)
 
     async def get_enterprise_events(self, host, enterprise_id):
         err_msg = None
