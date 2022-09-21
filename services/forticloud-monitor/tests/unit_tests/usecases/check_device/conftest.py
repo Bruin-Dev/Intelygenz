@@ -1,6 +1,6 @@
 import pytest
 
-from usecases.check_device import Device, DeviceId, DeviceStatus, DeviceType, Ticket
+from usecases.check_device import CreatedTicket, Device, DeviceId, DeviceStatus, DeviceType, Ticket
 
 
 @pytest.fixture
@@ -34,3 +34,8 @@ def any_offline_device(any_device):
 @pytest.fixture
 def any_ticket():
     return Ticket(client_id=str(hash("any_client_id")), service_number=str(hash("any_service_number")))
+
+
+@pytest.fixture
+def any_created_ticket():
+    return CreatedTicket(ticket_id="any_ticket_id", status_description="any_status_description")

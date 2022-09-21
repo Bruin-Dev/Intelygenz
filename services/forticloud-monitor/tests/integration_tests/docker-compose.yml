@@ -1,0 +1,17 @@
+version: '3.6'
+services:
+  redis:
+    image: redis:5.0.4
+    ports:
+      - 6379:6379
+    expose:
+      - 6379
+  nats-server:
+    build:
+      context: ../../../../
+      dockerfile: nats-server/Dockerfile
+    env_file:
+      - ../../../../nats-server/env
+    ports:
+      - 4222:4222
+      - 8222:8222

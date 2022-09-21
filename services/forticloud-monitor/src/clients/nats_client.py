@@ -1,5 +1,5 @@
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List, Protocol, TypeVar
 
 from framework.nats.client import Client
@@ -29,16 +29,15 @@ class NatsClient:
 
     settings: NatsSettings
     framework_client: Client
-    is_connected: bool = field(init=False, default=False)
 
     async def add(self, consumer: NatsConsumer):
         log.debug(f"add(consumer={consumer})")
-        if not self.is_connected:
-            await self.connect()
-            self.is_connected = True
-
         await self.framework_client.subscribe(**consumer.subscription().__dict__)
 
     async def connect(self):
-        log.debug("_connect()")
+        log.debug("connect()")
         await self.framework_client.connect(servers=self.settings.servers)
+
+    async def close(self):
+        log.debug("close()")
+        await self.framework_client.close()

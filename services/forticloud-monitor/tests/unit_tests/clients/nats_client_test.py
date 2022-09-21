@@ -4,7 +4,7 @@ import pytest
 from framework.nats.client import Client as FrameworkClient
 from framework.nats.models import Subscription
 
-from shared import NatsClient, NatsConsumer, NatsSettings
+from clients import NatsClient, NatsConsumer, NatsSettings
 
 
 async def consumers_are_properly_subscribed_test(nats_client_builder, any_subscription, any_consumer):
@@ -19,30 +19,6 @@ async def consumers_are_properly_subscribed_test(nats_client_builder, any_subscr
 
     # then
     subscribe.assert_awaited_once_with(**any_subscription.__dict__)
-
-
-async def nats_clients_are_automatically_connected_when_adding_a_consumer_test(nats_client_builder, any_consumer):
-    # given
-    nats_client = nats_client_builder(is_connected=False)
-
-    # when
-    await nats_client.add(any_consumer)
-
-    # then
-    assert nats_client.is_connected
-
-
-async def nats_client_are_only_connected_once_when_adding_multiple_consumers_test(nats_client_builder, any_consumer):
-    # given
-    connect = AsyncMock()
-    nats_client = nats_client_builder(connect=connect)
-
-    # when
-    await nats_client.add(any_consumer)
-    await nats_client.add(any_consumer)
-
-    # then
-    connect.assert_awaited_once()
 
 
 @pytest.fixture
