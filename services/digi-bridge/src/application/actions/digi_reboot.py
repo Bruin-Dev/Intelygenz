@@ -1,46 +1,44 @@
 import json
+import logging
+
+import humps
+from nats.aio.msg import Msg
+
+logger = logging.getLogger(__name__)
 
 
 class DiGiReboot:
-    def __init__(self, logger, event_bus, digi_repository):
-        self._logger = logger
-        self._event_bus = event_bus
+    def __init__(self, digi_repository):
         self._digi_repository = digi_repository
 
-    async def digi_reboot(self, msg: dict):
-        request_id = msg["request_id"]
-        response_topic = msg["response_topic"]
-        response = {"request_id": request_id, "body": None, "status": None}
-        if "body" not in msg.keys():
-            self._logger.error(f"Cannot reboot DiGi client using {json.dumps(msg)}. JSON malformed")
+    async def __call__(self, request_msg: Msg):
+
+        msg_data = json.loads(request_msg.data)
+        response = {"igzID": msg_data.get("igzID"), "body": None, "status": None}
+
+        request_filters = msg_data.get("body")
+
+        if not request_filters:
+            logger.error(f"Cannot reboot DiGi client using {request_msg}. JSON malformed")
             response["status"] = 400
             response["body"] = 'Must include "body" in request'
-            await self._event_bus.publish_message(response_topic, response)
-            return
 
-        payload = msg["body"]
-
-        if not all(key in payload.keys() for key in ("velo_serial", "ticket", "MAC")):
-            self._logger.error(f"Cannot reboot DiGi client using {json.dumps(msg)}. JSON malformed")
-
+        elif not all(key in request_filters.keys() for key in ("velo_serial", "ticket", "MAC")):
+            logger.error(f"Cannot reboot DiGi client using {request_msg}. JSON malformed")
             response["body"] = (
                 'You must include "velo_serial", "ticket", "MAC" ' 'in the "body" field of the response request'
             )
             response["status"] = 400
-            await self._event_bus.publish_message(msg["response_topic"], response)
-            return
+        else:
+            logger.info(f"Attempting to reboot DiGi client with payload of: {request_filters}")
 
-        payload["igzID"] = request_id
+            reboot_response = await self._digi_repository.reboot(humps.pascalize(request_filters))
 
-        self._logger.info(f"Attempting to reboot DiGi client with payload of: {json.dumps(payload)}")
+            response["body"] = reboot_response["body"]
+            response["status"] = reboot_response["status"]
 
-        results = await self._digi_repository.reboot(payload)
-
-        response["body"] = results["body"]
-        response["status"] = results["status"]
-
-        await self._event_bus.publish_message(response_topic, response)
-        self._logger.info(
-            f"DiGi reboot process completed and publishing results in event bus for request {json.dumps(msg)}. "
+        await request_msg.respond(json.dumps(response).encode())
+        logger.info(
+            f"DiGi reboot process completed and publishing results in event bus for request {request_msg}. "
             f"Message published was {response}"
         )
