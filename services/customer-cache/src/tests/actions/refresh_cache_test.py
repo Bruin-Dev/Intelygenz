@@ -315,7 +315,7 @@ class TestRefreshCache:
             ]
         )
         send_email_res = {"request_id": "asjkdhaskj8", "status": 200}
-        instance_refresh_cache._event_bus.rpc_request = CoroutineMock(return_value=send_email_res)
+        instance_refresh_cache._email_repository.send_email = CoroutineMock(return_value=send_email_res)
         instance_refresh_cache._storage_repository.get_cache = Mock(return_value=stored_cache)
         instance_refresh_cache._cross_stored_cache_and_new_cache = Mock(return_value=new_cache)
         instance_refresh_cache._storage_repository.set_cache = Mock()
@@ -418,7 +418,7 @@ class TestRefreshCache:
         )
         instance_refresh_cache._invalid_edges = {host: [EdgeIdentifier(**edge_from_bruin_2_with_config["edge"])]}
         send_email_res = {"request_id": "asjkdhaskj8", "status": 200}
-        instance_refresh_cache._event_bus.rpc_request = CoroutineMock(return_value=send_email_res)
+        instance_refresh_cache._email_repository.send_email = CoroutineMock(return_value=send_email_res)
         instance_refresh_cache._storage_repository.get_cache = Mock(return_value=stored_cache)
         instance_refresh_cache._cross_stored_cache_and_new_cache = Mock(return_value=crossed_cache)
         instance_refresh_cache._storage_repository.set_cache = Mock()
@@ -444,7 +444,7 @@ class TestRefreshCache:
         ]
         instance_err_msg_refresh_cache["request_id"] = uuid_
 
-        instance_refresh_cache._event_bus.rpc_request = CoroutineMock()
+        instance_refresh_cache._notifications_repository.send_slack_message = CoroutineMock()
         instance_refresh_cache._filter_edge_list = CoroutineMock(return_value=edge_from_bruin)
         instance_refresh_cache._storage_repository.get_cache = Mock()
         instance_refresh_cache._cross_stored_cache_and_new_cache = Mock()
@@ -455,7 +455,7 @@ class TestRefreshCache:
         instance_refresh_cache._filter_edge_list.assert_awaited()
         instance_refresh_cache._cross_stored_cache_and_new_cache.assert_not_called()
         instance_refresh_cache._storage_repository.set_cache.assert_not_called()
-        instance_refresh_cache._event_bus.rpc_request.assert_awaited_once()
+        instance_refresh_cache._notifications_repository.send_slack_message.assert_awaited_once()
 
     def cross_stored_cache_and_new_cache_with_both_caches_empty_test(self):
         stored_cache = []

@@ -140,7 +140,7 @@ class RefreshCache:
                 f" Check if Bruin is returning errors when asking for management statuses of the host"
             )
             self._logger.error(error_msg)
-            self._notifications_repository.send_slack_message(error_msg)
+            await self._notifications_repository.send_slack_message(error_msg)
         else:
             stored_cache = self._storage_repository.get_cache(host)
 
