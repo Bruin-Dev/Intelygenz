@@ -96,10 +96,6 @@ prometheus-nats-exporter:
     # will be created in the microservice deployment that will wait until the
     # velocloud-bridge service responds correctly to healthcheck calls.
     velocloud_bridge: true
-    # -- Indicate if forticloud-bridge is going to be activated. If it is true an initContainer
-    # will be created in the microservice deployment that will wait until the
-    # forticloud-bridge service responds correctly to healthcheck calls.
-    forticloud_bridge: true
 
 
 # -- Global configuration for all subcharts

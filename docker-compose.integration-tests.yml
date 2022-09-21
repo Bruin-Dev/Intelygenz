@@ -63,8 +63,6 @@ services:
     entrypoint: ["echo", "Service is disabled"]
   fraud-monitor:
     entrypoint: ["echo", "Service is disabled"]
-  forticloud-bridge:
-    entrypoint: ["echo", "Service is disabled"]
   hawkeye-affecting-monitor:
     entrypoint: ["echo", "Service is disabled"]
   hawkeye-bridge:

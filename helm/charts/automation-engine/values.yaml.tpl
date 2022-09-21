@@ -449,41 +449,6 @@ fraud-monitor:
       memory: 256Mi
 
 
-# -- forticloud-bridge subchart specific configuration
-forticloud-bridge:
-  enabled: ${FORTICLOUD_BRIDGE_ENABLED}
-  replicaCount: ${FORTICLOUD_BRIDGE_DESIRED_TASKS}
-  config:
-    # -- Indicate the capabilities dependencies
-    <<: *capabilitiesEnabled
-    metrics:
-      # -- Indicates whether the microservice will expose metrics through prometheus.
-      enabled: true
-      svc:
-        port: 9090
-        name: metrics
-      ## Additional labels for the service monitor
-      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
-      labels: {}
-      #labels:
-      #  servicediscovery: true
-  image:
-    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/forticloud-bridge
-    pullPolicy: Always
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: ${FORTICLOUD_BRIDGE_BUILD_NUMBER}
-  service:
-    type: ClusterIP
-    port: 5000
-  resources:
-    limits:
-      cpu: 400m
-      memory: 512Mi
-    requests:
-      cpu: 200m
-      memory: 256Mi
-
-
 # -- gateway-monitor subchart specific configuration
 gateway-monitor:
   enabled: ${GATEWAY_MONITOR_ENABLED}
