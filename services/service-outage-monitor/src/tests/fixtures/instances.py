@@ -198,6 +198,7 @@ def outage_monitor(
     digi_repository,
     ha_repository,
     utils_repository,
+    email_repository
 ):
     instance = OutageMonitor(
         event_bus=event_bus,
