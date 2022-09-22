@@ -30,7 +30,6 @@ services:
     depends_on:
       - nats-server
       - redis
-      - integration-tests
     ports:
       - 5006:5000
       - 9190:9090
@@ -111,7 +110,6 @@ services:
     depends_on:
       - nats-server
       - redis
-      - integration-tests
     ports:
       - 5056:5000
       - 9690:9090
@@ -166,6 +164,23 @@ services:
     ports:
       - 5024:5000
       - 9890:9090
+
+  forticloud-poller:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: services/forticloud-poller/Dockerfile
+    env_file:
+      - services/forticloud-poller/src/config/env
+    volumes:
+      - ./services/forticloud-poller:/service/app
+    depends_on:
+      - nats-server
+      - redis
+      - notifications-bridge
+    ports:
+      - 5032:5000
+      - 9878:9090
 
   gateway-monitor:
     build:
@@ -437,7 +452,6 @@ services:
     depends_on:
       - nats-server
       - redis
-      - integration-tests
     ports:
       - 5058:5000
       - 9010:9000

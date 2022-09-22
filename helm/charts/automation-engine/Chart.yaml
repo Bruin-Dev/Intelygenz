@@ -62,6 +62,9 @@ dependencies:
   - name: fraud-monitor
     version: '*.*.*'
     condition: fraud-monitor.enabled
+  - name: forticloud-poller
+    version: '*.*.*'
+    condition: forticloud-poller.enabled
   - name: gateway-monitor
     version: '*.*.*'
     condition: gateway-monitor.enabled

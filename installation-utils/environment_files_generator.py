@@ -251,6 +251,9 @@ TNBA_MONITOR__GRACE_PERIOD_BEFORE_APPENDING_NEW_TNBA_NOTES = parameters["common"
 TNBA_MONITOR__GRACE_PERIOD_BEFORE_MONITORING_TICKETS_BASED_ON_LAST_DOCUMENTED_OUTAGE = parameters["common"]["tnba-monitor"]["grace-period-before-monitoring-tickets-based-on-last-documented-outage"]
 TNBA_MONITOR__MIN_REQUIRED_CONFIDENCE_FOR_REQUEST_AND_REPAIR_COMPLETED_PREDICTIONS = parameters["common"]["tnba-monitor"]["min-required-confidence-for-request-and-repair-completed-predictions"]
 
+# Forticloud Poller variables
+FORTICLOUD_POLLER__MONITORING_JOB_INTERVAL = parameters["common"]["forticloud-poller"]["monitoring-job-interval"]
+
 # Gateway Monitor
 GATEWAY_MONITOR__MONITORED_VELOCLOUD_HOSTS = json.dumps(json.loads(parameters["dev"]["gateway-monitor"]["monitored-velocloud-hosts"]))
 GATEWAY_MONITOR__MONITORING_JOB_INTERVAL = parameters["common"]["gateway-monitor"]["monitoring-job-interval"]
@@ -700,6 +703,17 @@ env_dict = {
         f"PAPERTRAIL_ACTIVE={PAPERTRAIL_ACTIVE}",
         f"PAPERTRAIL_HOST={PAPERTRAIL_HOST}",
         f"PAPERTRAIL_PORT={PAPERTRAIL_PORT}",
+    ],
+    os.path.join("services", "forticloud-poller", "src", "config", "env"): [
+        f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",
+        f"NATS_SERVER1={NATS_SERVER1}",
+        f"REDIS_HOSTNAME={REDIS_HOSTNAME}",
+        f"CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}",
+        f"TIMEZONE={TIMEZONE}",
+        f"PAPERTRAIL_ACTIVE={PAPERTRAIL_ACTIVE}",
+        f"PAPERTRAIL_HOST={PAPERTRAIL_HOST}",
+        f"PAPERTRAIL_PORT={PAPERTRAIL_PORT}",
+        f"MONITORING_JOB_INTERVAL={FORTICLOUD_POLLER__MONITORING_JOB_INTERVAL}",
     ],
     os.path.join("services", "gateway-monitor", "src", "config", "env"): [
         f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",

@@ -79,6 +79,11 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "forticloud-monitor",
                 },
                 {
+                    "query": f"forticloud-poller AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[forticloud-poller] - logs",
+                    "repository": "forticloud-poller",
+                },
+                {
                     "query": f"gateway-monitor AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[gateway-monitor] - logs",
                     "repository": "gateway-monitor",
@@ -306,6 +311,10 @@ PAPERTRAIL_PROVISIONING = {
                 {
                     "query": f"gateway-monitor AND {ENVIRONMENT_NAME} AND ERROR:",
                     "search_name": f"[gateway-monitor] - ERROR messages",
+                },
+                {
+                    "query": f"forticloud-poller AND {ENVIRONMENT_NAME} AND ERROR:",
+                    "search_name": f"[forticloud-poller] - ERROR messages",
                 },
                 {
                     "query": f"task-dispatcher AND {ENVIRONMENT_NAME} AND ERROR:",

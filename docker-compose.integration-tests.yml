@@ -20,9 +20,13 @@ services:
     environment:
       BRUIN_LOGIN_URL: http://integration-tests:8001/login
       BRUIN_BASE_URL: http://integration-tests:8002
+    depends_on:
+      - integration-tests
   email-tagger-kre-bridge:
     environment:
       KRE_BASE_URL: integration-tests:50001
+    depends_on:
+      - integration-tests
   email-tagger-monitor:
     environment:
       NEW_EMAILS_JOB_INTERVAL: 5
@@ -35,6 +39,8 @@ services:
   repair-tickets-kre-bridge:
     environment:
       KRE_BASE_URL: integration-tests:50002
+    depends_on:
+      - integration-tests
   repair-tickets-monitor:
     environment:
       RTA_MONITOR_JOB_INTERVAL: 5
