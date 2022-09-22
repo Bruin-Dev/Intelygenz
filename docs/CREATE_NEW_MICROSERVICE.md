@@ -62,18 +62,7 @@ It's important to have the .gitlab-ci.yaml files correctly defined to enable pip
   * `new-bridge/.gitlab-ci.yml`
   Change any reference of the template microservice to the new one: example find and replace "bruin-bridge" for "new-bridge"
   * `.gitlab-ci.yml` (the file in the root of the repository)
-  Here we need to specify to gitlab-ci that we define other jobs in a different directories (the .gitlab-ci.yml of our new repo). So locate the root gitlab file and add a new line with the path of the new micro jobs (do it respecting the alphabetical order)
-  ````
-  ...
-    - local: 'services/links-metrics-api/.gitlab-ci.yml'
-    - local: 'services/links-metrics-collector/.gitlab-ci.yml'
-    - local: 'services/lumin-billing-report/.gitlab-ci.yml'
-    - local: 'services/new-bridge/.gitlab-ci.yml'    <─────────────── here!
-    - local: 'services/service-affecting-monitor/.gitlab-ci.yml'
-    - local: 'services/service-outage-monitor/.gitlab-ci.yml'
-  ...
-  ````
-  Now in the same file, let's define the "desired_tasks" variable for this new micro (do it respecting the alphabetical order):
+  Here we need to define the "desired_tasks" variable for this new micro (do it respecting the alphabetical order):
   ````
   ...
     NATS_SERVER_DESIRED_TASKS: "1"
