@@ -150,42 +150,42 @@ PAPERTRAIL_PROVISIONING = {
                 },
                 {
                     "query": f"sam-mettel-velocloud-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                    "search_name": f"[sam-mettel-velocloud-net] - logs",
+                    "search_name": f"[sam-vco01] - logs",
                     "repository": "service-affecting-monitor",
                 },
                 {
                     "query": f"sam-metvco02-mettel-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                    "search_name": f"[sam-metvco02-mettel-net] - logs",
+                    "search_name": f"[sam-vco02] - logs",
                     "repository": "service-affecting-monitor",
                 },
                 {
                     "query": f"sam-metvco03-mettel-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                    "search_name": f"[sam-metvco03-mettel-net] - logs",
+                    "search_name": f"[sam-vco03] - logs",
                     "repository": "service-affecting-monitor",
                 },
                 {
                     "query": f"sam-metvco04-mettel-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                    "search_name": f"[sam-metvco04-mettel-net] - logs",
+                    "search_name": f"[sam-vco04] - logs",
                     "repository": "service-affecting-monitor",
                 },
                 {
                     "query": f"som-mettel-velocloud-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                    "search_name": f"[som-mettel-velocloud-net] - logs",
+                    "search_name": f"[som-vco01] - logs",
                     "repository": "service-outage-monitor",
                 },
                 {
                     "query": f"som-metvco02-mettel-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                    "search_name": f"[som-metvco02-mettel-net] - logs",
+                    "search_name": f"[som-vco02] - logs",
                     "repository": "service-outage-monitor",
                 },
                 {
                     "query": f"som-metvco03-mettel-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                    "search_name": f"[som-metvco03-mettel-net] - logs",
+                    "search_name": f"[som-vco03] - logs",
                     "repository": "service-outage-monitor",
                 },
                 {
                     "query": f"som-metvco04-mettel-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                    "search_name": f"[som-metvco04-mettel-net] - logs",
+                    "search_name": f"[som-vco04] - logs",
                     "repository": "service-outage-monitor",
                 },
                 {
@@ -210,22 +210,22 @@ PAPERTRAIL_PROVISIONING = {
                 },
                 {
                     "query": f"tnba-mettel-velocloud-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                    "search_name": f"[tnba-mettel-velocloud-net] - logs",
+                    "search_name": f"[tnba-vco01] - logs",
                     "repository": "tnba-monitor",
                 },
                 {
                     "query": f"tnba-metvco02-mettel-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                    "search_name": f"[tnba-metvco02-mettel-net] - logs",
+                    "search_name": f"[tnba-vco02] - logs",
                     "repository": "tnba-monitor",
                 },
                 {
                     "query": f"tnba-metvco03-mettel-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                    "search_name": f"[tnba-metvco03-mettel-net] - logs",
+                    "search_name": f"[tnba-vco03] - logs",
                     "repository": "tnba-monitor",
                 },
                 {
                     "query": f"tnba-metvco04-mettel-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
-                    "search_name": f"[tnba-metvco04-mettel-net] - logs",
+                    "search_name": f"[tnba-vco04] - logs",
                     "repository": "tnba-monitor",
                 },
                 {
