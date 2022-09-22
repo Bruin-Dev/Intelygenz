@@ -149,6 +149,11 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "dispatch-portal-frontend/nginx",
                 },
                 {
+                    "query": f"sam-met AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[service-affecting-monitor] - logs",
+                    "repository": "service-affecting-monitor",
+                },
+                {
                     "query": f"sam-mettel-velocloud-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[sam-vco01] - logs",
                     "repository": "service-affecting-monitor",
@@ -166,6 +171,11 @@ PAPERTRAIL_PROVISIONING = {
                 {
                     "query": f"sam-metvco04-mettel-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[sam-vco04] - logs",
+                    "repository": "service-affecting-monitor",
+                },
+                {
+                    "query": f"som-met AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[service-outage-monitor] - logs",
                     "repository": "service-affecting-monitor",
                 },
                 {
@@ -207,6 +217,11 @@ PAPERTRAIL_PROVISIONING = {
                     "query": f"tnba-feedback AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[tnba-feedback] - logs",
                     "repository": "tnba-feedback",
+                },
+                {
+                    "query": f"tnba-met AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[tnba-monitor] - logs",
+                    "repository": "tnba-monitor",
                 },
                 {
                     "query": f"tnba-mettel-velocloud-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
