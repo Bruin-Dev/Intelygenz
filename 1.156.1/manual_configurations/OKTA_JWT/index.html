@@ -1,0 +1,695 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://docs.mettel-automation.net/1.156.1/manual_configurations/OKTA_JWT/">
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
+    
+    
+      
+        <title>Creation of Oauth Application for Data Highway API - Automation Engine Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.8c5ef100.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.9647289d.min.css">
+        
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#creation-of-oauth-application-for-data-highway-api" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        <aside class="md-banner md-banner--warning">
+          
+        </aside>
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Automation Engine Documentation" class="md-header__button md-logo" aria-label="Automation Engine Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Automation Engine Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Creation of Oauth Application for Data Highway API
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../.." class="md-tabs__link">
+      Home
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../CONCEPTS/" class="md-tabs__link">
+        Topics
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Automation Engine Documentation" class="md-nav__button md-logo" aria-label="Automation Engine Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Automation Engine Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Topics
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Topics" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Topics
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../CONCEPTS/" class="md-nav__link">
+        Concepts
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_2" type="checkbox" id="__nav_2_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_2">
+          Pipelines
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Pipelines" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_2">
+          <span class="md-nav__icon md-icon"></span>
+          Pipelines
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline/BASIC_CI_CONFIGURATION/" class="md-nav__link">
+        Basic configurations
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline/PIPELINE_RULES/" class="md-nav__link">
+        Pipeline rules
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_3" type="checkbox" id="__nav_2_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_3">
+          Documentation
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Documentation" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_3">
+          <span class="md-nav__icon md-icon"></span>
+          Documentation
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DOCUMENTATION/" class="md-nav__link">
+        Organization
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../decisions/" class="md-nav__link">
+        MetTel decisions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../metrics-definitions/" class="md-nav__link">
+        Metrics definitions
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Development rules
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_5" type="checkbox" id="__nav_2_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_5">
+          Work in a local env
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Work in a local env" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_5">
+          <span class="md-nav__icon md-icon"></span>
+          Work in a local env
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kafka/LAUNCH_DOCKER_COMPOSE/" class="md-nav__link">
+        Launch docker compose
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../snowflake/" class="md-nav__link">
+        Datalake
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Manual processes
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pre-requisites" class="md-nav__link">
+    Pre requisites
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#description" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#group-api-access" class="md-nav__link">
+    Group API access
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-application-server" class="md-nav__link">
+    Create Application server
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-authorization-server" class="md-nav__link">
+    Create Authorization server
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#update-application-with-new-parameters" class="md-nav__link">
+    Update Application with new parameters
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+
+
+<h1 id="creation-of-oauth-application-for-data-highway-api">Creation of Oauth Application for Data Highway API</h1>
+<h2 id="pre-requisites">Pre requisites</h2>
+<ul>
+<li>Okta Account</li>
+<li>AWS Account</li>
+</ul>
+<h2 id="description">Description</h2>
+<p>API needs a way to verify the access of vendors and internal users provided from Okta. They way to do it is about provide
+a JWT from Okta with a company name information on it.</p>
+<h2 id="group-api-access">Group API access</h2>
+<p>First steep is about the creation of a group for the API access, only members with his group will access the API.
+The groups must have the next values:
+* Name: IGZ-INT-DATA-HIGHWAY-API
+* Description: API Data highway access group.</p>
+<ul>
+<li>Name: IGZ-EXT-DATA-HIGHWAY-API</li>
+<li>Description: API Data highway access group.</li>
+</ul>
+<h2 id="create-application-server">Create Application server</h2>
+<ol>
+<li>To create an application destined for the API, we are gonna need to go to "Applications/Applications" and click on create
+app integration
+<img alt="" src="../../img/manual_configurations/okta_jwt/add_api_application.png" /></li>
+<li>A new form will show and we need to fill it with the next information:</li>
+<li>App integration name: IGZ-DATA-HIGHWAY-API</li>
+<li>Grant type: Select "Authorization Code" and "Resource Owner Password"</li>
+<li>Controlled access: Select "Limit access to selected groups"</li>
+<li>Selected groups: IGZ-INT-DATA-HIGHWAY-API, IGZ-EXT-DATA-HIGHWAY-API</li>
+<li>Click Save.</li>
+</ol>
+<h2 id="create-authorization-server">Create Authorization server</h2>
+<ol>
+<li>In the Admin Dashboard, go to security/API and click on add authorization server.
+   <img alt="" src="../../img/manual_configurations/okta_jwt/add-authorization-server.png" /></li>
+<li>We will need to fill the name, audience, and description. the next values are the selected ones:</li>
+<li>Name: API-DATA-HIGHWAY</li>
+<li>Audience: API-DATA-HIGHWAY</li>
+<li>Description: API data highway access.</li>
+</ol>
+<p>After filling this form, click on the save button.
+3. With the Authorization server created, we need to add some extra configurations. Go to the Claims menu following the next image
+<img alt="" src="../../img/manual_configurations/okta_jwt/authorization_server_claims_menu.png" />
+   1. Click on "Add claim"
+   2. Fill the new claim with the next information:
+      1. Name: organization
+      2. Include in token type: "Id Token" - "Always"
+      3. Value type: "Expression"
+      4. Value: user.organization
+      5. Include in: "Any scope"
+4. Go to access policies menu following the next image:
+<img alt="" src="../../img/manual_configurations/okta_jwt/authorization_server_access_policies_menu.png" />
+   1. in this menu click in the button "Add new access policy"
+   2. it will appear a new form, fill it with the next values and click on create policy:
+      1. Name: IGZ-DATA-HIGHWAY-API-JWT-ACCESS-POLICY
+      2. Description: Api JWT access policy.
+      3. Assign to: IGZ-INT-DATA-HIGHWAY-API, IGZ-EXT-DATA-HIGHWAY-API</p>
+<p><img alt="" src="../../img/manual_configurations/okta_jwt/authorization_server_add_new_rule_on_policy.png" />
+   3. After closing the form, select the policy created and click on the "Add rule" button. And fill the form with the next information:
+      1. Rule Name: IGZ-DATA-HIGHWAY-API-ACCESS-RULE
+      2. Grant type is: Select "Client credentials" and "Resource Owner Password"
+      3. Assigned the app and a member of one of the following: Add the groups "IGZ-INT-DATA-HIGHWAY-API, IGZ-EXT-DATA-HIGHWAY-API".
+      4. The following scopes: profiles and openid
+      5. but will expire if not used every: 1 h</p>
+<h2 id="update-application-with-new-parameters">Update Application with new parameters</h2>
+<ol>
+<li>we are going to need to go to "Applications/Applications" and update the configuration of the application "IGZ-DATA-HIGHWAY-API".</li>
+<li>Disable User consent in general configurations.</li>
+</ol>
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs"], "search": "../../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.748e2769.min.js"></script>
+      
+    
+  </body>
+</html>
