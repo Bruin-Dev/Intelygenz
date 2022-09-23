@@ -22,7 +22,7 @@ async def application(docker_services, config, event_loop):
     application = Application()
     start(application, config, event_loop)
     yield application
-    await application.close()
+    await application.close(stop_loop=False)
 
 
 @pytest.hookimpl
