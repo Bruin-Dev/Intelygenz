@@ -490,10 +490,249 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_7">
+          Manual procedures
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Manual procedures" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_7">
+          <span class="md-nav__icon md-icon"></span>
+          Manual procedures
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../../../../.." class="md-nav__link">
-        Manual processes
+      <a href="../../../../../manual_procedures/EMERGENCY_PLAN/" class="md-nav__link">
+        Emergency recovery plan
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_procedures/API_VENDOR_ACCESS/" class="md-nav__link">
+        Vendor access to the API
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION/" class="md-nav__link">
+        Switch Automation Engine region
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_8">
+          Backups Recovery plans
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Backups Recovery plans" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_8">
+          <span class="md-nav__icon md-icon"></span>
+          Backups Recovery plans
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../backups/ECR_RECOVERY_PLAN/" class="md-nav__link">
+        ECR backup recovery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../backups/EKS_SSH_RECOVERY_PLAN/" class="md-nav__link">
+        EKS SSH recovery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../backups/GIT_RECOVERY_PLAN/" class="md-nav__link">
+        GIT recovery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../backups/PROMETHEUS_RECOVERY_PLAN/" class="md-nav__link">
+        Prometheus recovery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../backups/TERRAFORM_RECOVERY_PLAN/" class="md-nav__link">
+        Terraform recovery
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_9" type="checkbox" id="__nav_2_9" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_9">
+          Manual configurations
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Manual configurations" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_9">
+          <span class="md-nav__icon md-icon"></span>
+          Manual configurations
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_configurations/INIT_AUTOMATION_PROJECT/" class="md-nav__link">
+        Init Automation Engine project
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_configurations/OKTA_CONFIGURATIONS/" class="md-nav__link">
+        AWS SSO Okta configurations
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_configurations/OKTA_JWT/" class="md-nav__link">
+        AWS SSO Okta JWT token
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -565,18 +804,18 @@
 <li>
 <p>If e-mail represents an UP event:
   <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="sa">f</span><span class="s1">&#39;Event from InterMapper was </span><span class="si">{</span><span class="n">parsed_email_dict</span><span class="p">[</span><span class="s2">&quot;event&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">, there is no need to create a new ticket&quot;</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="p">)</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="sa">f</span><span class="s1">&#39;Event from InterMapper was </span><span class="si">{</span><span class="n">parsed_email_dict</span><span class="p">[</span><span class="s2">&quot;event&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">, there is no need to create &#39;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="sa">f</span><span class="s2">&quot;a new ticket. Checking for autoresolve ...&quot;</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">)</span>
 </code></pre></div>
   <a href="../_autoresolve_ticket/">_autoresolve_ticket</a></p>
 </li>
 <li>
 <p>If e-mail represents a DOWN event:
   <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="sa">f</span><span class="s1">&#39;Event: </span><span class="si">{</span><span class="n">parsed_email_dict</span><span class="p">[</span><span class="s2">&quot;event&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1"> - &#39;</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="sa">f</span><span class="s1">&#39;Condition: </span><span class="si">{</span><span class="n">parsed_email_dict</span><span class="p">[</span><span class="s2">&quot;condition&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1"> - &#39;</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="sa">f</span><span class="s1">&#39;Document: </span><span class="si">{</span><span class="n">parsed_email_dict</span><span class="p">[</span><span class="s2">&quot;document&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="p">)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="sa">f</span><span class="s1">&#39;Event from InterMapper was </span><span class="si">{</span><span class="n">parsed_email_dict</span><span class="p">[</span><span class="s2">&quot;event&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">, &#39;</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="sa">f</span><span class="s1">&#39;condition was </span><span class="si">{</span><span class="n">parsed_email_dict</span><span class="p">[</span><span class="s2">&quot;condition&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">. Checking for ticket creation ...&#39;</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">)</span>
 </code></pre></div></p>
 <ul>
 <li>If device is a PIAB:

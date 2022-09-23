@@ -490,10 +490,249 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_7">
+          Manual procedures
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Manual procedures" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_7">
+          <span class="md-nav__icon md-icon"></span>
+          Manual procedures
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../../../../../.." class="md-nav__link">
-        Manual processes
+      <a href="../../../../../../manual_procedures/EMERGENCY_PLAN/" class="md-nav__link">
+        Emergency recovery plan
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../manual_procedures/API_VENDOR_ACCESS/" class="md-nav__link">
+        Vendor access to the API
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION/" class="md-nav__link">
+        Switch Automation Engine region
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_8">
+          Backups Recovery plans
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Backups Recovery plans" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_8">
+          <span class="md-nav__icon md-icon"></span>
+          Backups Recovery plans
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backups/ECR_RECOVERY_PLAN/" class="md-nav__link">
+        ECR backup recovery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backups/EKS_SSH_RECOVERY_PLAN/" class="md-nav__link">
+        EKS SSH recovery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backups/GIT_RECOVERY_PLAN/" class="md-nav__link">
+        GIT recovery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backups/PROMETHEUS_RECOVERY_PLAN/" class="md-nav__link">
+        Prometheus recovery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backups/TERRAFORM_RECOVERY_PLAN/" class="md-nav__link">
+        Terraform recovery
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_9" type="checkbox" id="__nav_2_9" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_9">
+          Manual configurations
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Manual configurations" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_9">
+          <span class="md-nav__icon md-icon"></span>
+          Manual configurations
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../manual_configurations/INIT_AUTOMATION_PROJECT/" class="md-nav__link">
+        Init Automation Engine project
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../manual_configurations/OKTA_CONFIGURATIONS/" class="md-nav__link">
+        AWS SSO Okta configurations
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../manual_configurations/OKTA_JWT/" class="md-nav__link">
+        AWS SSO Okta JWT token
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -575,9 +814,10 @@
   <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>self._logger.info(f&quot;Bad status calling get ticket details for outage ticket: {outage_ticket_id}. &quot;
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>                  f&quot;Skipping autoresolve ...&quot;)
 </code></pre></div></li>
-<li>If has faulty BYOB link and is ticket task in ipa queue:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>self._logger.info(f&quot;Task for serial {serial_number} in ticket {outage_ticket_id} is related to a BYOB link &quot;
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>                  f&quot;and is in the IPA Investigate queue. Ignoring auto-resolution restrictions...&quot;)
+<li>If is ticket task in ipa queue:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>self._logger.info(f&quot;Task for serial {serial_number} in ticket {outage_ticket_id} is in the IPA Investigate queue. &quot;
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>                  f&quot;Skipping checks for max auto-resolves and grace period to auto-resolve after last documented &quot;
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>                  f&quot;outage...&quot;)
 </code></pre></div></li>
 <li>Else:<ul>
 <li>If was last outage detect recently:

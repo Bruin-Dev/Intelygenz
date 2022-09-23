@@ -490,10 +490,249 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_7">
+          Manual procedures
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Manual procedures" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_7">
+          <span class="md-nav__icon md-icon"></span>
+          Manual procedures
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../../../../.." class="md-nav__link">
-        Manual processes
+      <a href="../../../../../manual_procedures/EMERGENCY_PLAN/" class="md-nav__link">
+        Emergency recovery plan
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_procedures/API_VENDOR_ACCESS/" class="md-nav__link">
+        Vendor access to the API
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION/" class="md-nav__link">
+        Switch Automation Engine region
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_8">
+          Backups Recovery plans
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Backups Recovery plans" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_8">
+          <span class="md-nav__icon md-icon"></span>
+          Backups Recovery plans
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../backups/ECR_RECOVERY_PLAN/" class="md-nav__link">
+        ECR backup recovery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../backups/EKS_SSH_RECOVERY_PLAN/" class="md-nav__link">
+        EKS SSH recovery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../backups/GIT_RECOVERY_PLAN/" class="md-nav__link">
+        GIT recovery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../backups/PROMETHEUS_RECOVERY_PLAN/" class="md-nav__link">
+        Prometheus recovery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../backups/TERRAFORM_RECOVERY_PLAN/" class="md-nav__link">
+        Terraform recovery
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_9" type="checkbox" id="__nav_2_9" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_9">
+          Manual configurations
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Manual configurations" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_9">
+          <span class="md-nav__icon md-icon"></span>
+          Manual configurations
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_configurations/INIT_AUTOMATION_PROJECT/" class="md-nav__link">
+        Init Automation Engine project
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_configurations/OKTA_CONFIGURATIONS/" class="md-nav__link">
+        AWS SSO Okta configurations
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_configurations/OKTA_JWT/" class="md-nav__link">
+        AWS SSO Okta JWT token
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -555,20 +794,12 @@
 <h2 id="subject-notificationemailrequest">Subject: notification.email.request</h2>
 <p><em>Message arrives at subject</em></p>
 <ul>
-<li>
-<p>If message doesn't have a body:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot send to email with </span><span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span><span class="si">}</span><span class="s2">. Must include body in request&quot;</span><span class="p">)</span>
+<li>If message does not contain <code>email_data</code>:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot send to email with </span><span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span><span class="si">}</span><span class="s1">. JSON malformed&quot;&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">END</span>
 </code></pre></div>
-  END</p>
-</li>
-<li>
-<p>If message body does not contain <code>email_data</code>:</p>
-</li>
+<a href="../../repositories/email_repository/send_to_email/">send_to_email</a></li>
 </ul>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot send to email with </span><span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span><span class="si">}</span><span class="s1">. JSON malformed&quot;&#39;</span><span class="p">)</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">END</span>
-</code></pre></div>
-<a href="../../repositories/email_repository/send_to_email/">send_to_email</a></p>
 
               
             </article>

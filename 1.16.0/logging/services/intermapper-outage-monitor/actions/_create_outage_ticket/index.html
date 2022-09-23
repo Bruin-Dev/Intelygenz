@@ -490,10 +490,249 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_7">
+          Manual procedures
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Manual procedures" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_7">
+          <span class="md-nav__icon md-icon"></span>
+          Manual procedures
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../../../../.." class="md-nav__link">
-        Manual processes
+      <a href="../../../../../manual_procedures/EMERGENCY_PLAN/" class="md-nav__link">
+        Emergency recovery plan
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_procedures/API_VENDOR_ACCESS/" class="md-nav__link">
+        Vendor access to the API
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION/" class="md-nav__link">
+        Switch Automation Engine region
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_8">
+          Backups Recovery plans
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Backups Recovery plans" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_8">
+          <span class="md-nav__icon md-icon"></span>
+          Backups Recovery plans
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../backups/ECR_RECOVERY_PLAN/" class="md-nav__link">
+        ECR backup recovery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../backups/EKS_SSH_RECOVERY_PLAN/" class="md-nav__link">
+        EKS SSH recovery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../backups/GIT_RECOVERY_PLAN/" class="md-nav__link">
+        GIT recovery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../backups/PROMETHEUS_RECOVERY_PLAN/" class="md-nav__link">
+        Prometheus recovery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../backups/TERRAFORM_RECOVERY_PLAN/" class="md-nav__link">
+        Terraform recovery
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_9" type="checkbox" id="__nav_2_9" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_9">
+          Manual configurations
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Manual configurations" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_9">
+          <span class="md-nav__icon md-icon"></span>
+          Manual configurations
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_configurations/INIT_AUTOMATION_PROJECT/" class="md-nav__link">
+        Init Automation Engine project
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_configurations/OKTA_CONFIGURATIONS/" class="md-nav__link">
+        AWS SSO Okta configurations
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../manual_configurations/OKTA_JWT/" class="md-nav__link">
+        AWS SSO Okta JWT token
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -603,31 +842,16 @@
 </ul>
 </li>
 <li>
-<p>If response status for get ticket details is not ok:
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>    <span class="sa">f</span><span class="s2">&quot;Bad status calling get ticket details to ticket id: </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">. Skipping append note to ticket...&quot;</span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="p">)</span>
-</code></pre></div></p>
-</li>
-<li>
-<p>If current condition has already been reported on the ticket:
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>    <span class="sa">f</span><span class="s2">&quot;Current condition has already been reported on ticket id </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">. &quot;</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>    <span class="sa">f</span><span class="s2">&quot;Skipping append note to ticket...&quot;</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="p">)</span>
-</code></pre></div></p>
-</li>
-<li>
 <p>If additional data exists in the DRI system for service number:
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>    <span class="sa">f</span><span class="s2">&quot;Appending InterMapper note to ticket id </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> with dri parameters: &quot;</span>
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dri_parameters</span><span class="si">}</span><span class="s2">&quot;</span>
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="p">)</span>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>    <span class="sa">f</span><span class="s2">&quot;Appending InterMapper note to ticket id </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> with dri parameters: &quot;</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dri_parameters</span><span class="si">}</span><span class="s2">&quot;</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="p">)</span>
 </code></pre></div>
     <a href="../../repositories/bruin_repository/append_dri_note/">append_dri_note</a></p>
 <ul>
 <li>If response status for append DRI note to ticket is not ok:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad status calling append dri note. Skipping append note to ticket...&quot;</span><span class="p">)</span>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad status calling append dri note. Skipping create outage ticket ...&quot;</span><span class="p">)</span>
 </code></pre></div></li>
 <li>
 <p>Otherwise:</p>
@@ -637,12 +861,12 @@
 </li>
 <li>
 <p>Otherwise:
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Appending InterMapper note to ticket id </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Appending InterMapper note to ticket id </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
     <a href="../../repositories/bruin_repository/append_intermapper_note/">append_intermapper_note</a></p>
 <ul>
 <li>If response status of append InterMapper note is not ok:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad status calling append intermapper note. Skipping append note to ticket...&quot;</span><span class="p">)</span>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad status calling append intermapper note. Skipping create outage ticket ...&quot;</span><span class="p">)</span>
 </code></pre></div>
   END</li>
 </ul>

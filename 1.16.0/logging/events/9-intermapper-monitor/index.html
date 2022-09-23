@@ -490,10 +490,249 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_7">
+          Manual procedures
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Manual procedures" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_7">
+          <span class="md-nav__icon md-icon"></span>
+          Manual procedures
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../../.." class="md-nav__link">
-        Manual processes
+      <a href="../../../manual_procedures/EMERGENCY_PLAN/" class="md-nav__link">
+        Emergency recovery plan
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../manual_procedures/API_VENDOR_ACCESS/" class="md-nav__link">
+        Vendor access to the API
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION/" class="md-nav__link">
+        Switch Automation Engine region
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_8">
+          Backups Recovery plans
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Backups Recovery plans" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_8">
+          <span class="md-nav__icon md-icon"></span>
+          Backups Recovery plans
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backups/ECR_RECOVERY_PLAN/" class="md-nav__link">
+        ECR backup recovery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backups/EKS_SSH_RECOVERY_PLAN/" class="md-nav__link">
+        EKS SSH recovery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backups/GIT_RECOVERY_PLAN/" class="md-nav__link">
+        GIT recovery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backups/PROMETHEUS_RECOVERY_PLAN/" class="md-nav__link">
+        Prometheus recovery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backups/TERRAFORM_RECOVERY_PLAN/" class="md-nav__link">
+        Terraform recovery
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_9" type="checkbox" id="__nav_2_9" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_9">
+          Manual configurations
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Manual configurations" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_9">
+          <span class="md-nav__icon md-icon"></span>
+          Manual configurations
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../manual_configurations/INIT_AUTOMATION_PROJECT/" class="md-nav__link">
+        Init Automation Engine project
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../manual_configurations/OKTA_CONFIGURATIONS/" class="md-nav__link">
+        AWS SSO Okta configurations
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../manual_configurations/OKTA_JWT/" class="md-nav__link">
+        AWS SSO Okta JWT token
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -621,12 +860,6 @@ be enriched with information from the DRI system.</p>
 </tr>
 <tr>
 <td>3</td>
-<td>Check to see if another DOWN event note with the same Condition has already been appended since the latest re-open</td>
-<td>Note with same Condition has already been appended since the latest re-open</td>
-<td>Note with same Condition has NOT been appended since the latest re-open</td>
-</tr>
-<tr>
-<td>4</td>
 <td>Check Probe Type and Condition of event</td>
 <td>Probe Type is Data Remote Probe AND Condition is Device Lost Power - Battery is in use</td>
 <td>Probe Type is NOT Data Remote Probe or Condition is NOT Device Lost Power - Battery is in use</td>
@@ -646,42 +879,36 @@ be enriched with information from the DRI system.</p>
 <tbody>
 <tr>
 <td>1</td>
-<td>Check to see if another UP event note with the same Condition has already been appended since the latest re-open</td>
-<td>Note with same Condition has already been appended since the latest re-open</td>
-<td>Note with same Condition has NOT been appended since the latest re-open</td>
-</tr>
-<tr>
-<td>2</td>
 <td>Check to see if ticket's product category is in the whitelist</td>
 <td>Ticket's product category is whitelisted</td>
 <td>Ticket's product category is NOT whitelisted</td>
 </tr>
 <tr>
-<td>3</td>
+<td>2</td>
 <td>Check for time at impacted site</td>
 <td>Time at impacted site is between 12am and 6am (NIGHT)</td>
 <td>Time at impacted site is between 6am and 12am (DAY)</td>
 </tr>
 <tr>
-<td>4</td>
+<td>3</td>
 <td>Check if time passed is more or less than 3 hrs (NIGHT)</td>
 <td>Less than 3 hrs have passed since an outage has been documented</td>
 <td>More than 3 hrs have passed since an outage has been documented</td>
 </tr>
 <tr>
-<td>5</td>
+<td>4</td>
 <td>Check if time passed is more or less than 90 min (DAY)</td>
 <td>Less than 90 min have passed since an outage has been documented</td>
 <td>More than 90 min have passed since an outage has been documented</td>
 </tr>
 <tr>
-<td>6</td>
+<td>5</td>
 <td>Check if max auto-resolves threshold has been exceeded</td>
 <td>Ticket has been auto-resolved less than 3 times</td>
 <td>Ticket has been auto-resolved 3+ times already</td>
 </tr>
 <tr>
-<td>7</td>
+<td>6</td>
 <td>Check if ticket is resolved</td>
 <td>Ticket is resolved already</td>
 <td>Ticket is not resolved</td>
