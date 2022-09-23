@@ -20,22 +20,22 @@ forticloud-poller-linter:
 # ===================================
 # Unit tests jobs for forticloud-poller module
 # ===================================
-#forticloud-poller-test:
-#  variables:
-#    MODULE: forticloud-poller
-#  rules:
-#    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
-#      changes:
-#        - services/forticloud-poller/src/application/**/*
-#        - services/forticloud-poller/src/config/**/*
-#        - services/forticloud-poller/src/app.py
-#        - services/forticloud-poller/Dockerfile
-#        - services/forticloud-poller/pyproject.toml
-#        - services/forticloud-poller/poetry.lock
-#        - pyutils_automation/py310/**/*
-#    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
-#  extends: .unittest_module_python_310
-#  needs: ["forticloud-poller-linter"]
+forticloud-poller-test:
+  variables:
+    MODULE: forticloud-poller
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+      changes:
+        - services/forticloud-poller/src/application/**/*
+        - services/forticloud-poller/src/config/**/*
+        - services/forticloud-poller/src/app.py
+        - services/forticloud-poller/Dockerfile
+        - services/forticloud-poller/pyproject.toml
+        - services/forticloud-poller/poetry.lock
+        - pyutils_automation/py310/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+  extends: .unittest_module_python_310
+  needs: ["forticloud-poller-linter"]
 
 # ======================================
 # Images builds jobs for forticloud-poller module

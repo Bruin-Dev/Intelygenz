@@ -344,13 +344,6 @@ data:
         log_group_name      {{ .Values.config.logGroupName }}
         log_stream_name     forticloud-poller
         auto_create_group   true
-    [OUTPUT]
-        Name                cloudwatch
-        Match               kube.var.log.containers.forticloud-poller*
-        region              {{ .Values.config.region }}
-        log_group_name      {{ .Values.config.logGroupName }}
-        log_stream_name     forticloud-poller
-        auto_create_group   true
 
 
   parsers.conf: |

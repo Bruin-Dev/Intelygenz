@@ -16,6 +16,14 @@ NATS_CONFIG = {
 }
 
 ENVIRONMENT_NAME = os.environ["ENVIRONMENT_NAME"]
+CURRENT_ENVIRONMENT = os.environ["CURRENT_ENVIRONMENT"]
+
+TIMEZONE = os.environ["TIMEZONE"]
+
+
+MONITOR_CONFIG = {
+    "monitoring_minutes_interval": int(os.environ["MONITORING__MONITORING_JOB_INTERVAL"]) // 60,
+}
 
 LOG_CONFIG = {
     "name": "forticloud-poller",
@@ -33,5 +41,7 @@ LOG_CONFIG = {
 QUART_CONFIG = {"title": "forticloud-poller", "port": 5000}
 
 REDIS = {"host": os.environ["REDIS_HOSTNAME"]}
+
+REDIS_FORTICLOUD_CACHE = {"host": os.environ["REDIS_FORTICLOUD_CACHE_HOSTNAME"]}
 
 METRICS_SERVER_CONFIG = {"port": 9090}

@@ -8,11 +8,7 @@
 
 ## Description <a name="forticloud-poller-description"></a>
 
-The forticloud poller get forticloud devices data from forticloud cache and send it through nats
-
-## 
-
-### Description <a name="_description"></a>
+The forticloud poller get forticloud data from redis and send it through nats
 
 # Running in docker-compose
 
