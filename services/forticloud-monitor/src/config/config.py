@@ -6,7 +6,7 @@ from pydantic import BaseSettings, Field
 class Config(BaseSettings):
     environment: str = Field("local", env="CURRENT_ENVIRONMENT")
     environment_name: str = Field("local", env="ENVIRONMENT_NAME")
-    health_server_port: int = Field(5000)
+    health_server_port: int = Field(5000, env="HEALTH_SERVER_PORT")
     papertrail_active: Optional[bool] = Field(True, env="PAPERTRAIL_ACTIVE")
     papertrail_host: Optional[str] = Field(None, env="PAPERTRAIL_HOST")
     papertrail_port: Optional[int] = Field(None, env="PAPERTRAIL_PORT")

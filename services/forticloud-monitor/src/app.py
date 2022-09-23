@@ -3,6 +3,7 @@ import logging
 import signal
 from asyncio import AbstractEventLoop
 
+from framework.http.server import Config as HealthConfig
 from framework.logging.formatters import Papertrail as PapertrailFormatter
 from framework.logging.formatters import Standard as StandardFormatter
 from framework.logging.handlers import Papertrail as PapertrailHandler
@@ -11,8 +12,10 @@ from framework.logging.handlers import Stdout as StdoutHandler
 from config.config import Config
 from health_server import HealthServer
 
-log = logging.getLogger("application")
-log.setLevel(logging.DEBUG)
+log = logging.getLogger()
+log.setLevel(logging.INFO)
+logging.getLogger("application").setLevel(logging.DEBUG)
+logging.getLogger("framework").setLevel(logging.DEBUG)
 
 
 class Application:
@@ -39,8 +42,8 @@ class Application:
 
         # Health server
         log.info("Starting health server ...")
-        self.health_server = HealthServer("health_server", 5000)
-        await self.health_server.start(asyncio.get_running_loop())
+        self.health_server = HealthServer(HealthConfig(config.health_server_port))
+        await self.health_server.run()
         log.info("Health server started")
 
         log.info("==========================================================")

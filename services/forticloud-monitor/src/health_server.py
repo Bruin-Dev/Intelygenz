@@ -1,32 +1,30 @@
+import asyncio
 import logging
-from asyncio import AbstractEventLoop
-from dataclasses import dataclass, field
 
-from sanic import HTTPResponse, Sanic
-from sanic.server import AsyncioServer
+from framework.http.server import Config, Server
+from hypercorn.asyncio import serve
 
 log = logging.getLogger(__name__)
-logging.getLogger("sanic.root").setLevel(logging.ERROR)
 
 
-@dataclass
-class HealthServer:
-    name: str
-    port: int
-    server: AsyncioServer = field(init=False)
-    sanic: Sanic = Sanic("health_server", log_config=dict(version=1, disable_existing_loggers=True))
+class HealthServer(Server):
+    def __init__(self, config: Config):
+        super().__init__(config)
+        self._shutdown_trigger = asyncio.Event()
+        self._shutdown_completed = asyncio.Event()
 
-    @sanic.route("/_health")
-    async def _health(self):
-        log.info("Got health check request in /_health")
-        return HTTPResponse()
+    async def run(self):
+        """
+        Runs the Quart server according to the configuration.
+        """
+        self._hypercorn_config.loglevel = "ERROR"
+        coro = serve(self.server, self._hypercorn_config, shutdown_trigger=self._shutdown_trigger.wait)
+        task = asyncio.create_task(coro)
+        task.add_done_callback(self._shutdown_callback)
 
-    async def start(self, loop: AbstractEventLoop):
-        self.server = await self.sanic.create_server(port=self.port, return_asyncio_server=True)
-        await self.server.startup()
-        loop.create_task(self.server.start_serving())
+    def _shutdown_callback(self, *args):
+        self._shutdown_completed.set()
 
     async def close(self):
-        self.server.close()
-        await self.server.wait_closed()
-        self.sanic.stop()
+        self._shutdown_trigger.set()
+        await self._shutdown_completed.wait()
