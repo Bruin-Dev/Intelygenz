@@ -76,9 +76,9 @@ It's important to have the .gitlab-ci.yaml files correctly defined to enable pip
 
 ## 3. Configure semantic-release 
 
-We need to edit two files, one in the new micro path and other in the root of the repo:
+We need to edit a file in the new micro path:
   * `new-bridge/package.json`
-  update the name of the micro with our new working name (do it respecting the alphabetical order):
+  update the name of the micro with our new working name:
   ````
   {
       "name": "new-bridge",    <─────────────── here!
@@ -86,18 +86,6 @@ We need to edit two files, one in the new micro path and other in the root of th
       "dependencies": {},
       "devDependencies": {}
   }
-  ````
-  * `package.json` (the file in the root of the repository)
-  add to the semantic-release global config our new path to analyze version changes (do it respecting the alphabetical order):
-  ````
-  ...
-      "./services/links-metrics-api",
-      "./services/links-metrics-collector",
-      "./services/lumin-billing-report",
-      "./services/new-bridge",    <─────────────── here!
-      "./services/service-affecting-monitor",
-      "./services/service-outage-monitor",
-  ...
   ````
 
 ## 3. Configure logs
