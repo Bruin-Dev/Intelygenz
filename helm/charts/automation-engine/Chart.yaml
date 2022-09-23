@@ -56,6 +56,9 @@ dependencies:
   - name: email-tagger-monitor
     version: '*.*.*'
     condition: email-tagger-monitor.enabled
+  - name: forticloud-monitor
+    version: '*.*.*'
+    condition: forticloud-monitor.enabled
   - name: fraud-monitor
     version: '*.*.*'
     condition: fraud-monitor.enabled

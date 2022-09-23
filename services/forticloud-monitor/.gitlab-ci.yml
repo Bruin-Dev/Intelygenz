@@ -1,0 +1,63 @@
+# ========================================================
+# Linter validation jobs for forticloud-monitor module
+# ========================================================
+forticloud-monitor-linter:
+  variables:
+    MODULE: forticloud-monitor
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+      changes:
+        - services/forticloud-monitor/src/application/**/*
+        - services/forticloud-monitor/src/config/**/*
+        - services/forticloud-monitor/src/app.py
+        - services/forticloud-monitor/Dockerfile
+        - services/forticloud-monitor/pyproject.toml
+        - services/forticloud-monitor/poetry.lock
+        - pyutils_automation/py310/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+  extends: .lint_module
+
+# =================================================
+# Unit tests jobs for forticloud-monitor module
+# =================================================
+#forticloud-monitor-test:
+#  variables:
+#    MODULE: forticloud-monitor
+#  rules:
+#    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+#      changes:
+#        - services/forticloud-monitor/src/application/**/*
+#        - services/forticloud-monitor/src/config/**/*
+#        - services/forticloud-monitor/src/app.py
+#        - services/forticloud-monitor/Dockerfile
+#        - services/forticloud-monitor/pyproject.toml
+#        - services/forticloud-monitor/poetry.lock
+#        - pyutils_automation/py310/**/*
+#    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+#  extends: .unittest_module_python_310
+#  needs: ["forticloud-monitor-linter"]
+
+# ====================================================
+# Images builds jobs for forticloud-monitor module
+# ====================================================
+forticloud-monitor-build:
+  stage: build
+  variables:
+    MODULE_NAME: forticloud-monitor
+    MODULE_VERSION: ${CI_PIPELINE_ID}
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $INTERMAPPER_OUTAGE_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+      changes:
+        - services/forticloud-monitor/src/application/**/*
+        - services/forticloud-monitor/src/config/**/*
+        - services/forticloud-monitor/src/app.py
+        - services/forticloud-monitor/Dockerfile
+        - services/forticloud-monitor/pyproject.toml
+        - services/forticloud-monitor/poetry.lock
+        - pyutils_automation/py310/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $INTERMAPPER_OUTAGE_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
+  extends: .build_app_image
+  needs:
+#    - job: forticloud-monitor-test
+    - job: semantic-release
+      optional: true

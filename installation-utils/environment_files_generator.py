@@ -445,6 +445,13 @@ env_dict = {
         f"DEFAULT_CLIENT_INFO_FOR_DID_WITHOUT_INVENTORY={FRAUD_MONITOR__DEFAULT_CLIENT_INFO_FOR_DID_WITHOUT_INVENTORY}",
         f"ALERTS_LOOKUP_DAYS={FRAUD_MONITOR__ALERTS_LOOKUP_DAYS}",
     ],
+    os.path.join("services", "forticloud-monitor", "src", "config", "env"): [
+        f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",
+        f"CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}",
+        f"PAPERTRAIL_ACTIVE={PAPERTRAIL_ACTIVE}",
+        f"PAPERTRAIL_HOST={PAPERTRAIL_HOST}",
+        f"PAPERTRAIL_PORT={PAPERTRAIL_PORT}",
+    ],
     os.path.join("services", "hawkeye-affecting-monitor", "src", "config", "env"): [
         f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",
         f"NATS_SERVER1={NATS_SERVER1}",

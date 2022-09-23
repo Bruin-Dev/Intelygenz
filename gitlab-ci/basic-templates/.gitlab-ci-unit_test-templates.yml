@@ -43,7 +43,7 @@
     - cd services/${MODULE}
     - poetry install --no-root
   script:
-    - poetry run pytest --cov
+    - poetry run pytest -m "not integration" --cov
   coverage: '/^TOTAL.+?(\d{2,3}.\d+\%)$/'
   tags:
     - kubernetes

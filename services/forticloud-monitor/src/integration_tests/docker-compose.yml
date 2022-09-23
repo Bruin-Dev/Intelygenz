@@ -1,0 +1,9 @@
+version: '3.6'
+services:
+  # Example service
+  redis:
+    image: redis:5.0.4
+    ports:
+      - 6379:6379
+    expose:
+      - 6379

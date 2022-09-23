@@ -137,6 +137,18 @@ services:
       - 5055:5000
       - 9790:9090
 
+  forticloud-monitor:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: services/forticloud-monitor/Dockerfile
+    env_file:
+      - services/forticloud-monitor/src/config/env
+    volumes:
+      - ./services/forticloud-monitor:/service/app
+    ports:
+      - 5025:5000
+
   fraud-monitor:
     build:
       # Context must be the root of the monorepo

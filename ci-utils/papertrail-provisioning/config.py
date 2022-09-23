@@ -74,6 +74,11 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "fraud-monitor",
                 },
                 {
+                    "query": f"forticloud-monitor AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[forticloud-monitor] - logs",
+                    "repository": "forticloud-monitor",
+                },
+                {
                     "query": f"gateway-monitor AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[gateway-monitor] - logs",
                     "repository": "gateway-monitor",
