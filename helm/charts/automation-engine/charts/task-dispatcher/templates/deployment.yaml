@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "task-dispatcher.fullname" . }}
+  labels:
+    {{- include "task-dispatcher.labels" . | nindent 4 }}
+  annotations:
+    reloader.stakater.com/search: "true"
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "task-dispatcher.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        {{- include "task-dispatcher.labels" . | nindent 8 }}
+      annotations:
+        fluentbit.io/parser: mettel_parser_logs
+    spec:
+      priorityClassName: medium-priority
+      initContainers:
+        {{- if .Values.config.capabilities_enabled.bruin_bridge }}
+        - name: wait-bruin-bridge
+          image: busybox:1.28
+          command: ['sh', '-c', 'until wget --spider -S http://bruin-bridge:5000/_health; do echo waiting for bruin-bridge; sleep 2; done']
+        {{- end }}
+        {{- if .Values.config.capabilities_enabled.email_bridge }}
+        - name: wait-email-bridge
+          image: busybox:1.28
+          command: [ 'sh', '-c', 'until wget --spider -S http://email-bridge:5000/_health; do echo waiting for email-bridge; sleep 2; done' ]
+        {{- end }}
+        {{- if .Values.config.capabilities_enabled.notifications_bridge }}
+        - name: wait-notifications-bridge
+          image: busybox:1.28
+          command: ['sh', '-c', 'until wget --spider -S http://notifications-bridge:5000/_health; do echo waiting for notifications-bridge; sleep 2; done']
+        {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "automation-master-latest" }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "task-dispatcher.configmapName" . }}
+            - secretRef:
+                name: {{ include "task-dispatcher.secretName" . }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+            {{- if .Values.config.metrics.enabled }}
+            - name: {{ .Values.config.metrics.svc.name }}
+              containerPort: {{ .Values.config.metrics.svc.port }}
+              protocol: TCP
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /_health
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /_health
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 15
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if eq .Values.global.mode "local" }}
+      imagePullSecrets:
+        - name: {{ .Values.global.ecr_registry.name }}
+      {{- end }}

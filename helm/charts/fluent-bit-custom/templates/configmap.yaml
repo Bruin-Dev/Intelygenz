@@ -283,6 +283,13 @@ data:
         auto_create_group   true
     [OUTPUT]
         Name                cloudwatch
+        Match               kube.var.log.containers.task-dispatcher*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     task-dispatcher
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
         Match               kube.var.log.containers.tnba-feedback*
         region              {{ .Values.config.region }}
         log_group_name      {{ .Values.config.logGroupName }}

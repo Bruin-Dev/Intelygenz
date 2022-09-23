@@ -188,6 +188,12 @@ scrape_configs:
     static_configs:
       - targets: ['t7-bridge:9090']
 
+  - job_name: 'task-dispatcher'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['task-dispatcher:9090']
+
   - job_name: 'tnba-feedback'
 
     scrape_interval: 5s

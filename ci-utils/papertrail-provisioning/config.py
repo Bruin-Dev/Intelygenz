@@ -219,6 +219,11 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "t7-bridge",
                 },
                 {
+                    "query": f"task-dispatcher AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[task-dispatcher] - logs",
+                    "repository": "task-dispatcher",
+                },
+                {
                     "query": f"tnba-feedback AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[tnba-feedback] - logs",
                     "repository": "tnba-feedback",
@@ -301,6 +306,10 @@ PAPERTRAIL_PROVISIONING = {
                 {
                     "query": f"gateway-monitor AND {ENVIRONMENT_NAME} AND ERROR:",
                     "search_name": f"[gateway-monitor] - ERROR messages",
+                },
+                {
+                    "query": f"task-dispatcher AND {ENVIRONMENT_NAME} AND ERROR:",
+                    "search_name": f"[task-dispatcher] - ERROR messages",
                 },
                 {
                     "query": f"tnba-feedback AND {ENVIRONMENT_ID} AND An error occurred when posting metrics",

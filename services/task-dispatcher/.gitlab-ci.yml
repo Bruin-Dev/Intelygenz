@@ -1,0 +1,42 @@
+# ==================================================
+# Linter validation jobs for task-dispatcher module
+# ==================================================
+task-dispatcher-linter:
+  variables:
+    MODULE: task-dispatcher
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+      changes:
+        - services/task-dispatcher/src/application/**/*
+        - services/task-dispatcher/src/config/**/*
+        - services/task-dispatcher/src/app.py
+        - services/task-dispatcher/Dockerfile
+        - services/task-dispatcher/pyproject.toml
+        - services/task-dispatcher/poetry.lock
+        - pyutils_automation/py310/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+  extends: .lint_module
+
+# ==============================================
+# Images builds jobs for task-dispatcher module
+# ==============================================
+task-dispatcher-build:
+  stage: build
+  variables:
+    MODULE_NAME: task-dispatcher
+    MODULE_VERSION: ${CI_PIPELINE_ID}
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $TASK_DISPATCHER_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+      changes:
+        - services/task-dispatcher/src/application/**/*
+        - services/task-dispatcher/src/config/**/*
+        - services/task-dispatcher/src/app.py
+        - services/task-dispatcher/Dockerfile
+        - services/task-dispatcher/pyproject.toml
+        - services/task-dispatcher/poetry.lock
+        - pyutils_automation/py310/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $TASK_DISPATCHER_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
+  extends: .build_app_image
+  needs:
+    - job: semantic-release
+      optional: true

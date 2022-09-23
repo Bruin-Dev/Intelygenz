@@ -119,6 +119,9 @@ dependencies:
   - name: t7-bridge
     version: '*.*.*'
     condition: t7-bridge.enabled
+  - name: task-dispatcher
+    version: '*.*.*'
+    condition: task-dispatcher.enabled
   - name: tnba-feedback
     version: '*.*.*'
     condition: tnba-feedback.enabled

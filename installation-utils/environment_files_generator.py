@@ -233,6 +233,9 @@ SERVICENOW__CLIENT_SECRET = parameters["common"]["servicenow-bridge"]["client-se
 SERVICENOW__USERNAME = parameters["common"]["servicenow-bridge"]["username"]
 SERVICENOW__PASSWORD = parameters["common"]["servicenow-bridge"]["password"]
 
+# Task Dispatcher variables
+TASK_DISPATCHER__DISPATCHING_JOB_INTERVAL = parameters["common"]["task-dispatcher"]["dispatching-job-interval"]
+
 # TNBA Feedback variables
 TNBA_FEEDBACK__FEEDBACK_JOB_INTERVAL = parameters["common"]["tnba-feedback"]["feedback-job-interval"]
 TNBA_FEEDBACK__MONITORED_VELOCLOUD_HOSTS = json.dumps(json.loads(parameters["dev"]["tnba-feedback"]["monitored-velocloud-hosts"]))
@@ -754,6 +757,17 @@ env_dict = {
         f"CLIENT_SECRET={SERVICENOW__CLIENT_SECRET}",
         f"USERNAME={SERVICENOW__USERNAME}",
         f"PASSWORD={SERVICENOW__PASSWORD}",
+    ],
+    os.path.join("services", "task-dispatcher", "src", "config", "env"): [
+        f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",
+        f"CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}",
+        f"NATS_SERVER1={NATS_SERVER1}",
+        f"REDIS_HOSTNAME={REDIS_HOSTNAME}",
+        f"PAPERTRAIL_ACTIVE={PAPERTRAIL_ACTIVE}",
+        f"PAPERTRAIL_HOST={PAPERTRAIL_HOST}",
+        f"PAPERTRAIL_PORT={PAPERTRAIL_PORT}",
+        f"TIMEZONE={TIMEZONE}",
+        f"DISPATCHING_JOB_INTERVAL={TASK_DISPATCHER__DISPATCHING_JOB_INTERVAL}",
     ],
 }
 

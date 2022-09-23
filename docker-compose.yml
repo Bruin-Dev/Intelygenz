@@ -549,6 +549,24 @@ services:
       - 5009:5000
       - 9097:9090
 
+  task-dispatcher:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: services/task-dispatcher/Dockerfile
+    env_file:
+      - services/task-dispatcher/src/config/env
+    volumes:
+      - ./services/task-dispatcher:/service/app
+    depends_on:
+      - nats-server
+      - redis
+      - bruin-bridge
+      - notifications-bridge
+    ports:
+      - 5011:5000
+      - 9102:9090
+
   tnba-feedback:
     build:
       # Context must be the root of the monorepo
