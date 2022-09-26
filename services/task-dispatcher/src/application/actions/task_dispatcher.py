@@ -2,9 +2,9 @@ import logging
 from datetime import datetime
 
 from apscheduler.jobstores.base import ConflictingIdError
+from framework.storage.task_dispatcher_client import TaskTypes
 from pytz import timezone
 
-from application import TaskTypes
 from application.repositories.utils_repository import to_json_bytes
 
 logger = logging.getLogger(__name__)
@@ -15,14 +15,14 @@ class TaskDispatcher:
         self,
         nats_client,
         scheduler,
+        task_dispatcher_client,
         config,
-        storage_repository,
         bruin_repository,
     ):
         self._nats_client = nats_client
         self._scheduler = scheduler
+        self._task_dispatcher_client = task_dispatcher_client
         self._config = config
-        self._storage_repository = storage_repository
         self._bruin_repository = bruin_repository
 
     async def start_dispatching(self):
@@ -45,7 +45,7 @@ class TaskDispatcher:
     async def _dispatch_due_tasks(self):
         logger.info("Getting due tasks...")
 
-        ticket_forward_tasks = self._storage_repository.get_due_tasks(TaskTypes.TICKET_FORWARDS)
+        ticket_forward_tasks = self._task_dispatcher_client.get_due_tasks(TaskTypes.TICKET_FORWARDS)
         due_tasks = ticket_forward_tasks
 
         if due_tasks:
@@ -72,7 +72,7 @@ class TaskDispatcher:
         result = "success" if success else "error"
         await self._nats_client.publish(f"task_dispatcher.{task['type'].value}.{result}", to_json_bytes(task["data"]))
 
-        self._storage_repository.delete_task(task["type"], task["key"])
+        self._task_dispatcher_client.clear_task(task["type"], task["key"])
         logger.info(f"Task of type {task['type'].value} for key {task['key']} was completed!")
 
     async def _forward_ticket(self, ticket_id: int, serial_number: str, target_queue: str, **_kwargs):

@@ -14,12 +14,12 @@ from framework.logging.handlers import Stdout as StdoutHandler
 from framework.nats.client import Client
 from framework.nats.models import Connection
 from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
+from framework.storage.task_dispatcher_client import TaskDispatcherClient
 from prometheus_client import start_http_server
 
 from application.actions.task_dispatcher import TaskDispatcher
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.notifications_repository import NotificationsRepository
-from application.repositories.storage_repository import StorageRepository
 from config import config
 
 base_handler = StdoutHandler()
@@ -66,13 +66,13 @@ class Container:
         # REDIS
         redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         redis_client.ping()
+        self._task_dispatcher_client = TaskDispatcherClient(config, redis_client)
 
         # NATS
         tmp_redis_storage = RedisStorage(storage_client=redis_client)
         self._nats_client = Client(temp_payload_storage=tmp_redis_storage)
 
         # REPOSITORIES
-        self._storage_repository = StorageRepository(config, redis_client)
         self._notifications_repository = NotificationsRepository(self._nats_client, config)
         self._bruin_repository = BruinRepository(self._nats_client, config, self._notifications_repository)
 
@@ -80,8 +80,8 @@ class Container:
         self._task_dispatcher = TaskDispatcher(
             self._nats_client,
             self._scheduler,
+            self._task_dispatcher_client,
             config,
-            self._storage_repository,
             self._bruin_repository,
         )
 
