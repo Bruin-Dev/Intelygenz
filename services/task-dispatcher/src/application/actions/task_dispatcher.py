@@ -67,7 +67,7 @@ class TaskDispatcher:
         success = False
 
         if task["type"] == TaskTypes.TICKET_FORWARDS:
-            success = await self._forward_ticket(task["type"], **task["data"])
+            success = await self._forward_ticket(**task["data"])
 
         if success:
             await self._nats_client.publish(f"dispatcher.{task['type'].value}.success", to_json_bytes(task["data"]))
@@ -75,7 +75,7 @@ class TaskDispatcher:
         self._storage_repository.delete_task(task["type"], task["key"])
         logger.info(f"Task of type {task['type'].value} for key {task['key']} was completed!")
 
-    async def _forward_ticket(self, ticket_id: int, serial_number: str, target_queue: str):
+    async def _forward_ticket(self, ticket_id: int, serial_number: str, target_queue: str, **_kwargs):
         change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
             ticket_id, serial_number, target_queue
         )
