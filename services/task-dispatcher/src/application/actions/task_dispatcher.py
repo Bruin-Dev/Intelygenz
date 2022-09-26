@@ -75,8 +75,10 @@ class TaskDispatcher:
         self._task_dispatcher_client.clear_task(task["type"], task["key"])
         logger.info(f"Task of type {task['type'].value} for key {task['key']} was completed!")
 
-    async def _forward_ticket(self, ticket_id: int, serial_number: str, target_queue: str, **_kwargs):
+    async def _forward_ticket(
+        self, target_queue: str, ticket_id: int, detail_id: int = None, serial_number: str = None, **_kwargs
+    ):
         change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
-            ticket_id, serial_number, target_queue
+            target_queue, ticket_id, detail_id, serial_number
         )
         return change_detail_work_queue_response["status"] in range(200, 300)
