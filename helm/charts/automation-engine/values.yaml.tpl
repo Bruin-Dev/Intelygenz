@@ -1313,6 +1313,47 @@ t7-bridge:
     targetMemoryUtilizationPercentage: 80
 
 
+# -- task-dispatcher subchart specific configuration
+task-dispatcher:
+  enabled: ${TASK_DISPATCHER_ENABLED}
+  replicaCount: ${TASK_DISPATCHER_DESIRED_TASKS}
+  config:
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/task-dispatcher
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ${TASK_DISPATCHER_BUILD_NUMBER}
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  autoscaling:
+    enabled: ${TASK_DISPATCHER_ENABLED}
+    minReplicas: ${TASK_DISPATCHER_DESIRED_TASKS}
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+
+
 # -- tnba-feedback subchart specific configuration
 tnba-feedback:
   enabled: ${TNBA_FEEDBACK_ENABLED}
