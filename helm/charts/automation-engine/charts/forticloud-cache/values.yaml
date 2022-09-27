@@ -1,8 +1,8 @@
-# Default values for forticloud-monitor.
+# Default values for forticloud-cache.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# -- Number of forticloud-monitor pods
+# -- Number of forticloud-cache pods
 replicaCount: 1
 
 enabled: true
@@ -106,7 +106,7 @@ config:
     #  servicediscovery: true
 
 image:
-  repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/forticloud-monitor
+  repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/forticloud-cache
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""

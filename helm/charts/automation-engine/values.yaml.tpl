@@ -449,6 +449,43 @@ forticloud-monitor:
       memory: 128Mi
 
 
+# -- forticloud-cache subchart specific configuration
+forticloud-cache:
+  # -- Field to indicate if the forticloud-cache module is going to be deployed
+  enabled: true
+  # -- Number of replicas of forticloud-cache module
+  replicaCount: 1
+  config:
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/forticloud-cache
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+
 # -- fraud-monitor subchart specific configuration
 fraud-monitor:
   enabled: ${FRAUD_MONITOR_ENABLED}

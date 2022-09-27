@@ -84,6 +84,11 @@ PAPERTRAIL_PROVISIONING = {
                     "repository": "forticloud-poller",
                 },
                 {
+                    "query": f"forticloud-cache AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
+                    "search_name": f"[forticloud-cache] - logs",
+                    "repository": "forticloud-cache",
+                },
+                {
                     "query": f"gateway-monitor AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[gateway-monitor] - logs",
                     "repository": "gateway-monitor",
@@ -307,6 +312,10 @@ PAPERTRAIL_PROVISIONING = {
                     "query": f"email-tagger-monitor AND {ENVIRONMENT_ID} AND "
                     f'"An error occurred when sending emails to Email Tagger"',
                     "search_name": "[email-tagger-monitor] KRE communication error",
+                },
+                {
+                    "query": f"forticloud-cache AND {ENVIRONMENT_NAME} AND ERROR:",
+                    "search_name": f"[forticloud-cache] - ERROR messages",
                 },
                 {
                     "query": f"gateway-monitor AND {ENVIRONMENT_NAME} AND ERROR:",

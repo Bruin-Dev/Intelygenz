@@ -59,6 +59,9 @@ dependencies:
   - name: forticloud-monitor
     version: '*.*.*'
     condition: forticloud-monitor.enabled
+  - name: forticloud-cache
+    version: '*.*.*'
+    condition: forticloud-cache.enabled
   - name: fraud-monitor
     version: '*.*.*'
     condition: fraud-monitor.enabled

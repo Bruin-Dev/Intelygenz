@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "forticloud-monitor.fullname" . }}
+  name: {{ include "forticloud-cache.fullname" . }}
   labels:
-    {{- include "forticloud-monitor.labels" . | nindent 4 }}
+    {{- include "forticloud-cache.labels" . | nindent 4 }}
   annotations:
     reloader.stakater.com/search: "true"
 spec:
@@ -12,13 +12,13 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "forticloud-monitor.selectorLabels" . | nindent 6 }}
+      {{- include "forticloud-cache.selectorLabels" . | nindent 6 }}
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        {{- include "forticloud-monitor.labels" . | nindent 8 }}
+        {{- include "forticloud-cache.labels" . | nindent 8 }}
       annotations:
         fluentbit.io/parser: mettel_parser_logs
     spec:
@@ -35,9 +35,9 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:
             - configMapRef:
-                name: {{ include "forticloud-monitor.configmapName" . }}
+                name: {{ include "forticloud-cache.configmapName" . }}
             - secretRef:
-                name: {{ include "forticloud-monitor.secretName" . }}
+                name: {{ include "forticloud-cache.secretName" . }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

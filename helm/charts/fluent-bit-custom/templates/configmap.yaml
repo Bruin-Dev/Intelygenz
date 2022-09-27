@@ -108,6 +108,13 @@ data:
         auto_create_group   true
     [OUTPUT]
         Name                cloudwatch
+        Match               kube.var.log.containers.forticloud-cache*
+        region              {{ .Values.config.region }}
+        log_group_name      {{ .Values.config.logGroupName }}
+        log_stream_name     forticloud-cache
+        auto_create_group   true
+    [OUTPUT]
+        Name                cloudwatch
         Match               kube.var.log.containers.gateway-monitor*
         region              {{ .Values.config.region }}
         log_group_name      {{ .Values.config.logGroupName }}

@@ -81,6 +81,12 @@ DIGI_REBOOT_REPORT__JOB_INTERVAL = parameters["common"]["digi-reboot-report"]["r
 DIGI_REBOOT_REPORT__LOGS_LOOKUP_INTERVAL = parameters["common"]["digi-reboot-report"]["logs-lookup-interval"]
 DIGI_REBOOT_REPORT__RECIPIENT = parameters["dev"]["digi-reboot-report"]["report-recipient"]
 
+# Forticloud variables
+FORTICLOUD_BASE_URL = parameters["dev"]["forticloud"]["base-url"]
+FORTICLOUD_USERNAME = parameters["common"]["forticloud"]["username"]
+FORTICLOUD_PASSWORD = parameters["common"]["forticloud"]["password"]
+FORTICLOUD_ACCOUNT = parameters["common"]["forticloud"]["account"]
+
 # Fraud Monitor variables
 FRAUD_MONITOR__MONITORING_JOB_INTERVAL = parameters["common"]["fraud-monitor"]["monitoring-job-interval"]
 FRAUD_MONITOR__OBSERVED_INBOX_EMAIL_ADDRESS = parameters["dev"]["fraud-monitor"]["observed-inbox-email-address"]
@@ -457,6 +463,20 @@ env_dict = {
         f"PAPERTRAIL_ACTIVE={PAPERTRAIL_ACTIVE}",
         f"PAPERTRAIL_HOST={PAPERTRAIL_HOST}",
         f"PAPERTRAIL_PORT={PAPERTRAIL_PORT}",
+    ],
+    os.path.join("services", "forticloud-cache", "src", "config", "env"): [
+        f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",
+        f"NATS_SERVER1={NATS_SERVER1}",
+        f"REDIS_HOSTNAME={REDIS_HOSTNAME}",
+        f"CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}",
+        f"TIMEZONE={TIMEZONE}",
+        f"PAPERTRAIL_ACTIVE={PAPERTRAIL_ACTIVE}",
+        f"PAPERTRAIL_HOST={PAPERTRAIL_HOST}",
+        f"PAPERTRAIL_PORT={PAPERTRAIL_PORT}",
+        f"FORTICLOUD_BASE_URL={FORTICLOUD_BASE_URL}",
+        f"FORTICLOUD_USERNAME={FORTICLOUD_USERNAME}",
+        f"FORTICLOUD_PASSWORD={FORTICLOUD_PASSWORD}",
+        f"FORTICLOUD_ACCOUNT={FORTICLOUD_ACCOUNT}",
     ],
     os.path.join("services", "hawkeye-affecting-monitor", "src", "config", "env"): [
         f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",
