@@ -804,18 +804,18 @@
 <li>
 <p>If e-mail represents an UP event:
   <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="sa">f</span><span class="s1">&#39;Event from InterMapper was </span><span class="si">{</span><span class="n">parsed_email_dict</span><span class="p">[</span><span class="s2">&quot;event&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">, there is no need to create &#39;</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="sa">f</span><span class="s2">&quot;a new ticket. Checking for autoresolve ...&quot;</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">)</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="sa">f</span><span class="s1">&#39;Event from InterMapper was </span><span class="si">{</span><span class="n">parsed_email_dict</span><span class="p">[</span><span class="s2">&quot;event&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">, there is no need to create a new ticket&quot;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="p">)</span>
 </code></pre></div>
   <a href="../_autoresolve_ticket/">_autoresolve_ticket</a></p>
 </li>
 <li>
 <p>If e-mail represents a DOWN event:
   <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="sa">f</span><span class="s1">&#39;Event from InterMapper was </span><span class="si">{</span><span class="n">parsed_email_dict</span><span class="p">[</span><span class="s2">&quot;event&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">, &#39;</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="sa">f</span><span class="s1">&#39;condition was </span><span class="si">{</span><span class="n">parsed_email_dict</span><span class="p">[</span><span class="s2">&quot;condition&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">. Checking for ticket creation ...&#39;</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="sa">f</span><span class="s1">&#39;Event: </span><span class="si">{</span><span class="n">parsed_email_dict</span><span class="p">[</span><span class="s2">&quot;event&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1"> - &#39;</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="sa">f</span><span class="s1">&#39;Condition: </span><span class="si">{</span><span class="n">parsed_email_dict</span><span class="p">[</span><span class="s2">&quot;condition&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1"> - &#39;</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="sa">f</span><span class="s1">&#39;Document: </span><span class="si">{</span><span class="n">parsed_email_dict</span><span class="p">[</span><span class="s2">&quot;document&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="p">)</span>
 </code></pre></div></p>
 <ul>
 <li>If device is a PIAB:

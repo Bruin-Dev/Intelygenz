@@ -817,10 +817,9 @@
 <li><a href="../../repositories/bruin_repository/get_ticket_details/">Get ticket details</a></li>
 <li>if remove_auto_resolution_restrictions_for_byob
     <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.info(
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>                  f&quot;Task for serial {serial_number} in ticket {affecting_ticket_id} is in the IPA Investigate&quot;
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>                  f&quot; queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last&quot;
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>                  f&quot; documented trouble...&quot;
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>                )
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>                  f&quot;Task for serial {serial_number} in ticket {affecting_ticket_id} is related to a BYOB link &quot;
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>                  f&quot;and is in the IPA Investigate queue. Ignoring auto-resolution restrictions...&quot;
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>                )
 </code></pre></div></li>
 <li>else<ul>
 <li>if not last_trouble_was_detected_recently
