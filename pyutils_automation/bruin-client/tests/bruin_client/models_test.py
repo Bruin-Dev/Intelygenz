@@ -3,10 +3,10 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from models import BruinCredentials, BruinToken
+from bruin_client import BruinCredentials, BruinToken
 
 
-@patch("models.base64")
+@patch("bruin_client.models.base64")
 def bruin_credentials_are_properly_encoded_test(base64):
     # given
     bruin_credentials = BruinCredentials(client_id="any_client_id", client_secret="any_client_secret")
@@ -19,17 +19,21 @@ def bruin_credentials_are_properly_encoded_test(base64):
     base64.b64encode.assert_called_once_with(b"any_client_id:any_client_secret")
 
 
-@patch("models.base64")
+@patch("bruin_client.models.base64")
 def encoded_bruin_credentials_are_properly_returned_test(base64):
     # given
     bruin_credentials = BruinCredentials(client_id="any_client_id", client_secret="any_client_secret")
-    base64.b64encode = Mock(b"any_base64_credentials")
+    base64.b64encode = Mock(return_value=b"any_base64_credentials")
 
     # then
-    bruin_credentials.b64encoded() == "any_base64_credentials"
+    assert bruin_credentials.b64encoded() == "any_base64_credentials"
 
 
-@patch("models.datetime")
+def new_tokens_are_initially_expired():
+    assert BruinToken().is_expired()
+
+
+@patch("bruin_client.models.datetime")
 @pytest.mark.parametrize(
     ["issued_at", "expires_in", "utcnow", "is_expired"],
     [

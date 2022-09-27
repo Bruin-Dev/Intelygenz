@@ -7,8 +7,7 @@ from unittest.mock import Mock
 import pytest
 from aiohttp import ClientResponse
 
-from client import TOKEN_FORM_DATA, TOKEN_METHOD, TOKEN_PATH, BruinClient
-from models import BruinCredentials, BruinRequest, BruinResponse, BruinToken, RefreshTokenError
+from bruin_client import BruinClient, BruinCredentials, BruinRequest, BruinResponse, BruinToken, RefreshTokenError
 
 
 async def requests_are_properly_sent_test(any_bruin_client, any_request, any_response):
@@ -78,6 +77,15 @@ async def responses_are_properly_built_test(any_bruin_client, any_request, any_r
     assert await bruin_client.send(any_request) == BruinResponse(status=1, text="any_text")
 
 
+async def bruin_client_tokens_are_initially_expired_test(any_credentials):
+    # given
+    bruin_client = BruinClient("http://localhost", any_credentials)
+
+    # then
+    assert bruin_client.token.is_expired()
+    await bruin_client.close()
+
+
 async def expired_tokens_are_automatically_refreshed_test(any_bruin_client, any_request, any_expired_token):
     # given
     refresh_token = AsyncMock()
@@ -132,6 +140,18 @@ async def non_parseable_token_responses_raise_a_proper_exception_test(any_bruin_
         await bruin_client.refresh_token()
 
 
+async def bruin_clients_are_properly_closed_test(any_bruin_client):
+    # given
+    close = AsyncMock()
+    bruin_client = any_bruin_client(close=close)
+
+    # when
+    await bruin_client.close()
+
+    # then
+    close.assert_awaited_once()
+
+
 @pytest.fixture
 def any_bruin_client(any_response, any_credentials, any_valid_token):
     def builder(
@@ -139,10 +159,12 @@ def any_bruin_client(any_response, any_credentials, any_valid_token):
         bruin_credentials: BruinCredentials = any_credentials(),
         bruin_token: BruinToken = any_valid_token,
         refresh_token: Optional[AsyncMock] = None,
+        close: AsyncMock = AsyncMock(),
     ):
         bruin_client = BruinClient(base_url="http://localhost", credentials=bruin_credentials)
         bruin_client.token = bruin_token
         bruin_client.session.request = http_request
+        bruin_client.session.close = close
         if refresh_token:
             bruin_client.refresh_token = refresh_token
 
@@ -185,22 +207,6 @@ def any_valid_token():
 @pytest.fixture
 def any_expired_token():
     return BruinToken(issued_at=datetime.utcnow() - timedelta(minutes=1))
-
-
-@pytest.fixture
-def refresh_args_for():
-    def builder(bruin_credentials: BruinCredentials):
-        return dict(
-            method=TOKEN_METHOD,
-            url=TOKEN_PATH,
-            data=TOKEN_FORM_DATA,
-            headers={
-                "authorization": f"Basic {bruin_credentials.b64encoded()}",
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-        )
-
-    return builder
 
 
 @pytest.fixture

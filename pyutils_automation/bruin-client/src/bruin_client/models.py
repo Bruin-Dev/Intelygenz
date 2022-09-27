@@ -15,8 +15,8 @@ class BruinCredentials:
 
 @dataclass
 class BruinToken:
-    value: str = "initial_token"
-    expires_in: int = 0
+    value: str = ""
+    expires_in: int = -1
     issued_at: datetime = field(default_factory=lambda: datetime.utcnow())
 
     def is_expired(self) -> bool:

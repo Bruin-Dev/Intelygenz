@@ -5,7 +5,7 @@ from http import HTTPStatus
 from aiohttp import ClientSession
 from pydantic.main import BaseModel
 
-from models import BruinCredentials, BruinRequest, BruinResponse, BruinToken, RefreshTokenError
+from bruin_client.models import BruinCredentials, BruinRequest, BruinResponse, BruinToken, RefreshTokenError
 
 log = logging.getLogger(__name__)
 TOKEN_METHOD = "POST"
@@ -70,6 +70,9 @@ class BruinClient:
             self.token = BruinToken(value=token_response.access_token, expires_in=token_response.expires_in)
         except Exception as e:
             raise RefreshTokenError(f"Failed to parse Bruin response: {response_text}") from e
+
+    async def close(self):
+        await self.session.close()
 
     def request_headers(self):
         return {
