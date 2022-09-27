@@ -503,19 +503,6 @@ pure-eval = "*"
 tests = ["cython", "littleutils", "pygments", "typeguard", "pytest"]
 
 [[package]]
-name = "testing"
-version = "1.0.0"
-description = "Testing utilities"
-category = "dev"
-optional = false
-python-versions = "3.10.4"
-develop = false
-
-[package.source]
-type = "directory"
-url = "../testing"
-
-[[package]]
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
@@ -565,7 +552,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "3.10.4"
-content-hash = "e01f1cf99a359b9ce66061767972d60b01cef42cf79a5e36f14ab75340c6ca08"
+content-hash = "20afc792bf1ecc1b4eeec7e9f3c40a37074c83519fe61d6d32e1ce20ca1a10be"
 
 [metadata.files]
 aiohttp = [
@@ -1028,7 +1015,6 @@ stack-data = [
     {file = "stack_data-0.5.1-py3-none-any.whl", hash = "sha256:5120731a18ba4c82cefcf84a945f6f3e62319ef413bfc210e32aca3a69310ba2"},
     {file = "stack_data-0.5.1.tar.gz", hash = "sha256:95eb784942e861a3d80efd549ff9af6cf847d88343a12eb681d7157cfcb6e32b"},
 ]
-testing = []
 tomli = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
     {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},

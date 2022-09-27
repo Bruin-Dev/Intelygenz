@@ -21,11 +21,13 @@ class BruinClient:
     """
 
     base_url: str
+    login_url: str
     credentials: BruinCredentials
     token: BruinToken = field(init=False, default_factory=BruinToken)
 
     def __post_init__(self):
         self.session = ClientSession(base_url=self.base_url)
+        self.login_session = ClientSession(base_url=self.login_url)
 
     async def send(self, bruin_request: BruinRequest) -> BruinResponse:
         """
@@ -51,7 +53,7 @@ class BruinClient:
     async def refresh_token(self):
         log.debug(f"refresh_token()")
         # Make the value request
-        response = await self.session.request(
+        response = await self.login_session.request(
             method=TOKEN_METHOD,
             url=TOKEN_PATH,
             data=TOKEN_FORM_DATA,
