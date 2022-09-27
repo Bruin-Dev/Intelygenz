@@ -79,7 +79,7 @@ async def responses_are_properly_built_test(any_bruin_client, any_request, any_r
 
 async def bruin_client_tokens_are_initially_expired_test(any_credentials):
     # given
-    bruin_client = BruinClient("http://localhost", any_credentials)
+    bruin_client = BruinClient(base_url="any://url", login_url="any://url", credentials=any_credentials)
 
     # then
     assert bruin_client.token.is_expired()
@@ -112,8 +112,8 @@ async def valid_tokens_are_never_refreshed_test(any_bruin_client, any_request, a
 
 async def tokens_are_properly_refreshed_test(any_bruin_client, any_response):
     # given
-    http_request = AsyncMock(return_value=any_response(text='{"access_token":"any_access_token","expires_in":1}'))
-    bruin_client = any_bruin_client(http_request=http_request)
+    login_request = AsyncMock(return_value=any_response(text='{"access_token":"any_access_token","expires_in":1}'))
+    bruin_client = any_bruin_client(login_request=login_request)
 
     # when
     await bruin_client.refresh_token()
@@ -124,7 +124,7 @@ async def tokens_are_properly_refreshed_test(any_bruin_client, any_response):
 
 async def token_refresh_error_status_raise_a_proper_exception_test(any_bruin_client, any_response):
     # given
-    bruin_client = any_bruin_client(http_request=AsyncMock(return_value=any_response(status=400)))
+    bruin_client = any_bruin_client(login_request=AsyncMock(return_value=any_response(status=400)))
 
     # then
     with pytest.raises(RefreshTokenError):
@@ -133,7 +133,7 @@ async def token_refresh_error_status_raise_a_proper_exception_test(any_bruin_cli
 
 async def non_parseable_token_responses_raise_a_proper_exception_test(any_bruin_client, any_response):
     # given
-    bruin_client = any_bruin_client(http_request=AsyncMock(return_value=any_response(text="non_parseable_data")))
+    bruin_client = any_bruin_client(login_request=AsyncMock(return_value=any_response(text="non_parseable_data")))
 
     # then
     with pytest.raises(RefreshTokenError):
@@ -153,17 +153,19 @@ async def bruin_clients_are_properly_closed_test(any_bruin_client):
 
 
 @pytest.fixture
-def any_bruin_client(any_response, any_credentials, any_valid_token):
+def any_bruin_client(any_response, any_login_response, any_credentials, any_valid_token):
     def builder(
         http_request: AsyncMock = AsyncMock(return_value=any_response()),
+        login_request: AsyncMock = AsyncMock(return_value=any_login_response()),
         bruin_credentials: BruinCredentials = any_credentials(),
         bruin_token: BruinToken = any_valid_token,
         refresh_token: Optional[AsyncMock] = None,
         close: AsyncMock = AsyncMock(),
     ):
-        bruin_client = BruinClient(base_url="http://localhost", credentials=bruin_credentials)
+        bruin_client = BruinClient(base_url="any://url", login_url="any://url", credentials=bruin_credentials)
         bruin_client.token = bruin_token
         bruin_client.session.request = http_request
+        bruin_client.login_session.request = login_request
         bruin_client.session.close = close
         if refresh_token:
             bruin_client.refresh_token = refresh_token
@@ -197,6 +199,11 @@ def any_response():
         return client_response
 
     return builder
+
+
+@pytest.fixture
+def any_login_response(any_response):
+    return any_response(text='{"access_token":"any_access_token","expires_in":1}')
 
 
 @pytest.fixture
