@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1ag9804" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="9.3.1">
+  <bpmn:process id="Process_1hxvniw" isExecutable="false">
+    <bpmn:startEvent id="Event_03hnn4d" name="Cycle starts">
+      <bpmn:outgoing>Flow_1wsudsu</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:dataStoreReference id="DataStoreReference_0jw3tgs" name="Parameter store" />
+    <bpmn:task id="Activity_0efb08w" name="Use describe_parameters function to get parameters">
+      <bpmn:incoming>Flow_1wsudsu</bpmn:incoming>
+      <bpmn:outgoing>Flow_10domzi</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOutputAssociation_16vpeu9">
+        <bpmn:targetRef>DataStoreReference_0jw3tgs</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_1wsudsu" sourceRef="Event_03hnn4d" targetRef="Activity_0efb08w" />
+    <bpmn:task id="Activity_1gf8df5" name="Use get_parameter function to get each parameter&#39;s unencrypted value">
+      <bpmn:incoming>Flow_10domzi</bpmn:incoming>
+      <bpmn:outgoing>Flow_0eysy73</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOutputAssociation_1bq24jk">
+        <bpmn:targetRef>DataStoreReference_0jw3tgs</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_10domzi" sourceRef="Activity_0efb08w" targetRef="Activity_1gf8df5" />
+    <bpmn:task id="Activity_04t86kd" name="Make a dictionary with parameter&#39;s name as key and parameter&#39;s value as the value">
+      <bpmn:incoming>Flow_0eysy73</bpmn:incoming>
+      <bpmn:outgoing>Flow_0z0zozb</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_0eysy73" sourceRef="Activity_1gf8df5" targetRef="Activity_04t86kd" />
+    <bpmn:task id="Activity_0w96eru" name="Create a file with new dictionary">
+      <bpmn:incoming>Flow_0z0zozb</bpmn:incoming>
+      <bpmn:outgoing>Flow_17wdksr</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_0z0zozb" sourceRef="Activity_04t86kd" targetRef="Activity_0w96eru" />
+    <bpmn:dataStoreReference id="DataStoreReference_09dwyr8" name="S3 bucket" />
+    <bpmn:task id="Activity_1rqftwr" name="Send file to s3 bucket under file name ssm_backup.txt">
+      <bpmn:incoming>Flow_17wdksr</bpmn:incoming>
+      <bpmn:dataOutputAssociation id="DataOutputAssociation_1am3dr9">
+        <bpmn:targetRef>DataStoreReference_09dwyr8</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_17wdksr" sourceRef="Activity_0w96eru" targetRef="Activity_1rqftwr" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1hxvniw">
+      <bpmndi:BPMNEdge id="Flow_1wsudsu_di" bpmnElement="Flow_1wsudsu">
+        <di:waypoint x="208" y="270" />
+        <di:waypoint x="300" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10domzi_di" bpmnElement="Flow_10domzi">
+        <di:waypoint x="400" y="270" />
+        <di:waypoint x="480" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0eysy73_di" bpmnElement="Flow_0eysy73">
+        <di:waypoint x="580" y="270" />
+        <di:waypoint x="640" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0z0zozb_di" bpmnElement="Flow_0z0zozb">
+        <di:waypoint x="740" y="270" />
+        <di:waypoint x="820" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_17wdksr_di" bpmnElement="Flow_17wdksr">
+        <di:waypoint x="920" y="270" />
+        <di:waypoint x="980" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_03hnn4d_di" bpmnElement="Event_03hnn4d">
+        <dc:Bounds x="172" y="252" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="161" y="295" width="58" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0efb08w_di" bpmnElement="Activity_0efb08w">
+        <dc:Bounds x="300" y="230" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataStoreReference_0jw3tgs_di" bpmnElement="DataStoreReference_0jw3tgs">
+        <dc:Bounds x="415" y="85" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="401" y="142" width="79" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1gf8df5_di" bpmnElement="Activity_1gf8df5">
+        <dc:Bounds x="480" y="230" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_04t86kd_di" bpmnElement="Activity_04t86kd">
+        <dc:Bounds x="640" y="230" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0w96eru_di" bpmnElement="Activity_0w96eru">
+        <dc:Bounds x="820" y="230" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataStoreReference_09dwyr8_di" bpmnElement="DataStoreReference_09dwyr8">
+        <dc:Bounds x="1165" y="245" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1166" y="302" width="49" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1rqftwr_di" bpmnElement="Activity_1rqftwr">
+        <dc:Bounds x="980" y="230" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataOutputAssociation_16vpeu9_di" bpmnElement="DataOutputAssociation_16vpeu9">
+        <di:waypoint x="371" y="230" />
+        <di:waypoint x="422" y="135" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOutputAssociation_1bq24jk_di" bpmnElement="DataOutputAssociation_1bq24jk">
+        <di:waypoint x="508" y="230" />
+        <di:waypoint x="456" y="135" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOutputAssociation_1am3dr9_di" bpmnElement="DataOutputAssociation_1am3dr9">
+        <di:waypoint x="1080" y="270" />
+        <di:waypoint x="1165" y="270" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
