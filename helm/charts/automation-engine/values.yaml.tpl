@@ -112,6 +112,8 @@ global:
   redis_tnba_feedback_hostname: "ref+awsssm://automation-engine/${CURRENT_ENVIRONMENT_SHORT}/redis/tnba-feedback-hostname"
   # -- Redis Hostname used to store information used by email-tagger
   redis_email_tagger_hostname: "ref+awsssm://automation-engine/${CURRENT_ENVIRONMENT_SHORT}/redis/email-tagger-hostname"
+    # -- Redis Hostname used to store information used by forticloud
+  redis_forticloud_cache_hostname: "ref+awsssm://automation-engine/${CURRENT_ENVIRONMENT_SHORT}/redis/forticloud-cache-hostname"
   # -- external-secrets feature to sync parameters from AWS
   externalSecrets:
     # -- Enable/disable external-secrets

@@ -147,6 +147,24 @@ services:
     ports:
       - 5025:5000
 
+  forticloud-cache:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: services/forticloud-cache/Dockerfile
+    env_file:
+      - services/forticloud-cache/src/config/env
+    volumes:
+      - ./services/forticloud-cache:/service/app
+    depends_on:
+      - nats-server
+      - redis
+      - redis-forticloud-cache
+      - notifications-bridge
+    ports:
+      - 5032:5000
+      - 9838:9090
+
   fraud-monitor:
     build:
       # Context must be the root of the monorepo
@@ -177,6 +195,7 @@ services:
     depends_on:
       - nats-server
       - redis
+      - redis-forticloud-cache
       - notifications-bridge
     ports:
       - 5032:5000
@@ -629,6 +648,13 @@ services:
       - 6380:6379
     expose:
       - 6380
+
+  redis-forticloud-cache:
+    image: redis:5.0.4
+    ports:
+      - 6384:6379
+    expose:
+      - 6384
 
   redis-tnba-feedback:
     image: redis:5.0.4

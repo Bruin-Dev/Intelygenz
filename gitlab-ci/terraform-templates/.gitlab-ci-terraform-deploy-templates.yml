@@ -99,6 +99,12 @@
                               elif [[ ${e} == "3-redis-email-tagger" ]]; then
                                   curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/REDIS_EMAIL_TAGGER_HOSTNAME_DEV" --form "value=$(terraform output REDIS_EMAIL_TAGGER_HOSTNAME)"
                               fi
+                              if [[ ${e} == "4-redis-forticloud-cache" &&  "$TF_VAR_ENVIRONMENT" == "production" ]]; then
+                                  echo "updating gitlab-ci variables with deployed infra values.."
+                                  curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/REDIS_FORTICLOUD_CACHE_HOSTNAME_PRO" --form "value=$(terraform output REDIS_FORTICLOUD_CACHE_HOSTNAME)"
+                              elif [[ ${e} == "1-redis-forticloud-cache" ]]; then
+                                  curl --request PUT --header "PRIVATE-TOKEN:${GITLAB_TOKEN}" "https://gitlab.intelygenz.com/api/v4/projects/1040/variables/REDIS_FORTICLOUD_CACHE_HOSTNAME_DEV" --form "value=$(terraform output REDIS_FORTICLOUD_CACHE_HOSTNAME)"
+                              fi
                           fi
                           cd ..
                       )

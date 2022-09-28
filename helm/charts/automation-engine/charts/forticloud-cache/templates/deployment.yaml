@@ -29,6 +29,12 @@ spec:
           image: busybox:1.28
           command: [ 'sh', '-c', 'until wget --spider -S http://notifications-bridge:5000/_health; do echo waiting for notifications-bridge; sleep 2; done' ]
         {{- end }}
+        - name: wait-redis-forticloud-cache
+          image: busybox:1.28
+          command: [ 'sh', '-c', 'until printf "PING\r\n" | nc ${REDIS_FORTICLOUD_CACHE_HOSTNAME} 6379; do echo waiting for redis; sleep 2; done' ]
+          envFrom:
+            - configMapRef:
+                name: {{ include "forticloud-cache.configmapName" . }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "automation-master-latest" }}"

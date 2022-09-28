@@ -112,6 +112,8 @@ global:
   redis_tnba_feedback_hostname: "redis"
   # -- Redis Hostname used to store information used by email-tagger
   redis_email_tagger_hostname: "redis"
+  # -- Redis Hostname used to store information used by forticloud
+  redis_forticloud_cache_hostname: "redis"
   # -- external-secrets feature to sync parameters from AWS
   externalSecrets:
     # -- Enable/disable external-secrets

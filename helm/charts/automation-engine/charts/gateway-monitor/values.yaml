@@ -14,6 +14,8 @@ global:
   environment: "automation-test"
   # -- Redis Hostname used to store heavy NATS messages (>1MB)
   redis_hostname: "redis"
+  # -- Redis Hostname used to store information used by forticloud
+  redis_forticloud_cache_hostname: "redis"
   externalSecrets:
     # -- Enable/disable external-secrets
     enabled: true

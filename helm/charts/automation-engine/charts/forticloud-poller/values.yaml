@@ -2,6 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# -- Number of forticloud-poller pods
 replicaCount: 1
 
 enabled: true
@@ -14,6 +15,13 @@ global:
   environment: "automation-test"
   # -- Redis Hostname used to store heavy NATS messages (>1MB)
   redis_hostname: "redis"
+  # -- Redis Hostname used to store metrics obtained from tnba-feedback to train the ML model
+  redis_tnba_feedback_hostname: "redis"
+  # -- Redis Hostname used to store information used by email-tagger
+  redis_email_tagger_hostname: "redis"
+  # -- Redis Hostname used to store information used by forticloud
+  redis_forticloud_cache_hostname: "redis"
+  # -- external-secrets feature to sync parameters from AWS
   externalSecrets:
     # -- Enable/disable external-secrets
     enabled: true
@@ -93,7 +101,7 @@ config:
       name: metrics
     ## Additional labels for the service monitor
     ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
-    labels: { }
+    labels: {}
     #labels:
     #  servicediscovery: true
 
@@ -109,11 +117,11 @@ service:
 
 resources:
   limits:
-    cpu: 300m
-    memory: 384Mi
+    cpu: 400m
+    memory: 512Mi
   requests:
-    cpu: 150m
-    memory: 192Mi
+    cpu: 200m
+    memory: 256Mi
 
 autoscaling:
   enabled: false

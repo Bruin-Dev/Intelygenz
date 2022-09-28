@@ -10,3 +10,4 @@ data:
   CURRENT_ENVIRONMENT: {{ .Values.global.current_environment | quote }}
   ENVIRONMENT_NAME: {{ .Values.global.environment | quote }}
   PAPERTRAIL_PREFIX: "{{ include "forticloud-cache.fullname" . }}-{{ .Values.image.tag }}"
+  REDIS_FORTICLOUD_CACHE_HOSTNAME: {{ .Values.global.redis_forticloud_cache_hostname | quote }}
