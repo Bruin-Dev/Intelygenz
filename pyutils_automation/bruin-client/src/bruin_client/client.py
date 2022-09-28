@@ -75,6 +75,7 @@ class BruinClient:
 
     async def close(self):
         await self.session.close()
+        await self.login_session.close()
 
     def request_headers(self):
         return {

@@ -143,13 +143,13 @@ async def non_parseable_token_responses_raise_a_proper_exception_test(any_bruin_
 async def bruin_clients_are_properly_closed_test(any_bruin_client):
     # given
     close = AsyncMock()
-    bruin_client = any_bruin_client(close=close)
+    bruin_client = any_bruin_client(close=close, login_close=close)
 
     # when
     await bruin_client.close()
 
     # then
-    close.assert_awaited_once()
+    assert close.await_count == 2
 
 
 @pytest.fixture
@@ -161,12 +161,14 @@ def any_bruin_client(any_response, any_login_response, any_credentials, any_vali
         bruin_token: BruinToken = any_valid_token,
         refresh_token: Optional[AsyncMock] = None,
         close: AsyncMock = AsyncMock(),
+        login_close: AsyncMock = AsyncMock(),
     ):
         bruin_client = BruinClient(base_url="any://url", login_url="any://url", credentials=bruin_credentials)
         bruin_client.token = bruin_token
         bruin_client.session.request = http_request
-        bruin_client.login_session.request = login_request
         bruin_client.session.close = close
+        bruin_client.login_session.request = login_request
+        bruin_client.login_session.close = login_close
         if refresh_token:
             bruin_client.refresh_token = refresh_token
 
