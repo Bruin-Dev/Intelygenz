@@ -451,10 +451,8 @@ forticloud-monitor:
 
 # -- forticloud-cache subchart specific configuration
 forticloud-cache:
-  # -- Field to indicate if the forticloud-cache module is going to be deployed
-  enabled: true
-  # -- Number of replicas of forticloud-cache module
-  replicaCount: 1
+  enabled: ${FORTICLOUD_CACHE_ENABLED}
+  replicaCount: ${FORTICLOUD_CACHE_DESIRED_TASKS}
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
