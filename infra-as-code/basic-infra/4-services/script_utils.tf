@@ -9,7 +9,7 @@
   }
 
   depends_on = [
-      //module.mettel-automation-eks-cluster,
+      module.mettel-automation-eks-cluster,
       aws_iam_role.external-dns-role-eks
    ]
 }
