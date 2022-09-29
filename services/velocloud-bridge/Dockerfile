@@ -12,8 +12,8 @@ COPY pyutils_automation/py310 /pyutils_automation/py310
 WORKDIR /pyutils_automation/py310
 RUN poetry install --no-dev
 
-COPY services/velocloud-bridge/ /services/velocloud-bridge/
-WORKDIR /services/velocloud-bridge/
+COPY services/velocloud-bridge/ /service/app
+WORKDIR /service/app
 RUN poetry install --no-dev
 
 CMD ["python3", "-u", "src/app.py"]
