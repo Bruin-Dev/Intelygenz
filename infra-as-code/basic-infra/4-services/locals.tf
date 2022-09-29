@@ -4,7 +4,7 @@ locals {
   logs_name = var.CURRENT_ENVIRONMENT == "dev" ? "DEV-${var.common_info.project}-${var.CURRENT_ENVIRONMENT}-logs" : "PRO-${var.common_info.project}-logs"
   logs_dns_name = var.CURRENT_ENVIRONMENT == "dev" ? "docs-dev.${data.aws_route53_zone.mettel_automation.name}" : "docs.${data.aws_route53_zone.mettel_automation.name}"
   k8s_version = "1.21"
-  min_worker_nodes = var.CURRENT_ENVIRONMENT == "dev" ? 3 : 5
+  min_worker_nodes = var.CURRENT_ENVIRONMENT == "dev" ? 5 : 5
   max_worker_nodes = var.CURRENT_ENVIRONMENT == "dev" ? 6 : 10
   eks_worker_ami_name_filter = "amazon-eks-node-${local.k8s_version}-*"
   eks_worker_ami_owner_id = "amazon"
