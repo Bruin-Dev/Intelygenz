@@ -17,6 +17,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from asynctest import create_autospec
 from config import testconfig as config
 from igz.packages.eventbus.eventbus import EventBus
+from igz.packages.storage.task_dispatcher_client import TaskDispatcherClient, TaskTypes
 from tests.fixtures._helpers import wrap_all_methods
 
 
@@ -40,6 +41,11 @@ def event_bus():
 @pytest.fixture(scope="function")
 def scheduler():
     return create_autospec(AsyncIOScheduler)
+
+
+@pytest.fixture(scope="function")
+def task_dispatcher_client():
+    return create_autospec(TaskDispatcherClient)
 
 
 @pytest.fixture(scope="function")
@@ -188,6 +194,7 @@ def outage_monitor(
     event_bus,
     logger,
     scheduler,
+    task_dispatcher_client,
     outage_repository,
     bruin_repository,
     velocloud_repository,
@@ -204,6 +211,7 @@ def outage_monitor(
         event_bus=event_bus,
         logger=logger,
         scheduler=scheduler,
+        task_dispatcher_client=task_dispatcher_client,
         config=config,
         outage_repository=outage_repository,
         bruin_repository=bruin_repository,

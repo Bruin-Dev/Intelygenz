@@ -3,13 +3,14 @@ from datetime import datetime, timedelta
 from unittest.mock import Mock, call, patch
 
 import pytest
-from application import REMINDER_NOTE_REGEX, REOPEN_NOTE_REGEX, ChangeTicketSeverityStatus, Outages
+from application import REMINDER_NOTE_REGEX, REOPEN_NOTE_REGEX, ChangeTicketSeverityStatus, ForwardQueues, Outages
 from application.actions import outage_monitoring as outage_monitoring_module
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
 from config import testconfig
 from dateutil.parser import parse
+from igz.packages.storage.task_dispatcher_client import TaskTypes
 from pytz import utc
 from shortuuid import uuid
 from tests.fixtures._constants import CURRENT_DATETIME
@@ -4188,6 +4189,9 @@ class TestServiceOutageMonitor:
             "body": "ok",
             "status": 200,
         }
+        task_type = TaskTypes.TICKET_FORWARDS
+        task_key = f"{outage_ticket_1_id}-{serial_number_1}"
+
         outage_monitor._bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
         outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         outage_monitor._bruin_repository.unpause_ticket_detail = CoroutineMock()
@@ -4201,8 +4205,6 @@ class TestServiceOutageMonitor:
         outage_monitor._is_detail_resolved = Mock(return_value=False)
         outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
-        job_id = f"_forward_ticket_{outage_ticket_1_id}_{serial_number_1}_to_hnoc"
-        outage_monitor._scheduler.get_job.return_value = None
 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._run_ticket_autoresolve_for_edge(edge)
@@ -4225,8 +4227,7 @@ class TestServiceOutageMonitor:
             outage_ticket_1_id, serial_number_1
         )
         outage_monitor._notify_successful_autoresolve.assert_awaited_once_with(outage_ticket_1_id)
-        outage_monitor._scheduler.get_job.assert_called_with(job_id=job_id)
-        outage_monitor._scheduler.remove_job.assert_not_called()
+        outage_monitor._task_dispatcher_client.clear_task.assert_called_with(task_type, task_key)
 
     @pytest.mark.asyncio
     async def run_ticket_autoresolve_with_all_conditions_met_test(self, outage_monitor):
@@ -4366,6 +4367,9 @@ class TestServiceOutageMonitor:
             "body": "ok",
             "status": 200,
         }
+        task_type = TaskTypes.TICKET_FORWARDS
+        task_key = f"{outage_ticket_1_id}-{serial_number_1}"
+
         outage_monitor._bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
         outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         outage_monitor._bruin_repository.unpause_ticket_detail = CoroutineMock()
@@ -4379,8 +4383,6 @@ class TestServiceOutageMonitor:
         outage_monitor._is_detail_resolved = Mock(return_value=False)
         outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
-        job_id = f"_forward_ticket_{outage_ticket_1_id}_{serial_number_1}_to_hnoc"
-        outage_monitor._scheduler.get_job.return_value = None
 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._run_ticket_autoresolve_for_edge(edge)
@@ -4412,8 +4414,7 @@ class TestServiceOutageMonitor:
             outage_ticket_1_id, serial_number_1
         )
         outage_monitor._notify_successful_autoresolve.assert_awaited_once_with(outage_ticket_1_id)
-        outage_monitor._scheduler.get_job.assert_called_with(job_id=job_id)
-        outage_monitor._scheduler.remove_job.assert_not_called()
+        outage_monitor._task_dispatcher_client.clear_task.assert_called_with(task_type, task_key)
 
     @pytest.mark.asyncio
     async def run_ticket_autoresolve_with_all_conditions_met_test(self, outage_monitor):
@@ -4553,6 +4554,9 @@ class TestServiceOutageMonitor:
             "body": "ok",
             "status": 200,
         }
+        task_type = TaskTypes.TICKET_FORWARDS
+        task_key = f"{outage_ticket_1_id}-{serial_number_1}"
+
         outage_monitor._bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
         outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
         outage_monitor._bruin_repository.unpause_ticket_detail = CoroutineMock()
@@ -4566,9 +4570,6 @@ class TestServiceOutageMonitor:
         outage_monitor._is_detail_resolved = Mock(return_value=False)
         outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
-        job_id = f"_forward_ticket_{outage_ticket_1_id}_{serial_number_1}_to_hnoc"
-        outage_monitor._scheduler.get_job.return_value = Mock(return_value=job_id)
-        outage_monitor._scheduler.remove_job.return_value = Mock(return_value=True)
 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._run_ticket_autoresolve_for_edge(edge)
@@ -4600,8 +4601,7 @@ class TestServiceOutageMonitor:
             outage_ticket_1_id, serial_number_1
         )
         outage_monitor._notify_successful_autoresolve.assert_awaited_once_with(outage_ticket_1_id)
-        outage_monitor._scheduler.get_job.assert_called_with(job_id=job_id)
-        outage_monitor._scheduler.remove_job.assert_called_with(job_id=job_id)
+        outage_monitor._task_dispatcher_client.clear_task.assert_called_with(task_type, task_key)
 
     def was_ticket_created_by_automation_engine_test(self, outage_monitor):
         ticket = {
@@ -10636,6 +10636,7 @@ class TestServiceOutageMonitor:
         client_name = "METTEL/NEW YORK"
         serial_number = "VC1234567"
         ticket_id = 12345  # Ticket ID
+        target_queue = ForwardQueues.HNOC.value
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG["severity_by_outage_type"]["edge_down"]
         forward_time = testconfig.MONITOR_CONFIG["jobs_intervals"]["forward_to_hnoc_edge_down"]
@@ -10646,193 +10647,40 @@ class TestServiceOutageMonitor:
             minutes=outage_monitor._config.MONITOR_CONFIG["jobs_intervals"]["forward_to_hnoc_edge_down"]
         )
         datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=CURRENT_DATETIME)
+        datetime_mock.utcnow = Mock(return_value=CURRENT_DATETIME)
 
         with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
-            with patch.object(outage_monitoring_module, "timezone", new=Mock()):
-                outage_monitor._schedule_forward_to_hnoc_queue(
-                    forward_time=forward_time,
-                    ticket_id=ticket_id,
-                    serial_number=serial_number,
-                    client_name=client_name,
-                    outage_type=outage_type,
-                    severity=target_severity,
-                    has_faulty_digi_link=has_faulty_digi_link,
-                    has_faulty_byob_link=has_faulty_byob_link,
-                    faulty_link_types=faulty_link_types,
-                )
+            outage_monitor._schedule_forward_to_hnoc_queue(
+                forward_time=forward_time,
+                ticket_id=ticket_id,
+                serial_number=serial_number,
+                client_name=client_name,
+                outage_type=outage_type,
+                severity=target_severity,
+                has_faulty_digi_link=has_faulty_digi_link,
+                has_faulty_byob_link=has_faulty_byob_link,
+                faulty_link_types=faulty_link_types,
+            )
 
-        outage_monitor._scheduler.add_job.assert_called_once_with(
-            outage_monitor.forward_ticket_to_hnoc_queue,
-            "date",
-            kwargs={
+        outage_monitor._task_dispatcher_client.schedule_task.assert_called_once_with(
+            date=forward_task_run_date,
+            task_type=TaskTypes.TICKET_FORWARDS,
+            task_key=f"{ticket_id}-{serial_number}",
+            task_data={
                 "ticket_id": ticket_id,
                 "serial_number": serial_number,
-                "client_name": client_name,
-                "outage_type": outage_type,
-                "severity": target_severity,
-                "has_faulty_digi_link": has_faulty_digi_link,
-                "has_faulty_byob_link": has_faulty_byob_link,
-                "faulty_link_types": faulty_link_types,
+                "target_queue": target_queue,
+                "metrics_labels": {
+                    "client": client_name,
+                    "outage_type": outage_type.value,
+                    "severity": target_severity,
+                    "target_queue": target_queue,
+                    "has_digi": has_faulty_digi_link,
+                    "has_byob": has_faulty_byob_link,
+                    "link_types": faulty_link_types,
+                },
             },
-            run_date=forward_task_run_date,
-            replace_existing=False,
-            misfire_grace_time=9999,
-            coalesce=True,
-            id=f"_forward_ticket_{ticket_id}_{serial_number}_to_hnoc",
         )
-
-    @pytest.mark.asyncio
-    async def change_detail_work_queue_2xx_status_test(self, outage_monitor):
-        outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
-        target_severity = outage_monitor._config.MONITOR_CONFIG["severity_by_outage_type"]["edge_down"]
-        has_faulty_digi_link = False
-        has_faulty_byob_link = False
-        faulty_link_types = []
-
-        client_name = "METTEL/NEW YORK"
-        serial_number = "VC1234567"
-        ticket_id = 12345  # Ticket ID
-        task_result = "HNOC Investigate"
-        slack_message = (
-            f"Detail of ticket {ticket_id} related to serial {serial_number}"
-            f" was successfully forwarded to {task_result} queue!"
-        )
-        change_queue_ticket_response = {
-            "body": "ok",
-            "status": 200,
-        }
-        outage_monitor._notifications_repository.send_slack_message = CoroutineMock()
-        outage_monitor._bruin_repository.change_detail_work_queue = CoroutineMock(
-            return_value=change_queue_ticket_response
-        )
-        next_run_time = CURRENT_DATETIME
-        datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=next_run_time)
-
-        with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
-            with patch.object(outage_monitoring_module, "timezone", new=Mock()):
-                await outage_monitor.change_detail_work_queue_to_hnoc(
-                    ticket_id,
-                    serial_number,
-                    client_name,
-                    outage_type,
-                    target_severity,
-                    has_faulty_digi_link,
-                    has_faulty_byob_link,
-                    faulty_link_types,
-                )
-
-        outage_monitor._bruin_repository.change_detail_work_queue.assert_called_once_with(
-            serial_number=serial_number, ticket_id=ticket_id, task_result=task_result
-        )
-        outage_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
-
-    @pytest.mark.asyncio
-    async def change_detail_work_queue_4xx_status_test(self, outage_monitor):
-        outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
-        target_severity = outage_monitor._config.MONITOR_CONFIG["severity_by_outage_type"]["edge_down"]
-        has_faulty_digi_link = False
-        has_faulty_byob_link = False
-        faulty_link_types = []
-
-        client_name = "METTEL/NEW YORK"
-        serial_number = "VC1234567"
-        ticket_id = 12345  # Ticket ID
-        task_result = "HNOC Investigate"
-        change_queue_ticket_response = {
-            "body": "ko",
-            "status": 400,
-        }
-        outage_monitor._notifications_repository.send_slack_message = CoroutineMock()
-        outage_monitor._bruin_repository.change_detail_work_queue = CoroutineMock(
-            return_value=change_queue_ticket_response
-        )
-        next_run_time = CURRENT_DATETIME
-        datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=next_run_time)
-
-        with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
-            with patch.object(outage_monitoring_module, "timezone", new=Mock()):
-                await outage_monitor.change_detail_work_queue_to_hnoc(
-                    ticket_id,
-                    serial_number,
-                    client_name,
-                    outage_type,
-                    target_severity,
-                    has_faulty_digi_link,
-                    has_faulty_byob_link,
-                    faulty_link_types,
-                )
-
-        outage_monitor._bruin_repository.change_detail_work_queue.assert_called_once_with(
-            serial_number=serial_number, ticket_id=ticket_id, task_result=task_result
-        )
-        outage_monitor._notifications_repository.send_slack_message.assert_not_awaited()
-
-    @pytest.mark.asyncio
-    async def forward_ticket_to_hnoc_queue_test(self, outage_monitor):
-        outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
-        target_severity = outage_monitor._config.MONITOR_CONFIG["severity_by_outage_type"]["edge_down"]
-        has_faulty_digi_link = False
-        has_faulty_byob_link = False
-        faulty_link_types = []
-        client_name = "METTEL/NEW YORK"
-        serial_number = "VC1234567"
-        ticket_id = 12345  # Ticket ID
-        change_detail_work_queue_response = {"body": "Success", "status": 200}
-        outage_monitor._notifications_repository.send_slack_message = CoroutineMock()
-        outage_monitor._bruin_repository.change_detail_work_queue = CoroutineMock(
-            return_value=change_detail_work_queue_response
-        )
-
-        await outage_monitor.forward_ticket_to_hnoc_queue(
-            ticket_id,
-            serial_number,
-            client_name,
-            outage_type,
-            target_severity,
-            has_faulty_digi_link,
-            has_faulty_byob_link,
-            faulty_link_types,
-        )
-
-        outage_monitor._bruin_repository.change_detail_work_queue.assert_awaited_once_with(
-            serial_number=serial_number, ticket_id=ticket_id, task_result="HNOC Investigate"
-        )
-        outage_monitor._notifications_repository.send_slack_message.assert_awaited_once()
-
-    @pytest.mark.asyncio
-    async def forward_ticket_to_hnoc_queue_non_2xx_change_work_queue_test(self, outage_monitor):
-        outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
-        target_severity = testconfig.MONITOR_CONFIG["severity_by_outage_type"]["edge_down"]
-        has_faulty_digi_link = False
-        has_faulty_byob_link = False
-        faulty_link_types = []
-        client_name = "METTEL/NEW YORK"
-        serial_number = "VC1234567"
-        ticket_id = 12345  # Ticket ID
-        change_detail_work_queue_response = {"body": "Failed", "status": 400}
-        outage_monitor._notifications_repository.send_slack_message = CoroutineMock()
-        outage_monitor._bruin_repository.change_detail_work_queue = CoroutineMock(
-            return_value=change_detail_work_queue_response
-        )
-
-        await outage_monitor.forward_ticket_to_hnoc_queue(
-            ticket_id,
-            serial_number,
-            client_name,
-            outage_type,
-            target_severity,
-            has_faulty_digi_link,
-            has_faulty_byob_link,
-            faulty_link_types,
-        )
-
-        outage_monitor._bruin_repository.change_detail_work_queue.assert_awaited_once_with(
-            serial_number=serial_number, ticket_id=ticket_id, task_result="HNOC Investigate"
-        )
-        outage_monitor._notifications_repository.send_slack_message.assert_not_awaited()
 
     def is_ticket_old_enough_test(self, outage_monitor):
         ticket_creation_date = "9/25/2020 6:31:54 AM"

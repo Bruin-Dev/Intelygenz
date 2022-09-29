@@ -44,5 +44,3 @@ EVENT_INTERFACE_NAME_REGEX = re.compile(
     r"(^Interface (?P<interface_name>[a-zA-Z0-9]+) is (up|down)$)|"
     r"(^Link (?P<interface_name2>[a-zA-Z0-9]+) is (no longer|now) DEAD$)"
 )
-
-FORWARD_TICKET_TO_HNOC_JOB_ID = "_forward_ticket_{ticket_id}_{serial_number}_to_hnoc"

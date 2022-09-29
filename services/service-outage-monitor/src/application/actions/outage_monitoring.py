@@ -11,7 +11,6 @@ from typing import List, Optional, Pattern
 
 from application import (
     DIGI_NOTE_REGEX,
-    FORWARD_TICKET_TO_HNOC_JOB_ID,
     LINK_INFO_REGEX,
     OUTAGE_TYPE_REGEX,
     REMINDER_NOTE_REGEX,
@@ -24,9 +23,9 @@ from application import (
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from dateutil.parser import parse
+from igz.packages.storage.task_dispatcher_client import TaskTypes
 from pytz import timezone, utc
 from shortuuid import uuid
-from tenacity import retry, stop_after_delay, wait_exponential
 
 
 class OutageMonitor:
@@ -35,6 +34,7 @@ class OutageMonitor:
         event_bus,
         logger,
         scheduler,
+        task_dispatcher_client,
         config,
         utils_repository,
         outage_repository,
@@ -51,6 +51,7 @@ class OutageMonitor:
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
+        self._task_dispatcher_client = task_dispatcher_client
         self._config = config
         self._utils_repository = utils_repository
         self._outage_repository = outage_repository
@@ -516,13 +517,13 @@ class OutageMonitor:
                 f"edge {serial_number} was autoresolved!"
             )
 
-            job_id = FORWARD_TICKET_TO_HNOC_JOB_ID.format(ticket_id=outage_ticket_id, serial_number=serial_number)
-            if self._scheduler.get_job(job_id):
+            task_type = TaskTypes.TICKET_FORWARDS
+            task_key = f"{outage_ticket_id}-{serial_number}"
+            if self._task_dispatcher_client.clear_task(task_type, task_key):
                 self._logger.info(
-                    f"Found job to forward to HNOC scheduled for autoresolved ticket {outage_ticket_id}"
-                    f" related to serial number {serial_number}! Removing..."
+                    f"Removed scheduled task to forward to HNOC for autoresolved ticket {outage_ticket_id} "
+                    f"related to serial number {serial_number}"
                 )
-                self._scheduler.remove_job(job_id)
 
     def _was_ticket_created_by_automation_engine(self, ticket: dict) -> bool:
         return ticket["createdBy"] == self._config.IPA_SYSTEM_USERNAME_IN_BRUIN
@@ -663,118 +664,34 @@ class OutageMonitor:
         has_faulty_byob_link,
         faulty_link_types,
     ):
-        tz = timezone(self._config.TIMEZONE)
-        current_datetime = datetime.now(tz)
+        target_queue = ForwardQueues.HNOC.value
+        current_datetime = datetime.utcnow()
         forward_task_run_date = current_datetime + timedelta(minutes=forward_time)
 
         self._logger.info(
-            f"Scheduling HNOC forwarding for ticket_id {ticket_id} and serial {serial_number}"
-            f" to happen at timestamp: {forward_task_run_date}"
+            f"Scheduling HNOC forward for ticket {ticket_id} and serial number {serial_number} "
+            f"to happen in {forward_time} minutes"
         )
 
-        job_id = FORWARD_TICKET_TO_HNOC_JOB_ID.format(ticket_id=ticket_id, serial_number=serial_number)
-        self._scheduler.add_job(
-            self.forward_ticket_to_hnoc_queue,
-            "date",
-            kwargs={
+        self._task_dispatcher_client.schedule_task(
+            date=forward_task_run_date,
+            task_type=TaskTypes.TICKET_FORWARDS,
+            task_key=f"{ticket_id}-{serial_number}",
+            task_data={
                 "ticket_id": ticket_id,
                 "serial_number": serial_number,
-                "client_name": client_name,
-                "outage_type": outage_type,
-                "severity": severity,
-                "has_faulty_digi_link": has_faulty_digi_link,
-                "has_faulty_byob_link": has_faulty_byob_link,
-                "faulty_link_types": faulty_link_types,
+                "target_queue": target_queue,
+                "metrics_labels": {
+                    "client": client_name,
+                    "outage_type": outage_type.value,
+                    "severity": severity,
+                    "target_queue": target_queue,
+                    "has_digi": has_faulty_digi_link,
+                    "has_byob": has_faulty_byob_link,
+                    "link_types": faulty_link_types,
+                },
             },
-            run_date=forward_task_run_date,
-            replace_existing=False,
-            misfire_grace_time=9999,
-            coalesce=True,
-            id=job_id,
         )
-
-    async def forward_ticket_to_hnoc_queue(
-        self,
-        ticket_id,
-        serial_number,
-        client_name,
-        outage_type,
-        severity,
-        has_faulty_digi_link,
-        has_faulty_byob_link,
-        faulty_link_types,
-    ):
-        @retry(
-            wait=wait_exponential(
-                multiplier=self._config.NATS_CONFIG["multiplier"], min=self._config.NATS_CONFIG["min"]
-            ),
-            stop=stop_after_delay(self._config.NATS_CONFIG["stop_delay"]),
-        )
-        async def forward_ticket_to_hnoc_queue():
-            self._logger.info(
-                f"Checking if ticket_id {ticket_id} for serial {serial_number} is resolved before "
-                f"attempting to forward to HNOC..."
-            )
-
-            await self.change_detail_work_queue_to_hnoc(
-                ticket_id=ticket_id,
-                serial_number=serial_number,
-                client_name=client_name,
-                outage_type=outage_type,
-                severity=severity,
-                has_faulty_digi_link=has_faulty_digi_link,
-                has_faulty_byob_link=has_faulty_byob_link,
-                faulty_link_types=faulty_link_types,
-            )
-
-        try:
-            await forward_ticket_to_hnoc_queue()
-        except Exception as e:
-            self._logger.error(
-                f"An error occurred while trying to forward ticket_id {ticket_id} for serial {serial_number} to HNOC"
-                f" -> {e}"
-            )
-
-    async def change_detail_work_queue_to_hnoc(
-        self,
-        ticket_id,
-        serial_number,
-        client_name,
-        outage_type,
-        severity,
-        has_faulty_digi_link,
-        has_faulty_byob_link,
-        faulty_link_types,
-    ):
-        target_queue = ForwardQueues.HNOC.value
-        change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
-            serial_number=serial_number, ticket_id=ticket_id, task_result=target_queue
-        )
-
-        if change_detail_work_queue_response["status"] in range(200, 300):
-            self._metrics_repository.increment_tasks_forwarded(
-                client=client_name,
-                outage_type=outage_type.value,
-                severity=severity,
-                target_queue=target_queue,
-                has_digi=has_faulty_digi_link,
-                has_byob=has_faulty_byob_link,
-                link_types=faulty_link_types,
-            )
-            slack_message = (
-                f"Detail of ticket {ticket_id} related to serial {serial_number} was successfully forwarded "
-                f"to {target_queue} queue!"
-            )
-            await self._notifications_repository.send_slack_message(slack_message)
-            self._logger.info(
-                f"Successfully forwarded ticket_id {ticket_id} and serial {serial_number} to {target_queue}."
-            )
-        else:
-            self._logger.error(
-                f"Failed to forward ticket_id {ticket_id} and "
-                f"serial {serial_number} to {target_queue} due to bruin "
-                f"returning {change_detail_work_queue_response} when attempting to forward to HNOC."
-            )
 
     async def _append_triage_note(
         self, ticket_id: int, cached_edge: dict, edge_status: dict, outage_type: Outages, *, is_reopen_note=False
