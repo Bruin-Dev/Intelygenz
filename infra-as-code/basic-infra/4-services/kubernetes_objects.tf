@@ -4,7 +4,7 @@ resource "kubernetes_namespace" "prometheus" {
   }
 
   depends_on = [
-    module.mettel-automation-eks-cluster
+    //module.mettel-automation-eks-cluster
   ]
 }
 
@@ -20,7 +20,7 @@ resource "kubernetes_secret" "grafana_auth" {
   }
 
   depends_on = [
-    module.mettel-automation-eks-cluster,
+    //module.mettel-automation-eks-cluster,
     kubernetes_namespace.prometheus
   ]
 }
@@ -44,7 +44,7 @@ resource "kubectl_manifest" "kyverno_cluster_policy" {
   yaml_body = data.template_file.yaml_kyverno_cluster_policy.rendered
   
   depends_on = [
-    module.mettel-automation-eks-cluster,
+    //module.mettel-automation-eks-cluster,
     helm_release.descheduler,
     helm_release.external-secrets,
     helm_release.external-dns,

@@ -29,7 +29,7 @@ resource "helm_release" "cluster-autoscaler" {
   depends_on = [
       aws_iam_role.cluster-autoscaler-role-eks,
       null_resource.associate-iam-oidc-provider,
-      module.mettel-automation-eks-cluster,
+      //module.mettel-automation-eks-cluster,
       data.aws_eks_cluster_auth.cluster,
       data.aws_eks_cluster.cluster
    ]
@@ -53,7 +53,7 @@ resource "helm_release" "descheduler" {
   ]
 
   depends_on = [
-      module.mettel-automation-eks-cluster,
+      //module.mettel-automation-eks-cluster,
       data.aws_eks_cluster_auth.cluster,
       data.aws_eks_cluster.cluster
    ]
@@ -79,7 +79,7 @@ resource "helm_release" "external-secrets" {
   depends_on = [
       aws_iam_role.external-secrets-role-eks,
       null_resource.associate-iam-oidc-provider,
-      module.mettel-automation-eks-cluster,
+      //module.mettel-automation-eks-cluster,
       data.aws_eks_cluster_auth.cluster,
       data.aws_eks_cluster.cluster
    ]
@@ -137,7 +137,7 @@ resource "helm_release" "chartmuseum" {
       aws_s3_bucket.bucket_chartmuseum,
       aws_iam_role.chartmuseum-role-eks,
       null_resource.associate-iam-oidc-provider,
-      module.mettel-automation-eks-cluster,
+      //module.mettel-automation-eks-cluster,
       data.aws_eks_cluster_auth.cluster,
       data.aws_eks_cluster.cluster
    ]
@@ -168,7 +168,7 @@ resource "helm_release" "external-dns" {
   depends_on = [
       aws_iam_role.external-dns-role-eks,
       null_resource.associate-iam-oidc-provider,
-      module.mettel-automation-eks-cluster,
+      //module.mettel-automation-eks-cluster,
       data.aws_eks_cluster_auth.cluster,
       data.aws_eks_cluster.cluster
    ]
@@ -203,7 +203,7 @@ resource "helm_release" "ingress-nginx" {
   }
 
   depends_on = [
-      module.mettel-automation-eks-cluster,
+      //module.mettel-automation-eks-cluster,
       aws_iam_role.external-dns-role-eks,
       null_resource.associate-iam-oidc-provider,
       data.aws_eks_cluster_auth.cluster,
@@ -224,7 +224,7 @@ resource "helm_release" "metrics-server" {
   wait          = true
 
   depends_on = [
-      module.mettel-automation-eks-cluster,
+      //module.mettel-automation-eks-cluster,
       data.aws_eks_cluster_auth.cluster,
       data.aws_eks_cluster.cluster
    ]
@@ -244,7 +244,7 @@ resource "helm_release" "reloader" {
   wait          = true
 
   depends_on = [
-      module.mettel-automation-eks-cluster,
+      //module.mettel-automation-eks-cluster,
       data.aws_eks_cluster_auth.cluster,
       data.aws_eks_cluster.cluster
    ]
@@ -263,7 +263,7 @@ resource "helm_release" "kyverno" {
   wait          = true
 
   depends_on = [
-      module.mettel-automation-eks-cluster,
+      //module.mettel-automation-eks-cluster,
       data.aws_eks_cluster_auth.cluster,
    ]
 }

@@ -8,7 +8,7 @@ resource "aws_security_group_rule" "calls_from_ingress_elb_to_eks_worker_nodes" 
   source_security_group_id  = data.aws_security_group.elb_ingress_nginx_eks_security_group.id
 
   depends_on = [
-    module.mettel-automation-eks-cluster,
+    //module.mettel-automation-eks-cluster,
     helm_release.ingress-nginx
   ]
 }
