@@ -6,13 +6,13 @@ from application.actions.triage import Triage
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.customer_cache_repository import CustomerCacheRepository
 from application.repositories.digi_repository import DiGiRepository
+from application.repositories.email_repository import EmailRepository
 from application.repositories.ha_repository import HaRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.outage_repository import OutageRepository
 from application.repositories.triage_repository import TriageRepository
 from application.repositories.utils_repository import UtilsRepository
 from application.repositories.velocloud_repository import VelocloudRepository
-from application.repositories.email_repository import EmailRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from asynctest import create_autospec
 from config import testconfig as config
@@ -198,7 +198,7 @@ def outage_monitor(
     digi_repository,
     ha_repository,
     utils_repository,
-    email_repository
+    email_repository,
 ):
     instance = OutageMonitor(
         event_bus=event_bus,

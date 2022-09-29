@@ -5746,7 +5746,7 @@ class TestServiceOutageMonitor:
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
-        outage_monitor.schedule_forward_to_hnoc_queue = Mock()
+        outage_monitor._schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
@@ -5766,7 +5766,7 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         outage_monitor._append_reminder_note.assert_not_awaited()
-        outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
+        outage_monitor._schedule_forward_to_hnoc_queue.assert_called_once_with(
             forward_time,
             ticket_id,
             edge_primary_serial,
@@ -5984,7 +5984,7 @@ class TestServiceOutageMonitor:
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
-        outage_monitor.schedule_forward_to_hnoc_queue = Mock()
+        outage_monitor._schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
@@ -6004,7 +6004,7 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_awaited_once()
         outage_monitor._append_reminder_note.assert_awaited_once()
-        outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
+        outage_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._check_for_digi_reboot.assert_awaited_once_with(
             ticket_id,
             logical_id_list,
@@ -6210,7 +6210,7 @@ class TestServiceOutageMonitor:
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
-        outage_monitor.schedule_forward_to_hnoc_queue = Mock()
+        outage_monitor._schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
@@ -6230,7 +6230,7 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_awaited_once()
         outage_monitor._append_reminder_note.assert_not_awaited()
-        outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
+        outage_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._check_for_digi_reboot.assert_awaited_once_with(
             ticket_id,
             logical_id_list,
@@ -6440,7 +6440,7 @@ class TestServiceOutageMonitor:
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
-        outage_monitor.schedule_forward_to_hnoc_queue = Mock()
+        outage_monitor._schedule_forward_to_hnoc_queue = Mock()
         outage_monitor._attempt_forward_to_asr = CoroutineMock()
 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
@@ -6455,7 +6455,7 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         outage_monitor._append_reminder_note.assert_not_awaited()
-        outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
+        outage_monitor._schedule_forward_to_hnoc_queue.assert_called_once_with(
             forward_time,
             ticket_id,
             edge_primary_serial,
@@ -6691,7 +6691,7 @@ class TestServiceOutageMonitor:
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
-        outage_monitor.schedule_forward_to_hnoc_queue = Mock()
+        outage_monitor._schedule_forward_to_hnoc_queue = Mock()
         outage_monitor._attempt_forward_to_asr = CoroutineMock()
 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
@@ -6706,7 +6706,7 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         outage_monitor._append_reminder_note.assert_not_awaited()
-        outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
+        outage_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._send_reminder.assert_awaited()
         outage_monitor._check_for_failed_digi_reboot.assert_awaited_once_with(
             ticket_id,
@@ -6928,7 +6928,7 @@ class TestServiceOutageMonitor:
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
-        outage_monitor.schedule_forward_to_hnoc_queue = Mock()
+        outage_monitor._schedule_forward_to_hnoc_queue = Mock()
         outage_monitor._attempt_forward_to_asr = CoroutineMock()
 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
@@ -6943,7 +6943,7 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         outage_monitor._append_reminder_note.assert_not_awaited()
-        outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
+        outage_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._check_for_failed_digi_reboot.assert_awaited_once_with(
             ticket_id,
             logical_id_list,
@@ -7165,7 +7165,7 @@ class TestServiceOutageMonitor:
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
-        outage_monitor.schedule_forward_to_hnoc_queue = Mock()
+        outage_monitor._schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
@@ -7179,7 +7179,7 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         outage_monitor._append_reminder_note.assert_not_awaited()
-        outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
+        outage_monitor._schedule_forward_to_hnoc_queue.assert_called_once_with(
             forward_time,
             ticket_id,
             edge_primary_serial,
@@ -7398,7 +7398,7 @@ class TestServiceOutageMonitor:
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
-        outage_monitor.schedule_forward_to_hnoc_queue = Mock()
+        outage_monitor._schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
@@ -7412,7 +7412,7 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_awaited_once()
         outage_monitor._append_reminder_note.assert_awaited_once()
-        outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
+        outage_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._check_for_digi_reboot.assert_awaited_once_with(
             ticket_id,
             logical_id_list,
@@ -7622,7 +7622,7 @@ class TestServiceOutageMonitor:
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
-        outage_monitor.schedule_forward_to_hnoc_queue = Mock()
+        outage_monitor._schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
@@ -7636,7 +7636,7 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         outage_monitor._append_reminder_note.assert_not_awaited()
-        outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
+        outage_monitor._schedule_forward_to_hnoc_queue.assert_called_once_with(
             forward_time,
             ticket_id,
             edge_primary_serial,
@@ -7854,7 +7854,7 @@ class TestServiceOutageMonitor:
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
-        outage_monitor.schedule_forward_to_hnoc_queue = Mock()
+        outage_monitor._schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
@@ -7868,7 +7868,7 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_awaited_once()
         outage_monitor._append_reminder_note.assert_awaited_once()
-        outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
+        outage_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._append_triage_note.assert_awaited_once_with(
             ticket_id,
             cached_edge_primary,
@@ -8074,7 +8074,7 @@ class TestServiceOutageMonitor:
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
-        outage_monitor.schedule_forward_to_hnoc_queue = Mock()
+        outage_monitor._schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
@@ -8088,7 +8088,7 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         outage_monitor._append_reminder_note.assert_not_awaited()
-        outage_monitor.schedule_forward_to_hnoc_queue.assert_called_once_with(
+        outage_monitor._schedule_forward_to_hnoc_queue.assert_called_once_with(
             forward_time,
             ticket_id,
             edge_primary_serial,
@@ -8305,7 +8305,7 @@ class TestServiceOutageMonitor:
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
-        outage_monitor.schedule_forward_to_hnoc_queue = Mock()
+        outage_monitor._schedule_forward_to_hnoc_queue = Mock()
 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
@@ -8317,7 +8317,7 @@ class TestServiceOutageMonitor:
             target_severity=target_severity,
             check_ticket_tasks=False,
         )
-        outage_monitor.schedule_forward_to_hnoc_queue.assert_not_called()
+        outage_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_awaited_once()
         outage_monitor._append_reminder_note.assert_awaited_once()
         outage_monitor._append_triage_note.assert_awaited_once_with(
@@ -10650,7 +10650,7 @@ class TestServiceOutageMonitor:
 
         with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
             with patch.object(outage_monitoring_module, "timezone", new=Mock()):
-                outage_monitor.schedule_forward_to_hnoc_queue(
+                outage_monitor._schedule_forward_to_hnoc_queue(
                     forward_time=forward_time,
                     ticket_id=ticket_id,
                     serial_number=serial_number,
@@ -10970,7 +10970,7 @@ class TestServiceOutageMonitor:
         change_detail_work_queue_response = {"body": "Success", "status": 200}
         slack_message = (
             f"Detail of ticket {ticket_id} related to serial {edge_serial} was successfully forwarded "
-            f"to {task_result} queue!"
+            f"to ASR Investigate queue!"
         )
         outage_monitor._outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_monitor._outage_repository.find_disconnected_wired_links = Mock(return_value=edge_status["links"])
