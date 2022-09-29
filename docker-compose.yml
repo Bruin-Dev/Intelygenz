@@ -467,6 +467,8 @@ services:
     env_file:
       # Change the env file to test a different VCO
       - services/service-affecting-monitor/src/config/env-sam-mettel-velocloud-net
+    volumes:
+      - ./services/service-affecting-monitor:/service/app
     depends_on:
       - nats-server
       - redis
@@ -484,6 +486,8 @@ services:
     env_file:
       # Change the env file to test a different VCO
       - services/service-outage-monitor/src/config/env-som-mettel-velocloud-net
+    volumes:
+      - ./services/service-outage-monitor:/service/app
     depends_on:
       - nats-server
       - redis
@@ -586,6 +590,8 @@ services:
     env_file:
       # Change the env file to test a different VCO
       - services/tnba-monitor/src/config/env-tnba-mettel-velocloud-net
+    volumes:
+      - ./services/tnba-monitor:/service/app
     depends_on:
       - nats-server
       - redis
