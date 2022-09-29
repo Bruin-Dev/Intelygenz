@@ -5,7 +5,7 @@
 # -- Number of task-dispatcher pods
 replicaCount: 1
 
-enabled: false
+enabled: true
 
 # -- Global configuration for all subcharts
 global:
