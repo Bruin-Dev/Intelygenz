@@ -47,8 +47,8 @@ services:
       - nats-server
       - redis
       - redis-customer-cache
-      - "notifications-bridge"
-      - "email-bridge"
+      - notifications-bridge
+      - email-bridge
     ports:
       - 5013:5000
       - 9390:9090
@@ -79,8 +79,8 @@ services:
     volumes:
       - ./services/digi-reboot-report:/service/app
     depends_on:
-      - "notifications-bridge"
-      - "email-bridge"
+      - notifications-bridge
+      - email-bridge
     ports:
       - 5016:5000
       - 9590:9090
@@ -130,7 +130,7 @@ services:
       - nats-server
       - redis
       - redis-email-tagger
-      - "notifications-bridge"
+      - notifications-bridge
     ports:
       - 5055:5000
       - 9790:9090
@@ -159,8 +159,8 @@ services:
     depends_on:
       - nats-server
       - redis
-      - "notifications-bridge"
-      - "email-bridge"
+      - notifications-bridge
+      - email-bridge
     ports:
       - 5024:5000
       - 9890:9090
@@ -213,7 +213,7 @@ services:
     depends_on:
       - nats-server
       - redis
-      - "notifications-bridge"
+      - notifications-bridge
     ports:
       - 5707:5000
       - 9770:9090
@@ -247,8 +247,8 @@ services:
       - nats-server
       - redis
       - redis-customer-cache
-      - "notifications-bridge"
-      - "email-bridge"
+      - notifications-bridge
+      - email-bridge
     ports:
       - 5023:5000
       - 9091:9090
@@ -265,7 +265,7 @@ services:
     depends_on:
       - nats-server
       - redis
-      - "notifications-bridge"
+      - notifications-bridge
     ports:
       - 5607:5000
       - 9270:9090
@@ -282,8 +282,8 @@ services:
     depends_on:
       - nats-server
       - redis
-      - "notifications-bridge"
-      - "email-bridge"
+      - notifications-bridge
+      - email-bridge
     ports:
       - 5017:5000
       - 9092:9090
@@ -300,8 +300,8 @@ services:
     depends_on:
       - nats-server
       - redis
-      - "notifications-bridge"
-      - "email-bridge"
+      - notifications-bridge
+      - email-bridge
     ports:
       - 5003:5000
       - 9093:9090
@@ -409,7 +409,7 @@ services:
     volumes:
       - ./services/notifications-bridge:/service/app
     depends_on:
-      - "nats-server"
+      - nats-server
       - redis
     ports:
       - 5022:5000
@@ -432,14 +432,13 @@ services:
       - bruin-bridge
       - redis
       - redis-email-tagger
-      - "notifications-bridge"
-      - "email-bridge"
+      - notifications-bridge
+      - email-bridge
     ports:
       - 5057:5000
       - 9096:9090
     stdin_open: true # for debug
     tty: true # for debug
-
 
   repair-tickets-kre-bridge:
     build:
@@ -460,59 +459,39 @@ services:
     stdin_open: true # for debug
     tty: true # for debug
 
-# service-affecting-monitor instances vary depending on the environment you want to test, so their configuration
-# can't be hardcoded in this docker-compose file
-#
-# Use the following template if you need to spin up such instances:
-# -------------------------------------------------------------------------------------
-#  service-affecting-monitor-<id>:
-#    build:
-#      # Context must be the root of the monorepo
-#      context: .
-#      dockerfile: services/service-affecting-monitor/Dockerfile
-#    env_file:
-#      - services/service-affecting-monitor/src/config/<env_filename>
-#    depends_on:
-#      - nats-server
-#      - redis
-#      - "notifications-bridge"
-#      - "email-bridge"
-#    ports:
-#      - <port_mapped_to_quartz>:5000
-#      - <port_mapped_to_metrics_server>:9090
-# -------------------------------------------------------------------------------------
-# where:
-#  - <id> is an identifier for the service
-#  - <env_filename> is the filename of the env file you want to use for the configuration of the service
-#  - <port_mapped_to_quartz> is the port of the host machine mapped to Quartz's
-#  - <port_mapped_to_metrics_server> is the port of the host machine mapped to the metric server's
+  service-affecting-monitor:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: services/service-affecting-monitor/Dockerfile
+    env_file:
+      # Change the env file to test a different VCO
+      - services/service-affecting-monitor/src/config/env-sam-mettel-velocloud-net
+    depends_on:
+      - nats-server
+      - redis
+      - notifications-bridge
+      - email-bridge
+    ports:
+      - 5008:5000
+      - 9130:9090
 
-# service-outage-monitor instances vary depending on the environment you want to test, so their configuration
-# can't be hardcoded in this docker-compose file
-#
-# Use the following template if you need to spin up such instances:
-# -------------------------------------------------------------------------------------
-#  service-outage-monitor-<id>:
-#    build:
-#      # Context must be the root of the monorepo
-#      context: .
-#      dockerfile: services/service-outage-monitor/Dockerfile
-#    env_file:
-#      - services/service-outage-monitor/src/config/<env_filename>
-#    depends_on:
-#      - nats-server
-#      - redis
-#      - "notifications-bridge"
-#      - "email-bridge"
-#    ports:
-#      - <port_mapped_to_quartz>:5000
-#      - <port_mapped_to_metrics_server>:9090
-# -------------------------------------------------------------------------------------
-# where:
-#  - <id> is an identifier for the service
-#  - <env_filename> is the filename of the env file you want to use for the configuration of the service
-#  - <port_mapped_to_quartz> is the port of the host machine mapped to Quartz's
-#  - <port_mapped_to_metrics_server> is the port of the host machine mapped to the metric server's
+  service-outage-monitor:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: services/service-outage-monitor/Dockerfile
+    env_file:
+      # Change the env file to test a different VCO
+      - services/service-outage-monitor/src/config/env-som-mettel-velocloud-net
+    depends_on:
+      - nats-server
+      - redis
+      - notifications-bridge
+      - email-bridge
+    ports:
+      - 5107:5000
+      - 9140:9090
 
   service-outage-monitor-triage:
     build:
@@ -526,7 +505,7 @@ services:
     depends_on:
       - nats-server
       - redis
-      - "notifications-bridge"
+      - notifications-bridge
     ports:
       - 5007:5000
       - 9180:9090
@@ -594,36 +573,26 @@ services:
       - nats-server
       - redis
       - redis-tnba-feedback
-      - "notifications-bridge"
+      - notifications-bridge
     ports:
       - 5014:5000
       - 9098:9090
 
-# tnba-monitor instances vary depending on the environment you want to test, so their configuration
-# can't be hardcoded in this docker-compose file
-#
-# Use the following template if you need to spin up such instances:
-# -------------------------------------------------------------------------------------
-#  tnba-monitor-<id>:
-#    build:
-#      # Context must be the root of the monorepo
-#      context: .
-#      dockerfile: services/tnba-monitor/Dockerfile
-#    env_file:
-#      - services/tnba-monitor/src/config/<env_filename>
-#    depends_on:
-#      - nats-server
-#      - redis
-#      - "notifications-bridge"
-#    ports:
-#      - <port_mapped_to_quartz>:5000
-#      - <port_mapped_to_metrics_server>:9090
-# -------------------------------------------------------------------------------------
-# where:
-#  - <id> is an identifier for the service
-#  - <env_filename> is the filename of the env file you want to use for the configuration of the service
-#  - <port_mapped_to_quartz> is the port of the host machine mapped to Quartz's
-#  - <port_mapped_to_metrics_server> is the port of the host machine mapped to the metric server's
+  tnba-monitor:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: services/tnba-monitor/Dockerfile
+    env_file:
+      # Change the env file to test a different VCO
+      - services/tnba-monitor/src/config/env-tnba-mettel-velocloud-net
+    depends_on:
+      - nats-server
+      - redis
+      - notifications-bridge
+    ports:
+      - 5012:5000
+      - 9103:9090
 
   velocloud-bridge:
     build:
