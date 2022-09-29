@@ -1,5 +1,4 @@
 module "mettel-automation-eks-cluster" {
-  count = 0
   source                          = "terraform-aws-modules/eks/aws"
   cluster_name                    = local.cluster_name
   cluster_version                 = local.k8s_version
