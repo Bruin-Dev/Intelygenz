@@ -4,7 +4,6 @@ import sys
 from dataclasses import asdict
 
 import redis
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from framework.http.server import Config as QuartConfig
 from framework.http.server import Server as QuartServer
 from framework.logging.formatters import Papertrail as PapertrailFormatter
@@ -111,6 +110,7 @@ class Container:
 
 if __name__ == "__main__":
     container = Container()
+
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
