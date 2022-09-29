@@ -69,8 +69,8 @@ class TaskDispatcher:
         if task["type"] == TaskTypes.TICKET_FORWARDS:
             success = await self._forward_ticket(**task["data"])
 
-        if success:
-            await self._nats_client.publish(f"dispatcher.{task['type'].value}.success", to_json_bytes(task["data"]))
+        result = "success" if success else "error"
+        await self._nats_client.publish(f"task_dispatcher.{task['type'].value}.{result}", to_json_bytes(task["data"]))
 
         self._storage_repository.delete_task(task["type"], task["key"])
         logger.info(f"Task of type {task['type'].value} for key {task['key']} was completed!")
