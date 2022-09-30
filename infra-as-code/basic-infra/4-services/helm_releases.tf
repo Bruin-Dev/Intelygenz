@@ -149,11 +149,11 @@ resource "helm_release" "external-dns" {
   repository    = "https://charts.bitnami.com/bitnami"
   chart         = "external-dns"
 
-  version       = var.EXTERNAL_DNS_HELM_CHART_VERSION
+  version       = "6.8.2"
   namespace     = "kube-system"
-  force_update  = false
+  force_update  = true
   wait          = true
-  recreate_pods = false
+  recreate_pods = true
 
   values = [
     file("helm/external-charts/external-dns-values.yaml")
