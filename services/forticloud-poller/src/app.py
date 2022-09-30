@@ -9,10 +9,9 @@ from framework.logging.formatters import Papertrail as PapertrailFormatter
 from framework.logging.formatters import Standard as StandardFormatter
 from framework.logging.handlers import Papertrail as PapertrailHandler
 from framework.logging.handlers import Stdout as StdoutHandler
-from framework.nats.client import Client
+from framework.nats.client import Client as NatsClient
 from framework.nats.models import Connection
 from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
-from prometheus_client import start_http_server
 from redis.client import Redis
 
 from application.actions.forticloud_poller import ForticloudPoller
@@ -73,7 +72,7 @@ class Container:
 
         # NATS
         tmp_redis_storage = RedisStorage(storage_client=redis)
-        self._nats_client = Client(temp_payload_storage=tmp_redis_storage)
+        self._nats_client = NatsClient(temp_payload_storage=tmp_redis_storage)
 
         # REPOSITORIES
         self._notifications_repository = NotificationsRepository(self._nats_client, config)
@@ -89,9 +88,6 @@ class Container:
         )
 
     async def run(self):
-        # Prometheus
-        self._start_prometheus_metrics_server()
-
         # Start NATS connection
         conn = Connection(servers=config.NATS_CONFIG["servers"])
         await self._nats_client.connect(**asdict(conn))
@@ -101,10 +97,6 @@ class Container:
 
         # Start scheduler
         self._scheduler.start()
-
-    @staticmethod
-    def _start_prometheus_metrics_server():
-        start_http_server(config.METRICS_SERVER_CONFIG["port"])
 
     async def start_server(self):
         await self._server.run()

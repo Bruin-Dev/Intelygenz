@@ -1,7 +1,8 @@
+import json
 import logging
 import time
 from datetime import datetime
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
@@ -71,7 +72,10 @@ class ForticloudPoller:
         for device in data:
             await self._publish_forticloud_data(device, target)
 
+    @staticmethod
+    def to_json_bytes(message: dict[str, Any]):
+        return json.dumps(message, default=str, separators=(",", ":")).encode()
+
     async def _publish_forticloud_data(self, data: Dict, target: str):
         logger.info(f"Publishing {target} forticloud data in NATS")
-        msg = {"data": data}
-        await self._nats_client.publish_message(f"forticloud.{target}", msg)
+        await self._nats_client.publish(f"forticloud.{target}", self.to_json_bytes(data))

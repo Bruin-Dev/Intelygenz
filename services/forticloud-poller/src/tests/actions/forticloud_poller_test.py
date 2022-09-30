@@ -1,4 +1,6 @@
+import json
 from datetime import datetime
+from typing import Any
 from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
@@ -6,7 +8,10 @@ from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 
 from application.actions import forticloud_poller as forticloud_poller_module
-from config import testconfig
+
+
+def to_json_bytes(message: dict[str, Any]):
+    return json.dumps(message, default=str, separators=(",", ":")).encode()
 
 
 class TestForticloudPoller:
@@ -117,8 +122,8 @@ class TestForticloudPoller:
     @pytest.mark.asyncio
     async def _forticloud_publish_forticloud_data_ok_test(self, forticloud_poller):
         data = {"data": "some-data", "other-data": "some-other-data", "some_id": 1}
-        forticloud_poller._nats_client.publish_message = AsyncMock()
+        forticloud_poller._nats_client.publish = AsyncMock()
 
         await forticloud_poller._publish_forticloud_data(data, target="whatever")
 
-        forticloud_poller._nats_client.publish_message.assert_awaited_with("forticloud.whatever", {"data": data})
+        forticloud_poller._nats_client.publish.assert_awaited_with("forticloud.whatever", to_json_bytes(data))
