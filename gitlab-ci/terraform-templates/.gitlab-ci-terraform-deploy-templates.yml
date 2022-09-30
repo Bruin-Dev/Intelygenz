@@ -127,6 +127,7 @@
     - helm dep up ${HELM_CHART_PROMETHEUS_DIR}
     # DEPLOY PROMETHEUS HELM CHART
     - envsubst < ${HELM_CHART_PROMETHEUS_DIR}/values.yaml.tpl > ${HELM_CHART_PROMETHEUS_DIR}/values.yaml
+    - cat  ${HELM_CHART_PROMETHEUS_DIR}/values.yaml
     - helm -n prometheus upgrade --wait --install prometheus ${HELM_CHART_PROMETHEUS_DIR} -f ${HELM_CHART_PROMETHEUS_DIR}/values.yaml
     - >
       if [[ "$TF_VAR_CURRENT_ENVIRONMENT" == "dev" ]]; then
