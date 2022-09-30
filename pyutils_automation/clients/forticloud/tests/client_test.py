@@ -318,6 +318,30 @@ async def get_device_status_return_body_with_status_test(forticloud_client):
     assert "status_device" in device_status_response["body"]
 
 
+async def get_device_info_return_not_none_test(forticloud_client):
+    forticloud_client.device_strategy = AsyncMock(return_value=RESPONSE_DEVICE)
+    device_status_response = await forticloud_client.get_device_info(network_id="", device="", serial_number="")
+    assert device_status_response is not None
+
+
+async def get_device_info_return_dict_test(forticloud_client):
+    forticloud_client.device_strategy = AsyncMock(return_value=RESPONSE_DEVICE)
+    device_status_response = await forticloud_client.get_device_info(network_id="", device="", serial_number="")
+    assert type(device_status_response) is dict
+
+
+async def get_device_info_return_status_test(forticloud_client):
+    forticloud_client.device_strategy = AsyncMock(return_value=RESPONSE_DEVICE)
+    device_status_response = await forticloud_client.get_device_info(network_id="", device="", serial_number="")
+    assert "status" in device_status_response
+
+
+async def get_device_info_return_body_test(forticloud_client):
+    forticloud_client.device_strategy = AsyncMock(return_value=RESPONSE_DEVICE)
+    device_status_response = await forticloud_client.get_device_info(network_id="", device="", serial_number="")
+    assert "body" in device_status_response
+
+
 RESPONSE_LOGIN = {"access_token": "example token", "expires_in": 3600}
 RESPONSE_DEVICES = {"result": [{"id": "device id"}]}
 RESPONSE_DEVICE = {"status": 200, "body": {"status": "offline"}}

@@ -123,3 +123,6 @@ class ForticloudClient:
     async def get_device_status(self, network_id, device, serial_number):
         device_response = await self.device_strategy(network_id, device, serial_number)
         return device_status_response_assembler(device_response)
+
+    async def get_device_info(self, network_id, device, serial_number):
+        return await self.device_strategy(network_id, device, serial_number)
