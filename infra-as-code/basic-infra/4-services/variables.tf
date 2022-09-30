@@ -37,7 +37,7 @@ variable "CHARTMUSEUM_HELM_CHART_VERSION" {
 }
 
 variable "EXTERNAL_DNS_HELM_CHART_VERSION" {
-  default     = "6.0.2"
+  default     = "6.8.2"
   description = "Helm chart version used for external-dns"
 }
 
