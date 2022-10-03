@@ -125,20 +125,22 @@ class Container:
             )
 
     async def _add_consumers(self):
-        handle_ticket_forward_subscriber = NATSClient(config, logger=self._logger)
-        handle_ticket_forward = HandleTicketForward(self._metrics_repository, self._bruin_repository)
-        self._handle_ticket_forward_success = ActionWrapper(
-            handle_ticket_forward, "success", is_async=True, logger=self._logger
-        )
-        self._event_bus.add_consumer(handle_ticket_forward_subscriber, consumer_name="handle_ticket_forward")
+        if not config.ENABLE_TRIAGE_MONITORING:
+            handle_ticket_forward_subscriber = NATSClient(config, logger=self._logger)
+            handle_ticket_forward = HandleTicketForward(self._metrics_repository, self._bruin_repository)
+            self._handle_ticket_forward_success = ActionWrapper(
+                handle_ticket_forward, "success", is_async=True, logger=self._logger
+            )
+            self._event_bus.add_consumer(handle_ticket_forward_subscriber, consumer_name="handle_ticket_forward")
 
     async def _subscribe_consumers(self):
-        await self._event_bus.subscribe_consumer(
-            consumer_name="handle_ticket_forward",
-            topic=f"task_dispatcher.{TaskTypes.TICKET_FORWARDS.value}.success",
-            action_wrapper=self._handle_ticket_forward_success,
-            queue="task_dispatcher",
-        )
+        if not config.ENABLE_TRIAGE_MONITORING:
+            await self._event_bus.subscribe_consumer(
+                consumer_name="handle_ticket_forward",
+                topic=f"task_dispatcher.{TaskTypes.TICKET_FORWARDS.value}.success",
+                action_wrapper=self._handle_ticket_forward_success,
+                queue="task_dispatcher",
+            )
 
     async def _start(self):
         self._start_prometheus_metrics_server()
