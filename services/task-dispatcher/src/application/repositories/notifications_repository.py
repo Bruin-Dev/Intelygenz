@@ -15,6 +15,6 @@ class NotificationsRepository:
     async def send_slack_message(self, message: str):
         message = {
             "request_id": uuid(),
-            "body": f"[{self._config.LOG_CONFIG['name']}]: {message}",
+            "body": {"message": f"[{self._config.LOG_CONFIG['name']}]: {message}"},
         }
         await self._nats_client.request("notification.slack.request", to_json_bytes(message), timeout=10)
