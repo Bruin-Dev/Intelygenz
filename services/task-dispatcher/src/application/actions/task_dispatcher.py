@@ -70,7 +70,8 @@ class TaskDispatcher:
             success = await self._forward_ticket(**task["data"])
 
         result = "success" if success else "error"
-        await self._nats_client.publish(f"task_dispatcher.{task['type'].value}.{result}", to_json_bytes(task["data"]))
+        topic = f"task_dispatcher.{task['data']['service']}.{task['type'].value}.{result}"
+        await self._nats_client.publish(topic, to_json_bytes(task["data"]))
 
         self._task_dispatcher_client.clear_task(task["type"], task["key"])
         logger.info(f"Task of type {task['type'].value} for key {task['key']} was completed!")
