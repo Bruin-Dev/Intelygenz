@@ -1,6 +1,7 @@
 stages:
   - validation
   - unit_test
+  - sonar
   - parameters
   - basic_infra
   - basic_infra_kre
@@ -88,5 +89,28 @@ semantic-release:
         - "services/*/src/app.py"
         - "services/*/Dockerfile"
         - "services/*/requirements.txt"
+    - if: $CI_COMMIT_TAG
+      when: never
+
+sonar-analysis:
+  stage: sonar
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [ "" ]
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - sonar-scanner -Dsonar.organization=intelygenz-sonar -Dsonar.python.coverage.reportPaths=coverage.xml -Dsonar.branch.name=${CI_COMMIT_BRANCH}
+  tags:
+    - kubernetes
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "web"
+      changes:
+        - services/**/*
+        - infra-as-code/**/*
     - if: $CI_COMMIT_TAG
       when: never
