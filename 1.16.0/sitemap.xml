@@ -71,6 +71,31 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://docs.mettel-automation.net/1.16.0/backups/ECR_RECOVERY_PLAN/</loc>
+         <lastmod>2022-10-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://docs.mettel-automation.net/1.16.0/backups/EKS_SSH_RECOVERY_PLAN/</loc>
+         <lastmod>2022-10-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://docs.mettel-automation.net/1.16.0/backups/GIT_RECOVERY_PLAN/</loc>
+         <lastmod>2022-10-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://docs.mettel-automation.net/1.16.0/backups/PROMETHEUS_RECOVERY_PLAN/</loc>
+         <lastmod>2022-10-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://docs.mettel-automation.net/1.16.0/backups/TERRAFORM_RECOVERY_PLAN/</loc>
+         <lastmod>2022-10-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://docs.mettel-automation.net/1.16.0/decisions/</loc>
          <lastmod>2022-10-03</lastmod>
          <changefreq>daily</changefreq>
@@ -1926,12 +1951,32 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://docs.mettel-automation.net/1.16.0/manual_configurations/INIT_AUTOMATION_PROJECT/</loc>
+         <lastmod>2022-10-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://docs.mettel-automation.net/1.16.0/manual_configurations/OKTA_CONFIGURATIONS/</loc>
          <lastmod>2022-10-03</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.mettel-automation.net/1.16.0/manual_configurations/OKTA_JWT/</loc>
+         <lastmod>2022-10-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://docs.mettel-automation.net/1.16.0/manual_procedures/API_VENDOR_ACCESS/</loc>
+         <lastmod>2022-10-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://docs.mettel-automation.net/1.16.0/manual_procedures/EMERGENCY_PLAN/</loc>
+         <lastmod>2022-10-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://docs.mettel-automation.net/1.16.0/manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION/</loc>
          <lastmod>2022-10-03</lastmod>
          <changefreq>daily</changefreq>
     </url>
@@ -1982,11 +2027,6 @@
     </url>
     <url>
          <loc>https://docs.mettel-automation.net/1.16.0/pipeline/PIPELINE_RULES/</loc>
-         <lastmod>2022-10-03</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://docs.mettel-automation.net/1.16.0/procedures/API_VENDOR_ACCESS/</loc>
          <lastmod>2022-10-03</lastmod>
          <changefreq>daily</changefreq>
     </url>
