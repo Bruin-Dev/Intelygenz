@@ -127,7 +127,7 @@ class Container:
     async def _add_consumers(self):
         if not config.ENABLE_TRIAGE_MONITORING:
             handle_ticket_forward_subscriber = NATSClient(config, logger=self._logger)
-            handle_ticket_forward = HandleTicketForward(self._metrics_repository, self._bruin_repository)
+            handle_ticket_forward = HandleTicketForward(self._logger, self._metrics_repository, self._bruin_repository)
             self._handle_ticket_forward_success = ActionWrapper(
                 handle_ticket_forward, "success", is_async=True, logger=self._logger
             )
