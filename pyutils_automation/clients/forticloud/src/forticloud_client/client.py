@@ -70,13 +70,10 @@ class ForticloudClient:
         except Exception as e:
             logger.exception(e)
             raise LoginError
-        finally:
-            await self.close_session()
 
     async def get_devices(self, serial_number, response_content_type="application/json", url_api="", network_id=""):
         get_devices_response = {"status": 200, "body": []}
         try:
-            await self.create_session()
 
             if self.get_if_need_to_do_login():
                 await self.login()
@@ -97,8 +94,6 @@ class ForticloudClient:
         except LoginError as e:
             get_devices_response["status"] = HTTPStatus.INTERNAL_SERVER_ERROR
             return get_devices_response
-        finally:
-            await self.close_session()
 
     async def device_strategy(self, device, network_id, serial_number=""):
         devices = []
