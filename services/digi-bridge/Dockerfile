@@ -12,8 +12,8 @@ COPY pyutils_automation/py310 /pyutils_automation/py310
 WORKDIR /pyutils_automation/py310
 RUN poetry install --no-dev
 
-COPY services/digi-bridge/ /services/digi-bridge/
-WORKDIR /services/digi-bridge/
+COPY services/digi-bridge/ /service/app
+WORKDIR /service/app
 RUN poetry install --no-dev
 
 CMD ["python3", "-u", "src/app.py"]
