@@ -7,10 +7,10 @@ authors = ["Intelygenz"]
 [tool.poetry.dependencies]
 framework = {path = "../../pyutils_automation/py310", develop = false}
 python = "3.10.4"
-pyhumps = "^3.7.3"
-APScheduler = "^3.9.1"
-prometheus-client = "^0.14.1"
-aiohttp = "^3.8.1"
+pyhumps = "3.7.2"
+APScheduler = "3.9.1"
+prometheus-client = "0.14.1"
+aiohttp = "3.8.0"
 
 [tool.poetry.dev-dependencies]
 framework = {path = "../../pyutils_automation/py310", develop = true}
