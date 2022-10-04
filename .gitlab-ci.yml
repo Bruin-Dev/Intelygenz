@@ -72,7 +72,7 @@ include:
 
 semantic-release:
   stage: release
-  image: node:16.10-alpine
+  image: node:16.13-alpine
   environment:
     name: production
   script:
