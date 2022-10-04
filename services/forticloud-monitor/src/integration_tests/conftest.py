@@ -69,7 +69,7 @@ async def check_docker(config):
             redis.ping()
             redis.close()
             return True
-        except:
+        except Exception:
             return False
 
     return inner
@@ -164,7 +164,7 @@ class RouteMock:
             try:
                 await asyncio.wait_for(self.reached.wait(), timeout)
                 return True
-            except:
+            except Exception:
                 return False
 
 

@@ -31,7 +31,7 @@ class SwitchConsumer:
             device_message = SwitchMessage.parse_raw(msg.data)
             device_id = to_device_id(device_message)
             await self.check_device(device_id)
-        except:
+        except Exception:
             log.exception("Error consuming message")
 
     def subscription(self) -> Subscription:
