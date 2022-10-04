@@ -678,6 +678,7 @@ class OutageMonitor:
             task_type=TaskTypes.TICKET_FORWARDS,
             task_key=f"{ticket_id}-{serial_number}",
             task_data={
+                "service": self._config.LOG_CONFIG["name"],
                 "ticket_id": ticket_id,
                 "serial_number": serial_number,
                 "target_queue": target_queue,
