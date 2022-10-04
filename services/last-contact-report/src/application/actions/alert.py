@@ -1,37 +1,35 @@
+import logging
 from collections import OrderedDict
 from datetime import datetime
 
 from apscheduler.util import undefined
 from dateutil import relativedelta
-from igz.packages.eventbus.eventbus import EventBus
 from pytz import timezone
+
+logger = logging.getLogger(__name__)
 
 
 class Alert:
     def __init__(
         self,
-        event_bus: EventBus,
         scheduler,
-        logger,
         config,
         velocloud_repository,
         template_renderer,
         email_repository,
     ):
-        self._event_bus = event_bus
         self._scheduler = scheduler
-        self._logger = logger
         self._config = config
         self._velocloud_repository = velocloud_repository
         self._email_repository = email_repository
         self._template_renderer = template_renderer
 
     async def start_alert_job(self, exec_on_start=False):
-        self._logger.info("Scheduled task: alert report process configured to run first day of each month")
+        logger.info("Scheduled task: alert report process configured to run first day of each month")
         next_run_time = undefined
         if exec_on_start:
             next_run_time = datetime.now(timezone(self._config.TIMEZONE))
-            self._logger.info(f"It will be executed now")
+            logger.info(f"It will be executed now")
         self._scheduler.add_job(
             self._alert_process,
             "cron",
@@ -43,7 +41,7 @@ class Alert:
         )
 
     async def _alert_process(self):
-        self._logger.info("Requesting all edges with details for alert report")
+        logger.info("Requesting all edges with details for alert report")
         list_edges = await self._velocloud_repository.get_edges()
         if len(list_edges) == 0:
             return
@@ -57,7 +55,7 @@ class Alert:
             total_months_elapsed = relative_time_elapsed.years * 12 + relative_time_elapsed.months
 
             if time_elapsed.days < 30:
-                self._logger.info(f"Time elapsed is less than 30 days for {serial_number}")
+                logger.info(f"Time elapsed is less than 30 days for {serial_number}")
                 continue
 
             edge_for_alert = OrderedDict()
@@ -77,4 +75,4 @@ class Alert:
 
         email_obj = self._template_renderer.compose_email_object(edges_to_report)
         await self._email_repository.send_email(email_obj)
-        self._logger.info("Last Contact Report sent")
+        logger.info("Last Contact Report sent")

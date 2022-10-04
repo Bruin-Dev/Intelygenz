@@ -1,63 +1,105 @@
 import asyncio
+import logging
+from dataclasses import asdict
 
-import redis
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from framework.http.server import Config as HealthConfig
+from framework.http.server import Server as HealthServer
+from framework.logging.formatters import Papertrail as PapertrailFormatter
+from framework.logging.formatters import Standard as StandardFormatter
+from framework.logging.handlers import Papertrail as PapertrailHandler
+from framework.logging.handlers import Stdout as StdoutHandler
+from framework.nats.client import Client
+from framework.nats.models import Connection
+from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
+from prometheus_client import start_http_server
+from redis.client import Redis
+
 from application.actions.alert import Alert
 from application.repositories.email_repository import EmailRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.template_management import TemplateRenderer
 from application.repositories.velocloud_repository import VelocloudRepository
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import config
-from igz.packages.eventbus.eventbus import EventBus
-from igz.packages.eventbus.storage_managers import RedisStorageManager
-from igz.packages.Logger.logger_client import LoggerClient
-from igz.packages.nats.clients import NATSClient
-from igz.packages.server.api import QuartServer
-from prometheus_client import start_http_server
-from pytz import timezone
+
+# Standard output logging
+base_handler = StdoutHandler()
+base_handler.setFormatter(StandardFormatter(environment_name=config.ENVIRONMENT_NAME))
+
+app_logger = logging.getLogger("application")
+app_logger.setLevel(logging.DEBUG)
+app_logger.addHandler(base_handler)
+
+framework_logger = logging.getLogger("framework")
+framework_logger.setLevel(logging.DEBUG)
+framework_logger.addHandler(base_handler)
+
+# Papertrail logging
+if config.LOG_CONFIG["papertrail"]["active"]:
+    pt_handler = PapertrailHandler(
+        host=config.LOG_CONFIG["papertrail"]["host"],
+        port=config.LOG_CONFIG["papertrail"]["port"],
+    )
+    pt_handler.setFormatter(
+        PapertrailFormatter(
+            environment_name=config.ENVIRONMENT_NAME,
+            papertrail_prefix=config.LOG_CONFIG["papertrail"]["prefix"],
+        )
+    )
+    app_logger.addHandler(pt_handler)
+    framework_logger.addHandler(pt_handler)
+
+# APScheduler logging
+apscheduler_logger = logging.getLogger("apscheduler")
+apscheduler_logger.setLevel(logging.DEBUG)
+apscheduler_logger.addHandler(base_handler)
 
 
 class Container:
     def __init__(self):
-        self._logger = LoggerClient(config).get_logger()
-        self._logger.info("Last contact report starting...")
+        app_logger.info(f"Last Contact Report starting...")
 
-        self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
-        self._redis_client.ping()
+        # HEALTHCHECK ENDPOINT
+        self._server = HealthServer(HealthConfig(port=config.QUART_CONFIG["port"]))
 
-        self._scheduler = AsyncIOScheduler(timezone=timezone(config.TIMEZONE))
-        self._server = QuartServer(config)
+        # SCHEDULER
+        self._scheduler = AsyncIOScheduler(timezone=config.TIMEZONE)
 
-        self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
+        # REDIS
+        redis = Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
+        redis.ping()
 
-        self._publisher = NATSClient(config, logger=self._logger)
-        self.subscriber_alert = NATSClient(config, logger=self._logger)
-        self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
-        self._event_bus.add_consumer(self.subscriber_alert, consumer_name="sub-alert")
-        self._event_bus.set_producer(self._publisher)
-        self._notifications_repository = NotificationsRepository(event_bus=self._event_bus, config=config)
-        self._email_repository = EmailRepository(event_bus=self._event_bus)
-        self._velocloud_repository = VelocloudRepository(
-            self._event_bus, self._logger, config, self._notifications_repository
-        )
+        # NATS
+        tmp_redis_storage = RedisStorage(storage_client=redis)
+        self._nats_client = Client(temp_payload_storage=tmp_redis_storage)
+
+        # REPOSITORIES
+        self._notifications_repository = NotificationsRepository(nats_client=self._nats_client, config=config)
+        self._email_repository = EmailRepository(nats_client=self._nats_client)
+        self._velocloud_repository = VelocloudRepository(self._nats_client, config, self._notifications_repository)
         self._template_renderer = TemplateRenderer(config.REPORT_CONFIG)
 
+        # ACTIONS
         self._alert = Alert(
-            self._event_bus,
             self._scheduler,
-            self._logger,
             config,
             self._velocloud_repository,
             self._template_renderer,
             self._email_repository,
         )
 
-    async def _start(self):
+    async def run(self):
+        # Prometheus
         self._start_prometheus_metrics_server()
 
-        await self._event_bus.connect()
+        # Start NATS connection
+        conn = Connection(servers=config.NATS_CONFIG["servers"])
+        await self._nats_client.connect(**asdict(conn))
 
+        # Prepare scheduler jobs
         await self._alert.start_alert_job(exec_on_start=False)
+
+        # Start scheduler
         self._scheduler.start()
 
     @staticmethod
@@ -65,15 +107,15 @@ class Container:
         start_http_server(config.METRICS_SERVER_CONFIG["port"])
 
     async def start_server(self):
-        await self._server.run_server()
-
-    async def run(self):
-        await self._start()
+        await self._server.run()
 
 
 if __name__ == "__main__":
     container = Container()
+
     loop = asyncio.get_event_loop()
+
     asyncio.ensure_future(container.run(), loop=loop)
     asyncio.ensure_future(container.start_server(), loop=loop)
+
     loop.run_forever()

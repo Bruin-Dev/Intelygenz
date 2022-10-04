@@ -1,9 +1,8 @@
 import base64
-from unittest.mock import Mock
 
 import pandas as pd
+
 from application.repositories.template_management import TemplateRenderer
-from asynctest import CoroutineMock
 from config import testconfig
 from config import testconfig as config
 
@@ -51,8 +50,6 @@ class TestTemplateRenderer:
         assert email["body"]["email_data"]["attachments"][0]["data"] == file_csv.decode("utf-8")
 
     def compose_email_test(self):
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
         config = testconfig.REPORT_CONFIG
         template_renderer = TemplateRenderer(config)
 

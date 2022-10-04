@@ -1,11 +1,13 @@
-from unittest.mock import Mock, call, patch
+from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
-from application.repositories import velocloud_repository as velocloud_repository_module
-from application.repositories.velocloud_repository import VelocloudRepository
-from asynctest import CoroutineMock
-from config import testconfig
+from nats.aio.msg import Msg
 from shortuuid import uuid
+
+from application.repositories import velocloud_repository as velocloud_repository_module
+from application.repositories.utils_repository import to_json_bytes
+from application.repositories.velocloud_repository import VelocloudRepository
+from config import testconfig
 
 uuid_ = uuid()
 uuid_mock = patch.object(velocloud_repository_module, "uuid", return_value=uuid_)
@@ -13,13 +15,11 @@ uuid_mock = patch.object(velocloud_repository_module, "uuid", return_value=uuid_
 
 class TestVelocloudRepository:
     def instance_test(self):
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         notifications_repository = Mock()
 
-        velocloud_repository = VelocloudRepository(event_bus, logger, testconfig, notifications_repository)
-        assert velocloud_repository._event_bus is event_bus
-        assert velocloud_repository._logger is logger
+        velocloud_repository = VelocloudRepository(nats_client, testconfig, notifications_repository)
+        assert velocloud_repository._nats_client is nats_client
         assert velocloud_repository._config is testconfig
         assert velocloud_repository._notifications_repository is notifications_repository
 
@@ -29,7 +29,11 @@ class TestVelocloudRepository:
         host = "mettel.velocloud.net"
 
         edge_request = {"request_id": request_id, "body": [edge_link_host1], "status": 200}
-        velocloud_repository._event_bus.rpc_request = CoroutineMock(return_value=edge_request)
+
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(edge_request)
+
+        velocloud_repository._nats_client.request = AsyncMock(return_value=response_msg)
         response = await velocloud_repository.get_edges_links_by_host(host)
         assert response["body"] == [edge_link_host1]
         assert response["status"] == 200
@@ -38,15 +42,18 @@ class TestVelocloudRepository:
     async def get_edges_links_by_host_400_test(self, velocloud_repository):
         request_id = uuid()
         host = "mettel.velocloud.net"
+
         response_status = 400
         response_body = []
-        error_msg = (
-            f"Error while retrieving edges links in DEV environment: Error {response_status} - {response_body}"
-        )
         edge_request = {"request_id": request_id, "body": response_body, "status": response_status}
-        velocloud_repository._event_bus.rpc_request = CoroutineMock(return_value=edge_request)
 
-        velocloud_repository._notify_error = CoroutineMock(side_effect=[None])
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(edge_request)
+
+        error_msg = f"Error while retrieving edges links in DEV environment: Error {response_status} - {response_body}"
+        velocloud_repository._nats_client.request = AsyncMock(return_value=response_msg)
+
+        velocloud_repository._notify_error = AsyncMock(side_effect=[None])
         response = await velocloud_repository.get_edges_links_by_host(host)
         velocloud_repository._notify_error.assert_has_awaits([call(error_msg)])
         assert response["body"] == []
@@ -57,8 +64,8 @@ class TestVelocloudRepository:
         exception_msg = "test exception"
         host = "mettel.velocloud.net"
         error_msg = f"An error occurred when requesting edge list from {host} -> {exception_msg}"
-        velocloud_repository._notify_error = CoroutineMock(side_effect=[None])
-        velocloud_repository._event_bus.rpc_request = CoroutineMock(side_effect=Exception(exception_msg))
+        velocloud_repository._notify_error = AsyncMock(side_effect=[None])
+        velocloud_repository._nats_client.request = AsyncMock(side_effect=Exception(exception_msg))
         response = await velocloud_repository.get_edges_links_by_host(host)
         velocloud_repository._notify_error.assert_has_awaits([call(error_msg)])
         assert response["body"] is None
@@ -74,7 +81,7 @@ class TestVelocloudRepository:
         response_get_links2 = {"status": 200, "body": [edge_link_list[2]]}
         response_get_links3 = {"status": 200, "body": [edge_link_list[3]]}
         response_get_links4 = {"status": 200, "body": [edge_link_list[3]]}
-        velocloud_repository.get_edges_links_by_host = CoroutineMock(
+        velocloud_repository.get_edges_links_by_host = AsyncMock(
             side_effect=[response_get_links1, response_get_links2, response_get_links3, response_get_links4]
         )
         response = await velocloud_repository.get_all_edges_links()
@@ -100,7 +107,7 @@ class TestVelocloudRepository:
         response_get_links2 = {"status": 200, "body": [edge_link_list[2]]}
         response_get_links3 = {"status": 400, "body": [edge_link_list[3]]}
         response_get_links4 = {"status": 400, "body": [edge_link_list[3]]}
-        velocloud_repository.get_edges_links_by_host = CoroutineMock(
+        velocloud_repository.get_edges_links_by_host = AsyncMock(
             side_effect=[response_get_links1, response_get_links2, response_get_links3, response_get_links4]
         )
         response = await velocloud_repository.get_all_edges_links()
@@ -112,7 +119,7 @@ class TestVelocloudRepository:
 
     @pytest.mark.asyncio
     async def get_edges_test(self, velocloud_repository, edge_link_list):
-        velocloud_repository.get_all_edges_links = CoroutineMock(return_value={"body": edge_link_list})
+        velocloud_repository.get_all_edges_links = AsyncMock(return_value={"body": edge_link_list})
         edge_list = await velocloud_repository.get_edges()
         assert len(edge_list) == 1
 
@@ -122,7 +129,7 @@ class TestVelocloudRepository:
         edge_link_list[1]["edgeState"] = None
         edge_link_list[2]["edgeState"] = None
         edge_link_list[3]["edgeState"] = None
-        velocloud_repository.get_all_edges_links = CoroutineMock(return_value={"body": edge_link_list})
+        velocloud_repository.get_all_edges_links = AsyncMock(return_value={"body": edge_link_list})
         edge_list = await velocloud_repository.get_edges()
         assert len(edge_list) == 0
 
@@ -132,7 +139,7 @@ class TestVelocloudRepository:
         velocloud_repository,
     ):
         slack_message = "Error last contact notify"
-        velocloud_repository._notifications_repository.send_slack_message = CoroutineMock(return_value=None)
+        velocloud_repository._notifications_repository.send_slack_message = AsyncMock(return_value=None)
         with uuid_mock:
             await velocloud_repository._notify_error(slack_message)
         velocloud_repository._notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)

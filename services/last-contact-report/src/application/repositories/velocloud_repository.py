@@ -1,12 +1,18 @@
+import json
+import logging
+
 from shortuuid import uuid
+
+from application.repositories.utils_repository import to_json_bytes
+
+logger = logging.getLogger(__name__)
 
 nats_error_response = {"body": None, "status": 503}
 
 
 class VelocloudRepository:
-    def __init__(self, event_bus, logger, config, notifications_repository):
-        self._event_bus = event_bus
-        self._logger = logger
+    def __init__(self, nats_client, config, notifications_repository):
+        self._nats_client = nats_client
         self._config = config
         self._notifications_repository = notifications_repository
 
@@ -19,9 +25,12 @@ class VelocloudRepository:
         }
 
         try:
-            self._logger.info(f"Getting edges links from Velocloud for host {host}...")
-            response = await self._event_bus.rpc_request("get.links.with.edge.info", request, timeout=rpc_timeout)
-            self._logger.info("Got edges links from Velocloud!")
+            logger.info(f"Getting edges links from Velocloud for host {host}...")
+            response = await self._nats_client.request(
+                "get.links.with.edge.info", to_json_bytes(request), timeout=rpc_timeout
+            )
+            response = json.loads(response.data)
+            logger.info("Got edges links from Velocloud!")
         except Exception as e:
             err_msg = f"An error occurred when requesting edge list from {host} -> {e}"
             response = nats_error_response
@@ -45,7 +54,7 @@ class VelocloudRepository:
         for host in self._config.REPORT_CONFIG["monitored_velocloud_hosts"]:
             response = await self.get_edges_links_by_host(host=host)
             if response["status"] not in range(200, 300):
-                self._logger.info(f"Error: could not retrieve edges links by host: {host}")
+                logger.info(f"Error: could not retrieve edges links by host: {host}")
                 continue
             all_edges += response["body"]
 
@@ -62,14 +71,14 @@ class VelocloudRepository:
             serial_number = link["edgeSerialNumber"]
 
             if link["edgeState"] is None:
-                self._logger.info(
+                logger.info(
                     f"Edge in host {velocloud_host} and enterprise {enterprise_name} (ID: {enterprise_id}) "
                     f"has an invalid state. Skipping..."
                 )
                 continue
 
             if link["edgeState"] == "NEVER_ACTIVATED":
-                self._logger.info(
+                logger.info(
                     f"Edge {edge_name} in host {velocloud_host} and enterprise {enterprise_name} (ID: {enterprise_id}) "
                     f"has never been activated. Skipping..."
                 )
@@ -105,5 +114,5 @@ class VelocloudRepository:
         return self.extract_edge_info(edge_links_list["body"])
 
     async def _notify_error(self, err_msg):
-        self._logger.error(err_msg)
+        logger.error(err_msg)
         await self._notifications_repository.send_slack_message(err_msg)

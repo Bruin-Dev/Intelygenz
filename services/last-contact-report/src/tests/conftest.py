@@ -3,15 +3,15 @@ from datetime import datetime
 from unittest.mock import Mock
 
 import pytest
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from shortuuid import uuid
+
 from application.actions.alert import Alert
 from application.repositories.email_repository import EmailRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.template_management import TemplateRenderer
 from application.repositories.velocloud_repository import VelocloudRepository
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from asynctest import create_autospec
 from config import testconfig
-from shortuuid import uuid
 
 # Scopes
 # - function
@@ -26,35 +26,35 @@ def logger():
 
 
 @pytest.fixture(scope="function")
-def event_bus():
-    event_bus = Mock()
-    return event_bus
+def nats_client():
+    nats_client = Mock()
+    return nats_client
 
 
 @pytest.fixture(scope="function")
 def scheduler():
-    return create_autospec(AsyncIOScheduler)
+    return Mock(spec_set=AsyncIOScheduler)
 
 
 @pytest.fixture(scope="function")
-def notifications_repository(event_bus):
-    return NotificationsRepository(event_bus, testconfig)
+def notifications_repository(nats_client):
+    return NotificationsRepository(nats_client, testconfig)
 
 
 @pytest.fixture(scope="function")
-def email_repository(event_bus):
-    return EmailRepository(event_bus)
+def email_repository(nats_client):
+    return EmailRepository(nats_client)
 
 
 @pytest.fixture(scope="function")
-def velocloud_repository(event_bus, logger, notifications_repository):
-    return VelocloudRepository(event_bus, logger, testconfig, notifications_repository)
+def velocloud_repository(nats_client, logger, notifications_repository):
+    return VelocloudRepository(nats_client, testconfig, notifications_repository)
 
 
 @pytest.fixture(scope="function")
-def alert(event_bus, logger, email_repository, scheduler):
+def alert(nats_client, logger, email_repository, scheduler):
     template_renderer = TemplateRenderer(testconfig.REPORT_CONFIG)
-    return Alert(event_bus, scheduler, logger, testconfig, velocloud_repository, template_renderer, email_repository)
+    return Alert(scheduler, testconfig, velocloud_repository, template_renderer, email_repository)
 
 
 @pytest.fixture(scope="function")
@@ -172,7 +172,7 @@ def email_obj():
                 ],
                 "attachments": [{"name": "CSV", "data": "DATACSV"}],
             },
-        }
+        },
     }
 
 

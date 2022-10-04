@@ -1,31 +1,31 @@
-from unittest.mock import patch, Mock
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from asynctest import CoroutineMock
+from shortuuid import uuid
 
 from application.repositories import email_repository as email_repository_module
 from application.repositories.email_repository import EmailRepository
-from shortuuid import uuid
+from application.repositories.utils_repository import to_json_bytes
 
 uuid_ = uuid()
 uuid_mock = patch.object(email_repository_module, "uuid", return_value=uuid_)
 
 
 @pytest.fixture(scope="function")
-def mock_event_bus():
-    event_bus = Mock()
-    event_bus.rpc_request = CoroutineMock()
-    return event_bus
+def mock_nats_client():
+    nats_client = Mock()
+    nats_client.request = AsyncMock()
+    return nats_client
 
 
 @pytest.fixture(scope="function")
-def instance_email_repository(mock_event_bus):
-    return EmailRepository(mock_event_bus)
+def instance_email_repository(mock_nats_client):
+    return EmailRepository(mock_nats_client)
 
 
 class TestEmailRepository:
-    def instance_test(self, instance_email_repository, mock_event_bus):
-        assert instance_email_repository._event_bus is mock_event_bus
+    def instance_test(self, instance_email_repository, mock_nats_client):
+        assert instance_email_repository._nats_client is mock_nats_client
 
     @pytest.mark.asyncio
     async def send_email_test(self, instance_email_repository):
@@ -45,6 +45,6 @@ class TestEmailRepository:
 
         await instance_email_repository.send_email(email_data)
 
-        instance_email_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "notification.email.request", email_data, timeout=60
+        instance_email_repository._nats_client.request.assert_awaited_once_with(
+            "notification.email.request", to_json_bytes(email_data), timeout=60
         )

@@ -1,22 +1,20 @@
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from application.actions import alert as alert_module
 from apscheduler.util import undefined
-from asynctest import CoroutineMock
-from config import testconfig
 from shortuuid import uuid
+
+from application.actions import alert as alert_module
+from config import testconfig
 
 uuid_ = uuid()
 uuid_mock = patch.object(alert_module, "uuid", return_value=uuid_)
 
 
 class TestAlert:
-    def instance_test(self, alert, event_bus, scheduler, logger, email_repository):
-        assert alert._event_bus is event_bus
+    def instance_test(self, alert, scheduler, email_repository):
         assert alert._scheduler is scheduler
-        assert alert._logger is logger
         assert alert._config is testconfig
         assert alert._email_repository is email_repository
 
@@ -59,14 +57,13 @@ class TestAlert:
 
     @pytest.mark.asyncio
     async def alert_process_test(self, alert, edge_link_list, email_obj, list_edge_alert):
-        alert._velocloud_repository.get_edges = CoroutineMock(return_value=edge_link_list)
-        alert._event_bus.publish_message = CoroutineMock(return_value=None)
+        alert._velocloud_repository.get_edges = AsyncMock(return_value=edge_link_list)
         datetime_mock = Mock()
         datetime_now = datetime.now()
         datetime_mock.now = Mock(return_value=datetime_now)
         datetime_mock.strptime = Mock(return_value=datetime_now - timedelta(days=40))
         alert._template_renderer.compose_email_object = Mock(return_value=email_obj)
-        alert._email_repository.send_email = CoroutineMock()
+        alert._email_repository.send_email = AsyncMock()
         with patch.object(alert_module, "datetime", new=datetime_mock) as _:
             await alert._alert_process()
 
@@ -75,29 +72,27 @@ class TestAlert:
 
     @pytest.mark.asyncio
     async def alert_process_empty_test(self, alert, email_obj, list_edge_alert):
-        alert._velocloud_repository.get_edges = CoroutineMock(return_value=[])
-        alert._event_bus.publish_message = CoroutineMock(return_value=None)
+        alert._velocloud_repository.get_edges = AsyncMock(return_value=[])
         datetime_mock = Mock()
         datetime_now = datetime.now()
         datetime_mock.now = Mock(return_value=datetime_now)
         datetime_mock.strptime = Mock(return_value=datetime_now - timedelta(days=40))
         alert._template_renderer.compose_email_object = Mock(return_value=email_obj)
-        alert._email_repository.send_email = CoroutineMock()
+        alert._email_repository.send_email = AsyncMock()
         with patch.object(alert_module, "datetime", new=datetime_mock) as _:
             await alert._alert_process()
         alert._email_repository.send_email.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def alert_process_not_elapsed_last_contact_test(self, alert, edge_link_list, email_obj, list_edge_alert):
-        alert._velocloud_repository.get_edges = CoroutineMock(return_value=edge_link_list)
-        alert._event_bus.publish_message = CoroutineMock(return_value=None)
+        alert._velocloud_repository.get_edges = AsyncMock(return_value=edge_link_list)
         datetime_mock = Mock()
         datetime_now = datetime.now()
         datetime_mock.now = Mock(return_value=datetime_now)
         late_date = datetime_now - timedelta(days=40)
         datetime_mock.strptime = Mock(side_effect=[datetime_now, late_date, late_date, late_date])
         alert._template_renderer.compose_email_object = Mock(return_value=email_obj)
-        alert._email_repository.send_email = CoroutineMock()
+        alert._email_repository.send_email = AsyncMock()
         with patch.object(alert_module, "datetime", new=datetime_mock) as _:
             await alert._alert_process()
         alert._template_renderer.compose_email_object.assert_called_once_with(
