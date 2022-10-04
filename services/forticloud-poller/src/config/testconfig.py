@@ -23,6 +23,6 @@ LOG_CONFIG = {
 
 REDIS = {"host": "redis"}
 
-REDIS_FORTICLOUD_CACHE = {"host": "redis-forticloud-cache"}
+REDIS_CUSTOMER_CACHE = {"host": "redis-customer-cache"}
 
 METRICS_SERVER_CONFIG = {"port": 9090}

@@ -9,4 +9,5 @@ metadata:
 data:
   CURRENT_ENVIRONMENT: {{ .Values.global.current_environment | quote }}
   ENVIRONMENT_NAME: {{ .Values.global.environment | quote }}
+  REDIS_CUSTOMER_CACHE_HOSTNAME: {{ .Values.global.redis_customer_cache_hostname | quote }}
   PAPERTRAIL_PREFIX: "{{ include "forticloud-poller.fullname" . }}-{{ .Values.image.tag }}"

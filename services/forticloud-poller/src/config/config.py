@@ -21,7 +21,7 @@ TIMEZONE = os.environ["TIMEZONE"]
 
 
 MONITOR_CONFIG = {
-    "monitoring_minutes_interval": int(os.environ["MONITORING__MONITORING_JOB_INTERVAL"]) // 60,
+    "monitoring_minutes_interval": int(os.environ["FORTICLOUD_POLLER__MONITORING_JOB_INTERVAL"]) // 60,
 }
 
 LOG_CONFIG = {
@@ -41,6 +41,6 @@ QUART_CONFIG = {"title": "forticloud-poller", "port": 5000}
 
 REDIS = {"host": os.environ["REDIS_HOSTNAME"]}
 
-REDIS_FORTICLOUD_CACHE = {"host": os.environ["REDIS_FORTICLOUD_CACHE_HOSTNAME"]}
+REDIS_CUSTOMER_CACHE = {"host": os.environ["REDIS_CUSTOMER_CACHE_HOSTNAME"]}
 
 METRICS_SERVER_CONFIG = {"port": 9090}

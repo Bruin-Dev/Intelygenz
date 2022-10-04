@@ -63,7 +63,7 @@ class Container:
         self._scheduler = AsyncIOScheduler(timezone=config.TIMEZONE)
 
         # REDIS FORTICLOUD CACHE
-        redis_forticloud_cache = Redis(host=config.REDIS_FORTICLOUD_CACHE["host"], port=6379, decode_responses=True)
+        redis_forticloud_cache = Redis(host=config.REDIS_CUSTOMER_CACHE["host"], port=6379, decode_responses=True)
         redis_forticloud_cache.ping()
 
         # REDIS
