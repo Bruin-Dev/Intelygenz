@@ -4,6 +4,7 @@ import sys
 from dataclasses import asdict
 
 import redis
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from framework.http.server import Config as QuartConfig
 from framework.http.server import Server as QuartServer
 from framework.logging.formatters import Papertrail as PapertrailFormatter
