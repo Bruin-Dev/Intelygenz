@@ -414,41 +414,6 @@ email-tagger-monitor:
       memory: 256Mi
 
 
-# -- forticloud-monitor subchart specific configuration
-forticloud-monitor:
-  enabled: ${FORTICLOUD_MONITOR_ENABLED}
-  replicaCount: ${FORTICLOUD_MONITOR_DESIRED_TASKS}
-  config:
-    # -- Indicate the capabilities dependencies
-    <<: *capabilitiesEnabled
-    metrics:
-      # -- Indicates whether the microservice will expose metrics through prometheus.
-      enabled: true
-      svc:
-        port: 9090
-        name: metrics
-      ## Additional labels for the service monitor
-      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
-      labels: {}
-      #labels:
-      #  servicediscovery: true
-  image:
-    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/forticloud-monitor
-    pullPolicy: Always
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: ${FORTICLOUD_MONITOR_BUILD_NUMBER}
-  service:
-    type: ClusterIP
-    port: 5000
-  resources:
-    limits:
-      cpu: 200m
-      memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
-
-
 # -- forticloud-cache subchart specific configuration
 forticloud-cache:
   enabled: ${FORTICLOUD_CACHE_ENABLED}
@@ -484,10 +449,10 @@ forticloud-cache:
       memory: 128Mi
 
 
-# -- fraud-monitor subchart specific configuration
-fraud-monitor:
-  enabled: ${FRAUD_MONITOR_ENABLED}
-  replicaCount: ${FRAUD_MONITOR_DESIRED_TASKS}
+# -- forticloud-monitor subchart specific configuration
+forticloud-monitor:
+  enabled: ${FORTICLOUD_MONITOR_ENABLED}
+  replicaCount: ${FORTICLOUD_MONITOR_DESIRED_TASKS}
   config:
     # -- Indicate the capabilities dependencies
     <<: *capabilitiesEnabled
@@ -503,20 +468,20 @@ fraud-monitor:
       #labels:
       #  servicediscovery: true
   image:
-    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/fraud-monitor
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/forticloud-monitor
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
-    tag: ${FRAUD_MONITOR_BUILD_NUMBER}
+    tag: ${FORTICLOUD_MONITOR_BUILD_NUMBER}
   service:
     type: ClusterIP
     port: 5000
   resources:
     limits:
-      cpu: 400m
-      memory: 512Mi
-    requests:
       cpu: 200m
       memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
 
 
 # -- forticloud-poller subchart specific configuration
@@ -542,6 +507,41 @@ forticloud-poller:
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: ${FORTICLOUD_POLLER_BUILD_NUMBER}
+  service:
+    type: ClusterIP
+    port: 5000
+  resources:
+    limits:
+      cpu: 400m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+
+
+# -- fraud-monitor subchart specific configuration
+fraud-monitor:
+  enabled: ${FRAUD_MONITOR_ENABLED}
+  replicaCount: ${FRAUD_MONITOR_DESIRED_TASKS}
+  config:
+    # -- Indicate the capabilities dependencies
+    <<: *capabilitiesEnabled
+    metrics:
+      # -- Indicates whether the microservice will expose metrics through prometheus.
+      enabled: true
+      svc:
+        port: 9090
+        name: metrics
+      ## Additional labels for the service monitor
+      ## in case you use "serviceMonitorNamespaceSelector" in Prometheus CRD
+      labels: {}
+      #labels:
+      #  servicediscovery: true
+  image:
+    repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/fraud-monitor
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ${FRAUD_MONITOR_BUILD_NUMBER}
   service:
     type: ClusterIP
     port: 5000
