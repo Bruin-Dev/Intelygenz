@@ -1,32 +1,37 @@
 import json
+import logging
+
+import humps
+from nats.aio.msg import Msg
+
+logger = logging.getLogger(__name__)
 
 
 class DiGiRecoveryLogs:
-    def __init__(self, logger, event_bus, digi_repository):
-        self._logger = logger
-        self._event_bus = event_bus
+    def __init__(self, digi_repository):
         self._digi_repository = digi_repository
 
-    async def get_digi_recovery_logs(self, msg: dict):
-        request_id = msg["request_id"]
-        response_topic = msg["response_topic"]
-        response = {"request_id": request_id, "body": None, "status": None}
-        if "body" not in msg.keys():
-            self._logger.error(f"Cannot reboot DiGi client using {json.dumps(msg)}. JSON malformed")
+    async def __call__(self, request_msg: Msg):
+
+        msg_data = json.loads(request_msg.data)
+        response = {"request_id": msg_data["request_id"], "body": None, "status": None}
+        request_filters = msg_data.get("body")
+
+        if not request_filters:
+            logger.error(f"Cannot reboot DiGi client using {request_msg}. JSON malformed")
             response["status"] = 400
             response["body"] = 'Must include "body" in request'
-            await self._event_bus.publish_message(response_topic, response)
-            return
 
-        payload = msg["body"]
+        else:
+            digi_recovery_logs_response = await self._digi_repository.get_digi_recovery_logs(
+                humps.pascalize(request_filters)
+            )
 
-        results = await self._digi_repository.get_digi_recovery_logs(payload)
+            response["body"] = digi_recovery_logs_response["body"]
+            response["status"] = digi_recovery_logs_response["status"]
 
-        response["body"] = results["body"]
-        response["status"] = results["status"]
-
-        await self._event_bus.publish_message(response_topic, response)
-        self._logger.info(
-            f"DiGi recovery logs retrieved and publishing results in event bus for request {json.dumps(msg)}. "
+        await request_msg.respond(json.dumps(response).encode())
+        logger.info(
+            f"DiGi recovery logs retrieved and publishing results in event bus for request {request_msg}. "
             f"Message published was {response}"
         )
