@@ -2,7 +2,7 @@ resource "aws_ssm_parameter" "parameter-bruin-base-url" {
   name        = "/automation-engine/${local.env}/bruin/base-url"
   description = "Base URL for Bruin's API"
   type        = "SecureString"
-  value       = ""  # to edit go to parameter store dashboard.
+  value       = "-"  # to edit go to parameter store dashboard.
   key_id      =  aws_kms_alias.kms_key.name
 
   lifecycle {
@@ -22,7 +22,7 @@ resource "aws_ssm_parameter" "parameter-bruin-client-id" {
   name        = "/automation-engine/${local.env}/bruin/client-id"
   description = "Client ID credential to authenticate against Bruin's API"
   type        = "SecureString"
-  value       = ""  # to edit go to parameter store dashboard.
+  value       = "-"  # to edit go to parameter store dashboard.
   key_id      =  aws_kms_alias.kms_key.name
 
   lifecycle {
@@ -41,7 +41,7 @@ resource "aws_ssm_parameter" "parameter-bruin-client-secret" {
   name        = "/automation-engine/${local.env}/bruin/client-secret"
   description = "Client Secret credential to authenticate against Bruin's API"
   type        = "SecureString"
-  value       = ""  # to edit go to parameter store dashboard.
+  value       = "-"  # to edit go to parameter store dashboard.
   key_id      =  aws_kms_alias.kms_key.name
 
   lifecycle {
@@ -60,7 +60,7 @@ resource "aws_ssm_parameter" "parameter-bruin-login-url" {
   name        = "/automation-engine/${local.env}/bruin/login-url"
   description = "Login URL for Bruin's API"
   type        = "SecureString"
-  value       = ""  # to edit go to parameter store dashboard.
+  value       = "-"  # to edit go to parameter store dashboard.
   key_id      =  aws_kms_alias.kms_key.name
 
   lifecycle {
