@@ -1,5 +1,5 @@
 resource "aws_ssm_parameter" "parameter-forticloud-cache-time-to-refresh-interval" {
-    name        = "/automation-engine/${local.env}/forticloud/base-url"
+    name        = "/automation-engine/${local.env}/forticloud-cache/time-to-refresh-interval"
     description = "Time to refresh the Forticloud cache "
     type        = "SecureString"
     value       = "-"  # to edit go to parameter store dashboard.
@@ -17,7 +17,7 @@ resource "aws_ssm_parameter" "parameter-forticloud-cache-time-to-refresh-interva
     })
 }
 resource "aws_ssm_parameter" "parameter-forticloud-cache-monitorable-management-status" {
-    name = "/automation-engine/${local.env}/forticloud/base-url"
+    name = "/automation-engine/${local.env}/forticloud-cache/monitorable-management-status"
     description = "Managements statuses to store devices in cache "
     type = "SecureString"
     value = "-"
