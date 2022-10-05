@@ -39,8 +39,12 @@ TIMEZONE = parameters["common"]["timezone"]
 IPA_SYSTEM_USERNAME_IN_BRUIN = parameters["common"]["bruin-ipa-system-username"]
 AUTORESOLVE_DAY_START_HOUR = parameters["common"]["autoresolve-day-start-hour"]
 AUTORESOLVE_DAY_END_HOUR = parameters["common"]["autoresolve-day-end-hour"]
-LINK_LABELS_BLACKLISTED_FROM_ASR_FORWARDS = json.dumps(json.loads(parameters["common"]["link-labels-blacklisted-from-asr-forwards"]))
-LINK_LABELS_BLACKLISTED_FROM_HNOC_FORWARDS = json.dumps(json.loads(parameters["common"]["link-labels-blacklisted-from-hnoc-forwards"]))
+LINK_LABELS_BLACKLISTED_FROM_ASR_FORWARDS = json.dumps(
+    json.loads(parameters["common"]["link-labels-blacklisted-from-asr-forwards"])
+)
+LINK_LABELS_BLACKLISTED_FROM_HNOC_FORWARDS = json.dumps(
+    json.loads(parameters["common"]["link-labels-blacklisted-from-hnoc-forwards"])
+)
 
 # Metrics variables
 METRICS_RELEVANT_CLIENTS = parameters["common"]["metrics"]["relevant-clients"]
@@ -58,8 +62,12 @@ CUSTOMER_CACHE__DUPLICATE_INVENTORIES_RECIPIENT = parameters["dev"]["customer-ca
 CUSTOMER_CACHE__REFRESH_JOB_INTERVAL = parameters["common"]["customer-cache"]["refresh-job-interval"]
 CUSTOMER_CACHE__REFRESH_CHECK_INTERVAL = parameters["common"]["customer-cache"]["refresh-check-interval"]
 CUSTOMER_CACHE__BLACKLISTED_EDGES = parameters["dev"]["customer-cache"]["blacklisted-edges"]
-CUSTOMER_CACHE__BLACKLISTED_CLIENTS_WITH_PENDING_STATUS = parameters["dev"]["customer-cache"]["blacklisted-clients-with-pending-status"]
-CUSTOMER_CACHE__WHITELISTED_MANAGEMENT_STATUSES = parameters["common"]["customer-cache"]["whitelisted-management-statuses"]
+CUSTOMER_CACHE__BLACKLISTED_CLIENTS_WITH_PENDING_STATUS = parameters["dev"]["customer-cache"][
+    "blacklisted-clients-with-pending-status"
+]
+CUSTOMER_CACHE__WHITELISTED_MANAGEMENT_STATUSES = parameters["common"]["customer-cache"][
+    "whitelisted-management-statuses"
+]
 
 # DRI variables
 DRI_BRIDGE__USERNAME = parameters["common"]["dri-bridge"]["username"]
@@ -90,15 +98,27 @@ FORTICLOUD_ACCOUNT = parameters["common"]["forticloud"]["account"]
 # Fraud Monitor variables
 FRAUD_MONITOR__MONITORING_JOB_INTERVAL = parameters["common"]["fraud-monitor"]["monitoring-job-interval"]
 FRAUD_MONITOR__OBSERVED_INBOX_EMAIL_ADDRESS = parameters["dev"]["fraud-monitor"]["observed-inbox-email-address"]
-FRAUD_MONITOR__OBSERVED_INBOX_SENDERS = json.dumps(json.loads(parameters["common"]["fraud-monitor"]["observed-inbox-senders"]))
-FRAUD_MONITOR__DEFAULT_CONTACT_FOR_NEW_TICKETS = json.dumps(json.loads(parameters["common"]["fraud-monitor"]["default-contact-for-new-tickets"]))
-FRAUD_MONITOR__DEFAULT_CLIENT_INFO_FOR_DID_WITHOUT_INVENTORY = json.dumps(json.loads(parameters["common"]["fraud-monitor"]["default-client-info-for-did-without-inventory"]))
+FRAUD_MONITOR__OBSERVED_INBOX_SENDERS = json.dumps(
+    json.loads(parameters["common"]["fraud-monitor"]["observed-inbox-senders"])
+)
+FRAUD_MONITOR__DEFAULT_CONTACT_FOR_NEW_TICKETS = json.dumps(
+    json.loads(parameters["common"]["fraud-monitor"]["default-contact-for-new-tickets"])
+)
+FRAUD_MONITOR__DEFAULT_CLIENT_INFO_FOR_DID_WITHOUT_INVENTORY = json.dumps(
+    json.loads(parameters["common"]["fraud-monitor"]["default-client-info-for-did-without-inventory"])
+)
 FRAUD_MONITOR__ALERTS_LOOKUP_DAYS = parameters["common"]["fraud-monitor"]["alerts-lookup-days"]
 
 # Hawkeye Affecting Monitor variables
-HAWKEYE_AFFECTING_MONITOR__MONITORING_JOB_INTERVAL = parameters["common"]["hawkeye-affecting-monitor"]["monitoring-job-interval"]
-HAWKEYE_AFFECTING_MONITOR__PROBES_TESTS_RESULTS_LOOKUP_INTERVAL = parameters["common"]["hawkeye-affecting-monitor"]["probes-tests-results-lookup-interval"]
-HAWKEYE_AFFECTING_MONITOR__MONITORED_PRODUCT_CATEGORY = parameters["common"]["hawkeye-affecting-monitor"]["monitored-product-category"]
+HAWKEYE_AFFECTING_MONITOR__MONITORING_JOB_INTERVAL = parameters["common"]["hawkeye-affecting-monitor"][
+    "monitoring-job-interval"
+]
+HAWKEYE_AFFECTING_MONITOR__PROBES_TESTS_RESULTS_LOOKUP_INTERVAL = parameters["common"]["hawkeye-affecting-monitor"][
+    "probes-tests-results-lookup-interval"
+]
+HAWKEYE_AFFECTING_MONITOR__MONITORED_PRODUCT_CATEGORY = parameters["common"]["hawkeye-affecting-monitor"][
+    "monitored-product-category"
+]
 
 # Hawkeye Bridge variables
 HAWKEYE_BRIDGE__CLIENT_USERNAME = parameters["common"]["hawkeye-bridge"]["client-username"]
@@ -106,41 +126,89 @@ HAWKEYE_BRIDGE__CLIENT_PASSWORD = parameters["common"]["hawkeye-bridge"]["client
 HAWKEYE_BRIDGE__BASE_URL = parameters["common"]["hawkeye-bridge"]["base-url"]
 
 # Hawkeye Customer Cache variables
-HAWKEYE_CUSTOMER_CACHE__DUPLICATE_INVENTORIES_RECIPIENT = parameters["dev"]["hawkeye-customer-cache"]["duplicate-inventories-recipient"]
+HAWKEYE_CUSTOMER_CACHE__DUPLICATE_INVENTORIES_RECIPIENT = parameters["dev"]["hawkeye-customer-cache"][
+    "duplicate-inventories-recipient"
+]
 HAWKEYE_CUSTOMER_CACHE__REFRESH_JOB_INTERVAL = parameters["common"]["hawkeye-customer-cache"]["refresh-job-interval"]
-HAWKEYE_CUSTOMER_CACHE__WHITELISTED_MANAGEMENT_STATUSES = parameters["common"]["hawkeye-customer-cache"]["whitelisted-management-statuses"]
+HAWKEYE_CUSTOMER_CACHE__WHITELISTED_MANAGEMENT_STATUSES = parameters["common"]["hawkeye-customer-cache"][
+    "whitelisted-management-statuses"
+]
 
 # Hawkeye Outage Monitor variables
-HAWKEYE_OUTAGE_MONITOR__MONITORING_JOB_INTERVAL = parameters["common"]["hawkeye-outage-monitor"]["monitoring-job-interval"]
-HAWKEYE_OUTAGE_MONITOR__QUARANTINE_FOR_DEVICES_IN_OUTAGE = parameters["common"]["hawkeye-outage-monitor"]["quarantine-for-devices-in-outage"]
-HAWKEYE_OUTAGE_MONITOR__MONITORED_PRODUCT_CATEGORY = parameters["common"]["hawkeye-outage-monitor"]["monitored-product-category"]
-HAWKEYE_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE = parameters["common"]["hawkeye-outage-monitor"]["grace-period-to-autoresolve-after-last-documented-outage"]
+HAWKEYE_OUTAGE_MONITOR__MONITORING_JOB_INTERVAL = parameters["common"]["hawkeye-outage-monitor"][
+    "monitoring-job-interval"
+]
+HAWKEYE_OUTAGE_MONITOR__QUARANTINE_FOR_DEVICES_IN_OUTAGE = parameters["common"]["hawkeye-outage-monitor"][
+    "quarantine-for-devices-in-outage"
+]
+HAWKEYE_OUTAGE_MONITOR__MONITORED_PRODUCT_CATEGORY = parameters["common"]["hawkeye-outage-monitor"][
+    "monitored-product-category"
+]
+HAWKEYE_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE = parameters["common"][
+    "hawkeye-outage-monitor"
+]["grace-period-to-autoresolve-after-last-documented-outage"]
 
 # InterMapper Outage Monitor variables
-INTERMAPPER_OUTAGE_MONITOR__MONITORING_JOB_INTERVAL = parameters["common"]["intermapper-outage-monitor"]["monitoring-job-interval"]
-INTERMAPPER_OUTAGE_MONITOR__OBSERVED_INBOX_EMAIL_ADDRESS = parameters["dev"]["intermapper-outage-monitor"]["observed-inbox-email-address"]
-INTERMAPPER_OUTAGE_MONITOR__OBSERVED_INBOX_SENDERS = json.dumps(json.loads(parameters["common"]["intermapper-outage-monitor"]["observed-inbox-senders"]))
-INTERMAPPER_OUTAGE_MONITOR__MONITORED_DOWN_EVENTS = json.dumps(json.loads(parameters["common"]["intermapper-outage-monitor"]["monitored-down-events"]))
-INTERMAPPER_OUTAGE_MONITOR__MONITORED_UP_EVENTS = json.dumps(json.loads(parameters["common"]["intermapper-outage-monitor"]["monitored-up-events"]))
-INTERMAPPER_OUTAGE_MONITOR__MAX_AUTORESOLVES_PER_TICKET = parameters["common"]["intermapper-outage-monitor"]["max-autoresolves-per-ticket"]
-INTERMAPPER_OUTAGE_MONITOR__MAX_CONCURRENT_EMAIL_BATCHES = parameters["common"]["intermapper-outage-monitor"]["max-concurrent-email-batches"]
-INTERMAPPER_OUTAGE_MONITOR__WHITELISTED_PRODUCT_CATEGORIES_FOR_AUTORESOLVE = json.dumps(json.loads(parameters["common"]["intermapper-outage-monitor"]["whitelisted-product-categories-for-autoresolve"]))
-INTERMAPPER_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_DAY_TIME = parameters["common"]["intermapper-outage-monitor"]["grace-period-to-autoresolve-after-last-documented-outage-day-time"]
-INTERMAPPER_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_NIGHT_TIME = parameters["common"]["intermapper-outage-monitor"]["grace-period-to-autoresolve-after-last-documented-outage-night-time"]
-INTERMAPPER_OUTAGE_MONITOR__DRI_PARAMETERS_FOR_PIAB_NOTES = json.dumps(json.loads(parameters["common"]["intermapper-outage-monitor"]["dri-parameters-for-piab-notes"]))
-INTERMAPPER_OUTAGE_MONITOR__EVENTS_LOOKUP_DAYS = parameters["common"]["intermapper-outage-monitor"]["events-lookup-days"]
-INTERMAPPER_OUTAGE_MONITOR__BATTERY_ALERT_PROBE_TYPES = parameters["common"]["intermapper-outage-monitor"]["battery-alert-probe-types"]
-INTERMAPPER_OUTAGE_MONITOR__BATTERY_ALERT_PROBE_CONDITIONS = parameters["common"]["intermapper-outage-monitor"]["battery-alert-probe-conditions"]
-INTERMAPPER_OUTAGE_MONITOR__FORWARD_TO_HNOC_JOB_INTERVAL = parameters["common"]["intermapper-outage-monitor"]["forward-to-hnoc-job-interval"]
-INTERMAPPER_OUTAGE_MONITOR__FORWARD_TO_IPA_JOB_INTERVAL = parameters["common"]["intermapper-outage-monitor"]["forward-to-ipa-job-interval"]
+INTERMAPPER_OUTAGE_MONITOR__MONITORING_JOB_INTERVAL = parameters["common"]["intermapper-outage-monitor"][
+    "monitoring-job-interval"
+]
+INTERMAPPER_OUTAGE_MONITOR__OBSERVED_INBOX_EMAIL_ADDRESS = parameters["dev"]["intermapper-outage-monitor"][
+    "observed-inbox-email-address"
+]
+INTERMAPPER_OUTAGE_MONITOR__OBSERVED_INBOX_SENDERS = json.dumps(
+    json.loads(parameters["common"]["intermapper-outage-monitor"]["observed-inbox-senders"])
+)
+INTERMAPPER_OUTAGE_MONITOR__MONITORED_DOWN_EVENTS = json.dumps(
+    json.loads(parameters["common"]["intermapper-outage-monitor"]["monitored-down-events"])
+)
+INTERMAPPER_OUTAGE_MONITOR__MONITORED_UP_EVENTS = json.dumps(
+    json.loads(parameters["common"]["intermapper-outage-monitor"]["monitored-up-events"])
+)
+INTERMAPPER_OUTAGE_MONITOR__MAX_AUTORESOLVES_PER_TICKET = parameters["common"]["intermapper-outage-monitor"][
+    "max-autoresolves-per-ticket"
+]
+INTERMAPPER_OUTAGE_MONITOR__MAX_CONCURRENT_EMAIL_BATCHES = parameters["common"]["intermapper-outage-monitor"][
+    "max-concurrent-email-batches"
+]
+INTERMAPPER_OUTAGE_MONITOR__WHITELISTED_PRODUCT_CATEGORIES_FOR_AUTORESOLVE = json.dumps(
+    json.loads(parameters["common"]["intermapper-outage-monitor"]["whitelisted-product-categories-for-autoresolve"])
+)
+INTERMAPPER_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_DAY_TIME = parameters["common"][
+    "intermapper-outage-monitor"
+]["grace-period-to-autoresolve-after-last-documented-outage-day-time"]
+INTERMAPPER_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_NIGHT_TIME = parameters["common"][
+    "intermapper-outage-monitor"
+]["grace-period-to-autoresolve-after-last-documented-outage-night-time"]
+INTERMAPPER_OUTAGE_MONITOR__DRI_PARAMETERS_FOR_PIAB_NOTES = json.dumps(
+    json.loads(parameters["common"]["intermapper-outage-monitor"]["dri-parameters-for-piab-notes"])
+)
+INTERMAPPER_OUTAGE_MONITOR__EVENTS_LOOKUP_DAYS = parameters["common"]["intermapper-outage-monitor"][
+    "events-lookup-days"
+]
+INTERMAPPER_OUTAGE_MONITOR__BATTERY_ALERT_PROBE_TYPES = parameters["common"]["intermapper-outage-monitor"][
+    "battery-alert-probe-types"
+]
+INTERMAPPER_OUTAGE_MONITOR__BATTERY_ALERT_PROBE_CONDITIONS = parameters["common"]["intermapper-outage-monitor"][
+    "battery-alert-probe-conditions"
+]
+INTERMAPPER_OUTAGE_MONITOR__FORWARD_TO_HNOC_JOB_INTERVAL = parameters["common"]["intermapper-outage-monitor"][
+    "forward-to-hnoc-job-interval"
+]
+INTERMAPPER_OUTAGE_MONITOR__FORWARD_TO_IPA_JOB_INTERVAL = parameters["common"]["intermapper-outage-monitor"][
+    "forward-to-ipa-job-interval"
+]
 
 # Last Contact Report variables
 LAST_CONTACT_REPORT__MONITORED_VELOCLOUD_HOSTS = parameters["dev"]["last-contact-report"]["monitored-velocloud-hosts"]
 LAST_CONTACT_REPORT__RECIPIENT = parameters["dev"]["last-contact-report"]["report-recipient"]
 
 # Email Bridge variables
-EMAIL_BRIDGE__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_USERNAME = parameters["common"]["email-bridge"]["email-account-for-message-delivery-username"]
-EMAIL_BRIDGE__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_PASSWORD = parameters["common"]["email-bridge"]["email-account-for-message-delivery-password"]
+EMAIL_BRIDGE__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_USERNAME = parameters["common"]["email-bridge"][
+    "email-account-for-message-delivery-username"
+]
+EMAIL_BRIDGE__EMAIL_ACCOUNT_FOR_MESSAGE_DELIVERY_PASSWORD = parameters["common"]["email-bridge"][
+    "email-account-for-message-delivery-password"
+]
 EMAIL_BRIDGE__MONITORABLE_EMAIL_ACCOUNTS = parameters["dev"]["email-bridge"]["monitorable-email-accounts"]
 
 # Notifications bridge variables
@@ -150,87 +218,209 @@ NOTIFICATIONS_BRIDGE__SLACK_WEBHOOK = parameters["dev"]["notifications-bridge"][
 REPAIR_TICKETS_KRE_BRIDGE__KRE_BASE_URL = parameters["dev"]["repair-tickets-kre-bridge"]["kre-base-url"]
 
 # RTA Monitor variables
-REPAIR_TICKETS_MONITOR__RTA_MONITOR_JOB_INTERVAL = parameters["common"]["repair-tickets-monitor"]["rta-monitor-job-interval"]
-REPAIR_TICKETS_MONITOR__NEW_CREATED_TICKETS_FEEDBACK_JOB_INTERVAL = parameters["common"]["repair-tickets-monitor"]["new-created-tickets-feedback-job-interval"]
-REPAIR_TICKETS_MONITOR__NEW_CLOSED_TICKETS_FEEDBACK_JOB_INTERVAL = parameters["common"]["repair-tickets-monitor"]["new-closed-tickets-feedback-job-interval"]
-REPAIR_TICKETS_MONITOR__OLD_PARENT_EMAILS_REPROCESSING_JOB_INTERVAL = parameters["common"]["repair-tickets-monitor"]["old-parent-emails-reprocessing-job-interval"]
-REPAIR_TICKETS_MONITOR__MAX_CONCURRENT_EMAILS_FOR_MONITORING = parameters["common"]["repair-tickets-monitor"]["max-concurrent-emails-for-monitoring"]
-REPAIR_TICKETS_MONITOR__MAX_CONCURRENT_CREATED_TICKETS_FOR_FEEDBACK = parameters["common"]["repair-tickets-monitor"]["max-concurrent-created-tickets-for-feedback"]
-REPAIR_TICKETS_MONITOR__MAX_CONCURRENT_CLOSED_TICKETS_FOR_FEEDBACK = parameters["common"]["repair-tickets-monitor"]["max-concurrent-closed-tickets-for-feedback"]
-REPAIR_TICKETS_MONITOR__MAX_CONCURRENT_OLD_PARENT_EMAILS_REPROCESSING = parameters["common"]["repair-tickets-monitor"]["max-concurrent-old-parent-emails-reprocessing"]
+REPAIR_TICKETS_MONITOR__RTA_MONITOR_JOB_INTERVAL = parameters["common"]["repair-tickets-monitor"][
+    "rta-monitor-job-interval"
+]
+REPAIR_TICKETS_MONITOR__NEW_CREATED_TICKETS_FEEDBACK_JOB_INTERVAL = parameters["common"]["repair-tickets-monitor"][
+    "new-created-tickets-feedback-job-interval"
+]
+REPAIR_TICKETS_MONITOR__NEW_CLOSED_TICKETS_FEEDBACK_JOB_INTERVAL = parameters["common"]["repair-tickets-monitor"][
+    "new-closed-tickets-feedback-job-interval"
+]
+REPAIR_TICKETS_MONITOR__OLD_PARENT_EMAILS_REPROCESSING_JOB_INTERVAL = parameters["common"]["repair-tickets-monitor"][
+    "old-parent-emails-reprocessing-job-interval"
+]
+REPAIR_TICKETS_MONITOR__MAX_CONCURRENT_EMAILS_FOR_MONITORING = parameters["common"]["repair-tickets-monitor"][
+    "max-concurrent-emails-for-monitoring"
+]
+REPAIR_TICKETS_MONITOR__MAX_CONCURRENT_CREATED_TICKETS_FOR_FEEDBACK = parameters["common"]["repair-tickets-monitor"][
+    "max-concurrent-created-tickets-for-feedback"
+]
+REPAIR_TICKETS_MONITOR__MAX_CONCURRENT_CLOSED_TICKETS_FOR_FEEDBACK = parameters["common"]["repair-tickets-monitor"][
+    "max-concurrent-closed-tickets-for-feedback"
+]
+REPAIR_TICKETS_MONITOR__MAX_CONCURRENT_OLD_PARENT_EMAILS_REPROCESSING = parameters["common"]["repair-tickets-monitor"][
+    "max-concurrent-old-parent-emails-reprocessing"
+]
 REPAIR_TICKETS_MONITOR__TAG_IDS_MAPPING = parameters["common"]["repair-tickets-monitor"]["tag-ids-mapping"]
 REPAIR_TICKETS_MONITOR__AUTO_REPLY_ENABLED = parameters["dev"]["repair-tickets-monitor"]["auto-reply-enabled"]
 REPAIR_TICKETS_MONITOR__AUTO_REPLY_WHITELIST = parameters["dev"]["repair-tickets-monitor"]["auto-reply-whitelist"]
-REPAIR_TICKETS_MONITOR__OLD_PARENT_EMAIL_TTL_SECONDS = parameters["dev"]["repair-tickets-monitor"]["old-parent-email-ttl-seconds"]
+REPAIR_TICKETS_MONITOR__OLD_PARENT_EMAIL_TTL_SECONDS = parameters["dev"]["repair-tickets-monitor"][
+    "old-parent-email-ttl-seconds"
+]
 
 # Service Affecting Monitor - Shared variables
 SERVICE_AFFECTING__MONITORED_PRODUCT_CATEGORY = parameters["common"]["service-affecting"]["monitored-product-category"]
 
 # Service Affecting Monitor - Monitoring variables
-SERVICE_AFFECTING__MONITOR__MONITORING_JOB_INTERVAL = parameters["common"]["service-affecting"]["monitor"]["monitoring-job-interval"]
-SERVICE_AFFECTING__MONITOR__MONITORED_VELOCLOUD_HOSTS = json.loads(parameters["dev"]["service-affecting"]["monitor"]["monitored-velocloud-hosts"])
-SERVICE_AFFECTING__MONITOR__DEFAULT_CONTACT_INFO_PER_CUSTOMER = json.dumps(json.loads(parameters["common"]["service-affecting"]["monitor"]["default-contact-info-per-customer"]))
-SERVICE_AFFECTING__MONITOR__CUSTOMERS_TO_ALWAYS_USE_DEFAULT_CONTACT_INFO = json.dumps(json.loads(parameters["common"]["service-affecting"]["monitor"]["customers-to-always-use-default-contact-info"]))
-SERVICE_AFFECTING__MONITOR__LATENCY_MONITORING_THRESHOLD = parameters["common"]["service-affecting"]["monitor"]["latency-monitoring-threshold"]
-SERVICE_AFFECTING__MONITOR__PACKET_LOSS_MONITORING_THRESHOLD = parameters["common"]["service-affecting"]["monitor"]["packet-loss-monitoring-threshold"]
-SERVICE_AFFECTING__MONITOR__JITTER_MONITORING_THRESHOLD = parameters["common"]["service-affecting"]["monitor"]["jitter-monitoring-threshold"]
-SERVICE_AFFECTING__MONITOR__BANDWIDTH_OVER_UTILIZATION_MONITORING_THRESHOLD = parameters["common"]["service-affecting"]["monitor"]["bandwidth-over-utilization-monitoring-threshold"]
-SERVICE_AFFECTING__MONITOR__CIRCUIT_INSTABILITY_MONITORING_THRESHOLD = parameters["common"]["service-affecting"]["monitor"]["circuit-instability-monitoring-threshold"]
-SERVICE_AFFECTING__MONITOR__CIRCUIT_INSTABILITY_AUTORESOLVE_THRESHOLD = parameters["common"]["service-affecting"]["monitor"]["circuit-instability-autoresolve-threshold"]
-SERVICE_AFFECTING__MONITOR__LATENCY_MONITORING_LOOKUP_INTERVAL = parameters["common"]["service-affecting"]["monitor"]["latency-monitoring-lookup-interval"]
-SERVICE_AFFECTING__MONITOR__PACKET_LOSS_MONITORING_LOOKUP_INTERVAL = parameters["common"]["service-affecting"]["monitor"]["packet-loss-monitoring-lookup-interval"]
-SERVICE_AFFECTING__MONITOR__JITTER_MONITORING_LOOKUP_INTERVAL = parameters["common"]["service-affecting"]["monitor"]["jitter-monitoring-lookup-interval"]
-SERVICE_AFFECTING__MONITOR__BANDWIDTH_OVER_UTILIZATION_MONITORING_LOOKUP_INTERVAL = parameters["common"]["service-affecting"]["monitor"]["bandwidth-over-utilization-monitoring-lookup-interval"]
-SERVICE_AFFECTING__MONITOR__CIRCUIT_INSTABILITY_MONITORING_LOOKUP_INTERVAL = parameters["common"]["service-affecting"]["monitor"]["circuit-instability-monitoring-lookup-interval"]
-SERVICE_AFFECTING__MONITOR__AUTORESOLVE_LOOKUP_INTERVAL = parameters["common"]["service-affecting"]["monitor"]["autoresolve-lookup-interval"]
-SERVICE_AFFECTING__MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_TROUBLE_DAY_TIME = parameters["common"]["service-affecting"]["monitor"]["grace-period-to-autoresolve-after-last-documented-trouble-day-time"]
-SERVICE_AFFECTING__MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_TROUBLE_NIGHT_TIME = parameters["common"]["service-affecting"]["monitor"]["grace-period-to-autoresolve-after-last-documented-trouble-night-time"]
-SERVICE_AFFECTING__MONITOR__MAX_AUTORESOLVES_PER_TICKET = parameters["common"]["service-affecting"]["monitor"]["max-autoresolves-per-ticket"]
-SERVICE_AFFECTING__MONITOR__CUSTOMERS_WITH_BANDWIDTH_OVER_UTILIZATION_MONITORING = json.dumps(json.loads(parameters["common"]["service-affecting"]["monitor"]["customers-with-bandwidth-over-utilization-monitoring"]))
-SERVICE_AFFECTING__MONITOR__WAIT_TIME_BEFORE_SENDING_NEW_MILESTONE_REMINDER = parameters["common"]["service-affecting"]["monitor"]["wait-time-before-sending-new-milestone-reminder"]
+SERVICE_AFFECTING__MONITOR__MONITORING_JOB_INTERVAL = parameters["common"]["service-affecting"]["monitor"][
+    "monitoring-job-interval"
+]
+SERVICE_AFFECTING__MONITOR__MONITORED_VELOCLOUD_HOSTS = json.loads(
+    parameters["dev"]["service-affecting"]["monitor"]["monitored-velocloud-hosts"]
+)
+SERVICE_AFFECTING__MONITOR__DEFAULT_CONTACT_INFO_PER_CUSTOMER = json.dumps(
+    json.loads(parameters["common"]["service-affecting"]["monitor"]["default-contact-info-per-customer"])
+)
+SERVICE_AFFECTING__MONITOR__CUSTOMERS_TO_ALWAYS_USE_DEFAULT_CONTACT_INFO = json.dumps(
+    json.loads(parameters["common"]["service-affecting"]["monitor"]["customers-to-always-use-default-contact-info"])
+)
+SERVICE_AFFECTING__MONITOR__LATENCY_MONITORING_THRESHOLD = parameters["common"]["service-affecting"]["monitor"][
+    "latency-monitoring-threshold"
+]
+SERVICE_AFFECTING__MONITOR__PACKET_LOSS_MONITORING_THRESHOLD = parameters["common"]["service-affecting"]["monitor"][
+    "packet-loss-monitoring-threshold"
+]
+SERVICE_AFFECTING__MONITOR__JITTER_MONITORING_THRESHOLD = parameters["common"]["service-affecting"]["monitor"][
+    "jitter-monitoring-threshold"
+]
+SERVICE_AFFECTING__MONITOR__BANDWIDTH_OVER_UTILIZATION_MONITORING_THRESHOLD = parameters["common"]["service-affecting"][
+    "monitor"
+]["bandwidth-over-utilization-monitoring-threshold"]
+SERVICE_AFFECTING__MONITOR__CIRCUIT_INSTABILITY_MONITORING_THRESHOLD = parameters["common"]["service-affecting"][
+    "monitor"
+]["circuit-instability-monitoring-threshold"]
+SERVICE_AFFECTING__MONITOR__CIRCUIT_INSTABILITY_AUTORESOLVE_THRESHOLD = parameters["common"]["service-affecting"][
+    "monitor"
+]["circuit-instability-autoresolve-threshold"]
+SERVICE_AFFECTING__MONITOR__LATENCY_MONITORING_LOOKUP_INTERVAL = parameters["common"]["service-affecting"]["monitor"][
+    "latency-monitoring-lookup-interval"
+]
+SERVICE_AFFECTING__MONITOR__PACKET_LOSS_MONITORING_LOOKUP_INTERVAL = parameters["common"]["service-affecting"][
+    "monitor"
+]["packet-loss-monitoring-lookup-interval"]
+SERVICE_AFFECTING__MONITOR__JITTER_MONITORING_LOOKUP_INTERVAL = parameters["common"]["service-affecting"]["monitor"][
+    "jitter-monitoring-lookup-interval"
+]
+SERVICE_AFFECTING__MONITOR__BANDWIDTH_OVER_UTILIZATION_MONITORING_LOOKUP_INTERVAL = parameters["common"][
+    "service-affecting"
+]["monitor"]["bandwidth-over-utilization-monitoring-lookup-interval"]
+SERVICE_AFFECTING__MONITOR__CIRCUIT_INSTABILITY_MONITORING_LOOKUP_INTERVAL = parameters["common"]["service-affecting"][
+    "monitor"
+]["circuit-instability-monitoring-lookup-interval"]
+SERVICE_AFFECTING__MONITOR__AUTORESOLVE_LOOKUP_INTERVAL = parameters["common"]["service-affecting"]["monitor"][
+    "autoresolve-lookup-interval"
+]
+SERVICE_AFFECTING__MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_TROUBLE_DAY_TIME = parameters["common"][
+    "service-affecting"
+]["monitor"]["grace-period-to-autoresolve-after-last-documented-trouble-day-time"]
+SERVICE_AFFECTING__MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_TROUBLE_NIGHT_TIME = parameters["common"][
+    "service-affecting"
+]["monitor"]["grace-period-to-autoresolve-after-last-documented-trouble-night-time"]
+SERVICE_AFFECTING__MONITOR__MAX_AUTORESOLVES_PER_TICKET = parameters["common"]["service-affecting"]["monitor"][
+    "max-autoresolves-per-ticket"
+]
+SERVICE_AFFECTING__MONITOR__CUSTOMERS_WITH_BANDWIDTH_OVER_UTILIZATION_MONITORING = json.dumps(
+    json.loads(
+        parameters["common"]["service-affecting"]["monitor"]["customers-with-bandwidth-over-utilization-monitoring"]
+    )
+)
+SERVICE_AFFECTING__MONITOR__WAIT_TIME_BEFORE_SENDING_NEW_MILESTONE_REMINDER = parameters["common"]["service-affecting"][
+    "monitor"
+]["wait-time-before-sending-new-milestone-reminder"]
 
 # Service Affecting Monitor - Reoccurring Trouble Report variables
-SERVICE_AFFECTING__REOCCURRING_TROUBLE_REPORT__EXECUTION_CRON_EXPRESSION = parameters["common"]["service-affecting"]["reoccurring-trouble-report"]["execution-cron-expression"]
-SERVICE_AFFECTING__REOCCURRING_TROUBLE_REPORT__REPORTED_TROUBLES = json.dumps(json.loads(parameters["common"]["service-affecting"]["reoccurring-trouble-report"]["reported-troubles"]))
-SERVICE_AFFECTING__REOCCURRING_TROUBLE_REPORT__TICKETS_LOOKUP_INTERVAL = parameters["common"]["service-affecting"]["reoccurring-trouble-report"]["tickets-lookup-interval"]
-SERVICE_AFFECTING__REOCCURRING_TROUBLE_REPORT__REOCCURRING_TROUBLE_TICKETS_THRESHOLD = parameters["common"]["service-affecting"]["reoccurring-trouble-report"]["reoccurring-trouble-tickets-threshold"]
-SERVICE_AFFECTING__REOCCURRING_TROUBLE_REPORT__DEFAULT_CONTACTS = json.dumps(json.loads(parameters["common"]["service-affecting"]["reoccurring-trouble-report"]["default-contacts"]))
-SERVICE_AFFECTING__REOCCURRING_TROUBLE_REPORT__RECIPIENTS_PER_HOST_AND_CUSTOMER = json.dumps(json.loads(parameters["common"]["service-affecting"]["reoccurring-trouble-report"]["recipients-per-host-and-customer"]))
+SERVICE_AFFECTING__REOCCURRING_TROUBLE_REPORT__EXECUTION_CRON_EXPRESSION = parameters["common"]["service-affecting"][
+    "reoccurring-trouble-report"
+]["execution-cron-expression"]
+SERVICE_AFFECTING__REOCCURRING_TROUBLE_REPORT__REPORTED_TROUBLES = json.dumps(
+    json.loads(parameters["common"]["service-affecting"]["reoccurring-trouble-report"]["reported-troubles"])
+)
+SERVICE_AFFECTING__REOCCURRING_TROUBLE_REPORT__TICKETS_LOOKUP_INTERVAL = parameters["common"]["service-affecting"][
+    "reoccurring-trouble-report"
+]["tickets-lookup-interval"]
+SERVICE_AFFECTING__REOCCURRING_TROUBLE_REPORT__REOCCURRING_TROUBLE_TICKETS_THRESHOLD = parameters["common"][
+    "service-affecting"
+]["reoccurring-trouble-report"]["reoccurring-trouble-tickets-threshold"]
+SERVICE_AFFECTING__REOCCURRING_TROUBLE_REPORT__DEFAULT_CONTACTS = json.dumps(
+    json.loads(parameters["common"]["service-affecting"]["reoccurring-trouble-report"]["default-contacts"])
+)
+SERVICE_AFFECTING__REOCCURRING_TROUBLE_REPORT__RECIPIENTS_PER_HOST_AND_CUSTOMER = json.dumps(
+    json.loads(
+        parameters["common"]["service-affecting"]["reoccurring-trouble-report"]["recipients-per-host-and-customer"]
+    )
+)
 SERVICE_AFFECTING__REOCCURRING_TROUBLE_REPORT__EXEC_ON_START = False
 
 # Service Affecting Monitor - Daily Bandwidth Report variables
-SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__EXECUTION_CRON_EXPRESSION = parameters["common"]["service-affecting"]["daily-bandwidth-report"]["execution-cron-expression"]
-SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__LOOKUP_INTERVAL = parameters["common"]["service-affecting"]["daily-bandwidth-report"]["lookup-interval"]
-SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__ENABLED_CUSTOMERS_PER_HOST = json.dumps(json.loads(parameters["common"]["service-affecting"]["daily-bandwidth-report"]["enabled-customers-per-host"]))
-SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__RECIPIENTS = json.dumps(json.loads(parameters["common"]["service-affecting"]["daily-bandwidth-report"]["recipients"]))
+SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__EXECUTION_CRON_EXPRESSION = parameters["common"]["service-affecting"][
+    "daily-bandwidth-report"
+]["execution-cron-expression"]
+SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__LOOKUP_INTERVAL = parameters["common"]["service-affecting"][
+    "daily-bandwidth-report"
+]["lookup-interval"]
+SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__ENABLED_CUSTOMERS_PER_HOST = json.dumps(
+    json.loads(parameters["common"]["service-affecting"]["daily-bandwidth-report"]["enabled-customers-per-host"])
+)
+SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__RECIPIENTS = json.dumps(
+    json.loads(parameters["common"]["service-affecting"]["daily-bandwidth-report"]["recipients"])
+)
 SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__EXEC_ON_START = False
 
 # Service Outage Monitor - Shared variables
 SERVICE_OUTAGE__MONITORED_PRODUCT_CATEGORY = parameters["common"]["service-outage"]["monitored-product-category"]
 
 # Service Outage Monitor - Monitoring variables
-SERVICE_OUTAGE__MONITOR__MONITORING_JOB_INTERVAL = parameters["common"]["service-outage"]["monitor"]["monitoring-job-interval"]
-SERVICE_OUTAGE__MONITOR__MONITORED_VELOCLOUD_HOSTS = json.loads(parameters["dev"]["service-outage"]["monitor"]["monitored-velocloud-hosts"])
-SERVICE_OUTAGE__MONITOR__QUARANTINE_FOR_EDGES_IN_LINK_DOWN_OUTAGE = parameters["common"]["service-outage"]["monitor"]["quarantine-for-edges-in-link-down-outage"]
-SERVICE_OUTAGE__MONITOR__QUARANTINE_FOR_EDGES_IN_HARD_DOWN_OUTAGE = parameters["common"]["service-outage"]["monitor"]["quarantine-for-edges-in-hard-down-outage"]
-SERVICE_OUTAGE__MONITOR__QUARANTINE_FOR_EDGES_IN_HA_LINK_DOWN_OUTAGE = parameters["common"]["service-outage"]["monitor"]["quarantine-for-edges-in-ha-link-down-outage"]
-SERVICE_OUTAGE__MONITOR__QUARANTINE_FOR_EDGES_IN_HA_SOFT_DOWN_OUTAGE = parameters["common"]["service-outage"]["monitor"]["quarantine-for-edges-in-ha-soft-down-outage"]
-SERVICE_OUTAGE__MONITOR__QUARANTINE_FOR_EDGES_IN_HA_HARD_DOWN_OUTAGE = parameters["common"]["service-outage"]["monitor"]["quarantine-for-edges-in-ha-hard-down-outage"]
-SERVICE_OUTAGE__MONITOR__BLACKLISTED_EDGES = json.dumps(json.loads(parameters["dev"]["service-outage"]["monitor"]["blacklisted-edges"]))
-SERVICE_OUTAGE__MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_DAY_TIME = parameters["common"]["service-outage"]["monitor"]["grace-period-to-autoresolve-after-last-documented-outage-day-time"]
-SERVICE_OUTAGE__MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_NIGHT_TIME = parameters["common"]["service-outage"]["monitor"]["grace-period-to-autoresolve-after-last-documented-outage-night-time"]
-SERVICE_OUTAGE__MONITOR__GRACE_PERIOD_BEFORE_ATTEMPTING_NEW_DIGI_REBOOTS = parameters["common"]["service-outage"]["monitor"]["grace-period-before-attempting-new-digi-reboots"]
-SERVICE_OUTAGE__MONITOR__SEVERITY_FOR_EDGE_DOWN_OUTAGES = parameters["common"]["service-outage"]["monitor"]["severity-for-edge-down-outages"]
-SERVICE_OUTAGE__MONITOR__SEVERITY_FOR_LINK_DOWN_OUTAGES = parameters["common"]["service-outage"]["monitor"]["severity-for-link-down-outages"]
-SERVICE_OUTAGE__MONITOR__MAX_AUTORESOLVES_PER_TICKET = parameters["common"]["service-outage"]["monitor"]["max-autoresolves-per-ticket"]
-SERVICE_OUTAGE__MONITOR__WAIT_TIME_BEFORE_SENDING_NEW_MILESTONE_REMINDER = parameters["common"]["service-outage"]["monitor"]["wait-time-before-sending-new-milestone-reminder"]
-SERVICE_OUTAGE__MONITOR__BUSINESS_GRADE_LINK_LABELS = json.dumps(json.loads(parameters["common"]["service-outage"]["monitor"]["business-grade-link-labels"]))
+SERVICE_OUTAGE__MONITOR__MONITORING_JOB_INTERVAL = parameters["common"]["service-outage"]["monitor"][
+    "monitoring-job-interval"
+]
+SERVICE_OUTAGE__MONITOR__MONITORED_VELOCLOUD_HOSTS = json.loads(
+    parameters["dev"]["service-outage"]["monitor"]["monitored-velocloud-hosts"]
+)
+SERVICE_OUTAGE__MONITOR__QUARANTINE_FOR_EDGES_IN_LINK_DOWN_OUTAGE = parameters["common"]["service-outage"]["monitor"][
+    "quarantine-for-edges-in-link-down-outage"
+]
+SERVICE_OUTAGE__MONITOR__QUARANTINE_FOR_EDGES_IN_HARD_DOWN_OUTAGE = parameters["common"]["service-outage"]["monitor"][
+    "quarantine-for-edges-in-hard-down-outage"
+]
+SERVICE_OUTAGE__MONITOR__QUARANTINE_FOR_EDGES_IN_HA_LINK_DOWN_OUTAGE = parameters["common"]["service-outage"][
+    "monitor"
+]["quarantine-for-edges-in-ha-link-down-outage"]
+SERVICE_OUTAGE__MONITOR__QUARANTINE_FOR_EDGES_IN_HA_SOFT_DOWN_OUTAGE = parameters["common"]["service-outage"][
+    "monitor"
+]["quarantine-for-edges-in-ha-soft-down-outage"]
+SERVICE_OUTAGE__MONITOR__QUARANTINE_FOR_EDGES_IN_HA_HARD_DOWN_OUTAGE = parameters["common"]["service-outage"][
+    "monitor"
+]["quarantine-for-edges-in-ha-hard-down-outage"]
+SERVICE_OUTAGE__MONITOR__BLACKLISTED_EDGES = json.dumps(
+    json.loads(parameters["dev"]["service-outage"]["monitor"]["blacklisted-edges"])
+)
+SERVICE_OUTAGE__MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_DAY_TIME = parameters["common"][
+    "service-outage"
+]["monitor"]["grace-period-to-autoresolve-after-last-documented-outage-day-time"]
+SERVICE_OUTAGE__MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE_NIGHT_TIME = parameters["common"][
+    "service-outage"
+]["monitor"]["grace-period-to-autoresolve-after-last-documented-outage-night-time"]
+SERVICE_OUTAGE__MONITOR__GRACE_PERIOD_BEFORE_ATTEMPTING_NEW_DIGI_REBOOTS = parameters["common"]["service-outage"][
+    "monitor"
+]["grace-period-before-attempting-new-digi-reboots"]
+SERVICE_OUTAGE__MONITOR__SEVERITY_FOR_EDGE_DOWN_OUTAGES = parameters["common"]["service-outage"]["monitor"][
+    "severity-for-edge-down-outages"
+]
+SERVICE_OUTAGE__MONITOR__SEVERITY_FOR_LINK_DOWN_OUTAGES = parameters["common"]["service-outage"]["monitor"][
+    "severity-for-link-down-outages"
+]
+SERVICE_OUTAGE__MONITOR__MAX_AUTORESOLVES_PER_TICKET = parameters["common"]["service-outage"]["monitor"][
+    "max-autoresolves-per-ticket"
+]
+SERVICE_OUTAGE__MONITOR__WAIT_TIME_BEFORE_SENDING_NEW_MILESTONE_REMINDER = parameters["common"]["service-outage"][
+    "monitor"
+]["wait-time-before-sending-new-milestone-reminder"]
+SERVICE_OUTAGE__MONITOR__BUSINESS_GRADE_LINK_LABELS = json.dumps(
+    json.loads(parameters["common"]["service-outage"]["monitor"]["business-grade-link-labels"])
+)
 
 # Service Outage Monitor - Triage variables
-SERVICE_OUTAGE__TRIAGE__MONITORING_JOB_INTERVAL = parameters["common"]["service-outage"]["triage"]["monitoring-job-interval"]
+SERVICE_OUTAGE__TRIAGE__MONITORING_JOB_INTERVAL = parameters["common"]["service-outage"]["triage"][
+    "monitoring-job-interval"
+]
 SERVICE_OUTAGE__TRIAGE__LAST_NOTE_INTERVAL = parameters["common"]["service-outage"]["triage"]["last-note-interval"]
-SERVICE_OUTAGE__TRIAGE__MONITORED_VELOCLOUD_HOSTS = json.dumps(json.loads(parameters["dev"]["service-outage"]["triage"]["monitored-velocloud-hosts"]))
-SERVICE_OUTAGE__TRIAGE__MAX_EVENTS_PER_EVENT_NOTE = parameters["common"]["service-outage"]["triage"]["max-events-per-event-note"]
+SERVICE_OUTAGE__TRIAGE__MONITORED_VELOCLOUD_HOSTS = json.dumps(
+    json.loads(parameters["dev"]["service-outage"]["triage"]["monitored-velocloud-hosts"])
+)
+SERVICE_OUTAGE__TRIAGE__MAX_EVENTS_PER_EVENT_NOTE = parameters["common"]["service-outage"]["triage"][
+    "max-events-per-event-note"
+]
 
 # ServiceNow Bridge variables
 SERVICENOW__BASE_URL = parameters["dev"]["servicenow-bridge"]["base-url"]
@@ -244,26 +434,46 @@ TASK_DISPATCHER__DISPATCHING_JOB_INTERVAL = parameters["common"]["task-dispatche
 
 # TNBA Feedback variables
 TNBA_FEEDBACK__FEEDBACK_JOB_INTERVAL = parameters["common"]["tnba-feedback"]["feedback-job-interval"]
-TNBA_FEEDBACK__MONITORED_VELOCLOUD_HOSTS = json.dumps(json.loads(parameters["dev"]["tnba-feedback"]["monitored-velocloud-hosts"]))
+TNBA_FEEDBACK__MONITORED_VELOCLOUD_HOSTS = json.dumps(
+    json.loads(parameters["dev"]["tnba-feedback"]["monitored-velocloud-hosts"])
+)
 TNBA_FEEDBACK__MONITORED_PRODUCT_CATEGORY = parameters["common"]["tnba-feedback"]["monitored-product-category"]
-TNBA_FEEDBACK__GRACE_PERIOD_BEFORE_RESENDING_TICKETS = parameters["common"]["tnba-feedback"]["grace-period-before-resending-tickets"]
+TNBA_FEEDBACK__GRACE_PERIOD_BEFORE_RESENDING_TICKETS = parameters["common"]["tnba-feedback"][
+    "grace-period-before-resending-tickets"
+]
 
 # TNBA Monitor variables
 TNBA_MONITOR__MONITORING_JOB_INTERVAL = parameters["common"]["tnba-monitor"]["monitoring-job-interval"]
 TNBA_MONITOR__MONITORED_VELOCLOUD_HOSTS = json.loads(parameters["dev"]["tnba-monitor"]["monitored-velocloud-hosts"])
 TNBA_MONITOR__MONITORED_PRODUCT_CATEGORY = parameters["common"]["tnba-monitor"]["monitored-product-category"]
 TNBA_MONITOR__BLACKLISTED_EDGES = parameters["dev"]["tnba-monitor"]["blacklisted-edges"]
-TNBA_MONITOR__GRACE_PERIOD_BEFORE_APPENDING_NEW_TNBA_NOTES = parameters["common"]["tnba-monitor"]["grace-period-before-appending-new-tnba-notes"]
-TNBA_MONITOR__GRACE_PERIOD_BEFORE_MONITORING_TICKETS_BASED_ON_LAST_DOCUMENTED_OUTAGE = parameters["common"]["tnba-monitor"]["grace-period-before-monitoring-tickets-based-on-last-documented-outage"]
-TNBA_MONITOR__MIN_REQUIRED_CONFIDENCE_FOR_REQUEST_AND_REPAIR_COMPLETED_PREDICTIONS = parameters["common"]["tnba-monitor"]["min-required-confidence-for-request-and-repair-completed-predictions"]
+TNBA_MONITOR__GRACE_PERIOD_BEFORE_APPENDING_NEW_TNBA_NOTES = parameters["common"]["tnba-monitor"][
+    "grace-period-before-appending-new-tnba-notes"
+]
+TNBA_MONITOR__GRACE_PERIOD_BEFORE_MONITORING_TICKETS_BASED_ON_LAST_DOCUMENTED_OUTAGE = parameters["common"][
+    "tnba-monitor"
+]["grace-period-before-monitoring-tickets-based-on-last-documented-outage"]
+TNBA_MONITOR__MIN_REQUIRED_CONFIDENCE_FOR_REQUEST_AND_REPAIR_COMPLETED_PREDICTIONS = parameters["common"][
+    "tnba-monitor"
+]["min-required-confidence-for-request-and-repair-completed-predictions"]
 
 # Forticloud Poller variables
 FORTICLOUD_POLLER__MONITORING_JOB_INTERVAL = parameters["common"]["forticloud-poller"]["monitoring-job-interval"]
 
+# Forticloud cache variables
+FORTICLOUD_CACHE__TIME_TO_REFRESH_INTERVAL = parameters["common"]["forticloud-cache"]["time-to-refresh-interval"]
+FORTICLOUD_CACHE__MONITORABLE_MANAGEMENT_STATUSES = parameters["common"]["forticloud-cache"][
+    "monitorable-management-statuses"
+]
+
 # Gateway Monitor
-GATEWAY_MONITOR__MONITORED_VELOCLOUD_HOSTS = json.dumps(json.loads(parameters["dev"]["gateway-monitor"]["monitored-velocloud-hosts"]))
+GATEWAY_MONITOR__MONITORED_VELOCLOUD_HOSTS = json.dumps(
+    json.loads(parameters["dev"]["gateway-monitor"]["monitored-velocloud-hosts"])
+)
 GATEWAY_MONITOR__MONITORING_JOB_INTERVAL = parameters["common"]["gateway-monitor"]["monitoring-job-interval"]
-GATEWAY_MONITOR__GATEWAY_METRICS_LOOKUP_INTERVAL = parameters["common"]["gateway-monitor"]["gateway-metrics-lookup-interval"]
+GATEWAY_MONITOR__GATEWAY_METRICS_LOOKUP_INTERVAL = parameters["common"]["gateway-monitor"][
+    "gateway-metrics-lookup-interval"
+]
 GATEWAY_MONITOR__BLACKLISTED_GATEWAYS = parameters["common"]["gateway-monitor"]["blacklisted-gateways"]
 GATEWAY_MONITOR__OFFLINE_TROUBLE_ENABLED = parameters["common"]["gateway-monitor"]["offline-trouble-enabled"]
 GATEWAY_MONITOR__TUNNEL_COUNT_TROUBLE_ENABLED = parameters["common"]["gateway-monitor"]["tunnel-count-trouble-enabled"]
@@ -314,11 +524,15 @@ EMAIL_TAGGER_KRE_BRIDGE__KRE_BASE_URL = parameters["dev"]["email-tagger-kre-brid
 
 # Email Tagger Monitor variables
 EMAIL_TAGGER_MONITOR__NEW_EMAILS_JOB_INTERVAL = parameters["common"]["email-tagger-monitor"]["new-emails-job-interval"]
-EMAIL_TAGGER_MONITOR__NEW_TICKETS_JOB_INTERVAL = parameters["common"]["email-tagger-monitor"]["new-tickets-job-interval"]
+EMAIL_TAGGER_MONITOR__NEW_TICKETS_JOB_INTERVAL = parameters["common"]["email-tagger-monitor"][
+    "new-tickets-job-interval"
+]
 EMAIL_TAGGER_MONITOR__MAX_CONCURRENT_EMAILS = parameters["common"]["email-tagger-monitor"]["max-concurrent-emails"]
 EMAIL_TAGGER_MONITOR__MAX_CONCURRENT_TICKETS = parameters["common"]["email-tagger-monitor"]["max-concurrent-tickets"]
 EMAIL_TAGGER_MONITOR__API_REQUEST_KEY = parameters["dev"]["email-tagger-monitor"]["api-request-key"]
-EMAIL_TAGGER_MONITOR__API_REQUEST_SIGNATURE_SECRET_KEY = parameters["dev"]["email-tagger-monitor"]["api-request-signature-secret-key"]
+EMAIL_TAGGER_MONITOR__API_REQUEST_SIGNATURE_SECRET_KEY = parameters["dev"]["email-tagger-monitor"][
+    "api-request-signature-secret-key"
+]
 EMAIL_TAGGER_MONITOR__API_ENDPOINT_PREFIX = parameters["common"]["email-tagger-monitor"]["api-endpoint-prefix"]
 EMAIL_TAGGER_MONITOR__STORE_REPLIES_ENABLED = parameters["dev"]["email-tagger-monitor"]["store-replies-enabled"]
 
@@ -455,6 +669,8 @@ env_dict = {
         f"FORTICLOUD_USERNAME={FORTICLOUD_USERNAME}",
         f"FORTICLOUD_PASSWORD={FORTICLOUD_PASSWORD}",
         f"FORTICLOUD_ACCOUNT={FORTICLOUD_ACCOUNT}",
+        f"TIME_TO_REFRESH_INTERVAL={FORTICLOUD_CACHE__TIME_TO_REFRESH_INTERVAL}",
+        f"MONITORABLE_MANAGEMENT_STATUSES={FORTICLOUD_CACHE__MONITORABLE_MANAGEMENT_STATUSES}",
     ],
     os.path.join("services", "forticloud-monitor", "src", "config", "env"): [
         f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",
@@ -463,15 +679,15 @@ env_dict = {
         f"PAPERTRAIL_HOST={PAPERTRAIL_HOST}",
         f"PAPERTRAIL_PORT={PAPERTRAIL_PORT}",
         f"REDIS_HOSTNAME={REDIS_HOSTNAME}",
-        f'NATS_SERVER={NATS_SERVER1}',
-        f'BRUIN_BASE_URL={BRUIN_BASE_URL}',
-        f'BRUIN_LOGIN_URL={BRUIN_LOGIN_URL}',
-        f'BRUIN_CLIENT_ID={BRUIN_CLIENT_ID}',
-        f'BRUIN_CLIENT_SECRET={BRUIN_CLIENT_SECRET}',
-        f'FORTICLOUD_BASE_URL={FORTICLOUD_BASE_URL}',
-        f'FORTICLOUD_USERNAME={FORTICLOUD_USERNAME}',
-        f'FORTICLOUD_PASSWORD={FORTICLOUD_PASSWORD}',
-        f'FORTICLOUD_ACCOUNT={FORTICLOUD_ACCOUNT}',
+        f"NATS_SERVER={NATS_SERVER1}",
+        f"BRUIN_BASE_URL={BRUIN_BASE_URL}",
+        f"BRUIN_LOGIN_URL={BRUIN_LOGIN_URL}",
+        f"BRUIN_CLIENT_ID={BRUIN_CLIENT_ID}",
+        f"BRUIN_CLIENT_SECRET={BRUIN_CLIENT_SECRET}",
+        f"FORTICLOUD_BASE_URL={FORTICLOUD_BASE_URL}",
+        f"FORTICLOUD_USERNAME={FORTICLOUD_USERNAME}",
+        f"FORTICLOUD_PASSWORD={FORTICLOUD_PASSWORD}",
+        f"FORTICLOUD_ACCOUNT={FORTICLOUD_ACCOUNT}",
     ],
     os.path.join("services", "forticloud-poller", "src", "config", "env"): [
         f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",
@@ -621,7 +837,7 @@ env_dict = {
         f"PAPERTRAIL_ACTIVE={PAPERTRAIL_ACTIVE}",
         f"PAPERTRAIL_HOST={PAPERTRAIL_HOST}",
         f"PAPERTRAIL_PORT={PAPERTRAIL_PORT}",
-        f"SLACK_WEBHOOK={NOTIFICATIONS_BRIDGE__SLACK_WEBHOOK}"
+        f"SLACK_WEBHOOK={NOTIFICATIONS_BRIDGE__SLACK_WEBHOOK}",
     ],
     os.path.join("services", "repair-tickets-kre-bridge", "src", "config", "env"): [
         f"CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}",

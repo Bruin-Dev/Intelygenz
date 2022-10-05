@@ -1,0 +1,63 @@
+# ==================================================
+# Linter validation jobs for forticloud-cache module
+# ==================================================
+forticloud-cache-linter:
+  variables:
+    MODULE: forticloud-cache
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+      changes:
+        - services/forticloud-cache/src/application/**/*
+        - services/forticloud-cache/src/config/**/*
+        - services/forticloud-cache/src/app.py
+        - services/forticloud-cache/Dockerfile
+        - services/forticloud-cache/pyproject.toml
+        - services/forticloud-cache/poetry.lock
+        - pyutils_automation/py310/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+  extends: .lint_module
+
+# ===========================================
+# Unit tests jobs for forticloud-cache module
+# ===========================================
+forticloud-cache-test:
+  variables:
+    MODULE: forticloud-cache
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+      changes:
+        - services/forticloud-cache/src/application/**/*
+        - services/forticloud-cache/src/config/**/*
+        - services/forticloud-cache/src/app.py
+        - services/forticloud-cache/Dockerfile
+        - services/forticloud-cache/pyproject.toml
+        - services/forticloud-cache/poetry.lock
+        - pyutils_automation/py310/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+  extends: .unittest_module_python_310
+  needs: ["forticloud-cache-linter"]
+
+# ==============================================
+# Images builds jobs for forticloud-cache module
+# ==============================================
+forticloud-cache-build:
+  stage: build
+  variables:
+    MODULE_NAME: forticloud-cache
+    MODULE_VERSION: ${CI_PIPELINE_ID}
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $FORTICLOUD_CACHE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+      changes:
+        - services/forticloud-cache/src/application/**/*
+        - services/forticloud-cache/src/config/**/*
+        - services/forticloud-cache/src/app.py
+        - services/forticloud-cache/Dockerfile
+        - services/forticloud-cache/pyproject.toml
+        - services/forticloud-cache/poetry.lock
+        - pyutils_automation/py310/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $FORTICLOUD_CACHE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
+  extends: .build_app_image
+  needs:
+    - job: forticloud-cache-test
+    - job: semantic-release
+      optional: true
