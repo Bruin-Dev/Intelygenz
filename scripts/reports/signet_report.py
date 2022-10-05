@@ -6,18 +6,40 @@ from datetime import datetime, timedelta, timezone
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from dateutil.relativedelta import relativedelta
+from framework.logging.formatters import Standard as StandardFormatter
+from framework.logging.handlers import Stdout as StdoutHandler
+from src.application.clients import velocloud_client
+from src.application.clients.velocloud_client import VelocloudClient
+from src.application.repositories import velocloud_repository
+from src.application.repositories.velocloud_repository import VelocloudRepository
+from src.config import config
 
-from application.clients.velocloud_client import VelocloudClient
-from application.repositories.velocloud_repository import VelocloudRepository
-from config import config
+# Loggers
+base_handler = StdoutHandler()
+base_handler.setFormatter(StandardFormatter(environment_name=config.ENVIRONMENT_NAME))
 
+app_logger = logging.getLogger("application")
+app_logger.setLevel(logging.DEBUG)
+app_logger.addHandler(base_handler)
+
+framework_logger = logging.getLogger("framework")
+framework_logger.setLevel(logging.DEBUG)
+framework_logger.addHandler(base_handler)
+
+velo_client_logger = velocloud_client.logger
+velo_client_logger.setLevel(logging.DEBUG)
+velo_client_logger.addHandler(base_handler)
+
+velo_repository_logger = velocloud_repository.logger
+velo_repository_logger.setLevel(logging.DEBUG)
+velo_client_logger.addHandler(base_handler)
+
+# Velo utils
 scheduler = AsyncIOScheduler(timezone=config.TIMEZONE)
-
-logger = logging.getLogger(__name__)
-
 velo_client = VelocloudClient(config, scheduler)
 velo_repository = VelocloudRepository(config, velo_client)
 
+# Misc
 semaphore = BoundedSemaphore(1)
 
 total_intervals = 0
@@ -31,10 +53,14 @@ async def print_row(host, enterprise_id, interval):
     async with semaphore:
         start = datetime.fromtimestamp(interval["start"] // 1000, tz=timezone.utc)
         end = datetime.fromtimestamp(interval["end"] // 1000, tz=timezone.utc)
-        print(f"get_links_metric_info with host: {host} and interval: [start: {start} -> end: {end}]")
+        print(
+            f"get_links_metric_info with host: {host} and interval: [start: {start} -> end: {end}]"
+        )
 
         try:
-            host_links_metrics_info = await velo_repository.get_links_metric_info(host, interval)
+            host_links_metrics_info = await velo_repository.get_links_metric_info(
+                host, interval
+            )
         except Exception as e:
             print(f"ERROR calling get_links_metric_info {e}")
             return
@@ -69,7 +95,9 @@ async def print_row(host, enterprise_id, interval):
             }
 
             if edge_id not in config_modules_by_id:
-                links_config_response = await velo_repository.get_links_configuration(edge_full_id)
+                links_config_response = await velo_repository.get_links_configuration(
+                    edge_full_id
+                )
 
                 if links_config_response["status"] not in range(200, 300):
                     print(
@@ -112,11 +140,17 @@ async def print_row(host, enterprise_id, interval):
 
                     result_mapping.setdefault(edge_id_int, {})
                     result_mapping[edge_id_int].setdefault(current_year, {})
-                    result_mapping[edge_id_int][current_year].setdefault(current_month, {})
+                    result_mapping[edge_id_int][current_year].setdefault(
+                        current_month, {}
+                    )
 
-                    link_row = result_mapping[edge_id_int][current_year][current_month].get(link_interface)
+                    link_row = result_mapping[edge_id_int][current_year][
+                        current_month
+                    ].get(link_interface)
                     if not link_row:
-                        report_start_date = datetime(year=current_year, month=current_month, day=1)
+                        report_start_date = datetime(
+                            year=current_year, month=current_month, day=1
+                        )
                         report_end_date = report_start_date + relativedelta(months=1)
 
                         row = [
@@ -133,11 +167,19 @@ async def print_row(host, enterprise_id, interval):
                             total_bytes,
                         ]
 
-                        result_mapping[edge_id_int][current_year][current_month][link_interface] = row
+                        result_mapping[edge_id_int][current_year][current_month][
+                            link_interface
+                        ] = row
                     else:
-                        result_mapping[edge_id_int][current_year][current_month][link_interface][-3] += bytes_tx
-                        result_mapping[edge_id_int][current_year][current_month][link_interface][-2] += bytes_rx
-                        result_mapping[edge_id_int][current_year][current_month][link_interface][-1] += total_bytes
+                        result_mapping[edge_id_int][current_year][current_month][
+                            link_interface
+                        ][-3] += bytes_tx
+                        result_mapping[edge_id_int][current_year][current_month][
+                            link_interface
+                        ][-2] += bytes_rx
+                        result_mapping[edge_id_int][current_year][current_month][
+                            link_interface
+                        ][-1] += total_bytes
 
     global intervals_processed
     intervals_processed += 1
@@ -152,8 +194,12 @@ async def process_velo_management_status(csvfile):
     tasks = []
     init_year = 2022
     end_year = 2022
-    report_start_date = datetime(year=init_year, month=8, day=1, hour=0, minute=0, second=0, tzinfo=timezone.utc)
-    report_end_date = datetime(year=end_year, month=9, day=1, hour=0, minute=0, second=0, tzinfo=timezone.utc)
+    report_start_date = datetime(
+        year=init_year, month=9, day=1, hour=0, minute=0, second=0, tzinfo=timezone.utc
+    )
+    report_end_date = datetime(
+        year=end_year, month=10, day=1, hour=0, minute=0, second=0, tzinfo=timezone.utc
+    )
 
     start = report_start_date
     while start < report_end_date:
@@ -181,9 +227,13 @@ async def process_velo_management_status(csvfile):
     print("done writing rows")
 
 
-
+async def main():
+    await velo_client.create_session()
+    await velo_client.instantiate_and_connect_clients()
     with open(f"./signet_usage.csv", "w") as csvfile:
-        filewriter = csv.writer(csvfile, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        filewriter = csv.writer(
+            csvfile, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
+        )
 
         titles = [
             "id",
@@ -208,3 +258,4 @@ async def process_velo_management_status(csvfile):
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
+    loop.close()
