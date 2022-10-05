@@ -2,6 +2,7 @@ import asyncio
 
 import redis
 from application.actions.bandwidth_reports import BandwidthReports
+from application.actions.handle_ticket_forward import HandleTicketForward
 from application.actions.service_affecting_monitor import ServiceAffectingMonitor
 from application.actions.service_affecting_monitor_reports import ServiceAffectingMonitorReports
 from application.repositories.bruin_repository import BruinRepository
@@ -21,7 +22,7 @@ from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
-from igz.packages.storage.task_dispatcher_client import TaskDispatcherClient
+from igz.packages.storage.task_dispatcher_client import TaskDispatcherClient, TaskTypes
 from prometheus_client import start_http_server
 from pytz import timezone
 
@@ -126,10 +127,28 @@ class Container:
             template_repository=self._template_repository,
         )
 
+    async def _add_consumers(self):
+        handle_ticket_forward_subscriber = NATSClient(config, logger=self._logger)
+        handle_ticket_forward = HandleTicketForward(self._metrics_repository)
+        self._handle_ticket_forward_success = ActionWrapper(
+            handle_ticket_forward, "success", is_async=True, logger=self._logger
+        )
+        self._event_bus.add_consumer(handle_ticket_forward_subscriber, consumer_name="handle_ticket_forward")
+
+    async def _subscribe_consumers(self):
+        await self._event_bus.subscribe_consumer(
+            consumer_name="handle_ticket_forward",
+            topic=f"task_dispatcher.{TaskTypes.TICKET_FORWARDS.value}.success",
+            action_wrapper=self._handle_ticket_forward_success,
+            queue="task_dispatcher",
+        )
+
     async def _start(self):
         self._start_prometheus_metrics_server()
 
+        await self._add_consumers()
         await self._event_bus.connect()
+        await self._subscribe_consumers()
 
         await self._service_affecting_monitor.start_service_affecting_monitor(exec_on_start=True)
 
