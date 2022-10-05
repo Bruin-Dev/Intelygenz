@@ -8,4 +8,5 @@ from tests.fixtures._constants import CURRENT_DATETIME
 def frozen_datetime():
     dt_mock = Mock()
     dt_mock.now.return_value = CURRENT_DATETIME
+    dt_mock.utcnow.return_value = CURRENT_DATETIME
     return dt_mock
