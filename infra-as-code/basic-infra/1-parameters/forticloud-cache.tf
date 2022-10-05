@@ -1,4 +1,4 @@
-resource "aws_ssm_parameter" "parameter-forticloud-time-to-refresh-interval" {
+resource "aws_ssm_parameter" "parameter-forticloud-cache-time-to-refresh-interval" {
     name        = "/automation-engine/${local.env}/forticloud/base-url"
     description = "Time to refresh the Forticloud cache "
     type        = "SecureString"
@@ -16,12 +16,13 @@ resource "aws_ssm_parameter" "parameter-forticloud-time-to-refresh-interval" {
         note = "can be updated from the parameter store dashboard"
     })
 }
-resource "aws_ssm_parameter" "parameter-forticloud-monitorable-management-status" {
-    name        = "/automation-engine/${local.env}/forticloud/base-url"
+resource "aws_ssm_parameter" "parameter-forticloud-cache-monitorable-management-status" {
+    name = "/automation-engine/${local.env}/forticloud/base-url"
     description = "Managements statuses to store devices in cache "
-    type        = "SecureString"
-    value       = "-"  # to edit go to parameter store dashboard.
-    key_id      =  aws_kms_alias.kms_key.name
+    type = "SecureString"
+    value = "-"
+    # to edit go to parameter store dashboard.
+    key_id = aws_kms_alias.kms_key.name
 
     lifecycle {
         ignore_changes = [
@@ -33,3 +34,4 @@ resource "aws_ssm_parameter" "parameter-forticloud-monitorable-management-status
         Name = "MONITORABLE_MANAGEMENT_STATUSES"
         note = "can be updated from the parameter store dashboard"
     })
+}
