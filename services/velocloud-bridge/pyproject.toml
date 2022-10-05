@@ -3,6 +3,11 @@ name = "velocloud-bridge"
 version = "1.0.0"
 description = "MetTel's Automation bridge for VeloCloud"
 authors = ["Intelygenz"]
+packages = [
+    # Signet Network Usage report needs to use some logic from this service to succeed, so this line gives the chance
+    # to install its source code as a library. It's not ideal, but it's the best we can do for now.
+    { include = "src", from = "." },
+]
 
 [tool.poetry.dependencies]
 python = "3.10.4"
