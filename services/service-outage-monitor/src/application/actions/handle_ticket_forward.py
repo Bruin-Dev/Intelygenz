@@ -1,8 +1,7 @@
 class HandleTicketForward:
-    def __init__(self, logger, metrics_repository, bruin_repository):
+    def __init__(self, logger, metrics_repository):
         self._logger = logger
         self._metrics_repository = metrics_repository
-        self._bruin_repository = bruin_repository
 
     async def success(self, msg: dict):
         ticket_id = msg["ticket_id"]
