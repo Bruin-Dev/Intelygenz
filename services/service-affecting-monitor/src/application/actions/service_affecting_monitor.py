@@ -4,19 +4,12 @@ from collections import ChainMap
 from datetime import datetime, timedelta
 from typing import List, Optional
 
-from application import (
-    AFFECTING_NOTE_REGEX,
-    FORWARD_TICKET_TO_HNOC_JOB_ID,
-    LINK_INFO_REGEX,
-    REMINDER_NOTE_REGEX,
-    AffectingTroubles,
-    ForwardQueues,
-)
+from application import AFFECTING_NOTE_REGEX, LINK_INFO_REGEX, REMINDER_NOTE_REGEX, AffectingTroubles, ForwardQueues
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from dateutil.parser import parse
+from igz.packages.storage.task_dispatcher_client import TaskTypes
 from pytz import timezone
-from tenacity import retry, stop_after_delay, wait_exponential
 
 
 class ServiceAffectingMonitor:
@@ -24,6 +17,7 @@ class ServiceAffectingMonitor:
         self,
         logger,
         scheduler,
+        task_dispatcher_client,
         config,
         metrics_repository,
         bruin_repository,
@@ -36,6 +30,7 @@ class ServiceAffectingMonitor:
     ):
         self._logger = logger
         self._scheduler = scheduler
+        self._task_dispatcher_client = task_dispatcher_client
         self._config = config
         self._metrics_repository = metrics_repository
         self._bruin_repository = bruin_repository
@@ -434,15 +429,13 @@ class ServiceAffectingMonitor:
                     f"Detail of ticket {affecting_ticket_id} related to serial number {serial_number} was autoresolved!"
                 )
 
-                job_id = FORWARD_TICKET_TO_HNOC_JOB_ID.format(
-                    ticket_id=affecting_ticket_id, serial_number=serial_number
-                )
-                if self._scheduler.get_job(job_id):
+                task_type = TaskTypes.TICKET_FORWARDS
+                task_key = f"{affecting_ticket_id}-{serial_number}"
+                if self._task_dispatcher_client.clear_task(task_type, task_key):
                     self._logger.info(
-                        f"Found job to forward to HNOC scheduled for autoresolved ticket {affecting_ticket_id}"
-                        f" related to serial number {serial_number}! Removing..."
+                        f"Removed scheduled task to forward to HNOC for autoresolved ticket {affecting_ticket_id} "
+                        f"related to serial number {serial_number}"
                     )
-                    self._scheduler.remove_job(job_id)
 
             self._logger.info(f"Finished autoresolve for edge {serial_number}!")
 
@@ -920,12 +913,11 @@ class ServiceAffectingMonitor:
 
         link_label = link_data["link_status"]["displayName"]
         if self._should_forward_to_hnoc(link_label):
+            forward_time = self._get_max_seconds_since_last_trouble(link_data) / 60
             self._logger.info(
                 f"Forwarding reopened task for serial {serial_number} of ticket {ticket_id} to the HNOC queue..."
             )
-            self._schedule_forward_to_hnoc_queue(
-                ticket_id=ticket_id, serial_number=serial_number, link_data=link_data, trouble=trouble
-            )
+            self._schedule_forward_to_hnoc_queue(forward_time, ticket_id, serial_number, link_data, trouble)
         else:
             self._logger.info(
                 f"Ticket_id: {ticket_id} for serial: {serial_number} with link_label: "
@@ -941,9 +933,7 @@ class ServiceAffectingMonitor:
                 ticket_id, serial_number
             )
             if email_response["status"] not in range(200, 300):
-                self._logger.error(
-                    f"Reminder email of edge {serial_number} could not be sent for ticket {ticket_id}!"
-                )
+                self._logger.error(f"Reminder email of edge {serial_number} could not be sent for ticket {ticket_id}!")
                 return
 
             append_note_response = await self._append_reminder_note(ticket_id, serial_number)
@@ -1008,7 +998,8 @@ class ServiceAffectingMonitor:
         link_label = link_data["link_status"]["displayName"]
         if trouble is not AffectingTroubles.BOUNCING:
             if self._should_forward_to_hnoc(link_label):
-                self._schedule_forward_to_hnoc_queue(ticket_id, serial_number, link_data, trouble)
+                forward_time = self._get_max_seconds_since_last_trouble(link_data) / 60
+                self._schedule_forward_to_hnoc_queue(forward_time, ticket_id, serial_number, link_data, trouble)
             else:
                 self._logger.info(
                     f"Ticket_id: {ticket_id} for serial: {serial_number} with link_label: "
@@ -1043,76 +1034,42 @@ class ServiceAffectingMonitor:
             return True
         return not self._is_link_label_blacklisted_from_hnoc(link_label)
 
-    def _schedule_forward_to_hnoc_queue(self, ticket_id, serial_number, link_data, trouble):
-        tz = timezone(self._config.TIMEZONE)
-        current_datetime = datetime.now(tz)
-        max_seconds_since_last_trouble = self._get_max_seconds_since_last_trouble(link_data)
-        forward_task_run_date = current_datetime + timedelta(seconds=max_seconds_since_last_trouble)
+    def _schedule_forward_to_hnoc_queue(self, forward_time, ticket_id, serial_number, link_data, trouble):
+        target_queue = ForwardQueues.HNOC.value
+        current_datetime = datetime.utcnow()
+        forward_task_run_date = current_datetime + timedelta(minutes=forward_time)
+
+        interface = link_data["link_status"]["interface"]
+        client_name = link_data["cached_info"]["bruin_client_info"]["client_name"]
+        link_label = link_data["link_status"]["displayName"]
+        links_configuration = link_data["cached_info"]["links_configuration"]
+
+        is_byob = self._is_link_label_blacklisted_from_hnoc(link_label)
+        link_type = self._get_link_type(interface, links_configuration)
 
         self._logger.info(
-            f"Scheduling HNOC forwarding for ticket_id: {ticket_id} and serial: {serial_number} "
-            f"to happen at timestamp: {forward_task_run_date}"
+            f"Scheduling HNOC forward for ticket {ticket_id} and serial number {serial_number} "
+            f"to happen in {forward_time} minutes"
         )
 
-        job_id = FORWARD_TICKET_TO_HNOC_JOB_ID.format(ticket_id=ticket_id, serial_number=serial_number)
-        self._scheduler.add_job(
-            self._forward_ticket_to_hnoc_queue,
-            "date",
-            kwargs={"ticket_id": ticket_id, "serial_number": serial_number, "link_data": link_data, "trouble": trouble},
-            run_date=forward_task_run_date,
-            replace_existing=False,
-            misfire_grace_time=9999,
-            coalesce=True,
-            id=job_id,
+        self._task_dispatcher_client.schedule_task(
+            date=forward_task_run_date,
+            task_type=TaskTypes.TICKET_FORWARDS,
+            task_key=f"{ticket_id}-{serial_number}",
+            task_data={
+                "service": self._config.LOG_CONFIG["name"],
+                "ticket_id": ticket_id,
+                "serial_number": serial_number,
+                "target_queue": target_queue,
+                "metrics_labels": {
+                    "client": client_name,
+                    "trouble": trouble.value,
+                    "has_byob": is_byob,
+                    "link_type": link_type,
+                    "target_queue": target_queue,
+                },
+            },
         )
-
-    async def _forward_ticket_to_hnoc_queue(self, ticket_id, serial_number, link_data, trouble):
-        @retry(
-            wait=wait_exponential(
-                multiplier=self._config.NATS_CONFIG["multiplier"], min=self._config.NATS_CONFIG["min"]
-            ),
-            stop=stop_after_delay(self._config.NATS_CONFIG["stop_delay"]),
-        )
-        async def forward_ticket_to_hnoc_queue():
-            target_queue = ForwardQueues.HNOC.value
-            interface = link_data["link_status"]["interface"]
-            client_name = link_data["cached_info"]["bruin_client_info"]["client_name"]
-            link_label = link_data["link_status"]["displayName"]
-            links_configuration = link_data["cached_info"]["links_configuration"]
-
-            is_byob = self._is_link_label_blacklisted_from_hnoc(link_label)
-            link_type = self._get_link_type(interface, links_configuration)
-
-            change_work_queue_response = await self._bruin_repository.change_detail_work_queue_to_hnoc(
-                ticket_id=ticket_id, service_number=serial_number
-            )
-            if change_work_queue_response["status"] not in range(200, 300):
-                self._logger.error(
-                    f"Failed to forward ticket_id: {ticket_id} and "
-                    f"serial: {serial_number} to HNOC Investigate due to bruin "
-                    f"returning {change_work_queue_response} when attempting to forward to HNOC."
-                )
-                return
-
-            self._metrics_repository.increment_tasks_forwarded(
-                client=client_name,
-                trouble=trouble.value,
-                has_byob=is_byob,
-                link_type=link_type,
-                target_queue=target_queue,
-            )
-
-            await self._notifications_repository.notify_successful_ticket_forward(
-                ticket_id=ticket_id, serial_number=serial_number
-            )
-
-        try:
-            await forward_ticket_to_hnoc_queue()
-        except Exception as e:
-            self._logger.error(
-                f"An error occurred while trying to forward ticket_id {ticket_id} for serial {serial_number} to HNOC"
-                f" -> {e}"
-            )
 
     async def _attempt_forward_to_asr(self, link_data: dict, trouble: AffectingTroubles, ticket_id: Optional[int]):
         if not ticket_id:
@@ -1138,10 +1095,11 @@ class ServiceAffectingMonitor:
                 link_interface_type = link_configuration["type"]
 
         if link_interface_type != "WIRED":
+            forward_time = 0
             self._logger.info(
                 f"Link {interface} is of type {link_interface_type} and not WIRED. Attempting to forward to HNOC..."
             )
-            await self._forward_ticket_to_hnoc_queue(ticket_id, serial_number, link_data, trouble)
+            self._schedule_forward_to_hnoc_queue(forward_time, ticket_id, serial_number, link_data, trouble)
             return
 
         self._logger.info(
@@ -1343,14 +1301,10 @@ class ServiceAffectingMonitor:
 
         append_note_response = await self._append_reminder_note(ticket_id, service_number)
         if append_note_response["status"] not in range(200, 300):
-            self._logger.error(
-                f"Reminder note of edge {service_number} could not be appended to ticket {ticket_id}!"
-            )
+            self._logger.error(f"Reminder note of edge {service_number} could not be appended to ticket {ticket_id}!")
             return
 
-        self._logger.info(
-            f"Reminder note of edge {service_number} was successfully appended to ticket {ticket_id}!"
-        )
+        self._logger.info(f"Reminder note of edge {service_number} was successfully appended to ticket {ticket_id}!")
         await self._notifications_repository.notify_successful_reminder_note_append(ticket_id, service_number)
 
     def _was_last_reminder_sent_recently(

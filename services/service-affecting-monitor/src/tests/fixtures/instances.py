@@ -15,6 +15,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from asynctest import create_autospec
 from config import testconfig as config
 from igz.packages.eventbus.eventbus import EventBus
+from igz.packages.storage.task_dispatcher_client import TaskDispatcherClient, TaskTypes
 from tests.fixtures._helpers import wrap_all_methods
 
 
@@ -38,6 +39,11 @@ def event_bus():
 @pytest.fixture(scope="function")
 def scheduler():
     return create_autospec(AsyncIOScheduler)
+
+
+@pytest.fixture(scope="function")
+def task_dispatcher_client():
+    return create_autospec(TaskDispatcherClient)
 
 
 @pytest.fixture(scope="function")
@@ -139,6 +145,7 @@ def utils_repository():
 def service_affecting_monitor(
     logger,
     scheduler,
+    task_dispatcher_client,
     customer_cache_repository,
     bruin_repository,
     velocloud_repository,
@@ -151,6 +158,7 @@ def service_affecting_monitor(
     instance = ServiceAffectingMonitor(
         logger=logger,
         scheduler=scheduler,
+        task_dispatcher_client=task_dispatcher_client,
         config=config,
         bruin_repository=bruin_repository,
         velocloud_repository=velocloud_repository,
