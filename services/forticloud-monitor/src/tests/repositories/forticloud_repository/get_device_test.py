@@ -34,14 +34,14 @@ async def ap_devices_are_properly_queried_test(any_forticloud_repository, any_ap
     await forticloud_repository.get_device(any_device_id)
 
     # then
-    get_device_info.assert_awaited_once_with("access_points", any_device_id.network_id, any_device_id.id)
+    get_device_info.assert_awaited_once_with(any_device_id.network_id, "access_points", f"{any_device_id.id}/")
 
 
 @pytest.mark.parametrize(
     ["forticloud_body", "expected_device"],
     [
         (
-            {"connection_state": "connected"},
+            {"result": {"connection_state": "connected"}},
             Device(
                 id=ANY,
                 status=DeviceStatus.ONLINE,
@@ -51,7 +51,7 @@ async def ap_devices_are_properly_queried_test(any_forticloud_repository, any_ap
             ),
         ),
         (
-            {"connection_state": "connected", "any_field": "any_value"},
+            {"result": {"connection_state": "connected"}, "any_field": "any_value"},
             Device(
                 id=ANY,
                 status=DeviceStatus.ONLINE,
@@ -61,7 +61,24 @@ async def ap_devices_are_properly_queried_test(any_forticloud_repository, any_ap
             ),
         ),
         (
-            {"connection_state": "connected", "name": "any_name", "disc_type": "any_type", "serial": "any_serial"},
+            {"result": {"connection_state": "connected", "any_field": "any_value"}},
+            Device(
+                id=ANY,
+                status=DeviceStatus.ONLINE,
+                name="unknown",
+                type="unknown",
+                serial="unknown",
+            ),
+        ),
+        (
+            {
+                "result": {
+                    "connection_state": "connected",
+                    "name": "any_name",
+                    "disc_type": "any_type",
+                    "serial": "any_serial",
+                }
+            },
             Device(
                 id=ANY,
                 status=DeviceStatus.ONLINE,
@@ -71,7 +88,7 @@ async def ap_devices_are_properly_queried_test(any_forticloud_repository, any_ap
             ),
         ),
         (
-            {"connection_state": "connected", "name": {}, "disc_type": {}, "serial": {}},
+            {"result": {"connection_state": "connected", "name": {}, "disc_type": {}, "serial": {}}},
             Device(
                 id=ANY,
                 status=DeviceStatus.ONLINE,
@@ -84,6 +101,7 @@ async def ap_devices_are_properly_queried_test(any_forticloud_repository, any_ap
     ids=[
         "partial data",
         "extra root fields",
+        "extra result fields",
         "full data",
         "wrong data types",
     ],
@@ -123,7 +141,9 @@ async def ap_statuses_are_properly_parsed_test(
     # given
     any_device_id.type = DeviceType.AP
     forticloud_repository = any_forticloud_repository(
-        get_device_info=AsyncMock(return_value={"status": 200, "body": {"connection_state": forticloud_ap_status}})
+        get_device_info=AsyncMock(
+            return_value={"status": 200, "body": {"result": {"connection_state": forticloud_ap_status}}}
+        )
     )
 
     # when
@@ -146,7 +166,9 @@ async def unknown_ap_statuses_raise_a_proper_exception_test(
     # given
     any_device_id.type = DeviceType.AP
     forticloud_repository = any_forticloud_repository(
-        get_device_info=AsyncMock(return_value={"status": 200, "body": {"status": forticloud_ap_status}})
+        get_device_info=AsyncMock(
+            return_value={"status": 200, "body": {"result": {"connection_state": forticloud_ap_status}}}
+        )
     )
 
     # then
@@ -164,14 +186,14 @@ async def switch_devices_are_properly_queried_test(any_forticloud_repository, an
     await forticloud_repository.get_device(any_device_id)
 
     # then
-    get_device_info.assert_awaited_once_with("switches", any_device_id.network_id, any_device_id.id)
+    get_device_info.assert_awaited_once_with(any_device_id.network_id, "switches", f"{any_device_id.id}/")
 
 
 @pytest.mark.parametrize(
     ["forticloud_body", "expected_device"],
     [
         (
-            {"status": "online"},
+            {"conn_status": {"status": "online"}},
             Device(
                 id=ANY,
                 status=DeviceStatus.ONLINE,
@@ -181,7 +203,17 @@ async def switch_devices_are_properly_queried_test(any_forticloud_repository, an
             ),
         ),
         (
-            {"status": "online", "any_field": "any_value"},
+            {"conn_status": {"status": "online"}, "system": {"status": {"hostname": "any_hostname"}}},
+            Device(
+                id=ANY,
+                status=DeviceStatus.ONLINE,
+                name="any_hostname",
+                type="unknown",
+                serial="unknown",
+            ),
+        ),
+        (
+            {"conn_status": {"status": "online"}, "any_field": "any_value"},
             Device(
                 id=ANY,
                 status=DeviceStatus.ONLINE,
@@ -191,7 +223,20 @@ async def switch_devices_are_properly_queried_test(any_forticloud_repository, an
             ),
         ),
         (
-            {"status": "online", "hostname": "any_name", "model": "any_type", "sn": "any_serial"},
+            {"conn_status": {"status": "online", "any_field": "any_value"}},
+            Device(
+                id=ANY,
+                status=DeviceStatus.ONLINE,
+                name="unknown",
+                type="unknown",
+                serial="unknown",
+            ),
+        ),
+        (
+            {
+                "conn_status": {"status": "online"},
+                "system": {"status": {"hostname": "any_name", "model": "any_type", "serial_number": "any_serial"}},
+            },
             Device(
                 id=ANY,
                 status=DeviceStatus.ONLINE,
@@ -201,7 +246,30 @@ async def switch_devices_are_properly_queried_test(any_forticloud_repository, an
             ),
         ),
         (
-            {"status": "online", "hostname": {}, "model": {}, "sn": {}},
+            {"conn_status": {"status": "online"}, "system": "any_system"},
+            Device(
+                id=ANY,
+                status=DeviceStatus.ONLINE,
+                name="unknown",
+                type="unknown",
+                serial="unknown",
+            ),
+        ),
+        (
+            {"conn_status": {"status": "online"}, "system": {"status": "any_status"}},
+            Device(
+                id=ANY,
+                status=DeviceStatus.ONLINE,
+                name="unknown",
+                type="unknown",
+                serial="unknown",
+            ),
+        ),
+        (
+            {
+                "conn_status": {"status": "online"},
+                "system": {"status": {"hostname": {}, "model": {}, "sn": {}}},
+            },
             Device(
                 id=ANY,
                 status=DeviceStatus.ONLINE,
@@ -213,9 +281,13 @@ async def switch_devices_are_properly_queried_test(any_forticloud_repository, an
     ],
     ids=[
         "partial data",
+        "partial system status data",
         "extra root fields",
+        "extra conn_status fields",
         "full data",
-        "wrong data types",
+        "wrong system type",
+        "wrong system status type",
+        "wrong system status types",
     ],
 )
 async def switch_responses_are_properly_parsed_test(
@@ -251,7 +323,9 @@ async def switch_statuses_are_properly_parsed_test(
     # given
     any_device_id.type = DeviceType.SWITCH
     forticloud_repository = any_forticloud_repository(
-        get_device_info=AsyncMock(return_value={"status": 200, "body": {"status": forticloud_switch_status}})
+        get_device_info=AsyncMock(
+            return_value={"status": 200, "body": {"conn_status": {"status": forticloud_switch_status}}}
+        )
     )
 
     # when
@@ -274,7 +348,9 @@ async def unknown_switch_statuses_raise_a_proper_exception_test(
     # given
     any_device_id.type = DeviceType.SWITCH
     forticloud_repository = any_forticloud_repository(
-        get_device_info=AsyncMock(return_value={"status": 200, "body": {"status": forticloud_switch_status}})
+        get_device_info=AsyncMock(
+            return_value={"status": 200, "body": {"conn_status": {"status": forticloud_switch_status}}}
+        )
     )
 
     # then
@@ -456,9 +532,9 @@ def any_forticloud_repository():
 
 @pytest.fixture
 def any_ap_response():
-    return {"status": 200, "body": {"connection_state": "connected"}}
+    return {"status": 200, "body": {"result": {"connection_state": "connected"}}}
 
 
 @pytest.fixture
 def any_switch_response():
-    return {"status": 200, "body": {"status": "online"}}
+    return {"status": 200, "body": {"conn_status": {"status": "online"}}}

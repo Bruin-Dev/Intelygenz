@@ -17,7 +17,9 @@ METRICS_SERVER_CONFIG = {"port": 9090}
 
 MONITORABLE_MANAGEMENTS_STATUSES = json.loads(os.environ["MONITORABLE_MANAGEMENT_STATUSES"])
 
-FORTICLOUD_CACHE_CONFIGURATION = {"time_to_refresh_interval": int(os.environ["TIME_TO_REFRESH_INTERVAL"])}
+FORTICLOUD_CACHE_CONFIGURATION = {
+    "time_to_refresh_interval_in_minutes": int(os.environ["TIME_TO_REFRESH_INTERVAL_IN_MINUTES"])
+}
 
 NATS_CONFIG = {
     "servers": [os.environ["NATS_SERVER1"]],

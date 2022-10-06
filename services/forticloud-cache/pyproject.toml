@@ -6,19 +6,15 @@ authors = ["Intelygenz"]
 
 [tool.poetry.dependencies]
 python = "3.10.4"
-aiohttp = "3.8.3"
 APScheduler = "3.9.1"
-prometheus_client = "0.6.0"
+prometheus-client = "0.14.1"
 redis = "3.3.11"
-forticloud_client = {path = "../../pyutils_automation/clients/forticloud", develop = false}
-framework = {path = "../../pyutils_automation/py310", develop = false}
 pydantic = "1.9.0"
 tenacity = "8.0.1"
 forticloud-client = {path = "../../pyutils_automation/clients/forticloud"}
+framework = {path = "../../pyutils_automation/py310"}
 
 [tool.poetry.dev-dependencies]
-forticloud_client = {path = "../../pyutils_automation/clients/forticloud", develop = true}
-framework = {path = "../../pyutils_automation/py310", develop = true}
 black = "22.3.0"
 isort = "5.10.1"
 pytest = "6.2.5"

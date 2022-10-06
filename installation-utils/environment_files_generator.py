@@ -264,6 +264,10 @@ TNBA_MONITOR__GRACE_PERIOD_BEFORE_APPENDING_NEW_TNBA_NOTES = parameters["common"
 TNBA_MONITOR__GRACE_PERIOD_BEFORE_MONITORING_TICKETS_BASED_ON_LAST_DOCUMENTED_OUTAGE = parameters["common"]["tnba-monitor"]["grace-period-before-monitoring-tickets-based-on-last-documented-outage"]
 TNBA_MONITOR__MIN_REQUIRED_CONFIDENCE_FOR_REQUEST_AND_REPAIR_COMPLETED_PREDICTIONS = parameters["common"]["tnba-monitor"]["min-required-confidence-for-request-and-repair-completed-predictions"]
 
+# Forticloud Poller variables
+FORTICLOUD_CACHE__TIME_TO_REFRESH_INTERVAL_IN_MINUTES = parameters["common"]["forticloud-cache"]["time-to-refresh-interval-in-minutes"]
+FORTICLOUD_CACHE__MONITORABLE_MANAGEMENT_STATUSES = parameters["common"]["forticloud-cache"]["monitorable-management-statuses"]
+
 # Gateway Monitor
 GATEWAY_MONITOR__MONITORED_VELOCLOUD_HOSTS = json.dumps(json.loads(parameters["dev"]["gateway-monitor"]["monitored-velocloud-hosts"]))
 GATEWAY_MONITOR__MONITORING_JOB_INTERVAL = parameters["common"]["gateway-monitor"]["monitoring-job-interval"]

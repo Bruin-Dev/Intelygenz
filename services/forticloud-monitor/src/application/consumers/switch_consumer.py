@@ -14,10 +14,9 @@ log = logging.getLogger(__name__)
 
 
 class SwitchMessage(BaseModel):
-    device_id: str
-    device_network_id: str
+    serial_number: str
+    network_id: str
     client_id: str
-    service_number: str
 
 
 @dataclass
@@ -41,9 +40,9 @@ class SwitchConsumer:
 def to_device_id(switch_message: SwitchMessage) -> DeviceId:
     log.debug(f"to_device_id(switch_message={switch_message})")
     return DeviceId(
-        switch_message.device_id,
-        switch_message.device_network_id,
-        switch_message.client_id,
-        switch_message.service_number,
-        DeviceType.SWITCH,
+        id=switch_message.serial_number,
+        network_id=switch_message.network_id,
+        client_id=switch_message.client_id,
+        service_number=switch_message.serial_number,
+        type=DeviceType.SWITCH,
     )

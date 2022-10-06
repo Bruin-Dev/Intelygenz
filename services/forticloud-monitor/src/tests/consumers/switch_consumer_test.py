@@ -8,7 +8,7 @@ from nats.aio.msg import Msg
 from application.consumers import ConsumerSettings, SwitchConsumer
 from application.models.device import DeviceId, DeviceType
 
-any_serialized_message = b'{"device_id":1,device_network_id":1,"client_id":1,"service_number":1}'
+any_serialized_message = b'{"serial_number":1,"network_id":1,"client_id":1}'
 
 
 def subcriptions_are_properly_built_test(any_switch_consumer):
@@ -22,14 +22,7 @@ def subcriptions_are_properly_built_test(any_switch_consumer):
 async def messages_are_properly_consumed_test(any_switch_consumer):
     # given
     check_device = AsyncMock()
-    serialized_message = (
-        b"{"
-        b'"device_id":"any_id",'
-        b'"device_network_id":1,'
-        b'"client_id":true,'
-        b'"service_number":"any_service_number"'
-        b"}"
-    )
+    serialized_message = b'{"serial_number":"any_serial_number","network_id":1,"client_id":true}'
     consumer = any_switch_consumer(check_device=check_device)
 
     # when
@@ -37,10 +30,10 @@ async def messages_are_properly_consumed_test(any_switch_consumer):
 
     # then
     expected_device_id = DeviceId(
-        id="any_id",
+        id="any_serial_number",
         network_id="1",
         client_id="True",
-        service_number="any_service_number",
+        service_number="any_serial_number",
         type=DeviceType.SWITCH,
     )
     check_device.assert_awaited_once_with(expected_device_id)
@@ -51,8 +44,8 @@ async def messages_are_properly_consumed_test(any_switch_consumer):
     [
         b"not_a_json_message",
         b'{id: "any_id"}',
-        b'{"device_id": "any_id"}',
-        b'{"device_id":{},"device_network_id":1,"client_id":1,"service_number":1}',
+        b'{"serial_number": "any_id"}',
+        b'{"serial_number":{},"network_id":1,"client_id":1}',
     ],
     ids=[
         "not a json message",
