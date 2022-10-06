@@ -1,6 +1,6 @@
 import logging
 
-from application.clients.models import Network
+from application.models.models import Network
 
 logger = logging.getLogger(__name__)
 

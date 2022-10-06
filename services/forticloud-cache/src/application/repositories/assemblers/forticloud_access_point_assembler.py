@@ -1,6 +1,6 @@
 import logging
 
-from application.clients.models import AccessPoint
+from application.models.models import AccessPoint
 
 logger = logging.getLogger(__name__)
 

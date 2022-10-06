@@ -1,4 +1,4 @@
-from application.clients.models import Network
+from application.models.models import Network
 from application.repositories.assemblers import forticloud_networks_assembler
 
 mock_network_example_1 = {"oid": 1, "name": "network_1"}

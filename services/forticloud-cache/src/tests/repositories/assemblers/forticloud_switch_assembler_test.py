@@ -1,4 +1,4 @@
-from application.clients.models import Switch
+from application.models.models import Switch
 from application.repositories.assemblers import forticloud_switch_assembler
 
 mock_switch_1 = {"network": 1, "sn": "serial_number_test_1", "status": "offline"}

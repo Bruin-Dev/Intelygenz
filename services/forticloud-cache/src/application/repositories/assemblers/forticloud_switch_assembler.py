@@ -1,6 +1,6 @@
 import logging
 
-from application.clients.models import Switch
+from application.models.models import Switch
 
 logger = logging.getLogger(__name__)
 

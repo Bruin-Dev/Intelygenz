@@ -1,4 +1,4 @@
-from application.clients.models import AccessPoint
+from application.models.models import AccessPoint
 from application.repositories.assemblers import forticloud_access_point_assembler
 
 mock_access_point_1 = {"connection_state": "connected", "serial": "sn_2"}
