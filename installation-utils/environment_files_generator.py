@@ -82,14 +82,14 @@ DIGI_REBOOT_REPORT__LOGS_LOOKUP_INTERVAL = parameters["common"]["digi-reboot-rep
 DIGI_REBOOT_REPORT__RECIPIENT = parameters["dev"]["digi-reboot-report"]["report-recipient"]
 
 # Forticloud variables
-FORTICLOUD_BASE_URL = parameters["dev"]["forticloud"]["base-url"]
+FORTICLOUD_BASE_URL = parameters["pro"]["forticloud"]["base-url"]
 FORTICLOUD_USERNAME = parameters["common"]["forticloud"]["username"]
 FORTICLOUD_PASSWORD = parameters["common"]["forticloud"]["password"]
 FORTICLOUD_ACCOUNT = parameters["common"]["forticloud"]["account"]
 
 # Forticloud cache variables
 FORTICLOUD_CACHE__TIME_TO_REFRESH_INTERVAL = parameters["common"]["forticloud-cache"]["time-to-refresh-interval"]
-FORTICLOUD_CACHE__MONITORABLE_MANAGEMENT_STATUSES = parameters["common"]["forticloud-cache"]["monitorable-management-statuses"]
+FORTICLOUD_CACHE__MONITORABLE_MANAGEMENT_STATUSES = parameters["common"]["forticloud-cache"]["monitorable-management-status"]
 
 # Forticloud Poller variables
 FORTICLOUD_POLLER__MONITORING_JOB_INTERVAL = parameters["common"]["forticloud-poller"]["monitoring-job-interval"]
@@ -263,10 +263,6 @@ TNBA_MONITOR__BLACKLISTED_EDGES = parameters["dev"]["tnba-monitor"]["blacklisted
 TNBA_MONITOR__GRACE_PERIOD_BEFORE_APPENDING_NEW_TNBA_NOTES = parameters["common"]["tnba-monitor"]["grace-period-before-appending-new-tnba-notes"]
 TNBA_MONITOR__GRACE_PERIOD_BEFORE_MONITORING_TICKETS_BASED_ON_LAST_DOCUMENTED_OUTAGE = parameters["common"]["tnba-monitor"]["grace-period-before-monitoring-tickets-based-on-last-documented-outage"]
 TNBA_MONITOR__MIN_REQUIRED_CONFIDENCE_FOR_REQUEST_AND_REPAIR_COMPLETED_PREDICTIONS = parameters["common"]["tnba-monitor"]["min-required-confidence-for-request-and-repair-completed-predictions"]
-
-# Forticloud Poller variables
-FORTICLOUD_CACHE__TIME_TO_REFRESH_INTERVAL_IN_MINUTES = parameters["common"]["forticloud-cache"]["time-to-refresh-interval-in-minutes"]
-FORTICLOUD_CACHE__MONITORABLE_MANAGEMENT_STATUSES = parameters["common"]["forticloud-cache"]["monitorable-management-statuses"]
 
 # Gateway Monitor
 GATEWAY_MONITOR__MONITORED_VELOCLOUD_HOSTS = json.dumps(json.loads(parameters["dev"]["gateway-monitor"]["monitored-velocloud-hosts"]))

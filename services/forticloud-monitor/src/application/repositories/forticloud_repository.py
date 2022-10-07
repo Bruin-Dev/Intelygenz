@@ -7,7 +7,7 @@ from typing import Any, Dict
 
 from forticloud_client.client import ForticloudClient
 from pydantic import ValidationError
-from tenacity import AsyncRetrying, retry_if_exception_type, stop_after_attempt, wait_random
+from tenacity import AsyncRetrying, retry_if_exception_type, stop_after_attempt, wait_chain, wait_random
 
 from application.models.device import Device, DeviceId, DeviceStatus, DeviceType
 from application.repositories import UnexpectedResponseError, UnexpectedStatusError
@@ -27,8 +27,8 @@ DEVICE_DOWN_EVENT = "Event: Device Down"
 
 DEFAULT_RETRY_CONFIG = dict(
     reraise=True,
-    stop=stop_after_attempt(3),
-    wait=wait_random(min=1, max=2),
+    stop=stop_after_attempt(4),
+    wait=wait_chain(wait_random(min=1, max=3), wait_random(min=2, max=4), wait_random(min=3, max=5)),
     retry=retry_if_exception_type(UnexpectedStatusError),
 )
 
@@ -60,7 +60,7 @@ class ForticloudRepository:
 
         ap_status = DeviceStatus.UNKNOWN
         match body.result.connection_state:
-            case "connected" | "Connected":
+            case "connected" | "Connected" | "connecting" | "Connecting":
                 ap_status = DeviceStatus.ONLINE
             case "disconnected" | "Disconnected":
                 ap_status = DeviceStatus.OFFLINE
@@ -90,9 +90,9 @@ class ForticloudRepository:
 
         switch_status = DeviceStatus.UNKNOWN
         match body.conn_status.status:
-            case "online":
+            case "online" | "connected" | "Connected" | "connecting" | "Connecting":
                 switch_status = DeviceStatus.ONLINE
-            case "offline":
+            case "offline" | "disconnected" | "Disconnected":
                 switch_status = DeviceStatus.OFFLINE
 
         if switch_status == DeviceStatus.UNKNOWN:
@@ -112,7 +112,8 @@ class ForticloudRepository:
             network_id=network_id,
             serial_number=f"{serial_number}/",
         )
-        log.debug(f"get_device_info(...) => {response if len(str(response)) < 500 else '{...}'}")
+        str_response = response if len(str(response)) < 500 else "{...}"
+        log.debug(f"get_device_info(...) => {str_response}")
         try:
             return ForticloudResponse.parse_obj(response)
         except ValidationError as e:

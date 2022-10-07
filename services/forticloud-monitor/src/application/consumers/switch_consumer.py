@@ -30,6 +30,7 @@ class SwitchConsumer:
             device_message = SwitchMessage.parse_raw(msg.data)
             device_id = to_device_id(device_message)
             await self.check_device(device_id)
+            log.debug(f"The device {device_id} was properly consumed")
         except Exception:
             log.exception("Error consuming message")
 
