@@ -200,7 +200,7 @@ tests = ["rich", "littleutils", "pytest", "asttokens"]
 
 [[package]]
 name = "forticloud-client"
-version = "1.0.0"
+version = "1.0.1"
 description = "Lib for use the forticloud client"
 category = "main"
 optional = false
@@ -1105,7 +1105,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "3.10.4"
-content-hash = "be204ba31afa22767ff7561c8ec289838c42387f31f581aa594bb63f611c47b8"
+content-hash = "aaf240d282763ef114d815e7335fc1982cb0b1cb96f3b9d51b0c7ddb0693c1ec"
 
 [metadata.files]
 aiofiles = [

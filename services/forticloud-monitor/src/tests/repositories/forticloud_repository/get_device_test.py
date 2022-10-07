@@ -1,15 +1,27 @@
+from copy import deepcopy
 from unittest.mock import ANY, AsyncMock, Mock
 
 import pytest
 from forticloud_client.client import ForticloudClient
+from tenacity import stop_after_attempt
+from tenacity.stop import stop_base
 
 from application.models.device import Device, DeviceStatus, DeviceType
 from application.repositories import (
+    DEFAULT_RETRY_CONFIG,
     ForticloudRepository,
     UnexpectedResponseError,
     UnexpectedStatusError,
     UnknownStatusError,
 )
+
+
+async def a_forticloud_repository_is_built_with_a_default_ap_retry_config_test():
+    assert ForticloudRepository(Mock()).ap_retry_config == DEFAULT_RETRY_CONFIG
+
+
+async def a_forticloud_repository_is_built_with_a_default_switch_retry_config_test():
+    assert ForticloudRepository(Mock()).switch_retry_config == DEFAULT_RETRY_CONFIG
 
 
 async def ap_devices_are_properly_queried_test(any_forticloud_repository, any_ap_response, any_device_id):
@@ -328,11 +340,11 @@ async def unparseable_ap_responses_raise_a_proper_exception_test(
         {"status": "any_string", "body": {}},
     ],
     ids=[
-        "string response",
-        "empty response",
-        "unexpected fields",
-        "wrong body type",
-        "wrong status type",
+        "string_response",
+        "empty_response",
+        "unexpected_fields",
+        "wrong_body_type",
+        "wrong_status_type",
     ],
 )
 async def unparseable_switch_responses_raise_a_proper_exception_test(
@@ -349,12 +361,95 @@ async def unparseable_switch_responses_raise_a_proper_exception_test(
         await forticloud_repository.get_device(any_device_id)
 
 
+@pytest.mark.parametrize("ap_attempts", [2, 3, 4])
+async def unexpected_ap_statuses_are_properly_retried_test(
+    any_forticloud_repository,
+    any_device_id,
+    ap_attempts,
+):
+    # given
+    get_device_info = AsyncMock(return_value={"status": 500, "body": {}})
+    any_device_id.type = DeviceType.AP
+    forticloud_repository = any_forticloud_repository(
+        get_device_info=get_device_info,
+        ap_retry_stop=stop_after_attempt(ap_attempts),
+    )
+
+    # when
+    with pytest.raises(UnexpectedStatusError):
+        await forticloud_repository.get_device(any_device_id)
+
+    # then
+    assert get_device_info.await_count == ap_attempts
+
+
+@pytest.mark.parametrize("switch_attempts", [2, 3, 4])
+async def unexpected_switch_statuses_are_properly_retried_test(
+    any_forticloud_repository,
+    any_device_id,
+    switch_attempts,
+):
+    # given
+    get_device_info = AsyncMock(return_value={"status": 500, "body": {}})
+    any_device_id.type = DeviceType.SWITCH
+    forticloud_repository = any_forticloud_repository(
+        get_device_info=get_device_info,
+        switch_retry_stop=stop_after_attempt(switch_attempts),
+    )
+
+    # when
+    with pytest.raises(UnexpectedStatusError):
+        await forticloud_repository.get_device(any_device_id)
+
+    # then
+    assert get_device_info.await_count == switch_attempts
+
+
+@pytest.mark.parametrize("forticloud_status", [500, 429])
+async def unexpected_forticloud_statuses_are_properly_retried_test(
+    any_forticloud_repository,
+    any_device_id,
+    forticloud_status,
+):
+    # given
+    get_device_info = AsyncMock(return_value={"status": forticloud_status, "body": {}})
+    any_device_id.type = DeviceType.AP
+    forticloud_repository = any_forticloud_repository(
+        get_device_info=get_device_info,
+        ap_retry_stop=stop_after_attempt(3),
+    )
+
+    # when
+    with pytest.raises(UnexpectedStatusError):
+        await forticloud_repository.get_device(any_device_id)
+
+    # then
+    assert get_device_info.await_count == 3
+
+
 @pytest.fixture
 def any_forticloud_repository():
-    def builder(get_device_info: AsyncMock):
+    def builder(
+        get_device_info: AsyncMock,
+        ap_retry_stop: stop_base = stop_after_attempt(1),
+        switch_retry_stop: stop_base = stop_after_attempt(1),
+    ):
         forticloud_client = Mock(ForticloudClient)
         forticloud_client.get_device_info = get_device_info
-        return ForticloudRepository(forticloud_client=forticloud_client)
+
+        ap_retry_config = deepcopy(DEFAULT_RETRY_CONFIG)
+        ap_retry_config["stop"] = ap_retry_stop
+        del ap_retry_config["wait"]
+
+        switch_retry_config = deepcopy(DEFAULT_RETRY_CONFIG)
+        switch_retry_config["stop"] = switch_retry_stop
+        del switch_retry_config["wait"]
+
+        return ForticloudRepository(
+            forticloud_client=forticloud_client,
+            ap_retry_config=ap_retry_config,
+            switch_retry_config=switch_retry_config,
+        )
 
     return builder
 
