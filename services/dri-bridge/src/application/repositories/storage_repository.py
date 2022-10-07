@@ -1,10 +1,12 @@
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class StorageRepository:
-    def __init__(self, config, logger, redis):
+    def __init__(self, config, redis):
         self._config = config
-        self._logger = logger
         self._redis = redis
 
         self._redis_key_prefix = f"{config.ENVIRONMENT_NAME}-dri-serial"

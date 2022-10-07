@@ -1,19 +1,17 @@
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
+
 from application.repositories.dri_repository import DRIRepository
-from asynctest import CoroutineMock
 
 
 class TestBruinRepository:
     def instance_test(self):
-        logger = Mock()
         storage_repo = Mock()
         dri_client = Mock()
 
-        dri_repository = DRIRepository(logger, storage_repo, dri_client)
+        dri_repository = DRIRepository(storage_repo, dri_client)
 
-        assert dri_repository._logger == logger
         assert dri_repository._storage_repository == storage_repo
         assert dri_repository._dri_client == dri_client
 
@@ -37,13 +35,12 @@ class TestBruinRepository:
             "body": {"InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers": "ATT"},
             "status": 200,
         }
-        logger = Mock()
         storage_repo = Mock()
         dri_client = Mock()
 
-        dri_repository = DRIRepository(logger, storage_repo, dri_client)
-        dri_repository._get_task_id = CoroutineMock(return_value=task_id_return)
-        dri_repository._get_task_results = CoroutineMock(return_value=get_task_results_return)
+        dri_repository = DRIRepository(storage_repo, dri_client)
+        dri_repository._get_task_id = AsyncMock(return_value=task_id_return)
+        dri_repository._get_task_results = AsyncMock(return_value=get_task_results_return)
 
         task_id_status_return = await dri_repository.get_dri_parameters(serial, parameter_set)
         dri_repository._get_task_id.assert_awaited_once_with(serial, parameter_set)
@@ -67,13 +64,12 @@ class TestBruinRepository:
 
         task_id_return = {"body": "Failed", "status": 400}
 
-        logger = Mock()
         storage_repo = Mock()
         dri_client = Mock()
 
-        dri_repository = DRIRepository(logger, storage_repo, dri_client)
-        dri_repository._get_task_id = CoroutineMock(return_value=task_id_return)
-        dri_repository._get_task_results = CoroutineMock()
+        dri_repository = DRIRepository(storage_repo, dri_client)
+        dri_repository._get_task_id = AsyncMock(return_value=task_id_return)
+        dri_repository._get_task_results = AsyncMock()
 
         task_id_status_return = await dri_repository.get_dri_parameters(serial, parameter_set)
         dri_repository._get_task_id.assert_awaited_once_with(serial, parameter_set)
@@ -101,12 +97,11 @@ class TestBruinRepository:
         storage_repo.get = Mock(return_value=task_id_return)
         storage_repo.save = Mock()
 
-        logger = Mock()
         dri_client = Mock()
 
-        dri_repository = DRIRepository(logger, storage_repo, dri_client)
-        dri_repository._get_pending_task_ids = CoroutineMock()
-        dri_repository._get_task_id_from_dri = CoroutineMock()
+        dri_repository = DRIRepository(storage_repo, dri_client)
+        dri_repository._get_pending_task_ids = AsyncMock()
+        dri_repository._get_task_id_from_dri = AsyncMock()
 
         task_id_response = await dri_repository._get_task_id(serial, parameter_set)
 
@@ -137,12 +132,11 @@ class TestBruinRepository:
         storage_repo.get = Mock(return_value=None)
         storage_repo.save = Mock()
 
-        logger = Mock()
         dri_client = Mock()
 
-        dri_repository = DRIRepository(logger, storage_repo, dri_client)
-        dri_repository._get_pending_task_ids = CoroutineMock(return_value=pending_task_response)
-        dri_repository._get_task_id_from_dri = CoroutineMock()
+        dri_repository = DRIRepository(storage_repo, dri_client)
+        dri_repository._get_pending_task_ids = AsyncMock(return_value=pending_task_response)
+        dri_repository._get_task_id_from_dri = AsyncMock()
 
         task_id_response = await dri_repository._get_task_id(serial, parameter_set)
 
@@ -176,12 +170,11 @@ class TestBruinRepository:
         storage_repo.get = Mock(return_value=None)
         storage_repo.save = Mock()
 
-        logger = Mock()
         dri_client = Mock()
 
-        dri_repository = DRIRepository(logger, storage_repo, dri_client)
-        dri_repository._get_pending_task_ids = CoroutineMock(return_value=pending_task_response)
-        dri_repository._get_task_id_from_dri = CoroutineMock()
+        dri_repository = DRIRepository(storage_repo, dri_client)
+        dri_repository._get_pending_task_ids = AsyncMock(return_value=pending_task_response)
+        dri_repository._get_task_id_from_dri = AsyncMock()
 
         task_id_response = await dri_repository._get_task_id(serial, parameter_set)
 
@@ -215,12 +208,11 @@ class TestBruinRepository:
         storage_repo.get = Mock(return_value=None)
         storage_repo.save = Mock()
 
-        logger = Mock()
         dri_client = Mock()
 
-        dri_repository = DRIRepository(logger, storage_repo, dri_client)
-        dri_repository._get_pending_task_ids = CoroutineMock(return_value=pending_task_response)
-        dri_repository._get_task_id_from_dri = CoroutineMock(return_value=task_id_from_dri_response)
+        dri_repository = DRIRepository(storage_repo, dri_client)
+        dri_repository._get_pending_task_ids = AsyncMock(return_value=pending_task_response)
+        dri_repository._get_task_id_from_dri = AsyncMock(return_value=task_id_from_dri_response)
 
         task_id_response = await dri_repository._get_task_id(serial, parameter_set)
 
@@ -255,15 +247,13 @@ class TestBruinRepository:
             "status": 200,
         }
 
-        logger = Mock()
-
         storage_repo = Mock()
         storage_repo.save = Mock()
 
         dri_client = Mock()
-        dri_client.get_task_id = CoroutineMock(return_value=task_id_from_dri_response)
+        dri_client.get_task_id = AsyncMock(return_value=task_id_from_dri_response)
 
-        dri_repository = DRIRepository(logger, storage_repo, dri_client)
+        dri_repository = DRIRepository(storage_repo, dri_client)
         task_id_from_dri = await dri_repository._get_task_id_from_dri(serial, parameter_set)
         dri_client.get_task_id.assert_awaited_once_with(serial, parameter_set)
         storage_repo.save.assert_called_once_with(serial, task_id_return)
@@ -286,15 +276,13 @@ class TestBruinRepository:
 
         task_id_from_dri_response = {"body": "Failed", "status": 400}
 
-        logger = Mock()
-
         storage_repo = Mock()
         storage_repo.save = Mock()
 
         dri_client = Mock()
-        dri_client.get_task_id = CoroutineMock(return_value=task_id_from_dri_response)
+        dri_client.get_task_id = AsyncMock(return_value=task_id_from_dri_response)
 
-        dri_repository = DRIRepository(logger, storage_repo, dri_client)
+        dri_repository = DRIRepository(storage_repo, dri_client)
         task_id_from_dri = await dri_repository._get_task_id_from_dri(serial, parameter_set)
         dri_client.get_task_id.assert_awaited_once_with(serial, parameter_set)
         storage_repo.save.assert_not_called()
@@ -323,15 +311,14 @@ class TestBruinRepository:
         task_id_from_dri_response = {"body": dri_task_id_body, "status": 200}
 
         get_task_id_from_dri_return_dict = {"body": dri_task_id_body, "status": 400}
-        logger = Mock()
 
         storage_repo = Mock()
         storage_repo.save = Mock()
 
         dri_client = Mock()
-        dri_client.get_task_id = CoroutineMock(return_value=task_id_from_dri_response)
+        dri_client.get_task_id = AsyncMock(return_value=task_id_from_dri_response)
 
-        dri_repository = DRIRepository(logger, storage_repo, dri_client)
+        dri_repository = DRIRepository(storage_repo, dri_client)
         task_id_from_dri = await dri_repository._get_task_id_from_dri(serial, parameter_set)
         dri_client.get_task_id.assert_awaited_once_with(serial, parameter_set)
         storage_repo.save.assert_not_called()
@@ -356,15 +343,14 @@ class TestBruinRepository:
             },
             "status": 200,
         }
-        logger = Mock()
 
         storage_repo = Mock()
         storage_repo.remove = Mock()
 
         dri_client = Mock()
-        dri_client.get_task_results = CoroutineMock(return_value=get_tasks_result_response)
+        dri_client.get_task_results = AsyncMock(return_value=get_tasks_result_response)
 
-        dri_repository = DRIRepository(logger, storage_repo, dri_client)
+        dri_repository = DRIRepository(storage_repo, dri_client)
         task_results_response = await dri_repository._get_task_results(serial, task_id)
         dri_client.get_task_results.assert_awaited_once_with(serial, task_id)
         storage_repo.remove.assert_not_called()
@@ -383,15 +369,14 @@ class TestBruinRepository:
             },
             "status": 200,
         }
-        logger = Mock()
 
         storage_repo = Mock()
         storage_repo.remove = Mock()
 
         dri_client = Mock()
-        dri_client.get_task_results = CoroutineMock(return_value=get_tasks_result_response)
+        dri_client.get_task_results = AsyncMock(return_value=get_tasks_result_response)
 
-        dri_repository = DRIRepository(logger, storage_repo, dri_client)
+        dri_repository = DRIRepository(storage_repo, dri_client)
         task_results_response = await dri_repository._get_task_results(serial, task_id)
         dri_client.get_task_results.assert_awaited_once_with(serial, task_id)
         storage_repo.remove.assert_not_called()
@@ -413,15 +398,14 @@ class TestBruinRepository:
             },
             "status": 200,
         }
-        logger = Mock()
 
         storage_repo = Mock()
         storage_repo.remove = Mock()
 
         dri_client = Mock()
-        dri_client.get_task_results = CoroutineMock(return_value=get_tasks_result_response)
+        dri_client.get_task_results = AsyncMock(return_value=get_tasks_result_response)
 
-        dri_repository = DRIRepository(logger, storage_repo, dri_client)
+        dri_repository = DRIRepository(storage_repo, dri_client)
         task_results_response = await dri_repository._get_task_results(serial, task_id)
         dri_client.get_task_results.assert_awaited_once_with(serial, task_id)
         storage_repo.remove.assert_called_once_with(serial)
@@ -433,15 +417,14 @@ class TestBruinRepository:
         task_id = "1720079"
 
         get_tasks_result_response = {"body": "Got 401 from DRI", "status": 401}
-        logger = Mock()
 
         storage_repo = Mock()
         storage_repo.remove = Mock()
 
         dri_client = Mock()
-        dri_client.get_task_results = CoroutineMock(return_value=get_tasks_result_response)
+        dri_client.get_task_results = AsyncMock(return_value=get_tasks_result_response)
 
-        dri_repository = DRIRepository(logger, storage_repo, dri_client)
+        dri_repository = DRIRepository(storage_repo, dri_client)
         task_results_response = await dri_repository._get_task_results(serial, task_id)
         dri_client.get_task_results.assert_awaited_once_with(serial, task_id)
         storage_repo.remove.assert_not_called()
@@ -457,15 +440,14 @@ class TestBruinRepository:
             "status": 200,
         }
         get_tasks_result_response = {"body": f"Failed to retrieve data from DRI for serial {serial}", "status": 400}
-        logger = Mock()
 
         storage_repo = Mock()
         storage_repo.remove = Mock()
 
         dri_client = Mock()
-        dri_client.get_task_results = CoroutineMock(return_value=dri_task_results_response)
+        dri_client.get_task_results = AsyncMock(return_value=dri_task_results_response)
 
-        dri_repository = DRIRepository(logger, storage_repo, dri_client)
+        dri_repository = DRIRepository(storage_repo, dri_client)
         task_results_response = await dri_repository._get_task_results(serial, task_id)
         dri_client.get_task_results.assert_awaited_once_with(serial, task_id)
         storage_repo.remove.assert_called_once_with(serial)
@@ -477,15 +459,14 @@ class TestBruinRepository:
         task_id = "1720079"
 
         get_tasks_result_response = {"body": f"Failed to retrieve data from DRI for serial {serial}", "status": 400}
-        logger = Mock()
 
         storage_repo = Mock()
         storage_repo.remove = Mock()
 
         dri_client = Mock()
-        dri_client.get_task_results = CoroutineMock(return_value=get_tasks_result_response)
+        dri_client.get_task_results = AsyncMock(return_value=get_tasks_result_response)
 
-        dri_repository = DRIRepository(logger, storage_repo, dri_client)
+        dri_repository = DRIRepository(storage_repo, dri_client)
         task_results_response = await dri_repository._get_task_results(serial, task_id)
         dri_client.get_task_results.assert_awaited_once_with(serial, task_id)
         storage_repo.remove.assert_called_once_with(serial)
@@ -506,13 +487,12 @@ class TestBruinRepository:
         }
 
         pending_task_list_body = [task["Id"] for task in pending_task_list]
-        logger = Mock()
         storage_repo = Mock()
 
         dri_client = Mock()
-        dri_client.get_pending_task_ids = CoroutineMock(return_value=pending_task_ids_response)
+        dri_client.get_pending_task_ids = AsyncMock(return_value=pending_task_ids_response)
 
-        dri_repository = DRIRepository(logger, storage_repo, dri_client)
+        dri_repository = DRIRepository(storage_repo, dri_client)
         pending_task_response = await dri_repository._get_pending_task_ids(serial)
         dri_client.get_pending_task_ids.assert_awaited_once_with(serial)
         assert pending_task_response == {"body": pending_task_list_body, "status": 200}
@@ -523,13 +503,12 @@ class TestBruinRepository:
 
         pending_task_ids_response = {"body": "Failed", "status": 400}
 
-        logger = Mock()
         storage_repo = Mock()
 
         dri_client = Mock()
-        dri_client.get_pending_task_ids = CoroutineMock(return_value=pending_task_ids_response)
+        dri_client.get_pending_task_ids = AsyncMock(return_value=pending_task_ids_response)
 
-        dri_repository = DRIRepository(logger, storage_repo, dri_client)
+        dri_repository = DRIRepository(storage_repo, dri_client)
         pending_task_response = await dri_repository._get_pending_task_ids(serial)
         dri_client.get_pending_task_ids.assert_awaited_once_with(serial)
         assert pending_task_response == pending_task_ids_response
@@ -547,13 +526,12 @@ class TestBruinRepository:
         pending_task_from_dri_response = {"body": pending_task_from_dri_body, "status": 200}
         pending_task_ids_response = {"body": pending_task_from_dri_body, "status": 400}
 
-        logger = Mock()
         storage_repo = Mock()
 
         dri_client = Mock()
-        dri_client.get_pending_task_ids = CoroutineMock(return_value=pending_task_from_dri_response)
+        dri_client.get_pending_task_ids = AsyncMock(return_value=pending_task_from_dri_response)
 
-        dri_repository = DRIRepository(logger, storage_repo, dri_client)
+        dri_repository = DRIRepository(storage_repo, dri_client)
         pending_task_response = await dri_repository._get_pending_task_ids(serial)
         dri_client.get_pending_task_ids.assert_awaited_once_with(serial)
         assert pending_task_response == pending_task_ids_response

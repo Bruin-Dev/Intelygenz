@@ -11,7 +11,9 @@ dri-bridge-linter:
         - services/dri-bridge/src/config/**/*
         - services/dri-bridge/src/app.py
         - services/dri-bridge/Dockerfile
-        - services/dri-bridge/requirements.txt
+        - services/dri-bridge/pyproject.toml
+        - services/dri-bridge/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
@@ -28,9 +30,11 @@ dri-bridge-test:
         - services/dri-bridge/src/config/**/*
         - services/dri-bridge/src/app.py
         - services/dri-bridge/Dockerfile
-        - services/dri-bridge/requirements.txt
+        - services/dri-bridge/pyproject.toml
+        - services/dri-bridge/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
-  extends: .unittest_module_python_36_alpine
+  extends: .unittest_module_python_310
   needs: ["dri-bridge-linter"]
 
 # ==========================================
@@ -48,7 +52,9 @@ dri-bridge-build:
         - services/dri-bridge/src/config/**/*
         - services/dri-bridge/src/app.py
         - services/dri-bridge/Dockerfile
-        - services/dri-bridge/requirements.txt
+        - services/dri-bridge/pyproject.toml
+        - services/dri-bridge/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $DRI_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:

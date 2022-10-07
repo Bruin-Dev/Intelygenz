@@ -1,33 +1,28 @@
-import json
-from unittest.mock import Mock, call, patch
+from unittest.mock import AsyncMock, Mock, patch
 
-import humps
 import pytest
-from aiohttp import ClientConnectionError
-from application.clients.dri_client import DRIClient
-from asynctest import CoroutineMock
-from config import testconfig as config
+from aiohttp import ClientSession
 from pytest import raises
+
+from application.clients.dri_client import DRIClient
+from config import testconfig as config
 
 
 class TestDRIClient:
     def instance_test(self):
-        logger = Mock()
+        dri_client = DRIClient(config)
 
-        dri_client = DRIClient(config, logger)
-
-        assert dri_client._logger is logger
         assert dri_client._config is config
 
     @pytest.mark.asyncio
     async def login_test(self):
-        logger = Mock()
         access_token_str = "Someverysecretaccesstoken"
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value={"authorization_token": access_token_str})
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value={"authorization_token": access_token_str})
 
-        dri_client = DRIClient(config, logger)
-        with patch.object(dri_client._session, "post", new=CoroutineMock(return_value=response_mock)) as mock_post:
+        dri_client = DRIClient(config)
+        dri_client._session = Mock(spec_set=ClientSession)
+        with patch.object(dri_client._session, "post", new=AsyncMock(return_value=response_mock)) as mock_post:
             await dri_client.login()
 
             assert dri_client._bearer_token == access_token_str
@@ -35,17 +30,15 @@ class TestDRIClient:
 
     @pytest.mark.asyncio
     async def login_with_failure_test(self):
-        logger = Mock()
-
-        dri_client = DRIClient(config, logger)
-        with patch.object(dri_client._session, "post", new=CoroutineMock(return_value=Exception)) as mock_post:
+        dri_client = DRIClient(config)
+        dri_client._session = Mock(spec_set=ClientSession)
+        with patch.object(dri_client._session, "post", new=AsyncMock(return_value=Exception)) as mock_post:
             await dri_client.login()
 
             assert dri_client._bearer_token == ""
             mock_post.assert_called_once()
 
     def get_request_headers_test(self):
-        logger = Mock()
         access_token_str = "Someverysecretaccesstoken"
         expected_headers = {
             "authorization": f"Bearer {access_token_str}",
@@ -53,15 +46,16 @@ class TestDRIClient:
             "Cache-control": "no-cache, no-store, no-transform, max-age=0, only-if-cached",
         }
 
-        dri_client = DRIClient(config, logger)
+        dri_client = DRIClient(config)
+        dri_client._session = Mock(spec_set=ClientSession)
         dri_client._bearer_token = access_token_str
 
         headers = dri_client._get_request_headers()
         assert headers == expected_headers
 
     def get_request_headers_with_no_bearer_token_test(self):
-        logger = Mock()
-        dri_client = DRIClient(config, logger)
+        dri_client = DRIClient(config)
+        dri_client._session = Mock(spec_set=ClientSession)
 
         with raises(Exception) as error_info:
             dri_client._get_request_headers()
@@ -87,17 +81,16 @@ class TestDRIClient:
             "data": {"Id": 1725608, "ErrorCode": 100, "Message": ""},
         }
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=get_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=get_response)
         response_mock.status = 200
 
-        logger = Mock()
-
-        dri_client = DRIClient(config, logger)
+        dri_client = DRIClient(config)
+        dri_client._session = Mock(spec_set=ClientSession)
         dri_client._bearer_token = "Someverysecretaccesstoken"
-        dri_client.login = CoroutineMock()
+        dri_client.login = AsyncMock()
 
-        with patch.object(dri_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        with patch.object(dri_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             task_id = await dri_client.get_task_id(serial, parameter_set)
             mock_get.assert_called_once()
             dri_client.login.assert_not_awaited()
@@ -122,17 +115,16 @@ class TestDRIClient:
 
         get_response = {"status": "FAILED", "message": "FAILED", "data": {}}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=get_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=get_response)
         response_mock.status = 400
 
-        logger = Mock()
-
-        dri_client = DRIClient(config, logger)
+        dri_client = DRIClient(config)
+        dri_client._session = Mock(spec_set=ClientSession)
         dri_client._bearer_token = "Someverysecretaccesstoken"
-        dri_client.login = CoroutineMock()
+        dri_client.login = AsyncMock()
 
-        with patch.object(dri_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        with patch.object(dri_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             task_id = await dri_client.get_task_id(serial, parameter_set)
             mock_get.assert_called_once()
             dri_client.login.assert_not_awaited()
@@ -155,16 +147,15 @@ class TestDRIClient:
             "Source": 0,
         }
 
-        response_mock = CoroutineMock()
+        response_mock = AsyncMock()
         response_mock.status = 401
 
-        logger = Mock()
-
-        dri_client = DRIClient(config, logger)
+        dri_client = DRIClient(config)
+        dri_client._session = Mock(spec_set=ClientSession)
         dri_client._bearer_token = "Someverysecretaccesstoken"
-        dri_client.login = CoroutineMock()
+        dri_client.login = AsyncMock()
 
-        with patch.object(dri_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        with patch.object(dri_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             task_id = await dri_client.get_task_id(serial, parameter_set)
             mock_get.assert_called_once()
             dri_client.login.assert_awaited_once()
@@ -187,16 +178,15 @@ class TestDRIClient:
             "Source": 0,
         }
 
-        response_mock = CoroutineMock()
+        response_mock = AsyncMock()
         response_mock.status = 504
 
-        logger = Mock()
-
-        dri_client = DRIClient(config, logger)
+        dri_client = DRIClient(config)
+        dri_client._session = Mock(spec_set=ClientSession)
         dri_client._bearer_token = "Someverysecretaccesstoken"
-        dri_client.login = CoroutineMock()
+        dri_client.login = AsyncMock()
 
-        with patch.object(dri_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        with patch.object(dri_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             task_id = await dri_client.get_task_id(serial, parameter_set)
             mock_get.assert_called_once()
             dri_client.login.assert_not_awaited()
@@ -221,13 +211,12 @@ class TestDRIClient:
 
         err_msg = "Failed"
 
-        logger = Mock()
-
-        dri_client = DRIClient(config, logger)
+        dri_client = DRIClient(config)
+        dri_client._session = Mock(spec_set=ClientSession)
         dri_client._bearer_token = "Someverysecretaccesstoken"
-        dri_client.login = CoroutineMock()
+        dri_client.login = AsyncMock()
 
-        with patch.object(dri_client._session, "get", new=CoroutineMock(side_effect=Exception(err_msg))) as mock_get:
+        with patch.object(dri_client._session, "get", new=AsyncMock(side_effect=Exception(err_msg))) as mock_get:
             task_id = await dri_client.get_task_id(serial, parameter_set)
             mock_get.assert_called_once()
             dri_client.login.assert_not_awaited()
@@ -256,17 +245,16 @@ class TestDRIClient:
             },
         }
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=get_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=get_response)
         response_mock.status = 200
 
-        logger = Mock()
-
-        dri_client = DRIClient(config, logger)
+        dri_client = DRIClient(config)
+        dri_client._session = Mock(spec_set=ClientSession)
         dri_client._bearer_token = "Someverysecretaccesstoken"
-        dri_client.login = CoroutineMock()
+        dri_client.login = AsyncMock()
 
-        with patch.object(dri_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        with patch.object(dri_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             task_results = await dri_client.get_task_results(serial, task_id)
             mock_get.assert_called_once()
             dri_client.login.assert_not_awaited()
@@ -280,17 +268,16 @@ class TestDRIClient:
 
         get_response = {"status": "FAILED", "message": "Failed"}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=get_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=get_response)
         response_mock.status = 400
 
-        logger = Mock()
-
-        dri_client = DRIClient(config, logger)
+        dri_client = DRIClient(config)
+        dri_client._session = Mock(spec_set=ClientSession)
         dri_client._bearer_token = "Someverysecretaccesstoken"
-        dri_client.login = CoroutineMock()
+        dri_client.login = AsyncMock()
 
-        with patch.object(dri_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        with patch.object(dri_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             task_results = await dri_client.get_task_results(serial, task_id)
             mock_get.assert_called_once()
             dri_client.login.assert_not_awaited()
@@ -302,16 +289,15 @@ class TestDRIClient:
         serial = "700059"
         task_id = 1725608
 
-        response_mock = CoroutineMock()
+        response_mock = AsyncMock()
         response_mock.status = 401
 
-        logger = Mock()
-
-        dri_client = DRIClient(config, logger)
+        dri_client = DRIClient(config)
+        dri_client._session = Mock(spec_set=ClientSession)
         dri_client._bearer_token = "Someverysecretaccesstoken"
-        dri_client.login = CoroutineMock()
+        dri_client.login = AsyncMock()
 
-        with patch.object(dri_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        with patch.object(dri_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             task_results = await dri_client.get_task_results(serial, task_id)
             mock_get.assert_called_once()
             dri_client.login.assert_awaited_once()
@@ -325,13 +311,12 @@ class TestDRIClient:
 
         err_msg = "Failed"
 
-        logger = Mock()
-
-        dri_client = DRIClient(config, logger)
+        dri_client = DRIClient(config)
+        dri_client._session = Mock(spec_set=ClientSession)
         dri_client._bearer_token = "Someverysecretaccesstoken"
-        dri_client.login = CoroutineMock()
+        dri_client.login = AsyncMock()
 
-        with patch.object(dri_client._session, "get", new=CoroutineMock(side_effect=Exception(err_msg))) as mock_get:
+        with patch.object(dri_client._session, "get", new=AsyncMock(side_effect=Exception(err_msg))) as mock_get:
             task_results = await dri_client.get_task_results(serial, task_id)
             mock_get.assert_called_once()
             dri_client.login.assert_not_awaited()
@@ -346,17 +331,16 @@ class TestDRIClient:
             "message": "All Good!",
             "data": {"Transactions": [{"Ids": 17000}], "ErrorCode": 100, "Message": ""},
         }
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=get_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=get_response)
         response_mock.status = 200
 
-        logger = Mock()
-
-        dri_client = DRIClient(config, logger)
+        dri_client = DRIClient(config)
+        dri_client._session = Mock(spec_set=ClientSession)
         dri_client._bearer_token = "Someverysecretaccesstoken"
-        dri_client.login = CoroutineMock()
+        dri_client.login = AsyncMock()
 
-        with patch.object(dri_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        with patch.object(dri_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             pending_task_ids = await dri_client.get_pending_task_ids(serial)
             mock_get.assert_called_once()
             dri_client.login.assert_not_awaited()
@@ -367,17 +351,16 @@ class TestDRIClient:
     async def get_pending_task_ids_non_2xx_test(self):
         serial = "700059"
         get_response = {"status": "Failed", "message": "Failed"}
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=get_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=get_response)
         response_mock.status = 400
 
-        logger = Mock()
-
-        dri_client = DRIClient(config, logger)
+        dri_client = DRIClient(config)
+        dri_client._session = Mock(spec_set=ClientSession)
         dri_client._bearer_token = "Someverysecretaccesstoken"
-        dri_client.login = CoroutineMock()
+        dri_client.login = AsyncMock()
 
-        with patch.object(dri_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        with patch.object(dri_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             pending_task_ids = await dri_client.get_pending_task_ids(serial)
             mock_get.assert_called_once()
             dri_client.login.assert_not_awaited()
@@ -387,16 +370,15 @@ class TestDRIClient:
     @pytest.mark.asyncio
     async def get_pending_task_ids_401_login_failed_test(self):
         serial = "700059"
-        response_mock = CoroutineMock()
+        response_mock = AsyncMock()
         response_mock.status = 401
 
-        logger = Mock()
-
-        dri_client = DRIClient(config, logger)
+        dri_client = DRIClient(config)
+        dri_client._session = Mock(spec_set=ClientSession)
         dri_client._bearer_token = "Someverysecretaccesstoken"
-        dri_client.login = CoroutineMock()
+        dri_client.login = AsyncMock()
 
-        with patch.object(dri_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        with patch.object(dri_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             pending_task_ids = await dri_client.get_pending_task_ids(serial)
             mock_get.assert_called_once()
             dri_client.login.assert_awaited_once()
@@ -409,13 +391,12 @@ class TestDRIClient:
 
         err_msg = "Failed"
 
-        logger = Mock()
-
-        dri_client = DRIClient(config, logger)
+        dri_client = DRIClient(config)
+        dri_client._session = Mock(spec_set=ClientSession)
         dri_client._bearer_token = "Someverysecretaccesstoken"
-        dri_client.login = CoroutineMock()
+        dri_client.login = AsyncMock()
 
-        with patch.object(dri_client._session, "get", new=CoroutineMock(side_effect=Exception(err_msg))) as mock_get:
+        with patch.object(dri_client._session, "get", new=AsyncMock(side_effect=Exception(err_msg))) as mock_get:
             pending_task_ids = await dri_client.get_pending_task_ids(serial)
             mock_get.assert_called_once()
             dri_client.login.assert_not_awaited()
