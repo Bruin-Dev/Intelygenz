@@ -139,7 +139,7 @@ class Container:
     async def _subscribe_consumers(self):
         await self._event_bus.subscribe_consumer(
             consumer_name="handle_ticket_forward",
-            topic=f"task_dispatcher.{TaskTypes.TICKET_FORWARDS.value}.success",
+            topic=f"task_dispatcher.{config.LOG_CONFIG['name']}.{TaskTypes.TICKET_FORWARDS.value}.success",
             action_wrapper=self._handle_ticket_forward_success,
             queue="task_dispatcher",
         )
