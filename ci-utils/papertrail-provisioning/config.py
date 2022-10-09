@@ -191,7 +191,7 @@ PAPERTRAIL_PROVISIONING = {
                 {
                     "query": f"som-met AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
                     "search_name": f"[service-outage-monitor] - logs",
-                    "repository": "service-affecting-monitor",
+                    "repository": "service-outage-monitor",
                 },
                 {
                     "query": f"som-mettel-velocloud-net AND {ENVIRONMENT_NAME} AND <BUILD_NUMBER>",
