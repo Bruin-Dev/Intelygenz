@@ -4190,7 +4190,7 @@ class TestServiceOutageMonitor:
             "status": 200,
         }
         task_type = TaskTypes.TICKET_FORWARDS
-        task_key = f"{outage_ticket_1_id}-{serial_number_1}"
+        task_key = f"{outage_ticket_1_id}-{serial_number_1}-{ForwardQueues.HNOC.name}"
 
         outage_monitor._bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
         outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
@@ -4368,7 +4368,7 @@ class TestServiceOutageMonitor:
             "status": 200,
         }
         task_type = TaskTypes.TICKET_FORWARDS
-        task_key = f"{outage_ticket_1_id}-{serial_number_1}"
+        task_key = f"{outage_ticket_1_id}-{serial_number_1}-{ForwardQueues.HNOC.name}"
 
         outage_monitor._bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
         outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
@@ -4555,7 +4555,7 @@ class TestServiceOutageMonitor:
             "status": 200,
         }
         task_type = TaskTypes.TICKET_FORWARDS
-        task_key = f"{outage_ticket_1_id}-{serial_number_1}"
+        task_key = f"{outage_ticket_1_id}-{serial_number_1}-{ForwardQueues.HNOC.name}"
 
         outage_monitor._bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
         outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
@@ -10636,7 +10636,7 @@ class TestServiceOutageMonitor:
         client_name = "METTEL/NEW YORK"
         serial_number = "VC1234567"
         ticket_id = 12345  # Ticket ID
-        target_queue = ForwardQueues.HNOC.value
+        target_queue = ForwardQueues.HNOC
         outage_type = Outages.HA_HARD_DOWN  # We can use whatever outage type
         target_severity = testconfig.MONITOR_CONFIG["severity_by_outage_type"]["edge_down"]
         forward_time = testconfig.MONITOR_CONFIG["jobs_intervals"]["forward_to_hnoc_edge_down"]
@@ -10665,17 +10665,17 @@ class TestServiceOutageMonitor:
         outage_monitor._task_dispatcher_client.schedule_task.assert_called_once_with(
             date=forward_task_run_date,
             task_type=TaskTypes.TICKET_FORWARDS,
-            task_key=f"{ticket_id}-{serial_number}",
+            task_key=f"{ticket_id}-{serial_number}-{target_queue.name}",
             task_data={
                 "service": testconfig.LOG_CONFIG["name"],
                 "ticket_id": ticket_id,
                 "serial_number": serial_number,
-                "target_queue": target_queue,
+                "target_queue": target_queue.value,
                 "metrics_labels": {
                     "client": client_name,
                     "outage_type": outage_type.value,
                     "severity": target_severity,
-                    "target_queue": target_queue,
+                    "target_queue": target_queue.value,
                     "has_digi": has_faulty_digi_link,
                     "has_byob": has_faulty_byob_link,
                     "link_types": faulty_link_types,

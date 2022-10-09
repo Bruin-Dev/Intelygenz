@@ -518,7 +518,7 @@ class OutageMonitor:
             )
 
             task_type = TaskTypes.TICKET_FORWARDS
-            task_key = f"{outage_ticket_id}-{serial_number}"
+            task_key = f"{outage_ticket_id}-{serial_number}-{ForwardQueues.HNOC.name}"
             if self._task_dispatcher_client.clear_task(task_type, task_key):
                 self._logger.info(
                     f"Removed scheduled task to forward to HNOC for autoresolved ticket {outage_ticket_id} "
@@ -664,7 +664,7 @@ class OutageMonitor:
         has_faulty_byob_link,
         faulty_link_types,
     ):
-        target_queue = ForwardQueues.HNOC.value
+        target_queue = ForwardQueues.HNOC
         current_datetime = datetime.utcnow()
         forward_task_run_date = current_datetime + timedelta(minutes=forward_time)
 
@@ -676,17 +676,17 @@ class OutageMonitor:
         self._task_dispatcher_client.schedule_task(
             date=forward_task_run_date,
             task_type=TaskTypes.TICKET_FORWARDS,
-            task_key=f"{ticket_id}-{serial_number}",
+            task_key=f"{ticket_id}-{serial_number}-{target_queue.name}",
             task_data={
                 "service": self._config.LOG_CONFIG["name"],
                 "ticket_id": ticket_id,
                 "serial_number": serial_number,
-                "target_queue": target_queue,
+                "target_queue": target_queue.value,
                 "metrics_labels": {
                     "client": client_name,
                     "outage_type": outage_type.value,
                     "severity": severity,
-                    "target_queue": target_queue,
+                    "target_queue": target_queue.value,
                     "has_digi": has_faulty_digi_link,
                     "has_byob": has_faulty_byob_link,
                     "link_types": faulty_link_types,
