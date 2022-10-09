@@ -17,6 +17,7 @@ from application.repositories.utils_repository import UtilsRepository
 from application.repositories.velocloud_repository import VelocloudRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import config
+from igz.packages.eventbus.action import ActionWrapper
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.Logger.logger_client import LoggerClient
@@ -129,7 +130,7 @@ class Container:
 
     async def _add_consumers(self):
         handle_ticket_forward_subscriber = NATSClient(config, logger=self._logger)
-        handle_ticket_forward = HandleTicketForward(self._metrics_repository)
+        handle_ticket_forward = HandleTicketForward(self._logger, self._metrics_repository)
         self._handle_ticket_forward_success = ActionWrapper(
             handle_ticket_forward, "success", is_async=True, logger=self._logger
         )
