@@ -10,7 +10,6 @@ from pytz import utc
 
 from application import FORWARD_TICKET_TO_QUEUE_JOB_ID, ForwardQueues
 from application.actions import intermapper_monitoring as intermapper_monitor_module
-from application.actions.intermapper_monitoring import InterMapperMonitor
 from config import testconfig
 from tests.fixtures._constants import CURRENT_DATETIME
 
@@ -39,33 +38,12 @@ class TestInterMapperMonitor:
         assert intermapper_monitor._dri_repository == dri_repository
 
     @pytest.mark.asyncio
-    async def start_intermapper_outage_monitoring_with_no_exec_on_start_test(self):
-        scheduler = Mock()
-        scheduler.add_job = Mock()
-
+    async def start_intermapper_outage_monitoring_with_no_exec_on_start_test(self, intermapper_monitor):
         config = testconfig
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        bruin_repository = Mock()
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
 
         await intermapper_monitor.start_intermapper_outage_monitoring()
 
-        scheduler.add_job.assert_called_once_with(
+        intermapper_monitor._scheduler.add_job.assert_called_once_with(
             intermapper_monitor._intermapper_monitoring_process,
             "interval",
             seconds=config.INTERMAPPER_CONFIG["monitoring_interval"],
@@ -75,29 +53,8 @@ class TestInterMapperMonitor:
         )
 
     @pytest.mark.asyncio
-    async def start_intermapper_outage_monitoring_with_exec_on_start_test(self):
-        scheduler = Mock()
-        scheduler.add_job = Mock()
-
+    async def start_intermapper_outage_monitoring_with_exec_on_start_test(self, intermapper_monitor):
         config = testconfig
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        bruin_repository = Mock()
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -106,7 +63,7 @@ class TestInterMapperMonitor:
             with patch.object(intermapper_monitor_module, "timezone", new=Mock()):
                 await intermapper_monitor.start_intermapper_outage_monitoring(exec_on_start=True)
 
-        scheduler.add_job.assert_called_once_with(
+        intermapper_monitor._scheduler.add_job.assert_called_once_with(
             intermapper_monitor._intermapper_monitoring_process,
             "interval",
             seconds=config.INTERMAPPER_CONFIG["monitoring_interval"],
@@ -116,36 +73,16 @@ class TestInterMapperMonitor:
         )
 
     @pytest.mark.asyncio
-    async def start_intermapper_outage_monitoring_with_job_id_already_executing_test(self):
+    async def start_intermapper_outage_monitoring_with_job_id_already_executing_test(self, intermapper_monitor):
         job_id = "some-duplicated-id"
         exception_instance = ConflictingIdError(job_id)
-        scheduler = Mock()
-        scheduler.add_job = Mock(side_effect=exception_instance)
-
+        intermapper_monitor._scheduler.add_job = Mock(side_effect=exception_instance)
         config = testconfig
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        bruin_repository = Mock()
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
 
         try:
             await intermapper_monitor.start_intermapper_outage_monitoring()
         except ConflictingIdError:
-            scheduler.add_job.assert_called_once_with(
+            intermapper_monitor._scheduler.add_job.assert_called_once_with(
                 intermapper_monitor._intermapper_monitoring_process,
                 "interval",
                 seconds=config.INTERMAPPER_CONFIG["monitoring_interval"],
@@ -155,7 +92,7 @@ class TestInterMapperMonitor:
             )
 
     @pytest.mark.asyncio
-    async def intermapper_monitoring_process_test(self):
+    async def intermapper_monitoring_process_test(self, intermapper_monitor):
         circuit_id = "123"
 
         email_1 = {
@@ -174,28 +111,8 @@ class TestInterMapperMonitor:
             "body": emails,
             "status": 200,
         }
-        scheduler = Mock()
-        bruin_repository = Mock()
-        config = testconfig
 
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        email_repository.get_unread_emails = AsyncMock(return_value=response)
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
+        intermapper_monitor._email_repository.get_unread_emails = AsyncMock(return_value=response)
         intermapper_monitor._process_email_batch = AsyncMock()
 
         await intermapper_monitor._intermapper_monitoring_process()
@@ -203,7 +120,7 @@ class TestInterMapperMonitor:
         intermapper_monitor._email_repository.get_unread_emails.assert_awaited_once()
         intermapper_monitor._process_email_batch.assert_has_awaits([call(emails, circuit_id)], any_order=True)
 
-    def _group_emails_by_circuit_id_test(self):
+    def _group_emails_by_circuit_id_test(self, intermapper_monitor):
         circuit_id_1 = "123"
         circuit_id_2 = "456"
 
@@ -225,32 +142,12 @@ class TestInterMapperMonitor:
             circuit_id_1: [email_1, email_2],
             circuit_id_2: [email_3],
         }
-        scheduler = Mock()
-        bruin_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        config = testconfig
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
 
         result = intermapper_monitor._group_emails_by_circuit_id(emails)
         assert result == emails_by_circuit_id
 
     @pytest.mark.asyncio
-    async def process_email_batch_test(self):
-        circuit_id = 123
+    async def process_email_batch_test(self, intermapper_monitor):
         circuit_id = 3214
         client_id = 83959
 
@@ -265,12 +162,6 @@ class TestInterMapperMonitor:
             f"Name: OReilly-HotSpringsAR({circuit_id})-Site803",
         }
         emails = [email_1, email_2]
-        scheduler = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        config = testconfig
 
         response = {
             "body": {
@@ -280,21 +171,7 @@ class TestInterMapperMonitor:
             "status": 200,
         }
 
-        bruin_repository = Mock()
-        bruin_repository.get_service_number_by_circuit_id = AsyncMock(return_value=response)
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
+        intermapper_monitor._bruin_repository.get_service_number_by_circuit_id = AsyncMock(return_value=response)
         intermapper_monitor._process_email = AsyncMock()
 
         await intermapper_monitor._process_email_batch(emails, circuit_id)
@@ -308,7 +185,7 @@ class TestInterMapperMonitor:
         )
 
     @pytest.mark.asyncio
-    async def process_email_batch_no_circuit_id_test(self):
+    async def process_email_batch_no_circuit_id_test(self, intermapper_monitor):
         circuit_id = None
 
         email_1 = {
@@ -322,30 +199,9 @@ class TestInterMapperMonitor:
             f"Name: OReilly-HotSpringsAR({circuit_id})-Site803",
         }
         emails = [email_1, email_2]
-        scheduler = Mock()
-        config = testconfig
 
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        email_repository.mark_email_as_read = AsyncMock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_service_number_by_circuit_id = AsyncMock()
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
+        intermapper_monitor._email_repository.mark_email_as_read = AsyncMock()
+        intermapper_monitor._bruin_repository.get_service_number_by_circuit_id = AsyncMock()
 
         with config_mock:
             await intermapper_monitor._process_email_batch(emails, circuit_id)
@@ -359,7 +215,7 @@ class TestInterMapperMonitor:
         intermapper_monitor._bruin_repository.get_service_number_by_circuit_id.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def process_email_batch_non_2xx_test(self):
+    async def process_email_batch_non_2xx_test(self, intermapper_monitor):
         circuit_id = 123
 
         email_1 = {
@@ -373,35 +229,14 @@ class TestInterMapperMonitor:
             f"Name: OReilly-HotSpringsAR({circuit_id})-Site803",
         }
         emails = [email_1, email_2]
-        scheduler = Mock()
-        config = testconfig
 
         response = {
             "body": None,
             "status": 400,
         }
 
-        bruin_repository = Mock()
-        bruin_repository.get_service_number_by_circuit_id = AsyncMock(return_value=response)
-
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        email_repository.mark_email_as_read = AsyncMock()
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
+        intermapper_monitor._bruin_repository.get_service_number_by_circuit_id = AsyncMock(return_value=response)
+        intermapper_monitor._email_repository.mark_email_as_read = AsyncMock()
 
         with config_mock:
             await intermapper_monitor._process_email_batch(emails, circuit_id)
@@ -410,7 +245,7 @@ class TestInterMapperMonitor:
         intermapper_monitor._email_repository.mark_email_as_read.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def process_email_batch_204_test(self):
+    async def process_email_batch_204_test(self, intermapper_monitor):
         circuit_id = 123
 
         email_1 = {
@@ -424,35 +259,14 @@ class TestInterMapperMonitor:
             f"Name: OReilly-HotSpringsAR({circuit_id})-Site803",
         }
         emails = [email_1, email_2]
-        scheduler = Mock()
-        config = testconfig
 
         response = {
             "body": None,
             "status": 204,
         }
 
-        bruin_repository = Mock()
-        bruin_repository.get_service_number_by_circuit_id = AsyncMock(return_value=response)
-
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        email_repository.mark_email_as_read = AsyncMock()
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
+        intermapper_monitor._bruin_repository.get_service_number_by_circuit_id = AsyncMock(return_value=response)
+        intermapper_monitor._email_repository.mark_email_as_read = AsyncMock()
 
         with config_mock:
             await intermapper_monitor._process_email_batch(emails, circuit_id)
@@ -466,7 +280,7 @@ class TestInterMapperMonitor:
         )
 
     @pytest.mark.asyncio
-    async def process_email_invalid_test(self):
+    async def process_email_invalid_test(self, intermapper_monitor):
         circuit_id = 3214
         client_id = 83959
 
@@ -476,28 +290,8 @@ class TestInterMapperMonitor:
             "subject": "",
             "body": "Event: Down",
         }
-        scheduler = Mock()
-        bruin_repository = Mock()
-        config = testconfig
 
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        email_repository.mark_email_as_read = AsyncMock()
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
+        intermapper_monitor._email_repository.mark_email_as_read = AsyncMock()
 
         with config_mock:
             await intermapper_monitor._process_email(email, circuit_id, client_id)
@@ -505,7 +299,7 @@ class TestInterMapperMonitor:
         intermapper_monitor._email_repository.mark_email_as_read.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def process_email_down_event_non_PIAB_device_test(self):
+    async def process_email_down_event_non_PIAB_device_test(self, intermapper_monitor):
         circuit_id = 3214
         client_id = 83959
 
@@ -520,28 +314,8 @@ class TestInterMapperMonitor:
         }
 
         response = {"body": None, "status": 204}
-        scheduler = Mock()
-        bruin_repository = Mock()
-        config = testconfig
 
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        email_repository.mark_email_as_read = AsyncMock(return_value=response)
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
+        intermapper_monitor._email_repository.mark_email_as_read = AsyncMock(return_value=response)
         intermapper_monitor._create_outage_ticket = AsyncMock(return_value=True)
         intermapper_monitor._get_dri_parameters = AsyncMock(return_value=dri_parameters)
 
@@ -557,7 +331,7 @@ class TestInterMapperMonitor:
         intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(email["msg_uid"])
 
     @pytest.mark.asyncio
-    async def process_email_down_event_PIAB_device_test(self):
+    async def process_email_down_event_PIAB_device_test(self, intermapper_monitor):
         circuit_id = 3214
         client_id = 83959
 
@@ -579,28 +353,8 @@ class TestInterMapperMonitor:
         }
 
         response = {"body": None, "status": 204}
-        scheduler = Mock()
-        bruin_repository = Mock()
-        config = testconfig
 
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        email_repository.mark_email_as_read = AsyncMock(return_value=response)
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
+        intermapper_monitor._email_repository.mark_email_as_read = AsyncMock(return_value=response)
         intermapper_monitor._create_outage_ticket = AsyncMock(return_value=True)
         intermapper_monitor._get_dri_parameters = AsyncMock(return_value=dri_parameters)
 
@@ -616,7 +370,7 @@ class TestInterMapperMonitor:
         intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(email["msg_uid"])
 
     @pytest.mark.asyncio
-    async def process_email_up_event_test(self):
+    async def process_email_up_event_test(self, intermapper_monitor):
         circuit_id = 3214
         client_id = 83959
 
@@ -628,28 +382,8 @@ class TestInterMapperMonitor:
         }
 
         response = {"body": None, "status": 204}
-        scheduler = Mock()
-        bruin_repository = Mock()
-        config = testconfig
 
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        email_repository.mark_email_as_read = AsyncMock(return_value=response)
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
+        intermapper_monitor._email_repository.mark_email_as_read = AsyncMock(return_value=response)
         intermapper_monitor._autoresolve_ticket = AsyncMock(return_value=True)
         parsed_email_dict = intermapper_monitor._parse_email_body(email["body"])
 
@@ -660,7 +394,7 @@ class TestInterMapperMonitor:
         intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(email["msg_uid"])
 
     @pytest.mark.asyncio
-    async def process_email_irrelevant_event_test(self):
+    async def process_email_irrelevant_event_test(self, intermapper_monitor):
         circuit_id = 3214
         client_id = 83959
 
@@ -672,28 +406,8 @@ class TestInterMapperMonitor:
         }
 
         response = {"body": None, "status": 204}
-        scheduler = Mock()
-        bruin_repository = Mock()
-        config = testconfig
 
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        email_repository.mark_email_as_read = AsyncMock(return_value=response)
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
+        intermapper_monitor._email_repository.mark_email_as_read = AsyncMock(return_value=response)
         intermapper_monitor._create_outage_ticket = AsyncMock()
         intermapper_monitor._autoresolve_ticket = AsyncMock()
 
@@ -705,7 +419,7 @@ class TestInterMapperMonitor:
         intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(email["msg_uid"])
 
     @pytest.mark.asyncio
-    async def process_email_failed_test(self):
+    async def process_email_failed_test(self, intermapper_monitor):
         circuit_id = 3214
         client_id = 83959
 
@@ -715,28 +429,8 @@ class TestInterMapperMonitor:
             "subject": "",
             "body": "01/19 19:35:31: Message from InterMapper 6.1.5\nEvent: Up",
         }
-        scheduler = Mock()
-        bruin_repository = Mock()
-        config = testconfig
 
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        email_repository.mark_email_as_read = AsyncMock()
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
+        intermapper_monitor._email_repository.mark_email_as_read = AsyncMock()
         intermapper_monitor._autoresolve_ticket = AsyncMock(return_value=False)
 
         with config_mock:
@@ -744,16 +438,7 @@ class TestInterMapperMonitor:
 
         intermapper_monitor._email_repository.mark_email_as_read.assert_not_awaited()
 
-    def parse_email_body_test(self):
-        scheduler = Mock()
-        config = testconfig
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        bruin_repository = Mock()
-        dri_repository = Mock()
-
+    def parse_email_body_test(self, intermapper_monitor):
         intermapper_body = os.linesep.join(
             [
                 "01/10 15:35:40: Message from InterMapper 6.1.5\n",
@@ -783,30 +468,10 @@ class TestInterMapperMonitor:
             "up_time": "209 days, 10 hours, 44 minutes, 16 seconds",
         }
 
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
-
         email_body = intermapper_monitor._parse_email_body(intermapper_body)
         assert email_body == expected_dict
 
-    def parse_email_body_no_condition_test(self):
-        scheduler = Mock()
-        config = testconfig
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        bruin_repository = Mock()
-        dri_repository = Mock()
-
+    def parse_email_body_no_condition_test(self, intermapper_monitor):
         intermapper_body = os.linesep.join(
             [
                 "01/10 15:35:40: Message from InterMapper 6.1.5\n",
@@ -836,30 +501,10 @@ class TestInterMapperMonitor:
             "up_time": "209 days, 10 hours, 44 minutes, 16 seconds",
         }
 
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
-
         email_body = intermapper_monitor._parse_email_body(intermapper_body)
         assert email_body == expected_dict
 
-    def parse_email_body_missing_section_test(self):
-        scheduler = Mock()
-        config = testconfig
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        bruin_repository = Mock()
-        dri_repository = Mock()
-
+    def parse_email_body_missing_section_test(self, intermapper_monitor):
         intermapper_body = os.linesep.join(
             [
                 "01/10 15:35:40: Message from InterMapper 6.1.5\n",
@@ -887,95 +532,28 @@ class TestInterMapperMonitor:
             "last_reported_down": "7 days, 23 hours, 54 minutes, 10 seconds",
             "up_time": "209 days, 10 hours, 44 minutes, 16 seconds",
         }
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
 
         email_body = intermapper_monitor._parse_email_body(intermapper_body)
         assert email_body == expected_dict
 
-    def extract_value_from_field_same_ending_and_starting_char_test(self):
-        scheduler = Mock()
-        config = testconfig
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        bruin_repository = Mock()
-        dri_repository = Mock()
-
+    def extract_value_from_field_same_ending_and_starting_char_test(self, intermapper_monitor):
         expected_client_id = 83959
         client_id_str = f"O Reilly Auto Parts - South East |{expected_client_id}| Platinum Monitoring"
 
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
         client_id = intermapper_monitor._extract_value_from_field("|", "|", client_id_str)
         assert client_id == str(expected_client_id)
 
-    def extract_value_from_field_different_ending_and_starting_char_test(self):
-        scheduler = Mock()
-        config = testconfig
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        bruin_repository = Mock()
-        dri_repository = Mock()
-
+    def extract_value_from_field_different_ending_and_starting_char_test(self, intermapper_monitor):
         expected_client_id = 83959
         client_id_str = f"O Reilly Auto Parts - South East [{expected_client_id}] Platinum Monitoring"
 
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
         client_id = intermapper_monitor._extract_value_from_field("[", "]", client_id_str)
         assert client_id == str(expected_client_id)
 
-    def extract_value_from_field_missing_ending_and_starting_char_test(self):
-        scheduler = Mock()
-        config = testconfig
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        bruin_repository = Mock()
-        dri_repository = Mock()
-
+    def extract_value_from_field_missing_ending_and_starting_char_test(self, intermapper_monitor):
         expected_client_id = 83959
         client_id_str = f"O Reilly Auto Parts - South East [{expected_client_id}] Platinum Monitoring"
 
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
         client_id = intermapper_monitor._extract_value_from_field("|", "]", client_id_str)
         assert client_id is None
 
@@ -1034,7 +612,7 @@ class TestInterMapperMonitor:
         assert response is True
 
     @pytest.mark.asyncio
-    async def create_outage_ticket_dri_parameters_given_test(self):
+    async def create_outage_ticket_dri_parameters_given_test(self, intermapper_monitor):
         dri_parameter = {
             "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei": "864839040023968",
             "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers": "ATT",
@@ -1067,33 +645,12 @@ class TestInterMapperMonitor:
 
         post_ticket_response = {"body": "success", "status": 200}
         get_ticket_details_response = {"body": {"ticketNotes": []}, "status": 200}
-        scheduler = Mock()
-        config = testconfig
 
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        notifications_repository.send_slack_message = AsyncMock()
-
-        bruin_repository = Mock()
-        bruin_repository.create_outage_ticket = AsyncMock(return_value=outage_ticket_response)
-        bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_details_response)
-        bruin_repository.append_intermapper_note = AsyncMock()
-        bruin_repository.append_dri_note = AsyncMock(return_value=post_ticket_response)
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
+        intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
+        intermapper_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_details_response)
+        intermapper_monitor._bruin_repository.append_intermapper_note = AsyncMock()
+        intermapper_monitor._bruin_repository.append_dri_note = AsyncMock(return_value=post_ticket_response)
         intermapper_monitor._process_dri_email = AsyncMock(return_value=True)
         intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
 
@@ -1102,14 +659,16 @@ class TestInterMapperMonitor:
                 circuit_id, client_id, parsed_email_dict, dri_parameter
             )
 
-        bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, circuit_id)
+        intermapper_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, circuit_id)
         intermapper_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
-        bruin_repository.append_dri_note.assert_awaited_once_with(ticket_id, dri_parameter, parsed_email_dict)
-        bruin_repository.append_intermapper_note.assert_not_awaited()
+        intermapper_monitor._bruin_repository.append_dri_note.assert_awaited_once_with(
+            ticket_id, dri_parameter, parsed_email_dict
+        )
+        intermapper_monitor._bruin_repository.append_intermapper_note.assert_not_awaited()
         assert response is True
 
     @pytest.mark.asyncio
-    async def create_outage_ticket_failed_ticket_creation_rpc_test(self):
+    async def create_outage_ticket_failed_ticket_creation_rpc_test(self, intermapper_monitor):
         dri_parameter = None
         client_id = 83959
         parsed_email_dict = {
@@ -1127,46 +686,25 @@ class TestInterMapperMonitor:
         circuit_id = 3214
         ticket_id = 321
         outage_ticket_response = {"body": ticket_id, "status": 400}
-        scheduler = Mock()
-        config = testconfig
 
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        notifications_repository.send_slack_message = AsyncMock()
-
-        bruin_repository = Mock()
-        bruin_repository.create_outage_ticket = AsyncMock(return_value=outage_ticket_response)
-        bruin_repository.append_intermapper_note = AsyncMock()
-        bruin_repository.append_dri_note = AsyncMock()
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
+        intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
+        intermapper_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.append_intermapper_note = AsyncMock()
+        intermapper_monitor._bruin_repository.append_dri_note = AsyncMock()
 
         with config_mock:
             response = await intermapper_monitor._create_outage_ticket(
                 circuit_id, client_id, parsed_email_dict, dri_parameter
             )
 
-        bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, circuit_id)
-        notifications_repository.send_slack_message.assert_not_awaited()
-        bruin_repository.append_intermapper_note.assert_not_awaited()
-        bruin_repository.append_dri_note.assert_not_awaited()
+        intermapper_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, circuit_id)
+        intermapper_monitor._notifications_repository.send_slack_message.assert_not_awaited()
+        intermapper_monitor._bruin_repository.append_intermapper_note.assert_not_awaited()
+        intermapper_monitor._bruin_repository.append_dri_note.assert_not_awaited()
         assert response is False
 
     @pytest.mark.asyncio
-    async def create_outage_ticket_failed_post_intermapper_note_rpc_test(self):
+    async def create_outage_ticket_failed_post_intermapper_note_rpc_test(self, intermapper_monitor):
         client_id = 83959
         dri_parameter = None
         parsed_email_dict = {
@@ -1192,33 +730,12 @@ class TestInterMapperMonitor:
 
         post_ticket_response = {"body": "failed", "status": 400}
         get_ticket_details_response = {"body": {"ticketNotes": []}, "status": 200}
-        scheduler = Mock()
-        config = testconfig
 
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        notifications_repository.send_slack_message = AsyncMock()
-
-        bruin_repository = Mock()
-        bruin_repository.create_outage_ticket = AsyncMock(return_value=outage_ticket_response)
-        bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_details_response)
-        bruin_repository.append_intermapper_note = AsyncMock(return_value=post_ticket_response)
-        bruin_repository.append_dri_note = AsyncMock()
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
+        intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
+        intermapper_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_details_response)
+        intermapper_monitor._bruin_repository.append_intermapper_note = AsyncMock(return_value=post_ticket_response)
+        intermapper_monitor._bruin_repository.append_dri_note = AsyncMock()
         intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
 
         with config_mock:
@@ -1226,14 +743,16 @@ class TestInterMapperMonitor:
                 circuit_id, client_id, parsed_email_dict, dri_parameter
             )
 
-        bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, circuit_id)
+        intermapper_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, circuit_id)
         intermapper_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
-        bruin_repository.append_dri_note.assert_not_awaited()
-        bruin_repository.append_intermapper_note.assert_awaited_once_with(ticket_id, parsed_email_dict, False)
+        intermapper_monitor._bruin_repository.append_dri_note.assert_not_awaited()
+        intermapper_monitor._bruin_repository.append_intermapper_note.assert_awaited_once_with(
+            ticket_id, parsed_email_dict, False
+        )
         assert response is False
 
     @pytest.mark.asyncio
-    async def create_outage_ticket_dri_parameters_given_failed_post_dri_note_rpc_test(self):
+    async def create_outage_ticket_dri_parameters_given_failed_post_dri_note_rpc_test(self, intermapper_monitor):
         dri_parameter = {
             "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.ModemImei": "864839040023968",
             "InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.Providers": "ATT",
@@ -1266,33 +785,12 @@ class TestInterMapperMonitor:
 
         post_ticket_response = {"body": "failed", "status": 400}
         get_ticket_details_response = {"body": {"ticketNotes": []}, "status": 200}
-        scheduler = Mock()
-        config = testconfig
 
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        notifications_repository.send_slack_message = AsyncMock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_details_response)
-        bruin_repository.create_outage_ticket = AsyncMock(return_value=outage_ticket_response)
-        bruin_repository.append_intermapper_note = AsyncMock()
-        bruin_repository.append_dri_note = AsyncMock(return_value=post_ticket_response)
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
+        intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
+        intermapper_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_details_response)
+        intermapper_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.append_intermapper_note = AsyncMock()
+        intermapper_monitor._bruin_repository.append_dri_note = AsyncMock(return_value=post_ticket_response)
         intermapper_monitor._process_dri_email = AsyncMock(return_value=True)
         intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
 
@@ -1301,10 +799,12 @@ class TestInterMapperMonitor:
                 circuit_id, client_id, parsed_email_dict, dri_parameter
             )
 
-        bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, circuit_id)
+        intermapper_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, circuit_id)
         intermapper_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
-        bruin_repository.append_dri_note.assert_awaited_once_with(ticket_id, dri_parameter, parsed_email_dict)
-        bruin_repository.append_intermapper_note.assert_not_awaited()
+        intermapper_monitor._bruin_repository.append_dri_note.assert_awaited_once_with(
+            ticket_id, dri_parameter, parsed_email_dict
+        )
+        intermapper_monitor._bruin_repository.append_intermapper_note.assert_not_awaited()
         assert response is False
 
     @pytest.mark.asyncio
@@ -1461,7 +961,7 @@ class TestInterMapperMonitor:
         assert response is True
 
     @pytest.mark.asyncio
-    async def autoresolve_no_tickets_test(self):
+    async def autoresolve_no_tickets_test(self, intermapper_monitor):
         service_number = 123
         client_id = 83959
         parsed_email_dict = {
@@ -1482,55 +982,31 @@ class TestInterMapperMonitor:
             "body": [],
             "status": 200,
         }
-        scheduler = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        notifications_repository.send_slack_message = AsyncMock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
-        bruin_repository.get_tickets = AsyncMock()
-        bruin_repository.get_ticket_details = AsyncMock()
-        bruin_repository.resolve_ticket = AsyncMock()
-        bruin_repository.append_autoresolve_note = AsyncMock()
-
-        config = testconfig
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
+        intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
+        intermapper_monitor._bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_tickets = AsyncMock()
+        intermapper_monitor._bruin_repository.get_ticket_details = AsyncMock()
+        intermapper_monitor._bruin_repository.resolve_ticket = AsyncMock()
+        intermapper_monitor._bruin_repository.append_autoresolve_note = AsyncMock()
         intermapper_monitor._was_last_outage_detected_recently = Mock()
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock()
 
         with config_mock:
             response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, parsed_email_dict)
 
-        bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
-        bruin_repository.get_tickets.assert_not_awaited()
-        bruin_repository.get_ticket_details.assert_not_awaited()
+        intermapper_monitor._bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
+        intermapper_monitor._bruin_repository.get_tickets.assert_not_awaited()
+        intermapper_monitor._bruin_repository.get_ticket_details.assert_not_awaited()
         intermapper_monitor._was_last_outage_detected_recently.assert_not_called()
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_not_called()
-
-        bruin_repository.resolve_ticket.assert_not_awaited()
-        bruin_repository.append_autoresolve_note.assert_not_awaited()
-        notifications_repository.send_slack_message.assert_not_awaited()
+        intermapper_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
+        intermapper_monitor._bruin_repository.append_autoresolve_note.assert_not_awaited()
+        intermapper_monitor._notifications_repository.send_slack_message.assert_not_awaited()
 
         assert response is True
 
     @pytest.mark.asyncio
-    async def autoresolve_ticket_failed_tickets_rpc_request_test(self):
-        service_number = 123
+    async def autoresolve_ticket_failed_tickets_rpc_request_test(self, intermapper_monitor):
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
@@ -1550,54 +1026,30 @@ class TestInterMapperMonitor:
             "body": "Failed RPC",
             "status": 400,
         }
-        scheduler = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        notifications_repository.send_slack_message = AsyncMock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
-        bruin_repository.get_tickets = AsyncMock()
-        bruin_repository.get_ticket_details = AsyncMock()
-        bruin_repository.resolve_ticket = AsyncMock()
-        bruin_repository.append_autoresolve_note = AsyncMock()
-
-        config = testconfig
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
+        intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
+        intermapper_monitor._bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_tickets = AsyncMock()
+        intermapper_monitor._bruin_repository.get_ticket_details = AsyncMock()
+        intermapper_monitor._bruin_repository.resolve_ticket = AsyncMock()
+        intermapper_monitor._bruin_repository.append_autoresolve_note = AsyncMock()
         intermapper_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
 
         with config_mock:
             response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, parsed_email_dict)
 
-        bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
-        bruin_repository.get_tickets.assert_not_awaited()
-        bruin_repository.get_ticket_details.assert_not_awaited()
+        intermapper_monitor._bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
+        intermapper_monitor._bruin_repository.get_tickets.assert_not_awaited()
+        intermapper_monitor._bruin_repository.get_ticket_details.assert_not_awaited()
         intermapper_monitor._was_last_outage_detected_recently.assert_not_called()
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_not_called()
-
-        bruin_repository.resolve_ticket.assert_not_awaited()
-        bruin_repository.append_autoresolve_note.assert_not_awaited()
-        notifications_repository.send_slack_message.assert_not_awaited()
+        intermapper_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
+        intermapper_monitor._bruin_repository.append_autoresolve_note.assert_not_awaited()
+        intermapper_monitor._notifications_repository.send_slack_message.assert_not_awaited()
         assert response is False
 
     @pytest.mark.asyncio
-    async def autoresolve_ticket_failed_append_up_note_rpc_request_test(self):
-        service_number = 123
+    async def autoresolve_ticket_failed_append_up_note_rpc_request_test(self, intermapper_monitor):
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
@@ -1636,35 +1088,15 @@ class TestInterMapperMonitor:
         }
 
         append_intermapper_up_response = {"body": "KO", "status": 400}
-        scheduler = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        notifications_repository.send_slack_message = AsyncMock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
-        bruin_repository.get_tickets = AsyncMock()
-        bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_details_response)
-        bruin_repository.resolve_ticket = AsyncMock()
-        bruin_repository.append_intermapper_up_note = AsyncMock(return_value=append_intermapper_up_response)
-        bruin_repository.append_autoresolve_note = AsyncMock()
-
-        config = testconfig
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
+        intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
+        intermapper_monitor._bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_tickets = AsyncMock()
+        intermapper_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_details_response)
+        intermapper_monitor._bruin_repository.resolve_ticket = AsyncMock()
+        intermapper_monitor._bruin_repository.append_intermapper_up_note = AsyncMock(
+            return_value=append_intermapper_up_response
         )
+        intermapper_monitor._bruin_repository.append_autoresolve_note = AsyncMock()
         intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         intermapper_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
@@ -1672,23 +1104,21 @@ class TestInterMapperMonitor:
         with config_mock:
             response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, parsed_email_dict)
 
-        bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
-        bruin_repository.append_intermapper_up_note.assert_awaited_once_with(
+        intermapper_monitor._bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
+        intermapper_monitor._bruin_repository.append_intermapper_up_note.assert_awaited_once_with(
             outage_ticket_1_id, circuit_id, parsed_email_dict, False
         )
-        bruin_repository.get_tickets.assert_not_awaited()
-        bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
+        intermapper_monitor._bruin_repository.get_tickets.assert_not_awaited()
+        intermapper_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         intermapper_monitor._was_last_outage_detected_recently.assert_not_called()
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_not_called()
-
-        bruin_repository.resolve_ticket.assert_not_awaited()
-        bruin_repository.append_autoresolve_note.assert_not_awaited()
-        notifications_repository.send_slack_message.assert_not_awaited()
+        intermapper_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
+        intermapper_monitor._bruin_repository.append_autoresolve_note.assert_not_awaited()
+        intermapper_monitor._notifications_repository.send_slack_message.assert_not_awaited()
         assert response is False
 
     @pytest.mark.asyncio
-    async def autoresolve_ticket_failed_product_category_rpc_request_test(self):
-        service_number = 123
+    async def autoresolve_ticket_failed_product_category_rpc_request_test(self, intermapper_monitor):
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
@@ -1732,35 +1162,15 @@ class TestInterMapperMonitor:
         }
 
         append_intermapper_up_response = {"body": "OK", "status": 200}
-        scheduler = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        notifications_repository.send_slack_message = AsyncMock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
-        bruin_repository.get_tickets = AsyncMock(return_value=product_category_response)
-        bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_details_response)
-        bruin_repository.resolve_ticket = AsyncMock()
-        bruin_repository.append_intermapper_up_note = AsyncMock(return_value=append_intermapper_up_response)
-        bruin_repository.append_autoresolve_note = AsyncMock()
-
-        config = testconfig
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
+        intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
+        intermapper_monitor._bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_tickets = AsyncMock(return_value=product_category_response)
+        intermapper_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_details_response)
+        intermapper_monitor._bruin_repository.resolve_ticket = AsyncMock()
+        intermapper_monitor._bruin_repository.append_intermapper_up_note = AsyncMock(
+            return_value=append_intermapper_up_response
         )
+        intermapper_monitor._bruin_repository.append_autoresolve_note = AsyncMock()
         intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         intermapper_monitor._was_last_outage_detected_recently = Mock()
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock()
@@ -1768,24 +1178,21 @@ class TestInterMapperMonitor:
         with config_mock:
             response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, parsed_email_dict)
 
-        bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
-        bruin_repository.append_intermapper_up_note.assert_awaited_once_with(
+        intermapper_monitor._bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
+        intermapper_monitor._bruin_repository.append_intermapper_up_note.assert_awaited_once_with(
             outage_ticket_1_id, circuit_id, parsed_email_dict, False
         )
-        bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
-        bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
+        intermapper_monitor._bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
+        intermapper_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         intermapper_monitor._was_last_outage_detected_recently.assert_not_called()
-
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_not_called()
-
-        bruin_repository.resolve_ticket.assert_not_awaited()
-        bruin_repository.append_autoresolve_note.assert_not_awaited()
-        notifications_repository.send_slack_message.assert_not_awaited()
+        intermapper_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
+        intermapper_monitor._bruin_repository.append_autoresolve_note.assert_not_awaited()
+        intermapper_monitor._notifications_repository.send_slack_message.assert_not_awaited()
         assert response is False
 
     @pytest.mark.asyncio
-    async def autoresolve_ticket_no_product_category_test(self):
-        service_number = 123
+    async def autoresolve_ticket_no_product_category_test(self, intermapper_monitor):
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
@@ -1829,35 +1236,15 @@ class TestInterMapperMonitor:
         }
 
         append_intermapper_up_response = {"body": "OK", "status": 200}
-        scheduler = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        notifications_repository.send_slack_message = AsyncMock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
-        bruin_repository.get_tickets = AsyncMock(return_value=product_category_response)
-        bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_details_response)
-        bruin_repository.resolve_ticket = AsyncMock()
-        bruin_repository.append_intermapper_up_note = AsyncMock(return_value=append_intermapper_up_response)
-        bruin_repository.append_autoresolve_note = AsyncMock()
-
-        config = testconfig
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
+        intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
+        intermapper_monitor._bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_tickets = AsyncMock(return_value=product_category_response)
+        intermapper_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_details_response)
+        intermapper_monitor._bruin_repository.resolve_ticket = AsyncMock()
+        intermapper_monitor._bruin_repository.append_intermapper_up_note = AsyncMock(
+            return_value=append_intermapper_up_response
         )
+        intermapper_monitor._bruin_repository.append_autoresolve_note = AsyncMock()
         intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         intermapper_monitor._was_last_outage_detected_recently = Mock()
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock()
@@ -1865,24 +1252,21 @@ class TestInterMapperMonitor:
         with config_mock:
             response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, parsed_email_dict)
 
-        bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
-        bruin_repository.append_intermapper_up_note.assert_awaited_once_with(
+        intermapper_monitor._bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
+        intermapper_monitor._bruin_repository.append_intermapper_up_note.assert_awaited_once_with(
             outage_ticket_1_id, circuit_id, parsed_email_dict, False
         )
-        bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
-        bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
+        intermapper_monitor._bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
+        intermapper_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         intermapper_monitor._was_last_outage_detected_recently.assert_not_called()
-
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_not_called()
-
-        bruin_repository.resolve_ticket.assert_not_awaited()
-        bruin_repository.append_autoresolve_note.assert_not_awaited()
-        notifications_repository.send_slack_message.assert_not_awaited()
+        intermapper_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
+        intermapper_monitor._bruin_repository.append_autoresolve_note.assert_not_awaited()
+        intermapper_monitor._notifications_repository.send_slack_message.assert_not_awaited()
         assert response is True
 
     @pytest.mark.asyncio
-    async def autoresolve_ticket_product_category_not_in_list_test(self):
-        service_number = 123
+    async def autoresolve_ticket_product_category_not_in_list_test(self, intermapper_monitor):
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
@@ -1921,35 +1305,15 @@ class TestInterMapperMonitor:
         }
 
         append_intermapper_up_response = {"body": "OK", "status": 200}
-        scheduler = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        notifications_repository.send_slack_message = AsyncMock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
-        bruin_repository.get_tickets = AsyncMock(return_value=outage_ticket_response)
-        bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_details_response)
-        bruin_repository.resolve_ticket = AsyncMock()
-        bruin_repository.append_intermapper_up_note = AsyncMock(return_value=append_intermapper_up_response)
-        bruin_repository.append_autoresolve_note = AsyncMock()
-
-        config = testconfig
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
+        intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
+        intermapper_monitor._bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_tickets = AsyncMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_details_response)
+        intermapper_monitor._bruin_repository.resolve_ticket = AsyncMock()
+        intermapper_monitor._bruin_repository.append_intermapper_up_note = AsyncMock(
+            return_value=append_intermapper_up_response
         )
+        intermapper_monitor._bruin_repository.append_autoresolve_note = AsyncMock()
         intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         intermapper_monitor._was_last_outage_detected_recently = Mock()
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock()
@@ -1957,24 +1321,21 @@ class TestInterMapperMonitor:
         with config_mock:
             response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, parsed_email_dict)
 
-        bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
-        bruin_repository.append_intermapper_up_note.assert_awaited_once_with(
+        intermapper_monitor._bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
+        intermapper_monitor._bruin_repository.append_intermapper_up_note.assert_awaited_once_with(
             outage_ticket_1_id, circuit_id, parsed_email_dict, False
         )
-        bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
-        bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
+        intermapper_monitor._bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
+        intermapper_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         intermapper_monitor._was_last_outage_detected_recently.assert_not_called()
-
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_not_called()
-
-        bruin_repository.resolve_ticket.assert_not_awaited()
-        bruin_repository.append_autoresolve_note.assert_not_awaited()
-        notifications_repository.send_slack_message.assert_not_awaited()
+        intermapper_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
+        intermapper_monitor._bruin_repository.append_autoresolve_note.assert_not_awaited()
+        intermapper_monitor._notifications_repository.send_slack_message.assert_not_awaited()
         assert response is True
 
     @pytest.mark.asyncio
-    async def autoresolve_ticket_failed_tickets_details_rpc_request_test(self):
-        service_number = 123
+    async def autoresolve_ticket_failed_tickets_details_rpc_request_test(self, intermapper_monitor):
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
@@ -2012,57 +1373,32 @@ class TestInterMapperMonitor:
             "status": 400,
         }
 
-        scheduler = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        notifications_repository.send_slack_message = AsyncMock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
-        bruin_repository.get_tickets = AsyncMock()
-        bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
-        bruin_repository.resolve_ticket = AsyncMock()
-        bruin_repository.append_intermapper_up_note = AsyncMock()
-        bruin_repository.append_autoresolve_note = AsyncMock()
-
-        config = testconfig
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
+        intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
+        intermapper_monitor._bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_tickets = AsyncMock()
+        intermapper_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
+        intermapper_monitor._bruin_repository.resolve_ticket = AsyncMock()
+        intermapper_monitor._bruin_repository.append_intermapper_up_note = AsyncMock()
+        intermapper_monitor._bruin_repository.append_autoresolve_note = AsyncMock()
         intermapper_monitor._was_last_outage_detected_recently = Mock()
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock()
 
         with config_mock:
             response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, parsed_email_dict)
 
-        bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
-        bruin_repository.append_intermapper_up_note.assert_not_awaited()
-        bruin_repository.get_tickets.assert_not_awaited()
-        bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
+        intermapper_monitor._bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
+        intermapper_monitor._bruin_repository.append_intermapper_up_note.assert_not_awaited()
+        intermapper_monitor._bruin_repository.get_tickets.assert_not_awaited()
+        intermapper_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         intermapper_monitor._was_last_outage_detected_recently.assert_not_called()
-
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_not_called()
-
-        bruin_repository.resolve_ticket.assert_not_awaited()
-        bruin_repository.append_autoresolve_note.assert_not_awaited()
-        notifications_repository.send_slack_message.assert_not_awaited()
+        intermapper_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
+        intermapper_monitor._bruin_repository.append_autoresolve_note.assert_not_awaited()
+        intermapper_monitor._notifications_repository.send_slack_message.assert_not_awaited()
         assert response is False
 
     @pytest.mark.asyncio
-    async def autoresolve_ticket_outage_not_detected_recently_test(self):
-        service_number = 123
+    async def autoresolve_ticket_outage_not_detected_recently_test(self, intermapper_monitor):
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
@@ -2162,35 +1498,15 @@ class TestInterMapperMonitor:
         }
 
         append_intermapper_up_response = {"body": "OK", "status": 200}
-        scheduler = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        notifications_repository.send_slack_message = AsyncMock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
-        bruin_repository.get_tickets = AsyncMock(return_value=outage_ticket_response)
-        bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
-        bruin_repository.resolve_ticket = AsyncMock(return_value=resolve_outage_ticket_response)
-        bruin_repository.append_intermapper_up_note = AsyncMock(return_value=append_intermapper_up_response)
-        bruin_repository.append_autoresolve_note = AsyncMock()
-
-        config = testconfig
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
+        intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
+        intermapper_monitor._bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_tickets = AsyncMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
+        intermapper_monitor._bruin_repository.resolve_ticket = AsyncMock(return_value=resolve_outage_ticket_response)
+        intermapper_monitor._bruin_repository.append_intermapper_up_note = AsyncMock(
+            return_value=append_intermapper_up_response
         )
+        intermapper_monitor._bruin_repository.append_autoresolve_note = AsyncMock()
         intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         intermapper_monitor._was_last_outage_detected_recently = Mock(return_value=False)
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
@@ -2198,25 +1514,23 @@ class TestInterMapperMonitor:
         with config_mock:
             response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, parsed_email_dict)
 
-        bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
-        bruin_repository.append_intermapper_up_note.assert_awaited_once_with(
+        intermapper_monitor._bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
+        intermapper_monitor._bruin_repository.append_intermapper_up_note.assert_awaited_once_with(
             outage_ticket_1_id, circuit_id, parsed_email_dict, False
         )
-        bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
-        bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
+        intermapper_monitor._bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
+        intermapper_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         intermapper_monitor._was_last_outage_detected_recently.assert_called_once_with(
             relevant_notes_for_edge, outage_ticket_1_creation_date, parsed_email_dict
         )
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_not_called()
-
-        bruin_repository.resolve_ticket.assert_not_awaited()
-        bruin_repository.append_autoresolve_note.assert_not_awaited()
-        notifications_repository.send_slack_message.assert_not_awaited()
+        intermapper_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
+        intermapper_monitor._bruin_repository.append_autoresolve_note.assert_not_awaited()
+        intermapper_monitor._notifications_repository.send_slack_message.assert_not_awaited()
         assert response is True
 
     @pytest.mark.asyncio
-    async def autoresolve_ticket_cannot_autoresolve_one_more_time_test(self):
-        service_number = 123
+    async def autoresolve_ticket_cannot_autoresolve_one_more_time_test(self, intermapper_monitor):
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
@@ -2316,35 +1630,15 @@ class TestInterMapperMonitor:
         }
 
         append_intermapper_up_response = {"body": "OK", "status": 200}
-        scheduler = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        notifications_repository.send_slack_message = AsyncMock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
-        bruin_repository.get_tickets = AsyncMock(return_value=outage_ticket_response)
-        bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
-        bruin_repository.resolve_ticket = AsyncMock(return_value=resolve_outage_ticket_response)
-        bruin_repository.append_intermapper_up_note = AsyncMock(return_value=append_intermapper_up_response)
-        bruin_repository.append_autoresolve_note = AsyncMock()
-
-        config = testconfig
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
+        intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
+        intermapper_monitor._bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_tickets = AsyncMock(return_value=outage_ticket_response)
+        intermapper_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
+        intermapper_monitor._bruin_repository.resolve_ticket = AsyncMock(return_value=resolve_outage_ticket_response)
+        intermapper_monitor._bruin_repository.append_intermapper_up_note = AsyncMock(
+            return_value=append_intermapper_up_response
         )
+        intermapper_monitor._bruin_repository.append_autoresolve_note = AsyncMock()
         intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         intermapper_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock(return_value=False)
@@ -2352,28 +1646,25 @@ class TestInterMapperMonitor:
         with config_mock:
             response = await intermapper_monitor._autoresolve_ticket(circuit_id, client_id, parsed_email_dict)
 
-        bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
-        bruin_repository.append_intermapper_up_note.assert_awaited_once_with(
+        intermapper_monitor._bruin_repository.get_ticket_basic_info.assert_awaited_once_with(client_id, circuit_id)
+        intermapper_monitor._bruin_repository.append_intermapper_up_note.assert_awaited_once_with(
             outage_ticket_1_id, circuit_id, parsed_email_dict, False
         )
-        bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
-
-        bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
+        intermapper_monitor._bruin_repository.get_tickets.assert_awaited_once_with(client_id, outage_ticket_1_id)
+        intermapper_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
         intermapper_monitor._was_last_outage_detected_recently.assert_called_once_with(
             relevant_notes_for_edge, outage_ticket_1_creation_date, parsed_email_dict
         )
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
             relevant_notes_for_edge, circuit_id
         )
-
-        bruin_repository.resolve_ticket.assert_not_awaited()
-        bruin_repository.append_autoresolve_note.assert_not_awaited()
-        notifications_repository.send_slack_message.assert_not_awaited()
+        intermapper_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
+        intermapper_monitor._bruin_repository.append_autoresolve_note.assert_not_awaited()
+        intermapper_monitor._notifications_repository.send_slack_message.assert_not_awaited()
         assert response is True
 
     @pytest.mark.asyncio
     async def autoresolve_ticket_failed_resolve_rpc_request_test(self, intermapper_monitor):
-        service_number = 123
         client_id = 83959
         parsed_email_dict = {
             "time": "01/10 15:35:40",
@@ -2522,7 +1813,7 @@ class TestInterMapperMonitor:
         assert response is False
 
     @pytest.mark.asyncio
-    async def get_dri_parameters_test(self):
+    async def get_dri_parameters_test(self, intermapper_monitor):
         circuit_id = 3214
         client_id = 83959
 
@@ -2538,71 +1829,41 @@ class TestInterMapperMonitor:
 
         attribute_serial = "705286"
         attribute_serial_response = {"body": attribute_serial, "status": 200}
-        scheduler = Mock()
-        config = testconfig
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
 
-        bruin_repository = Mock()
-        bruin_repository.get_serial_attribute_from_inventory = AsyncMock(return_value=attribute_serial_response)
-
-        dri_repository = Mock()
-        dri_repository.get_dri_parameters = AsyncMock(return_value=dri_parameters_response)
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
+        intermapper_monitor._bruin_repository.get_serial_attribute_from_inventory = AsyncMock(
+            return_value=attribute_serial_response
         )
+        intermapper_monitor._dri_repository.get_dri_parameters = AsyncMock(return_value=dri_parameters_response)
+
         dri_parameters = await intermapper_monitor._get_dri_parameters(circuit_id, client_id)
-        bruin_repository.get_serial_attribute_from_inventory.assert_awaited_once_with(circuit_id, client_id)
-        dri_repository.get_dri_parameters.assert_awaited_once_with(attribute_serial)
+        intermapper_monitor._bruin_repository.get_serial_attribute_from_inventory.assert_awaited_once_with(
+            circuit_id, client_id
+        )
+        intermapper_monitor._dri_repository.get_dri_parameters.assert_awaited_once_with(attribute_serial)
         assert dri_parameters == dri_parameters_response_body
 
     @pytest.mark.asyncio
-    async def get_dri_parameters_failed_attributes_serial_rpc_request_test(self):
+    async def get_dri_parameters_failed_attributes_serial_rpc_request_test(self, intermapper_monitor):
         circuit_id = 3214
         client_id = 83959
 
         attribute_serial = "Failed"
         attribute_serial_response = {"body": attribute_serial, "status": 400}
-        scheduler = Mock()
-        config = testconfig
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
 
-        bruin_repository = Mock()
-        bruin_repository.get_serial_attribute_from_inventory = AsyncMock(return_value=attribute_serial_response)
-
-        dri_repository = Mock()
-        dri_repository.get_dri_parameters = AsyncMock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
+        intermapper_monitor._bruin_repository.get_serial_attribute_from_inventory = AsyncMock(
+            return_value=attribute_serial_response
         )
+        intermapper_monitor._dri_repository.get_dri_parameters = AsyncMock()
+
         dri_parameters = await intermapper_monitor._get_dri_parameters(circuit_id, client_id)
-        bruin_repository.get_serial_attribute_from_inventory.assert_awaited_once_with(circuit_id, client_id)
-        dri_repository.get_dri_parameters.assert_not_awaited()
+        intermapper_monitor._bruin_repository.get_serial_attribute_from_inventory.assert_awaited_once_with(
+            circuit_id, client_id
+        )
+        intermapper_monitor._dri_repository.get_dri_parameters.assert_not_awaited()
         assert dri_parameters is None
 
     @pytest.mark.asyncio
-    async def get_dri_parameters_none_attribute_test(self):
+    async def get_dri_parameters_none_attribute_test(self, intermapper_monitor):
         circuit_id = 3214
         client_id = 83959
 
@@ -2618,36 +1879,21 @@ class TestInterMapperMonitor:
 
         attribute_serial = None
         attribute_serial_response = {"body": attribute_serial, "status": 200}
-        scheduler = Mock()
-        config = testconfig
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
 
-        bruin_repository = Mock()
-        bruin_repository.get_serial_attribute_from_inventory = AsyncMock(return_value=attribute_serial_response)
-
-        dri_repository = Mock()
-        dri_repository.get_dri_parameters = AsyncMock(return_value=dri_parameters_response)
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
+        intermapper_monitor._bruin_repository.get_serial_attribute_from_inventory = AsyncMock(
+            return_value=attribute_serial_response
         )
+        intermapper_monitor._dri_repository.get_dri_parameters = AsyncMock(return_value=dri_parameters_response)
+
         dri_parameters = await intermapper_monitor._get_dri_parameters(circuit_id, client_id)
-        bruin_repository.get_serial_attribute_from_inventory.assert_awaited_once_with(circuit_id, client_id)
-        dri_repository.get_dri_parameters.assert_not_awaited()
+        intermapper_monitor._bruin_repository.get_serial_attribute_from_inventory.assert_awaited_once_with(
+            circuit_id, client_id
+        )
+        intermapper_monitor._dri_repository.get_dri_parameters.assert_not_awaited()
         assert dri_parameters is None
 
     @pytest.mark.asyncio
-    async def get_dri_parameters_failed_dri_parameters_rpc_request_test(self):
+    async def get_dri_parameters_failed_dri_parameters_rpc_request_test(self, intermapper_monitor):
         circuit_id = 3214
         client_id = 83959
 
@@ -2656,57 +1902,24 @@ class TestInterMapperMonitor:
 
         dri_parameters_response_body = f"DRI task was rejected for serial {attribute_serial}"
         dri_parameters_response = {"body": dri_parameters_response_body, "status": 403}
-        scheduler = Mock()
-        config = testconfig
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
 
-        bruin_repository = Mock()
-        bruin_repository.get_serial_attribute_from_inventory = AsyncMock(return_value=attribute_serial_response)
-
-        dri_repository = Mock()
-        dri_repository.get_dri_parameters = AsyncMock(return_value=dri_parameters_response)
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
+        intermapper_monitor._bruin_repository.get_serial_attribute_from_inventory = AsyncMock(
+            return_value=attribute_serial_response
         )
+        intermapper_monitor._dri_repository.get_dri_parameters = AsyncMock(return_value=dri_parameters_response)
+
         dri_parameters = await intermapper_monitor._get_dri_parameters(circuit_id, client_id)
-        bruin_repository.get_serial_attribute_from_inventory.assert_awaited_once_with(circuit_id, client_id)
-        dri_repository.get_dri_parameters.assert_awaited_once_with(attribute_serial)
+        intermapper_monitor._bruin_repository.get_serial_attribute_from_inventory.assert_awaited_once_with(
+            circuit_id, client_id
+        )
+        intermapper_monitor._dri_repository.get_dri_parameters.assert_awaited_once_with(attribute_serial)
         assert dri_parameters is None
 
-    def last_outage_detected_recently_with_no_reopen_note_or_no_triage_test(self):
+    def last_outage_detected_recently_with_no_reopen_note_or_no_triage_test(self, intermapper_monitor):
         ticket_creation_date = "9/25/2020 6:31:54 AM"
         ticket_notes = []
         parsed_email_dict = {"name": ""}
-        scheduler = Mock()
-        config = testconfig
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        bruin_repository = Mock()
-        dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
         intermapper_monitor._get_max_seconds_since_last_outage = Mock(return_value=3600)
         datetime_mock = Mock()
 
@@ -2734,7 +1947,7 @@ class TestInterMapperMonitor:
             )
             assert result is False
 
-    def last_outage_detected_recently_with_reopen_note_test(self):
+    def last_outage_detected_recently_with_reopen_note_test(self, intermapper_monitor):
         ticket_creation_date = "9/25/2020 6:31:54 AM"
         triage_timestamp = "2021-01-02T10:18:16.71-05:00"
         reopen_timestamp = "2021-01-02T11:00:16.71-05:00"
@@ -2762,25 +1975,7 @@ class TestInterMapperMonitor:
         ]
 
         parsed_email_dict = {"name": ""}
-        scheduler = Mock()
-        config = testconfig
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        bruin_repository = Mock()
-        dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
         intermapper_monitor._get_max_seconds_since_last_outage = Mock(return_value=3600)
         datetime_mock = Mock()
 
@@ -2808,7 +2003,7 @@ class TestInterMapperMonitor:
             )
             assert result is False
 
-    def last_outage_detected_recently_with_triage_note_and_no_reopen_note_test(self):
+    def last_outage_detected_recently_with_triage_note_and_no_reopen_note_test(self, intermapper_monitor):
         ticket_creation_date = "9/25/2020 6:31:54 AM"
         triage_timestamp = "2021-01-02T10:18:16.71-05:00"
 
@@ -2826,25 +2021,7 @@ class TestInterMapperMonitor:
         ]
 
         parsed_email_dict = {"name": ""}
-        scheduler = Mock()
-        config = testconfig
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        bruin_repository = Mock()
-        dri_repository = Mock()
 
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
         intermapper_monitor._get_max_seconds_since_last_outage = Mock(return_value=3600)
         datetime_mock = Mock()
 
@@ -2872,7 +2049,7 @@ class TestInterMapperMonitor:
             )
             assert result is False
 
-    def is_outage_ticket_detail_auto_resolvable_test(self):
+    def is_outage_ticket_detail_auto_resolvable_test(self, intermapper_monitor):
         serial_number_1 = "VC1234567"
         serial_number_2 = "VC7654321"
         serial_number_3 = "123"
@@ -3011,25 +2188,6 @@ class TestInterMapperMonitor:
                 ],
             },
         ]
-        scheduler = Mock()
-        config = testconfig
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        bruin_repository = Mock()
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
 
         ticket_bool1 = intermapper_monitor._is_outage_ticket_detail_auto_resolvable(ticket_notes1, serial_number_1)
         assert ticket_bool1 is True
@@ -3050,92 +2208,31 @@ class TestInterMapperMonitor:
         assert ticket_bool6 is True
 
     @pytest.mark.asyncio
-    async def mark_email_as_read_test(self):
+    async def mark_email_as_read_test(self, intermapper_monitor):
         msg_uid = 123
-        scheduler = Mock()
-        bruin_repository = Mock()
-        config = testconfig
-
         response = {"body": None, "status": 204}
 
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        email_repository.mark_email_as_read = AsyncMock(return_value=response)
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
+        intermapper_monitor._email_repository.mark_email_as_read = AsyncMock(return_value=response)
 
         await intermapper_monitor._mark_email_as_read(msg_uid)
 
         intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(msg_uid)
 
     @pytest.mark.asyncio
-    async def mark_email_as_read_non_2xx_test(self):
+    async def mark_email_as_read_non_2xx_test(self, intermapper_monitor):
         msg_uid = 123
-        scheduler = Mock()
-        bruin_repository = Mock()
-        config = testconfig
-
         response = {"body": None, "status": 400}
 
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        email_repository.mark_email_as_read = AsyncMock(return_value=response)
-
-        dri_repository = Mock()
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
+        intermapper_monitor._email_repository.mark_email_as_read = AsyncMock(return_value=response)
 
         await intermapper_monitor._mark_email_as_read(msg_uid)
 
         intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(msg_uid)
 
-    def get_tz_offset_test(self):
-        scheduler = Mock()
-        bruin_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        dri_repository = Mock()
-        config = testconfig
-
+    def get_tz_offset_test(self, intermapper_monitor):
         datetime_mock = Mock()
         datetime_mock.now.side_effect = lambda tz: tz.localize(datetime.now().replace(month=1))
 
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
         intermapper_monitor._zip_db.get = Mock()
 
         with patch.object(intermapper_monitor_module, "datetime", new=datetime_mock):
@@ -3145,27 +2242,7 @@ class TestInterMapperMonitor:
             intermapper_monitor._get_tz_offset("1 Infinite Loop, Cupertino, CA 95014")
             intermapper_monitor._zip_db.get.assert_called_once_with("95014")
 
-    def get_max_seconds_since_last_outage_test(self):
-        scheduler = Mock()
-        bruin_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        notifications_repository = Mock()
-        email_repository = Mock()
-        dri_repository = Mock()
-        config = testconfig
-
-        intermapper_monitor = InterMapperMonitor(
-            scheduler,
-            config,
-            utils_repository,
-            metrics_repository,
-            notifications_repository,
-            email_repository,
-            bruin_repository,
-            dri_repository,
-        )
-
+    def get_max_seconds_since_last_outage_test(self, intermapper_monitor):
         tz_offset = 0
 
         day_schedule = testconfig.INTERMAPPER_CONFIG["autoresolve"]["day_schedule"]
