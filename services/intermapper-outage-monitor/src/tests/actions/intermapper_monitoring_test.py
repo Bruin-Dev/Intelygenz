@@ -6,9 +6,10 @@ import pytest
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from dateutil.parser import parse
+from framework.storage.task_dispatcher_client import TaskTypes
 from pytz import utc
 
-from application import FORWARD_TICKET_TO_QUEUE_JOB_ID, ForwardQueues
+from application import ForwardQueues
 from application.actions import intermapper_monitoring as intermapper_monitor_module
 from config import testconfig
 from tests.fixtures._constants import CURRENT_DATETIME
@@ -2375,17 +2376,13 @@ class TestInterMapperMonitor:
         ticket_id = 12345
         is_piab = True
         event = "example"
-        target_queue = ForwardQueues.HNOC.value
+        target_queue = ForwardQueues.HNOC
         forward_time = testconfig.INTERMAPPER_CONFIG["forward_to_hnoc_job_interval"]
         forward_task_run_date = CURRENT_DATETIME + timedelta(
             seconds=intermapper_monitor._config.INTERMAPPER_CONFIG["forward_to_hnoc_job_interval"]
         )
         datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=CURRENT_DATETIME)
-        _target_queue = target_queue.replace(" ", "_")
-        job_id = FORWARD_TICKET_TO_QUEUE_JOB_ID.format(
-            ticket_id=ticket_id, serial_number=serial_number, target_queue=_target_queue
-        )
+        datetime_mock.utcnow = Mock(return_value=CURRENT_DATETIME)
 
         with patch.object(intermapper_monitor_module, "datetime", new=datetime_mock):
             with patch.object(intermapper_monitor_module, "timezone", new=Mock()):
@@ -2398,141 +2395,22 @@ class TestInterMapperMonitor:
                     event=event,
                 )
 
-        intermapper_monitor._scheduler.add_job.assert_called_once_with(
-            intermapper_monitor.forward_ticket_to_queue,
-            "date",
-            kwargs={
+        intermapper_monitor._task_dispatcher_client.schedule_task.assert_called_once_with(
+            date=forward_task_run_date,
+            task_type=TaskTypes.TICKET_FORWARDS,
+            task_key=f"{ticket_id}-{serial_number}-{target_queue.name}",
+            task_data={
+                "service": intermapper_monitor._config.LOG_CONFIG["name"],
                 "ticket_id": ticket_id,
                 "serial_number": serial_number,
-                "target_queue": target_queue,
-                "is_piab": is_piab,
-                "event": event,
+                "target_queue": target_queue.value,
+                "metrics_labels": {
+                    "event": event,
+                    "is_piab": is_piab,
+                    "target_queue": target_queue.value,
+                },
             },
-            run_date=forward_task_run_date,
-            replace_existing=False,
-            misfire_grace_time=9999,
-            coalesce=True,
-            id=job_id,
         )
-
-    @pytest.mark.asyncio
-    async def change_detail_work_queue_2xx_status_test(self, intermapper_monitor):
-        serial_number = "VC1234567"
-        ticket_id = 12345
-        is_piab = True
-        event = "example"
-        target_queue = ForwardQueues.HNOC.value
-        slack_message = (
-            f"Detail of ticket {ticket_id} related to serial {serial_number}"
-            f" was successfully forwarded to {target_queue} queue!"
-        )
-        change_queue_ticket_response = {
-            "body": "ok",
-            "status": 200,
-        }
-        intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
-        intermapper_monitor._bruin_repository.change_detail_work_queue = AsyncMock(
-            return_value=change_queue_ticket_response
-        )
-        intermapper_monitor._bruin_repository.send_forward_email_milestone_notification = AsyncMock()
-        next_run_time = CURRENT_DATETIME
-        datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=next_run_time)
-
-        with patch.object(intermapper_monitor_module, "datetime", new=datetime_mock):
-            with patch.object(intermapper_monitor_module, "timezone", new=Mock()):
-                await intermapper_monitor.change_detail_work_queue(
-                    ticket_id, serial_number, target_queue, is_piab, event
-                )
-
-        intermapper_monitor._bruin_repository.change_detail_work_queue.assert_called_once_with(
-            serial_number=serial_number, ticket_id=ticket_id, task_result=target_queue
-        )
-        intermapper_monitor._notifications_repository.send_slack_message.assert_awaited_with(slack_message)
-
-    @pytest.mark.asyncio
-    async def change_detail_work_queue_4xx_status_test(self, intermapper_monitor):
-        serial_number = "VC1234567"
-        ticket_id = 12345
-        is_piab = True
-        event = "example"
-        target_queue = ForwardQueues.HNOC.value
-        change_queue_ticket_response = {
-            "body": "ko",
-            "status": 400,
-        }
-        intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
-        intermapper_monitor._bruin_repository.change_detail_work_queue = AsyncMock(
-            return_value=change_queue_ticket_response
-        )
-        next_run_time = CURRENT_DATETIME
-        datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=next_run_time)
-
-        with patch.object(intermapper_monitor_module, "datetime", new=datetime_mock):
-            with patch.object(intermapper_monitor_module, "timezone", new=Mock()):
-                await intermapper_monitor.change_detail_work_queue(
-                    ticket_id, serial_number, target_queue, is_piab, event
-                )
-
-        intermapper_monitor._bruin_repository.change_detail_work_queue.assert_called_once_with(
-            serial_number=serial_number, ticket_id=ticket_id, task_result=target_queue
-        )
-        intermapper_monitor._notifications_repository.send_slack_message.assert_not_awaited()
-
-    @pytest.mark.asyncio
-    async def forward_ticket_to_queue_test(self, intermapper_monitor):
-        serial_number = "VC1234567"
-        ticket_id = 12345
-        target_queue = ForwardQueues.HNOC.value
-        is_piab = True
-        event = "example"
-        change_detail_work_queue_response = {"body": "Success", "status": 200}
-        intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
-        intermapper_monitor._bruin_repository.change_detail_work_queue = AsyncMock(
-            return_value=change_detail_work_queue_response
-        )
-
-        await intermapper_monitor.forward_ticket_to_queue(
-            ticket_id,
-            serial_number,
-            target_queue,
-            is_piab,
-            event,
-        )
-
-        intermapper_monitor._bruin_repository.change_detail_work_queue.assert_awaited_once_with(
-            serial_number=serial_number, ticket_id=ticket_id, task_result=target_queue
-        )
-        intermapper_monitor._notifications_repository.send_slack_message.assert_awaited()
-
-    @pytest.mark.asyncio
-    async def forward_ticket_to_queue_non_2xx_change_work_queue_test(self, intermapper_monitor):
-        serial_number = "VC1234567"
-        ticket_id = 12345
-        target_queue = ForwardQueues.HNOC.value
-        is_piab = True
-        event = "example"
-        change_detail_work_queue_response = {"body": "Failed", "status": 400}
-        intermapper_monitor._notifications_repository.send_slack_message = AsyncMock()
-        intermapper_monitor._bruin_repository.change_detail_work_queue = AsyncMock(
-            return_value=change_detail_work_queue_response
-        )
-
-        await intermapper_monitor.forward_ticket_to_queue(
-            ticket_id,
-            serial_number,
-            target_queue,
-            is_piab,
-            event,
-        )
-
-        intermapper_monitor._bruin_repository.change_detail_work_queue.assert_awaited_once_with(
-            serial_number=serial_number,
-            ticket_id=ticket_id,
-            task_result=target_queue,
-        )
-        intermapper_monitor._notifications_repository.send_slack_message.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def autoresolve_ticket_remove_pendings_jobs_test(self, intermapper_monitor):
@@ -2647,6 +2525,9 @@ class TestInterMapperMonitor:
         )
 
         append_intermapper_up_response = {"body": "OK", "status": 200}
+        task_type = TaskTypes.TICKET_FORWARDS
+        task_key = f"{outage_ticket_1_id}-{serial_number_1}-{ForwardQueues.IPA.name}"
+
         intermapper_monitor._bruin_repository.get_ticket_basic_info = AsyncMock(return_value=outage_ticket_response)
         intermapper_monitor._bruin_repository.get_tickets = AsyncMock(return_value=outage_ticket_response)
         intermapper_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
@@ -2661,12 +2542,6 @@ class TestInterMapperMonitor:
         intermapper_monitor._was_last_outage_detected_recently = Mock(return_value=True)
         intermapper_monitor._is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
         intermapper_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
-        target_queue = ForwardQueues.IPA.value.replace(" ", "_")
-        ipa_job_id = FORWARD_TICKET_TO_QUEUE_JOB_ID.format(
-            ticket_id=outage_ticket_1_id, serial_number=serial_number_1, target_queue=target_queue
-        )
-        intermapper_monitor._scheduler.get_job = Mock(side_effect=[None, ipa_job_id])
-        intermapper_monitor._scheduler.remove_job = Mock(return_value=True)
 
         with config_mock:
             response = await intermapper_monitor._autoresolve_ticket(serial_number_1, client_id, parsed_email_dict)
@@ -2691,5 +2566,4 @@ class TestInterMapperMonitor:
         )
         intermapper_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(slack_message)
         assert response is True
-        intermapper_monitor._scheduler.get_job.assert_called_with(ipa_job_id)
-        intermapper_monitor._scheduler.remove_job.assert_called_once_with(ipa_job_id)
+        intermapper_monitor._task_dispatcher_client.clear_task.assert_called_with(task_type, task_key)

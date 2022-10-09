@@ -3,6 +3,7 @@ from unittest.mock import Mock
 import pytest
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from framework.nats.client import Client as NatsClient
+from framework.storage.task_dispatcher_client import TaskDispatcherClient
 
 from application.actions.intermapper_monitoring import InterMapperMonitor
 from application.repositories.bruin_repository import BruinRepository
@@ -28,6 +29,11 @@ def nats_client():
 @pytest.fixture(scope="function")
 def scheduler():
     return Mock(spec_set=AsyncIOScheduler)
+
+
+@pytest.fixture(scope="function")
+def task_dispatcher_client():
+    return Mock(spec_set=TaskDispatcherClient)
 
 
 @pytest.fixture(scope="function")
@@ -84,6 +90,7 @@ def dri_repository(nats_client, notifications_repository):
 def intermapper_monitor(
     nats_client,
     scheduler,
+    task_dispatcher_client,
     bruin_repository,
     notifications_repository,
     email_repository,
@@ -93,6 +100,7 @@ def intermapper_monitor(
 ):
     instance = InterMapperMonitor(
         scheduler=scheduler,
+        task_dispatcher_client=task_dispatcher_client,
         config=config,
         bruin_repository=bruin_repository,
         notifications_repository=notifications_repository,

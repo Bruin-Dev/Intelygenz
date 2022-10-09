@@ -8,16 +8,15 @@ from typing import Callable, Dict, List, Optional
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from dateutil.parser import parse
+from framework.storage.task_dispatcher_client import TaskTypes
 from pytz import timezone, utc
 from pyzipcode import ZipCodeDatabase
-from tenacity import retry, stop_after_delay, wait_exponential
 
 from application import (
     AUTORESOLVE_REGEX,
     CONDITION_REGEX,
     EVENT_REGEX,
     EVENT_TIME_REGEX,
-    FORWARD_TICKET_TO_QUEUE_JOB_ID,
     REOPEN_NOTE_REGEX,
     TRIAGE_NOTE_REGEX,
     ZIP_CODE_REGEX,
@@ -31,6 +30,7 @@ class InterMapperMonitor:
     def __init__(
         self,
         scheduler,
+        task_dispatcher_client,
         config,
         utils_repository,
         metrics_repository,
@@ -40,6 +40,7 @@ class InterMapperMonitor:
         dri_repository,
     ):
         self._scheduler = scheduler
+        self._task_dispatcher_client = task_dispatcher_client
         self._config = config
         self._utils_repository = utils_repository
         self._metrics_repository = metrics_repository
@@ -386,8 +387,8 @@ class InterMapperMonitor:
                 f"Detail {ticket_detail_id} (service number {service_number}) of ticket {ticket_id} was autoresolved!"
             )
 
-            self._remove_job_for_autoresolved_task(ForwardQueues.HNOC.value, ticket_id, service_number)
-            self._remove_job_for_autoresolved_task(ForwardQueues.IPA.value, ticket_id, service_number)
+            self._remove_job_for_autoresolved_task(ForwardQueues.HNOC, ticket_id, service_number)
+            self._remove_job_for_autoresolved_task(ForwardQueues.IPA, ticket_id, service_number)
         return True
 
     async def _create_outage_ticket(self, service_number, client_id, parsed_email_dict, dri_parameters):
@@ -481,12 +482,12 @@ class InterMapperMonitor:
             if self._should_forward_to_ipa_queue(parsed_email_dict) and outage_ticket_status in (200, 471, 472, 473):
                 ipa_forward_time = self._config.INTERMAPPER_CONFIG["forward_to_ipa_job_interval"]
                 self._schedule_forward_to_queue(
-                    ticket_id, service_number, ForwardQueues.IPA.value, ipa_forward_time, is_piab, event
+                    ticket_id, service_number, ForwardQueues.IPA, ipa_forward_time, is_piab, event
                 )
 
                 hnoc_forward_time = self._config.INTERMAPPER_CONFIG["forward_to_hnoc_job_interval"]
                 self._schedule_forward_to_queue(
-                    ticket_id, service_number, ForwardQueues.HNOC.value, hnoc_forward_time, is_piab, event
+                    ticket_id, service_number, ForwardQueues.HNOC, hnoc_forward_time, is_piab, event
                 )
             return True
 
@@ -676,120 +677,43 @@ class InterMapperMonitor:
         self,
         ticket_id: int,
         serial_number: str,
-        target_queue: str,
+        target_queue: ForwardQueues,
         forward_time: float,
         is_piab: bool,
         event: str,
     ):
-        tz = timezone(self._config.TIMEZONE)
-        current_datetime = datetime.now(tz)
-        forward_task_run_date = current_datetime + timedelta(seconds=forward_time)
+        current_datetime = datetime.utcnow()
+        forward_time = forward_time / 60
+        forward_task_run_date = current_datetime + timedelta(minutes=forward_time)
 
         logger.info(
-            f"Scheduling {target_queue} queue forwarding for ticket_id {ticket_id} and service number {serial_number}"
-            f" to happen at timestamp: {forward_task_run_date}"
+            f"Scheduling forward to {target_queue.value} for ticket {ticket_id} and serial number {serial_number} "
+            f"to happen in {forward_time} minutes"
         )
 
-        _target_queue = target_queue.replace(" ", "_")
-        job_id = FORWARD_TICKET_TO_QUEUE_JOB_ID.format(
-            ticket_id=ticket_id, serial_number=serial_number, target_queue=_target_queue
-        )
-        self._scheduler.add_job(
-            self.forward_ticket_to_queue,
-            "date",
-            kwargs={
+        self._task_dispatcher_client.schedule_task(
+            date=forward_task_run_date,
+            task_type=TaskTypes.TICKET_FORWARDS,
+            task_key=f"{ticket_id}-{serial_number}-{target_queue.name}",
+            task_data={
+                "service": self._config.LOG_CONFIG["name"],
                 "ticket_id": ticket_id,
                 "serial_number": serial_number,
-                "target_queue": target_queue,
-                "is_piab": is_piab,
-                "event": event,
+                "target_queue": target_queue.value,
+                "metrics_labels": {
+                    "event": event,
+                    "is_piab": is_piab,
+                    "target_queue": target_queue.value,
+                },
             },
-            run_date=forward_task_run_date,
-            replace_existing=False,
-            misfire_grace_time=9999,
-            coalesce=True,
-            id=job_id,
         )
 
-    async def forward_ticket_to_queue(
-        self,
-        ticket_id: int,
-        serial_number: str,
-        target_queue: str,
-        is_piab: bool,
-        event: str,
-    ):
-        @retry(
-            wait=wait_exponential(
-                multiplier=self._config.NATS_CONFIG["multiplier"], min=self._config.NATS_CONFIG["min"]
-            ),
-            stop=stop_after_delay(self._config.NATS_CONFIG["stop_delay"]),
-        )
-        async def forward_ticket_to_queue():
+    def _remove_job_for_autoresolved_task(self, target_queue: ForwardQueues, ticket_id: int, serial_number: str):
+        task_type = TaskTypes.TICKET_FORWARDS
+        task_key = f"{ticket_id}-{serial_number}-{target_queue.name}"
+
+        if self._task_dispatcher_client.clear_task(task_type, task_key):
             logger.info(
-                f"Checking if ticket_id {ticket_id} for serial {serial_number} is resolved before "
-                f"attempting to forward to {target_queue} queue..."
+                f"Removed scheduled task to forward to {target_queue.value} "
+                f"for autoresolved ticket {ticket_id} and serial number {serial_number}"
             )
-
-            await self.change_detail_work_queue(
-                ticket_id=ticket_id,
-                serial_number=serial_number,
-                target_queue=target_queue,
-                is_piab=is_piab,
-                event=event,
-            )
-
-        try:
-            await forward_ticket_to_queue()
-        except Exception as e:
-            logger.error(
-                f"An error occurred while trying to forward ticket_id {ticket_id} for serial {serial_number} to"
-                f" {target_queue} queue -> {e}"
-            )
-
-    async def change_detail_work_queue(
-        self, ticket_id: int, serial_number: str, target_queue: str, is_piab: bool, event: str
-    ):
-        change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
-            serial_number=serial_number, ticket_id=ticket_id, task_result=target_queue
-        )
-
-        if change_detail_work_queue_response["status"] in range(200, 300):
-            logger.info(
-                f"Successfully forwarded ticket_id {ticket_id} and serial {serial_number} to {target_queue} queue."
-            )
-            self._metrics_repository.increment_tasks_forwarded(event=event, is_piab=is_piab, target_queue=target_queue)
-
-            slack_message = (
-                f"Detail of ticket {ticket_id} related to serial {serial_number} was successfully forwarded "
-                f"to {target_queue} queue!"
-            )
-            await self._notifications_repository.send_slack_message(slack_message)
-
-            if target_queue == ForwardQueues.HNOC.value:
-                email_response = await self._bruin_repository.send_forward_email_milestone_notification(
-                    ticket_id, serial_number
-                )
-                if email_response["status"] not in range(200, 300):
-                    logger.error(
-                        f"Forward email related to service number {serial_number} could not be sent for ticket "
-                        f"{ticket_id}!"
-                    )
-        else:
-            logger.error(
-                f"Failed to forward ticket_id {ticket_id} and "
-                f"serial {serial_number} to {target_queue} queue due to bruin "
-                f"returning {change_detail_work_queue_response} when attempting to forward to {target_queue} queue."
-            )
-
-    def _remove_job_for_autoresolved_task(self, target_queue: str, ticket_id: int, serial_number: str):
-        _target_queue = target_queue.replace(" ", "_")
-        job_id = FORWARD_TICKET_TO_QUEUE_JOB_ID.format(
-            ticket_id=ticket_id, serial_number=serial_number, target_queue=_target_queue
-        )
-        if self._scheduler.get_job(job_id):
-            logger.info(
-                f"Found job to forward to {target_queue} scheduled for autoresolved ticket {ticket_id}"
-                f" related to serial number {serial_number}! Removing..."
-            )
-            self._scheduler.remove_job(job_id)

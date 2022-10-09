@@ -12,10 +12,13 @@ from framework.logging.handlers import Stdout as StdoutHandler
 from framework.nats.client import Client
 from framework.nats.models import Connection
 from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
+from framework.storage.task_dispatcher_client import TaskDispatcherClient, TaskTypes
 from prometheus_client import start_http_server
 from redis.client import Redis
 
+from application.actions.handle_ticket_forward import HandleTicketForward
 from application.actions.intermapper_monitoring import InterMapperMonitor
+from application.models import subscriptions
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.dri_repository import DRIRepository
 from application.repositories.email_repository import EmailRepository
@@ -71,6 +74,7 @@ class Container:
         # REDIS
         redis = Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         redis.ping()
+        self._task_dispatcher_client = TaskDispatcherClient(config, redis)
 
         # NATS
         tmp_redis_storage = RedisStorage(storage_client=redis)
@@ -89,6 +93,7 @@ class Container:
         # ACTIONS
         self._intermapper_monitoring = InterMapperMonitor(
             self._scheduler,
+            self._task_dispatcher_client,
             config,
             self._utils_repository,
             self._metrics_repository,
@@ -98,6 +103,11 @@ class Container:
             self._dri_repository,
         )
 
+    async def _init_subscriptions(self):
+        # NOTE: Using dataclasses::asdict() throws a pickle error, so we need to use <dataclass>.__dict__ instead
+        cb = HandleTicketForward(self._metrics_repository, self._bruin_repository)
+        await self._nats_client.subscribe(**subscriptions.HandleTicketForwardSuccess(cb=cb.success).__dict__)
+
     async def run(self):
         # Prometheus
         self._start_prometheus_metrics_server()
@@ -105,6 +115,7 @@ class Container:
         # Start NATS connection
         conn = Connection(servers=config.NATS_CONFIG["servers"])
         await self._nats_client.connect(**asdict(conn))
+        await self._init_subscriptions()
 
         # Prepare scheduler jobs
         await self._intermapper_monitoring.start_intermapper_outage_monitoring(exec_on_start=True)
