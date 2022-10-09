@@ -519,10 +519,11 @@ class OutageMonitor:
 
             task_type = TaskTypes.TICKET_FORWARDS
             task_key = f"{outage_ticket_id}-{serial_number}-{ForwardQueues.HNOC.name}"
+
             if self._task_dispatcher_client.clear_task(task_type, task_key):
                 self._logger.info(
-                    f"Removed scheduled task to forward to HNOC for autoresolved ticket {outage_ticket_id} "
-                    f"related to serial number {serial_number}"
+                    f"Removed scheduled task to forward to {ForwardQueues.HNOC.value} "
+                    f"for autoresolved ticket {outage_ticket_id} and serial number {serial_number}"
                 )
 
     def _was_ticket_created_by_automation_engine(self, ticket: dict) -> bool:
@@ -669,7 +670,7 @@ class OutageMonitor:
         forward_task_run_date = current_datetime + timedelta(minutes=forward_time)
 
         self._logger.info(
-            f"Scheduling HNOC forward for ticket {ticket_id} and serial number {serial_number} "
+            f"Scheduling forward to {target_queue.value} for ticket {ticket_id} and serial number {serial_number} "
             f"to happen in {forward_time} minutes"
         )
 

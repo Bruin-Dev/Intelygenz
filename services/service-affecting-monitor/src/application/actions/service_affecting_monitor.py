@@ -431,10 +431,11 @@ class ServiceAffectingMonitor:
 
                 task_type = TaskTypes.TICKET_FORWARDS
                 task_key = f"{affecting_ticket_id}-{serial_number}-{ForwardQueues.HNOC.name}"
+
                 if self._task_dispatcher_client.clear_task(task_type, task_key):
                     self._logger.info(
-                        f"Removed scheduled task to forward to HNOC for autoresolved ticket {affecting_ticket_id} "
-                        f"related to serial number {serial_number}"
+                        f"Removed scheduled task to forward to {ForwardQueues.HNOC.value} "
+                        f"for autoresolved ticket {affecting_ticket_id} and serial number {serial_number}"
                     )
 
             self._logger.info(f"Finished autoresolve for edge {serial_number}!")
@@ -1048,7 +1049,7 @@ class ServiceAffectingMonitor:
         link_type = self._get_link_type(interface, links_configuration)
 
         self._logger.info(
-            f"Scheduling HNOC forward for ticket {ticket_id} and serial number {serial_number} "
+            f"Scheduling forward to {target_queue.value} for ticket {ticket_id} and serial number {serial_number} "
             f"to happen in {forward_time} minutes"
         )
 
