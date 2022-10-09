@@ -2597,7 +2597,7 @@ class TestServiceAffectingMonitor:
         link_type = "WIRED"
         link_info = make_structured_metrics_object_with_cache_and_contact_info()
         trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
-        target_queue = ForwardQueues.HNOC.value
+        target_queue = ForwardQueues.HNOC
 
         current_datetime = frozen_datetime.now()
         autoresolve_config = service_affecting_monitor._config.MONITOR_CONFIG["autoresolve"]
@@ -2621,18 +2621,18 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._task_dispatcher_client.schedule_task.assert_called_once_with(
             date=forward_task_run_date,
             task_type=TaskTypes.TICKET_FORWARDS,
-            task_key=f"{ticket_id}-{serial_number}",
+            task_key=f"{ticket_id}-{serial_number}-{target_queue.name}",
             task_data={
                 "service": testconfig.LOG_CONFIG["name"],
                 "ticket_id": ticket_id,
                 "serial_number": serial_number,
-                "target_queue": target_queue,
+                "target_queue": target_queue.value,
                 "metrics_labels": {
                     "client": "",
                     "trouble": trouble.value,
                     "has_byob": is_byob,
                     "link_type": link_type,
-                    "target_queue": target_queue,
+                    "target_queue": target_queue.value,
                 },
             },
         )
@@ -3417,7 +3417,7 @@ class TestServiceAffectingMonitor:
         notes = make_list_of_ticket_notes()
         ticket_details = make_ticket_details(detail_items=detail_items, notes=notes)
         task_type = TaskTypes.TICKET_FORWARDS
-        task_key = f"{ticket_id}-{serial_number}"
+        task_key = f"{ticket_id}-{serial_number}-{ForwardQueues.HNOC.name}"
 
         service_affecting_monitor._get_is_byob_from_affecting_trouble_note.return_value = True
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.return_value = make_rpc_response(
@@ -3507,7 +3507,7 @@ class TestServiceAffectingMonitor:
         notes = make_list_of_ticket_notes(note_1)
         ticket_details = make_ticket_details(detail_items=detail_items, notes=notes)
         task_type = TaskTypes.TICKET_FORWARDS
-        task_key = f"{ticket_id}-{serial_number}"
+        task_key = f"{ticket_id}-{serial_number}-{ForwardQueues.HNOC.name}"
 
         service_affecting_monitor._get_is_byob_from_affecting_trouble_note.return_value = True
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.return_value = make_rpc_response(
@@ -3604,7 +3604,7 @@ class TestServiceAffectingMonitor:
         notes = make_list_of_ticket_notes(note_1, note_2, note_3)
         ticket_details = make_ticket_details(detail_items=detail_items, notes=notes)
         task_type = TaskTypes.TICKET_FORWARDS
-        task_key = f"{ticket_id}-{serial_number}"
+        task_key = f"{ticket_id}-{serial_number}-{ForwardQueues.HNOC.name}"
 
         service_affecting_monitor._get_is_byob_from_affecting_trouble_note.return_value = True
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.return_value = make_rpc_response(
@@ -3913,7 +3913,7 @@ class TestServiceAffectingMonitor:
         notes = make_list_of_ticket_notes()
         ticket_details = make_ticket_details(detail_items=detail_items, notes=notes)
         task_type = TaskTypes.TICKET_FORWARDS
-        task_key = f"{ticket_id}-{serial_number}"
+        task_key = f"{ticket_id}-{serial_number}-{ForwardQueues.HNOC.name}"
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.return_value = make_rpc_response(
             body=open_affecting_tickets,
@@ -4004,7 +4004,7 @@ class TestServiceAffectingMonitor:
         notes = make_list_of_ticket_notes()
         ticket_details = make_ticket_details(detail_items=detail_items, notes=notes)
         task_type = TaskTypes.TICKET_FORWARDS
-        task_key = f"{ticket_id}-{serial_number}"
+        task_key = f"{ticket_id}-{serial_number}-{ForwardQueues.HNOC.name}"
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.return_value = make_rpc_response(
             body=open_affecting_tickets,

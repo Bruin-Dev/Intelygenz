@@ -430,7 +430,7 @@ class ServiceAffectingMonitor:
                 )
 
                 task_type = TaskTypes.TICKET_FORWARDS
-                task_key = f"{affecting_ticket_id}-{serial_number}"
+                task_key = f"{affecting_ticket_id}-{serial_number}-{ForwardQueues.HNOC.name}"
                 if self._task_dispatcher_client.clear_task(task_type, task_key):
                     self._logger.info(
                         f"Removed scheduled task to forward to HNOC for autoresolved ticket {affecting_ticket_id} "
@@ -1035,7 +1035,7 @@ class ServiceAffectingMonitor:
         return not self._is_link_label_blacklisted_from_hnoc(link_label)
 
     def _schedule_forward_to_hnoc_queue(self, forward_time, ticket_id, serial_number, link_data, trouble):
-        target_queue = ForwardQueues.HNOC.value
+        target_queue = ForwardQueues.HNOC
         current_datetime = datetime.utcnow()
         forward_task_run_date = current_datetime + timedelta(minutes=forward_time)
 
@@ -1055,18 +1055,18 @@ class ServiceAffectingMonitor:
         self._task_dispatcher_client.schedule_task(
             date=forward_task_run_date,
             task_type=TaskTypes.TICKET_FORWARDS,
-            task_key=f"{ticket_id}-{serial_number}",
+            task_key=f"{ticket_id}-{serial_number}-{target_queue.name}",
             task_data={
                 "service": self._config.LOG_CONFIG["name"],
                 "ticket_id": ticket_id,
                 "serial_number": serial_number,
-                "target_queue": target_queue,
+                "target_queue": target_queue.value,
                 "metrics_labels": {
                     "client": client_name,
                     "trouble": trouble.value,
                     "has_byob": is_byob,
                     "link_type": link_type,
-                    "target_queue": target_queue,
+                    "target_queue": target_queue.value,
                 },
             },
         )
