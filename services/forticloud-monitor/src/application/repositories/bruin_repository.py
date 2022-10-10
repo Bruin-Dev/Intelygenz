@@ -35,7 +35,7 @@ class BruinRepository:
     async def post_repair_ticket(self, device_id: DeviceId) -> CreatedTicket:
         log.debug(f"post_repair_ticket(device={device_id})")
         request_body = PostRepairTicketBody.build_for(device_id, DESCRIPTION)
-        request = BruinRequest(method="POST", path="/api/Ticket/repair", json=request_body.json())
+        request = BruinRequest(method="POST", path="/api/Ticket/repair", json=request_body.dict())
         response = await self.bruin_client.send(request)
         log.debug(f"bruin_client.send({request})={response}")
 
@@ -63,7 +63,7 @@ class BruinRepository:
         request = BruinRequest(
             method="POST",
             path=f"/api/Ticket/{note.ticket_id}/notes",
-            json=request_body.json(),
+            json=request_body.dict(),
         )
         response = await self.bruin_client.send(request)
         log.debug(f"bruin_client.send({request})={response}")

@@ -132,7 +132,7 @@ async def ap_responses_are_properly_parsed_test(
         ("disconnected", DeviceStatus.OFFLINE),
         ("Disconnected", DeviceStatus.OFFLINE),
     ],
-    ids=["connected", "Connected", "disconnected", "Disconnected"],
+    ids=["connected", "Connected", "connecting", "Connecting", "disconnected", "Disconnected"],
 )
 async def ap_statuses_are_properly_parsed_test(
     any_forticloud_repository,
@@ -320,7 +320,7 @@ async def switch_responses_are_properly_parsed_test(
         ("disconnected", DeviceStatus.OFFLINE),
         ("Disconnected", DeviceStatus.OFFLINE),
     ],
-    ids=["connected", "offline"],
+    ids=["online", "connected", "Connected", "connecting", "Connecting", "offline", "disconnected", "Disconnected"],
 )
 async def switch_statuses_are_properly_parsed_test(
     any_forticloud_repository,

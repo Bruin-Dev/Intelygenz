@@ -23,11 +23,11 @@ async def repair_tickets_are_properly_posted_test(any_bruin_repository, any_resp
         BruinRequest(
             method="POST",
             path="/api/Ticket/repair",
-            json="{"
-            '"ClientID": 1, '
-            '"WTNs": ["any_service_number"], '
-            '"RequestDescription": "MetTel\'s IPA -- Service Outage Trouble"'
-            "}",
+            json={
+                "ClientID": 1,
+                "WTNs": ["any_service_number"],
+                "RequestDescription": "MetTel's IPA -- Service Outage Trouble",
+            },
         )
     )
 

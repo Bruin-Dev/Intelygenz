@@ -89,7 +89,7 @@ FORTICLOUD_ACCOUNT = parameters["common"]["forticloud"]["account"]
 
 # Forticloud cache variables
 FORTICLOUD_CACHE__TIME_TO_REFRESH_INTERVAL = parameters["common"]["forticloud-cache"]["time-to-refresh-interval"]
-FORTICLOUD_CACHE__MONITORABLE_MANAGEMENT_STATUSES = parameters["common"]["forticloud-cache"]["monitorable-management-status"]
+FORTICLOUD_CACHE__MONITORABLE_MANAGEMENT_STATUSES = parameters["common"]["forticloud-cache"]["monitorable-management-statuses"]
 
 # Forticloud Poller variables
 FORTICLOUD_POLLER__MONITORING_JOB_INTERVAL = parameters["common"]["forticloud-poller"]["monitoring-job-interval"]

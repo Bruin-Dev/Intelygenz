@@ -17,9 +17,9 @@ resource "aws_ssm_parameter" "parameter-forticloud-cache-time-to-refresh-interva
         note = "can be updated from the parameter store dashboard"
     })
 }
-resource "aws_ssm_parameter" "parameter-forticloud-cache-monitorable-management-status" {
+resource "aws_ssm_parameter" "parameter-forticloud-cache-monitorable-management-statuses" {
     count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
-    name        = "/automation-engine/common/forticloud-cache/monitorable-management-status"
+    name        = "/automation-engine/common/forticloud-cache/monitorable-management-statuses"
     description = "Managements statuses to store devices in cache "
     type        = "SecureString"
     value       = "-"

@@ -184,7 +184,6 @@ def any_request():
         method="GET",
         query_params={"any_param": "any_value"},
         headers={"any_header": "any_value"},
-        json='"any_json"',
     )
 
 

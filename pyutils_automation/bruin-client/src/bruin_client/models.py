@@ -29,7 +29,7 @@ class BruinRequest:
     method: str
     query_params: Dict[str, str] = field(default_factory=dict)
     headers: Dict[str, str] = field(default_factory=dict)
-    json: Optional[str] = None
+    json: Optional[Dict] = None
 
 
 @dataclass
