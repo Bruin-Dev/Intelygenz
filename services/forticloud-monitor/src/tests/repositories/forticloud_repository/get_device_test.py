@@ -34,7 +34,11 @@ async def ap_devices_are_properly_queried_test(any_forticloud_repository, any_ap
     await forticloud_repository.get_device(any_device_id)
 
     # then
-    get_device_info.assert_awaited_once_with(any_device_id.network_id, "access_points", f"{any_device_id.id}/")
+    get_device_info.assert_awaited_once_with(
+        network_id=any_device_id.network_id,
+        device="access_points",
+        serial_number=f"{any_device_id.id}/",
+    )
 
 
 @pytest.mark.parametrize(
@@ -188,7 +192,11 @@ async def switch_devices_are_properly_queried_test(any_forticloud_repository, an
     await forticloud_repository.get_device(any_device_id)
 
     # then
-    get_device_info.assert_awaited_once_with(any_device_id.network_id, "switches", f"{any_device_id.id}/")
+    get_device_info.assert_awaited_once_with(
+        network_id=any_device_id.network_id,
+        device="switches",
+        serial_number=f"{any_device_id.id}/",
+    )
 
 
 @pytest.mark.parametrize(
@@ -384,64 +392,74 @@ async def unexpected_forticloud_statuses_raise_a_proper_exception_test(
 
 
 @pytest.mark.parametrize(
-    "forticloud_response",
+    ["forticloud_response", "expected_exception"],
     [
-        "non_json_response",
-        {},
-        {"any_unexpected_field": "any_value"},
-        {"status": 200, "body": "non_dict_body"},
-        {"status": "any_string", "body": {}},
+        ("non_json_response", UnexpectedResponseError),
+        ({}, UnexpectedResponseError),
+        ({"any_unexpected_field": "any_value"}, UnexpectedResponseError),
+        ({"status": "any_string", "body": {}}, UnexpectedResponseError),
+        ({"status": 200, "body": "non_dict_body"}, UnknownStatusError),
+        ({"status": 200, "body": {}}, UnknownStatusError),
+        ({"status": 200, "body": []}, UnknownStatusError),
     ],
     ids=[
-        "string response",
-        "empty response",
-        "unexpected fields",
-        "wrong body type",
-        "wrong status type",
+        "string_response",
+        "empty_response",
+        "unexpected_fields",
+        "wrong_status_type",
+        "wrong_body_type",
+        "empty_dict_body",
+        "empty_list_body",
     ],
 )
 async def unparseable_ap_responses_raise_a_proper_exception_test(
     any_forticloud_repository,
     any_device_id,
     forticloud_response,
+    expected_exception,
 ):
     # given
     any_device_id.type = DeviceType.AP
     forticloud_repository = any_forticloud_repository(get_device_info=AsyncMock(return_value=forticloud_response))
 
     # then
-    with pytest.raises(UnexpectedResponseError):
+    with pytest.raises(expected_exception):
         await forticloud_repository.get_device(any_device_id)
 
 
 @pytest.mark.parametrize(
-    "forticloud_response",
+    ["forticloud_response", "expected_exception"],
     [
-        "non_json_response",
-        {},
-        {"any_unexpected_field": "any_value"},
-        {"status": 200, "body": "non_dict_body"},
-        {"status": "any_string", "body": {}},
+        ("non_json_response", UnexpectedResponseError),
+        ({}, UnexpectedResponseError),
+        ({"any_unexpected_field": "any_value"}, UnexpectedResponseError),
+        ({"status": "any_string", "body": {}}, UnexpectedResponseError),
+        ({"status": 200, "body": "non_dict_body"}, UnknownStatusError),
+        ({"status": 200, "body": {}}, UnknownStatusError),
+        ({"status": 200, "body": []}, UnknownStatusError),
     ],
     ids=[
         "string_response",
         "empty_response",
         "unexpected_fields",
-        "wrong_body_type",
         "wrong_status_type",
+        "wrong_body_type",
+        "empty_dict_body",
+        "empty_list_body",
     ],
 )
 async def unparseable_switch_responses_raise_a_proper_exception_test(
     any_forticloud_repository,
     any_device_id,
     forticloud_response,
+    expected_exception,
 ):
     # given
     any_device_id.type = DeviceType.SWITCH
     forticloud_repository = any_forticloud_repository(get_device_info=AsyncMock(return_value=forticloud_response))
 
     # then
-    with pytest.raises(UnexpectedResponseError):
+    with pytest.raises(expected_exception):
         await forticloud_repository.get_device(any_device_id)
 
 

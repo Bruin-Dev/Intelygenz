@@ -20,21 +20,14 @@ class APResponseResult(BaseModel):
 
 
 class APResponseBody(BaseModel):
-    result: APResponseResult
-
-    @validator("result", pre=True)
-    def validate_result(cls, v):
-        try:
-            return APResponseResult.parse_obj(v)
-        except ValidationError:
-            return APResponseResult()
+    result: APResponseResult = Field(default_factory=APResponseResult)
 
 
 class SwitchResponseConnStatus(BaseModel):
     status: Optional[str]
 
     @validator("status", pre=True)
-    def validate_status(cls, v):
+    def validate_strings(cls, v):
         return None if not isinstance(v, str) else v
 
 
@@ -51,28 +44,14 @@ class SwitchResponseSystemStatus(BaseModel):
 class SwitchResponseSystem(BaseModel):
     status: SwitchResponseSystemStatus = Field(default_factory=SwitchResponseSystemStatus)
 
-    @validator("status", pre=True)
-    def validate_status(cls, v):
-        try:
-            return SwitchResponseSystemStatus.parse_obj(v)
-        except ValidationError:
-            return SwitchResponseSystemStatus()
-
 
 class SwitchResponseBody(BaseModel):
     conn_status: SwitchResponseConnStatus = Field(default_factory=SwitchResponseConnStatus)
     system: SwitchResponseSystem = Field(default_factory=SwitchResponseSystem)
-
-    @validator("conn_status", pre=True)
-    def validate_conn_status(cls, v):
-        try:
-            return SwitchResponseConnStatus.parse_obj(v)
-        except ValidationError:
-            return SwitchResponseConnStatus()
 
     @validator("system", pre=True)
     def validate_system(cls, v):
         try:
             return SwitchResponseSystem.parse_obj(v)
         except ValidationError:
-            return SwitchResponseSystem(status=SwitchResponseSystemStatus())
+            return SwitchResponseSystem()
