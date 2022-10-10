@@ -6,13 +6,15 @@ authors = ["Intelygenz"]
 
 [tool.poetry.dependencies]
 python = "3.10.4"
-aiohttp = "3.8.0"
+aiohttp = "3.8.3"
 APScheduler = "3.9.1"
 prometheus_client = "0.6.0"
 redis = "3.3.11"
 forticloud_client = {path = "../../pyutils_automation/clients/forticloud", develop = false}
 framework = {path = "../../pyutils_automation/py310", develop = false}
 pydantic = "1.9.0"
+tenacity = "8.0.1"
+forticloud-client = {path = "../../pyutils_automation/clients/forticloud"}
 
 [tool.poetry.dev-dependencies]
 forticloud_client = {path = "../../pyutils_automation/clients/forticloud", develop = true}

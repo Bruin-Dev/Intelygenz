@@ -1,11 +1,13 @@
+from copy import deepcopy
 from unittest.mock import Mock
 
 import pytest
 from forticloud_client.client import ForticloudClient as ForticloudClientLibrary
+from tenacity import stop_after_attempt
 
 from application.actions.refresh_cache import RefreshCache
 from application.clients.bruin_client import BruinClient
-from application.clients.forticloud_client import ForticloudClient
+from application.clients.forticloud_client import DEFAULT_RETRY_CONFIG, ForticloudClient
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.cache_repository import CacheRepository
 from application.repositories.forticloud_repository import ForticloudRepository
@@ -34,8 +36,32 @@ def forticloud_client_library_instance():
 
 
 @pytest.fixture(scope="function")
-def forticloud_instance(forticloud_client_library_instance):
-    return ForticloudClient(forticloud_client=forticloud_client_library_instance)
+def forticloud_client_instance(forticloud_client_library_instance):
+    def builder(
+        ap_retry_stop=stop_after_attempt(1),
+        switch_retry_stop=stop_after_attempt(1),
+        network_retry_stop=stop_after_attempt(1),
+    ):
+        ap_retry_config = deepcopy(DEFAULT_RETRY_CONFIG)
+        ap_retry_config["stop"] = ap_retry_stop
+        del ap_retry_config["wait"]
+
+        switch_retry_config = deepcopy(DEFAULT_RETRY_CONFIG)
+        switch_retry_config["stop"] = switch_retry_stop
+        del switch_retry_config["wait"]
+
+        network_retry_config = deepcopy(DEFAULT_RETRY_CONFIG)
+        network_retry_config["stop"] = network_retry_stop
+        del network_retry_config["wait"]
+
+        return ForticloudClient(
+            forticloud_client=forticloud_client_library_instance,
+            ap_retry_config=ap_retry_config,
+            switch_retry_config=switch_retry_config,
+            network_retry_config=network_retry_config,
+        )
+
+    return builder
 
 
 @pytest.fixture(scope="function")
@@ -49,8 +75,8 @@ def bruin_repository_instance(bruin_client_instance):
 
 
 @pytest.fixture(scope="function")
-def forticloud_repository_instance(forticloud_instance):
-    return ForticloudRepository(forticloud_client=forticloud_instance)
+def forticloud_repository_instance(forticloud_client_instance):
+    return ForticloudRepository(forticloud_client=forticloud_client_instance)
 
 
 @pytest.fixture(scope="function")

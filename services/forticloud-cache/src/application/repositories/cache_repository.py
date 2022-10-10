@@ -46,10 +46,10 @@ class CacheRepository:
         return await self.get_devices_with_valid_management_status(list_of_switches_with_client_id)
 
     async def add_list_access_points_to_cache(self, list_of_access_points):
-        self.redis_repository.set_value_for_key(key="access_points", value=list_of_access_points)
+        await self.redis_repository.set_value_for_key(key="access_points", value=list_of_access_points)
 
     async def add_list_switches_to_cache(self, list_of_forticloud_switches):
-        self.redis_repository.set_value_for_key(key="switches", value=list_of_forticloud_switches)
+        await self.redis_repository.set_value_for_key(key="switches", value=list_of_forticloud_switches)
 
     async def get_devices_with_valid_management_status(self, list_of_devices):
         list_of_devices_with_valid_management_status = []
