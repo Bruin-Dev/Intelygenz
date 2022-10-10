@@ -2,11 +2,11 @@
 
 ## Date
 
-mm/dd/yyy
+mm/dd/yyyy
 
 ## State
 
-PROPOSED | ACCEPTED | REJECTED | OBSOLET | REPLACED
+PROPOSED | ACCEPTED | REJECTED | OUTDATED | REPLACED
 
 ## Context
 
