@@ -114,8 +114,8 @@ class TestSendBillingReport:
             end = expected_summary["dates"]["end"]
 
             assert "<!DOCTYPE html" in email_obj["html"]
-            assert f"<b>Generated</b>: {current}" in email_obj["html"]
-            assert f"<b>Period</b>: {start} - {end}" in email_obj["html"]
+            assert f"<strong>Generated</strong>: {current}" in email_obj["html"]
+            assert f"<strong>Period</strong>: {start} - {end}" in email_obj["html"]
 
             for r in mock_responses:
                 assert all(item["type"] in email_obj["html"] for item in r["items"])
