@@ -43,8 +43,6 @@ class DRIRepository:
                     f"Getting task_id from DRI..."
                 )
                 task_id_response = await self._get_task_id_from_dri(serial_number, parameter_set)
-                task_id_response["status"] = task_id_response["status"]
-                task_id_response["body"] = task_id_response["body"]
 
         return task_id_response
 

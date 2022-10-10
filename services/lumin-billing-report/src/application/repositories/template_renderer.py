@@ -14,7 +14,7 @@ class TemplateRenderer:
 
     def compose_email_object(self, summary: dict, data: List[dict], **opts) -> dict:
         loader = jinja2.FileSystemLoader(searchpath=".")
-        environ = jinja2.Environment(loader=loader)
+        environ = jinja2.Environment(loader=loader, autoescape=True)
 
         template_path = join("src/templates", opts.get("template", "lumin_billing_report.html"))
         logo = join("src/templates/images", opts.get("logo", "logo.png"))

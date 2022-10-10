@@ -21,7 +21,7 @@ class TemplateRepository:
 
         template = os.path.join("src", "templates", template_name)
         template_loader = jinja2.FileSystemLoader(searchpath=".")
-        template_env = jinja2.Environment(loader=template_loader)
+        template_env = jinja2.Environment(loader=template_loader, autoescape=True)
         template = template_env.get_template(template)
 
         if csv_report:

@@ -123,7 +123,7 @@ class CheckECSResources:
             if len(actual_clusters) > 0:
                 for element in actual_clusters:
                     clusters_arns.append(element)
-        except ValueError as e:
+        except ValueError:
             logging.error("Problem occurring with command execution for list ECS clusters")
         return clusters_arns
 

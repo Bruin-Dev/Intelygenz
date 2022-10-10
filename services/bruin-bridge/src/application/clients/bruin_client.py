@@ -10,6 +10,11 @@ import humps
 from application.clients.bruin_session import BruinGetRequest, BruinResponse, BruinSession
 
 
+BRUIN_401_RESPONSE = "Got 401 from Bruin"
+BRUIN_404_RESPONSE = "Resource not found"
+BRUIN_500_RESPONSE = "Got internal error from Bruin"
+
+
 class BruinClient:
     def __init__(self, logger, config):
         self._config = config
@@ -90,7 +95,7 @@ class BruinClient:
             if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin. Re-logging in...")
                 await self.login()
-                return_response["body"] = "Got 401 from Bruin"
+                return_response["body"] = BRUIN_401_RESPONSE
                 return_response["status"] = response.status
 
             if response.status == 403:
@@ -101,12 +106,12 @@ class BruinClient:
 
             if response.status == 404:
                 self._logger.error(f"Got 404 from Bruin, resource not found for params {parsed_params}")
-                return_response["body"] = "Resource not found"
+                return_response["body"] = BRUIN_404_RESPONSE
                 return_response["status"] = response.status
 
             if response.status in range(500, 513):
                 self._logger.error(f"Got {response.status}.")
-                return_response["body"] = "Got internal error from Bruin"
+                return_response["body"] = BRUIN_500_RESPONSE
                 return_response["status"] = 500
 
             return return_response
@@ -148,7 +153,7 @@ class BruinClient:
         if response.status == 401:
             self._logger.error(f"Got 401 from Bruin. Re-logging in...")
             await self.login()
-            return_response["body"] = "Got 401 from Bruin"
+            return_response["body"] = BRUIN_401_RESPONSE
             return_response["status"] = response.status
 
         if response.status == 403:
@@ -159,12 +164,12 @@ class BruinClient:
 
         if response.status == 404:
             self._logger.error(f"Got 404 from Bruin, resource not found for params {request_params}")
-            return_response["body"] = "Resource not found"
+            return_response["body"] = BRUIN_404_RESPONSE
             return_response["status"] = response.status
 
         if response.status in range(500, 513):
             self._logger.error(f"Got {response.status}.")
-            return_response["body"] = "Got internal error from Bruin"
+            return_response["body"] = BRUIN_500_RESPONSE
             return_response["status"] = 500
 
         return return_response
@@ -195,7 +200,7 @@ class BruinClient:
             if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin. Re-logging in...")
                 await self.login()
-                return_response["body"] = "Got 401 from Bruin"
+                return_response["body"] = BRUIN_401_RESPONSE
                 return_response["status"] = response.status
 
             if response.status == 403:
@@ -206,12 +211,12 @@ class BruinClient:
 
             if response.status == 404:
                 self._logger.error(f"Got 404 from Bruin, resource not found for ticket id {ticket_id}")
-                return_response["body"] = "Resource not found"
+                return_response["body"] = BRUIN_404_RESPONSE
                 return_response["status"] = response.status
 
             if response.status in range(500, 513):
                 self._logger.error(f"Got {response.status}.")
-                return_response["body"] = "Got internal error from Bruin"
+                return_response["body"] = BRUIN_500_RESPONSE
                 return_response["status"] = 500
 
             return return_response
@@ -248,7 +253,7 @@ class BruinClient:
             if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin. Re-logging in...")
                 await self.login()
-                return_response["body"] = "Got 401 from Bruin"
+                return_response["body"] = BRUIN_401_RESPONSE
                 return_response["status"] = response.status
 
             if response.status == 403:
@@ -261,12 +266,12 @@ class BruinClient:
                 self._logger.error(
                     f"Got 404 from Bruin, resource not posted for ticket_id {ticket_id} with payload {payload}"
                 )
-                return_response["body"] = "Resource not found"
+                return_response["body"] = BRUIN_404_RESPONSE
                 return_response["status"] = 404
 
             if response.status in range(500, 513):
                 self._logger.error(f"Got {response.status}.")
-                return_response["body"] = "Got internal error from Bruin"
+                return_response["body"] = BRUIN_500_RESPONSE
                 return_response["status"] = 500
 
             return return_response
@@ -307,7 +312,7 @@ class BruinClient:
             if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin. Re-logging in...")
                 await self.login()
-                return_response["body"] = "Got 401 from Bruin"
+                return_response["body"] = BRUIN_401_RESPONSE
                 return_response["status"] = response.status
 
             if response.status == 403:
@@ -320,12 +325,12 @@ class BruinClient:
                 self._logger.error(
                     f"Got 404 from Bruin, resources not posted for ticket_id {ticket_id} with payload {payload}"
                 )
-                return_response["body"] = "Resource not found"
+                return_response["body"] = BRUIN_404_RESPONSE
                 return_response["status"] = 404
 
             if response.status in range(500, 513):
                 self._logger.error(f"Got {response.status}.")
-                return_response["body"] = "Got internal error from Bruin"
+                return_response["body"] = BRUIN_500_RESPONSE
                 return_response["status"] = 500
 
             return return_response
@@ -361,7 +366,7 @@ class BruinClient:
             if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin. Re-logging in...")
                 await self.login()
-                return_response["body"] = "Got 401 from Bruin"
+                return_response["body"] = BRUIN_401_RESPONSE
                 return_response["status"] = response.status
 
             if response.status == 403:
@@ -372,12 +377,12 @@ class BruinClient:
 
             if response.status == 404:
                 self._logger.error(f"Got 404 from Bruin, resource not posted for payload of {payload}")
-                return_response["body"] = "Resource not found"
+                return_response["body"] = BRUIN_404_RESPONSE
                 return_response["status"] = 404
 
             if response.status in range(500, 513):
                 self._logger.error(f"Got {response.status}.")
-                return_response["body"] = "Got internal error from Bruin"
+                return_response["body"] = BRUIN_500_RESPONSE
                 return_response["status"] = 500
 
             return return_response
@@ -413,7 +418,7 @@ class BruinClient:
             if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin. Re-logging in...")
                 await self.login()
-                return_response["body"] = "Got 401 from Bruin"
+                return_response["body"] = BRUIN_401_RESPONSE
                 return_response["status"] = response.status
 
             if response.status == 403:
@@ -424,12 +429,12 @@ class BruinClient:
 
             if response.status == 404:
                 self._logger.error(f"Got 404 from Bruin, resource not posted for payload of {payload}")
-                return_response["body"] = "Resource not found"
+                return_response["body"] = BRUIN_404_RESPONSE
                 return_response["status"] = 404
 
             if response.status in range(500, 513):
                 self._logger.error(f"Got {response.status}.")
-                return_response["body"] = "Got internal error from Bruin"
+                return_response["body"] = BRUIN_500_RESPONSE
                 return_response["status"] = 500
 
             return return_response
@@ -471,7 +476,7 @@ class BruinClient:
             if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin. Re-logging in...")
                 await self.login()
-                return_response["body"] = "Got 401 from Bruin"
+                return_response["body"] = BRUIN_401_RESPONSE
                 return_response["status"] = response.status
 
             if response.status == 403:
@@ -482,7 +487,7 @@ class BruinClient:
 
             if response.status in range(500, 513):
                 self._logger.error(f"Got {response.status}.")
-                return_response["body"] = f"Got internal error from Bruin"
+                return_response["body"] = BRUIN_500_RESPONSE
                 return_response["status"] = 500
 
             return return_response
@@ -572,7 +577,7 @@ class BruinClient:
             if status_code == 401:
                 self._logger.info("Got HTTP 401 from Bruin.")
                 await self.login()
-                return_response["body"] = "Got 401 from Bruin"
+                return_response["body"] = BRUIN_401_RESPONSE
                 return_response["status"] = response.status
 
             if status_code == 403:
@@ -596,7 +601,7 @@ class BruinClient:
                 self._logger.error(
                     f"Got HTTP {status_code} from Bruin when posting outage ticket with payload {json.dumps(payload)}. "
                 )
-                return_response["body"] = "Got internal error from Bruin"
+                return_response["body"] = BRUIN_500_RESPONSE
                 return_response["status"] = 500
 
             return return_response
@@ -637,11 +642,11 @@ class BruinClient:
             if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin. Re-logging in...")
                 await self.login()
-                return_response["body"] = "Got 401 from Bruin"
+                return_response["body"] = BRUIN_401_RESPONSE
                 return_response["status"] = response.status
 
             if response.status in range(500, 513):
-                return_response["body"] = f"Got internal error from Bruin"
+                return_response["body"] = BRUIN_500_RESPONSE
                 return_response["status"] = 500
 
             return return_response
@@ -686,11 +691,11 @@ class BruinClient:
             if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin. Re-logging in...")
                 await self.login()
-                return_response["body"] = "Got 401 from Bruin"
+                return_response["body"] = BRUIN_401_RESPONSE
                 return_response["status"] = response.status
 
             if response.status in range(500, 513):
-                return_response["body"] = f"Got internal error from Bruin"
+                return_response["body"] = BRUIN_500_RESPONSE
                 return_response["status"] = 500
 
             return return_response
@@ -724,12 +729,12 @@ class BruinClient:
             if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin. Re-logging in...")
                 await self.login()
-                return_response["body"] = "Got 401 from Bruin"
+                return_response["body"] = BRUIN_401_RESPONSE
                 return_response["status"] = response.status
 
             if response.status in range(500, 513):
                 self._logger.error(f"Got {response.status}.")
-                return_response["body"] = f"Got internal error from Bruin"
+                return_response["body"] = BRUIN_500_RESPONSE
                 return_response["status"] = 500
 
             return return_response
@@ -763,12 +768,12 @@ class BruinClient:
             if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin. Re-logging in...")
                 await self.login()
-                return_response["body"] = "Got 401 from Bruin"
+                return_response["body"] = BRUIN_401_RESPONSE
                 return_response["status"] = response.status
 
             if response.status in range(500, 513):
                 self._logger.error(f"Got {response.status}.")
-                return_response["body"] = f"Got internal error from Bruin"
+                return_response["body"] = BRUIN_500_RESPONSE
                 return_response["status"] = 500
 
             return return_response
@@ -807,12 +812,12 @@ class BruinClient:
             if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin. Re-logging in...")
                 await self.login()
-                return_response["body"] = "Got 401 from Bruin"
+                return_response["body"] = BRUIN_401_RESPONSE
                 return_response["status"] = response.status
 
             if response.status in range(500, 513):
                 self._logger.error(f"Got {response.status}.")
-                return_response["body"] = "Got internal error from Bruin"
+                return_response["body"] = BRUIN_500_RESPONSE
                 return_response["status"] = 500
 
             return return_response
@@ -853,7 +858,7 @@ class BruinClient:
             if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin. Re-logging in...")
                 await self.login()
-                return_response["body"] = "Got 401 from Bruin"
+                return_response["body"] = BRUIN_401_RESPONSE
                 return_response["status"] = response.status
 
             if response.status == 403:
@@ -864,7 +869,7 @@ class BruinClient:
 
             if response.status in range(500, 513):
                 self._logger.error(f"Got {response.status}.")
-                return_response["body"] = "Got internal error from Bruin"
+                return_response["body"] = BRUIN_500_RESPONSE
                 return_response["status"] = 500
 
             return return_response
@@ -903,7 +908,7 @@ class BruinClient:
             if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin. Re-logging in...")
                 await self.login()
-                return_response["body"] = "Got 401 from Bruin"
+                return_response["body"] = BRUIN_401_RESPONSE
                 return_response["status"] = response.status
 
             if response.status == 403:
@@ -916,7 +921,7 @@ class BruinClient:
                 self._logger.error(
                     f"Got 404 from Bruin, resource not posted for email_id {email_id} with tag_id {tag_id}"
                 )
-                return_response["body"] = "Resource not found"
+                return_response["body"] = BRUIN_404_RESPONSE
                 return_response["status"] = 404
 
             if response.status == 409:
@@ -928,7 +933,7 @@ class BruinClient:
 
             if response.status in range(500, 513):
                 self._logger.error(f"Got {response.status}.")
-                return_response["body"] = "Got internal error from Bruin"
+                return_response["body"] = BRUIN_500_RESPONSE
                 return_response["status"] = 500
 
             return return_response
@@ -976,7 +981,7 @@ class BruinClient:
             if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin. Re-logging in...")
                 await self.login()
-                return_response["body"] = "Got 401 from Bruin"
+                return_response["body"] = BRUIN_401_RESPONSE
                 return_response["status"] = response.status
 
             if response.status == 403:
@@ -987,7 +992,7 @@ class BruinClient:
 
             if response.status in range(500, 513):
                 self._logger.error(f"Got {response.status}.")
-                return_response["body"] = "Got internal error from Bruin"
+                return_response["body"] = BRUIN_500_RESPONSE
                 return_response["status"] = 500
 
             return return_response
@@ -1027,7 +1032,7 @@ class BruinClient:
         if response.status == 401:
             self._logger.error(f"Got HTTP 401 from Bruin. Re-logging in...")
             await self.login()
-            return_response["body"] = "Got 401 from Bruin"
+            return_response["body"] = BRUIN_401_RESPONSE
             return_response["status"] = response.status
 
         if response.status == 403:
@@ -1037,12 +1042,12 @@ class BruinClient:
 
         if response.status == 404:
             self._logger.error(f"Got HTTP 404 from Bruin")
-            return_response["body"] = "Resource not found"
+            return_response["body"] = BRUIN_404_RESPONSE
             return_response["status"] = response.status
 
         if response.status in range(500, 513):
             self._logger.error(f"Got HTTP {response.status} from Bruin")
-            return_response["body"] = "Got internal error from Bruin"
+            return_response["body"] = BRUIN_500_RESPONSE
             return_response["status"] = 500
 
         return return_response
@@ -1082,7 +1087,7 @@ class BruinClient:
             if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin. Re-logging in...")
                 await self.login()
-                return_response["body"] = "Got 401 from Bruin"
+                return_response["body"] = BRUIN_401_RESPONSE
                 return_response["status"] = response.status
 
             if response.status == 403:
@@ -1092,12 +1097,12 @@ class BruinClient:
 
             if response.status == 404:
                 self._logger.error(f"Got HTTP 404 from Bruin")
-                return_response["body"] = "Resource not found"
+                return_response["body"] = BRUIN_404_RESPONSE
                 return_response["status"] = response.status
 
             if response.status in range(500, 513):
                 self._logger.error(f"Got HTTP {response.status} from Bruin")
-                return_response["body"] = f"Got internal error from Bruin"
+                return_response["body"] = BRUIN_500_RESPONSE
                 return_response["status"] = 500
 
             return return_response
@@ -1143,12 +1148,12 @@ class BruinClient:
             if response.status == 401:
                 self._logger.error("Got 401 from Bruin. Re-logging in...")
                 await self.login()
-                return_response["body"] = "Got 401 from Bruin"
+                return_response["body"] = BRUIN_401_RESPONSE
                 return_response["status"] = response.status
 
             if response.status in range(500, 513):
                 self._logger.error(f"Got HTTP {response.status} from Bruin")
-                return_response["body"] = f"Got internal error from Bruin"
+                return_response["body"] = BRUIN_500_RESPONSE
                 return_response["status"] = 500
 
             return return_response
@@ -1181,12 +1186,12 @@ class BruinClient:
             if response.status == 401:
                 self._logger.error("Got 401 from Bruin. Re-logging in...")
                 await self.login()
-                return_response["body"] = "Got 401 from Bruin"
+                return_response["body"] = BRUIN_401_RESPONSE
                 return_response["status"] = response.status
 
             if response.status in range(500, 513):
                 self._logger.error(f"Got HTTP {response.status} from Bruin")
-                return_response["body"] = "Got internal error from Bruin"
+                return_response["body"] = BRUIN_500_RESPONSE
                 return_response["status"] = 500
 
             return return_response
@@ -1227,7 +1232,7 @@ class BruinClient:
             if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin. Re-logging in...")
                 await self.login()
-                return_response["body"] = "Got 401 from Bruin"
+                return_response["body"] = BRUIN_401_RESPONSE
                 return_response["status"] = response.status
 
             if response.status == 403:
@@ -1238,12 +1243,12 @@ class BruinClient:
 
             if response.status == 404:
                 self._logger.error(f"Got 404 from Bruin, resource not posted for payload of {payload}")
-                return_response["body"] = "Resource not found"
+                return_response["body"] = BRUIN_404_RESPONSE
                 return_response["status"] = 404
 
             if response.status in range(500, 513):
                 self._logger.error(f"Got {response.status}.")
-                return_response["body"] = "Got internal error from Bruin"
+                return_response["body"] = BRUIN_500_RESPONSE
                 return_response["status"] = 500
 
             return return_response

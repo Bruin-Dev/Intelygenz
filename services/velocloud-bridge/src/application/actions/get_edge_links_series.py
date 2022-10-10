@@ -67,8 +67,6 @@ class GetEdgeLinksSeries:
 
         logger.info(f"Getting edge links series from host {host} using payload {payload}...")
         response = await self._velocloud_repository.get_edge_links_series(host=host, payload=payload)
-        response["status"] = response["status"]
-        response["body"] = response["body"]
 
         await msg.respond(json.dumps(response).encode())
         logger.info(f"Published edge links series for host {host} and payload {payload}")

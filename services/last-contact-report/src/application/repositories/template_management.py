@@ -12,7 +12,7 @@ class TemplateRenderer:
 
     def compose_email_object(self, edges_to_report, **kwargs):
         templateLoader = jinja2.FileSystemLoader(searchpath=".")
-        templateEnv = jinja2.Environment(loader=templateLoader)
+        templateEnv = jinja2.Environment(loader=templateLoader, autoescape=True)
         template = "src/templates/{}".format(kwargs.get("template", "last_contact.html"))
         logo = "src/templates/images/{}".format(kwargs.get("logo", "logo.png"))
         header = "src/templates/images/{}".format(kwargs.get("header", "header.jpg"))

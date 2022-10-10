@@ -20,7 +20,7 @@ class TaskHealthcheck:
         major_tasks_info = self._get_major_tasks(task_name_param, task_definition_arn_p)
         try:
             self._wait_until_tasks_is_ready(major_tasks_info, task_name_param)
-        except Exception as e:
+        except Exception:
             logging.error(
                 f"The maximum waiting time for the following tasks with name {task_name_param} "
                 f"to be RUNNING and with HEALTHY state has been reached"

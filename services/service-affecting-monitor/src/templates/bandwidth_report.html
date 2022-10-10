@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html
-        xmlns="http://www.w3.org/1999/xhtml"
+    lang="en"
+    xmlns="http://www.w3.org/1999/xhtml"
 >
 <head>
     <title>Automated Report Email Template</title>
@@ -421,8 +422,7 @@
                         <tr>
                             {% for header in __HEADERS__ %}
                                 {% set text_align = "center" if loop.index0 in __CENTERED_HEADERS__ else "left" %}
-                                <th bgcolor="#263640"
-                                    style="background-color: #263640; color: #ffffff; font-weight: bold; font-size: 16px; line-height: 22px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; text-align: {{ text_align }};">{{ header }}</th>
+                                <td style="background-color: #263640; color: #ffffff; font-weight: bold; font-size: 16px; line-height: 22px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; text-align: {{ text_align }};">{{ header }}</td>
                             {% endfor %}
                         </tr>
                         {% for row in __ROWS__ %}
@@ -449,7 +449,7 @@
     {% else %}
         <div style="margin:0px auto;background:#ffffff">
             <h3 style="text-align:center">
-                <i>This Daily Bandwidth Report does not have any locations/interface that met the criteria</i>
+                <em>This Daily Bandwidth Report does not have any locations/interface that met the criteria</em>
             </h3>
         </div>
     {% endif %}
