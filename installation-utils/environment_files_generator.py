@@ -47,10 +47,10 @@ METRICS_RELEVANT_CLIENTS = parameters["common"]["metrics"]["relevant-clients"]
 
 # We should use DEV variables here, but their test inventories lack lots of data so it's not worth it
 # Bruin Bridge variables
-BRUIN_CLIENT_ID = parameters["pro"]["bruin-bridge"]["client-id"]
-BRUIN_CLIENT_SECRET = parameters["pro"]["bruin-bridge"]["client-secret"]
-BRUIN_LOGIN_URL = parameters["pro"]["bruin-bridge"]["login-url"]
-BRUIN_BASE_URL = parameters["pro"]["bruin-bridge"]["base-url"]
+BRUIN_BRIDGE__BRUIN_CLIENT_ID = parameters["pro"]["bruin-bridge"]["client-id"]
+BRUIN_BRIDGE__BRUIN_CLIENT_SECRET = parameters["pro"]["bruin-bridge"]["client-secret"]
+BRUIN_BRIDGE__BRUIN_LOGIN_URL = parameters["pro"]["bruin-bridge"]["login-url"]
+BRUIN_BRIDGE__BRUIN_BASE_URL = parameters["pro"]["bruin-bridge"]["base-url"]
 
 # Customer Cache variables
 CUSTOMER_CACHE__VELOCLOUD_HOSTS = parameters["dev"]["customer-cache"]["velocloud-hosts"]
@@ -82,10 +82,16 @@ DIGI_REBOOT_REPORT__LOGS_LOOKUP_INTERVAL = parameters["common"]["digi-reboot-rep
 DIGI_REBOOT_REPORT__RECIPIENT = parameters["dev"]["digi-reboot-report"]["report-recipient"]
 
 # Forticloud variables
-FORTICLOUD_BASE_URL = parameters["pro"]["forticloud"]["base-url"]
+FORTICLOUD_BASE_URL = parameters["dev"]["forticloud"]["base-url"]
 FORTICLOUD_USERNAME = parameters["common"]["forticloud"]["username"]
 FORTICLOUD_PASSWORD = parameters["common"]["forticloud"]["password"]
 FORTICLOUD_ACCOUNT = parameters["common"]["forticloud"]["account"]
+
+# Bruin Bridge variables
+BRUIN_CLIENT_ID = parameters["dev"]["bruin"]["client-id"]
+BRUIN_CLIENT_SECRET = parameters["dev"]["bruin"]["client-secret"]
+BRUIN_LOGIN_URL = parameters["dev"]["bruin"]["login-url"]
+BRUIN_BASE_URL = parameters["dev"]["bruin"]["base-url"]
 
 # Forticloud cache variables
 FORTICLOUD_CACHE__TIME_TO_REFRESH_INTERVAL = parameters["common"]["forticloud-cache"]["time-to-refresh-interval"]
@@ -349,10 +355,10 @@ env_dict = {
         f"NATS_SERVER1={NATS_SERVER1}",
         f"NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}",
         f"REDIS_HOSTNAME={REDIS_HOSTNAME}",
-        f"BRUIN_CLIENT_ID={BRUIN_CLIENT_ID}",
-        f"BRUIN_CLIENT_SECRET={BRUIN_CLIENT_SECRET}",
-        f"BRUIN_LOGIN_URL={BRUIN_LOGIN_URL}",
-        f"BRUIN_BASE_URL={BRUIN_BASE_URL}",
+        f"BRUIN_CLIENT_ID={BRUIN_BRIDGE__BRUIN_CLIENT_ID}",
+        f"BRUIN_CLIENT_SECRET={BRUIN_BRIDGE__BRUIN_CLIENT_SECRET}",
+        f"BRUIN_LOGIN_URL={BRUIN_BRIDGE__BRUIN_LOGIN_URL}",
+        f"BRUIN_BASE_URL={BRUIN_BRIDGE__BRUIN_BASE_URL}",
         f"IPA_SYSTEM_USERNAME_IN_BRUIN={IPA_SYSTEM_USERNAME_IN_BRUIN}",
         f"PAPERTRAIL_ACTIVE={PAPERTRAIL_ACTIVE}",
         f"PAPERTRAIL_HOST={PAPERTRAIL_HOST}",
