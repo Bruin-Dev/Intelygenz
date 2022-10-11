@@ -7,6 +7,10 @@ class ForticloudResponse(BaseModel):
     status: int
     body: Dict
 
+    @validator("body", pre=True)
+    def validate_body(cls, v):
+        return {} if not isinstance(v, dict) else v
+
 
 class APResponseResult(BaseModel):
     connection_state: Optional[str]
