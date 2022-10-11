@@ -1,110 +1,75 @@
 from datetime import datetime, timedelta, timezone
-from unittest.mock import Mock, call, patch
+from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
+from apscheduler.util import undefined
+
 from application.actions import digi_reboot_report as digi_reboot_report_module
 from application.actions.digi_reboot_report import DiGiRebootReport
-from apscheduler.util import undefined
-from asynctest import CoroutineMock
 from config import testconfig
+
+
+@pytest.fixture(scope="function")
+def digi_reboot_instance():
+    return DiGiRebootReport(
+        scheduler=Mock(), config=testconfig, bruin_repository=Mock(), digi_repository=Mock(), email_repository=Mock()
+    )
 
 
 class TestDiGiRebootReport:
     def instance_test(self):
-        event_bus = Mock()
         scheduler = Mock()
-        logger = Mock()
         config = testconfig
         bruin_repository = Mock()
         digi_repository = Mock()
         email_repository = Mock()
 
-        digi_reboot_report = DiGiRebootReport(
-            event_bus, scheduler, logger, config, bruin_repository, digi_repository, email_repository
-        )
+        digi_reboot_report = DiGiRebootReport(scheduler, config, bruin_repository, digi_repository, email_repository)
 
-        assert digi_reboot_report._event_bus == event_bus
         assert digi_reboot_report._scheduler == scheduler
-        assert digi_reboot_report._logger == logger
         assert digi_reboot_report._config == config
         assert digi_reboot_report._bruin_repository == bruin_repository
         assert digi_reboot_report._digi_repository == digi_repository
         assert digi_reboot_report._email_repository == email_repository
 
-    @pytest.mark.asyncio
-    async def start_digi_reboot_report_job_with_exec_on_start_test(self):
-        event_bus = Mock()
-        scheduler = Mock()
-        scheduler.add_job = Mock()
+    async def start_digi_reboot_report_job_with_exec_on_start_test(self, digi_reboot_instance):
+        digi_reboot_instance._scheduler.add_job = Mock()
 
-        logger = Mock()
-        config = testconfig
-        bruin_repository = Mock()
-        digi_repository = Mock()
-        email_repository = Mock()
-
-        digi_reboot_report = DiGiRebootReport(
-            event_bus, scheduler, logger, config, bruin_repository, digi_repository, email_repository
-        )
         next_run_time = datetime.now()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
         with patch.object(digi_reboot_report_module, "datetime", new=datetime_mock):
             with patch.object(digi_reboot_report_module, "timezone", new=Mock()):
-                await digi_reboot_report.start_digi_reboot_report_job(exec_on_start=True)
+                await digi_reboot_instance.start_digi_reboot_report_job(exec_on_start=True)
 
-        scheduler.add_job.assert_called_once_with(
-            digi_reboot_report._digi_reboot_report_process,
+        digi_reboot_instance._scheduler.add_job.assert_called_once_with(
+            digi_reboot_instance._digi_reboot_report_process,
             "interval",
-            minutes=config.DIGI_CONFIG["digi_reboot_report_time"],
+            minutes=digi_reboot_instance._config.DIGI_CONFIG["digi_reboot_report_time"],
             next_run_time=next_run_time,
             replace_existing=False,
             id="_digi_reboot_report",
         )
 
-    @pytest.mark.asyncio
-    async def start_digi_reboot_report_job_with_exec_on_start_false_test(self):
-        event_bus = Mock()
-        scheduler = Mock()
-        scheduler.add_job = Mock()
+    async def start_digi_reboot_report_job_with_exec_on_start_false_test(self, digi_reboot_instance):
+        digi_reboot_instance._scheduler.add_job = Mock()
 
-        logger = Mock()
-        config = testconfig
-        bruin_repository = Mock()
-        digi_repository = Mock()
-        email_repository = Mock()
+        await digi_reboot_instance.start_digi_reboot_report_job()
 
-        digi_reboot_report = DiGiRebootReport(
-            event_bus, scheduler, logger, config, bruin_repository, digi_repository, email_repository
-        )
-
-        await digi_reboot_report.start_digi_reboot_report_job()
-
-        scheduler.add_job.assert_called_once_with(
-            digi_reboot_report._digi_reboot_report_process,
+        digi_reboot_instance._scheduler.add_job.assert_called_once_with(
+            digi_reboot_instance._digi_reboot_report_process,
             "interval",
-            minutes=config.DIGI_CONFIG["digi_reboot_report_time"],
+            minutes=digi_reboot_instance._config.DIGI_CONFIG["digi_reboot_report_time"],
             next_run_time=undefined,
             replace_existing=False,
             id="_digi_reboot_report",
         )
 
-    @pytest.mark.asyncio
-    async def digi_reboot_report_process_test(self):
+    async def digi_reboot_report_process_test(self, digi_reboot_instance):
         digi_recovery_logs_response = {"body": {"Logs": [{"TicketID": "123"}, {"TicketID": "321"}]}, "status": 200}
 
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        config = testconfig
-        bruin_repository = Mock()
-        email_repository = Mock()
-
-        digi_repository = Mock()
-        digi_repository.get_digi_recovery_logs = CoroutineMock(return_value=digi_recovery_logs_response)
-
-        digi_reboot_report = DiGiRebootReport(
-            event_bus, scheduler, logger, config, bruin_repository, digi_repository, email_repository
+        digi_reboot_instance._digi_repository.get_digi_recovery_logs = AsyncMock(
+            return_value=digi_recovery_logs_response
         )
 
         ticket_id_list = ["123", "321"]
@@ -112,35 +77,23 @@ class TestDiGiRebootReport:
             "123": {"ClientName": "Le Duff Management ", "Ticket Entered Date": "202008242225"},
             "321": {"ClientName": "Test", "Ticket Entered Date": "202008242225"},
         }
-        digi_reboot_report._get_all_ticket_ids_from_digi_recovery_logs = Mock(return_value=ticket_id_list)
-        digi_reboot_report._get_ticket_task_histories = CoroutineMock(return_value=ticket_task_history_map)
-        digi_reboot_report._merge_recovery_logs = CoroutineMock()
-        digi_reboot_report._generate_and_email_csv_file = CoroutineMock()
+        digi_reboot_instance._get_all_ticket_ids_from_digi_recovery_logs = Mock(return_value=ticket_id_list)
+        digi_reboot_instance._get_ticket_task_histories = AsyncMock(return_value=ticket_task_history_map)
+        digi_reboot_instance._merge_recovery_logs = AsyncMock()
+        digi_reboot_instance._generate_and_email_csv_file = AsyncMock()
 
-        await digi_reboot_report._digi_reboot_report_process()
+        await digi_reboot_instance._digi_reboot_report_process()
 
-        assert digi_reboot_report._digi_recovery_logs == digi_recovery_logs_response["body"]["Logs"]
-        digi_reboot_report._get_all_ticket_ids_from_digi_recovery_logs.assert_called_once()
-        digi_reboot_report._get_ticket_task_histories.assert_called_once_with(ticket_id_list)
-        digi_reboot_report._merge_recovery_logs.assert_called_once_with(ticket_task_history_map)
-        digi_reboot_report._generate_and_email_csv_file.assert_awaited_once_with(ticket_task_history_map)
+        assert digi_reboot_instance._digi_recovery_logs == digi_recovery_logs_response["body"]["Logs"]
+        digi_reboot_instance._get_all_ticket_ids_from_digi_recovery_logs.assert_called_once()
+        digi_reboot_instance._get_ticket_task_histories.assert_called_once_with(ticket_id_list)
+        digi_reboot_instance._merge_recovery_logs.assert_called_once_with(ticket_task_history_map)
+        digi_reboot_instance._generate_and_email_csv_file.assert_awaited_once_with(ticket_task_history_map)
 
-    @pytest.mark.asyncio
-    async def digi_reboot_report_process_failed_to_get_digi_recovery_logs_test(self):
+    async def digi_reboot_report_process_failed_to_get_digi_recovery_logs_test(self, digi_reboot_instance):
         digi_recovery_logs_response = {"body": "Failed", "status": 400}
-
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        config = testconfig
-        bruin_repository = Mock()
-        email_repository = Mock()
-
-        digi_repository = Mock()
-        digi_repository.get_digi_recovery_logs = CoroutineMock(return_value=digi_recovery_logs_response)
-
-        digi_reboot_report = DiGiRebootReport(
-            event_bus, scheduler, logger, config, bruin_repository, digi_repository, email_repository
+        digi_reboot_instance._digi_repository.get_digi_recovery_logs = AsyncMock(
+            return_value=digi_recovery_logs_response
         )
 
         ticket_id_list = ["123", "321"]
@@ -148,39 +101,28 @@ class TestDiGiRebootReport:
             "123": {"ClientName": "Le Duff Management ", "Ticket Entered Date": "202008242225"},
             "321": {"ClientName": "Test", "Ticket Entered Date": "202008242225"},
         }
-        digi_reboot_report._get_all_ticket_ids_from_digi_recovery_logs = Mock(return_value=ticket_id_list)
-        digi_reboot_report._get_ticket_task_histories = CoroutineMock(return_value=ticket_task_history_map)
-        digi_reboot_report._merge_recovery_logs = CoroutineMock()
-        digi_reboot_report._generate_and_email_csv_file = CoroutineMock()
+        digi_reboot_instance._get_all_ticket_ids_from_digi_recovery_logs = Mock(return_value=ticket_id_list)
+        digi_reboot_instance._get_ticket_task_histories = AsyncMock(return_value=ticket_task_history_map)
+        digi_reboot_instance._merge_recovery_logs = AsyncMock()
+        digi_reboot_instance._generate_and_email_csv_file = AsyncMock()
 
-        await digi_reboot_report._digi_reboot_report_process()
+        await digi_reboot_instance._digi_reboot_report_process()
 
-        digi_reboot_report._get_all_ticket_ids_from_digi_recovery_logs.assert_not_called()
-        digi_reboot_report._get_ticket_task_histories.assert_not_called()
-        digi_reboot_report._merge_recovery_logs.assert_not_called()
-        digi_reboot_report._generate_and_email_csv_file.assert_not_awaited()
+        digi_reboot_instance._get_all_ticket_ids_from_digi_recovery_logs.assert_not_called()
+        digi_reboot_instance._get_ticket_task_histories.assert_not_called()
+        digi_reboot_instance._merge_recovery_logs.assert_not_called()
+        digi_reboot_instance._generate_and_email_csv_file.assert_not_awaited()
 
-    def get_all_ticket_ids_from_digi_recovery_logs_test(self):
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        config = testconfig
-        bruin_repository = Mock()
-        digi_repository = Mock()
-        email_repository = Mock()
+    def get_all_ticket_ids_from_digi_recovery_logs_test(self, digi_reboot_instance):
 
         expected_digi_ticket_id_list = [123, 321]
-        digi_reboot_report = DiGiRebootReport(
-            event_bus, scheduler, logger, config, bruin_repository, digi_repository, email_repository
-        )
-        digi_reboot_report._digi_recovery_logs = [{"TicketID": "123"}, {"TicketID": "123"}, {"TicketID": "321"}]
+        digi_reboot_instance._digi_recovery_logs = [{"TicketID": "123"}, {"TicketID": "123"}, {"TicketID": "321"}]
 
-        digi_ticket_id_list = digi_reboot_report._get_all_ticket_ids_from_digi_recovery_logs()
+        digi_ticket_id_list = digi_reboot_instance._get_all_ticket_ids_from_digi_recovery_logs()
 
         assert digi_ticket_id_list == expected_digi_ticket_id_list
 
-    @pytest.mark.asyncio
-    async def _get_ticket_task_histories_test(self):
+    async def _get_ticket_task_histories_test(self, digi_reboot_instance):
         ticket_id_list = [123, 321, 589, 684]
         task_history_response_1 = {
             "body": [
@@ -284,13 +226,7 @@ class TestDiGiRebootReport:
             {"reboot_attempted": True, "reboot_time": datetime_now - timedelta(days=1)},
             {"reboot_attempted": False, "reboot_time": datetime_now - timedelta(days=1)},
         ]
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        config = testconfig
-
-        bruin_repository = Mock()
-        bruin_repository.get_ticket_task_history = CoroutineMock(
+        digi_reboot_instance._bruin_repository.get_ticket_task_history = AsyncMock(
             side_effect=[
                 task_history_response_1,
                 task_history_response_2,
@@ -298,22 +234,17 @@ class TestDiGiRebootReport:
                 task_history_response_4,
             ]
         )
-        digi_repository = Mock()
-        email_repository = Mock()
 
-        digi_reboot_report = DiGiRebootReport(
-            event_bus, scheduler, logger, config, bruin_repository, digi_repository, email_repository
-        )
-        digi_reboot_report._parse_ticket_history = Mock(side_effect=parsed_ticket_history)
+        digi_reboot_instance._parse_ticket_history = Mock(side_effect=parsed_ticket_history)
 
         with patch.object(digi_reboot_report_module, "datetime", new=datetime_mock):
-            ticket_map = await digi_reboot_report._get_ticket_task_histories(ticket_id_list)
+            ticket_map = await digi_reboot_instance._get_ticket_task_histories(ticket_id_list)
 
         assert ticket_map == {ticket_id_list[2]: parsed_ticket_history[1]}
-        bruin_repository.get_ticket_task_history.assert_has_awaits(
+        digi_reboot_instance._bruin_repository.get_ticket_task_history.assert_has_awaits(
             [call(ticket_id_list[0]), call(ticket_id_list[1]), call(ticket_id_list[2]), call(ticket_id_list[3])]
         )
-        digi_reboot_report._parse_ticket_history.assert_has_calls(
+        digi_reboot_instance._parse_ticket_history.assert_has_calls(
             [
                 call(task_history_response_1["body"]),
                 call(task_history_response_3["body"]),
@@ -321,10 +252,8 @@ class TestDiGiRebootReport:
             ]
         )
 
-    def parse_ticket_history_failed_digi_link_test(self):
-        event_bus = Mock()
+    def parse_ticket_history_failed_digi_link_test(self, digi_reboot_instance):
         scheduler = Mock()
-        logger = Mock()
         config = testconfig
         bruin_repository = Mock()
         digi_repository = Mock()
@@ -505,10 +434,7 @@ class TestDiGiRebootReport:
                 "Ticket Status": "Closed",
             },
         ]
-        digi_reboot_report = DiGiRebootReport(
-            event_bus, scheduler, logger, config, bruin_repository, digi_repository, email_repository
-        )
-        ticket_info = digi_reboot_report._parse_ticket_history(ticket_task_history)
+        ticket_info = digi_reboot_instance._parse_ticket_history(ticket_task_history)
 
         assert ticket_info == {
             "outage_type": "Link",
@@ -527,14 +453,7 @@ class TestDiGiRebootReport:
             "forwarded": True,
         }
 
-    def parse_ticket_history_failed_edge_test(self):
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        config = testconfig
-        bruin_repository = Mock()
-        digi_repository = Mock()
-        email_repository = Mock()
+    def parse_ticket_history_failed_edge_test(self, digi_reboot_instance):
 
         ticket_task_history = [
             {
@@ -577,10 +496,7 @@ class TestDiGiRebootReport:
                 "Ticket Status": "Closed",
             }
         ]
-        digi_reboot_report = DiGiRebootReport(
-            event_bus, scheduler, logger, config, bruin_repository, digi_repository, email_repository
-        )
-        ticket_info = digi_reboot_report._parse_ticket_history(ticket_task_history)
+        ticket_info = digi_reboot_instance._parse_ticket_history(ticket_task_history)
 
         assert ticket_info == {
             "outage_type": "Edge",
@@ -599,14 +515,7 @@ class TestDiGiRebootReport:
             "forwarded": False,
         }
 
-    def parse_ticket_history_no_edge_test(self):
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        config = testconfig
-        bruin_repository = Mock()
-        digi_repository = Mock()
-        email_repository = Mock()
+    def parse_ticket_history_no_edge_test(self, digi_reboot_instance):
 
         ticket_task_history = [
             {
@@ -649,10 +558,7 @@ class TestDiGiRebootReport:
                 "Ticket Status": "Closed",
             }
         ]
-        digi_reboot_report = DiGiRebootReport(
-            event_bus, scheduler, logger, config, bruin_repository, digi_repository, email_repository
-        )
-        ticket_info = digi_reboot_report._parse_ticket_history(ticket_task_history)
+        ticket_info = digi_reboot_instance._parse_ticket_history(ticket_task_history)
 
         assert ticket_info == {
             "outage_type": "Unclassified",
@@ -671,14 +577,7 @@ class TestDiGiRebootReport:
             "forwarded": False,
         }
 
-    def parse_ticket_history_auto_resolved_edge_test(self):
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        config = testconfig
-        bruin_repository = Mock()
-        digi_repository = Mock()
-        email_repository = Mock()
+    def parse_ticket_history_auto_resolved_edge_test(self, digi_reboot_instance):
 
         ticket_task_history = [
             {
@@ -774,10 +673,7 @@ class TestDiGiRebootReport:
                 "Ticket Status": "Resolved",
             },
         ]
-        digi_reboot_report = DiGiRebootReport(
-            event_bus, scheduler, logger, config, bruin_repository, digi_repository, email_repository
-        )
-        ticket_info = digi_reboot_report._parse_ticket_history(ticket_task_history)
+        ticket_info = digi_reboot_instance._parse_ticket_history(ticket_task_history)
 
         assert ticket_info == {
             "outage_type": "Link",
@@ -796,7 +692,7 @@ class TestDiGiRebootReport:
             "forwarded": False,
         }
 
-    def merge_recovery_logs_test(self):
+    def merge_recovery_logs_test(self, digi_reboot_instance):
         digi_recovery_logs = [
             {
                 "Id": 142,
@@ -998,23 +894,11 @@ class TestDiGiRebootReport:
                 "forwarded": True,
             },
         }
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        config = testconfig
-        bruin_repository = Mock()
-        digi_repository = Mock()
-        email_repository = Mock()
-
-        digi_reboot_report = DiGiRebootReport(
-            event_bus, scheduler, logger, config, bruin_repository, digi_repository, email_repository
-        )
-        digi_reboot_report._digi_recovery_logs = digi_recovery_logs
-        digi_reboot_report._merge_recovery_logs(intial_ticket_map)
+        digi_reboot_instance._digi_recovery_logs = digi_recovery_logs
+        digi_reboot_instance._merge_recovery_logs(intial_ticket_map)
         assert intial_ticket_map == expected_ticket_map
 
-    @pytest.mark.asyncio
-    async def generate_and_email_csv_file_test(self):
+    async def generate_and_email_csv_file_test(self, digi_reboot_instance):
         ticket_map = {
             123: {
                 "outage_type": "Edge",
@@ -1147,18 +1031,8 @@ class TestDiGiRebootReport:
             2,
             1,
         ]
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        config = testconfig
-        bruin_repository = Mock()
-        digi_repository = Mock()
-        email_repository = Mock()
-        email_repository.send_email = CoroutineMock()
+        digi_reboot_instance._email_repository.send_email = AsyncMock()
 
-        digi_reboot_report = DiGiRebootReport(
-            event_bus, scheduler, logger, config, bruin_repository, digi_repository, email_repository
-        )
         csv = Mock()
         csv.writer = Mock(writerow=Mock())
         io = Mock()
@@ -1166,6 +1040,6 @@ class TestDiGiRebootReport:
         with patch.object(digi_reboot_report_module, "csv", new=csv):
             with patch.object(digi_reboot_report_module, "io", new=io):
                 with patch.object(digi_reboot_report_module, "open", create=False):
-                    await digi_reboot_report._generate_and_email_csv_file(ticket_map)
+                    await digi_reboot_instance._generate_and_email_csv_file(ticket_map)
             assert csv.writer.mock_calls[2][1][0] == expected_breakdown
-            email_repository.send_email.assert_awaited()
+            digi_reboot_instance._email_repository.send_email.assert_awaited()

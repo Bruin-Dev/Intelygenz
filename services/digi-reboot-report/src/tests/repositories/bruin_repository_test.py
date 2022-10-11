@@ -1,34 +1,45 @@
-from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
+import json
+from typing import Any
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from nats.aio.msg import Msg
+from shortuuid import uuid
+
 from application.repositories import bruin_repository as bruin_repository_module
 from application.repositories import nats_error_response
 from application.repositories.bruin_repository import BruinRepository
-from asynctest import CoroutineMock
 from config import testconfig
-from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(bruin_repository_module, "uuid", return_value=uuid_)
 
 
+def to_json_bytes(message: dict[str, Any]):
+    return json.dumps(message, default=str, separators=(",", ":")).encode()
+
+
+@pytest.fixture(scope="function")
+def bruin_repository_instance():
+    return BruinRepository(nats_client=Mock(), config=testconfig, notifications_repository=Mock())
+
+
 class TestBruinRepository:
     def instance_test(self):
-        event_bus = Mock()
-        logger = Mock()
         config = testconfig
         notifications_repository = Mock()
+        nats_client = Mock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        bruin_repository = BruinRepository(
+            config=config, notifications_repository=notifications_repository, nats_client=nats_client
+        )
 
-        assert bruin_repository._event_bus is event_bus
-        assert bruin_repository._logger is logger
         assert bruin_repository._config is config
         assert bruin_repository._notifications_repository is notifications_repository
+        assert bruin_repository._nats_client is nats_client
 
     @pytest.mark.asyncio
-    async def get_ticket_task_history_test(self):
+    async def get_ticket_task_history_test(self, bruin_repository_instance):
         ticket_id = 11111
 
         request = {
@@ -67,51 +78,40 @@ class TestBruinRepository:
             ],
             "status": 200,
         }
-
-        logger = Mock()
-        config = testconfig
-        notifications_repository = Mock()
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
-
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        NATS_AIO_MSG = Msg(_client="NATS", data=to_json_bytes(response))
+        bruin_repository_instance._nats_client.request = AsyncMock(return_value=NATS_AIO_MSG)
 
         with uuid_mock:
-            result = await bruin_repository.get_ticket_task_history(ticket_id)
+            result = await bruin_repository_instance.get_ticket_task_history(ticket_id)
 
-        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.get.task.history", request, timeout=60)
+        bruin_repository_instance._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.get.task.history", to_json_bytes(request), timeout=60
+        )
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_ticket_task_history_with_rpc_request_failing_test(self):
+    async def get_ticket_task_history_with_rpc_request_failing_test(self, bruin_repository_instance):
         ticket_id = 11111
 
         request = {
             "request_id": uuid_,
             "body": {"ticket_id": ticket_id},
         }
-        logger = Mock()
-        config = testconfig
+        bruin_repository_instance._notifications_repository.send_slack_message = AsyncMock()
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=Exception)
-
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
-
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        bruin_repository_instance._nats_client.request = AsyncMock(side_effect=Exception)
 
         with uuid_mock:
-            result = await bruin_repository.get_ticket_task_history(ticket_id)
+            result = await bruin_repository_instance.get_ticket_task_history(ticket_id)
 
-        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.get.task.history", request, timeout=60)
-        notifications_repository.send_slack_message.assert_awaited_once()
-        logger.error.assert_called_once()
+        bruin_repository_instance._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.get.task.history", to_json_bytes(request), timeout=60
+        )
+        bruin_repository_instance._notifications_repository.send_slack_message.assert_awaited_once()
         assert result is nats_error_response
 
     @pytest.mark.asyncio
-    async def get_ticket_task_history_with_rpc_request_returning_non_2xx_status_test(self):
+    async def get_ticket_task_history_with_rpc_request_returning_non_2xx_status_test(self, bruin_repository_instance):
         ticket_id = 11111
 
         request = {
@@ -124,21 +124,15 @@ class TestBruinRepository:
             "status": 500,
         }
 
-        logger = Mock()
-        config = testconfig
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
-
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
-
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        bruin_repository_instance._notifications_repository.send_slack_message = AsyncMock()
+        NATS_AIO_MSG = Msg(_client="NATS", data=to_json_bytes(response))
+        bruin_repository_instance._nats_client.request = AsyncMock(return_value=NATS_AIO_MSG)
 
         with uuid_mock:
-            result = await bruin_repository.get_ticket_task_history(ticket_id)
+            result = await bruin_repository_instance.get_ticket_task_history(ticket_id)
 
-        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.get.task.history", request, timeout=60)
-        notifications_repository.send_slack_message.assert_awaited_once()
-        logger.error.assert_called_once()
+        bruin_repository_instance._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.get.task.history", to_json_bytes(request), timeout=60
+        )
+        bruin_repository_instance._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == response

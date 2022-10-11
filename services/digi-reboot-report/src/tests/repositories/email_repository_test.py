@@ -1,33 +1,40 @@
+import json
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
+from typing import Any
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from shortuuid import uuid
+
 from application.repositories import email_repository as email_repository_module
 from application.repositories.email_repository import EmailRepository
-from asynctest import CoroutineMock
 from config import testconfig
-from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(email_repository_module, "uuid", return_value=uuid_)
 
 
+def to_json_bytes(message: dict[str, Any]):
+    return json.dumps(message, default=str, separators=(",", ":")).encode()
+
+
+@pytest.fixture(scope="function")
+def email_repository_instance():
+    return EmailRepository(nats_client=Mock(), config=testconfig)
+
+
 class TestEmailRepository:
     def instance_test(self):
-        event_bus = Mock()
         config = testconfig
+        nats_client = Mock()
 
-        email_repository = EmailRepository(event_bus, config)
+        email_repository = EmailRepository(nats_client, config)
 
-        assert email_repository._event_bus is event_bus
         assert email_repository._config is config
+        assert email_repository._nats_client is nats_client
 
     @pytest.mark.asyncio
-    async def send_email_test(self):
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock()
-
-        config = testconfig
+    async def send_email_test(self, email_repository_instance):
 
         datetime_now = datetime.now()
 
@@ -45,14 +52,14 @@ class TestEmailRepository:
         </html>
         """
 
-        email_repository = EmailRepository(event_bus, config)
+        email_repository_instance._nats_client.request = AsyncMock()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=datetime_now)
         with patch.object(email_repository_module, "datetime", new=datetime_mock):
             with uuid_mock:
-                await email_repository.send_email("test.csv")
+                await email_repository_instance.send_email("test.csv")
+        request = json.loads(email_repository_instance._nats_client.request.call_args.args[1].decode("utf-8"))
+        assert email_repository_instance._nats_client.request.call_args.args[0] == "notification.email.request"
+        assert request["body"]["email_data"]["html"] == html
 
-        assert event_bus.rpc_request.call_args[0][0] == "notification.email.request"
-        assert event_bus.rpc_request.call_args[0][1]["body"]["email_data"]["html"] == html
-        expected_name = event_bus.rpc_request.call_args[0][1]["body"]["email_data"]["attachments"][0]["name"]
-        assert expected_name == "digi_reboot_report.csv"
+        assert request["body"]["email_data"]["attachments"][0]["name"] == "digi_reboot_report.csv"

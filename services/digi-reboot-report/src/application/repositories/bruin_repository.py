@@ -1,22 +1,38 @@
-from application.repositories import nats_error_response
+import json
+import logging
+from typing import Any
+
 from shortuuid import uuid
+
+from application.repositories import nats_error_response
+
+logger = logging.getLogger(__name__)
+
+
+def to_json_bytes(message: dict[str, Any]):
+    return json.dumps(message, default=str, separators=(",", ":")).encode()
+
+
+def get_data_from_response_message(message):
+    return json.loads(message.data)
 
 
 class BruinRepository:
-    def __init__(self, event_bus, logger, config, notifications_repository):
-        self._event_bus = event_bus
-        self._logger = logger
+    def __init__(self, nats_client, config, notifications_repository):
+        self._nats_client = nats_client
         self._config = config
         self._notifications_repository = notifications_repository
 
     async def get_ticket_task_history(self, ticket_id):
         err_msg = None
 
-        self._logger.info(f"Getting ticket task history for app.bruin.com/t/{ticket_id}")
+        logger.info(f"Getting ticket task history for app.bruin.com/t/{ticket_id}")
         request_msg = {"request_id": uuid(), "body": {"ticket_id": ticket_id}}
         try:
-            response = await self._event_bus.rpc_request("bruin.ticket.get.task.history", request_msg, timeout=60)
-            self._logger.info(f"Got task_history of ticket {ticket_id} from Bruin!")
+            response = get_data_from_response_message(
+                await self._nats_client.request("bruin.ticket.get.task.history", to_json_bytes(request_msg), timeout=60)
+            )
+            logger.info(f"Got task_history of ticket {ticket_id} from Bruin!")
 
         except Exception as e:
 
@@ -38,7 +54,7 @@ class BruinRepository:
                 )
 
         if err_msg:
-            self._logger.error(err_msg)
+            logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response

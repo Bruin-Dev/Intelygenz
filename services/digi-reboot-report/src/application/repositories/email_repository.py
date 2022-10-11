@@ -1,12 +1,18 @@
 import base64
+import json
 from datetime import datetime, timedelta
+from typing import Any
 
 from shortuuid import uuid
 
 
+def to_json_bytes(message: dict[str, Any]):
+    return json.dumps(message, default=str, separators=(",", ":")).encode()
+
+
 class EmailRepository:
-    def __init__(self, event_bus, config):
-        self._event_bus = event_bus
+    def __init__(self, nats_client, config):
+        self._nats_client = nats_client
         self._config = config
 
     async def send_email(self, digi_reboot_report, **kwargs):
@@ -40,4 +46,4 @@ class EmailRepository:
                 }
             },
         }
-        await self._event_bus.rpc_request("notification.email.request", email_object, timeout=60)
+        await self._nats_client.request("notification.email.request", to_json_bytes(email_object), timeout=60)

@@ -1,14 +1,27 @@
+import json
+import logging
 from datetime import datetime, timedelta
+from typing import Any
 
-from application.repositories import nats_error_response
 from pytz import timezone
 from shortuuid import uuid
 
+from application.repositories import nats_error_response
+
+logger = logging.getLogger(__name__)
+
+
+def to_json_bytes(message: dict[str, Any]):
+    return json.dumps(message, default=str, separators=(",", ":")).encode()
+
+
+def get_data_from_response_message(message):
+    return json.loads(message.data)
+
 
 class DiGiRepository:
-    def __init__(self, event_bus, logger, config, notifications_repository):
-        self._event_bus = event_bus
-        self._logger = logger
+    def __init__(self, nats_client, config, notifications_repository):
+        self._nats_client = nats_client
         self._config = config
         self._notifications_repository = notifications_repository
 
@@ -22,13 +35,16 @@ class DiGiRepository:
         }
 
         try:
-            self._logger.info(
+            logger.info(
                 f"Getting DiGi recovery logs from "
                 f'{self._config.DIGI_CONFIG["days_of_digi_recovery_log"]} '
                 f"day(s) ago"
             )
-            response = await self._event_bus.rpc_request("get.digi.recovery.logs", request, timeout=90)
-            self._logger.info(
+            response = get_data_from_response_message(
+                await self._nats_client.request("get.digi.recovery.logs", to_json_bytes(request), timeout=90)
+            )
+
+            logger.info(
                 f'Got DiGi recovery logs from {self._config.DIGI_CONFIG["days_of_digi_recovery_log"]} ' f"day(s) ago"
             )
         except Exception as e:
@@ -46,7 +62,7 @@ class DiGiRepository:
                 )
 
         if err_msg:
-            self._logger.error(err_msg)
+            logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response

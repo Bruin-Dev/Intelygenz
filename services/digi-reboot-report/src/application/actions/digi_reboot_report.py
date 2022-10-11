@@ -1,31 +1,32 @@
 import csv
 import io
+import logging
 import time
 from datetime import datetime, timedelta
 
 from apscheduler.util import undefined
 from pytz import timezone, utc
 
+logger = logging.getLogger(__name__)
+
 
 class DiGiRebootReport:
-    def __init__(self, event_bus, scheduler, logger, config, bruin_repository, digi_repository, email_repository):
-        self._event_bus = event_bus
+    def __init__(self, scheduler, config, bruin_repository, digi_repository, email_repository):
         self._scheduler = scheduler
-        self._logger = logger
         self._config = config
         self._bruin_repository = bruin_repository
         self._digi_repository = digi_repository
         self._email_repository = email_repository
 
     async def start_digi_reboot_report_job(self, exec_on_start=False):
-        self._logger.info(
-            f"Scheduled task: DiGi reboot report process configured to run every "
+        logger.info(
+            "Scheduled task: DiGi reboot report process configured to run every "
             f"{self._config.DIGI_CONFIG['digi_reboot_report_time']/60} hours"
         )
         next_run_time = undefined
         if exec_on_start:
             next_run_time = datetime.now(timezone(self._config.TIMEZONE))
-            self._logger.info(f"It will be executed now")
+            logger.info(f"It will be executed now")
         self._scheduler.add_job(
             self._digi_reboot_report_process,
             "interval",
@@ -36,10 +37,10 @@ class DiGiRebootReport:
         )
 
     async def _digi_reboot_report_process(self):
-        self._logger.info("Starting DiGi reboot report process")
+        logger.info("Starting DiGi reboot report process")
         start = time.time()
 
-        self._logger.info("Grabbing DiGi recovery logs")
+        logger.info("Grabbing DiGi recovery logs")
 
         digi_recovery_logs_response = await self._digi_repository.get_digi_recovery_logs()
         digi_recovery_logs_response_body = digi_recovery_logs_response["body"]
@@ -56,10 +57,10 @@ class DiGiRebootReport:
         await self._generate_and_email_csv_file(ticket_task_history_map)
         stop = time.time()
 
-        self._logger.info(f"DiGi reboot report process finished in {round((stop - start) / 60, 2)} minutes")
+        logger.info(f"DiGi reboot report process finished in {round((stop - start) / 60, 2)} minutes")
 
     def _get_all_ticket_ids_from_digi_recovery_logs(self):
-        self._logger.info("Creating a list of all ticket IDS from the DiGi recovery logs")
+        logger.info("Creating a list of all ticket IDS from the DiGi recovery logs")
         digi_ticket_ids = []
 
         for recovery_log in self._digi_recovery_logs:
@@ -67,21 +68,21 @@ class DiGiRebootReport:
             if ticket_id not in digi_ticket_ids:
                 digi_ticket_ids.append(ticket_id)
 
-        self._logger.info("List of all DiGi ticket IDS created")
-        self._logger.info(digi_ticket_ids)
+        logger.info("List of all DiGi ticket IDS created")
+        logger.info(digi_ticket_ids)
         return digi_ticket_ids
 
     async def _get_ticket_task_histories(self, ticket_id_list):
         ticket_map = {}
-        self._logger.info("Creating ticket map of ticket id to ticket task history")
+        logger.info("Creating ticket map of ticket id to ticket task history")
         for ticket_id in ticket_id_list:
-            self._logger.info(f"Grabbing the ticket task history for ticket {ticket_id}")
+            logger.info(f"Grabbing the ticket task history for ticket {ticket_id}")
             ticket_task_history_response = await self._bruin_repository.get_ticket_task_history(ticket_id)
             ticket_task_history_response_body = ticket_task_history_response["body"]
             ticket_task_history_response_status = ticket_task_history_response["status"]
             if ticket_task_history_response_status not in range(200, 300):
                 continue
-            self._logger.info(f"Parsing all data in the ticket task history for ticket {ticket_id}")
+            logger.info(f"Parsing all data in the ticket task history for ticket {ticket_id}")
             ticket_info = self._parse_ticket_history(ticket_task_history_response_body)
             if ticket_info["reboot_attempted"]:
                 tz = timezone(self._config.TIMEZONE)
@@ -159,15 +160,15 @@ class DiGiRebootReport:
         return None
 
     def _merge_recovery_logs(self, ticket_map):
-        self._logger.info("Merging recovery logs data into ticket map")
+        logger.info("Merging recovery logs data into ticket map")
         for process in self._digi_recovery_logs:
             ticket_id = int(process["TicketID"])
             if ticket_id not in ticket_map:
                 continue
 
-            self._logger.info(
+            logger.info(
                 f"Merging data from DiGi recovery logs of ticket id {ticket_id} "
-                f"into the ticket ID to ticket task history map"
+                "into the ticket ID to ticket task history map"
             )
             ticket_map[ticket_id]["process_attempted"] = True
             ticket_map[ticket_id]["process_start"] = (
@@ -223,7 +224,7 @@ class DiGiRebootReport:
             )
 
     async def _generate_and_email_csv_file(self, ticket_map):
-        self._logger.info("Generating a csv file from the ticket map of ticket IDs to ticket task histories")
+        logger.info("Generating a csv file from the ticket map of ticket IDs to ticket task histories")
         fields = [
             "Time (EST)",  # 0
             "Reboot Request Attempts",  # 1
@@ -349,5 +350,5 @@ class DiGiRebootReport:
                 csvwriter.writerow(breakdown[day])
             buf.seek(0)
             raw_csv = buf.read()
-            self._logger.info("Sending csv file through email")
+            logger.info("Sending csv file through email")
             await self._email_repository.send_email(raw_csv)

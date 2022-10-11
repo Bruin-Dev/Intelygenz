@@ -81,6 +81,8 @@ services:
     depends_on:
       - notifications-bridge
       - email-bridge
+      - digi-bridge
+      - bruin-bridge
     ports:
       - 5016:5000
       - 9590:9090
