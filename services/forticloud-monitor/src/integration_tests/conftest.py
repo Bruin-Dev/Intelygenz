@@ -132,7 +132,7 @@ def bruin_login(bruin_login_server):
     async def builder(access_token: str = "any_access_token", expires_in: int = 3600):
         await bruin_login_server.mock_route(
             method="POST",
-            path="/identity/connect/value",
+            path="/identity/connect/token",
             return_value=f'{{"access_token":"{access_token}","expires_in":{expires_in}}}',
         )
 

@@ -30,7 +30,7 @@ NATS_CONFIG = {
 
 FORTICLOUD_CONFIG = {
     "base_url": os.environ["FORTICLOUD_BASE_URL"],
-    "account_id": os.environ["FORTICLOUD_ACCOUNT_ID"],
+    "account_id": os.environ["FORTICLOUD_ACCOUNT"],
     "username": os.environ["FORTICLOUD_USERNAME"],
     "password": os.environ["FORTICLOUD_PASSWORD"],
 }

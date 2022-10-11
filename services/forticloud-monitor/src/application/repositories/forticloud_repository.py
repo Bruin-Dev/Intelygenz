@@ -7,7 +7,7 @@ from typing import Any, Dict
 
 from forticloud_client.client import ForticloudClient
 from pydantic import ValidationError
-from tenacity import AsyncRetrying, retry_if_exception_type, stop_after_attempt, wait_random
+from tenacity import AsyncRetrying, retry_if_exception_type, stop_after_attempt, wait_chain, wait_random
 
 from application.models.device import Device, DeviceId, DeviceStatus, DeviceType
 from application.repositories import UnexpectedResponseError, UnexpectedStatusError
@@ -27,8 +27,8 @@ DEVICE_DOWN_EVENT = "Event: Device Down"
 
 DEFAULT_RETRY_CONFIG = dict(
     reraise=True,
-    stop=stop_after_attempt(3),
-    wait=wait_random(min=1, max=2),
+    stop=stop_after_attempt(4),
+    wait=wait_chain(wait_random(min=1, max=3), wait_random(min=2, max=4), wait_random(min=3, max=5)),
     retry=retry_if_exception_type(UnexpectedStatusError),
 )
 
@@ -56,24 +56,24 @@ class ForticloudRepository:
                 if forticloud_response.status != HTTPStatus.OK:
                     raise UnexpectedStatusError(forticloud_response.status)
 
-        ap_response = APResponseBody.parse_obj(forticloud_response.body)
+        body = APResponseBody.parse_obj(forticloud_response.body)
 
         ap_status = DeviceStatus.UNKNOWN
-        match ap_response.connection_state:
-            case "connected" | "Connected":
+        match body.result.connection_state:
+            case "connected" | "Connected" | "connecting" | "Connecting":
                 ap_status = DeviceStatus.ONLINE
             case "disconnected" | "Disconnected":
                 ap_status = DeviceStatus.OFFLINE
 
         if ap_status == DeviceStatus.UNKNOWN:
-            raise UnknownStatusError(ap_response.connection_state)
+            raise UnknownStatusError(body.result.connection_state)
 
         return Device(
             id=device_id,
             status=ap_status,
-            name=ap_response.name or "unknown",
-            type=ap_response.disc_type or "unknown",
-            serial=ap_response.serial or "unknown",
+            name=body.result.name or "unknown",
+            type=body.result.disc_type or "unknown",
+            serial=body.result.serial or "unknown",
         )
 
     async def _get_switch_device(self, device_id: DeviceId) -> Device:
@@ -86,29 +86,34 @@ class ForticloudRepository:
                 if forticloud_response.status != HTTPStatus.OK:
                     raise UnexpectedStatusError(forticloud_response.status)
 
-        switch_response = SwitchResponseBody.parse_obj(forticloud_response.body)
+        body = SwitchResponseBody.parse_obj(forticloud_response.body)
 
         switch_status = DeviceStatus.UNKNOWN
-        match switch_response.status:
-            case "online":
+        match body.conn_status.status:
+            case "online" | "connected" | "Connected" | "connecting" | "Connecting":
                 switch_status = DeviceStatus.ONLINE
-            case "offline":
+            case "offline" | "disconnected" | "Disconnected":
                 switch_status = DeviceStatus.OFFLINE
 
         if switch_status == DeviceStatus.UNKNOWN:
-            raise UnknownStatusError(switch_response.status)
+            raise UnknownStatusError(body.conn_status.status)
 
         return Device(
             id=device_id,
             status=switch_status,
-            name=switch_response.hostname or "unknown",
-            type=switch_response.model or "unknown",
-            serial=switch_response.sn or "unknown",
+            name=body.system.status.hostname or "unknown",
+            type=body.system.status.model or "unknown",
+            serial=body.system.status.serial_number or "unknown",
         )
 
     async def _get_device(self, device_type: str, network_id: str, serial_number: str) -> ForticloudResponse:
-        response = await self.forticloud_client.get_device_info(device_type, network_id, serial_number)
-        log.debug(f"get_device_info(...) => {response}")
+        response = await self.forticloud_client.get_device_info(
+            device=device_type,
+            network_id=network_id,
+            serial_number=f"{serial_number}/",
+        )
+        str_response = response if len(str(response)) < 500 else "{...}"
+        log.debug(f"get_device_info(...) => {str_response}")
         try:
             return ForticloudResponse.parse_obj(response)
         except ValidationError as e:

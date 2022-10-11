@@ -9,7 +9,7 @@ from bruin_client.models import BruinCredentials, BruinRequest, BruinResponse, B
 
 log = logging.getLogger(__name__)
 TOKEN_METHOD = "POST"
-TOKEN_PATH = "/identity/connect/value"
+TOKEN_PATH = "/identity/connect/token"
 TOKEN_FORM_DATA = {"grant_type": "client_credentials", "scope": "public_api"}
 
 

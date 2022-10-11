@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, Field, ValidationError, validator
 
 
 class ForticloudResponse(BaseModel):
@@ -8,23 +8,50 @@ class ForticloudResponse(BaseModel):
     body: Dict
 
 
-class APResponseBody(BaseModel):
+class APResponseResult(BaseModel):
     connection_state: Optional[str]
     name: Optional[str]
     disc_type: Optional[str]
     serial: Optional[str]
 
-    @validator("*", pre=True)
-    def wrong_string_type(cls, v):
+    @validator("connection_state", "name", "disc_type", "serial", pre=True)
+    def validate_strings(cls, v):
         return None if not isinstance(v, str) else v
+
+
+class APResponseBody(BaseModel):
+    result: APResponseResult = Field(default_factory=APResponseResult)
+
+
+class SwitchResponseConnStatus(BaseModel):
+    status: Optional[str]
+
+    @validator("status", pre=True)
+    def validate_strings(cls, v):
+        return None if not isinstance(v, str) else v
+
+
+class SwitchResponseSystemStatus(BaseModel):
+    hostname: Optional[str]
+    serial_number: Optional[str]
+    model: Optional[str]
+
+    @validator("hostname", "serial_number", "model", pre=True)
+    def validate_strings(cls, v):
+        return None if not isinstance(v, str) else v
+
+
+class SwitchResponseSystem(BaseModel):
+    status: SwitchResponseSystemStatus = Field(default_factory=SwitchResponseSystemStatus)
 
 
 class SwitchResponseBody(BaseModel):
-    status: Optional[str]
-    hostname: Optional[str]
-    model: Optional[str]
-    sn: Optional[str]
+    conn_status: SwitchResponseConnStatus = Field(default_factory=SwitchResponseConnStatus)
+    system: SwitchResponseSystem = Field(default_factory=SwitchResponseSystem)
 
-    @validator("*", pre=True)
-    def wrong_string_type(cls, v):
-        return None if not isinstance(v, str) else v
+    @validator("system", pre=True)
+    def validate_system(cls, v):
+        try:
+            return SwitchResponseSystem.parse_obj(v)
+        except ValidationError:
+            return SwitchResponseSystem()

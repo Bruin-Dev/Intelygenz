@@ -19,6 +19,10 @@ COPY pyutils_automation/bruin-client /pyutils_automation/bruin-client
 WORKDIR /pyutils_automation/bruin-client
 RUN poetry install --no-dev
 
+COPY pyutils_automation/clients/forticloud /pyutils_automation/clients/forticloud
+WORKDIR /pyutils_automation/clients/forticloud
+RUN poetry install --no-dev
+
 COPY services/forticloud-monitor/ /service/app
 WORKDIR /service/app
 RUN poetry install --no-dev

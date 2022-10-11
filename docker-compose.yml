@@ -150,8 +150,8 @@ services:
       - redis-customer-cache
       - notifications-bridge
     ports:
-      - 5034:5000
-      - 9838:9090
+      - 5026:5000
+      - 9892:9090
 
   forticloud-monitor:
     build:
@@ -164,6 +164,24 @@ services:
       - ./services/forticloud-monitor:/service/app
     ports:
       - 5025:5000
+
+  forticloud-poller:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: services/forticloud-poller/Dockerfile
+    env_file:
+      - services/forticloud-poller/src/config/env
+    volumes:
+      - ./services/forticloud-poller:/service/app
+    depends_on:
+      - nats-server
+      - redis
+      - redis-customer-cache
+      - notifications-bridge
+    ports:
+      - 5027:5000
+      - 9891:9090
 
   fraud-monitor:
     build:
@@ -182,40 +200,6 @@ services:
     ports:
       - 5024:5000
       - 9890:9090
-
-  forticloud-poller:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: services/forticloud-poller/Dockerfile
-    env_file:
-      - services/forticloud-poller/src/config/env
-    volumes:
-      - ./services/forticloud-poller:/service/app
-    depends_on:
-      - nats-server
-      - redis
-      - redis-customer-cache
-      - notifications-bridge
-    ports:
-      - 5032:5000
-      - 9878:9090
-
-  forticloud-cache:
-    build:
-      # Context must be the root of the monorepo
-      context: .
-      dockerfile: services/forticloud-cache/Dockerfile
-    env_file:
-      - services/forticloud-cache/src/config/env
-    volumes:
-      - ./services/forticloud-cache:/service/app
-    depends_on:
-      - nats-server
-      - redis
-    ports:
-      - 5032:5000
-      - 9878:9090
 
   gateway-monitor:
     build:

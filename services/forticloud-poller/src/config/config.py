@@ -21,7 +21,7 @@ TIMEZONE = os.environ["TIMEZONE"]
 
 
 MONITOR_CONFIG = {
-    "monitoring_minutes_interval": int(os.environ["FORTICLOUD_POLLER__MONITORING_JOB_INTERVAL"]) // 60,
+    "monitoring_minutes_interval": int(os.environ["MONITORING_JOB_INTERVAL"]) // 60,
 }
 
 LOG_CONFIG = {

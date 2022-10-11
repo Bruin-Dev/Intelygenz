@@ -21,7 +21,7 @@ async def ticket_notes_are_properly_posted_test(any_bruin_repository, any_respon
         BruinRequest(
             method="POST",
             path="/api/Ticket/any_ticket_id/notes",
-            json='{"note": "any_text", "serviceNumbers": ["any_service_number"]}',
+            json={"note": "any_text", "serviceNumbers": ["any_service_number"]},
         )
     )
 

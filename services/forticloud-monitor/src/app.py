@@ -89,6 +89,9 @@ class Application:
         if self.bruin_client:
             await self.bruin_client.close()
             log.info("==> Bruin client closed")
+        if self.forticloud_client:
+            await self.forticloud_client.close_session()
+            log.info("==> Forticloud client closed")
         if self.redis:
             self.redis.close()
             log.info("==> Redis closed")

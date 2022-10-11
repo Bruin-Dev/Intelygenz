@@ -54,7 +54,7 @@ class ForticloudPoller:
         if access_points_data and type(access_points_data) == list:
             await self._process_data(access_points_data, target="aps")
         else:
-            error_msg = "Error: APS Forticloud MALFORMED DATA"
+            error_msg = f"Error: APS Forticloud MALFORMED DATA: {access_points_data}"
             logger.error(error_msg)
             await self._notifications_repository.send_slack_message(error_msg)
 
@@ -62,7 +62,7 @@ class ForticloudPoller:
         if switches_points_data and type(access_points_data) == list:
             await self._process_data(switches_points_data, target="switches")
         else:
-            error_msg = "Error: Switches Forticloud MALFORMED DATA"
+            error_msg = f"Error: Switches Forticloud MALFORMED DATA: {switches_points_data}"
             logger.error(error_msg)
             await self._notifications_repository.send_slack_message(error_msg)
 
