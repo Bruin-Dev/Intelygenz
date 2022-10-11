@@ -49,6 +49,12 @@
     - cd pyutils_automation/py310
     - poetry install --no-root
     - cd -
+    - cd pyutils_automation/clients/forticloud
+    - poetry install --no-root
+    - cd -
+    - cd pyutils_automation/bruin-client
+    - poetry install --no-root
+    - cd -
     - cd services/${MODULE}
     - poetry install --no-root
 
@@ -61,6 +67,12 @@
     - export PATH="/root/.local/bin:$PATH"
     - export POETRY_VIRTUALENVS_CREATE=false
     - cd pyutils_automation/py310
+    - poetry install --no-root
+    - cd -
+    - cd pyutils_automation/clients/forticloud
+    - poetry install --no-root
+    - cd -
+    - cd pyutils_automation/bruin-client
     - poetry install --no-root
     - cd -
     - cd services/${MODULE}
