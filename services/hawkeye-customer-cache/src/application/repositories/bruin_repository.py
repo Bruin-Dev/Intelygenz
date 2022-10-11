@@ -1,15 +1,20 @@
 import asyncio
+import json
+import logging
 
-from application import nats_error_response
 from shortuuid import uuid
 from tenacity import retry, stop_after_delay, wait_exponential
 
+from application import nats_error_response
+from application.repositories.utils_repository import to_json_bytes
+
+logger = logging.getLogger(__name__)
+
 
 class BruinRepository:
-    def __init__(self, config, logger, event_bus, notifications_repository):
+    def __init__(self, config, nats_client, notifications_repository):
         self._config = config
-        self._logger = logger
-        self._event_bus = event_bus
+        self._nats_client = nats_client
         self._semaphore = asyncio.BoundedSemaphore(self._config.REFRESH_CONFIG["semaphore"])
         self._notifications_repository = notifications_repository
         self._serials_with_multiple_inventories = {}
@@ -25,9 +30,10 @@ class BruinRepository:
         }
 
         try:
-            self._logger.info(f"Claiming client info for service number {service_number}...")
-            response = await self._event_bus.rpc_request("bruin.customer.get.info", request, timeout=30)
-            self._logger.info(f"Got client info for service number {service_number}!")
+            logger.info(f"Claiming client info for service number {service_number}...")
+            response = await self._nats_client.request("bruin.customer.get.info", to_json_bytes(request), timeout=30)
+            response = json.loads(response.data)
+            logger.info(f"Got client info for service number {service_number}!")
         except Exception as e:
             err_msg = f"An error occurred when claiming client info for service number {service_number} -> {e}"
             response = nats_error_response
@@ -59,11 +65,12 @@ class BruinRepository:
         }
 
         try:
-            self._logger.info(
-                f"Claiming management status for service number {service_number} and client {client_id}..."
+            logger.info(f"Claiming management status for service number {service_number} and client {client_id}...")
+            response = await self._nats_client.request(
+                "bruin.inventory.management.status", to_json_bytes(request), timeout=30
             )
-            response = await self._event_bus.rpc_request("bruin.inventory.management.status", request, timeout=30)
-            self._logger.info(f"Got management status for service number {service_number} and client {client_id}!")
+            response = json.loads(response.data)
+            logger.info(f"Got management status for service number {service_number} and client {client_id}!")
         except Exception as e:
             err_msg = (
                 f"An error occurred when claiming management status for service number {service_number} and "
@@ -90,7 +97,7 @@ class BruinRepository:
         return management_status in self._config.REFRESH_CONFIG["monitorable_management_statuses"]
 
     async def _notify_error(self, err_msg):
-        self._logger.error(err_msg)
+        logger.error(err_msg)
         await self._notifications_repository.send_slack_message(err_msg)
 
     async def filter_probe(self, probe):
@@ -104,7 +111,7 @@ class BruinRepository:
         async def _filter_probe():
             async with self._semaphore:
                 serial_number = probe["serialNumber"]
-                self._logger.info(f"Checking if device with serial {serial_number} should be monitored...")
+                logger.info(f"Checking if device with serial {serial_number} should be monitored...")
 
                 client_info_response = await self.get_client_info(serial_number)
                 client_info_response_status = client_info_response["status"]
@@ -116,7 +123,7 @@ class BruinRepository:
                     self._serials_with_multiple_inventories[serial_number] = client_info_response_body
 
                 if not client_info_response_body:
-                    self._logger.info(f"Edge with serial {serial_number} doesn't have any Bruin client info associated")
+                    logger.info(f"Edge with serial {serial_number} doesn't have any Bruin client info associated")
                     return
                 client_id = client_info_response_body[0].get("client_id")
 
@@ -127,10 +134,10 @@ class BruinRepository:
 
                 management_status_response_body = management_status_response["body"]
                 if not self.is_management_status_active(management_status_response_body):
-                    self._logger.info(f"Management status is not active for serial {serial_number}. Skipping...")
+                    logger.info(f"Management status is not active for serial {serial_number}. Skipping...")
                     return
                 else:
-                    self._logger.info(f"Management status for serial {serial_number} seems active")
+                    logger.info(f"Management status for serial {serial_number} seems active")
 
                 return {
                     "probe_id": probe["probeId"],
@@ -148,6 +155,4 @@ class BruinRepository:
         try:
             return await _filter_probe()
         except Exception as e:
-            self._logger.error(
-                f"An error occurred while checking if probe {probe['probeId']} should be cached or not -> {e}"
-            )
+            logger.error(f"An error occurred while checking if probe {probe['probeId']} should be cached or not -> {e}")

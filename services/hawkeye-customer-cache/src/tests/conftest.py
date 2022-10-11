@@ -1,13 +1,13 @@
 from datetime import datetime
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
+
 from application.actions.get_customers import GetCustomers
 from application.actions.refresh_cache import RefreshCache
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.hawkeye_repository import HawkeyeRepository
 from application.repositories.storage_repository import StorageRepository
-from asynctest import CoroutineMock
 from config import testconfig as config
 
 # Scopes
@@ -17,12 +17,7 @@ from config import testconfig as config
 
 
 @pytest.fixture(scope="function")
-def logger():
-    return Mock()
-
-
-@pytest.fixture(scope="function")
-def event_bus():
+def nats_client():
     return Mock()
 
 
@@ -47,35 +42,32 @@ def scheduler():
 
 
 @pytest.fixture(scope="function")
-def bruin_repository(logger, event_bus, notifications_repository):
-    return BruinRepository(config, logger, event_bus, notifications_repository)
+def bruin_repository(nats_client, notifications_repository):
+    return BruinRepository(config, nats_client, notifications_repository)
 
 
 @pytest.fixture(scope="function")
-def hawkeye_repository(logger, event_bus, notifications_repository):
-    return HawkeyeRepository(logger, event_bus, config, notifications_repository)
+def hawkeye_repository(nats_client, notifications_repository):
+    return HawkeyeRepository(nats_client, config, notifications_repository)
 
 
 @pytest.fixture(scope="function")
-def storage_repository(logger, redis):
-    return StorageRepository(config, logger, redis)
+def storage_repository(redis):
+    return StorageRepository(config, redis)
 
 
 @pytest.fixture(scope="function")
-def get_customer(storage_repository, logger, event_bus):
-    event_bus.publish_message = CoroutineMock()
-    return GetCustomers(config, logger, storage_repository, event_bus)
+def get_customer(storage_repository):
+    return GetCustomers(config, storage_repository)
 
 
 @pytest.fixture(scope="function")
-def instance_get_customer(storage_repository, logger, event_bus):
-    return GetCustomers(config, logger, storage_repository, event_bus)
+def instance_get_customer(storage_repository):
+    return GetCustomers(config, storage_repository)
 
 
 @pytest.fixture(scope="function")
 def refresh_cache(
-    logger,
-    event_bus,
     scheduler,
     storage_repository,
     bruin_repository,
@@ -85,8 +77,6 @@ def refresh_cache(
 ):
     return RefreshCache(
         config,
-        event_bus,
-        logger,
         scheduler,
         storage_repository,
         bruin_repository,
@@ -255,17 +245,17 @@ def request_message_without_topic():
 
 @pytest.fixture(scope="function")
 def response_building_cache_message():
-    return {"request_id": "1234", "body": "Cache is still being built", "status": 202}
+    return {"body": "Cache is still being built", "status": 202}
 
 
 @pytest.fixture(scope="function")
 def response_not_body_message():
-    return {"request_id": "1234", "body": 'You must specify {.."body":{...}} in the request', "status": 400}
+    return {"body": 'You must specify {.."body":{...}} in the request', "status": 400}
 
 
 @pytest.fixture(scope="function")
 def response_not_found_message():
-    return {"request_id": "1234", "body": "No devices were found for the specified filters", "status": 404}
+    return {"body": "No devices were found for the specified filters", "status": 404}
 
 
 @pytest.fixture(scope="function")

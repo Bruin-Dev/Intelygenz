@@ -1,37 +1,43 @@
 import json
+import logging
 
 from dateutil.parser import parse
+from nats.aio.msg import Msg
 from pytz import utc
+
+from application.repositories.utils_repository import to_json_bytes
+
+logger = logging.getLogger(__name__)
 
 
 class GetCustomers:
-    def __init__(self, config, logger, storage_repository, event_bus):
+    def __init__(self, config, storage_repository):
         self._config = config
-        self._logger = logger
         self._storage_repository = storage_repository
-        self._event_bus = event_bus
 
-    async def get_customers(self, msg: dict):
-        self._logger.info(f"Getting customers...")
-        request_id = msg["request_id"]
-        response_topic = msg["response_topic"]
-        response = {"request_id": request_id, "body": None, "status": None}
+    async def __call__(self, msg: Msg):
+        payload = json.loads(msg.data)
 
-        if "body" not in msg.keys():
-            self._logger.error(f"Cannot get customer cache using {json.dumps(msg)}. JSON malformed")
+        logger.info(f"Getting customers...")
+        response = {"body": None, "status": None}
+
+        if "body" not in payload.keys():
+            logger.error(f"Cannot get customer cache using {json.dumps(payload)}. JSON malformed")
             response["status"] = 400
             response["body"] = 'You must specify {.."body":{...}} in the request'
-            await self._event_bus.publish_message(response_topic, response)
+            await msg.respond(to_json_bytes(response))
             return
-        body = msg["body"]
+
+        body = payload["body"]
 
         last_contact_filter = body["last_contact_filter"] if "last_contact_filter" in body else None
         cache = self._storage_repository.get_hawkeye_cache()
         if len(cache) == 0:
             response["body"] = f"Cache is still being built"
             response["status"] = 202
-            await self._event_bus.publish_message(msg["response_topic"], response)
+            await msg.respond(to_json_bytes(response))
             return
+
         filter_cache = (
             [
                 device
@@ -45,10 +51,11 @@ class GetCustomers:
         if len(filter_cache) == 0:
             response["body"] = "No devices were found for the specified filters"
             response["status"] = 404
-            await self._event_bus.publish_message(msg["response_topic"], response)
+            await msg.respond(to_json_bytes(response))
             return
         else:
             response["body"] = filter_cache
             response["status"] = 200
-        await self._event_bus.publish_message(msg["response_topic"], response)
-        self._logger.info(f"Get customer response published in event bus")
+
+        await msg.respond(to_json_bytes(response))
+        logger.info(f"Get customer response published in event bus")
