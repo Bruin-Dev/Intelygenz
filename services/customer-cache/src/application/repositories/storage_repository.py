@@ -1,11 +1,13 @@
 import json
+import logging
 from datetime import datetime, timedelta
+
+logger = logging.getLogger(__name__)
 
 
 class StorageRepository:
-    def __init__(self, config, logger, redis):
+    def __init__(self, config, redis):
         self._config = config
-        self._logger = logger
         self._redis = redis
 
         self._redis_key_prefix = config.ENVIRONMENT_NAME
@@ -39,22 +41,22 @@ class StorageRepository:
         self._redis.set(key, json.dumps(cache))
 
     def get_refresh_date(self) -> datetime:
-        self._logger.info("Getting next refresh date from Redis...")
+        logger.info("Getting next refresh date from Redis...")
         date = self._redis.get(self.__next_refresh_key)
 
         if date:
-            self._logger.info(f"Got next refresh date from Redis: {date}")
+            logger.info(f"Got next refresh date from Redis: {date}")
             date = datetime.strptime(date, self.__next_refresh_date_format)
         else:
-            self._logger.info(f"No {self.__next_refresh_key} key found in Redis")
+            logger.info(f"No {self.__next_refresh_key} key found in Redis")
 
         return date
 
     def update_refresh_date(self):
-        self._logger.info("Setting new refresh date in Redis...")
+        logger.info("Setting new refresh date in Redis...")
 
         next_refresh = datetime.utcnow() + timedelta(minutes=self._config.REFRESH_CONFIG["refresh_map_minutes"])
         date = next_refresh.strftime(self.__next_refresh_date_format)
         self._redis.set(self.__next_refresh_key, date)
 
-        self._logger.info(f"New refresh date: {date} set in Redis")
+        logger.info(f"New refresh date: {date} set in Redis")

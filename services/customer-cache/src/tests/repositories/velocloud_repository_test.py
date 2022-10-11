@@ -1,12 +1,14 @@
-from unittest.mock import Mock, call, patch
+from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
+from nats.aio.msg import Msg
+from shortuuid import uuid
+
 from application.repositories import nats_error_response
 from application.repositories import velocloud_repository as velocloud_repository_module
+from application.repositories.utils_repository import to_json_bytes
 from application.repositories.velocloud_repository import VelocloudRepository
-from asynctest import CoroutineMock
 from config import testconfig
-from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(velocloud_repository_module, "uuid", return_value=uuid_)
@@ -14,15 +16,13 @@ uuid_mock = patch.object(velocloud_repository_module, "uuid", return_value=uuid_
 
 class TestVelocloudRepository:
     def instance_test(self):
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         config = testconfig
         notifications_repository = Mock()
 
-        velocloud_repository = VelocloudRepository(config, logger, event_bus, notifications_repository)
+        velocloud_repository = VelocloudRepository(config, nats_client, notifications_repository)
 
-        assert velocloud_repository._event_bus is event_bus
-        assert velocloud_repository._logger is logger
+        assert velocloud_repository._nats_client is nats_client
         assert velocloud_repository._config is config
         assert velocloud_repository._notifications_repository is notifications_repository
 
@@ -32,12 +32,17 @@ class TestVelocloudRepository:
     ):
         instance_velocloud_request["request_id"] = uuid_
         instance_velocloud_response["request_id"] = uuid_
-        instance_velocloud_repository._event_bus.rpc_request = CoroutineMock(return_value=instance_velocloud_response)
+
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(instance_velocloud_response)
+
+        instance_velocloud_repository._nats_client.request = AsyncMock(return_value=response_msg)
+
         with uuid_mock:
             result = await instance_velocloud_repository.get_edges_links_by_host("mettel.velocloud.net")
 
-        instance_velocloud_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "get.links.with.edge.info", instance_velocloud_request, timeout=300
+        instance_velocloud_repository._nats_client.request.assert_awaited_once_with(
+            "get.links.with.edge.info", to_json_bytes(instance_velocloud_request), timeout=300
         )
         assert result == instance_velocloud_response
 
@@ -48,14 +53,18 @@ class TestVelocloudRepository:
         instance_velocloud_request["request_id"] = uuid_
         instance_velocloud_response["request_id"] = uuid_
         rpc_timeout = 1000
-        instance_velocloud_repository._event_bus.rpc_request = CoroutineMock(return_value=instance_velocloud_response)
+
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(instance_velocloud_response)
+
+        instance_velocloud_repository._nats_client.request = AsyncMock(return_value=response_msg)
         with uuid_mock:
             result = await instance_velocloud_repository.get_edges_links_by_host(
                 "mettel.velocloud.net", rpc_timeout=rpc_timeout
             )
 
-        instance_velocloud_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "get.links.with.edge.info", instance_velocloud_request, timeout=rpc_timeout
+        instance_velocloud_repository._nats_client.request.assert_awaited_once_with(
+            "get.links.with.edge.info", to_json_bytes(instance_velocloud_request), timeout=rpc_timeout
         )
         assert result == instance_velocloud_response
 
@@ -64,8 +73,8 @@ class TestVelocloudRepository:
         self, instance_velocloud_repository, instance_enterprise_velocloud_request
     ):
         instance_enterprise_velocloud_request["request_id"] = uuid_
-        instance_velocloud_repository._event_bus.rpc_request = CoroutineMock(side_effect=Exception)
-        instance_velocloud_repository._notifications_repository.send_slack_message = CoroutineMock()
+        instance_velocloud_repository._nats_client.request = AsyncMock(side_effect=Exception)
+        instance_velocloud_repository._notifications_repository.send_slack_message = AsyncMock()
 
         host = "mettel.velocloud.net"
         enterprise_id = "123"
@@ -73,8 +82,8 @@ class TestVelocloudRepository:
             result = await instance_velocloud_repository._get_all_enterprise_edges(host, enterprise_id)
 
         instance_velocloud_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        instance_velocloud_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "request.enterprises.edges", instance_enterprise_velocloud_request, timeout=300
+        instance_velocloud_repository._nats_client.request.assert_awaited_once_with(
+            "request.enterprises.edges", to_json_bytes(instance_enterprise_velocloud_request), timeout=300
         )
         assert result == nats_error_response
 
@@ -87,10 +96,11 @@ class TestVelocloudRepository:
         instance_enterprise_edge_response["body"] = "Failed"
         instance_enterprise_edge_response["status"] = 400
 
-        instance_velocloud_repository._event_bus.rpc_request = CoroutineMock(
-            return_value=instance_enterprise_edge_response
-        )
-        instance_velocloud_repository._notifications_repository.send_slack_message = CoroutineMock()
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(instance_enterprise_edge_response)
+
+        instance_velocloud_repository._nats_client.request = AsyncMock(return_value=response_msg)
+        instance_velocloud_repository._notifications_repository.send_slack_message = AsyncMock()
 
         host = "mettel.velocloud.net"
         enterprise_id = "123"
@@ -98,8 +108,8 @@ class TestVelocloudRepository:
             result = await instance_velocloud_repository._get_all_enterprise_edges(host, enterprise_id)
 
         instance_velocloud_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        instance_velocloud_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "request.enterprises.edges", instance_enterprise_velocloud_request, timeout=300
+        instance_velocloud_repository._nats_client.request.assert_awaited_once_with(
+            "request.enterprises.edges", to_json_bytes(instance_enterprise_velocloud_request), timeout=300
         )
         assert result == instance_enterprise_edge_response
 
@@ -112,27 +122,53 @@ class TestVelocloudRepository:
         host2 = testconfig.VELOCLOUD_HOST[1]
         host3 = testconfig.VELOCLOUD_HOST[2]
         host4 = testconfig.VELOCLOUD_HOST[3]
-        instance_velocloud_repository._notifications_repository.send_slack_message = CoroutineMock()
-        instance_velocloud_repository._event_bus.rpc_request = CoroutineMock(
+
+        response_msg_links = Mock(spec_set=Msg)
+        response_msg_links.data = to_json_bytes(instance_velocloud_response)
+
+        response_msg_wrong = Mock(spec_set=Msg)
+        response_msg_wrong.data = to_json_bytes(wrong_request)
+
+        response_msg_enterprise_edges = Mock(spec_set=Msg)
+        response_msg_enterprise_edges.data = to_json_bytes(instance_enterprise_edge_response)
+
+        instance_velocloud_repository._notifications_repository.send_slack_message = AsyncMock()
+        instance_velocloud_repository._nats_client.request = AsyncMock(
             side_effect=[
-                instance_velocloud_response,
-                wrong_request,
-                wrong_request,
-                wrong_request,
-                instance_enterprise_edge_response,
+                response_msg_links,
+                response_msg_wrong,
+                response_msg_wrong,
+                response_msg_wrong,
+                response_msg_enterprise_edges,
             ]
         )
         with uuid_mock:
             edges_with_serial = await instance_velocloud_repository.get_all_velo_edges()
-        instance_velocloud_repository._event_bus.rpc_request.assert_has_awaits(
+        instance_velocloud_repository._nats_client.request.assert_has_awaits(
             [
-                call("get.links.with.edge.info", {"request_id": uuid_, "body": {"host": host1}}, timeout=300),
-                call("get.links.with.edge.info", {"request_id": uuid_, "body": {"host": host2}}, timeout=300),
-                call("get.links.with.edge.info", {"request_id": uuid_, "body": {"host": host3}}, timeout=300),
-                call("get.links.with.edge.info", {"request_id": uuid_, "body": {"host": host4}}, timeout=300),
+                call(
+                    "get.links.with.edge.info",
+                    to_json_bytes({"request_id": uuid_, "body": {"host": host1}}),
+                    timeout=300,
+                ),
+                call(
+                    "get.links.with.edge.info",
+                    to_json_bytes({"request_id": uuid_, "body": {"host": host2}}),
+                    timeout=300,
+                ),
+                call(
+                    "get.links.with.edge.info",
+                    to_json_bytes({"request_id": uuid_, "body": {"host": host3}}),
+                    timeout=300,
+                ),
+                call(
+                    "get.links.with.edge.info",
+                    to_json_bytes({"request_id": uuid_, "body": {"host": host4}}),
+                    timeout=300,
+                ),
                 call(
                     "request.enterprises.edges",
-                    {"request_id": uuid_, "body": {"host": host1, "enterprise_id": 1}},
+                    to_json_bytes({"request_id": uuid_, "body": {"host": host1, "enterprise_id": 1}}),
                     timeout=90,
                 ),
             ]
@@ -148,24 +184,52 @@ class TestVelocloudRepository:
         host2 = testconfig.VELOCLOUD_HOST[1]
         host3 = testconfig.VELOCLOUD_HOST[2]
         host4 = testconfig.VELOCLOUD_HOST[3]
-        instance_velocloud_repository._notifications_repository.send_slack_message = CoroutineMock()
-        instance_velocloud_repository._event_bus.rpc_request = CoroutineMock(
+
+        response_msg_links = Mock(spec_set=Msg)
+        response_msg_links.data = to_json_bytes(instance_special_velocloud_response)
+
+        response_msg_wrong = Mock(spec_set=Msg)
+        response_msg_wrong.data = to_json_bytes(wrong_request)
+
+        response_msg_enterprise_edges = Mock(spec_set=Msg)
+        response_msg_enterprise_edges.data = to_json_bytes(instance_enterprise_edge_response)
+
+        instance_velocloud_repository._notifications_repository.send_slack_message = AsyncMock()
+        instance_velocloud_repository._nats_client.request = AsyncMock(
             side_effect=[
-                instance_special_velocloud_response,
-                wrong_request,
-                wrong_request,
+                response_msg_links,
+                response_msg_wrong,
+                response_msg_wrong,
                 Exception,
-                instance_enterprise_edge_response,
+                response_msg_enterprise_edges,
             ]
         )
+
         with uuid_mock:
             edges_with_serial = await instance_velocloud_repository.get_all_velo_edges()
-        instance_velocloud_repository._event_bus.rpc_request.assert_has_awaits(
+
+        instance_velocloud_repository._nats_client.request.assert_has_awaits(
             [
-                call("get.links.with.edge.info", {"request_id": uuid_, "body": {"host": host1}}, timeout=300),
-                call("get.links.with.edge.info", {"request_id": uuid_, "body": {"host": host2}}, timeout=300),
-                call("get.links.with.edge.info", {"request_id": uuid_, "body": {"host": host3}}, timeout=300),
-                call("get.links.with.edge.info", {"request_id": uuid_, "body": {"host": host4}}, timeout=300),
+                call(
+                    "get.links.with.edge.info",
+                    to_json_bytes({"request_id": uuid_, "body": {"host": host1}}),
+                    timeout=300,
+                ),
+                call(
+                    "get.links.with.edge.info",
+                    to_json_bytes({"request_id": uuid_, "body": {"host": host2}}),
+                    timeout=300,
+                ),
+                call(
+                    "get.links.with.edge.info",
+                    to_json_bytes({"request_id": uuid_, "body": {"host": host3}}),
+                    timeout=300,
+                ),
+                call(
+                    "get.links.with.edge.info",
+                    to_json_bytes({"request_id": uuid_, "body": {"host": host4}}),
+                    timeout=300,
+                ),
             ]
         )
         assert len(edges_with_serial) == 0
@@ -175,8 +239,12 @@ class TestVelocloudRepository:
         self, instance_velocloud_repository, instance_get_configuration_request, instance_config_response
     ):
         instance_get_configuration_request["request_id"] = uuid_
-        instance_velocloud_repository._event_bus.rpc_request = CoroutineMock(return_value=instance_config_response)
-        instance_velocloud_repository._notifications_repository.send_slack_message = CoroutineMock()
+
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(instance_config_response)
+
+        instance_velocloud_repository._nats_client.request = AsyncMock(return_value=response_msg)
+        instance_velocloud_repository._notifications_repository.send_slack_message = AsyncMock()
         edge = {
             "host": instance_get_configuration_request["body"]["host"],
             "enterprise_id": instance_get_configuration_request["body"]["enterprise_id"],
@@ -186,8 +254,8 @@ class TestVelocloudRepository:
             result = await instance_velocloud_repository.get_links_configuration(edge)
 
         instance_velocloud_repository._notifications_repository.send_slack_message.assert_not_awaited()
-        instance_velocloud_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "request.links.configuration", instance_get_configuration_request, timeout=30
+        instance_velocloud_repository._nats_client.request.assert_awaited_once_with(
+            "request.links.configuration", to_json_bytes(instance_get_configuration_request), timeout=30
         )
         assert result == instance_config_response
 
@@ -197,8 +265,12 @@ class TestVelocloudRepository:
     ):
         config_stack_response = {"status": 400, "body": []}
         instance_get_configuration_request["request_id"] = uuid_
-        instance_velocloud_repository._event_bus.rpc_request = CoroutineMock(return_value=config_stack_response)
-        instance_velocloud_repository._notifications_repository.send_slack_message = CoroutineMock()
+
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(config_stack_response)
+
+        instance_velocloud_repository._nats_client.request = AsyncMock(return_value=response_msg)
+        instance_velocloud_repository._notifications_repository.send_slack_message = AsyncMock()
         edge = {
             "host": instance_get_configuration_request["body"]["host"],
             "enterprise_id": instance_get_configuration_request["body"]["enterprise_id"],
@@ -209,8 +281,8 @@ class TestVelocloudRepository:
             result = await instance_velocloud_repository.get_links_configuration(edge)
 
         instance_velocloud_repository._notifications_repository.send_slack_message.assert_awaited()
-        instance_velocloud_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "request.links.configuration", instance_get_configuration_request, timeout=30
+        instance_velocloud_repository._nats_client.request.assert_awaited_once_with(
+            "request.links.configuration", to_json_bytes(instance_get_configuration_request), timeout=30
         )
         assert result["status"] == 400
         assert result["body"] == []
@@ -220,8 +292,8 @@ class TestVelocloudRepository:
         self, instance_velocloud_repository, instance_get_configuration_request
     ):
         instance_get_configuration_request["request_id"] = uuid_
-        instance_velocloud_repository._event_bus.rpc_request = CoroutineMock(side_effect=Exception)
-        instance_velocloud_repository._notifications_repository.send_slack_message = CoroutineMock()
+        instance_velocloud_repository._nats_client.request = AsyncMock(side_effect=Exception)
+        instance_velocloud_repository._notifications_repository.send_slack_message = AsyncMock()
         edge = {
             "host": instance_get_configuration_request["body"]["host"],
             "enterprise_id": instance_get_configuration_request["body"]["enterprise_id"],
@@ -232,14 +304,14 @@ class TestVelocloudRepository:
             result = await instance_velocloud_repository.get_links_configuration(edge)
 
         instance_velocloud_repository._notifications_repository.send_slack_message.assert_awaited()
-        instance_velocloud_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "request.links.configuration", instance_get_configuration_request, timeout=30
+        instance_velocloud_repository._nats_client.request.assert_awaited_once_with(
+            "request.links.configuration", to_json_bytes(instance_get_configuration_request), timeout=30
         )
         assert result == nats_error_response
 
     @pytest.mark.asyncio
     async def add_edge_config_test(self, instance_velocloud_repository, instance_config_response):
-        instance_velocloud_repository.get_links_configuration = CoroutineMock(return_value=instance_config_response)
+        instance_velocloud_repository.get_links_configuration = AsyncMock(return_value=instance_config_response)
         edge = {
             "edge": {
                 "host": "mettel.velocloud.net",
@@ -253,7 +325,7 @@ class TestVelocloudRepository:
     @pytest.mark.asyncio
     async def add_edge_config_bad_status_test(self, instance_velocloud_repository, instance_config_response):
         instance_config_response["status"] = 400
-        instance_velocloud_repository.get_links_configuration = CoroutineMock(return_value=instance_config_response)
+        instance_velocloud_repository.get_links_configuration = AsyncMock(return_value=instance_config_response)
         edge = {
             "edge": {
                 "host": "mettel.velocloud.net",

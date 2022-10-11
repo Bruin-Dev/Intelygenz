@@ -1,15 +1,20 @@
 import json
+import logging
 import time
 
-from application.repositories import nats_error_response
 from shortuuid import uuid
+
+from application.repositories import nats_error_response
+from application.repositories.utils_repository import to_json_bytes
+
+logger = logging.getLogger(__name__)
 
 
 class VelocloudRepository:
-    def __init__(self, config, logger, event_bus, notifications_repository):
+    def __init__(self, config, nats_client, notifications_repository):
         self._config = config
         self._logger = logger
-        self._event_bus = event_bus
+        self._nats_client = nats_client
         self._notifications_repository = notifications_repository
 
     async def get_all_velo_edges(self):
@@ -79,7 +84,10 @@ class VelocloudRepository:
 
         try:
             self._logger.info(f"Getting edges links from Velocloud for host {host}...")
-            response = await self._event_bus.rpc_request("get.links.with.edge.info", request, timeout=rpc_timeout)
+            response = await self._nats_client.request(
+                "get.links.with.edge.info", to_json_bytes(request), timeout=rpc_timeout
+            )
+            response = json.loads(response.data)
             self._logger.info("Got edges links from Velocloud!")
         except Exception as e:
             err_msg = f"An error occurred when requesting edge list from {host} -> {e}"
@@ -110,7 +118,10 @@ class VelocloudRepository:
 
         try:
             self._logger.info(f"Getting all edges from Velocloud host {host} and enterprise ID {enterprise_id}...")
-            response = await self._event_bus.rpc_request("request.enterprises.edges", request, timeout=rpc_timeout)
+            response = await self._nats_client.request(
+                "request.enterprises.edges", to_json_bytes(request), timeout=rpc_timeout
+            )
+            response = json.loads(response.data)
             self._logger.info(f"Got all edges from Velocloud host {host} and enterprise ID {enterprise_id}!")
         except Exception as e:
             err_msg = (
@@ -141,7 +152,10 @@ class VelocloudRepository:
 
         try:
             self._logger.info(f"Getting links configuration for edge {edge}...")
-            response = await self._event_bus.rpc_request("request.links.configuration", request, timeout=30)
+            response = await self._nats_client.request(
+                "request.links.configuration", to_json_bytes(request), timeout=30
+            )
+            response = json.loads(response.data)
         except Exception as e:
             err_msg = f"An error occurred when requesting links configuration for edge {edge} -> {e}"
             response = nats_error_response

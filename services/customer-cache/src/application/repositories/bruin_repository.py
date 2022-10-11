@@ -1,14 +1,18 @@
-import asyncio
+import json
+import logging
+
+from shortuuid import uuid
 
 from application.repositories import nats_error_response
-from shortuuid import uuid
+from application.repositories.utils_repository import to_json_bytes
+
+logger = logging.getLogger(__name__)
 
 
 class BruinRepository:
-    def __init__(self, config, logger, event_bus, notifications_repository):
+    def __init__(self, config, nats_client, notifications_repository):
         self._config = config
-        self._logger = logger
-        self._event_bus = event_bus
+        self._nats_client = nats_client
         self._notifications_repository = notifications_repository
 
     async def get_client_info(self, service_number: str):
@@ -22,9 +26,10 @@ class BruinRepository:
         }
 
         try:
-            self._logger.info(f"Claiming client info for service number {service_number}...")
-            response = await self._event_bus.rpc_request("bruin.customer.get.info", request, timeout=30)
-            self._logger.info(f"Got client info for service number {service_number}!")
+            logger.info(f"Claiming client info for service number {service_number}...")
+            response = await self._nats_client.request("bruin.customer.get.info", to_json_bytes(request), timeout=30)
+            response = json.loads(response.data)
+            logger.info(f"Got client info for service number {service_number}!")
         except Exception as e:
             err_msg = f"An error occurred when claiming client info for service number {service_number} -> {e}"
             response = nats_error_response
@@ -39,7 +44,7 @@ class BruinRepository:
                 )
 
         if err_msg:
-            self._logger.error(err_msg)
+            logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response
@@ -57,11 +62,12 @@ class BruinRepository:
         }
 
         try:
-            self._logger.info(
-                f"Claiming management status for service number {service_number} and client {client_id}..."
+            logger.info(f"Claiming management status for service number {service_number} and client {client_id}...")
+            response = await self._nats_client.request(
+                "bruin.inventory.management.status", to_json_bytes(request), timeout=30
             )
-            response = await self._event_bus.rpc_request("bruin.inventory.management.status", request, timeout=30)
-            self._logger.info(f"Got management status for service number {service_number} and client {client_id}!")
+            response = json.loads(response.data)
+            logger.info(f"Got management status for service number {service_number} and client {client_id}!")
         except Exception as e:
             err_msg = (
                 f"An error occurred when claiming management status for service number {service_number} and "
@@ -80,7 +86,7 @@ class BruinRepository:
                 )
 
         if err_msg:
-            self._logger.error(err_msg)
+            logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response
@@ -97,19 +103,18 @@ class BruinRepository:
         }
 
         try:
-            self._logger.info(f"Getting site details of site {site_id} and client {client_id}...")
-            response = await self._event_bus.rpc_request("bruin.get.site", request, timeout=60)
+            logger.info(f"Getting site details of site {site_id} and client {client_id}...")
+            response = await self._nats_client.request("bruin.get.site", to_json_bytes(request), timeout=60)
+            response = json.loads(response.data)
         except Exception as e:
-            err_msg = (
-                f"An error occurred while getting site details of site {site_id} and client {client_id}... -> {e}"
-            )
+            err_msg = f"An error occurred while getting site details of site {site_id} and client {client_id}... -> {e}"
             response = nats_error_response
         else:
             response_body = response["body"]
             response_status = response["status"]
 
             if response_status in range(200, 300):
-                self._logger.info(f"Got site details of site {site_id} and client {client_id} successfully!")
+                logger.info(f"Got site details of site {site_id} and client {client_id} successfully!")
             else:
                 err_msg = (
                     f"Error while getting site details of site {site_id} and client {client_id} in "
@@ -117,7 +122,7 @@ class BruinRepository:
                 )
 
         if err_msg:
-            self._logger.error(err_msg)
+            logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response

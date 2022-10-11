@@ -1,16 +1,16 @@
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from apscheduler.jobstores.base import ConflictingIdError
+from apscheduler.util import undefined
+from shortuuid import uuid
+from tenacity import retry, stop_after_attempt
+
 from application.actions import refresh_cache as refresh_cache_module
 from application.actions.refresh_cache import RefreshCache
 from application.repositories import EdgeIdentifier
-from apscheduler.jobstores.base import ConflictingIdError
-from apscheduler.util import undefined
-from asynctest import CoroutineMock
 from config import testconfig
-from shortuuid import uuid
-from tenacity import retry, stop_after_attempt
 
 uuid_ = uuid()
 uuid_mock = patch.object(refresh_cache_module, "uuid", return_value=uuid_)
@@ -27,8 +27,6 @@ def retry_mock(attempts):
 class TestRefreshCache:
     def instance_test(self):
         config = testconfig
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         storage_repository = Mock()
         velocloud_repository = Mock()
@@ -38,8 +36,6 @@ class TestRefreshCache:
 
         refresh_cache = RefreshCache(
             config,
-            event_bus,
-            logger,
             scheduler,
             storage_repository,
             bruin_repository,
@@ -49,8 +45,6 @@ class TestRefreshCache:
         )
 
         assert refresh_cache._config == config
-        assert refresh_cache._event_bus == event_bus
-        assert refresh_cache._logger == logger
         assert refresh_cache._scheduler == scheduler
         assert refresh_cache._storage_repository == storage_repository
         assert refresh_cache._velocloud_repository == velocloud_repository
@@ -94,17 +88,12 @@ class TestRefreshCache:
 
     @pytest.mark.asyncio
     async def refresh_cache_edge_test(self, instance_refresh_cache, instance_cache_edges):
-
-        instance_refresh_cache._event_bus.rpc_request = CoroutineMock()
         next_run_time = datetime.now()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
-        instance_refresh_cache._logger.error = Mock()
-        instance_refresh_cache._velocloud_repository.get_all_velo_edges = CoroutineMock(
-            return_value=instance_cache_edges
-        )
+        instance_refresh_cache._velocloud_repository.get_all_velo_edges = AsyncMock(return_value=instance_cache_edges)
 
-        instance_refresh_cache._partial_refresh_cache = CoroutineMock()
+        instance_refresh_cache._partial_refresh_cache = AsyncMock()
         instance_refresh_cache._need_to_refresh_cache = Mock(return_value=True)
         tenacity_retry_mock = patch.object(refresh_cache_module, "retry", side_effect=retry_mock(attempts=1))
         with patch.object(refresh_cache_module, "datetime", new=datetime_mock):
@@ -115,17 +104,12 @@ class TestRefreshCache:
 
     @pytest.mark.asyncio
     async def not_refresh_cache_when_not_due_test(self, instance_refresh_cache, instance_cache_edges):
-
-        instance_refresh_cache._event_bus.rpc_request = CoroutineMock()
         next_run_time = datetime.now()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
-        instance_refresh_cache._logger.error = Mock()
-        instance_refresh_cache._velocloud_repository.get_all_velo_edges = CoroutineMock(
-            return_value=instance_cache_edges
-        )
+        instance_refresh_cache._velocloud_repository.get_all_velo_edges = AsyncMock(return_value=instance_cache_edges)
 
-        instance_refresh_cache._partial_refresh_cache = CoroutineMock()
+        instance_refresh_cache._partial_refresh_cache = AsyncMock()
         instance_refresh_cache._need_to_refresh_cache = Mock(return_value=False)
         tenacity_retry_mock = patch.object(refresh_cache_module, "retry", side_effect=retry_mock(attempts=1))
         with patch.object(refresh_cache_module, "datetime", new=datetime_mock):
@@ -138,13 +122,11 @@ class TestRefreshCache:
     async def refresh_cache_edge_list_failed_test(self, instance_refresh_cache):
         error = "Couldn't find any edge to refresh the cache"
         err_msg_refresh_cache = f"Maximum retries happened while while refreshing the cache cause of error was {error}"
-        instance_refresh_cache._event_bus.rpc_request = CoroutineMock()
 
-        instance_refresh_cache._logger.error = Mock()
-        instance_refresh_cache._velocloud_repository.get_all_velo_edges = CoroutineMock(return_value=None)
+        instance_refresh_cache._velocloud_repository.get_all_velo_edges = AsyncMock(return_value=None)
         instance_refresh_cache._need_to_refresh_cache = Mock(return_value=True)
-        instance_refresh_cache._partial_refresh_cache = CoroutineMock()
-        instance_refresh_cache._notifications_repository.send_slack_message = CoroutineMock()
+        instance_refresh_cache._partial_refresh_cache = AsyncMock()
+        instance_refresh_cache._notifications_repository.send_slack_message = AsyncMock()
 
         tenacity_retry_mock = patch.object(refresh_cache_module, "retry", side_effect=retry_mock(attempts=1))
         with uuid_mock, tenacity_retry_mock:
@@ -158,14 +140,11 @@ class TestRefreshCache:
         self, instance_refresh_cache, instance_err_msg_refresh_cache
     ):
         instance_err_msg_refresh_cache["request_id"] = uuid_
-        instance_refresh_cache._event_bus.rpc_request = CoroutineMock()
 
-        instance_refresh_cache._logger.error = Mock()
+        instance_refresh_cache._velocloud_repository.get_all_velo_edges = AsyncMock(return_value=None)
 
-        instance_refresh_cache._velocloud_repository.get_all_velo_edges = CoroutineMock(return_value=None)
-
-        instance_refresh_cache._partial_refresh_cache = CoroutineMock()
-        instance_refresh_cache._notifications_repository.send_slack_message = CoroutineMock()
+        instance_refresh_cache._partial_refresh_cache = AsyncMock()
+        instance_refresh_cache._notifications_repository.send_slack_message = AsyncMock()
 
         retry_mock_fn = retry_mock(attempts=instance_refresh_cache._config.REFRESH_CONFIG["attempts_threshold"])
         tenacity_retry_mock = patch.object(refresh_cache_module, "retry", side_effect=retry_mock_fn)
@@ -308,18 +287,18 @@ class TestRefreshCache:
         ]
 
         instance_refresh_cache._invalid_edges = {"mettel.velocloud.net": []}
-        instance_refresh_cache._filter_edge_list = CoroutineMock(
+        instance_refresh_cache._filter_edge_list = AsyncMock(
             side_effect=[
                 edge_from_bruin_1_with_config,
                 edge_from_bruin_2_with_config,
             ]
         )
         send_email_res = {"request_id": "asjkdhaskj8", "status": 200}
-        instance_refresh_cache._email_repository.send_email = CoroutineMock(return_value=send_email_res)
+        instance_refresh_cache._email_repository.send_email = AsyncMock(return_value=send_email_res)
         instance_refresh_cache._storage_repository.get_cache = Mock(return_value=stored_cache)
         instance_refresh_cache._cross_stored_cache_and_new_cache = Mock(return_value=new_cache)
         instance_refresh_cache._storage_repository.set_cache = Mock()
-        instance_refresh_cache._velocloud_repository.add_edge_config = CoroutineMock(
+        instance_refresh_cache._velocloud_repository.add_edge_config = AsyncMock(
             side_effect=[edge_from_bruin_1_with_config, edge_from_bruin_2_with_config]
         )
         instance_refresh_cache._serials_with_more_than_one_status = serials_with_more_than_one_status
@@ -410,7 +389,7 @@ class TestRefreshCache:
         crossed_cache = [edge_from_bruin_1_with_config, edge_from_bruin_2_with_config, edge_from_bruin_3_with_config]
         final_cache = [edge_from_bruin_1_with_config, edge_from_bruin_3_with_config]
 
-        instance_refresh_cache._filter_edge_list = CoroutineMock(
+        instance_refresh_cache._filter_edge_list = AsyncMock(
             side_effect=[
                 edge_from_bruin_1_with_config,
                 None,
@@ -418,11 +397,11 @@ class TestRefreshCache:
         )
         instance_refresh_cache._invalid_edges = {host: [EdgeIdentifier(**edge_from_bruin_2_with_config["edge"])]}
         send_email_res = {"request_id": "asjkdhaskj8", "status": 200}
-        instance_refresh_cache._email_repository.send_email = CoroutineMock(return_value=send_email_res)
+        instance_refresh_cache._email_repository.send_email = AsyncMock(return_value=send_email_res)
         instance_refresh_cache._storage_repository.get_cache = Mock(return_value=stored_cache)
         instance_refresh_cache._cross_stored_cache_and_new_cache = Mock(return_value=crossed_cache)
         instance_refresh_cache._storage_repository.set_cache = Mock()
-        instance_refresh_cache._velocloud_repository.add_edge_config = CoroutineMock(
+        instance_refresh_cache._velocloud_repository.add_edge_config = AsyncMock(
             side_effect=[edge_from_bruin_1_with_config, edge_from_bruin_2_with_config]
         )
 
@@ -444,8 +423,8 @@ class TestRefreshCache:
         ]
         instance_err_msg_refresh_cache["request_id"] = uuid_
 
-        instance_refresh_cache._notifications_repository.send_slack_message = CoroutineMock()
-        instance_refresh_cache._filter_edge_list = CoroutineMock(return_value=edge_from_bruin)
+        instance_refresh_cache._notifications_repository.send_slack_message = AsyncMock()
+        instance_refresh_cache._filter_edge_list = AsyncMock(return_value=edge_from_bruin)
         instance_refresh_cache._storage_repository.get_cache = Mock()
         instance_refresh_cache._cross_stored_cache_and_new_cache = Mock()
         instance_refresh_cache._storage_repository.set_cache = Mock()
@@ -791,14 +770,14 @@ class TestRefreshCache:
         instance_edges_refresh_cache[0]["links_configuration"] = links_configuration
         instance_cache_edges[0]["links_configuration"] = links_configuration
 
-        instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
+        instance_refresh_cache._bruin_repository.get_client_info = AsyncMock(
             return_value={"body": [client_info, client_info], "status": 200}
         )
-        instance_refresh_cache._bruin_repository.get_management_status = CoroutineMock(
+        instance_refresh_cache._bruin_repository.get_management_status = AsyncMock(
             return_value={"body": ["some management status"], "status": 200}
         )
         instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
-        instance_refresh_cache._bruin_repository.get_site_details = CoroutineMock(
+        instance_refresh_cache._bruin_repository.get_site_details = AsyncMock(
             return_value={"body": site_details, "status": 200}
         )
 
@@ -824,10 +803,8 @@ class TestRefreshCache:
         instance_edges_refresh_cache[0]["edgeSerialNumber"] = "VC01"
         instance_edges_refresh_cache[0]["edgeHASerialNumber"] = "VC02"
 
-        instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
-            return_value={"body": None, "status": 200}
-        )
-        instance_refresh_cache._bruin_repository.get_management_status = CoroutineMock(
+        instance_refresh_cache._bruin_repository.get_client_info = AsyncMock(return_value={"body": None, "status": 200})
+        instance_refresh_cache._bruin_repository.get_management_status = AsyncMock(
             return_value={"body": "some management status", "status": 200}
         )
         instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
@@ -838,8 +815,6 @@ class TestRefreshCache:
         instance_refresh_cache._bruin_repository.get_client_info.assert_awaited()
         instance_refresh_cache._bruin_repository.get_management_status.assert_not_awaited()
         instance_refresh_cache._bruin_repository.is_management_status_active.assert_not_called()
-
-        instance_refresh_cache._logger.error.assert_called_once()
 
         assert cache_return is None
         assert instance_refresh_cache._invalid_edges == {}
@@ -853,10 +828,8 @@ class TestRefreshCache:
         instance_edges_refresh_cache[0]["edgeSerialNumber"] = "VC01"
         instance_edges_refresh_cache[0]["edgeHASerialNumber"] = "VC02"
 
-        instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
-            return_value={"body": [], "status": 200}
-        )
-        instance_refresh_cache._bruin_repository.get_management_status = CoroutineMock(
+        instance_refresh_cache._bruin_repository.get_client_info = AsyncMock(return_value={"body": [], "status": 200})
+        instance_refresh_cache._bruin_repository.get_management_status = AsyncMock(
             return_value={"body": "some management status", "status": 200}
         )
         instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
@@ -884,10 +857,10 @@ class TestRefreshCache:
         instance_edges_refresh_cache[0]["edgeSerialNumber"] = "VC01"
         instance_edges_refresh_cache[0]["edgeHASerialNumber"] = "VC02"
 
-        instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
+        instance_refresh_cache._bruin_repository.get_client_info = AsyncMock(
             return_value={"body": {"client_id": "some client info"}, "status": 400}
         )
-        instance_refresh_cache._bruin_repository.get_management_status = CoroutineMock(
+        instance_refresh_cache._bruin_repository.get_management_status = AsyncMock(
             return_value={"body": "some management status", "status": 200}
         )
         instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
@@ -911,10 +884,10 @@ class TestRefreshCache:
         instance_edges_refresh_cache[0]["edgeSerialNumber"] = "VC01"
         instance_edges_refresh_cache[0]["edgeHASerialNumber"] = "VC02"
 
-        instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
+        instance_refresh_cache._bruin_repository.get_client_info = AsyncMock(
             return_value={"body": [{"client_id": "some client info"}], "status": 200}
         )
-        instance_refresh_cache._bruin_repository.get_management_status = CoroutineMock(
+        instance_refresh_cache._bruin_repository.get_management_status = AsyncMock(
             return_value={"body": "some management status", "status": 400}
         )
         instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
@@ -940,10 +913,10 @@ class TestRefreshCache:
         instance_edges_refresh_cache[0]["edgeSerialNumber"] = "VC01"
         instance_edges_refresh_cache[0]["edgeHASerialNumber"] = "VC02"
 
-        instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
+        instance_refresh_cache._bruin_repository.get_client_info = AsyncMock(
             return_value={"body": [{"client_id": "some client info"}], "status": 200}
         )
-        instance_refresh_cache._bruin_repository.get_management_status = CoroutineMock(
+        instance_refresh_cache._bruin_repository.get_management_status = AsyncMock(
             return_value={"body": "some management status", "status": 200}
         )
         instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=False)
@@ -971,14 +944,14 @@ class TestRefreshCache:
         instance_edges_refresh_cache[0]["edgeSerialNumber"] = "VC01"
         instance_edges_refresh_cache[0]["edgeHASerialNumber"] = "VC02"
 
-        instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
+        instance_refresh_cache._bruin_repository.get_client_info = AsyncMock(
             return_value={"body": [{"client_id": 30000, "client_name": "MetTel", "site_id": 12345}], "status": 200}
         )
-        instance_refresh_cache._bruin_repository.get_management_status = CoroutineMock(
+        instance_refresh_cache._bruin_repository.get_management_status = AsyncMock(
             return_value={"body": "some management status", "status": 200}
         )
         instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
-        instance_refresh_cache._bruin_repository.get_site_details = CoroutineMock(
+        instance_refresh_cache._bruin_repository.get_site_details = AsyncMock(
             return_value={
                 "body": "Got internal error from Bruin",
                 "status": 500,
@@ -1018,10 +991,10 @@ class TestRefreshCache:
         ]
         instance_edges_refresh_cache[0]["links_configuration"] = links_configuration
 
-        instance_refresh_cache._bruin_repository.get_client_info = CoroutineMock(
+        instance_refresh_cache._bruin_repository.get_client_info = AsyncMock(
             return_value={"body": [bruin_client_info, bruin_client_info], "status": 200}
         )
-        instance_refresh_cache._bruin_repository.get_management_status = CoroutineMock(
+        instance_refresh_cache._bruin_repository.get_management_status = AsyncMock(
             return_value={"body": "Pending", "status": 200}
         )
         instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)

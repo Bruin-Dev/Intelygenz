@@ -1,11 +1,12 @@
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from shortuuid import uuid
+
 from application.repositories import notifications_repository as notifications_repository_module
 from application.repositories.notifications_repository import NotificationsRepository
-from asynctest import CoroutineMock
+from application.repositories.utils_repository import to_json_bytes
 from config import testconfig
-from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(notifications_repository_module, "uuid", return_value=uuid_)
@@ -13,32 +14,34 @@ uuid_mock = patch.object(notifications_repository_module, "uuid", return_value=u
 
 class TestNotificationsRepository:
     def instance_test(self):
-        event_bus = Mock()
+        nats_client = Mock()
         config = testconfig
 
-        notifications_repository = NotificationsRepository(event_bus, config)
+        notifications_repository = NotificationsRepository(nats_client, config)
 
-        assert notifications_repository._event_bus is event_bus
+        assert notifications_repository._nats_client is nats_client
         assert notifications_repository._config is config
 
     @pytest.mark.asyncio
     async def send_slack_message_test(self):
         message = "Some message"
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock()
+        nats_client = Mock()
+        nats_client.request = AsyncMock()
         config = testconfig
 
-        notifications_repository = NotificationsRepository(event_bus, config)
+        notifications_repository = NotificationsRepository(nats_client, config)
 
         with uuid_mock:
             await notifications_repository.send_slack_message(message)
 
-        event_bus.rpc_request.assert_awaited_once_with(
+        nats_client.request.assert_awaited_once_with(
             "notification.slack.request",
-            {
-                "request_id": uuid_,
-                "body": {"message": f"[{notifications_repository._config.LOG_CONFIG['name']}] {message}"},
-            },
+            to_json_bytes(
+                {
+                    "request_id": uuid_,
+                    "body": {"message": f"[{notifications_repository._config.LOG_CONFIG['name']}] {message}"},
+                }
+            ),
             timeout=10,
         )

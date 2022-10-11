@@ -11,8 +11,9 @@ customer-cache-linter:
         - services/customer-cache/src/config/**/*
         - services/customer-cache/src/app.py
         - services/customer-cache/Dockerfile
-        - services/customer-cache/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/customer-cache/pyproject.toml
+        - services/customer-cache/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
@@ -29,10 +30,11 @@ customer-cache-test:
         - services/customer-cache/src/config/**/*
         - services/customer-cache/src/app.py
         - services/customer-cache/Dockerfile
-        - services/customer-cache/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/customer-cache/pyproject.toml
+        - services/customer-cache/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
-  extends: .unittest_module_python_36_alpine
+  extends: .unittest_module_python_310
   needs: ["customer-cache-linter"]
 
 # ==============================================
@@ -50,8 +52,9 @@ customer-cache-build:
         - services/customer-cache/src/config/**/*
         - services/customer-cache/src/app.py
         - services/customer-cache/Dockerfile
-        - services/customer-cache/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/customer-cache/pyproject.toml
+        - services/customer-cache/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CUSTOMER_CACHE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:

@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
+
 from application.actions.get_customers import GetCustomers
 from application.actions.refresh_cache import RefreshCache
 from application.repositories.bruin_repository import BruinRepository
@@ -9,7 +10,6 @@ from application.repositories.email_repository import EmailRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.storage_repository import StorageRepository
 from application.repositories.velocloud_repository import VelocloudRepository
-from asynctest import CoroutineMock
 from config import testconfig as config
 
 # Scopes
@@ -19,15 +19,9 @@ from config import testconfig as config
 
 
 @pytest.fixture(scope="function")
-def mock_logger():
-    logger = Mock()
-    return logger
-
-
-@pytest.fixture(scope="function")
-def mock_event_bus():
-    event_bus = Mock()
-    return event_bus
+def mock_nats_client():
+    nats_client = Mock()
+    return nats_client
 
 
 @pytest.fixture(scope="function")
@@ -55,34 +49,32 @@ def mock_velocloud_repository():
 
 
 @pytest.fixture(scope="function")
-def instance_notifications_repository(mock_event_bus):
-    return NotificationsRepository(mock_event_bus, config)
+def instance_notifications_repository(mock_nats_client):
+    return NotificationsRepository(mock_nats_client, config)
 
 
 @pytest.fixture(scope="function")
-def instance_email_repository(mock_event_bus):
-    return EmailRepository(mock_event_bus)
+def instance_email_repository(mock_nats_client):
+    return EmailRepository(mock_nats_client)
 
 
 @pytest.fixture(scope="function")
-def instance_velocloud_repository(mock_logger, mock_event_bus, instance_notifications_repository):
-    return VelocloudRepository(config, mock_logger, mock_event_bus, instance_notifications_repository)
+def instance_velocloud_repository(mock_nats_client, instance_notifications_repository):
+    return VelocloudRepository(config, mock_nats_client, instance_notifications_repository)
 
 
 @pytest.fixture(scope="function")
-def instance_bruin_repository(mock_logger, mock_event_bus, instance_notifications_repository):
-    return BruinRepository(config, mock_logger, mock_event_bus, instance_notifications_repository)
+def instance_bruin_repository(mock_nats_client, instance_notifications_repository):
+    return BruinRepository(config, mock_nats_client, instance_notifications_repository)
 
 
 @pytest.fixture(scope="function")
-def instance_storage_repository(mock_logger, mock_redis):
-    return StorageRepository(config, mock_logger, mock_redis)
+def instance_storage_repository(mock_redis):
+    return StorageRepository(config, mock_redis)
 
 
 @pytest.fixture(scope="function")
 def instance_refresh_cache(
-    mock_logger,
-    mock_event_bus,
     mock_scheduler,
     mock_storage_repository,
     instance_bruin_repository,
@@ -91,8 +83,6 @@ def instance_refresh_cache(
 ):
     return RefreshCache(
         config,
-        mock_event_bus,
-        mock_logger,
         mock_scheduler,
         mock_storage_repository,
         instance_bruin_repository,
@@ -118,7 +108,7 @@ def instance_request_message_without_topic():
 
 @pytest.fixture(scope="function")
 def instance_response_message():
-    return {"request_id": "1111", "body": "Cache is still being built for host(s): mettel.velocloud.com", "status": 202}
+    return {"body": "Cache is still being built for host(s): mettel.velocloud.com", "status": 202}
 
 
 @pytest.fixture(scope="function")
@@ -245,10 +235,9 @@ def instance_velocloud_response():
 
 
 @pytest.fixture(scope="function")
-def instance_get_customer(instance_storage_repository, mock_logger, mock_event_bus, instance_cache_edges):
-    mock_event_bus.publish_message = CoroutineMock()
+def instance_get_customer(instance_storage_repository, instance_cache_edges):
     instance_storage_repository.get_cache = Mock(return_value=instance_cache_edges)
-    return GetCustomers(config, mock_logger, instance_storage_repository, mock_event_bus)
+    return GetCustomers(config, instance_storage_repository)
 
 
 @pytest.fixture(scope="function")
@@ -259,19 +248,15 @@ def instance_cache_edges_with_last_contact(instance_cache_edges):
 
 
 @pytest.fixture(scope="function")
-def instance_get_customer_with_last_contact(
-    instance_storage_repository, mock_logger, mock_event_bus, instance_cache_edges_with_last_contact
-):
-    mock_event_bus.publish_message = CoroutineMock()
+def instance_get_customer_with_last_contact(instance_storage_repository, instance_cache_edges_with_last_contact):
     instance_storage_repository.get_cache = Mock(return_value=instance_cache_edges_with_last_contact)
-    return GetCustomers(config, mock_logger, instance_storage_repository, mock_event_bus)
+    return GetCustomers(config, instance_storage_repository)
 
 
 @pytest.fixture(scope="function")
-def instance_get_customer_with_empty_cache(instance_storage_repository, mock_logger, mock_event_bus):
-    mock_event_bus.publish_message = CoroutineMock()
+def instance_get_customer_with_empty_cache(instance_storage_repository):
     instance_storage_repository.get_cache = Mock(return_value=[])
-    return GetCustomers(config, mock_logger, instance_storage_repository, mock_event_bus)
+    return GetCustomers(config, instance_storage_repository)
 
 
 @pytest.fixture(scope="function")
