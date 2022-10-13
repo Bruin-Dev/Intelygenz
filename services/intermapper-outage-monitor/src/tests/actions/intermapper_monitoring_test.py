@@ -2215,7 +2215,8 @@ class TestInterMapperMonitor:
 
         intermapper_monitor._email_repository.mark_email_as_read = AsyncMock(return_value=response)
 
-        await intermapper_monitor._mark_email_as_read(msg_uid)
+        with config_mock:
+            await intermapper_monitor._mark_email_as_read(msg_uid)
 
         intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(msg_uid)
 
@@ -2226,7 +2227,8 @@ class TestInterMapperMonitor:
 
         intermapper_monitor._email_repository.mark_email_as_read = AsyncMock(return_value=response)
 
-        await intermapper_monitor._mark_email_as_read(msg_uid)
+        with config_mock:
+            await intermapper_monitor._mark_email_as_read(msg_uid)
 
         intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(msg_uid)
 

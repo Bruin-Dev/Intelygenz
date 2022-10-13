@@ -110,8 +110,7 @@ class InterMapperMonitor:
 
             if not circuit_id or circuit_id == "SD-WAN":
                 for email in emails:
-                    if self._config.CURRENT_ENVIRONMENT == "production":
-                        await self._mark_email_as_read(email["msg_uid"])
+                    await self._mark_email_as_read(email["msg_uid"])
 
                 logger.info(f"Invalid circuit_id. Skipping emails with circuit_id {circuit_id}...")
                 return
@@ -133,8 +132,7 @@ class InterMapperMonitor:
                 )
 
                 for email in emails:
-                    if self._config.CURRENT_ENVIRONMENT == "production":
-                        await self._mark_email_as_read(email["msg_uid"])
+                    await self._mark_email_as_read(email["msg_uid"])
 
                 return
 
@@ -188,7 +186,7 @@ class InterMapperMonitor:
             )
             event_processed_successfully = True
 
-        if event_processed_successfully and self._config.CURRENT_ENVIRONMENT == "production":
+        if event_processed_successfully:
             await self._mark_email_as_read(msg_uid)
 
         if event_processed_successfully:
@@ -575,6 +573,9 @@ class InterMapperMonitor:
         return True
 
     async def _mark_email_as_read(self, msg_uid):
+        if self._config.CURRENT_ENVIRONMENT != "production":
+            return
+
         mark_email_as_read_response = await self._email_repository.mark_email_as_read(msg_uid)
         mark_email_as_read_status = mark_email_as_read_response["status"]
 
