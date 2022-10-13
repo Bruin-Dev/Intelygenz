@@ -1,21 +1,27 @@
+import json
 from datetime import datetime
 from http import HTTPStatus
-from unittest.mock import patch
+from typing import Any
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from application.repositories import velocloud_repository as velocloud_repository_module
-from asynctest import CoroutineMock, Mock
-from config import testconfig
+from nats.aio.msg import Msg
 from shortuuid import uuid
+
+from application.repositories import velocloud_repository as velocloud_repository_module
+from config import testconfig
 
 uuid_ = uuid()
 uuid_mock = patch.object(velocloud_repository_module, "uuid", return_value=uuid_)
 
 
+def to_json_bytes(message: dict[str, Any]):
+    return json.dumps(message, default=str, separators=(",", ":")).encode()
+
+
 class TestVelocloudRepository:
-    def instance_test(self, velocloud_repository, event_bus, logger, notifications_repository):
-        assert velocloud_repository._event_bus is event_bus
-        assert velocloud_repository._logger is logger
+    def instance_test(self, velocloud_repository, nats_client, notifications_repository):
+        assert velocloud_repository._nats_client is nats_client
         assert velocloud_repository._notifications_repository is notifications_repository
         assert velocloud_repository._config is testconfig
 
@@ -25,14 +31,15 @@ class TestVelocloudRepository:
         payload = {"host": velocloud_host}
         request = make_rpc_request(request_id=uuid_, body=payload)
         response = make_rpc_response(request_id=uuid_, body=[], status=HTTPStatus.OK)
+        NATS_AIO_MSG = Msg(_client="NATS", data=to_json_bytes(response))
 
-        velocloud_repository._event_bus.rpc_request = CoroutineMock(return_value=response)
+        velocloud_repository._nats_client.request = AsyncMock(return_value=NATS_AIO_MSG)
 
         with uuid_mock:
             result = await velocloud_repository.get_network_gateway_list(velocloud_host)
 
-        velocloud_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "request.network.gateway.list", request, timeout=30
+        velocloud_repository._nats_client.request.assert_awaited_once_with(
+            "request.network.gateway.list", to_json_bytes(request), timeout=30
         )
         assert result == response
 
@@ -55,8 +62,9 @@ class TestVelocloudRepository:
 
         request = make_rpc_request(request_id=uuid_, body=payload)
         response = make_rpc_response(request_id=uuid_, body={}, status=HTTPStatus.OK)
+        NATS_AIO_MSG = Msg(_client="NATS", data=to_json_bytes(response))
 
-        velocloud_repository._event_bus.rpc_request = CoroutineMock(return_value=response)
+        velocloud_repository._nats_client.request = AsyncMock(return_value=NATS_AIO_MSG)
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=datetime(year=2022, month=1, day=1, hour=12))
@@ -65,7 +73,7 @@ class TestVelocloudRepository:
             with patch.object(velocloud_repository_module, "datetime", new=datetime_mock):
                 result = await velocloud_repository.get_gateway_status_metrics(gateway)
 
-        velocloud_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "request.gateway.status.metrics", request, timeout=30
+        velocloud_repository._nats_client.request.assert_awaited_once_with(
+            "request.gateway.status.metrics", to_json_bytes(request), timeout=30
         )
         assert result == response

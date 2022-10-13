@@ -1,12 +1,24 @@
+import json
+import logging
 from datetime import datetime, timedelta
+from typing import Any
 
 from shortuuid import uuid
 
+logger = logging.getLogger(__name__)
+
+
+def to_json_bytes(message: dict[str, Any]):
+    return json.dumps(message, default=str, separators=(",", ":")).encode()
+
+
+def get_data_from_response_message(message):
+    return json.loads(message.data)
+
 
 class VelocloudRepository:
-    def __init__(self, event_bus, logger, config, notifications_repository):
-        self._event_bus = event_bus
-        self._logger = logger
+    def __init__(self, nats_client, config, notifications_repository):
+        self._nats_client = nats_client
         self._config = config
         self._notifications_repository = notifications_repository
 
@@ -21,8 +33,10 @@ class VelocloudRepository:
         }
 
         try:
-            self._logger.info(f"Getting network gateway list from Velocloud host {velocloud_host}...")
-            response = await self._event_bus.rpc_request("request.network.gateway.list", request, timeout=30)
+            logger.info(f"Getting network gateway list from Velocloud host {velocloud_host}...")
+            response = get_data_from_response_message(
+                await self._nats_client.request("request.network.gateway.list", to_json_bytes(request), timeout=30)
+            )
         except Exception as e:
             err_msg = f"An error occurred when requesting network gateway list from Velocloud -> {e}"
             response = {"body": None, "status": 503}
@@ -31,7 +45,7 @@ class VelocloudRepository:
             response_status = response["status"]
 
             if response_status in range(200, 300):
-                self._logger.info(f"Got network gateway list from Velocloud host {velocloud_host}!")
+                logger.info(f"Got network gateway list from Velocloud host {velocloud_host}!")
             else:
                 environment = self._config.ENVIRONMENT_NAME.upper()
                 err_msg = (
@@ -40,7 +54,7 @@ class VelocloudRepository:
                 )
 
         if err_msg:
-            self._logger.error(err_msg)
+            logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response
@@ -64,11 +78,13 @@ class VelocloudRepository:
         }
 
         try:
-            self._logger.info(
+            logger.info(
                 f"Getting gateway status metrics from Velocloud host {gateway['host']} "
                 f"for gateway {gateway['id']} for the past {lookup_interval // 60} minutes..."
             )
-            response = await self._event_bus.rpc_request("request.gateway.status.metrics", request, timeout=30)
+            response = get_data_from_response_message(
+                await self._nats_client.request("request.gateway.status.metrics", to_json_bytes(request), timeout=30)
+            )
         except Exception as e:
             err_msg = f"An error occurred when requesting gateway status metrics from Velocloud -> {e}"
             response = {"body": None, "status": 503}
@@ -77,7 +93,7 @@ class VelocloudRepository:
             response_status = response["status"]
 
             if response_status in range(200, 300):
-                self._logger.info(
+                logger.info(
                     f"Got gateway status metrics from Velocloud host {gateway['host']} "
                     f"for gateway {gateway['id']} for the past {lookup_interval // 60} minutes!"
                 )
@@ -89,7 +105,7 @@ class VelocloudRepository:
                 )
 
         if err_msg:
-            self._logger.error(err_msg)
+            logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response

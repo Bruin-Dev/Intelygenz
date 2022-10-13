@@ -1,16 +1,28 @@
+import json
+import logging
 import os
 from datetime import datetime
-from typing import List
+from typing import Any, List
 
-from application import Troubles
 from pytz import timezone
 from shortuuid import uuid
 
+from application import Troubles
+
+logger = logging.getLogger(__name__)
+
+
+def to_json_bytes(message: dict[str, Any]):
+    return json.dumps(message, default=str, separators=(",", ":")).encode()
+
+
+def get_data_from_response_message(message):
+    return json.loads(message.data)
+
 
 class ServiceNowRepository:
-    def __init__(self, event_bus, logger, config, notifications_repository):
-        self._event_bus = event_bus
-        self._logger = logger
+    def __init__(self, nats_client, config, notifications_repository):
+        self._nats_client = nats_client
         self._config = config
         self._notifications_repository = notifications_repository
 
@@ -72,11 +84,15 @@ class ServiceNowRepository:
         }
 
         try:
-            self._logger.info(
+            logger.info(
                 f"Reporting {gateway['trouble'].value} incident to ServiceNow "
                 f"for host {gateway['host']} and gateway {gateway['name']}..."
             )
-            response = await self._event_bus.rpc_request("servicenow.incident.report.request", request, timeout=30)
+            response = get_data_from_response_message(
+                await self._nats_client.request(
+                    "servicenow.incident.report.request", to_json_bytes(request), timeout=30
+                )
+            )
         except Exception as e:
             err_msg = f"An error occurred when reporting incident to ServiceNow -> {e}"
             response = {"body": None, "status": 503}
@@ -85,7 +101,7 @@ class ServiceNowRepository:
             response_status = response["status"]
 
             if response_status in range(200, 300):
-                self._logger.info(
+                logger.info(
                     f"Reported {gateway['trouble'].value} incident to ServiceNow "
                     f"for host {gateway['host']} and gateway {gateway['name']}!"
                 )
@@ -98,7 +114,7 @@ class ServiceNowRepository:
                 )
 
         if err_msg:
-            self._logger.error(err_msg)
+            logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response

@@ -1,27 +1,20 @@
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
+
 from application.actions.monitoring import Monitor
 from application.repositories.metrics_repository import MetricsRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.servicenow_repository import ServiceNowRepository
 from application.repositories.utils_repository import UtilsRepository
 from application.repositories.velocloud_repository import VelocloudRepository
-from asynctest import CoroutineMock
 from config import testconfig
 from tests.fixtures._helpers import wrap_all_methods
 
 
 @pytest.fixture(scope="function")
-def logger() -> Mock:
+def nats_client() -> Mock:
     return Mock()
-
-
-@pytest.fixture(scope="function")
-def event_bus() -> Mock:
-    event_bus = Mock()
-    event_bus.publish_message = CoroutineMock()
-    return event_bus
 
 
 @pytest.fixture(scope="function")
@@ -44,30 +37,29 @@ def utils_repository() -> UtilsRepository:
 
 
 @pytest.fixture(scope="function")
-def notifications_repository(event_bus) -> NotificationsRepository:
-    instance = NotificationsRepository(event_bus)
-    wrap_all_methods(instance)
+def notifications_repository(nats_client) -> NotificationsRepository:
+    instance = NotificationsRepository(nats_client)
     return instance
 
 
 @pytest.fixture(scope="function")
-def velocloud_repository(event_bus, logger, notifications_repository) -> VelocloudRepository:
-    instance = VelocloudRepository(event_bus, logger, testconfig, notifications_repository)
-    wrap_all_methods(instance)
+def velocloud_repository(nats_client, notifications_repository) -> VelocloudRepository:
+    instance = VelocloudRepository(
+        nats_client=nats_client, config=testconfig, notifications_repository=notifications_repository
+    )
     return instance
 
 
 @pytest.fixture(scope="function")
-def servicenow_repository(event_bus, logger, notifications_repository) -> ServiceNowRepository:
-    instance = ServiceNowRepository(event_bus, logger, testconfig, notifications_repository)
-    wrap_all_methods(instance)
+def servicenow_repository(nats_client, notifications_repository) -> ServiceNowRepository:
+    instance = ServiceNowRepository(
+        nats_client=nats_client, config=testconfig, notifications_repository=notifications_repository
+    )
     return instance
 
 
 @pytest.fixture(scope="function")
 def monitor(
-    event_bus,
-    logger,
     scheduler,
     metrics_repository,
     servicenow_repository,
@@ -76,15 +68,12 @@ def monitor(
     utils_repository,
 ) -> Monitor:
     instance = Monitor(
-        event_bus,
-        logger,
-        scheduler,
-        testconfig,
-        metrics_repository,
-        servicenow_repository,
-        velocloud_repository,
-        notifications_repository,
-        utils_repository,
+        scheduler=scheduler,
+        config=testconfig,
+        metrics_repository=metrics_repository,
+        servicenow_repository=servicenow_repository,
+        velocloud_repository=velocloud_repository,
+        notifications_repository=notifications_repository,
+        utils_repository=utils_repository,
     )
-    wrap_all_methods(instance)
     return instance

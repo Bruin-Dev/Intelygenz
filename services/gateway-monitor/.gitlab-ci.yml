@@ -11,8 +11,9 @@ gateway-monitor-linter:
         - services/gateway-monitor/src/config/**/*
         - services/gateway-monitor/src/app.py
         - services/gateway-monitor/Dockerfile
-        - services/velocloud-bridge/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/forticloud-cache/pyproject.toml
+        - services/forticloud-cache/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
@@ -29,10 +30,11 @@ gateway-monitor-test:
         - services/gateway-monitor/src/config/**/*
         - services/gateway-monitor/src/app.py
         - services/gateway-monitor/Dockerfile
-        - services/velocloud-bridge/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/gateway-monitor/pyproject.toml
+        - services/gateway-monitor/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
-  extends: .unittest_module_python_36_alpine
+  extends: .unittest_module_python_310
   needs: ["gateway-monitor-linter"]
 
 # ====================================================
@@ -50,8 +52,9 @@ gateway-monitor-build:
         - services/gateway-monitor/src/config/**/*
         - services/gateway-monitor/src/app.py
         - services/gateway-monitor/Dockerfile
-        - services/velocloud-bridge/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/gateway-monitor/pyproject.toml
+        - services/gateway-monitor/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && ($GATEWAY_MONITOR_DESIRED_TASKS != "0") && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:

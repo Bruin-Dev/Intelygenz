@@ -1,23 +1,29 @@
+import json
 import os
 from http import HTTPStatus
-from unittest.mock import patch
+from typing import Any
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from nats.aio.msg import Msg
+from shortuuid import uuid
+
 from application import Troubles
 from application.repositories import servicenow_repository as servicenow_repository_module
-from asynctest import CoroutineMock, Mock
 from config import testconfig
-from shortuuid import uuid
 from tests.fixtures._constants import CURRENT_DATETIME
 
 uuid_ = uuid()
 uuid_mock = patch.object(servicenow_repository_module, "uuid", return_value=uuid_)
 
 
+def to_json_bytes(message: dict[str, Any]):
+    return json.dumps(message, default=str, separators=(",", ":")).encode()
+
+
 class TestServiceNowRepository:
-    def instance_test(self, servicenow_repository, event_bus, logger, notifications_repository):
-        assert servicenow_repository._event_bus is event_bus
-        assert servicenow_repository._logger is logger
+    def instance_test(self, servicenow_repository, nats_client, notifications_repository):
+        assert servicenow_repository._nats_client is nats_client
         assert servicenow_repository._notifications_repository is notifications_repository
         assert servicenow_repository._config is testconfig
 
@@ -35,7 +41,7 @@ class TestServiceNowRepository:
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=CURRENT_DATETIME)
 
-        servicenow_repository._get_trouble_note_lines.return_value = ["Condition: Test"]
+        servicenow_repository._get_trouble_note_lines = Mock(return_value=["Condition: Test"])
 
         with patch.object(servicenow_repository_module, "datetime", new=datetime_mock):
             note = servicenow_repository._build_incident_note(gateway)
@@ -101,17 +107,18 @@ class TestServiceNowRepository:
 
         request = make_rpc_request(request_id=uuid_, body=payload)
         response = make_rpc_response(request_id=uuid_, body=None, status=HTTPStatus.OK)
+        NATS_AIO_MSG = Msg(_client="NATS", data=to_json_bytes(response))
 
-        servicenow_repository._build_incident_summary.return_value = summary
-        servicenow_repository._build_incident_note.return_value = note
-        servicenow_repository._event_bus.rpc_request = CoroutineMock(return_value=response)
+        servicenow_repository._build_incident_summary = Mock(return_value=summary)
+        servicenow_repository._build_incident_note = Mock(return_value=note)
+        servicenow_repository._nats_client.request = AsyncMock(return_value=NATS_AIO_MSG)
 
         with uuid_mock:
             result = await servicenow_repository.report_incident(gateway)
 
         servicenow_repository._build_incident_summary.assert_called_once_with(gateway)
         servicenow_repository._build_incident_note.assert_called_once_with(gateway)
-        servicenow_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "servicenow.incident.report.request", request, timeout=30
+        servicenow_repository._nats_client.request.assert_awaited_once_with(
+            "servicenow.incident.report.request", to_json_bytes(request), timeout=30
         )
         assert result == response

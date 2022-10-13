@@ -1,15 +1,15 @@
 from datetime import datetime
 from http import HTTPStatus
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from application import Troubles
-from application.actions import monitoring as monitoring_module
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
-from asynctest import CoroutineMock
-from config import testconfig
 from shortuuid import uuid
+
+from application import Troubles
+from application.actions import monitoring as monitoring_module
+from config import testconfig
 
 uuid_ = uuid()
 uuid_mock = patch.object(monitoring_module, "uuid", return_value=uuid_)
@@ -19,16 +19,12 @@ class TestMonitor:
     def instance_test(
         self,
         monitor,
-        logger,
-        event_bus,
         scheduler,
         servicenow_repository,
         velocloud_repository,
         notifications_repository,
         utils_repository,
     ):
-        assert monitor._event_bus is event_bus
-        assert monitor._logger is logger
         assert monitor._scheduler is scheduler
         assert monitor._config is testconfig
         assert monitor._velocloud_repository is velocloud_repository
@@ -88,7 +84,7 @@ class TestMonitor:
 
     @pytest.mark.asyncio
     async def monitoring_process_test(self, monitor):
-        monitor._process_host = CoroutineMock()
+        monitor._process_host = AsyncMock()
 
         await monitor._monitoring_process()
 
@@ -105,11 +101,11 @@ class TestMonitor:
         gateway_metrics_response_1 = make_rpc_response(request_id=uuid_, body=gateway_metrics_1, status=HTTPStatus.OK)
         gateway_metrics_response_2 = make_rpc_response(request_id=uuid_, body=gateway_metrics_2, status=HTTPStatus.OK)
 
-        monitor._velocloud_repository.get_network_gateway_list = CoroutineMock(return_value=gateways_response)
-        monitor._velocloud_repository.get_gateway_status_metrics = CoroutineMock(
+        monitor._velocloud_repository.get_network_gateway_list = AsyncMock(return_value=gateways_response)
+        monitor._velocloud_repository.get_gateway_status_metrics = AsyncMock(
             side_effect=[gateway_metrics_response_1, gateway_metrics_response_2]
         )
-        monitor._report_servicenow_incident = CoroutineMock()
+        monitor._report_servicenow_incident = AsyncMock()
 
         await monitor._process_host(host)
 
@@ -135,8 +131,8 @@ class TestMonitor:
         response_4 = make_rpc_response(request_id=uuid_, body=None, status=HTTPStatus.INTERNAL_SERVER_ERROR)
         responses = [response_1, response_2, response_3, response_4]
 
-        monitor._servicenow_repository.report_incident = CoroutineMock(side_effect=responses)
-        monitor._notifications_repository.send_slack_message = CoroutineMock()
+        monitor._servicenow_repository.report_incident = AsyncMock(side_effect=responses)
+        monitor._notifications_repository.send_slack_message = AsyncMock()
 
         await monitor._report_servicenow_incident(gateway)
         await monitor._report_servicenow_incident(gateway)
@@ -144,7 +140,6 @@ class TestMonitor:
         await monitor._report_servicenow_incident(gateway)
 
         assert monitor._servicenow_repository.report_incident.call_count == 4
-        assert monitor._logger.info.call_count == 3
 
     def get_unhealthy_gateways_test(self, monitor, make_gateway_with_metrics):
         gateway_1 = make_gateway_with_metrics(id=1)
