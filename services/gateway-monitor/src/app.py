@@ -61,10 +61,9 @@ class Container:
         # LOGGER
         app_logger.info(f"Gateway Monitor starting in {config.CURRENT_ENVIRONMENT}...")
 
-        # REDIS
+        # NATS REDIS
         redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         redis_client.ping()
-
         tmp_redis_storage = RedisStorage(storage_client=redis_client)
         self._nats_client = Client(temp_payload_storage=tmp_redis_storage)
 
