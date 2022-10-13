@@ -13,10 +13,10 @@ RUN python poetry-install.py
 
 COPY pyutils_automation/py310 /pyutils_automation/py310
 WORKDIR /pyutils_automation/py310
-RUN poetry install --no-dev
+RUN poetry install --only main
 
 COPY services/servicenow-bridge/ /service/app
 WORKDIR /service/app
-RUN poetry install --no-dev
+RUN poetry install --only main
 
 CMD ["python3", "-u", "src/app.py"]
