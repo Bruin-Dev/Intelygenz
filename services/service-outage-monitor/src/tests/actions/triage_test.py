@@ -1,24 +1,22 @@
 from datetime import datetime, timedelta
 from typing import Generator
-from unittest.mock import Mock, call, patch
+from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
+from apscheduler.util import undefined
+from dateutil.parser import parse
+from shortuuid import uuid
+
 from application import Outages
 from application.actions import triage as triage_module
 from application.actions.triage import Triage
-from apscheduler.util import undefined
-from asynctest import CoroutineMock
 from config import testconfig
-from dateutil.parser import parse
-from shortuuid import uuid
 
 
 class TestTriage:
     def instance_test(
         self,
         triage,
-        event_bus,
-        logger,
         scheduler,
         outage_repository,
         customer_cache_repository,
@@ -29,8 +27,6 @@ class TestTriage:
         metrics_repository,
         ha_repository,
     ):
-        assert triage._event_bus is event_bus
-        assert triage._logger is logger
         assert triage._scheduler is scheduler
         assert triage._config is testconfig
         assert triage._outage_repository is outage_repository
@@ -44,8 +40,6 @@ class TestTriage:
 
     @pytest.mark.asyncio
     async def start_triage_job_with_exec_on_start_test(self):
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -57,8 +51,6 @@ class TestTriage:
         ha_repository = Mock()
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -88,8 +80,6 @@ class TestTriage:
 
     @pytest.mark.asyncio
     async def start_triage_job_with_no_exec_on_start_test(self):
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -101,8 +91,6 @@ class TestTriage:
         ha_repository = Mock()
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -132,8 +120,6 @@ class TestTriage:
             "status": 503,
         }
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -146,11 +132,9 @@ class TestTriage:
         ha_repository = Mock()
 
         customer_cache_repository = Mock()
-        customer_cache_repository.get_cache_for_triage_monitoring = CoroutineMock(return_value=get_cache_response)
+        customer_cache_repository.get_cache_for_triage_monitoring = AsyncMock(return_value=get_cache_response)
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -161,10 +145,10 @@ class TestTriage:
             triage_repository,
             ha_repository,
         )
-        triage._build_edges_status_by_serial = CoroutineMock()
-        triage._get_all_open_tickets_with_details_for_monitored_companies = CoroutineMock()
-        triage._process_ticket_details_with_triage = CoroutineMock()
-        triage._process_ticket_details_without_triage = CoroutineMock()
+        triage._build_edges_status_by_serial = AsyncMock()
+        triage._get_all_open_tickets_with_details_for_monitored_companies = AsyncMock()
+        triage._process_ticket_details_with_triage = AsyncMock()
+        triage._process_ticket_details_without_triage = AsyncMock()
 
         await triage._run_tickets_polling()
 
@@ -181,8 +165,6 @@ class TestTriage:
             "status": 202,
         }
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -195,11 +177,9 @@ class TestTriage:
         ha_repository = Mock()
 
         customer_cache_repository = Mock()
-        customer_cache_repository.get_cache_for_triage_monitoring = CoroutineMock(return_value=get_cache_response)
+        customer_cache_repository.get_cache_for_triage_monitoring = AsyncMock(return_value=get_cache_response)
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -210,10 +190,10 @@ class TestTriage:
             triage_repository,
             ha_repository,
         )
-        triage._build_edges_status_by_serial = CoroutineMock()
-        triage._get_all_open_tickets_with_details_for_monitored_companies = CoroutineMock()
-        triage._process_ticket_details_with_triage = CoroutineMock()
-        triage._process_ticket_details_without_triage = CoroutineMock()
+        triage._build_edges_status_by_serial = AsyncMock()
+        triage._get_all_open_tickets_with_details_for_monitored_companies = AsyncMock()
+        triage._process_ticket_details_with_triage = AsyncMock()
+        triage._process_ticket_details_without_triage = AsyncMock()
 
         await triage._run_tickets_polling()
 
@@ -427,8 +407,6 @@ class TestTriage:
             },
         ]
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -441,11 +419,9 @@ class TestTriage:
         ha_repository = Mock()
 
         customer_cache_repository = Mock()
-        customer_cache_repository.get_cache_for_triage_monitoring = CoroutineMock(return_value=get_cache_response)
+        customer_cache_repository.get_cache_for_triage_monitoring = AsyncMock(return_value=get_cache_response)
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -456,15 +432,15 @@ class TestTriage:
             triage_repository,
             ha_repository,
         )
-        triage._build_edges_status_by_serial = CoroutineMock()
-        triage._get_all_open_tickets_with_details_for_monitored_companies = CoroutineMock(return_value=open_tickets)
+        triage._build_edges_status_by_serial = AsyncMock()
+        triage._get_all_open_tickets_with_details_for_monitored_companies = AsyncMock(return_value=open_tickets)
         triage._filter_tickets_and_details_related_to_edges_under_monitoring = Mock(return_value=relevant_tickets)
         triage._filter_irrelevant_notes_in_tickets = Mock(return_value=relevant_tickets_with_notes_filtered)
         triage._get_ticket_details_with_and_without_triage = Mock(
             return_value=(ticket_details_with_triage, ticket_details_without_triage)
         )
-        triage._process_ticket_details_with_triage = CoroutineMock()
-        triage._process_ticket_details_without_triage = CoroutineMock()
+        triage._process_ticket_details_with_triage = AsyncMock()
+        triage._process_ticket_details_without_triage = AsyncMock()
 
         await triage._run_tickets_polling()
 
@@ -479,8 +455,6 @@ class TestTriage:
 
     @pytest.mark.asyncio
     async def build_edges_status_by_serial_test(self):
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -562,16 +536,14 @@ class TestTriage:
         ]
 
         velocloud_repository = Mock()
-        velocloud_repository.get_edges_for_triage = CoroutineMock(return_value=edges_statuses)
-        velocloud_repository.get_network_enterprises_for_triage = CoroutineMock(return_value=edges_network_enterprises)
+        velocloud_repository.get_edges_for_triage = AsyncMock(return_value=edges_statuses)
+        velocloud_repository.get_network_enterprises_for_triage = AsyncMock(return_value=edges_network_enterprises)
 
         ha_repository = Mock()
         ha_repository.map_edges_with_ha_info = Mock(return_value=edge_primaries_statuses_with_ha_info)
         ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(return_value=all_edge_statuses_with_ha_info)
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -687,10 +659,8 @@ class TestTriage:
         }
 
         bruin_repository = Mock()
-        bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=get_open_tickets_response)
+        bruin_repository.get_open_outage_tickets = AsyncMock(return_value=get_open_tickets_response)
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -701,8 +671,6 @@ class TestTriage:
         ha_repository = Mock()
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -714,7 +682,7 @@ class TestTriage:
             ha_repository,
         )
         triage._customer_cache = customer_cache
-        triage._get_open_tickets_with_details_by_ticket_id = CoroutineMock(side_effect=open_tickets_detail_return)
+        triage._get_open_tickets_with_details_by_ticket_id = AsyncMock(side_effect=open_tickets_detail_return)
 
         await triage._get_all_open_tickets_with_details_for_monitored_companies()
 
@@ -818,10 +786,8 @@ class TestTriage:
         }
 
         bruin_repository = Mock()
-        bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=get_open_tickets_response)
+        bruin_repository.get_open_outage_tickets = AsyncMock(return_value=get_open_tickets_response)
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -832,8 +798,6 @@ class TestTriage:
         ha_repository = Mock()
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -845,7 +809,7 @@ class TestTriage:
             ha_repository,
         )
         triage._customer_cache = customer_cache
-        triage._get_open_tickets_with_details_by_ticket_id = CoroutineMock(side_effect=open_tickets_detail_return)
+        triage._get_open_tickets_with_details_by_ticket_id = AsyncMock(side_effect=open_tickets_detail_return)
 
         await triage._get_all_open_tickets_with_details_for_monitored_companies()
 
@@ -940,10 +904,8 @@ class TestTriage:
         }
 
         bruin_repository = Mock()
-        bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=get_open_tickets_response)
+        bruin_repository.get_open_outage_tickets = AsyncMock(return_value=get_open_tickets_response)
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -954,8 +916,6 @@ class TestTriage:
         ha_repository = Mock()
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -967,7 +927,7 @@ class TestTriage:
             ha_repository,
         )
         triage._customer_cache = customer_cache
-        triage._get_open_tickets_with_details_by_ticket_id = CoroutineMock(return_value=open_tickets_detail_return)
+        triage._get_open_tickets_with_details_by_ticket_id = AsyncMock(return_value=open_tickets_detail_return)
 
         await triage._get_all_open_tickets_with_details_for_monitored_companies()
 
@@ -1007,8 +967,6 @@ class TestTriage:
             "status": 200,
         }
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -1019,11 +977,9 @@ class TestTriage:
         ha_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=get_ticket_1_details_response)
+        bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_1_details_response)
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -1060,8 +1016,6 @@ class TestTriage:
             "status": 500,
         }
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -1072,11 +1026,9 @@ class TestTriage:
         ha_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=get_ticket_1_details_response)
+        bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_1_details_response)
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -1113,8 +1065,6 @@ class TestTriage:
             "status": 200,
         }
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -1125,11 +1075,9 @@ class TestTriage:
         ha_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=get_ticket_1_details_response)
+        bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_1_details_response)
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -1181,8 +1129,6 @@ class TestTriage:
             "status": 200,
         }
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -1193,11 +1139,9 @@ class TestTriage:
         ha_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=get_ticket_1_details_response)
+        bruin_repository.get_ticket_details = AsyncMock(return_value=get_ticket_1_details_response)
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -1227,8 +1171,6 @@ class TestTriage:
     async def get_open_tickets_with_details_by_ticket_id_general_exception_test(self):
         ticket_1_id = 11111
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -1239,11 +1181,9 @@ class TestTriage:
         ha_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_details = CoroutineMock(side_effect=Exception)
+        bruin_repository.get_ticket_details = AsyncMock(side_effect=Exception)
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -1395,8 +1335,6 @@ class TestTriage:
             "ticket_notes": ticket_1_notes,
         }
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -1408,8 +1346,6 @@ class TestTriage:
         ha_repository = Mock()
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -1613,8 +1549,6 @@ class TestTriage:
             ticket_3,
         ]
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -1626,8 +1560,6 @@ class TestTriage:
         ha_repository = Mock()
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -1832,8 +1764,6 @@ class TestTriage:
             },
         ]
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -1845,8 +1775,6 @@ class TestTriage:
         ha_repository = Mock()
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -1960,8 +1888,6 @@ class TestTriage:
             ticket_detail_2,
         ]
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -1973,8 +1899,6 @@ class TestTriage:
         ha_repository = Mock()
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -1988,7 +1912,7 @@ class TestTriage:
         triage._cached_info_by_serial = edges_data_by_serial
         triage._get_most_recent_ticket_note = Mock(side_effect=[ticket_detail_1_note_1, ticket_detail_2_note_3])
         triage._was_ticket_note_appended_recently = Mock(side_effect=[False, True])
-        triage._append_new_triage_notes_based_on_recent_events = CoroutineMock()
+        triage._append_new_triage_notes_based_on_recent_events = AsyncMock()
 
         await triage._process_ticket_details_with_triage(ticket_details)
 
@@ -2035,8 +1959,6 @@ class TestTriage:
             "ticket_notes": [ticket_note_1, ticket_note_2, ticket_note_3],
         }
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -2048,8 +1970,6 @@ class TestTriage:
         ha_repository = Mock()
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -2072,8 +1992,6 @@ class TestTriage:
             "createdDate": "2019-12-30T06:38:13.503-05:00",
         }
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -2085,8 +2003,6 @@ class TestTriage:
         ha_repository = Mock()
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -2180,8 +2096,6 @@ class TestTriage:
             "status": 200,
         }
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -2190,7 +2104,7 @@ class TestTriage:
         ha_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.append_note_to_ticket = CoroutineMock(
+        bruin_repository.append_note_to_ticket = AsyncMock(
             side_effect=[
                 append_note_1_response,
                 append_note_2_response,
@@ -2200,7 +2114,7 @@ class TestTriage:
         )
 
         velocloud_repository = Mock()
-        velocloud_repository.get_last_edge_events = CoroutineMock(return_value=last_events_response)
+        velocloud_repository.get_last_edge_events = AsyncMock(return_value=last_events_response)
 
         triage_repository = Mock()
         triage_repository.build_events_note = Mock(
@@ -2213,8 +2127,6 @@ class TestTriage:
         )
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -2233,7 +2145,7 @@ class TestTriage:
                 events_chunk_4,
             ]
         )
-        triage._notify_triage_note_was_appended_to_ticket = CoroutineMock()
+        triage._notify_triage_note_was_appended_to_ticket = AsyncMock()
 
         with patch.object(config, "CURRENT_ENVIRONMENT", "production"):
             await triage._append_new_triage_notes_based_on_recent_events(
@@ -2305,8 +2217,6 @@ class TestTriage:
         note_for_events_chunk_3 = "This is the note for the third chunk"
         note_for_events_chunk_4 = "This is the note for the fourth chunk"
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -2315,10 +2225,10 @@ class TestTriage:
         ha_repository = Mock()
 
         velocloud_repository = Mock()
-        velocloud_repository.get_last_edge_events = CoroutineMock(return_value=last_events_response)
+        velocloud_repository.get_last_edge_events = AsyncMock(return_value=last_events_response)
 
         bruin_repository = Mock()
-        bruin_repository.append_note_to_ticket = CoroutineMock()
+        bruin_repository.append_note_to_ticket = AsyncMock()
 
         triage_repository = Mock()
         triage_repository.build_events_note = Mock(
@@ -2331,8 +2241,6 @@ class TestTriage:
         )
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -2351,7 +2259,7 @@ class TestTriage:
                 events_chunk_4,
             ]
         )
-        triage._notify_triage_note_was_appended_to_ticket = CoroutineMock()
+        triage._notify_triage_note_was_appended_to_ticket = AsyncMock()
 
         custom_triage_config = config.TRIAGE_CONFIG.copy()
         custom_triage_config["environment"] = "dev"
@@ -2429,8 +2337,6 @@ class TestTriage:
 
         events_sorted_by_event_time = [event_3, event_1, event_2, event_4]
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -2439,17 +2345,15 @@ class TestTriage:
         ha_repository = Mock()
 
         velocloud_repository = Mock()
-        velocloud_repository.get_last_edge_events = CoroutineMock(return_value=last_events_response)
+        velocloud_repository.get_last_edge_events = AsyncMock(return_value=last_events_response)
 
         bruin_repository = Mock()
-        bruin_repository.append_note_to_ticket = CoroutineMock()
+        bruin_repository.append_note_to_ticket = AsyncMock()
 
         triage_repository = Mock()
         triage_repository.build_events_note = Mock()
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -2461,7 +2365,7 @@ class TestTriage:
             ha_repository,
         )
         triage._get_events_chunked = Mock(return_value=[])  # Just tricking this return value to "stop" execution here
-        triage._notify_triage_note_was_appended_to_ticket = CoroutineMock()
+        triage._notify_triage_note_was_appended_to_ticket = AsyncMock()
 
         await triage._append_new_triage_notes_based_on_recent_events(ticket_detail, last_triage_timestamp, edge_data)
 
@@ -2500,8 +2404,6 @@ class TestTriage:
             "status": last_events_response_status,
         }
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -2512,11 +2414,9 @@ class TestTriage:
         ha_repository = Mock()
 
         velocloud_repository = Mock()
-        velocloud_repository.get_last_edge_events = CoroutineMock(return_value=last_events_response)
+        velocloud_repository.get_last_edge_events = AsyncMock(return_value=last_events_response)
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -2566,8 +2466,6 @@ class TestTriage:
             "status": last_events_response_status,
         }
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -2578,11 +2476,9 @@ class TestTriage:
         ha_repository = Mock()
 
         velocloud_repository = Mock()
-        velocloud_repository.get_last_edge_events = CoroutineMock(return_value=last_events_response)
+        velocloud_repository.get_last_edge_events = AsyncMock(return_value=last_events_response)
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -2662,8 +2558,6 @@ class TestTriage:
             "status": 500,
         }
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -2672,10 +2566,10 @@ class TestTriage:
         ha_repository = Mock()
 
         velocloud_repository = Mock()
-        velocloud_repository.get_last_edge_events = CoroutineMock(return_value=last_events_response)
+        velocloud_repository.get_last_edge_events = AsyncMock(return_value=last_events_response)
 
         bruin_repository = Mock()
-        bruin_repository.append_note_to_ticket = CoroutineMock(
+        bruin_repository.append_note_to_ticket = AsyncMock(
             side_effect=[
                 append_note_1_response,
                 append_note_2_response,
@@ -2695,8 +2589,6 @@ class TestTriage:
         )
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -2715,7 +2607,7 @@ class TestTriage:
                 events_chunk_4,
             ]
         )
-        triage._notify_triage_note_was_appended_to_ticket = CoroutineMock()
+        triage._notify_triage_note_was_appended_to_ticket = AsyncMock()
 
         with patch.object(config, "CURRENT_ENVIRONMENT", "production"):
             await triage._append_new_triage_notes_based_on_recent_events(
@@ -2794,8 +2686,6 @@ class TestTriage:
             "status": 500,
         }
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -2804,10 +2694,10 @@ class TestTriage:
         ha_repository = Mock()
 
         velocloud_repository = Mock()
-        velocloud_repository.get_last_edge_events = CoroutineMock(return_value=last_events_response)
+        velocloud_repository.get_last_edge_events = AsyncMock(return_value=last_events_response)
 
         bruin_repository = Mock()
-        bruin_repository.append_note_to_ticket = CoroutineMock(return_value=append_note_response)
+        bruin_repository.append_note_to_ticket = AsyncMock(return_value=append_note_response)
 
         triage_repository = Mock()
         triage_repository.build_events_note = Mock(
@@ -2818,8 +2708,6 @@ class TestTriage:
         )
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -2836,7 +2724,7 @@ class TestTriage:
                 events_chunk_2,
             ]
         )
-        triage._notify_triage_note_was_appended_to_ticket = CoroutineMock()
+        triage._notify_triage_note_was_appended_to_ticket = AsyncMock()
 
         with patch.object(config, "CURRENT_ENVIRONMENT", "production"):
             await triage._append_new_triage_notes_based_on_recent_events(
@@ -2892,8 +2780,6 @@ class TestTriage:
         }
         events = [event_1, event_2, event_3, event_4, event_5]
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -2905,8 +2791,6 @@ class TestTriage:
         ha_repository = Mock()
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -2950,8 +2834,6 @@ class TestTriage:
             ],
         }
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -2962,11 +2844,9 @@ class TestTriage:
         ha_repository = Mock()
 
         notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -3091,8 +2971,6 @@ class TestTriage:
 
         edge_status_by_serial = {}
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
@@ -3102,14 +2980,12 @@ class TestTriage:
         triage_repository = Mock()
 
         velocloud_repository = Mock()
-        velocloud_repository.get_last_edge_events = CoroutineMock()
+        velocloud_repository.get_last_edge_events = AsyncMock()
 
         bruin_repository = Mock()
-        bruin_repository.append_triage_note = CoroutineMock()
+        bruin_repository.append_triage_note = AsyncMock()
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -3122,7 +2998,7 @@ class TestTriage:
         )
         triage._cached_info_by_serial = cached_edges_by_serial
         triage._edges_status_by_serial = edge_status_by_serial
-        triage._append_new_triage_notes_based_on_recent_events = CoroutineMock()
+        triage._append_new_triage_notes_based_on_recent_events = AsyncMock()
 
         current_datetime = datetime.now()
         past_moment_for_events_lookup = current_datetime - timedelta(days=7)
@@ -3308,8 +3184,6 @@ class TestTriage:
             edge_1_ha_partner_serial: edge_1_ha_partner_status,
         }
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         notifications_repository = Mock()
@@ -3318,17 +3192,15 @@ class TestTriage:
         triage_repository = Mock()
 
         velocloud_repository = Mock()
-        velocloud_repository.get_last_edge_events = CoroutineMock()
+        velocloud_repository.get_last_edge_events = AsyncMock()
 
         outage_repository = Mock()
         outage_repository.get_outage_type_by_edge_status = Mock(return_value=None)
 
         bruin_repository = Mock()
-        bruin_repository.append_triage_note = CoroutineMock()
+        bruin_repository.append_triage_note = AsyncMock()
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -3341,7 +3213,7 @@ class TestTriage:
         )
         triage._cached_info_by_serial = cached_edges_by_serial
         triage._edges_status_by_serial = edge_status_by_serial
-        triage._append_new_triage_notes_based_on_recent_events = CoroutineMock()
+        triage._append_new_triage_notes_based_on_recent_events = AsyncMock()
 
         current_datetime = datetime.now()
         past_moment_for_events_lookup = current_datetime - timedelta(days=1)
@@ -3488,8 +3360,6 @@ class TestTriage:
 
         outage_type = Outages.HA_HARD_DOWN
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         notifications_repository = Mock()
@@ -3498,18 +3368,16 @@ class TestTriage:
         triage_repository = Mock()
 
         velocloud_repository = Mock()
-        velocloud_repository.get_last_edge_events = CoroutineMock()
+        velocloud_repository.get_last_edge_events = AsyncMock()
 
         outage_repository = Mock()
         outage_repository.get_outage_type_by_edge_status = Mock(return_value=outage_type)
         outage_repository.should_document_outage = Mock(return_value=False)
 
         bruin_repository = Mock()
-        bruin_repository.append_triage_note = CoroutineMock()
+        bruin_repository.append_triage_note = AsyncMock()
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -3522,7 +3390,7 @@ class TestTriage:
         )
         triage._cached_info_by_serial = cached_edges_by_serial
         triage._edges_status_by_serial = edge_status_by_serial
-        triage._append_new_triage_notes_based_on_recent_events = CoroutineMock()
+        triage._append_new_triage_notes_based_on_recent_events = AsyncMock()
 
         await triage._process_ticket_details_without_triage(tickets)
 
@@ -3709,8 +3577,6 @@ class TestTriage:
             "status": 500,
         }
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         notifications_repository = Mock()
@@ -3723,14 +3589,12 @@ class TestTriage:
         outage_repository.should_document_outage = Mock(return_value=True)
 
         velocloud_repository = Mock()
-        velocloud_repository.get_last_edge_events = CoroutineMock(return_value=last_events_response)
+        velocloud_repository.get_last_edge_events = AsyncMock(return_value=last_events_response)
 
         bruin_repository = Mock()
-        bruin_repository.append_triage_note = CoroutineMock()
+        bruin_repository.append_triage_note = AsyncMock()
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -3743,7 +3607,7 @@ class TestTriage:
         )
         triage._cached_info_by_serial = cached_edges_by_serial
         triage._edges_status_by_serial = edge_status_by_serial
-        triage._append_new_triage_notes_based_on_recent_events = CoroutineMock()
+        triage._append_new_triage_notes_based_on_recent_events = AsyncMock()
 
         current_datetime = datetime.now()
         past_moment_for_events_lookup = current_datetime - timedelta(days=7)
@@ -3916,8 +3780,6 @@ class TestTriage:
         triage_note = "Some info about the edge"
         append_triage_note_response_status = 503
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         notifications_repository = Mock()
@@ -3925,7 +3787,7 @@ class TestTriage:
         ha_repository = Mock()
 
         velocloud_repository = Mock()
-        velocloud_repository.get_last_edge_events = CoroutineMock(return_value=edge_last_events_response)
+        velocloud_repository.get_last_edge_events = AsyncMock(return_value=edge_last_events_response)
 
         outage_repository = Mock()
         outage_repository.get_outage_type_by_edge_status = Mock(return_value=outage_type)
@@ -3935,11 +3797,9 @@ class TestTriage:
         triage_repository.build_triage_note = Mock(return_value=triage_note)
 
         bruin_repository = Mock()
-        bruin_repository.append_triage_note = CoroutineMock(return_value=append_triage_note_response_status)
+        bruin_repository.append_triage_note = AsyncMock(return_value=append_triage_note_response_status)
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,
@@ -3952,7 +3812,7 @@ class TestTriage:
         )
         triage._cached_info_by_serial = cached_edges_by_serial
         triage._edges_status_by_serial = edge_status_by_serial
-        triage._append_new_triage_notes_based_on_recent_events = CoroutineMock()
+        triage._append_new_triage_notes_based_on_recent_events = AsyncMock()
 
         current_datetime = datetime.now()
         past_moment_for_events_lookup = current_datetime - timedelta(days=7)
@@ -4112,8 +3972,6 @@ class TestTriage:
         triage_note = "Some info about the edge"
         append_triage_note_response_status = 200
 
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
         config = testconfig
         notifications_repository = Mock()
@@ -4121,7 +3979,7 @@ class TestTriage:
         ha_repository = Mock()
 
         velocloud_repository = Mock()
-        velocloud_repository.get_last_edge_events = CoroutineMock(return_value=edge_last_events_response)
+        velocloud_repository.get_last_edge_events = AsyncMock(return_value=edge_last_events_response)
 
         outage_repository = Mock()
         outage_repository.get_outage_type_by_edge_status = Mock(return_value=outage_type)
@@ -4131,11 +3989,9 @@ class TestTriage:
         triage_repository.build_triage_note = Mock(return_value=triage_note)
 
         bruin_repository = Mock()
-        bruin_repository.append_triage_note = CoroutineMock(return_value=append_triage_note_response_status)
+        bruin_repository.append_triage_note = AsyncMock(return_value=append_triage_note_response_status)
 
         triage = Triage(
-            event_bus,
-            logger,
             scheduler,
             config,
             outage_repository,

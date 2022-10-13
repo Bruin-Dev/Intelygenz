@@ -5,8 +5,7 @@ from config import testconfig
 
 
 class TestHaRepository:
-    def instance_test(self, ha_repository, logger):
-        assert ha_repository._logger is logger
+    def instance_test(self, ha_repository):
         assert ha_repository._config is testconfig
 
     def is_ha_enabled_test(self):
@@ -323,10 +322,9 @@ class TestHaRepository:
             },
         ]
 
-        logger = Mock()
         config = testconfig
 
-        ha_repository = HaRepository(logger, config)
+        ha_repository = HaRepository(config)
 
         result = ha_repository.map_edges_with_ha_info(edges, edges_with_ha_info)
 
@@ -400,10 +398,9 @@ class TestHaRepository:
             edge_2,
         ]
 
-        logger = Mock()
         config = testconfig
 
-        ha_repository = HaRepository(logger, config)
+        ha_repository = HaRepository(config)
 
         result = ha_repository.get_edges_with_standbys_as_standalone_edges(edges)
 

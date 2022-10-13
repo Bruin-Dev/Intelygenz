@@ -4,8 +4,7 @@ from application import AUTORESOLVE_NOTE_REGEX, Outages
 
 
 class OutageRepository:
-    def __init__(self, logger, ha_repository):
-        self._logger = logger
+    def __init__(self, ha_repository):
         self._ha_repository = ha_repository
 
     def is_there_an_outage(self, edge_status):

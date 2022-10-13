@@ -5,8 +5,7 @@ from application.repositories.outage_repository import OutageRepository
 
 
 class TestOutageRepository:
-    def instance_test(self, outage_repository, logger, ha_repository):
-        assert outage_repository._logger is logger
+    def instance_test(self, outage_repository, ha_repository):
         assert outage_repository._ha_repository is ha_repository
 
     def is_there_an_outage_edge_test(self):
@@ -140,10 +139,9 @@ class TestOutageRepository:
             ],
         }
 
-        logger = Mock()
         ha_repository = Mock()
 
-        outage_utils = OutageRepository(logger, ha_repository)
+        outage_utils = OutageRepository(ha_repository)
 
         result = outage_utils.is_there_an_outage(edge_status_1)
         assert result is False
@@ -196,10 +194,9 @@ class TestOutageRepository:
             },
         ]
 
-        logger = Mock()
         ha_repository = Mock()
 
-        outage_utils = OutageRepository(logger, ha_repository)
+        outage_utils = OutageRepository(ha_repository)
 
         result_1 = outage_utils.is_any_link_disconnected(links_1)
         result_2 = outage_utils.is_any_link_disconnected(links_2)
@@ -314,10 +311,9 @@ class TestOutageRepository:
                 "last_active": "2020-09-29T04:45:15.000Z",
             },
         ]
-        logger = Mock()
         ha_repository = Mock()
 
-        outage_utils = OutageRepository(logger, ha_repository)
+        outage_utils = OutageRepository(ha_repository)
 
         result_1 = outage_utils.find_disconnected_wired_links(edge_status_1, links_configuration)
         result_2 = outage_utils.find_disconnected_wired_links(edge_status_2, links_configuration)
@@ -329,10 +325,9 @@ class TestOutageRepository:
         edge_state_1 = "CONNECTED"
         edge_state_2 = "OFFLINE"
 
-        logger = Mock()
         ha_repository = Mock()
 
-        outage_utils = OutageRepository(logger, ha_repository)
+        outage_utils = OutageRepository(ha_repository)
 
         result = outage_utils.is_faulty_edge(edge_state_1)
         assert result is False
@@ -344,10 +339,9 @@ class TestOutageRepository:
         link_state_1 = "STABLE"
         link_state_2 = "DISCONNECTED"
 
-        logger = Mock()
         ha_repository = Mock()
 
-        outage_utils = OutageRepository(logger, ha_repository)
+        outage_utils = OutageRepository(ha_repository)
 
         result = outage_utils.is_faulty_link(link_state_1)
         assert result is False
@@ -375,10 +369,9 @@ class TestOutageRepository:
             "linkIpAddress": "70.59.5.185",
         }
 
-        logger = Mock()
         ha_repository = Mock()
 
-        outage_repository = OutageRepository(logger, ha_repository)
+        outage_repository = OutageRepository(ha_repository)
 
         links = [
             link_1,
@@ -534,9 +527,8 @@ class TestOutageRepository:
             },
         ]
 
-        logger = Mock()
         ha_repository = Mock()
-        outage_utils = OutageRepository(logger, ha_repository)
+        outage_utils = OutageRepository(ha_repository)
         autoresolve_limit = 3
 
         ticket_bool1 = outage_utils.is_outage_ticket_detail_auto_resolvable(
@@ -620,10 +612,9 @@ class TestOutageRepository:
             edge_2,
         ]
 
-        logger = Mock()
         ha_repository = Mock()
 
-        outage_repository = OutageRepository(logger, ha_repository)
+        outage_repository = OutageRepository(ha_repository)
         outage_repository.is_link_down_outage = Mock(
             side_effect=[
                 True,
@@ -689,10 +680,9 @@ class TestOutageRepository:
             edge_2,
         ]
 
-        logger = Mock()
         ha_repository = Mock()
 
-        outage_repository = OutageRepository(logger, ha_repository)
+        outage_repository = OutageRepository(ha_repository)
         outage_repository.is_hard_down_outage = Mock(
             side_effect=[
                 True,
@@ -780,10 +770,9 @@ class TestOutageRepository:
             edge_2_standby,
         ]
 
-        logger = Mock()
         ha_repository = Mock()
 
-        outage_repository = OutageRepository(logger, ha_repository)
+        outage_repository = OutageRepository(ha_repository)
         outage_repository.is_ha_link_down_outage = Mock(
             side_effect=[
                 False,
@@ -850,10 +839,9 @@ class TestOutageRepository:
             edge_1_standby,
         ]
 
-        logger = Mock()
         ha_repository = Mock()
 
-        outage_repository = OutageRepository(logger, ha_repository)
+        outage_repository = OutageRepository(ha_repository)
         outage_repository.is_ha_soft_down_outage = Mock(
             side_effect=[
                 False,
@@ -941,10 +929,9 @@ class TestOutageRepository:
             edge_2,
         ]
 
-        logger = Mock()
         ha_repository = Mock()
 
-        outage_repository = OutageRepository(logger, ha_repository)
+        outage_repository = OutageRepository(ha_repository)
         outage_repository.is_ha_hard_down_outage = Mock(
             side_effect=[
                 True,
@@ -961,9 +948,8 @@ class TestOutageRepository:
         assert result == expected
 
     def is_link_down_outage_test(self):
-        logger = Mock()
         ha_repository = Mock()
-        outage_repository = OutageRepository(logger, ha_repository)
+        outage_repository = OutageRepository(ha_repository)
 
         edge_status = {
             # Some fields omitted for simplicity
@@ -1008,9 +994,8 @@ class TestOutageRepository:
         assert result is False
 
     def is_hard_down_outage_test(self):
-        logger = Mock()
         ha_repository = Mock()
-        outage_repository = OutageRepository(logger, ha_repository)
+        outage_repository = OutageRepository(ha_repository)
 
         edge_status = {
             # Some fields omitted for simplicity
@@ -1055,9 +1040,8 @@ class TestOutageRepository:
         assert result is False
 
     def is_HA_link_down_outage_test(self):
-        logger = Mock()
         ha_repository = Mock()
-        outage_repository = OutageRepository(logger, ha_repository)
+        outage_repository = OutageRepository(ha_repository)
 
         edge_status = {
             # Some fields omitted for simplicity
@@ -1144,9 +1128,8 @@ class TestOutageRepository:
         assert result is False
 
     def is_HA_soft_down_outage_test(self):
-        logger = Mock()
         ha_repository = Mock()
-        outage_repository = OutageRepository(logger, ha_repository)
+        outage_repository = OutageRepository(ha_repository)
 
         edge_status = {
             # Some fields omitted for simplicity
@@ -1179,9 +1162,8 @@ class TestOutageRepository:
         assert result is True
 
     def is_HA_hard_down_outage_test(self):
-        logger = Mock()
         ha_repository = Mock()
-        outage_repository = OutageRepository(logger, ha_repository)
+        outage_repository = OutageRepository(ha_repository)
 
         edge_status = {
             # Some fields omitted for simplicity
@@ -1226,9 +1208,8 @@ class TestOutageRepository:
         assert result is True
 
     def is_edge_up_test(self):
-        logger = Mock()
         ha_repository = Mock()
-        outage_repository = OutageRepository(logger, ha_repository)
+        outage_repository = OutageRepository(ha_repository)
 
         edge_status = {
             # Some fields omitted for simplicity
@@ -1311,9 +1292,8 @@ class TestOutageRepository:
         assert result is True
 
     def get_outage_type_by_edge_status_test(self):
-        logger = Mock()
         ha_repository = Mock()
-        outage_repository = OutageRepository(logger, ha_repository)
+        outage_repository = OutageRepository(ha_repository)
 
         edge_status = {
             # Some fields omitted for simplicity
@@ -1506,9 +1486,8 @@ class TestOutageRepository:
         assert result is None
 
     def should_document_outage_test(self):
-        logger = Mock()
         ha_repository = Mock()
-        outage_repository = OutageRepository(logger, ha_repository)
+        outage_repository = OutageRepository(ha_repository)
 
         edge_status = {
             # Some fields omitted for simplicity

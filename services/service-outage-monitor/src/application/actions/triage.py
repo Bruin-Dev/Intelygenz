@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import time
 from datetime import datetime, timedelta
 from typing import Set
@@ -6,16 +7,15 @@ from typing import Set
 from application import TRIAGE_NOTE_REGEX
 from apscheduler.util import undefined
 from dateutil.parser import parse
-from igz.packages.eventbus.eventbus import EventBus
 from pytz import timezone, utc
 from tenacity import retry, stop_after_delay, wait_exponential
+
+logger = logging.getLogger(__name__)
 
 
 class Triage:
     def __init__(
         self,
-        event_bus: EventBus,
-        logger,
         scheduler,
         config,
         outage_repository,
@@ -26,8 +26,6 @@ class Triage:
         triage_repository,
         ha_repository,
     ):
-        self._event_bus = event_bus
-        self._logger = logger
         self._scheduler = scheduler
         self._config = config
         self._outage_repository = outage_repository
@@ -46,14 +44,14 @@ class Triage:
         self._customer_cache = []
 
     async def start_triage_job(self, exec_on_start=False):
-        self._logger.info(
+        logger.info(
             f"Scheduled task: service outage triage configured to run every "
             f'{self._config.TRIAGE_CONFIG["polling_minutes"]} minutes'
         )
         next_run_time = undefined
         if exec_on_start:
             next_run_time = datetime.now(timezone(self._config.TIMEZONE))
-            self._logger.info(f"It will be executed now")
+            logger.info(f"It will be executed now")
         self._scheduler.add_job(
             self._run_tickets_polling,
             "interval",
@@ -67,34 +65,34 @@ class Triage:
         self.__reset_customer_cache()
 
         total_start_time = time.time()
-        self._logger.info(f"Starting triage process...")
+        logger.info(f"Starting triage process...")
 
         customer_cache_response = await self._customer_cache_repository.get_cache_for_triage_monitoring()
         if customer_cache_response["status"] not in range(200, 300) or customer_cache_response["status"] == 202:
-            self._logger.warning(f"Bad status calling to get cache for triage. Skipping run tickets polling ...")
+            logger.warning(f"Bad status calling to get cache for triage. Skipping run tickets polling ...")
             return
 
         self._customer_cache = customer_cache_response["body"]
 
-        self._logger.info("Getting all open tickets for all customers...")
+        logger.info("Getting all open tickets for all customers...")
         open_tickets = await self._get_all_open_tickets_with_details_for_monitored_companies()
-        self._logger.info(
+        logger.info(
             f"Got all {len(open_tickets)} open tickets for all customers. "
             f"Filtering them to get only the ones under the device list"
         )
         relevant_open_tickets = self._filter_tickets_and_details_related_to_edges_under_monitoring(open_tickets)
-        self._logger.info(
+        logger.info(
             f"Got {len(relevant_open_tickets)} relevant tickets for all customers. "
             f"Cleaning them up to exclude all invalid notes..."
         )
         relevant_open_tickets = self._filter_irrelevant_notes_in_tickets(relevant_open_tickets)
 
-        self._logger.info(f"Splitting relevant tickets in tickets with and without triage...")
+        logger.info(f"Splitting relevant tickets in tickets with and without triage...")
         details_with_triage, details_without_triage = self._get_ticket_details_with_and_without_triage(
             relevant_open_tickets
         )
 
-        self._logger.info(
+        logger.info(
             f"Ticket details split successfully. "
             f"Ticket details with triage: {len(details_with_triage)}. "
             f"Ticket details without triage: {len(details_without_triage)}. "
@@ -107,7 +105,7 @@ class Triage:
             self._process_ticket_details_with_triage(details_with_triage),
             self._process_ticket_details_without_triage(details_without_triage),
         )
-        self._logger.info(f"Triage process finished! took {time.time() - total_start_time} seconds")
+        logger.info(f"Triage process finished! took {time.time() - total_start_time} seconds")
 
     async def _build_edges_status_by_serial(self):
         edge_list = await self._velocloud_repository.get_edges_for_triage()
@@ -131,13 +129,13 @@ class Triage:
         open_tickets_response_status = open_tickets_response["status"]
 
         if open_tickets_response_status not in range(200, 300):
-            self._logger.warning(f"Bad status calling to open tickets. Return an empty list ...")
+            logger.warning(f"Bad status calling to open tickets. Return an empty list ...")
             return []
 
         filtered_ticket_list = [
             ticket for ticket in open_tickets_response_body if ticket["clientID"] in bruin_clients_ids
         ]
-        self._logger.info("Getting all opened tickets details for each open ticket ...")
+        logger.info("Getting all opened tickets details for each open ticket ...")
         open_tickets_ids = (ticket["ticketID"] for ticket in filtered_ticket_list)
 
         tasks = [
@@ -146,7 +144,7 @@ class Triage:
         ]
 
         await asyncio.gather(*tasks, return_exceptions=True)
-        self._logger.info("Finished getting all opened ticket details!")
+        logger.info("Finished getting all opened ticket details!")
 
         return open_tickets_details
 
@@ -164,7 +162,7 @@ class Triage:
                 ticket_details_response_status = ticket_details_response["status"]
 
                 if ticket_details_response_status not in range(200, 300):
-                    self._logger.warning(
+                    logger.warning(
                         f"Bad status calling get ticket details for ticket id: {ticket_id}. "
                         f"Skipping get open ticket ..."
                     )
@@ -172,12 +170,10 @@ class Triage:
 
                 ticket_details_list = ticket_details_response_body["ticketDetails"]
                 if not ticket_details_list:
-                    self._logger.info(
-                        f"Ticket {ticket_id} doesn't have any detail under ticketDetails key. Skipping..."
-                    )
+                    logger.info(f"Ticket {ticket_id} doesn't have any detail under ticketDetails key. Skipping...")
                     return
 
-                self._logger.info(f"Got details for ticket {ticket_id}!")
+                logger.info(f"Got details for ticket {ticket_id}!")
 
                 open_tickets_details.append(
                     {
@@ -190,16 +186,14 @@ class Triage:
         try:
             await get_open_tickets_with_details_by_ticket_id()
         except Exception as e:
-            self._logger.error(
-                f"An error occurred while trying to get tickets details for ticket_id {ticket_id} -> {e}"
-            )
+            logger.error(f"An error occurred while trying to get tickets details for ticket_id {ticket_id} -> {e}")
 
     def _filter_tickets_and_details_related_to_edges_under_monitoring(self, tickets):
         serials_under_monitoring: Set[str] = set(elem["serial_number"] for elem in self._customer_cache)
 
         relevant_tickets = []
         for ticket in tickets:
-            self._logger.info(f'Checking ticket_id: {ticket["ticket_id"]} for relevant details')
+            logger.info(f'Checking ticket_id: {ticket["ticket_id"]} for relevant details')
             ticket_details = ticket["ticket_details"]
 
             relevant_details = [
@@ -207,11 +201,11 @@ class Triage:
             ]
 
             if not relevant_details:
-                self._logger.info(f'Ticket with ticket_id: {ticket["ticket_id"]} has no relevant details')
+                logger.info(f'Ticket with ticket_id: {ticket["ticket_id"]} has no relevant details')
                 # Having no relevant details means the ticket is not relevant either
                 continue
 
-            self._logger.info(
+            logger.info(
                 f'Ticket with ticket_id: {ticket["ticket_id"]} contains relevant details.'
                 f"Appending to relevant_tickets list ..."
             )
@@ -231,7 +225,7 @@ class Triage:
         sanitized_tickets = []
 
         for ticket in tickets:
-            self._logger.info(f'Filtering notes for ticket_id: {ticket["ticket_id"]} to contain relevant notes')
+            logger.info(f'Filtering notes for ticket_id: {ticket["ticket_id"]} to contain relevant notes')
 
             relevant_notes = [
                 note
@@ -268,11 +262,11 @@ class Triage:
             ticket_id = ticket["ticket_id"]
             ticket_details = ticket["ticket_details"]
             ticket_notes = ticket["ticket_notes"]
-            self._logger.info(f"Checking details of ticket_id: {ticket_id}")
+            logger.info(f"Checking details of ticket_id: {ticket_id}")
 
             for detail in ticket_details:
                 serial_number = detail["detailValue"]
-                self._logger.info(
+                logger.info(
                     f"Checking for triage notes in ticket_id: {ticket_id} "
                     f"relating to serial number: {serial_number}"
                 )
@@ -288,14 +282,14 @@ class Triage:
                     "ticket_detail": detail,
                 }
                 if not notes_related_to_serial:
-                    self._logger.info(
+                    logger.info(
                         f"No triage notes found in ticket_id: {ticket_id} "
                         f"for serial number {serial_number}. "
                         f"Adding to ticket_details_without_triage list..."
                     )
                     ticket_details_without_triage.append(detail_object)
                 else:
-                    self._logger.info(
+                    logger.info(
                         f"Triage note found in ticket_id: {ticket_id} "
                         f"for serial number {serial_number}. "
                         f"Adding to ticket_details_with_triage list..."
@@ -306,28 +300,26 @@ class Triage:
         return ticket_details_with_triage, ticket_details_without_triage
 
     async def _process_ticket_details_with_triage(self, ticket_details):
-        self._logger.info("Processing ticket details with triage...")
+        logger.info("Processing ticket details with triage...")
 
         for detail in ticket_details:
             ticket_id = detail["ticket_id"]
             ticket_detail_id = detail["ticket_detail"]["detailID"]
             serial_number = detail["ticket_detail"]["detailValue"]
 
-            self._logger.info(f"Processing detail {ticket_detail_id} with triage of ticket {ticket_id}...")
+            logger.info(f"Processing detail {ticket_detail_id} with triage of ticket {ticket_id}...")
 
-            self._logger.info(
-                f"Checking if events need to be appended to detail {ticket_detail_id} of ticket {ticket_id}..."
-            )
+            logger.info(f"Checking if events need to be appended to detail {ticket_detail_id} of ticket {ticket_id}...")
             newest_triage_note = self._get_most_recent_ticket_note(detail)
 
             if self._was_ticket_note_appended_recently(newest_triage_note):
-                self._logger.info(
+                logger.info(
                     f"The last triage note was appended to detail {ticket_detail_id} of ticket "
                     f"{ticket_id} not long ago so no new triage note will be appended for now"
                 )
                 continue
 
-            self._logger.info(f"Appending events to detail {ticket_detail_id} of ticket {ticket_id}...")
+            logger.info(f"Appending events to detail {ticket_detail_id} of ticket {ticket_id}...")
 
             newest_triage_note_timestamp = newest_triage_note["createdDate"]
             edge_data = self._cached_info_by_serial[serial_number]
@@ -335,11 +327,11 @@ class Triage:
             await self._append_new_triage_notes_based_on_recent_events(
                 detail, newest_triage_note_timestamp, edge_data["edge"]
             )
-            self._logger.info(f"Events appended to detail {ticket_detail_id} of ticket {ticket_id}!")
+            logger.info(f"Events appended to detail {ticket_detail_id} of ticket {ticket_id}!")
 
-            self._logger.info(f"Finished processing detail {ticket_detail_id} of ticket {ticket_id}!")
+            logger.info(f"Finished processing detail {ticket_detail_id} of ticket {ticket_id}!")
 
-        self._logger.info("Finished processing ticket details with triage!")
+        logger.info("Finished processing ticket details with triage!")
 
     @staticmethod
     def _get_most_recent_ticket_note(ticket_detail):
@@ -360,12 +352,12 @@ class Triage:
         ticket_detail_id = ticket_detail["ticket_detail"]["detailID"]
         service_number = ticket_detail["ticket_detail"]["detailValue"]
 
-        self._logger.info(f"Appending new triage note to detail {ticket_detail_id} of ticket {ticket_id}...")
+        logger.info(f"Appending new triage note to detail {ticket_detail_id} of ticket {ticket_id}...")
 
         working_environment = self._config.CURRENT_ENVIRONMENT
 
         past_moment = parse(events_lookup_timestamp).astimezone(utc)
-        self._logger.info(
+        logger.info(
             f"Getting events for serial {service_number} (detail {ticket_detail_id}) in ticket "
             f"{ticket_id} before applying triage..."
         )
@@ -375,14 +367,14 @@ class Triage:
         recent_events_response_status = recent_events_response["status"]
 
         if recent_events_response_status not in range(200, 300):
-            self._logger.warning(
+            logger.warning(
                 f"Bad status calling get last edge events for edge: {edge_full_id}. "
                 f"Skipping append triage notes based in recent events ..."
             )
             return
 
         if not recent_events_response_body:
-            self._logger.info(
+            logger.info(
                 f"No events were found for edge {service_number} starting from {events_lookup_timestamp}. "
                 f"Not appending any new triage notes to detail {ticket_detail_id} of ticket {ticket_id}."
             )
@@ -400,12 +392,12 @@ class Triage:
                 )
 
                 if response["status"] not in range(200, 300):
-                    self._logger.warning(f"Bad status apeending note to ticket: {ticket_id}. Skipping append note ...")
+                    logger.warning(f"Bad status apeending note to ticket: {ticket_id}. Skipping append note ...")
                     continue
 
-                self._logger.info(f"Triage appended to detail {ticket_detail_id} of ticket {ticket_id}!")
+                logger.info(f"Triage appended to detail {ticket_detail_id} of ticket {ticket_id}!")
             else:
-                self._logger.info(
+                logger.info(
                     f"Not going to append a new triage note to detail {ticket_detail_id} of ticket "
                     f"{ticket_id} as current environment is {working_environment.upper()}. "
                     f"Triage note: {triage_note_contents}"
@@ -434,18 +426,18 @@ class Triage:
             f"Details at https://app.bruin.com/t/{ticket_id}"
         )
 
-        self._logger.info(message)
+        logger.info(message)
         await self._notifications_repository.send_slack_message(message)
 
     async def _process_ticket_details_without_triage(self, ticket_details):
-        self._logger.info("Processing ticket details without triage...")
+        logger.info("Processing ticket details without triage...")
 
         for detail in ticket_details:
             ticket_id = detail["ticket_id"]
             ticket_detail_id = detail["ticket_detail"]["detailID"]
             serial_number = detail["ticket_detail"]["detailValue"]
 
-            self._logger.info(f"Processing detail {ticket_detail_id} without triage of ticket {ticket_id}...")
+            logger.info(f"Processing detail {ticket_detail_id} without triage of ticket {ticket_id}...")
 
             edge_data = self._cached_info_by_serial[serial_number]
             edge_full_id = edge_data["edge"]
@@ -456,7 +448,7 @@ class Triage:
 
             outage_type = self._outage_repository.get_outage_type_by_edge_status(edge_status)
             if not outage_type:
-                self._logger.info(
+                logger.info(
                     f"Edge {serial_number} is no longer down, so the initial triage note won't be posted to ticket "
                     f"{ticket_id}. Posting events of the last 24 hours to the ticket so it's not blank..."
                 )
@@ -466,13 +458,13 @@ class Triage:
                     detail, timestamp_for_events_lookup, edge_full_id
                 )
             else:
-                self._logger.info(
+                logger.info(
                     f"Edge {serial_number} is in {outage_type.value} state. Posting initial triage note to ticket "
                     f"{ticket_id}..."
                 )
 
                 if not self._outage_repository.should_document_outage(edge_status):
-                    self._logger.info(
+                    logger.info(
                         f"Edge {serial_number} is down, but it doesn't qualify to be documented as a Service Outage in "
                         f"ticket {ticket_id}. Most probable thing is that the edge is the standby of a HA pair, and "
                         "standbys in outage state are only documented in the event of a Soft Down. Skipping..."
@@ -485,7 +477,7 @@ class Triage:
                 )
 
                 if recent_events_response["status"] not in range(200, 300):
-                    self._logger.warning(
+                    logger.warning(
                         f"Bad status calling to get last edge events. "
                         f"Skipping process details without details for edge: {edge_full_id} ..."
                     )
@@ -499,6 +491,6 @@ class Triage:
                 )
                 await self._bruin_repository.append_triage_note(detail, ticket_note)
 
-            self._logger.info(f"Finished processing detail {ticket_detail_id} of ticket {ticket_id}!")
+            logger.info(f"Finished processing detail {ticket_detail_id} of ticket {ticket_id}!")
 
-        self._logger.info("Finished processing ticket details without triage!")
+        logger.info("Finished processing ticket details without triage!")

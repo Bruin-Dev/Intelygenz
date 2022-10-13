@@ -1,10 +1,12 @@
+import logging
 from copy import deepcopy
 from typing import List, Optional
 
+logger = logging.getLogger(__name__)
+
 
 class HaRepository:
-    def __init__(self, logger, config):
-        self._logger = logger
+    def __init__(self, config):
         self._config = config
 
     @staticmethod
@@ -41,7 +43,7 @@ class HaRepository:
         for serial_number, edge_with_links in edges_with_links_by_serial.items():
             edge_ha_info = edges_with_ha_info_by_serial.get(serial_number)
             if not edge_ha_info:
-                self._logger.info(f"No HA info was found for edge {serial_number}. Skipping...")
+                logger.info(f"No HA info was found for edge {serial_number}. Skipping...")
                 continue
 
             ha_state = edge_ha_info["haState"]
@@ -54,7 +56,7 @@ class HaRepository:
                     }
                 )
             else:
-                self._logger.info(
+                logger.info(
                     f"HA partner for {serial_number} is in state {ha_state}, so HA will be considered as disabled for "
                     "this edge"
                 )

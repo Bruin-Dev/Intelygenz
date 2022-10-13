@@ -1,22 +1,23 @@
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from nats.aio.msg import Msg
+from shortuuid import uuid
+
 from application.repositories import nats_error_response
 from application.repositories import velocloud_repository as velocloud_repository_module
+from application.repositories.utils_repository import to_json_bytes
 from application.repositories.velocloud_repository import VelocloudRepository
-from asynctest import CoroutineMock
 from config import testconfig
-from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(velocloud_repository_module, "uuid", return_value=uuid_)
 
 
 class TestVelocloudRepository:
-    def instance_test(self, velocloud_repository, event_bus, logger, notifications_repository):
-        assert velocloud_repository._event_bus is event_bus
-        assert velocloud_repository._logger is logger
+    def instance_test(self, velocloud_repository, nats_client, notifications_repository):
+        assert velocloud_repository._nats_client is nats_client
         assert velocloud_repository._config is testconfig
         assert velocloud_repository._notifications_repository is notifications_repository
 
@@ -39,23 +40,25 @@ class TestVelocloudRepository:
             "status": 200,
         }
 
-        logger = Mock()
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+
         config = testconfig
         notifications_repository = Mock()
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
+        nats_client = Mock()
+        nats_client.request = AsyncMock(return_value=response_msg)
 
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
+        velocloud_repository = VelocloudRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
             result = await velocloud_repository.get_links_with_edge_info(host)
 
-        event_bus.rpc_request.assert_awaited_once_with("get.links.with.edge.info", request, timeout=30)
+        nats_client.request.assert_awaited_once_with("get.links.with.edge.info", to_json_bytes(request), timeout=30)
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_links_with_edge_info_with_rpc_request_failing_test(self):
+    async def get_links_with_edge_info_with_request_failing_test(self):
         host = "mettel.velocloud.net"
 
         request = {
@@ -65,27 +68,25 @@ class TestVelocloudRepository:
             },
         }
 
-        logger = Mock()
         config = testconfig
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=Exception)
+        nats_client = Mock()
+        nats_client.request = AsyncMock(side_effect=Exception)
 
         notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
+        velocloud_repository = VelocloudRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
             result = await velocloud_repository.get_links_with_edge_info(host)
 
-        event_bus.rpc_request.assert_awaited_once_with("get.links.with.edge.info", request, timeout=30)
+        nats_client.request.assert_awaited_once_with("get.links.with.edge.info", to_json_bytes(request), timeout=30)
         notifications_repository.send_slack_message.assert_awaited_once()
-        logger.error.assert_called_once()
         assert result == nats_error_response
 
     @pytest.mark.asyncio
-    async def get_edges_with_rpc_request_returning_non_2xx_status_test(self):
+    async def get_edges_with_request_returning_non_2xx_status_test(self):
         host = "mettel.velocloud.net"
 
         request = {
@@ -100,23 +101,24 @@ class TestVelocloudRepository:
             "status": 500,
         }
 
-        logger = Mock()
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+
         config = testconfig
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
+        nats_client = Mock()
+        nats_client.request = AsyncMock(return_value=response_msg)
 
         notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
+        velocloud_repository = VelocloudRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
             result = await velocloud_repository.get_links_with_edge_info(host)
 
-        event_bus.rpc_request.assert_awaited_once_with("get.links.with.edge.info", request, timeout=30)
+        nats_client.request.assert_awaited_once_with("get.links.with.edge.info", to_json_bytes(request), timeout=30)
         notifications_repository.send_slack_message.assert_awaited_once()
-        logger.error.assert_called_once()
         assert result == response
 
     @pytest.mark.asyncio
@@ -149,21 +151,23 @@ class TestVelocloudRepository:
             "status": 200,
         }
 
-        logger = Mock()
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+
         config = testconfig
         notifications_repository = Mock()
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
+        nats_client = Mock()
+        nats_client.request = AsyncMock(return_value=response_msg)
 
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
+        velocloud_repository = VelocloudRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
             result = await velocloud_repository.get_edge_events(
                 edge_full_id, past_moment, future_moment, event_types_filter
             )
 
-        event_bus.rpc_request.assert_awaited_once_with("alert.request.event.edge", request, timeout=180)
+        nats_client.request.assert_awaited_once_with("alert.request.event.edge", to_json_bytes(request), timeout=180)
         assert result == response
 
     @pytest.mark.asyncio
@@ -196,23 +200,25 @@ class TestVelocloudRepository:
             "status": 200,
         }
 
-        logger = Mock()
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+
         config = testconfig
         notifications_repository = Mock()
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
+        nats_client = Mock()
+        nats_client.request = AsyncMock(return_value=response_msg)
 
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
+        velocloud_repository = VelocloudRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
             result = await velocloud_repository.get_edge_events(edge_full_id, past_moment, future_moment)
 
-        event_bus.rpc_request.assert_awaited_once_with("alert.request.event.edge", request, timeout=180)
+        nats_client.request.assert_awaited_once_with("alert.request.event.edge", to_json_bytes(request), timeout=180)
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_edge_events_with_rpc_request_failing_test(self):
+    async def get_edge_events_with_request_failing_test(self):
         edge_full_id = {"host": "some-host", "enterprise_id": 1, "edge_id": 1}
         current_moment = datetime.now()
         past_moment = current_moment - timedelta(hours=1)
@@ -229,29 +235,27 @@ class TestVelocloudRepository:
             },
         }
 
-        logger = Mock()
         config = testconfig
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=Exception)
+        nats_client = Mock()
+        nats_client.request = AsyncMock(side_effect=Exception)
 
         notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
+        velocloud_repository = VelocloudRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
             result = await velocloud_repository.get_edge_events(
                 edge_full_id, past_moment, future_moment, event_types_filter
             )
 
-        event_bus.rpc_request.assert_awaited_once_with("alert.request.event.edge", request, timeout=180)
+        nats_client.request.assert_awaited_once_with("alert.request.event.edge", to_json_bytes(request), timeout=180)
         notifications_repository.send_slack_message.assert_awaited_once()
-        logger.error.assert_called_once()
         assert result == nats_error_response
 
     @pytest.mark.asyncio
-    async def get_edge_events_with_rpc_request_returning_non_2xx_status_test(self):
+    async def get_edge_events_with_request_returning_non_2xx_status_test(self):
         edge_full_id = {"host": "some-host", "enterprise_id": 1, "edge_id": 1}
         current_moment = datetime.now()
         past_moment = current_moment - timedelta(hours=1)
@@ -273,25 +277,26 @@ class TestVelocloudRepository:
             "status": 500,
         }
 
-        logger = Mock()
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+
         config = testconfig
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
+        nats_client = Mock()
+        nats_client.request = AsyncMock(return_value=response_msg)
 
         notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
+        velocloud_repository = VelocloudRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
             result = await velocloud_repository.get_edge_events(
                 edge_full_id, past_moment, future_moment, event_types_filter
             )
 
-        event_bus.rpc_request.assert_awaited_once_with("alert.request.event.edge", request, timeout=180)
+        nats_client.request.assert_awaited_once_with("alert.request.event.edge", to_json_bytes(request), timeout=180)
         notifications_repository.send_slack_message.assert_awaited_once()
-        logger.error.assert_called_once()
         assert result == response
 
     @pytest.mark.asyncio
@@ -323,19 +328,23 @@ class TestVelocloudRepository:
             "status": 200,
         }
 
-        logger = Mock()
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+
         config = testconfig
         notifications_repository = Mock()
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
+        nats_client = Mock()
+        nats_client.request = AsyncMock(return_value=response_msg)
 
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
+        velocloud_repository = VelocloudRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
             result = await velocloud_repository.get_network_enterprises(host)
 
-        event_bus.rpc_request.assert_awaited_once_with("request.network.enterprise.edges", request, timeout=30)
+        nats_client.request.assert_awaited_once_with(
+            "request.network.enterprise.edges", to_json_bytes(request), timeout=30
+        )
         assert result == response
 
     @pytest.mark.asyncio
@@ -367,23 +376,27 @@ class TestVelocloudRepository:
             "status": 200,
         }
 
-        logger = Mock()
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+
         config = testconfig
         notifications_repository = Mock()
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
+        nats_client = Mock()
+        nats_client.request = AsyncMock(return_value=response_msg)
 
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
+        velocloud_repository = VelocloudRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
             result = await velocloud_repository.get_network_enterprises(host, enterprise_ids=enterprise_ids)
 
-        event_bus.rpc_request.assert_awaited_once_with("request.network.enterprise.edges", request, timeout=30)
+        nats_client.request.assert_awaited_once_with(
+            "request.network.enterprise.edges", to_json_bytes(request), timeout=30
+        )
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_network_enterprises_with_rpc_request_failing_test(self):
+    async def get_network_enterprises_with_request_failing_test(self):
         host = "mettel.velocloud.net"
         enterprise_ids = []
 
@@ -395,27 +408,27 @@ class TestVelocloudRepository:
             },
         }
 
-        logger = Mock()
         config = testconfig
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=Exception)
+        nats_client = Mock()
+        nats_client.request = AsyncMock(side_effect=Exception)
 
         notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
+        velocloud_repository = VelocloudRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
             result = await velocloud_repository.get_network_enterprises(host)
 
-        event_bus.rpc_request.assert_awaited_once_with("request.network.enterprise.edges", request, timeout=30)
+        nats_client.request.assert_awaited_once_with(
+            "request.network.enterprise.edges", to_json_bytes(request), timeout=30
+        )
         notifications_repository.send_slack_message.assert_awaited_once()
-        logger.error.assert_called_once()
         assert result == nats_error_response
 
     @pytest.mark.asyncio
-    async def get_network_enterprises_with_rpc_request_returning_non_2xx_status_test(self):
+    async def get_network_enterprises_with_request_returning_non_2xx_status_test(self):
         host = "mettel.velocloud.net"
         enterprise_ids = []
 
@@ -432,29 +445,31 @@ class TestVelocloudRepository:
             "status": 500,
         }
 
-        logger = Mock()
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+
         config = testconfig
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
+        nats_client = Mock()
+        nats_client.request = AsyncMock(return_value=response_msg)
 
         notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
+        velocloud_repository = VelocloudRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
             result = await velocloud_repository.get_network_enterprises(host)
 
-        event_bus.rpc_request.assert_awaited_once_with("request.network.enterprise.edges", request, timeout=30)
+        nats_client.request.assert_awaited_once_with(
+            "request.network.enterprise.edges", to_json_bytes(request), timeout=30
+        )
         notifications_repository.send_slack_message.assert_awaited_once()
-        logger.error.assert_called_once()
         assert result == response
 
     @pytest.mark.asyncio
     async def get_edges_for_triage_test(self):
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         config = testconfig
         notifications_repository = Mock()
 
@@ -464,8 +479,8 @@ class TestVelocloudRepository:
         full_edge_list = [edge_list, edge_list, edge_list]
         edge_return = {"body": [edge_list], "status": 200}
         edge_return_fail = {"body": "Fail", "status": 500}
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
-        velocloud_repository.get_links_with_edge_info = CoroutineMock(
+        velocloud_repository = VelocloudRepository(nats_client, config, notifications_repository)
+        velocloud_repository.get_links_with_edge_info = AsyncMock(
             side_effect=[edge_return, edge_return_fail, edge_return, edge_return]
         )
         velocloud_repository.group_links_by_edge = Mock()
@@ -524,13 +539,12 @@ class TestVelocloudRepository:
             "status": 500,
         }
 
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         config = testconfig
         notifications_repository = Mock()
 
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
-        velocloud_repository.get_network_enterprises = CoroutineMock(
+        velocloud_repository = VelocloudRepository(nats_client, config, notifications_repository)
+        velocloud_repository.get_network_enterprises = AsyncMock(
             side_effect=[
                 host_1_response,
                 host_2_response,
@@ -557,13 +571,12 @@ class TestVelocloudRepository:
         past_moment = current_datetime - timedelta(hours=1)
         event_types_filter = ["LINK_ALIVE", "LINK_DEAD"]
 
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         config = testconfig
         notifications_repository = Mock()
 
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
-        velocloud_repository.get_edge_events = CoroutineMock()
+        velocloud_repository = VelocloudRepository(nats_client, config, notifications_repository)
+        velocloud_repository.get_edge_events = AsyncMock()
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
@@ -587,13 +600,12 @@ class TestVelocloudRepository:
         past_moment = current_datetime - timedelta(hours=1)
         event_types_filter = ["EDGE_DOWN", "LINK_DEAD"]
 
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         config = testconfig
         notifications_repository = Mock()
 
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
-        velocloud_repository.get_last_edge_events = CoroutineMock()
+        velocloud_repository = VelocloudRepository(nats_client, config, notifications_repository)
+        velocloud_repository.get_last_edge_events = AsyncMock()
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
@@ -775,12 +787,11 @@ class TestVelocloudRepository:
             link_with_never_activated_edge_info,
         ]
 
-        logger = Mock()
         config = testconfig
         notifications_repository = Mock()
-        event_bus = Mock()
+        nats_client = Mock()
 
-        velocloud_repository = VelocloudRepository(event_bus, logger, config, notifications_repository)
+        velocloud_repository = VelocloudRepository(nats_client, config, notifications_repository)
 
         result = velocloud_repository.group_links_by_edge(links_with_edge_info)
 

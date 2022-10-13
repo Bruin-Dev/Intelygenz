@@ -1,21 +1,22 @@
 import os
-from unittest.mock import patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from nats.aio.msg import Msg
+from shortuuid import uuid
+
 from application.repositories import digi_repository as digi_repository_module
 from application.repositories import nats_error_response
-from asynctest import CoroutineMock
+from application.repositories.utils_repository import to_json_bytes
 from config import testconfig
-from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(digi_repository_module, "uuid", return_value=uuid_)
 
 
 class TestDiGiRepository:
-    def instance_test(self, digi_repository, event_bus, logger, notifications_repository):
-        assert digi_repository._event_bus is event_bus
-        assert digi_repository._logger is logger
+    def instance_test(self, digi_repository, nats_client, notifications_repository):
+        assert digi_repository._nats_client is nats_client
         assert digi_repository._config is testconfig
         assert digi_repository._notifications_repository is notifications_repository
 
@@ -29,16 +30,20 @@ class TestDiGiRepository:
             "body": {"velo_serial": service_number, "ticket": str(ticket_id), "MAC": logical_id},
         }
         return_body = {"body": "Success", "status": 200}
-        digi_repository._event_bus.rpc_request = CoroutineMock(return_value=return_body)
+
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(return_body)
+
+        digi_repository._nats_client.request = AsyncMock(return_value=response_msg)
 
         with uuid_mock:
             result = await digi_repository.reboot_link(service_number, ticket_id, logical_id)
 
-        digi_repository._event_bus.rpc_request.assert_awaited_once_with("digi.reboot", request, timeout=90)
+        digi_repository._nats_client.request.assert_awaited_once_with("digi.reboot", to_json_bytes(request), timeout=90)
         assert result == return_body
 
     @pytest.mark.asyncio
-    async def reboot_link_success_with_rpc_request_failing_test(self, digi_repository):
+    async def reboot_link_success_with_request_failing_test(self, digi_repository):
         ticket_id = 11111
         service_number = "VC1234567"
         logical_id = "00:04:2d:123"
@@ -46,15 +51,14 @@ class TestDiGiRepository:
             "request_id": uuid_,
             "body": {"velo_serial": service_number, "ticket": str(ticket_id), "MAC": logical_id},
         }
-        digi_repository._event_bus.rpc_request = CoroutineMock(side_effect=Exception)
-        digi_repository._notifications_repository.send_slack_message = CoroutineMock()
+        digi_repository._nats_client.request = AsyncMock(side_effect=Exception)
+        digi_repository._notifications_repository.send_slack_message = AsyncMock()
 
         with uuid_mock:
             result = await digi_repository.reboot_link(service_number, ticket_id, logical_id)
 
-        digi_repository._event_bus.rpc_request.assert_awaited_once_with("digi.reboot", request, timeout=90)
+        digi_repository._nats_client.request.assert_awaited_once_with("digi.reboot", to_json_bytes(request), timeout=90)
         digi_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        digi_repository._logger.error.assert_called_once()
         assert result == nats_error_response
 
     @pytest.mark.asyncio
@@ -67,15 +71,18 @@ class TestDiGiRepository:
             "body": {"velo_serial": service_number, "ticket": str(ticket_id), "MAC": logical_id},
         }
         return_body = {"body": "Failed", "status": 400}
-        digi_repository._event_bus.rpc_request = CoroutineMock(return_value=return_body)
-        digi_repository._notifications_repository.send_slack_message = CoroutineMock()
+
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(return_body)
+
+        digi_repository._nats_client.request = AsyncMock(return_value=response_msg)
+        digi_repository._notifications_repository.send_slack_message = AsyncMock()
 
         with uuid_mock:
             result = await digi_repository.reboot_link(service_number, ticket_id, logical_id)
 
-        digi_repository._event_bus.rpc_request.assert_awaited_once_with("digi.reboot", request, timeout=90)
+        digi_repository._nats_client.request.assert_awaited_once_with("digi.reboot", to_json_bytes(request), timeout=90)
         digi_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        digi_repository._logger.error.assert_called_once()
         assert result == return_body
 
     def get_digi_links_test(self, digi_repository):

@@ -1,6 +1,10 @@
 from unittest.mock import Mock
 
 import pytest
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from framework.nats.client import Client as NatsClient
+from framework.storage.task_dispatcher_client import TaskDispatcherClient
+
 from application.actions.outage_monitoring import OutageMonitor
 from application.actions.triage import Triage
 from application.repositories.bruin_repository import BruinRepository
@@ -13,18 +17,8 @@ from application.repositories.outage_repository import OutageRepository
 from application.repositories.triage_repository import TriageRepository
 from application.repositories.utils_repository import UtilsRepository
 from application.repositories.velocloud_repository import VelocloudRepository
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from asynctest import create_autospec
 from config import testconfig as config
-from igz.packages.eventbus.eventbus import EventBus
-from igz.packages.storage.task_dispatcher_client import TaskDispatcherClient, TaskTypes
 from tests.fixtures._helpers import wrap_all_methods
-
-
-@pytest.fixture(scope="function")
-def logger():
-    # Let's suppress all logs in tests
-    return Mock()
 
 
 @pytest.fixture(scope="function")
@@ -34,41 +28,40 @@ def metrics_repository():
 
 
 @pytest.fixture(scope="function")
-def event_bus():
-    return create_autospec(EventBus)
+def nats_client():
+    return Mock(spec_set=NatsClient)
 
 
 @pytest.fixture(scope="function")
 def scheduler():
-    return create_autospec(AsyncIOScheduler)
+    return Mock(spec_set=AsyncIOScheduler)
 
 
 @pytest.fixture(scope="function")
 def task_dispatcher_client():
-    return create_autospec(TaskDispatcherClient)
+    return Mock(spec_set=TaskDispatcherClient)
 
 
 @pytest.fixture(scope="function")
-def notifications_repository(event_bus):
-    instance = NotificationsRepository(event_bus=event_bus)
+def notifications_repository(nats_client):
+    instance = NotificationsRepository(nats_client=nats_client)
     wrap_all_methods(instance)
 
     return instance
 
 
 @pytest.fixture(scope="function")
-def email_repository(event_bus):
-    instance = EmailRepository(event_bus=event_bus)
+def email_repository(nats_client):
+    instance = EmailRepository(nats_client=nats_client)
     wrap_all_methods(instance)
 
     return instance
 
 
 @pytest.fixture(scope="function")
-def bruin_repository(logger, event_bus, notifications_repository):
+def bruin_repository(nats_client, notifications_repository):
     instance = BruinRepository(
-        logger=logger,
-        event_bus=event_bus,
+        nats_client=nats_client,
         notifications_repository=notifications_repository,
         config=config,
     )
@@ -78,10 +71,9 @@ def bruin_repository(logger, event_bus, notifications_repository):
 
 
 @pytest.fixture(scope="function")
-def velocloud_repository(logger, event_bus, notifications_repository):
+def velocloud_repository(nats_client, notifications_repository):
     instance = VelocloudRepository(
-        logger=logger,
-        event_bus=event_bus,
+        nats_client=nats_client,
         notifications_repository=notifications_repository,
         config=config,
     )
@@ -91,10 +83,9 @@ def velocloud_repository(logger, event_bus, notifications_repository):
 
 
 @pytest.fixture(scope="function")
-def customer_cache_repository(logger, event_bus, notifications_repository):
+def customer_cache_repository(nats_client, notifications_repository):
     instance = CustomerCacheRepository(
-        logger=logger,
-        event_bus=event_bus,
+        nats_client=nats_client,
         notifications_repository=notifications_repository,
         config=config,
     )
@@ -105,10 +96,7 @@ def customer_cache_repository(logger, event_bus, notifications_repository):
 
 @pytest.fixture(scope="function")
 def triage_repository(utils_repository):
-    instance = TriageRepository(
-        config=config,
-        utils_repository=utils_repository,
-    )
+    instance = TriageRepository(config=config, utils_repository=utils_repository)
     wrap_all_methods(instance)
 
     return instance
@@ -123,21 +111,17 @@ def utils_repository():
 
 
 @pytest.fixture(scope="function")
-def outage_repository(logger, ha_repository):
-    instance = OutageRepository(
-        logger=logger,
-        ha_repository=ha_repository,
-    )
+def outage_repository(ha_repository):
+    instance = OutageRepository(ha_repository=ha_repository)
     wrap_all_methods(instance)
 
     return instance
 
 
 @pytest.fixture(scope="function")
-def digi_repository(event_bus, logger, notifications_repository):
+def digi_repository(nats_client, notifications_repository):
     instance = DiGiRepository(
-        event_bus=event_bus,
-        logger=logger,
+        nats_client=nats_client,
         config=config,
         notifications_repository=notifications_repository,
     )
@@ -147,11 +131,8 @@ def digi_repository(event_bus, logger, notifications_repository):
 
 
 @pytest.fixture(scope="function")
-def ha_repository(logger):
-    instance = HaRepository(
-        logger=logger,
-        config=config,
-    )
+def ha_repository():
+    instance = HaRepository(config=config)
     wrap_all_methods(instance)
 
     return instance
@@ -159,8 +140,6 @@ def ha_repository(logger):
 
 @pytest.fixture(scope="function")
 def triage(
-    event_bus,
-    logger,
     scheduler,
     outage_repository,
     customer_cache_repository,
@@ -172,8 +151,6 @@ def triage(
     ha_repository,
 ):
     instance = Triage(
-        event_bus=event_bus,
-        logger=logger,
         scheduler=scheduler,
         config=config,
         outage_repository=outage_repository,
@@ -191,8 +168,6 @@ def triage(
 
 @pytest.fixture(scope="function")
 def outage_monitor(
-    event_bus,
-    logger,
     scheduler,
     task_dispatcher_client,
     outage_repository,
@@ -208,8 +183,6 @@ def outage_monitor(
     email_repository,
 ):
     instance = OutageMonitor(
-        event_bus=event_bus,
-        logger=logger,
         scheduler=scheduler,
         task_dispatcher_client=task_dispatcher_client,
         config=config,

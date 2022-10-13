@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import List, Optional
 
 import pytest
+
 from tests.fixtures._helpers import _undefined, bruinize_date
 
 
@@ -115,9 +116,9 @@ def make_ticket_note():
 def make_post_notification_email_milestone_request(make_rpc_request):
     def _inner(*, request_id: str = "", ticket_id: int = 0, service_number: str = "", notification_type: str = ""):
         payload = {
-            "notification_type": notification_type,
             "ticket_id": ticket_id,
             "service_number": service_number,
+            "notification_type": notification_type,
         }
 
         return make_rpc_request(

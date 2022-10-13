@@ -1,6 +1,7 @@
 import asyncio
 import base64
 import json
+import logging
 import os
 import time
 from collections import defaultdict
@@ -8,6 +9,13 @@ from datetime import datetime, timedelta
 from ipaddress import ip_address
 from time import perf_counter
 from typing import List, Optional, Pattern
+
+from apscheduler.jobstores.base import ConflictingIdError
+from apscheduler.util import undefined
+from dateutil.parser import parse
+from framework.storage.task_dispatcher_client import TaskTypes
+from pytz import timezone, utc
+from shortuuid import uuid
 
 from application import (
     DIGI_NOTE_REGEX,
@@ -19,19 +27,13 @@ from application import (
     ForwardQueues,
     Outages,
 )
-from apscheduler.jobstores.base import ConflictingIdError
-from apscheduler.util import undefined
-from dateutil.parser import parse
-from igz.packages.storage.task_dispatcher_client import TaskTypes
-from pytz import timezone, utc
-from shortuuid import uuid
+
+logger = logging.getLogger(__name__)
 
 
 class OutageMonitor:
     def __init__(
         self,
-        event_bus,
-        logger,
         scheduler,
         task_dispatcher_client,
         config,
@@ -47,8 +49,6 @@ class OutageMonitor:
         ha_repository,
         email_repository,
     ):
-        self._event_bus = event_bus
-        self._logger = logger
         self._scheduler = scheduler
         self._task_dispatcher_client = task_dispatcher_client
         self._config = config
@@ -75,13 +75,13 @@ class OutageMonitor:
         self._velocloud_links_by_host = {}
 
     async def start_service_outage_monitoring(self, exec_on_start):
-        self._logger.info("Scheduling Service Outage Monitor job...")
+        logger.info("Scheduling Service Outage Monitor job...")
         next_run_time = undefined
 
         if exec_on_start:
             tz = timezone(self._config.TIMEZONE)
             next_run_time = datetime.now(tz)
-            self._logger.info("Service Outage Monitor job is going to be executed immediately")
+            logger.info("Service Outage Monitor job is going to be executed immediately")
 
         try:
             self._scheduler.add_job(
@@ -93,28 +93,28 @@ class OutageMonitor:
                 id="_service_outage_monitor_process",
             )
         except ConflictingIdError as conflict:
-            self._logger.error(f"Skipping start of Service Outage Monitoring job. Reason: {conflict}")
+            logger.error(f"Skipping start of Service Outage Monitoring job. Reason: {conflict}")
 
     async def _outage_monitoring_process(self):
         self.__reset_state()
 
         start = time.time()
-        self._logger.info(f"[outage_monitoring_process] Start with map cache!")
+        logger.info(f"[outage_monitoring_process] Start with map cache!")
 
         customer_cache_response = await self._customer_cache_repository.get_cache_for_outage_monitoring()
         if customer_cache_response["status"] not in range(200, 300) or customer_cache_response["status"] == 202:
-            self._logger.warning("Not found cache for service outage. " "Skipping the outage monitoring process ...")
+            logger.warning("Not found cache for service outage. " "Skipping the outage monitoring process ...")
             return
 
-        self._logger.info("[outage_monitoring_process] Ignoring blacklisted edges...")
+        logger.info("[outage_monitoring_process] Ignoring blacklisted edges...")
         self._customer_cache = [
             elem
             for elem in customer_cache_response["body"]
             if elem["edge"] not in self._config.MONITOR_CONFIG["blacklisted_edges"]
         ]
         serials_for_monitoring = [edge["serial_number"] for edge in self._customer_cache]
-        self._logger.info(f"List of serials from customer cache: {serials_for_monitoring}")
-        self._logger.info("[outage_monitoring_process] Creating list of whitelisted serials for autoresolve...")
+        logger.info(f"List of serials from customer cache: {serials_for_monitoring}")
+        logger.info("[outage_monitoring_process] Creating list of whitelisted serials for autoresolve...")
         autoresolve_filter = self._config.MONITOR_CONFIG["velocloud_instances_filter"].keys()
         autoresolve_filter_enabled = len(autoresolve_filter) > 0
         if not autoresolve_filter_enabled:
@@ -125,45 +125,43 @@ class OutageMonitor:
             )
 
         split_cache = defaultdict(list)
-        self._logger.info("[outage_monitoring_process] Splitting cache by host")
+        logger.info("[outage_monitoring_process] Splitting cache by host")
 
         for edge_info in self._customer_cache:
             split_cache[edge_info["edge"]["host"]].append(edge_info)
-        self._logger.info("[outage_monitoring_process] Cache split")
+        logger.info("[outage_monitoring_process] Cache split")
 
         process_tasks = [self._process_velocloud_host(host, split_cache[host]) for host in split_cache]
         await asyncio.gather(*process_tasks, return_exceptions=True)
 
         stop = time.time()
-        self._logger.info(
+        logger.info(
             f"[outage_monitoring_process] Outage monitoring process finished! Elapsed time:"
             f"{round((stop - start) / 60, 2)} minutes"
         )
 
     async def _process_velocloud_host(self, host, host_cache):
-        self._logger.info(f"Processing {len(host_cache)} edges in Velocloud {host}...")
+        logger.info(f"Processing {len(host_cache)} edges in Velocloud {host}...")
         start = perf_counter()
 
         links_with_edge_info_response = await self._velocloud_repository.get_links_with_edge_info(velocloud_host=host)
         if links_with_edge_info_response["status"] not in range(200, 300):
-            self._logger.warning(
-                f"Not found links with edge info for host: {host}. Skipping process velocloud host ..."
-            )
+            logger.warning(f"Not found links with edge info for host: {host}. Skipping process velocloud host ...")
             return
 
         network_enterprises_response = await self._velocloud_repository.get_network_enterprises(velocloud_host=host)
         if network_enterprises_response["status"] not in range(200, 300):
-            self._logger.warning(f"Not found network enterprises for host: {host}. Skipping process velocloud host ...")
+            logger.warning(f"Not found network enterprises for host: {host}. Skipping process velocloud host ...")
             return
 
         links_with_edge_info: list = links_with_edge_info_response["body"]
         edges_network_enterprises: list = network_enterprises_response["body"]
 
         self._velocloud_links_by_host[host] = links_with_edge_info
-        self._logger.info(f"Link status with edge info from Velocloud: {links_with_edge_info}")
+        logger.info(f"Link status with edge info from Velocloud: {links_with_edge_info}")
         links_grouped_by_edge = self._velocloud_repository.group_links_by_edge(links_with_edge_info)
 
-        self._logger.info(
+        logger.info(
             "Adding HA info to existing edges, and putting standby edges under monitoring as if they were "
             "standalone edges..."
         )
@@ -180,30 +178,30 @@ class OutageMonitor:
         ]
         primary_serials = [edge["edgeSerialNumber"] for edge in all_edges if self._ha_repository.is_ha_primary(edge)]
         standby_serials = [edge["edgeSerialNumber"] for edge in all_edges if self._ha_repository.is_ha_standby(edge)]
-        self._logger.info(f"Service Outage monitoring is about to check {len(all_edges)} edges")
-        self._logger.info(f"{len(serials_with_ha_disabled)} edges have HA disabled: {serials_with_ha_disabled}")
-        self._logger.info(f"{len(serials_with_ha_enabled)} edges have HA enabled: {serials_with_ha_enabled}")
-        self._logger.info(f"{len(primary_serials)} edges are the primary of a HA pair: {primary_serials}")
-        self._logger.info(f"{len(standby_serials)} edges are the standby of a HA pair: {standby_serials}")
+        logger.info(f"Service Outage monitoring is about to check {len(all_edges)} edges")
+        logger.info(f"{len(serials_with_ha_disabled)} edges have HA disabled: {serials_with_ha_disabled}")
+        logger.info(f"{len(serials_with_ha_enabled)} edges have HA enabled: {serials_with_ha_enabled}")
+        logger.info(f"{len(primary_serials)} edges are the primary of a HA pair: {primary_serials}")
+        logger.info(f"{len(standby_serials)} edges are the standby of a HA pair: {standby_serials}")
 
         edges_full_info = self._map_cached_edges_with_edges_status(host_cache, all_edges)
         mapped_serials_w_status = [edge["cached_info"]["serial_number"] for edge in edges_full_info]
-        self._logger.info(f"Mapped cache serials with status: {mapped_serials_w_status}")
+        logger.info(f"Mapped cache serials with status: {mapped_serials_w_status}")
 
         for outage_type in Outages:
             down_edges = self._outage_repository.filter_edges_by_outage_type(edges_full_info, outage_type)
-            self._logger.info(f'{outage_type.value} serials: {[e["status"]["edgeSerialNumber"] for e in down_edges]}')
+            logger.info(f'{outage_type.value} serials: {[e["status"]["edgeSerialNumber"] for e in down_edges]}')
 
             relevant_down_edges = [
                 edge for edge in down_edges if self._outage_repository.should_document_outage(edge["status"])
             ]
-            self._logger.info(
+            logger.info(
                 f"{outage_type.value} serials that should be documented: "
                 f'{[e["status"]["edgeSerialNumber"] for e in relevant_down_edges]}'
             )
 
             if relevant_down_edges:
-                self._logger.info(f"{len(relevant_down_edges)} edges were detected in {outage_type.value} state.")
+                logger.info(f"{len(relevant_down_edges)} edges were detected in {outage_type.value} state.")
                 edges_with_business_grade_links_down = [
                     edge
                     for edge in relevant_down_edges
@@ -216,7 +214,7 @@ class OutageMonitor:
                 ]
                 out = await asyncio.gather(*business_grade_tasks, return_exceptions=True)
                 for ex in filter(None, out):
-                    self._logger.error(
+                    logger.error(
                         f"[{outage_type.value}] Error while attempting ticket creation(s) for edge "
                         f"with Business Grade Link(s): {ex}"
                     )
@@ -226,27 +224,27 @@ class OutageMonitor:
                 ]
                 self._schedule_recheck_job_for_edges(regular_edges, outage_type)
             else:
-                self._logger.info(
+                logger.info(
                     f"No edges were detected in {outage_type.value} state. "
                     f"No ticket creations will trigger for this outage type"
                 )
 
         healthy_edges = [edge for edge in edges_full_info if self._outage_repository.is_edge_up(edge["status"])]
-        self._logger.info(f'Healthy serials: {[e["status"]["edgeSerialNumber"] for e in healthy_edges]}')
+        logger.info(f'Healthy serials: {[e["status"]["edgeSerialNumber"] for e in healthy_edges]}')
         if healthy_edges:
-            self._logger.info(
+            logger.info(
                 f"{len(healthy_edges)} edges were detected in healthy state. Running autoresolve for all of them..."
             )
             autoresolve_tasks = [self._run_ticket_autoresolve_for_edge(edge) for edge in healthy_edges]
             await asyncio.gather(*autoresolve_tasks)
         else:
-            self._logger.info("No edges were detected in healthy state. Autoresolve won't be triggered")
+            logger.info("No edges were detected in healthy state. Autoresolve won't be triggered")
 
         stop = perf_counter()
-        self._logger.info(f"Elapsed time processing edges in host {host}: {round((stop - start) / 60, 2)} minutes")
+        logger.info(f"Elapsed time processing edges in host {host}: {round((stop - start) / 60, 2)} minutes")
 
     def _schedule_recheck_job_for_edges(self, edges: list, outage_type: Outages):
-        self._logger.info(f"Scheduling recheck job for {len(edges)} edges in {outage_type.value} state...")
+        logger.info(f"Scheduling recheck job for {len(edges)} edges in {outage_type.value} state...")
 
         tz = timezone(self._config.TIMEZONE)
         current_datetime = datetime.now(tz)
@@ -263,7 +261,7 @@ class OutageMonitor:
             id=f"{outage_type.value}_ticket_creation_recheck",
         )
 
-        self._logger.info(f"Edges in {outage_type.value} state scheduled for recheck successfully")
+        logger.info(f"Edges in {outage_type.value} state scheduled for recheck successfully")
 
     def _map_cached_edges_with_edges_status(self, customer_cache: list, edges_status: list) -> list:
         result = []
@@ -275,16 +273,14 @@ class OutageMonitor:
         for serial_number, cached_edge in cached_edges_by_serial.items():
             edge_status = edge_statuses_by_serial.get(serial_number)
             if not edge_status:
-                self._logger.info(
-                    f'No edge status was found for cached edge {cached_edge["serial_number"]}. ' "Skipping..."
-                )
+                logger.info(f'No edge status was found for cached edge {cached_edge["serial_number"]}. ' "Skipping...")
                 edge = cached_edge["edge"]
                 if edge["host"] == "metvco03.mettel.net" and edge["enterprise_id"] == 124:
                     self._cached_edges_without_status.append(
                         f"<br>https://{edge['host']}/#!/operator/customer/"
                         f"{edge['enterprise_id']}/monitor/edge/{edge['edge_id']}/<br>"
                     )
-                    self._logger.info(
+                    logger.info(
                         f"Edge {edge} was appended to the list of edges that have no status but"
                         f"are in the customer cache."
                     )
@@ -302,20 +298,20 @@ class OutageMonitor:
     async def _report_cached_edges_without_status(self):
         working_environment = self._config.CURRENT_ENVIRONMENT
         if len(self._cached_edges_without_status) == 0:
-            self._logger.info(
+            logger.info(
                 "No RSI edges were found in customer cache but not in Velocloud response" ". Skipping report..."
             )
             return
         if working_environment != "production":
-            self._logger.info(
+            logger.info(
                 f"[outage-monitoring] Skipping sending email with edges that are in customer-cache"
                 f"but not in Velocloud response. Current environment is {working_environment}"
             )
             return
-        self._logger.info("Sending email with cached edges without status...")
+        logger.info("Sending email with cached edges without status...")
         email_obj = self._format_edges_to_report_for_email()
         response = await self._email_repository.send_email(email_obj)
-        self._logger.info(f"Response from sending email: {json.dumps(response)}")
+        logger.info(f"Response from sending email: {json.dumps(response)}")
 
     def _format_edges_to_report_for_email(self):
         string_edges_without_status = "".join(self._cached_edges_without_status)
@@ -361,10 +357,10 @@ class OutageMonitor:
             client_id = cached_edge["bruin_client_info"]["client_id"]
             client_name = cached_edge["bruin_client_info"]["client_name"]
 
-            self._logger.info(f"[ticket-autoresolve] Starting autoresolve for edge {serial_number}...")
+            logger.info(f"[ticket-autoresolve] Starting autoresolve for edge {serial_number}...")
 
             if serial_number not in self._autoresolve_serials_whitelist:
-                self._logger.info(
+                logger.info(
                     f"[ticket-autoresolve] Skipping autoresolve for edge {serial_number} because its "
                     f"serial ({serial_number}) is not whitelisted."
                 )
@@ -376,14 +372,14 @@ class OutageMonitor:
             outage_ticket_response_body = outage_ticket_response["body"]
             outage_ticket_response_status = outage_ticket_response["status"]
             if outage_ticket_response_status not in range(200, 300):
-                self._logger.warning(
+                logger.warning(
                     f"Bad status calling for outage tickets for client id: {client_id} and serial: {serial_number}. "
                     f"Skipping autoresolve ..."
                 )
                 return
 
             if not outage_ticket_response_body:
-                self._logger.info(
+                logger.info(
                     f"[ticket-autoresolve] No outage ticket found for edge {serial_number}. Skipping autoresolve..."
                 )
                 return
@@ -394,16 +390,14 @@ class OutageMonitor:
             outage_ticket_severity = outage_ticket["severity"]
 
             if not self._was_ticket_created_by_automation_engine(outage_ticket):
-                self._logger.info(
-                    f"Ticket {outage_ticket_id} was not created by Automation Engine. Skipping autoresolve..."
-                )
+                logger.info(f"Ticket {outage_ticket_id} was not created by Automation Engine. Skipping autoresolve...")
                 return
 
             ticket_details_response = await self._bruin_repository.get_ticket_details(outage_ticket_id)
             ticket_details_response_body = ticket_details_response["body"]
             ticket_details_response_status = ticket_details_response["status"]
             if ticket_details_response_status not in range(200, 300):
-                self._logger.warning(
+                logger.warning(
                     f"Bad status calling get ticket details for outage ticket: {outage_ticket_id}. "
                     f"Skipping autoresolve ..."
                 )
@@ -434,7 +428,7 @@ class OutageMonitor:
             is_task_in_ipa_queue = self._is_ticket_task_in_ipa_queue(detail_for_ticket_resolution)
 
             if has_faulty_byob_link and is_task_in_ipa_queue:
-                self._logger.info(
+                logger.info(
                     f"Task for serial {serial_number} in ticket {outage_ticket_id} is related to a BYOB link "
                     f"and is in the IPA Investigate queue. Ignoring auto-resolution restrictions..."
                 )
@@ -448,7 +442,7 @@ class OutageMonitor:
                     note_regex=REOPEN_NOTE_REGEX,
                 )
                 if not was_last_outage_detected_recently:
-                    self._logger.info(
+                    logger.info(
                         f"Edge {serial_number} has been in outage state for a long time, so detail {ticket_detail_id} "
                         f"(serial {serial_number}) of ticket {outage_ticket_id} will not be autoresolved. Skipping "
                         f"autoresolve..."
@@ -463,7 +457,7 @@ class OutageMonitor:
                     )
                 )
                 if not can_detail_be_autoresolved_one_more_time:
-                    self._logger.info(
+                    logger.info(
                         f"[ticket-autoresolve] Limit to autoresolve detail {ticket_detail_id} (serial {serial_number}) "
                         f"of ticket {outage_ticket_id} linked to edge {serial_number} has been maxed out already. "
                         "Skipping autoresolve..."
@@ -471,7 +465,7 @@ class OutageMonitor:
                     return
 
             if self._is_detail_resolved(detail_for_ticket_resolution):
-                self._logger.info(
+                logger.info(
                     f"Detail {ticket_detail_id} (serial {serial_number}) of ticket {outage_ticket_id} is already "
                     "resolved. Skipping autoresolve..."
                 )
@@ -479,13 +473,13 @@ class OutageMonitor:
 
             working_environment = self._config.CURRENT_ENVIRONMENT
             if working_environment != "production":
-                self._logger.info(
+                logger.info(
                     f"[ticket-autoresolve] Skipping autoresolve for edge {serial_number} since the "
                     f"current environment is {working_environment.upper()}."
                 )
                 return
 
-            self._logger.info(
+            logger.info(
                 f"Autoresolving detail {ticket_detail_id} of ticket {outage_ticket_id} linked to edge "
                 f"{serial_number} with serial number {serial_number}..."
             )
@@ -494,7 +488,7 @@ class OutageMonitor:
             )
             resolve_ticket_response = await self._bruin_repository.resolve_ticket(outage_ticket_id, ticket_detail_id)
             if resolve_ticket_response["status"] not in range(200, 300):
-                self._logger.warning(
+                logger.warning(
                     f"Bad status calling resolve ticket for outage ticket_id: {outage_ticket_id} and"
                     f"ticket detail: {ticket_detail_id}. Skipping autoresolve ..."
                 )
@@ -511,7 +505,7 @@ class OutageMonitor:
                 has_byob=has_faulty_byob_link,
                 link_types=faulty_link_types,
             )
-            self._logger.info(
+            logger.info(
                 f"Detail {ticket_detail_id} (serial {serial_number}) of ticket {outage_ticket_id} linked to "
                 f"edge {serial_number} was autoresolved!"
             )
@@ -520,7 +514,7 @@ class OutageMonitor:
             task_key = f"{outage_ticket_id}-{serial_number}-{ForwardQueues.HNOC.name}"
 
             if self._task_dispatcher_client.clear_task(task_type, task_key):
-                self._logger.info(
+                logger.info(
                     f"Removed scheduled task to forward to {ForwardQueues.HNOC.value} "
                     f"for autoresolved ticket {outage_ticket_id} and serial number {serial_number}"
                 )
@@ -542,28 +536,24 @@ class OutageMonitor:
         await self._notifications_repository.send_slack_message(message)
 
     async def _recheck_edges_for_ticket_creation(self, outage_edges: list, outage_type: Outages):
-        self._logger.info(
+        logger.info(
             f"[{outage_type.value}] Re-checking {len(outage_edges)} edges in outage state prior to ticket creation..."
         )
-        self._logger.info(f"[{outage_type.value}] Edges in outage before quarantine recheck: {outage_edges}")
+        logger.info(f"[{outage_type.value}] Edges in outage before quarantine recheck: {outage_edges}")
 
         host = self._config.VELOCLOUD_HOST
 
         links_with_edge_info_response = await self._velocloud_repository.get_links_with_edge_info(velocloud_host=host)
         if links_with_edge_info_response["status"] not in range(200, 300):
-            self._logger.warning(
-                f"Bad status calling to get links with edge info for host: {host}. Skipping recheck ..."
-            )
+            logger.warning(f"Bad status calling to get links with edge info for host: {host}. Skipping recheck ...")
             return
 
         network_enterprises_response = await self._velocloud_repository.get_network_enterprises(velocloud_host=host)
         if network_enterprises_response["status"] not in range(200, 300):
-            self._logger.warning(
-                f"Bad status calling to get network enterprises info for host: {host}. Skipping recheck ..."
-            )
+            logger.warning(f"Bad status calling to get network enterprises info for host: {host}. Skipping recheck ...")
             return
 
-        self._logger.info(
+        logger.info(
             f"[{outage_type.value}] Velocloud edge status response in quarantine recheck: "
             f"{links_with_edge_info_response}"
         )
@@ -572,7 +562,7 @@ class OutageMonitor:
 
         links_grouped_by_edge = self._velocloud_repository.group_links_by_edge(links_with_edge_info)
 
-        self._logger.info(
+        logger.info(
             f"[{outage_type.value}] Adding HA info to existing edges, and putting standby edges under monitoring as if "
             "they were standalone edges..."
         )
@@ -583,20 +573,20 @@ class OutageMonitor:
 
         customer_cache_for_outage_edges = [elem["cached_info"] for elem in outage_edges]
         edges_full_info = self._map_cached_edges_with_edges_status(customer_cache_for_outage_edges, all_edges)
-        self._logger.info(f"[{outage_type.value}] Current status of edges that were in outage state: {edges_full_info}")
+        logger.info(f"[{outage_type.value}] Current status of edges that were in outage state: {edges_full_info}")
 
         edges_still_down = self._outage_repository.filter_edges_by_outage_type(edges_full_info, outage_type)
         serials_still_down = [edge["status"]["edgeSerialNumber"] for edge in edges_still_down]
-        self._logger.info(f"[{outage_type.value}] Edges still in outage state after recheck: {edges_still_down}")
-        self._logger.info(f"[{outage_type.value}] Serials still in outage state after recheck: {serials_still_down}")
+        logger.info(f"[{outage_type.value}] Edges still in outage state after recheck: {edges_still_down}")
+        logger.info(f"[{outage_type.value}] Serials still in outage state after recheck: {serials_still_down}")
 
         healthy_edges = [edge for edge in edges_full_info if self._outage_repository.is_edge_up(edge["status"])]
         healthy_serials = [edge["status"]["edgeSerialNumber"] for edge in healthy_edges]
-        self._logger.info(f"[{outage_type.value}] Edges that are healthy after recheck: {healthy_edges}")
-        self._logger.info(f"[{outage_type.value}] Serials that are healthy after recheck: {healthy_serials}")
+        logger.info(f"[{outage_type.value}] Edges that are healthy after recheck: {healthy_edges}")
+        logger.info(f"[{outage_type.value}] Serials that are healthy after recheck: {healthy_serials}")
 
         if edges_still_down:
-            self._logger.info(
+            logger.info(
                 f"[{outage_type.value}] {len(edges_still_down)} edges are still in outage state after re-check. "
                 "Attempting outage ticket creation for all of them..."
             )
@@ -606,37 +596,35 @@ class OutageMonitor:
                 tasks = [self._attempt_ticket_creation(edge, outage_type) for edge in edges_still_down]
                 out = await asyncio.gather(*tasks, return_exceptions=True)
                 for ex in filter(None, out):
-                    self._logger.error(
+                    logger.error(
                         f"[{outage_type.value}] Error while attempting ticket creation(s) for edge in "
                         f"the quarantine: {ex}"
                     )
             else:
-                self._logger.info(
+                logger.info(
                     f"[{outage_type.value}] Not starting outage ticket creation for {len(edges_still_down)} faulty "
                     f"edges because the current working environment is {working_environment.upper()}."
                 )
         else:
-            self._logger.info(
+            logger.info(
                 f"[{outage_type.value}] No edges were detected in outage state after re-check. "
                 "Outage tickets won't be created"
             )
 
         if healthy_edges:
-            self._logger.info(
+            logger.info(
                 f"[{outage_type.value}] {len(healthy_edges)} edges were detected in healthy state after re-check. '"
                 "Running autoresolve for all of them..."
             )
-            self._logger.info(
-                f"[{outage_type.value}] Edges that are going to be attempted to autoresolve: {healthy_edges}"
-            )
+            logger.info(f"[{outage_type.value}] Edges that are going to be attempted to autoresolve: {healthy_edges}")
             autoresolve_tasks = [self._run_ticket_autoresolve_for_edge(edge) for edge in healthy_edges]
             await asyncio.gather(*autoresolve_tasks)
         else:
-            self._logger.info(
+            logger.info(
                 f"[{outage_type.value}] No edges were detected in healthy state. " "Autoresolve won't be triggered"
             )
 
-        self._logger.info(f"[{outage_type.value}] Re-check process finished for {len(outage_edges)} edges")
+        logger.info(f"[{outage_type.value}] Re-check process finished for {len(outage_edges)} edges")
 
     def _get_hnoc_forward_time_by_outage_type(self, outage_type: Outages, edge: dict) -> float:
         if outage_type in [Outages.LINK_DOWN, Outages.HA_LINK_DOWN]:
@@ -668,7 +656,7 @@ class OutageMonitor:
         current_datetime = datetime.utcnow()
         forward_task_run_date = current_datetime + timedelta(minutes=forward_time)
 
-        self._logger.info(
+        logger.info(
             f"Scheduling forward to {target_queue.value} for ticket {ticket_id} and serial number {serial_number} "
             f"to happen in {forward_time} minutes"
         )
@@ -707,7 +695,7 @@ class OutageMonitor:
         )
 
         if recent_events_response["status"] not in range(200, 300):
-            self._logger.warning(
+            logger.warning(
                 f"Couldn't find last edge events for edge id: {edge_full_id}. Skipping append triage note ..."
             )
             return
@@ -717,9 +705,7 @@ class OutageMonitor:
 
         ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
         if ticket_details_response["status"] not in range(200, 300):
-            self._logger.warning(
-                f"Couldn't find ticket details for ticket id: {ticket_id}. Skipping append triage note ..."
-            )
+            logger.warning(f"Couldn't find ticket details for ticket id: {ticket_id}. Skipping append triage note ...")
             return
 
         ticket_detail: dict = ticket_details_response["body"]["ticketDetails"][0]
@@ -729,7 +715,7 @@ class OutageMonitor:
             cached_edge, edge_status, recent_events, outage_type, is_reopen_note=is_reopen_note
         )
 
-        self._logger.info(
+        logger.info(
             f"Appending triage note to detail {ticket_detail_id} (serial {serial_number}) of ticket {ticket_id}..."
         )
         detail_object = {
@@ -740,13 +726,13 @@ class OutageMonitor:
 
     async def _reopen_outage_ticket(self, ticket_id: int, edge_status: dict, cached_edge: dict, outage_type: Outages):
         serial_number = edge_status["edgeSerialNumber"]
-        self._logger.info(f"Reopening outage ticket {ticket_id} for serial {serial_number}...")
+        logger.info(f"Reopening outage ticket {ticket_id} for serial {serial_number}...")
 
         ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
         ticket_details_response_body = ticket_details_response["body"]
         ticket_details_response_status = ticket_details_response["status"]
         if ticket_details_response_status not in range(200, 300):
-            self._logger.info(f"Bad status calling to get ticket details. Skipping reopen ticket ...")
+            logger.info(f"Bad status calling to get ticket details. Skipping reopen ticket ...")
             return
 
         ticket_detail_for_reopen = self._utils_repository.get_first_element_matching(
@@ -759,7 +745,7 @@ class OutageMonitor:
         ticket_reopening_response_status = ticket_reopening_response["status"]
 
         if ticket_reopening_response_status == 200:
-            self._logger.info(f"Detail {detail_id_for_reopening} of outage ticket {ticket_id} reopened successfully.")
+            logger.info(f"Detail {detail_id_for_reopening} of outage ticket {ticket_id} reopened successfully.")
             slack_message = (
                 f"Detail {detail_id_for_reopening} of outage ticket {ticket_id} reopened: "
                 f"https://app.bruin.com/t/{ticket_id}"
@@ -768,11 +754,11 @@ class OutageMonitor:
             await self._append_triage_note(ticket_id, cached_edge, edge_status, outage_type, is_reopen_note=True)
             return True
         else:
-            self._logger.error(f"Reopening for detail {detail_id_for_reopening} of outage ticket {ticket_id} failed.")
+            logger.error(f"Reopening for detail {detail_id_for_reopening} of outage ticket {ticket_id} failed.")
             return False
 
     async def _check_for_digi_reboot(self, ticket_id, logical_id_list, serial_number, edge_status):
-        self._logger.info(f"Checking edge {serial_number} for DiGi Links")
+        logger.info(f"Checking edge {serial_number} for DiGi Links")
         digi_links = self._digi_repository.get_digi_links(logical_id_list)
 
         for digi_link in digi_links:
@@ -782,7 +768,7 @@ class OutageMonitor:
             if link_status is not None and self._outage_repository.is_faulty_link(link_status["linkState"]):
                 reboot = await self._digi_repository.reboot_link(serial_number, ticket_id, digi_link["logical_id"])
                 if reboot["status"] in range(200, 300):
-                    self._logger.info(
+                    logger.info(
                         f'Attempting DiGi reboot of link with MAC address of {digi_link["logical_id"]}'
                         f"in edge {serial_number}"
                     )
@@ -790,7 +776,7 @@ class OutageMonitor:
                         ticket_id, serial_number, digi_link["interface_name"]
                     )
                     if append_digi_reboot_note_response not in range(200, 300):
-                        self._logger.warning(f" Bad status calling to append digi reboot note. Can't append the note")
+                        logger.warning(f" Bad status calling to append digi reboot note. Can't append the note")
                     slack_message = (
                         f"DiGi reboot started for faulty edge {serial_number}. Ticket "
                         f"details at https://app.bruin.com/t/{ticket_id}."
@@ -812,7 +798,7 @@ class OutageMonitor:
     ):
         if self._outage_repository.is_faulty_edge(edge_status["edgeState"]):
             return
-        self._logger.info(f"Checking edge {serial_number} for DiGi Links")
+        logger.info(f"Checking edge {serial_number} for DiGi Links")
         digi_links = self._digi_repository.get_digi_links(logical_id_list)
 
         for digi_link in digi_links:
@@ -825,7 +811,7 @@ class OutageMonitor:
                 ticket_details_response_body = ticket_details_response["body"]
                 ticket_details_response_status = ticket_details_response["status"]
                 if ticket_details_response_status not in range(200, 300):
-                    self._logger.info(
+                    logger.info(
                         f"Bad status calling to get ticket details checking failed digi reboot. Skipping link ..."
                     )
                     return
@@ -838,7 +824,7 @@ class OutageMonitor:
                 ticket_detail_id = detail_for_ticket_resolution["detailID"]
 
                 notes_from_outage_ticket = ticket_details_response_body["ticketNotes"]
-                self._logger.info(f"Notes of ticket {ticket_id}: {notes_from_outage_ticket}")
+                logger.info(f"Notes of ticket {ticket_id}: {notes_from_outage_ticket}")
 
                 relevant_notes = [
                     note
@@ -850,10 +836,10 @@ class OutageMonitor:
                 digi_note = self._find_note(relevant_notes, "DiGi")
 
                 if digi_note is None:
-                    self._logger.info(f"No DiGi note was found for ticket {ticket_id}")
+                    logger.info(f"No DiGi note was found for ticket {ticket_id}")
                     return
                 if self._was_digi_rebooted_recently(digi_note):
-                    self._logger.info(
+                    logger.info(
                         f"The last DiGi reboot attempt for Edge {serial_number} did not occur "
                         f'{self._config.MONITOR_CONFIG["last_digi_reboot_seconds"] / 60} or more mins ago.'
                     )
@@ -866,9 +852,9 @@ class OutageMonitor:
                     task_result_note = self._find_note(relevant_notes, target_queue)
 
                     if task_result_note is not None:
-                        self._logger.info(f'Task results has already been changed to "{target_queue}"')
+                        logger.info(f'Task results has already been changed to "{target_queue}"')
                         return
-                    self._logger.info(f"DiGi reboot attempt failed. Forwarding ticket {ticket_id} to Wireless team")
+                    logger.info(f"DiGi reboot attempt failed. Forwarding ticket {ticket_id} to Wireless team")
                     change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
                         ticket_id, target_queue, serial_number=serial_number, detail_id=ticket_detail_id
                     )
@@ -888,7 +874,7 @@ class OutageMonitor:
                 else:
                     reboot = await self._digi_repository.reboot_link(serial_number, ticket_id, digi_link["logical_id"])
                     if reboot["status"] in range(200, 300):
-                        self._logger.info(
+                        logger.info(
                             f'Attempting DiGi reboot of link with MAC address of {digi_link["logical_id"]}'
                             f"in edge {serial_number}"
                         )
@@ -914,35 +900,35 @@ class OutageMonitor:
         faulty_link_types,
     ):
         serial_number = cached_edge["serial_number"]
-        self._logger.info(
+        logger.info(
             f"Attempting to forward task of ticket {ticket_id} related to serial {serial_number} to ASR Investigate..."
         )
 
         links_configuration = cached_edge["links_configuration"]
         if self._outage_repository.is_faulty_edge(edge_status["edgeState"]):
-            self._logger.info(
+            logger.info(
                 f"Outage of serial {serial_number} is caused by a faulty edge. Related detail of ticket {ticket_id} "
                 "will not be forwarded to ASR Investigate."
             )
             return
 
-        self._logger.info(f"Searching serial {serial_number} for any wired links")
+        logger.info(f"Searching serial {serial_number} for any wired links")
         links_wired = self._outage_repository.find_disconnected_wired_links(edge_status, links_configuration)
         if not links_wired:
-            self._logger.info(
+            logger.info(
                 f"No wired links are disconnected for serial {serial_number}. Related detail of ticket {ticket_id} "
                 "will not be forwarded to ASR Investigate."
             )
             return
 
-        self._logger.info(
+        logger.info(
             f"Filtering out any of the wired links of serial {serial_number} that contains any of the "
             f'following: {self._config.MONITOR_CONFIG["blacklisted_link_labels_for_asr_forwards"]} '
             f"in the link label"
         )
         whitelisted_links = self._find_whitelisted_links_for_asr_forward(links_wired)
         if not whitelisted_links:
-            self._logger.info(
+            logger.info(
                 f"No links with whitelisted labels were found for serial {serial_number}. "
                 f"Related detail of ticket {ticket_id} will not be forwarded to ASR Investigate."
             )
@@ -952,7 +938,7 @@ class OutageMonitor:
         ticket_details_response_body = ticket_details_response["body"]
         ticket_details_response_status = ticket_details_response["status"]
         if ticket_details_response_status not in range(200, 300):
-            self._logger.info(f"Bad status calling get ticket details. Skipping forward asr ...")
+            logger.info(f"Bad status calling get ticket details. Skipping forward asr ...")
             return
 
         details_from_ticket = ticket_details_response_body["ticketDetails"]
@@ -963,7 +949,7 @@ class OutageMonitor:
         ticket_detail_id = detail_for_ticket_resolution["detailID"]
 
         notes_from_outage_ticket = ticket_details_response_body["ticketNotes"]
-        self._logger.info(f"Notes of ticket {ticket_id}: {notes_from_outage_ticket}")
+        logger.info(f"Notes of ticket {ticket_id}: {notes_from_outage_ticket}")
 
         relevant_notes = [
             note
@@ -978,7 +964,7 @@ class OutageMonitor:
         task_result_note = self._find_note(relevant_notes, target_queue)
 
         if task_result_note is not None:
-            self._logger.info(
+            logger.info(
                 f"Detail related to serial {serial_number} of ticket {ticket_id} has already been forwarded to "
                 f'"{target_queue}"'
             )
@@ -1095,12 +1081,12 @@ class OutageMonitor:
     async def _change_ticket_severity(
         self, ticket_id: int, edge_status: dict, target_severity: int, *, check_ticket_tasks: bool
     ):
-        self._logger.info(f"Attempting to change severity level of ticket {ticket_id}...")
+        logger.info(f"Attempting to change severity level of ticket {ticket_id}...")
 
         serial_number = edge_status["edgeSerialNumber"]
 
         if self._outage_repository.is_faulty_edge(edge_status["edgeState"]):
-            self._logger.info(
+            logger.info(
                 f"Severity level of ticket {ticket_id} is about to be changed, as the root cause of the outage issue "
                 f"is that edge {serial_number} is offline."
             )
@@ -1109,7 +1095,7 @@ class OutageMonitor:
             if check_ticket_tasks:
                 ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
                 if ticket_details_response["status"] not in range(200, 300):
-                    self._logger.warning(
+                    logger.warning(
                         f"Bad response calling get ticket details for ticket id: {ticket_id}. "
                         f"The ticket severity won't change"
                     )
@@ -1117,14 +1103,14 @@ class OutageMonitor:
 
                 ticket_tasks = ticket_details_response["body"]["ticketDetails"]
                 if self._has_ticket_multiple_unresolved_tasks(ticket_tasks):
-                    self._logger.info(
+                    logger.info(
                         f"Severity level of ticket {ticket_id} will remain the same, as the root cause of the outage "
                         f"issue is that at least one link of edge {serial_number} is disconnected, and this ticket "
                         f"has multiple unresolved tasks."
                     )
                     return
 
-            self._logger.info(
+            logger.info(
                 f"Severity level of ticket {ticket_id} is about to be changed, as the root cause of the outage issue "
                 f"is that at least one link of edge {serial_number} is disconnected, and this ticket has a single "
                 "unresolved task."
@@ -1138,7 +1124,7 @@ class OutageMonitor:
 
         get_ticket_response = await self._bruin_repository.get_ticket(ticket_id)
         if not get_ticket_response["status"] in range(200, 300):
-            self._logger.warning(
+            logger.warning(
                 f"Bad response calling get ticket for ticket id: {ticket_id}. The ticket severity won't change!"
             )
             change_severity_task.close()
@@ -1146,7 +1132,7 @@ class OutageMonitor:
 
         ticket_info = get_ticket_response["body"]
         if self._is_ticket_already_in_severity_level(ticket_info, target_severity):
-            self._logger.info(
+            logger.info(
                 f"Ticket {ticket_id} is already in severity level {target_severity}, so there is no need "
                 "to change it."
             )
@@ -1155,10 +1141,10 @@ class OutageMonitor:
 
         result = await change_severity_task
         if result["status"] not in range(200, 300):
-            self._logger.warning(f"Bad response for change severity task. The ticket severity don't change")
+            logger.warning(f"Bad response for change severity task. The ticket severity don't change")
             return
 
-        self._logger.info(f"Finished changing severity level of ticket {ticket_id} to {target_severity}!")
+        logger.info(f"Finished changing severity level of ticket {ticket_id} to {target_severity}!")
 
     def _has_ticket_multiple_unresolved_tasks(self, ticket_tasks: list) -> bool:
         unresolved_tasks = [task for task in ticket_tasks if not self._is_detail_resolved(task)]
@@ -1299,7 +1285,7 @@ class OutageMonitor:
         return seconds_elapsed_since_last_event <= max_seconds_since_last_event
 
     async def _send_reminder(self, ticket_id: int, service_number: str, ticket_notes: list):
-        self._logger.info(f"Attempting to send reminder for service number {service_number} to ticket {ticket_id}")
+        logger.info(f"Attempting to send reminder for service number {service_number} to ticket {ticket_id}")
 
         filtered_notes = self._get_notes_appended_since_latest_reopen_or_ticket_creation(ticket_notes)
         last_documentation_cycle_start_date = filtered_notes[0]["createdDate"]
@@ -1312,7 +1298,7 @@ class OutageMonitor:
             note_regex=REMINDER_NOTE_REGEX,
         )
         if not should_send_reminder_notification:
-            self._logger.info(
+            logger.info(
                 f"No Reminder note will be appended for service number {service_number} to ticket {ticket_id},"
                 f" since either the last documentation cycle started or the last reminder"
                 f" was sent too recently"
@@ -1321,7 +1307,7 @@ class OutageMonitor:
 
         working_environment = self._config.CURRENT_ENVIRONMENT
         if not working_environment == "production":
-            self._logger.info(
+            logger.info(
                 f"No Reminder note will be appended for service number {service_number} to ticket {ticket_id} since "
                 f"the current environment is {working_environment.upper()}"
             )
@@ -1331,15 +1317,15 @@ class OutageMonitor:
             ticket_id, service_number
         )
         if email_response["status"] not in range(200, 300):
-            self._logger.error(f"Reminder email of edge {service_number} could not be sent for ticket {ticket_id}!")
+            logger.error(f"Reminder email of edge {service_number} could not be sent for ticket {ticket_id}!")
             return
 
         append_note_response = await self._append_reminder_note(ticket_id, service_number)
         if append_note_response["status"] not in range(200, 300):
-            self._logger.error(f"Reminder note of edge {service_number} could not be appended to ticket {ticket_id}!")
+            logger.error(f"Reminder note of edge {service_number} could not be appended to ticket {ticket_id}!")
             return
 
-        self._logger.info(f"Reminder note of edge {service_number} was successfully appended to ticket {ticket_id}!")
+        logger.info(f"Reminder note of edge {service_number} was successfully appended to ticket {ticket_id}!")
         await self._notifications_repository.notify_successful_reminder_note_append(ticket_id, service_number)
 
     async def _append_reminder_note(self, ticket_id: int, service_number: str):
@@ -1367,18 +1353,18 @@ class OutageMonitor:
         has_faulty_byob_link = self._has_faulty_blacklisted_link(edge_links)
         faulty_link_types = self._get_faulty_link_types(edge_links, links_configuration)
 
-        self._logger.info(f"[{outage_type.value}] Attempting outage ticket creation for serial {serial_number}...")
+        logger.info(f"[{outage_type.value}] Attempting outage ticket creation for serial {serial_number}...")
 
         try:
             ticket_creation_response = await self._bruin_repository.create_outage_ticket(client_id, serial_number)
             ticket_id = ticket_creation_response["body"]
             ticket_creation_response_status = ticket_creation_response["status"]
-            self._logger.info(
+            logger.info(
                 f"[{outage_type.value}] Bruin response for ticket creation for edge {edge}: "
                 f"{ticket_creation_response}"
             )
             if ticket_creation_response_status in range(200, 300):
-                self._logger.info(f"[{outage_type.value}] Successfully created outage ticket for edge {edge}.")
+                logger.info(f"[{outage_type.value}] Successfully created outage ticket for edge {edge}.")
                 self._metrics_repository.increment_tasks_created(
                     client=client_name,
                     outage_type=outage_type.value,
@@ -1414,13 +1400,13 @@ class OutageMonitor:
                         faulty_link_types,
                     )
                 else:
-                    self._logger.info(
+                    logger.info(
                         f"Ticket_id: {ticket_id} for serial: {serial_number} "
                         f"with link_data: {edge_links} has a blacklisted link and "
                         f"should not be forwarded to HNOC. Skipping forward to HNOC..."
                     )
 
-                    self._logger.info(
+                    logger.info(
                         f"Sending an email for ticket_id: {ticket_id} "
                         f"with serial: {serial_number} instead of scheduling forward to HNOC..."
                     )
@@ -1428,20 +1414,20 @@ class OutageMonitor:
                         ticket_id, serial_number
                     )
                     if email_response["status"] not in range(200, 300):
-                        self._logger.error(
+                        logger.error(
                             f"Reminder email of edge {serial_number} could not be sent for ticket" f" {ticket_id}!"
                         )
                     else:
                         append_note_response = await self._append_reminder_note(ticket_id, serial_number)
                         if append_note_response["status"] not in range(200, 300):
-                            self._logger.error(
+                            logger.error(
                                 f"Reminder note of edge {serial_number} could not be appended to ticket"
                                 f" {ticket_id}!"
                             )
 
                 await self._check_for_digi_reboot(ticket_id, logical_id_list, serial_number, edge_status)
             elif ticket_creation_response_status == 409:
-                self._logger.info(
+                logger.info(
                     f"[{outage_type.value}] Faulty edge {serial_number} already has an outage ticket in "
                     f"progress (ID = {ticket_id}). Skipping outage ticket creation for "
                     "this edge..."
@@ -1467,7 +1453,7 @@ class OutageMonitor:
                         faulty_link_types,
                     )
                 else:
-                    self._logger.info(
+                    logger.info(
                         f"Ticket_id: {ticket_id} for serial: {serial_number} "
                         f"with link_data: {edge_links} has a blacklisted link and "
                         f"should not be forwarded to HNOC. Skipping forward to HNOC..."
@@ -1502,7 +1488,7 @@ class OutageMonitor:
                     faulty_link_types,
                 )
             elif ticket_creation_response_status == 471:
-                self._logger.info(
+                logger.info(
                     f"[{outage_type.value}] Faulty edge {serial_number} has a resolved outage ticket "
                     f"(ID = {ticket_id}). Re-opening ticket..."
                 )
@@ -1538,13 +1524,13 @@ class OutageMonitor:
                         faulty_link_types,
                     )
                 else:
-                    self._logger.info(
+                    logger.info(
                         f"Ticket_id: {ticket_id} for serial: {serial_number} "
                         f"with link_data: {edge_links} has a blacklisted link and "
                         f"should not be forwarded to HNOC. Skipping forward to HNOC..."
                     )
 
-                    self._logger.info(
+                    logger.info(
                         f"Sending an email for ticket_id: {ticket_id} "
                         f"with serial: {serial_number} instead of scheduling forward to HNOC..."
                     )
@@ -1552,20 +1538,20 @@ class OutageMonitor:
                         ticket_id, serial_number
                     )
                     if email_response["status"] not in range(200, 300):
-                        self._logger.error(
+                        logger.error(
                             f"Reminder email of edge {serial_number} could not be sent for ticket" f" {ticket_id}!"
                         )
                     else:
                         append_note_response = await self._append_reminder_note(ticket_id, serial_number)
                         if append_note_response["status"] not in range(200, 300):
-                            self._logger.error(
+                            logger.error(
                                 f"Reminder note of edge {serial_number} could not be appended to ticket"
                                 f" {ticket_id}!"
                             )
 
                 await self._check_for_digi_reboot(ticket_id, logical_id_list, serial_number, edge_status)
             elif ticket_creation_response_status == 472:
-                self._logger.info(
+                logger.info(
                     f"[{outage_type.value}] Faulty edge {serial_number} has a resolved outage ticket "
                     f"(ID = {ticket_id}). Its ticket detail was automatically unresolved "
                     f"by Bruin. Appending reopen note to ticket..."
@@ -1607,13 +1593,13 @@ class OutageMonitor:
                         faulty_link_types,
                     )
                 else:
-                    self._logger.info(
+                    logger.info(
                         f"Ticket_id: {ticket_id} for serial: {serial_number} "
                         f"with link_data: {edge_links} has a blacklisted link and "
                         f"should not be forwarded to HNOC. Skipping forward to HNOC..."
                     )
 
-                    self._logger.info(
+                    logger.info(
                         f"Sending an email for ticket_id: {ticket_id} "
                         f"with serial: {serial_number} instead of scheduling forward to HNOC..."
                     )
@@ -1621,19 +1607,19 @@ class OutageMonitor:
                         ticket_id, serial_number
                     )
                     if email_response["status"] not in range(200, 300):
-                        self._logger.error(
+                        logger.error(
                             f"Reminder email of edge {serial_number} could not be sent for ticket" f" {ticket_id}!"
                         )
                     else:
                         append_note_response = await self._append_reminder_note(ticket_id, serial_number)
                         if append_note_response["status"] not in range(200, 300):
-                            self._logger.error(
+                            logger.error(
                                 f"Reminder note of edge {serial_number} could not be appended to ticket"
                                 f" {ticket_id}!"
                             )
 
             elif ticket_creation_response_status == 473:
-                self._logger.info(
+                logger.info(
                     f"[{outage_type.value}] There is a resolve outage ticket for the same location of faulty "
                     f"edge {serial_number} (ticket ID = {ticket_id}). The ticket was "
                     f"automatically unresolved by Bruin and a new ticket detail for serial {serial_number} was "
@@ -1670,13 +1656,13 @@ class OutageMonitor:
                         faulty_link_types,
                     )
                 else:
-                    self._logger.info(
+                    logger.info(
                         f"Ticket_id: {ticket_id} for serial: {serial_number} "
                         f"with link_data: {edge_links} has a blacklisted link and "
                         f"should not be forwarded to HNOC. Skipping forward to HNOC..."
                     )
 
-                    self._logger.info(
+                    logger.info(
                         f"Sending an email for ticket_id: {ticket_id} "
                         f"with serial: {serial_number} instead of scheduling forward to HNOC..."
                     )
@@ -1684,13 +1670,13 @@ class OutageMonitor:
                         ticket_id, serial_number
                     )
                     if email_response["status"] not in range(200, 300):
-                        self._logger.error(
+                        logger.error(
                             f"Reminder email of edge {serial_number} could not be sent for ticket" f" {ticket_id}!"
                         )
                     else:
                         append_note_response = await self._append_reminder_note(ticket_id, serial_number)
                         if append_note_response["status"] not in range(200, 300):
-                            self._logger.error(
+                            logger.error(
                                 f"Reminder note of edge {serial_number} could not be appended to ticket"
                                 f" {ticket_id}!"
                             )
