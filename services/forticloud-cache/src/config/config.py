@@ -47,3 +47,8 @@ LOG_CONFIG = {
         "port": int(os.environ["PAPERTRAIL_PORT"]),
     },
 }
+
+MONITOR_RETRY_CONFIG = {
+    "reraise": True,
+    "stop_after_attempt": 4,
+}

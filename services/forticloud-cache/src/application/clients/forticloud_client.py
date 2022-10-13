@@ -6,13 +6,14 @@ from typing import Any, Dict
 from forticloud_client.client import ForticloudClient
 from tenacity import AsyncRetrying, retry_if_exception_type, stop_after_attempt, wait_chain, wait_random
 
+from config import config
 from application.repositories.errors import UnexpectedStatusError
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_RETRY_CONFIG = dict(
-    reraise=True,
-    stop=stop_after_attempt(4),
+    reraise=config.MONITOR_RETRY_CONFIG["reraise"],
+    stop=stop_after_attempt(config.MONITOR_RETRY_CONFIG["stop_after_attempt"]),
     wait=wait_chain(wait_random(min=1, max=3), wait_random(min=2, max=4), wait_random(min=3, max=5)),
     retry=retry_if_exception_type(UnexpectedStatusError),
 )
