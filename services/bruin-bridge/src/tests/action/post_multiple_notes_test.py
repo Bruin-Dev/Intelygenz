@@ -1,20 +1,18 @@
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
+from nats.aio.msg import Msg
+
 from application.actions.post_multiple_notes import PostMultipleNotes
-from asynctest import CoroutineMock
+from application.repositories.utils_repository import to_json_bytes
 
 
 class TestPostMultipleNotes:
     def instance_test(self):
-        logger = Mock()
-        event_bus = Mock()
         bruin_repository = Mock()
 
-        post_multiple_notes = PostMultipleNotes(logger, event_bus, bruin_repository)
+        post_multiple_notes = PostMultipleNotes(bruin_repository)
 
-        assert post_multiple_notes._logger is logger
-        assert post_multiple_notes._event_bus is event_bus
         assert post_multiple_notes._bruin_repository is bruin_repository
 
     @pytest.mark.asyncio
@@ -30,16 +28,15 @@ class TestPostMultipleNotes:
                 "detail_id": 999,
             },
         ]
-        response_topic = "some.topic"
-        request_id = 19
         request = {
-            "request_id": request_id,
             "body": {
                 "ticket_id": ticket_id,
                 "notes": notes,
             },
-            "response_topic": response_topic,
         }
+
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(request)
 
         post_multiple_notes_response = {
             "body": [
@@ -83,54 +80,40 @@ class TestPostMultipleNotes:
             "status": 200,
         }
         event_bus_response = {
-            "request_id": request_id,
             **post_multiple_notes_response,
         }
 
-        logger = Mock()
-
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-
         bruin_repository = Mock()
-        bruin_repository.post_multiple_ticket_notes = CoroutineMock(return_value=post_multiple_notes_response)
+        bruin_repository.post_multiple_ticket_notes = AsyncMock(return_value=post_multiple_notes_response)
 
-        post_multiple_notes = PostMultipleNotes(logger, event_bus, bruin_repository)
+        post_multiple_notes = PostMultipleNotes(bruin_repository)
 
-        await post_multiple_notes.post_multiple_notes(request)
+        await post_multiple_notes(request_msg)
 
         bruin_repository.post_multiple_ticket_notes.assert_awaited_once_with(ticket_id, notes)
-        event_bus.publish_message.assert_awaited_once_with(response_topic, event_bus_response)
+        request_msg.respond.assert_awaited_once_with(to_json_bytes(event_bus_response))
 
     @pytest.mark.asyncio
     async def post_multiple_notes_with_missing_body_in_request_test(self):
-        response_topic = "some.topic"
-        request_id = 19
-        request = {
-            "request_id": request_id,
-            "response_topic": response_topic,
-        }
+        request = {}
+
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(request)
 
         event_bus_response = {
-            "request_id": request_id,
             "body": 'Must include "body" in request',
             "status": 400,
         }
 
-        logger = Mock()
-
         bruin_repository = Mock()
-        bruin_repository.post_multiple_ticket_notes = CoroutineMock()
+        bruin_repository.post_multiple_ticket_notes = AsyncMock()
 
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+        post_multiple_notes = PostMultipleNotes(bruin_repository)
 
-        post_multiple_notes = PostMultipleNotes(logger, event_bus, bruin_repository)
-
-        await post_multiple_notes.post_multiple_notes(request)
+        await post_multiple_notes(request_msg)
 
         bruin_repository.post_multiple_ticket_notes.assert_not_awaited()
-        event_bus.publish_message.assert_awaited_once_with(response_topic, event_bus_response)
+        request_msg.respond.assert_awaited_once_with(to_json_bytes(event_bus_response))
 
     @pytest.mark.asyncio
     async def post_multiple_notes_with_mandatory_keys_missing_in_body_test(self):
@@ -144,36 +127,29 @@ class TestPostMultipleNotes:
                 "detail_id": 999,
             },
         ]
-        response_topic = "some.topic"
-        request_id = 19
         request = {
-            "request_id": request_id,
             "body": {
                 "notes": notes,
             },
-            "response_topic": response_topic,
         }
 
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(request)
+
         event_bus_response = {
-            "request_id": request_id,
             "body": 'You must include "ticket_id" and "notes" in the body of the request',
             "status": 400,
         }
 
-        logger = Mock()
-
         bruin_repository = Mock()
-        bruin_repository.post_multiple_ticket_notes = CoroutineMock()
+        bruin_repository.post_multiple_ticket_notes = AsyncMock()
 
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+        post_multiple_notes = PostMultipleNotes(bruin_repository)
 
-        post_multiple_notes = PostMultipleNotes(logger, event_bus, bruin_repository)
-
-        await post_multiple_notes.post_multiple_notes(request)
+        await post_multiple_notes(request_msg)
 
         bruin_repository.post_multiple_ticket_notes.assert_not_awaited()
-        event_bus.publish_message.assert_awaited_once_with(response_topic, event_bus_response)
+        request_msg.respond.assert_awaited_once_with(to_json_bytes(event_bus_response))
 
     @pytest.mark.asyncio
     async def post_multiple_notes_with_at_least_one_note_not_having_text_test(self):
@@ -187,38 +163,31 @@ class TestPostMultipleNotes:
                 "detail_id": 999,
             },
         ]
-        response_topic = "some.topic"
-        request_id = 19
         request = {
-            "request_id": request_id,
             "body": {
                 "ticket_id": ticket_id,
                 "notes": notes,
             },
-            "response_topic": response_topic,
         }
 
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(request)
+
         event_bus_response = {
-            "request_id": request_id,
             "body": 'You must include "text" and any of "service_number" and "detail_id" for every '
             'note in the "notes" field',
             "status": 400,
         }
 
-        logger = Mock()
-
         bruin_repository = Mock()
-        bruin_repository.post_multiple_ticket_notes = CoroutineMock()
+        bruin_repository.post_multiple_ticket_notes = AsyncMock()
 
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+        post_multiple_notes = PostMultipleNotes(bruin_repository)
 
-        post_multiple_notes = PostMultipleNotes(logger, event_bus, bruin_repository)
-
-        await post_multiple_notes.post_multiple_notes(request)
+        await post_multiple_notes(request_msg)
 
         bruin_repository.post_multiple_ticket_notes.assert_not_awaited()
-        event_bus.publish_message.assert_awaited_once_with(response_topic, event_bus_response)
+        request_msg.respond.assert_awaited_once_with(to_json_bytes(event_bus_response))
 
     @pytest.mark.asyncio
     async def post_multiple_notes_with_at_least_one_note_not_having_detail_id_or_service_number_test(self):
@@ -232,38 +201,31 @@ class TestPostMultipleNotes:
                 "detail_id": 999,
             },
         ]
-        response_topic = "some.topic"
-        request_id = 19
         request = {
-            "request_id": request_id,
             "body": {
                 "ticket_id": ticket_id,
                 "notes": notes,
             },
-            "response_topic": response_topic,
         }
 
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(request)
+
         event_bus_response = {
-            "request_id": request_id,
             "body": 'You must include "text" and any of "service_number" and "detail_id" for every '
             'note in the "notes" field',
             "status": 400,
         }
 
-        logger = Mock()
-
         bruin_repository = Mock()
-        bruin_repository.post_multiple_ticket_notes = CoroutineMock()
+        bruin_repository.post_multiple_ticket_notes = AsyncMock()
 
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+        post_multiple_notes = PostMultipleNotes(bruin_repository)
 
-        post_multiple_notes = PostMultipleNotes(logger, event_bus, bruin_repository)
-
-        await post_multiple_notes.post_multiple_notes(request)
+        await post_multiple_notes(request_msg)
 
         bruin_repository.post_multiple_ticket_notes.assert_not_awaited()
-        event_bus.publish_message.assert_awaited_once_with(response_topic, event_bus_response)
+        request_msg.respond.assert_awaited_once_with(to_json_bytes(event_bus_response))
 
     @pytest.mark.asyncio
     async def post_multiple_notes_with_notes_having_service_number_or_detail_id_or_both_test(self):
@@ -283,16 +245,15 @@ class TestPostMultipleNotes:
                 "detail_id": 888,
             },
         ]
-        response_topic = "some.topic"
-        request_id = 19
         request = {
-            "request_id": request_id,
             "body": {
                 "ticket_id": ticket_id,
                 "notes": notes,
             },
-            "response_topic": response_topic,
         }
+
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(request)
 
         post_multiple_notes_response = {
             "body": [
@@ -354,21 +315,15 @@ class TestPostMultipleNotes:
             "status": 200,
         }
         event_bus_response = {
-            "request_id": request_id,
             **post_multiple_notes_response,
         }
 
-        logger = Mock()
-
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-
         bruin_repository = Mock()
-        bruin_repository.post_multiple_ticket_notes = CoroutineMock(return_value=post_multiple_notes_response)
+        bruin_repository.post_multiple_ticket_notes = AsyncMock(return_value=post_multiple_notes_response)
 
-        post_multiple_notes = PostMultipleNotes(logger, event_bus, bruin_repository)
+        post_multiple_notes = PostMultipleNotes(bruin_repository)
 
-        await post_multiple_notes.post_multiple_notes(request)
+        await post_multiple_notes(request_msg)
 
         bruin_repository.post_multiple_ticket_notes.assert_awaited_once_with(ticket_id, notes)
-        event_bus.publish_message.assert_awaited_once_with(response_topic, event_bus_response)
+        request_msg.respond.assert_awaited_once_with(to_json_bytes(event_bus_response))

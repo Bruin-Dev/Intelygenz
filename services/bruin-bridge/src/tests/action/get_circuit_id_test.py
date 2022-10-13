@@ -1,20 +1,18 @@
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
+from nats.aio.msg import Msg
+
 from application.actions.get_circuit_id import GetCircuitID
-from asynctest import CoroutineMock
+from application.repositories.utils_repository import to_json_bytes
 
 
 class TestGetCircuitID:
     def instance_test(self):
-        logger = Mock()
-        event_bus = Mock()
         bruin_repository = Mock()
 
-        circuit_id_response = GetCircuitID(logger, event_bus, bruin_repository)
+        circuit_id_response = GetCircuitID(bruin_repository)
 
-        assert circuit_id_response._logger is logger
-        assert circuit_id_response._event_bus is event_bus
         assert circuit_id_response._bruin_repository is bruin_repository
 
     @pytest.mark.asyncio
@@ -24,59 +22,47 @@ class TestGetCircuitID:
             "status": 200,
         }
         circuit_id = "123"
-        client_id = "321"
 
         payload = {
             "circuit_id": circuit_id,
         }
-        event_bus_request = {"request_id": 19, "body": payload, "response_topic": "some.topic"}
+        event_bus_request = {"body": payload}
+
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(event_bus_request)
 
         event_bus_response = {
-            "request_id": 19,
             **circuit_id_return,
         }
 
-        logger = Mock()
-        logger.info = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
         bruin_repository = Mock()
-        bruin_repository.get_circuit_id = CoroutineMock(return_value=circuit_id_return)
+        bruin_repository.get_circuit_id = AsyncMock(return_value=circuit_id_return)
 
-        circuit_id_response = GetCircuitID(logger, event_bus, bruin_repository)
-        await circuit_id_response.get_circuit_id(event_bus_request)
+        circuit_id_response = GetCircuitID(bruin_repository)
+        await circuit_id_response(request_msg)
         bruin_repository.get_circuit_id.assert_awaited_once_with(payload)
-        event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
-        logger.info.assert_called()
+        request_msg.respond.assert_awaited_once_with(to_json_bytes(event_bus_response))
 
     @pytest.mark.asyncio
     async def get_circuit_id_no_body_test(self):
         circuit_id_return = {"body": 'You must specify {.."body":{"circuit_id"}...} in the request', "status": 400}
-        circuit_id = "123"
-        client_id = "321"
 
-        payload = {
-            "circuit_id": circuit_id,
-        }
-        event_bus_request = {"request_id": 19, "response_topic": "some.topic"}
+        event_bus_request = {}
+
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(event_bus_request)
 
         event_bus_response = {
-            "request_id": 19,
             **circuit_id_return,
         }
 
-        logger = Mock()
-        logger.error = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
         bruin_repository = Mock()
-        bruin_repository.get_circuit_id = CoroutineMock(return_value=circuit_id_return)
+        bruin_repository.get_circuit_id = AsyncMock(return_value=circuit_id_return)
 
-        circuit_id_response = GetCircuitID(logger, event_bus, bruin_repository)
-        await circuit_id_response.get_circuit_id(event_bus_request)
+        circuit_id_response = GetCircuitID(bruin_repository)
+        await circuit_id_response(request_msg)
         bruin_repository.get_circuit_id.assert_not_awaited()
-        event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
-        logger.error.assert_called()
+        request_msg.respond.assert_awaited_once_with(to_json_bytes(event_bus_response))
 
     @pytest.mark.asyncio
     async def get_circuit_id_no_circuit_id_test(self):
@@ -84,22 +70,21 @@ class TestGetCircuitID:
 
         payload = {}
 
-        event_bus_request = {"request_id": 19, "body": payload, "response_topic": "some.topic"}
+        event_bus_request = {
+            "body": payload,
+        }
+
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(event_bus_request)
 
         event_bus_response = {
-            "request_id": 19,
             **circuit_id_return,
         }
 
-        logger = Mock()
-        logger.error = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
         bruin_repository = Mock()
-        bruin_repository.get_circuit_id = CoroutineMock(return_value=circuit_id_return)
+        bruin_repository.get_circuit_id = AsyncMock(return_value=circuit_id_return)
 
-        circuit_id_response = GetCircuitID(logger, event_bus, bruin_repository)
-        await circuit_id_response.get_circuit_id(event_bus_request)
+        circuit_id_response = GetCircuitID(bruin_repository)
+        await circuit_id_response(request_msg)
         bruin_repository.get_circuit_id.assert_not_awaited()
-        event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
-        logger.error.assert_called()
+        request_msg.respond.assert_awaited_once_with(to_json_bytes(event_bus_response))

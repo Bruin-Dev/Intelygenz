@@ -1,23 +1,18 @@
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
-from application.actions.get_tickets_basic_info import GetTicketsBasicInfo
-from asynctest import CoroutineMock
-from shortuuid import uuid
+from nats.aio.msg import Msg
 
-uuid_ = uuid()
+from application.actions.get_tickets_basic_info import GetTicketsBasicInfo
+from application.repositories.utils_repository import to_json_bytes
 
 
 class TestGetTicketsBasicInfo:
     def instance_test(self):
-        logger = Mock()
-        event_bus = Mock()
         bruin_repository = Mock()
 
-        action = GetTicketsBasicInfo(logger, event_bus, bruin_repository)
+        action = GetTicketsBasicInfo(bruin_repository)
 
-        assert action._logger is logger
-        assert action._event_bus is event_bus
         assert action._bruin_repository is bruin_repository
 
     @pytest.mark.asyncio
@@ -40,12 +35,12 @@ class TestGetTicketsBasicInfo:
             "ticket_statuses": ticket_statuses,
         }
 
-        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
         request_message = {
-            "request_id": uuid_,
-            "response_topic": response_topic,
             "body": bruin_payload,
         }
+
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(request_message)
 
         tickets_response = {
             "body": [
@@ -66,60 +61,44 @@ class TestGetTicketsBasicInfo:
             "status": 200,
         }
         response_message = {
-            "request_id": uuid_,
             **tickets_response,
         }
 
-        logger = Mock()
-
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-
         bruin_repository = Mock()
-        bruin_repository.get_tickets_basic_info = CoroutineMock(return_value=tickets_response)
+        bruin_repository.get_tickets_basic_info = AsyncMock(return_value=tickets_response)
 
-        action = GetTicketsBasicInfo(logger, event_bus, bruin_repository)
+        action = GetTicketsBasicInfo(bruin_repository)
 
-        await action.get_tickets_basic_info(request_message)
+        await action(request_msg)
 
         bruin_repository.get_tickets_basic_info.assert_awaited_once_with(shared_payload, ticket_statuses)
-        event_bus.publish_message.assert_awaited_once_with(response_topic, response_message)
+        request_msg.respond.assert_awaited_once_with(to_json_bytes(response_message))
 
     @pytest.mark.asyncio
     async def get_tickets_basic_info_with_body_missing_in_request_message_test(self):
-        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
-        request_message = {
-            "request_id": uuid_,
-            "response_topic": response_topic,
-        }
+        request_message = {}
+
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(request_message)
 
         response_message = {
-            "request_id": uuid_,
             "body": 'Must include "body" in the request message',
             "status": 400,
         }
 
-        logger = Mock()
-
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-
         bruin_repository = Mock()
-        bruin_repository.get_tickets_basic_info = CoroutineMock()
+        bruin_repository.get_tickets_basic_info = AsyncMock()
 
-        action = GetTicketsBasicInfo(logger, event_bus, bruin_repository)
+        action = GetTicketsBasicInfo(bruin_repository)
 
-        await action.get_tickets_basic_info(request_message)
+        await action(request_msg)
 
         bruin_repository.get_tickets_basic_info.assert_not_awaited()
-        event_bus.publish_message.assert_awaited_once_with(response_topic, response_message)
+        request_msg.respond.assert_awaited_once_with(to_json_bytes(response_message))
 
     @pytest.mark.asyncio
     async def get_tickets_basic_info_with_ticket_statuses_missing_in_request_body_test(self):
-        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
         request_message = {
-            "request_id": uuid_,
-            "response_topic": response_topic,
             "body": {
                 "service_number": "VC1234567",
                 "product_category": "SD-WAN",
@@ -129,23 +108,20 @@ class TestGetTicketsBasicInfo:
             },
         }
 
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(request_message)
+
         response_message = {
-            "request_id": uuid_,
             "body": 'Must specify "ticket_statuses" in the body of the request',
             "status": 400,
         }
 
-        logger = Mock()
-
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-
         bruin_repository = Mock()
-        bruin_repository.get_tickets_basic_info = CoroutineMock()
+        bruin_repository.get_tickets_basic_info = AsyncMock()
 
-        action = GetTicketsBasicInfo(logger, event_bus, bruin_repository)
+        action = GetTicketsBasicInfo(bruin_repository)
 
-        await action.get_tickets_basic_info(request_message)
+        await action(request_msg)
 
         bruin_repository.get_tickets_basic_info.assert_not_awaited()
-        event_bus.publish_message.assert_awaited_once_with(response_topic, response_message)
+        request_msg.respond.assert_awaited_once_with(to_json_bytes(response_message))

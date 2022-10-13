@@ -1,14 +1,14 @@
-from logging import Logger
+from http import HTTPStatus
 from typing import Any, Callable, Dict
-from unittest.mock import ANY, Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
-from application.actions.get_asset_topics import *
+from nats.aio.msg import Msg
+
 from application.actions.subscribe_user import BRUIN_PATH, PostBody, PostBodyUser, SubscribeUser
 from application.clients.bruin_client import BruinClient
 from application.clients.bruin_session import BruinPostRequest, BruinResponse, BruinSession
-from asynctest import CoroutineMock
-from igz.packages.eventbus.eventbus import EventBus
+from application.repositories.utils_repository import to_json_bytes
 
 
 class TestSubscribeUser:
@@ -21,10 +21,13 @@ class TestSubscribeUser:
         message = make_subscribe_user_message(
             ticket_id=ticket_id, user_email=user_email, subscription_type=subscription_type
         )
+
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(message)
+
         response = BruinResponse(status=HTTPStatus.OK, body="OK")
 
-        subscribe_user.event_bus.publish_message = CoroutineMock()
-        subscribe_user.bruin_client._bruin_session.post = CoroutineMock(
+        subscribe_user.bruin_client._bruin_session.post = AsyncMock(
             side_effect=lambda request: response
             if request
             == BruinPostRequest(
@@ -35,39 +38,51 @@ class TestSubscribeUser:
         )
 
         # When
-        await subscribe_user.subscribe_user(message)
+        await subscribe_user(request_msg)
 
         # Then
-        subscribe_user.event_bus.publish_message.assert_awaited_once_with(
-            message.get("response_topic"),
-            {"request_id": message.get("request_id"), "status": response.status, "body": response.body},
+        request_msg.respond.assert_awaited_once_with(
+            to_json_bytes({"status": response.status, "body": response.body}),
         )
 
     @pytest.mark.asyncio
     async def request_validation_errors_are_properly_handled_test(self, subscribe_user, make_subscribe_user_message):
-        subscribe_user.event_bus.publish_message = CoroutineMock()
+        message = make_subscribe_user_message(body={"user_email": "any_user_email"})
+
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(message)
 
         # Mandatory ticket_id and subscription_type are missing
-        await subscribe_user.subscribe_user(make_subscribe_user_message(body={"user_email": "any_user_email"}))
+        await subscribe_user(request_msg)
 
-        subscribe_user.event_bus.publish_message.assert_awaited_once_with(
-            ANY, {"request_id": ANY, "status": HTTPStatus.BAD_REQUEST, "body": ANY}
+        request_msg.respond.assert_awaited_once_with(
+            to_json_bytes(
+                {
+                    "status": HTTPStatus.BAD_REQUEST,
+                    "body": [
+                        {"loc": ["ticket_id"], "msg": "field required", "type": "value_error.missing"},
+                        {"loc": ["subscription_type"], "msg": "field required", "type": "value_error.missing"},
+                    ],
+                }
+            )
         )
 
     @pytest.mark.asyncio
     async def unauthorized_requests_are_properly_handled_test(self, subscribe_user, make_subscribe_user_message):
-        subscribe_user.event_bus.publish_message = CoroutineMock()
-        subscribe_user.bruin_client.login = CoroutineMock()
-        subscribe_user.bruin_client._bruin_session.post = CoroutineMock(
+        message = make_subscribe_user_message()
+
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(message)
+
+        subscribe_user.bruin_client.login = AsyncMock()
+        subscribe_user.bruin_client._bruin_session.post = AsyncMock(
             return_value=BruinResponse(status=HTTPStatus.UNAUTHORIZED)
         )
 
-        await subscribe_user.subscribe_user(make_subscribe_user_message())
+        await subscribe_user(request_msg)
 
         subscribe_user.bruin_client.login.assert_awaited_once()
-        subscribe_user.event_bus.publish_message.assert_awaited_once_with(
-            ANY, {"request_id": ANY, "status": HTTPStatus.UNAUTHORIZED, "body": ANY}
-        )
+        request_msg.respond.assert_awaited_once_with(to_json_bytes({"status": HTTPStatus.UNAUTHORIZED, "body": None}))
 
 
 #
@@ -78,8 +93,6 @@ class TestSubscribeUser:
 @pytest.fixture()
 def make_subscribe_user_message() -> Callable[..., Dict[str, Any]]:
     def builder(
-        request_id: str = "any_request_id",
-        response_topic: str = "any_response_topic",
         body: Dict[str, Any] = None,
         ticket_id: str = hash("any_ticket_id"),
         user_email: str = "any_user_email",
@@ -92,7 +105,7 @@ def make_subscribe_user_message() -> Callable[..., Dict[str, Any]]:
                 "subscription_type": subscription_type,
             }
 
-        return {"request_id": request_id, "response_topic": response_topic, "body": body}
+        return {"body": body}
 
     return builder
 
@@ -101,4 +114,4 @@ def make_subscribe_user_message() -> Callable[..., Dict[str, Any]]:
 def subscribe_user() -> SubscribeUser:
     bruin_client = Mock(BruinClient)
     bruin_client._bruin_session = Mock(BruinSession)
-    return SubscribeUser(Mock(Logger), Mock(EventBus), bruin_client)
+    return SubscribeUser(bruin_client)

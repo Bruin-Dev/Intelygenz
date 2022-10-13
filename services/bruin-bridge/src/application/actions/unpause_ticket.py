@@ -1,20 +1,27 @@
 import json
+import logging
+
+from nats.aio.msg import Msg
+
+from application.repositories.utils_repository import to_json_bytes
+
+logger = logging.getLogger(__name__)
 
 
 class UnpauseTicket:
-    def __init__(self, logger, event_bus, bruin_repository):
-        self._logger = logger
-        self._event_bus = event_bus
+    def __init__(self, bruin_repository):
         self._bruin_repository = bruin_repository
 
-    async def unpause_ticket(self, msg: dict):
-        response = {"request_id": msg["request_id"], "body": None, "status": None}
-        body = msg.get("body")
+    async def __call__(self, msg: Msg):
+        payload = json.loads(msg.data)
+
+        response = {"body": None, "status": None}
+        body = payload.get("body")
 
         if body is None:
             response["status"] = 400
             response["body"] = 'Must include "body" in request'
-            await self._event_bus.publish_message(msg["response_topic"], response)
+            await msg.respond(to_json_bytes(response))
             return
 
         ticket_id = body.get("ticket_id")
@@ -22,13 +29,13 @@ class UnpauseTicket:
         detail_id = body.get("detail_id")
 
         if not ticket_id or (not serial_number and not detail_id):
-            self._logger.error(f"Cannot unpause a ticket using {json.dumps(msg)}. JSON malformed")
+            logger.error(f"Cannot unpause a ticket using {json.dumps(payload)}. JSON malformed")
             response["body"] = "You must include ticket_id and service_number or detail_id in the request"
             response["status"] = 400
-            await self._event_bus.publish_message(msg["response_topic"], response)
+            await msg.respond(to_json_bytes(response))
             return
 
-        self._logger.info(
+        logger.info(
             f"Unpause the ticket for ticket id: {ticket_id}, "
             f"serial number: {serial_number} and detail id: {detail_id}"
         )
@@ -37,9 +44,9 @@ class UnpauseTicket:
         response["body"] = result["body"]
         response["status"] = result["status"]
 
-        self._logger.info(
+        logger.info(
             f"Response from unpause: {response} to the ticket with ticket id: {ticket_id}, "
             f"serial number: {serial_number} and detail id {detail_id}"
         )
 
-        await self._event_bus.publish_message(msg["response_topic"], response)
+        await msg.respond(to_json_bytes(response))

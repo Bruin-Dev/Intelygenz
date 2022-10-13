@@ -1,27 +1,34 @@
 import json
+import logging
+
+from nats.aio.msg import Msg
+
+from application.repositories.utils_repository import to_json_bytes
+
+logger = logging.getLogger(__name__)
 
 
 class PostMultipleNotes:
-    def __init__(self, logger, event_bus, bruin_repository):
-        self._logger = logger
-        self._event_bus = event_bus
+    def __init__(self, bruin_repository):
         self._bruin_repository = bruin_repository
 
-    async def post_multiple_notes(self, msg: dict):
-        response = {"request_id": msg["request_id"], "body": None, "status": None}
+    async def __call__(self, msg: Msg):
+        payload = json.loads(msg.data)
 
-        body = msg.get("body")
+        response = {"body": None, "status": None}
+
+        body = payload.get("body")
         if body is None:
-            self._logger.error(f"Cannot post a note to ticket using {json.dumps(msg)}. JSON malformed")
+            logger.error(f"Cannot post a note to ticket using {json.dumps(payload)}. JSON malformed")
             response["status"] = 400
             response["body"] = 'Must include "body" in request'
-            await self._event_bus.publish_message(msg["response_topic"], response)
+            await msg.respond(to_json_bytes(response))
             return
 
         if not all(key in body.keys() for key in ("ticket_id", "notes")):
             response["body"] = 'You must include "ticket_id" and "notes" in the body of the request'
             response["status"] = 400
-            await self._event_bus.publish_message(msg["response_topic"], response)
+            await msg.respond(to_json_bytes(response))
             return
 
         ticket_id = body["ticket_id"]
@@ -34,13 +41,13 @@ class PostMultipleNotes:
                     'note in the "notes" field'
                 )
                 response["status"] = 400
-                await self._event_bus.publish_message(msg["response_topic"], response)
+                await msg.respond(to_json_bytes(response))
                 return
 
-        self._logger.info(f"Posting multiple notes for ticket {ticket_id}...")
+        logger.info(f"Posting multiple notes for ticket {ticket_id}...")
         result = await self._bruin_repository.post_multiple_ticket_notes(ticket_id, notes)
 
         response["body"] = result["body"]
         response["status"] = result["status"]
 
-        await self._event_bus.publish_message(msg["response_topic"], response)
+        await msg.respond(to_json_bytes(response))

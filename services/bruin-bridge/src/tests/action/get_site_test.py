@@ -1,113 +1,98 @@
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
+from nats.aio.msg import Msg
+
 from application.actions.get_site import GetSite
-from asynctest import CoroutineMock
+from application.repositories.utils_repository import to_json_bytes
 
 
 class TestGetSite:
     def instance_test(self):
-        logger = Mock()
-        event_bus = Mock()
         bruin_repository = Mock()
 
-        get_site = GetSite(logger, event_bus, bruin_repository)
+        get_site = GetSite(bruin_repository)
 
-        assert get_site._logger is logger
-        assert get_site._event_bus is event_bus
         assert get_site._bruin_repository is bruin_repository
 
     @pytest.mark.asyncio
     async def get_site_ok_test(self):
-        logger = Mock()
-        logger.info = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
         bruin_repository = Mock()
 
         client_id = 72959
         site_id = 343443
         params = {"client_id": client_id, "site_id": site_id}
         get_site_response = {"body": {"client_id": client_id, "site_id": site_id}, "status": 200}
-        bruin_repository.get_site = CoroutineMock(return_value=get_site_response)
+        bruin_repository.get_site = AsyncMock(return_value=get_site_response)
 
-        event_bus_request = {"request_id": 19, "body": params, "response_topic": "some.topic"}
+        event_bus_request = {"body": params}
+
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(event_bus_request)
 
         event_bus_response = {
-            "request_id": 19,
             **get_site_response,
         }
 
-        get_site = GetSite(logger, event_bus, bruin_repository)
-        await get_site.get_site(event_bus_request)
+        get_site = GetSite(bruin_repository)
+        await get_site(request_msg)
         bruin_repository.get_site.assert_awaited_once_with(params)
-        event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
-        assert logger.info.called
+        request_msg.respond.assert_awaited_once_with(to_json_bytes(event_bus_response))
 
     @pytest.mark.asyncio
     async def get_site_no_filters_test(self):
-        logger = Mock()
-        logger.info = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-
         bruin_repository = Mock()
-        bruin_repository.get_site = CoroutineMock()
+        bruin_repository.get_site = AsyncMock()
 
-        event_bus_request = {"request_id": 19, "response_topic": "some.topic"}
+        event_bus_request = {"response_topic": "some.topic"}
+
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(event_bus_request)
 
         event_bus_response = {
-            "request_id": 19,
             "body": "You must specify " '{.."body":{"client_id":...}} in the request',
             "status": 400,
         }
 
-        get_site = GetSite(logger, event_bus, bruin_repository)
-        await get_site.get_site(event_bus_request)
+        get_site = GetSite(bruin_repository)
+        await get_site(request_msg)
         bruin_repository.get_site.assert_not_awaited()
-        event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
-        assert logger.error.called
+        request_msg.respond.assert_awaited_once_with(to_json_bytes(event_bus_response))
 
     @pytest.mark.asyncio
     async def get_site_incomplete_filters_test(self):
         client_id = 72959
-        site_id = 343443
-        logger = Mock()
-        logger.info = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_site = CoroutineMock()
+        bruin_repository.get_site = AsyncMock()
 
-        event_bus_request = {"request_id": 19, "body": {"client_id": client_id}, "response_topic": "some.topic"}
+        event_bus_request = {"body": {"client_id": client_id}}
 
-        event_bus_response = {"request_id": 19, "body": 'You must specify "site_id" in the body', "status": 400}
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(event_bus_request)
 
-        get_site = GetSite(logger, event_bus, bruin_repository)
-        await get_site.get_site(event_bus_request)
+        event_bus_response = {"body": 'You must specify "site_id" in the body', "status": 400}
+
+        get_site = GetSite(bruin_repository)
+        await get_site(request_msg)
         bruin_repository.get_site.assert_not_awaited()
-        event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
-        assert logger.error.called
+        request_msg.respond.assert_awaited_once_with(to_json_bytes(event_bus_response))
 
     @pytest.mark.asyncio
     async def get_site_incomplete_filters_site_id_test(self):
-        client_id = 72959
         site_id = 343443
-        logger = Mock()
-        logger.info = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_site = CoroutineMock()
+        bruin_repository.get_site = AsyncMock()
 
-        event_bus_request = {"request_id": 19, "body": {"site_id": site_id}, "response_topic": "some.topic"}
+        event_bus_request = {"body": {"site_id": site_id}}
 
-        event_bus_response = {"request_id": 19, "body": 'You must specify "client_id" in the body', "status": 400}
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(event_bus_request)
 
-        get_site = GetSite(logger, event_bus, bruin_repository)
-        await get_site.get_site(event_bus_request)
+        event_bus_response = {"body": 'You must specify "client_id" in the body', "status": 400}
+
+        get_site = GetSite(bruin_repository)
+        await get_site(request_msg)
         bruin_repository.get_site.assert_not_awaited()
-        event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
-        assert logger.error.called
+        request_msg.respond.assert_awaited_once_with(to_json_bytes(event_bus_response))

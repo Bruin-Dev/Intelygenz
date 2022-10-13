@@ -1,161 +1,144 @@
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
+from nats.aio.msg import Msg
+
 from application.actions.post_outage_ticket import PostOutageTicket
-from asynctest import CoroutineMock
+from application.repositories.utils_repository import to_json_bytes
 
 
 class TestPostOutageTicket:
     def instance_test(self):
-        logger = Mock()
-        event_bus = Mock()
         bruin_repository = Mock()
 
-        post_outage_ticket = PostOutageTicket(logger, event_bus, bruin_repository)
+        post_outage_ticket = PostOutageTicket(bruin_repository)
 
-        assert post_outage_ticket._logger is logger
-        assert post_outage_ticket._event_bus is event_bus
         assert post_outage_ticket._bruin_repository is bruin_repository
 
     @pytest.mark.asyncio
     async def post_outage_ticket_with_missing_client_id_test(self):
-        logger = Mock()
-
         bruin_repository = Mock()
-        bruin_repository.post_outage_ticket = CoroutineMock()
-
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+        bruin_repository.post_outage_ticket = AsyncMock()
 
         parameters = {"service_number": "VC05400009999"}
-        response_topic = "some.topic"
-        event_bus_request = {"request_id": 123, "response_topic": response_topic, "body": parameters}
+        event_bus_request = {"body": parameters}
 
-        post_outage_ticket = PostOutageTicket(logger, event_bus, bruin_repository)
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(event_bus_request)
 
-        await post_outage_ticket.post_outage_ticket(event_bus_request)
+        post_outage_ticket = PostOutageTicket(bruin_repository)
+
+        await post_outage_ticket(request_msg)
 
         bruin_repository.post_outage_ticket.assert_not_awaited()
-        event_bus.publish_message.assert_awaited_once_with(
-            "some.topic",
-            {
-                "request_id": 123,
-                "status": 400,
-                "body": 'Must specify "client_id" and "service_number" to post an outage ticket',
-            },
+        request_msg.respond.assert_awaited_once_with(
+            to_json_bytes(
+                {
+                    "body": 'Must specify "client_id" and "service_number" to post an outage ticket',
+                    "status": 400,
+                }
+            )
         )
 
     @pytest.mark.asyncio
     async def post_outage_ticket_with_missing_service_number_test(self):
-        logger = Mock()
-
         bruin_repository = Mock()
-        bruin_repository.post_outage_ticket = CoroutineMock()
-
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+        bruin_repository.post_outage_ticket = AsyncMock()
 
         parameters = {
             "client_id": 9994,
         }
-        response_topic = "some.topic"
-        event_bus_request = {"request_id": 123, "response_topic": response_topic, "body": parameters}
+        event_bus_request = {"body": parameters}
 
-        post_outage_ticket = PostOutageTicket(logger, event_bus, bruin_repository)
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(event_bus_request)
 
-        await post_outage_ticket.post_outage_ticket(event_bus_request)
+        post_outage_ticket = PostOutageTicket(bruin_repository)
+
+        await post_outage_ticket(request_msg)
 
         bruin_repository.post_outage_ticket.assert_not_awaited()
-        event_bus.publish_message.assert_awaited_once_with(
-            "some.topic",
-            {
-                "request_id": 123,
-                "status": 400,
-                "body": 'Must specify "client_id" and "service_number" to post an outage ticket',
-            },
+        request_msg.respond.assert_awaited_once_with(
+            to_json_bytes(
+                {
+                    "body": 'Must specify "client_id" and "service_number" to post an outage ticket',
+                    "status": 400,
+                }
+            )
         )
 
     @pytest.mark.asyncio
     async def post_outage_ticket_with_missing_body_test(self):
-        logger = Mock()
-
         bruin_repository = Mock()
-        bruin_repository.post_outage_ticket = CoroutineMock()
+        bruin_repository.post_outage_ticket = AsyncMock()
 
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+        event_bus_request = {}
 
-        response_topic = "some.topic"
-        event_bus_request = {"request_id": 123, "response_topic": response_topic}
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(event_bus_request)
 
-        post_outage_ticket = PostOutageTicket(logger, event_bus, bruin_repository)
+        post_outage_ticket = PostOutageTicket(bruin_repository)
 
-        await post_outage_ticket.post_outage_ticket(event_bus_request)
+        await post_outage_ticket(request_msg)
 
         bruin_repository.post_outage_ticket.assert_not_awaited()
-        event_bus.publish_message.assert_awaited_once_with(
-            "some.topic",
-            {
-                "request_id": 123,
-                "status": 400,
-                "body": 'Must include "body" in request',
-            },
+        request_msg.respond.assert_awaited_once_with(
+            to_json_bytes(
+                {
+                    "body": 'Must include "body" in request',
+                    "status": 400,
+                }
+            )
         )
 
     @pytest.mark.asyncio
     async def post_outage_ticket_with_invalid_client_id_test(self):
-        logger = Mock()
-
         bruin_repository = Mock()
-        bruin_repository.post_outage_ticket = CoroutineMock()
-
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+        bruin_repository.post_outage_ticket = AsyncMock()
 
         parameters = {"client_id": None, "service_number": "VC05400009999"}
-        response_topic = "some.topic"
-        event_bus_request = {"request_id": 123, "response_topic": response_topic, "body": parameters}
+        event_bus_request = {"body": parameters}
 
-        post_outage_ticket = PostOutageTicket(logger, event_bus, bruin_repository)
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(event_bus_request)
 
-        await post_outage_ticket.post_outage_ticket(event_bus_request)
+        post_outage_ticket = PostOutageTicket(bruin_repository)
+
+        await post_outage_ticket(request_msg)
 
         bruin_repository.post_outage_ticket.assert_not_awaited()
-        event_bus.publish_message.assert_awaited_once_with(
-            "some.topic",
-            {
-                "request_id": 123,
-                "status": 400,
-                "body": '"client_id" and "service_number" must have non-null values',
-            },
+        request_msg.respond.assert_awaited_once_with(
+            to_json_bytes(
+                {
+                    "body": '"client_id" and "service_number" must have non-null values',
+                    "status": 400,
+                }
+            )
         )
 
     @pytest.mark.asyncio
     async def post_outage_ticket_with_invalid_client_id_test(self):
-        logger = Mock()
-
         bruin_repository = Mock()
-        bruin_repository.post_outage_ticket = CoroutineMock()
-
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+        bruin_repository.post_outage_ticket = AsyncMock()
 
         parameters = {"client_id": 9994, "service_number": None}
-        response_topic = "some.topic"
-        event_bus_request = {"request_id": 123, "response_topic": response_topic, "body": parameters}
+        event_bus_request = {"body": parameters}
 
-        post_outage_ticket = PostOutageTicket(logger, event_bus, bruin_repository)
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(event_bus_request)
 
-        await post_outage_ticket.post_outage_ticket(event_bus_request)
+        post_outage_ticket = PostOutageTicket(bruin_repository)
+
+        await post_outage_ticket(request_msg)
 
         bruin_repository.post_outage_ticket.assert_not_awaited()
-        event_bus.publish_message.assert_awaited_once_with(
-            "some.topic",
-            {
-                "request_id": 123,
-                "status": 400,
-                "body": '"client_id" and "service_number" must have non-null values',
-            },
+        request_msg.respond.assert_awaited_once_with(
+            to_json_bytes(
+                {
+                    "body": '"client_id" and "service_number" must have non-null values',
+                    "status": 400,
+                }
+            )
         )
 
     @pytest.mark.asyncio
@@ -171,29 +154,26 @@ class TestPostOutageTicket:
             "status": response_status_code,
         }
 
-        logger = Mock()
-
         bruin_repository = Mock()
-        bruin_repository.post_outage_ticket = CoroutineMock(return_value=repository_response)
-
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+        bruin_repository.post_outage_ticket = AsyncMock(return_value=repository_response)
 
         parameters = {"client_id": client_id, "service_number": service_number}
-        response_topic = "some.topic"
-        event_bus_request = {"request_id": 123, "response_topic": response_topic, "body": parameters}
+        event_bus_request = {"body": parameters}
 
-        post_outage_ticket = PostOutageTicket(logger, event_bus, bruin_repository)
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(event_bus_request)
 
-        await post_outage_ticket.post_outage_ticket(event_bus_request)
+        post_outage_ticket = PostOutageTicket(bruin_repository)
+
+        await post_outage_ticket(request_msg)
 
         bruin_repository.post_outage_ticket.assert_awaited_once_with(client_id, service_number, ticket_contact=None)
-        event_bus.publish_message.assert_awaited_once_with(
-            "some.topic",
-            {
-                "request_id": 123,
-                **repository_response,
-            },
+        request_msg.respond.assert_awaited_once_with(
+            to_json_bytes(
+                {
+                    **repository_response,
+                }
+            )
         )
 
     @pytest.mark.asyncio
@@ -210,29 +190,26 @@ class TestPostOutageTicket:
             "status": response_status_code,
         }
 
-        logger = Mock()
-
         bruin_repository = Mock()
-        bruin_repository.post_outage_ticket = CoroutineMock(return_value=repository_response)
-
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+        bruin_repository.post_outage_ticket = AsyncMock(return_value=repository_response)
 
         parameters = {"client_id": client_id, "service_number": service_number, "ticket_contact": ticket_contact}
-        response_topic = "some.topic"
-        event_bus_request = {"request_id": 123, "response_topic": response_topic, "body": parameters}
+        event_bus_request = {"body": parameters}
 
-        post_outage_ticket = PostOutageTicket(logger, event_bus, bruin_repository)
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(event_bus_request)
 
-        await post_outage_ticket.post_outage_ticket(event_bus_request)
+        post_outage_ticket = PostOutageTicket(bruin_repository)
+
+        await post_outage_ticket(request_msg)
 
         bruin_repository.post_outage_ticket.assert_awaited_once_with(
             client_id, service_number, ticket_contact=ticket_contact
         )
-        event_bus.publish_message.assert_awaited_once_with(
-            "some.topic",
-            {
-                "request_id": 123,
-                **repository_response,
-            },
+        request_msg.respond.assert_awaited_once_with(
+            to_json_bytes(
+                {
+                    **repository_response,
+                }
+            )
         )

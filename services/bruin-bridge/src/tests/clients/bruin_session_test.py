@@ -1,12 +1,15 @@
 from http import HTTPStatus
 from logging import Logger
 from typing import Any, Callable
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import aiohttp
 import pytest as pytest
 from aiohttp import ClientSession
 from aiohttp.client_reqrep import ClientResponse
+from pydantic import Field
+from pytest import fixture, mark
+
 from application.clients.bruin_session import (
     COMMON_HEADERS,
     BruinGetRequest,
@@ -15,9 +18,6 @@ from application.clients.bruin_session import (
     BruinResponse,
     BruinSession,
 )
-from asynctest import CoroutineMock
-from pydantic import Field
-from pytest import fixture, mark
 
 
 class TestBruinSession:
@@ -34,7 +34,7 @@ class TestBruinSession:
         response_body = "any_response_body"
         client_response = client_response_builder(response_body=response_body, status=response_status)
         bruin_session = bruin_session_builder(base_url=url, access_token=access_token)
-        bruin_session.session.get = CoroutineMock(return_value=client_response)
+        bruin_session.session.get = AsyncMock(return_value=client_response)
         params = {"query_param": "value"}
 
         subject = await bruin_session.get(BruinGetRequest(path=path, params=params))
@@ -60,7 +60,7 @@ class TestBruinSession:
         response_body = "any_response_body"
         client_response = client_response_builder(response_body=response_body, status=response_status)
         bruin_session = bruin_session_builder(base_url=url, access_token=access_token)
-        bruin_session.session.get = CoroutineMock(return_value=client_response)
+        bruin_session.session.get = AsyncMock(return_value=client_response)
 
         subject = await bruin_session.get(BruinGetRequest(path=path))
 
@@ -78,7 +78,7 @@ class TestBruinSession:
         bruin_session_builder: Callable[..., BruinSession],
     ):
         bruin_session = bruin_session_builder()
-        bruin_session.session.get = CoroutineMock(side_effect=aiohttp.ClientConnectionError("some error"))
+        bruin_session.session.get = AsyncMock(side_effect=aiohttp.ClientConnectionError("some error"))
 
         subject = await bruin_session.get(BruinGetRequest(path="any", params={}))
 
@@ -92,7 +92,7 @@ class TestBruinSession:
         bruin_session_builder: Callable[..., BruinSession],
     ):
         bruin_session = bruin_session_builder()
-        bruin_session.session.get = CoroutineMock(side_effect=Exception("some error"))
+        bruin_session.session.get = AsyncMock(side_effect=Exception("some error"))
 
         subject = await bruin_session.get(BruinGetRequest(path="any", params={}))
 
@@ -114,7 +114,7 @@ class TestBruinSession:
         response_body = "any_response_body"
         client_response = client_response_builder(response_body=response_body, status=response_status)
         bruin_session = bruin_session_builder(base_url=url, access_token=access_token)
-        bruin_session.session.post = CoroutineMock(return_value=client_response)
+        bruin_session.session.post = AsyncMock(return_value=client_response)
         params = {"query_param": "value"}
 
         request = BruinPostRequest(path=path, params=params, body=FooBody(any_parameter="any_value"))
@@ -145,7 +145,7 @@ class TestBruinSession:
         response_body = "any_response_body"
         client_response = client_response_builder(response_body=response_body, status=response_status)
         bruin_session = bruin_session_builder(base_url=url, access_token=access_token)
-        bruin_session.session.post = CoroutineMock(return_value=client_response)
+        bruin_session.session.post = AsyncMock(return_value=client_response)
 
         request = BruinPostRequest(path=path, body=FooBody(any_parameter="any_value"))
         subject = await bruin_session.post(request)
@@ -165,7 +165,7 @@ class TestBruinSession:
         bruin_session_builder: Callable[..., BruinSession],
     ):
         bruin_session = bruin_session_builder()
-        bruin_session.session.post = CoroutineMock(side_effect=aiohttp.ClientConnectionError("some error"))
+        bruin_session.session.post = AsyncMock(side_effect=aiohttp.ClientConnectionError("some error"))
 
         subject = await bruin_session.post(request=BruinPostRequest(path="any", body=BruinPostBody()))
 
@@ -179,7 +179,7 @@ class TestBruinSession:
         bruin_session_builder: Callable[..., BruinSession],
     ):
         bruin_session = bruin_session_builder()
-        bruin_session.session.post = CoroutineMock(side_effect=Exception("some error"))
+        bruin_session.session.post = AsyncMock(side_effect=Exception("some error"))
 
         subject = await bruin_session.post(request=BruinPostRequest(path="any", body=BruinPostBody()))
 
@@ -203,8 +203,8 @@ class TestBruinResponse:
         text = "any_text"
         client_response = Mock(ClientResponse)
         client_response.status = hash("any_status")
-        client_response.json = CoroutineMock(side_effect=ValueError())
-        client_response.text = CoroutineMock(return_value=text)
+        client_response.json = AsyncMock(side_effect=ValueError())
+        client_response.text = AsyncMock(return_value=text)
 
         subject = await BruinResponse.from_client_response(client_response)
 
@@ -215,8 +215,8 @@ class TestBruinResponse:
         json_error = "json_error"
         text_error = "text_error"
         client_response = Mock(ClientResponse)
-        client_response.json = CoroutineMock(side_effect=ValueError(json_error))
-        client_response.text = CoroutineMock(side_effect=ValueError(text_error))
+        client_response.json = AsyncMock(side_effect=ValueError(json_error))
+        client_response.text = AsyncMock(side_effect=ValueError(text_error))
 
         with pytest.raises(ValueError, match=text_error):
             await BruinResponse.from_client_response(client_response)
@@ -246,12 +246,11 @@ class TestBruinResponse:
 @fixture
 def bruin_session_builder():
     def builder(
-        logger: Logger = Mock(Logger),
         session: ClientSession = Mock(ClientSession),
         base_url: str = "any_url",
         access_token: str = "any_access_token",
     ) -> BruinSession:
-        return BruinSession(session=session, base_url=base_url, logger=logger, access_token=access_token)
+        return BruinSession(session=session, base_url=base_url, access_token=access_token)
 
     return builder
 
@@ -263,7 +262,7 @@ def client_response_builder():
             response_body = "any_response_body"
 
         client_response = Mock(ClientResponse)
-        client_response.json = CoroutineMock(return_value=response_body)
+        client_response.json = AsyncMock(return_value=response_body)
         client_response.status = status
         return client_response
 

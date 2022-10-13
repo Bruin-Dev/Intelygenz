@@ -1,13 +1,15 @@
+import logging
+from dataclasses import dataclass
 from http import HTTPStatus
-from logging import Logger
 from typing import Any, Dict, Optional
 
 import aiohttp
 import humps
 from aiohttp import ClientSession
 from aiohttp.client_reqrep import ClientResponse
-from dataclasses import dataclass
 from pydantic import BaseModel
+
+logger = logging.getLogger(__name__)
 
 COMMON_HEADERS = {
     "Content-Type": "application/json-patch+json",
@@ -23,15 +25,14 @@ class BruinSession:
 
     session: ClientSession
     base_url: str
-    logger: Logger
 
     access_token: Optional[str] = None
 
     def __post_init__(self):
-        self.logger.info(f"Started Bruin session")
+        logger.info(f"Started Bruin session")
 
     async def get(self, request: "BruinGetRequest") -> "BruinResponse":
-        self.logger.debug(f"get(request={request})")
+        logger.debug(f"get(request={request})")
 
         url = f"{self.base_url}{request.path}"
         headers = self.bruin_headers()
@@ -43,20 +44,20 @@ class BruinSession:
             response = await BruinResponse.from_client_response(client_response)
 
             if not response.ok():
-                self.logger.warning(f"get(request={request}) => response={response}")
+                logger.warning(f"get(request={request}) => response={response}")
 
             return response
 
         except aiohttp.ClientConnectionError as e:
-            self.logger.error(f"get(request={request}) => ClientConnectionError: {e}")
+            logger.error(f"get(request={request}) => ClientConnectionError: {e}")
             return BruinResponse(body=f"ClientConnectionError: {e}", status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
         except Exception as e:
-            self.logger.error(f"get(request={request}) => UnexpectedError: {e}")
+            logger.error(f"get(request={request}) => UnexpectedError: {e}")
             return BruinResponse(body=f"Unexpected error: {e}", status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
     async def post(self, request: "BruinPostRequest") -> "BruinResponse":
-        self.logger.debug(f"post(request={request}")
+        logger.debug(f"post(request={request}")
 
         url = f"{self.base_url}{request.path}"
         headers = self.bruin_headers()
@@ -74,16 +75,16 @@ class BruinSession:
             response = await BruinResponse.from_client_response(client_response)
 
             if not response.ok():
-                self.logger.warning(f"post(request={request}) => response={response}")
+                logger.warning(f"post(request={request}) => response={response}")
 
             return response
 
         except aiohttp.ClientConnectionError as e:
-            self.logger.error(f"post(request={request}) => ClientConnectionError: {e}")
+            logger.error(f"post(request={request}) => ClientConnectionError: {e}")
             return BruinResponse(body=f"ClientConnectionError: {e}", status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
         except Exception as e:
-            self.logger.error(f"post(request={request}) => UnexpectedError: {e}")
+            logger.error(f"post(request={request}) => UnexpectedError: {e}")
             return BruinResponse(body=f"Unexpected error: {e}", status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
     def bruin_headers(self) -> Dict[str, str]:

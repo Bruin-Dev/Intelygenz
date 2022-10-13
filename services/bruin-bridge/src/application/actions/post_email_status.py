@@ -1,13 +1,17 @@
+import json
+import logging
+from dataclasses import dataclass
 from http import HTTPStatus
-from logging import Logger
-from typing import Any
+
+from nats.aio.msg import Msg
+from pydantic import BaseModel, Field, ValidationError
 
 from application.clients.bruin_client import BruinClient
 from application.clients.bruin_session import BruinPostBody, BruinPostRequest
+from application.repositories.utils_repository import to_json_bytes
 from application.services.sentence_formatter import SentenceFormatter
-from dataclasses import dataclass
-from igz.packages.eventbus.eventbus import EventBus
-from pydantic import BaseModel, Field, ValidationError
+
+logger = logging.getLogger(__name__)
 
 BRUIN_PATH = "/api/Email/status"
 RESOLUTION_PATTERN = "Marked as {status} by {actor}"
@@ -15,22 +19,17 @@ RESOLUTION_PATTERN = "Marked as {status} by {actor}"
 
 @dataclass
 class PostEmailStatus:
-    logger: Logger
-    event_bus: EventBus
     bruin_client: BruinClient
     sentence_formatter: SentenceFormatter
 
-    async def post_email_status(self, msg: Any):
-        request_id = msg.get("request_id")
-        response_topic = msg.get("response_topic")
+    async def __call__(self, msg: Msg):
+        payload = json.loads(msg.data)
 
         try:
-            message_body = MessageBody.parse_obj(msg.get("body"))
+            message_body = MessageBody.parse_obj(payload.get("body"))
         except ValidationError as e:
-            self.logger.warning(f"Wrong request message: msg={msg}, validation_error={e}")
-            await self.event_bus.publish_message(
-                response_topic, {"request_id": request_id, "status": HTTPStatus.BAD_REQUEST, "body": e.errors()}
-            )
+            logger.warning(f"Wrong request message: msg={payload}, validation_error={e}")
+            await msg.respond(to_json_bytes({"status": HTTPStatus.BAD_REQUEST, "body": e.errors()}))
             return
 
         body = PostBody(
@@ -41,16 +40,14 @@ class PostEmailStatus:
         )
         post_request = BruinPostRequest(path=BRUIN_PATH, body=body)
 
-        self.logger.info(f"Setting email status: post_request={post_request}")
+        logger.info(f"Setting email status: post_request={post_request}")
         response = await self.bruin_client._bruin_session.post(post_request)
 
         if response.status == HTTPStatus.UNAUTHORIZED:
-            self.logger.error(f"Got 401 from Bruin. Re-logging in...")
+            logger.error(f"Got 401 from Bruin. Re-logging in...")
             await self.bruin_client.login()
 
-        await self.event_bus.publish_message(
-            response_topic, {"request_id": request_id, "status": response.status, "body": response.body}
-        )
+        await msg.respond(to_json_bytes({"status": response.status, "body": response.body}))
 
 
 class MessageBody(BaseModel):

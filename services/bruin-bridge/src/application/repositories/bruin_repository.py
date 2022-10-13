@@ -1,12 +1,14 @@
 import asyncio
+import logging
 from typing import Callable, List
 
 from application.clients.bruin_session import BruinResponse
 
+logger = logging.getLogger(__name__)
+
 
 class BruinRepository:
-    def __init__(self, logger, config, bruin_client):
-        self._logger = logger
+    def __init__(self, config, bruin_client):
         self._config = config
         self._bruin_client = bruin_client
 
@@ -56,27 +58,27 @@ class BruinRepository:
         current_page = 1
         params["page_size"] = page_size
 
-        self._logger.info(f"Fetching all pages using {fn.__name__}...")
+        logger.info(f"Fetching all pages using {fn.__name__}...")
         while remaining_items is None or remaining_items > 0:
             params_cp = params.copy()
             params_cp["page_number"] = current_page
             response = await fn(params_cp)
 
             if response["status"] not in range(200, 300):
-                self._logger.warning(
+                logger.warning(
                     f"Call to {fn.__name__} failed for page {current_page}. Checking if max retries threshold has been "
                     "reached"
                 )
 
                 if retries < max_retries:
-                    self._logger.info(
+                    logger.info(
                         f"Max retries threshold hasn't been reached yet. Retrying call to {fn.__name__} for page "
                         f"{current_page}..."
                     )
                     retries += 1
                     continue
                 else:
-                    self._logger.error(f"There have been {max_retries} or more errors when calling {fn.__name__}.")
+                    logger.error(f"There have been {max_retries} or more errors when calling {fn.__name__}.")
                     return response
 
             retries = 0
@@ -87,7 +89,7 @@ class BruinRepository:
 
             remaining_items -= len(response["body"]["responses"])
             if remaining_items <= 0:
-                self._logger.info(f"Finished fetching all pages for {fn.__name__}.")
+                logger.info(f"Finished fetching all pages for {fn.__name__}.")
                 break
 
             current_page += 1
@@ -104,7 +106,7 @@ class BruinRepository:
         ticket_list = ticket_response["body"]["responses"]
 
         if len(ticket_list) == 0:
-            self._logger.error(f"Call to get_tickets_basic_info succeeded, but TicketID {ticket_id} not found.")
+            logger.error(f"Call to get_tickets_basic_info succeeded, but TicketID {ticket_id} not found.")
             return {"body": {}, "status": 404}
 
         return {
@@ -325,7 +327,7 @@ class BruinRepository:
         if not ticket_id or (isinstance(ticket_id, str) and not ticket_id.isdigit()):
             return {"body": "not ticket id found", "status": 404}
         params = {"ticket_id": int(ticket_id)}
-        self._logger.info(f"Getting ticket overview: {ticket_id} from Bruin...")
+        logger.info(f"Getting ticket overview: {ticket_id} from Bruin...")
         ticket_response = await self._bruin_client.get_all_tickets(params)
         if ticket_response["status"] not in range(200, 300):
             return ticket_response
@@ -351,7 +353,7 @@ class BruinRepository:
         response = await self._bruin_client.get_site(params)
 
         if response["status"] not in range(200, 300):
-            self._logger.error(
+            logger.error(
                 f"Got response with status {response['status']} while getting site information for params {params}."
             )
             return response
@@ -359,7 +361,7 @@ class BruinRepository:
         documents = response["body"].get("documents", [])
         if not documents:
             msg = f"No site information was found for site {params['site_id']} and client {params['client_id']}"
-            self._logger.warning(msg)
+            logger.warning(msg)
 
             response["status"] = 404
             response[

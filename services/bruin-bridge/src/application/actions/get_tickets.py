@@ -1,22 +1,29 @@
 import json
+import logging
+
+from nats.aio.msg import Msg
+
+from application.repositories.utils_repository import to_json_bytes
+
+logger = logging.getLogger(__name__)
 
 
 class GetTicket:
-    def __init__(self, logger, config, event_bus, bruin_repository):
-        self._config = config
-        self._logger = logger
-        self._event_bus = event_bus
+    def __init__(self, bruin_repository):
         self._bruin_repository = bruin_repository
 
-    async def get_all_tickets(self, msg: dict):
-        filtered_tickets_response = {"request_id": msg["request_id"], "body": None, "status": None}
-        body = msg.get("body")
+    async def __call__(self, msg: Msg):
+        payload = json.loads(msg.data)
+
+        filtered_tickets_response = {"body": None, "status": None}
+        body = payload.get("body")
 
         if body is None:
             filtered_tickets_response["status"] = 400
             filtered_tickets_response["body"] = 'Must include "body" in request'
-            await self._event_bus.publish_message(msg["response_topic"], filtered_tickets_response)
+            await msg.respond(to_json_bytes(filtered_tickets_response))
             return
+
         if not all(key in body.keys() for key in ("client_id", "ticket_topic", "ticket_status")):
             filtered_tickets_response["status"] = 400
             filtered_tickets_response["body"] = (
@@ -24,7 +31,7 @@ class GetTicket:
                 '{..."body:{"client_id", "ticket_topic",'
                 ' "ticket_status":[list of statuses]}...} in the request'
             )
-            await self._event_bus.publish_message(msg["response_topic"], filtered_tickets_response)
+            await msg.respond(to_json_bytes(filtered_tickets_response))
             return
 
         ticket_status = body["ticket_status"]
@@ -50,12 +57,12 @@ class GetTicket:
             params["start_date"] = start_date
             params["end_date"] = end_date
 
-        self._logger.info(f'Collecting all tickets for client id: {params["client_id"]}...')
+        logger.info(f'Collecting all tickets for client id: {params["client_id"]}...')
 
         filtered_tickets = await self._bruin_repository.get_all_filtered_tickets(params, ticket_status)
 
         filtered_tickets_response = {**filtered_tickets_response, **filtered_tickets}
 
-        self._logger.info(f'All tickets for client id: {params["client_id"]} sent')
+        logger.info(f'All tickets for client id: {params["client_id"]} sent')
 
-        await self._event_bus.publish_message(msg["response_topic"], filtered_tickets_response)
+        await msg.respond(to_json_bytes(filtered_tickets_response))

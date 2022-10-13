@@ -1,36 +1,34 @@
 import json
 from http import HTTPStatus
-from unittest.mock import Mock, call, patch
+from unittest.mock import AsyncMock, Mock, call, patch
 
 import humps
 import pytest
-from aiohttp import ClientConnectionError
-from application.clients.bruin_client import BruinClient
-from application.clients.bruin_session import BruinGetRequest, BruinResponse
-from asynctest import CoroutineMock
-from config import testconfig as config
+from aiohttp import ClientConnectionError, ClientSession
 from pytest import raises
+
+from application.clients.bruin_client import BruinClient
+from application.clients.bruin_session import BruinGetRequest, BruinResponse, BruinSession
+from config import testconfig as config
 
 
 class TestBruinClient:
     def instance_test(self):
-        logger = Mock()
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
 
-        bruin_client = BruinClient(logger, config)
-
-        assert bruin_client._logger is logger
         assert bruin_client._config is config
 
     @pytest.mark.asyncio
     async def login_test(self):
-        logger = Mock()
         access_token_str = "Someverysecretaccesstoken"
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value={"access_token": access_token_str})
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value={"access_token": access_token_str})
 
-        bruin_client = BruinClient(logger, config)
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)) as mock_post:
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)) as mock_post:
             await bruin_client.login()
 
             assert access_token_str == bruin_client._bearer_token
@@ -38,10 +36,9 @@ class TestBruinClient:
 
     @pytest.mark.asyncio
     async def login_with_failure_test(self):
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(side_effect=Exception)) as mock_post:
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        with patch.object(bruin_client._session, "post", new=AsyncMock(side_effect=Exception)) as mock_post:
             await bruin_client.login()
 
             assert bruin_client._bearer_token == ""
@@ -49,7 +46,6 @@ class TestBruinClient:
 
     @pytest.mark.asyncio
     async def get_request_headers_test(self):
-        logger = Mock()
         access_token_str = "Someverysecretaccesstoken"
         expected_headers = {
             "authorization": f"Bearer {access_token_str}",
@@ -57,7 +53,8 @@ class TestBruinClient:
             "Cache-control": "no-cache, no-store, no-transform, max-age=0, only-if-cached",
         }
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = access_token_str
 
         headers = bruin_client._get_request_headers()
@@ -65,9 +62,8 @@ class TestBruinClient:
 
     @pytest.mark.asyncio
     async def get_request_headers_with_no_bearer_token_test(self):
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         with raises(Exception) as error_info:
             bruin_client._get_request_headers()
             assert error_info == "Missing BEARER token"
@@ -76,19 +72,19 @@ class TestBruinClient:
 class TestGetAllTickets:
     @pytest.mark.asyncio
     async def get_all_tickets_test(self):
-        logger = Mock()
         params = dict(client_id=123, ticket_id=321, ticket_status="New", product_category="SD-WAN", ticket_topic="VOO")
 
         get_response = {"responses": [{"category": "SD-WAN", "ticketStatus": "New"}]}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=get_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=get_response)
         response_mock.status = 200
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             tickets = await bruin_client.get_all_tickets(params)
 
         mock_get.assert_called_once()
@@ -102,108 +98,95 @@ class TestGetAllTickets:
 
     @pytest.mark.asyncio
     async def get_all_tickets_with_400_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         params = dict(client_id=123, ticket_id=321, ticket_status="New", category="SD-WAN", ticket_topic="VOO")
         error_response = {"error": "400 error"}
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=error_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=error_response)
         response_mock.status = 400
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             tickets = await bruin_client.get_all_tickets(params)
-
-            logger.error.assert_called()
 
             assert tickets["body"] == error_response
             assert tickets["status"] == 400
 
     @pytest.mark.asyncio
     async def get_all_tickets_with_401_status_test(self):
-        logger = Mock()
         params = dict(client_id=123, ticket_id=321, ticket_status="New", category="SD-WAN", ticket_topic="VOO")
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value={})
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value={})
         response_mock.status = 401
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             tickets = await bruin_client.get_all_tickets(params)
-            logger.error.assert_called()
 
             assert tickets["body"] == "Got 401 from Bruin"
             assert tickets["status"] == 401
 
     @pytest.mark.asyncio
     async def get_all_tickets_with_403_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         params = dict(client_id=123, ticket_id=321, ticket_status="New", category="SD-WAN", ticket_topic="VOO")
         error_response = {"error": "403 error"}
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=error_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=error_response)
         response_mock.status = 403
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             tickets = await bruin_client.get_all_tickets(params)
-
-            logger.error.assert_called()
 
             assert tickets["body"] == error_response
             assert tickets["status"] == 403
 
     @pytest.mark.asyncio
     async def get_all_tickets_with_404_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         params = dict(client_id=123, ticket_id=321, ticket_status="New", category="SD-WAN", ticket_topic="VOO")
         error_response = {"error": "400 error"}
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=error_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=error_response)
         response_mock.status = 404
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             tickets = await bruin_client.get_all_tickets(params)
-
-            logger.error.assert_called()
 
             assert tickets["body"] == "Resource not found"
             assert tickets["status"] == 404
 
     @pytest.mark.asyncio
     async def get_all_tickets_with_500_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         params = dict(client_id=123, ticket_id=321, ticket_status="New", category="SD-WAN", ticket_topic="VOO")
         error_response = {"error": "400 error"}
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=error_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=error_response)
         response_mock.status = 500
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             tickets = await bruin_client.get_all_tickets(params)
-
-            logger.error.assert_called()
 
             assert tickets["body"] == "Got internal error from Bruin"
             assert tickets["status"] == 500
@@ -212,18 +195,18 @@ class TestGetAllTickets:
 class TestGetTicketDetails:
     @pytest.mark.asyncio
     async def get_ticket_details_test(self):
-        logger = Mock()
         ticket_id = 321
         get_response = {"ticket_details": "Some Ticket Details"}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=get_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=get_response)
         response_mock.status = 200
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             ticket_details = await bruin_client.get_ticket_details(ticket_id)
 
             mock_get.assert_called_once()
@@ -232,108 +215,98 @@ class TestGetTicketDetails:
 
     @pytest.mark.asyncio
     async def get_ticket_details_with_400_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         ticket_id = 321
         error_response = {"error": "400 error"}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=error_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=error_response)
         response_mock.status = 400
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             ticket_details = await bruin_client.get_ticket_details(ticket_id)
-            logger.error.assert_called()
 
             assert ticket_details["body"] == error_response
             assert ticket_details["status"] == 400
 
     @pytest.mark.asyncio
     async def get_ticket_details_with_401_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         ticket_id = 321
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value={})
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value={})
         response_mock.status = 401
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             ticket_details = await bruin_client.get_ticket_details(ticket_id)
             bruin_client.login.assert_awaited()
-            logger.error.assert_called()
 
             assert ticket_details["body"] == "Got 401 from Bruin"
             assert ticket_details["status"] == 401
 
     @pytest.mark.asyncio
     async def get_ticket_details_with_403_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         ticket_id = 321
         error_response = {"error": "403 error"}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=error_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=error_response)
         response_mock.status = 403
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             ticket_details = await bruin_client.get_ticket_details(ticket_id)
-            logger.error.assert_called()
 
             assert ticket_details["body"] == error_response
             assert ticket_details["status"] == 403
 
     @pytest.mark.asyncio
     async def get_ticket_details_with_404_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         ticket_id = 321
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value={})
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value={})
         response_mock.status = 404
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             ticket_details = await bruin_client.get_ticket_details(ticket_id)
-            logger.error.assert_called()
 
             assert ticket_details["body"] == "Resource not found"
             assert ticket_details["status"] == 404
 
     @pytest.mark.asyncio
     async def get_ticket_details_with_500_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         ticket_id = 321
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value={})
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value={})
         response_mock.status = 500
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             ticket_details = await bruin_client.get_ticket_details(ticket_id)
-            logger.error.assert_called()
 
             assert ticket_details["body"] == "Got internal error from Bruin"
             assert ticket_details["status"] == 500
@@ -342,21 +315,20 @@ class TestGetTicketDetails:
 class TestPostTicketNote:
     @pytest.mark.asyncio
     async def post_ticket_note_test(self):
-        logger = Mock()
-        logger.error = Mock()
 
         ticket_id = 321
         note_contents = "Ticket Notes"
         expected_post_response = {"response": "Note Appended"}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=expected_post_response)
         response_mock.status = 200
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)) as mock_post:
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)) as mock_post:
             post_response = await bruin_client.post_ticket_note(ticket_id, note_contents)
 
             mock_post.assert_called_once()
@@ -365,117 +337,108 @@ class TestPostTicketNote:
 
     @pytest.mark.asyncio
     async def post_ticket_note_with_400_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         ticket_id = 321
         note_contents = "Ticket Notes"
         expected_post_response = {"response": "Error 400"}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=expected_post_response)
         response_mock.status = 400
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             post_response = await bruin_client.post_ticket_note(ticket_id, note_contents)
-            logger.error.assert_called()
 
             assert post_response["body"] == expected_post_response
             assert post_response["status"] == 400
 
     @pytest.mark.asyncio
     async def post_ticket_note_with_401_status_test(self):
-        logger = Mock()
         ticket_id = 321
         note_contents = "Ticket Notes"
         expected_post_response = {}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=expected_post_response)
         response_mock.status = 401
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             post_response = await bruin_client.post_ticket_note(ticket_id, note_contents)
 
             bruin_client.login.assert_awaited()
-            logger.error.assert_called()
 
             assert post_response["body"] == "Got 401 from Bruin"
             assert post_response["status"] == 401
 
     @pytest.mark.asyncio
     async def post_ticket_note_with_403_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         ticket_id = 321
         note_contents = "Ticket Notes"
         expected_post_response = {"response": "Error 403"}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=expected_post_response)
         response_mock.status = 403
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             post_response = await bruin_client.post_ticket_note(ticket_id, note_contents)
-            logger.error.assert_called()
 
             assert post_response["body"] == expected_post_response
             assert post_response["status"] == 403
 
     @pytest.mark.asyncio
     async def post_ticket_note_with_404_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
 
         ticket_id = 321
         note_contents = "Ticket Notes"
         expected_post_response = {}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=expected_post_response)
         response_mock.status = 404
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             post_response = await bruin_client.post_ticket_note(ticket_id, note_contents)
-            logger.error.assert_called()
 
             assert post_response["body"] == "Resource not found"
             assert post_response["status"] == 404
 
     @pytest.mark.asyncio
     async def post_ticket_note_with_500_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         ticket_id = 321
         note_contents = "Ticket Notes"
         expected_post_response = {}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=expected_post_response)
         response_mock.status = 500
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             post_response = await bruin_client.post_ticket_note(ticket_id, note_contents)
-            logger.error.assert_called()
 
             assert post_response["body"] == "Got internal error from Bruin"
             assert post_response["status"] == 500
@@ -484,7 +447,6 @@ class TestPostTicketNote:
 class TestPostTicket:
     @pytest.mark.asyncio
     async def post_ticket_test(self):
-        logger = Mock()
         payload = dict(
             clientId=321,
             category="Some Category",
@@ -494,14 +456,15 @@ class TestPostTicket:
         )
         expected_post_response = "Ticket Created"
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=expected_post_response)
         response_mock.status = 200
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)) as mock_post:
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)) as mock_post:
             post_ticket = await bruin_client.post_ticket(payload)
             mock_post.assert_called_once()
             assert post_ticket["body"] == expected_post_response
@@ -509,8 +472,6 @@ class TestPostTicket:
 
     @pytest.mark.asyncio
     async def post_ticket_400_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         payload = dict(
             clientId=321,
             category="Some Category",
@@ -520,25 +481,23 @@ class TestPostTicket:
         )
         expected_post_response = "Ticket failed to create"
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=expected_post_response)
         response_mock.status = 400
 
-        bruin_client = BruinClient(logger, config)
-        bruin_client.login = CoroutineMock()
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             post_ticket = await bruin_client.post_ticket(payload)
-            logger.error.assert_called()
 
             assert post_ticket["body"] == expected_post_response
             assert post_ticket["status"] == 400
 
     @pytest.mark.asyncio
     async def post_ticket_401_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         payload = dict(
             clientId=321,
             category="Some Category",
@@ -548,25 +507,23 @@ class TestPostTicket:
         )
         expected_post_response = "Ticket failed to create"
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=expected_post_response)
         response_mock.status = 401
 
-        bruin_client = BruinClient(logger, config)
-        bruin_client.login = CoroutineMock()
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             post_ticket = await bruin_client.post_ticket(payload)
-            logger.error.assert_called()
             bruin_client.login.assert_awaited()
             assert post_ticket["body"] == "Got 401 from Bruin"
             assert post_ticket["status"] == 401
 
     @pytest.mark.asyncio
     async def post_ticket_403_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         payload = dict(
             clientId=321,
             category="Some Category",
@@ -576,25 +533,23 @@ class TestPostTicket:
         )
         expected_post_response = "Ticket failed to create"
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=expected_post_response)
         response_mock.status = 403
 
-        bruin_client = BruinClient(logger, config)
-        bruin_client.login = CoroutineMock()
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             post_ticket = await bruin_client.post_ticket(payload)
-            logger.error.assert_called()
 
             assert post_ticket["body"] == expected_post_response
             assert post_ticket["status"] == 403
 
     @pytest.mark.asyncio
     async def post_ticket_404_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         payload = dict(
             clientId=321,
             category="Some Category",
@@ -604,25 +559,23 @@ class TestPostTicket:
         )
         expected_post_response = "Ticket failed to create"
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=expected_post_response)
         response_mock.status = 404
 
-        bruin_client = BruinClient(logger, config)
-        bruin_client.login = CoroutineMock()
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             post_ticket = await bruin_client.post_ticket(payload)
-            logger.error.assert_called()
 
             assert post_ticket["body"] == "Resource not found"
             assert post_ticket["status"] == 404
 
     @pytest.mark.asyncio
     async def post_ticket_500_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         payload = dict(
             clientId=321,
             category="Some Category",
@@ -632,17 +585,17 @@ class TestPostTicket:
         )
         expected_post_response = "Ticket failed to create"
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=expected_post_response)
         response_mock.status = 500
 
-        bruin_client = BruinClient(logger, config)
-        bruin_client.login = CoroutineMock()
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             post_ticket = await bruin_client.post_ticket(payload)
-            logger.error.assert_called()
 
             assert post_ticket["body"] == "Got internal error from Bruin"
             assert post_ticket["status"] == 500
@@ -651,21 +604,21 @@ class TestPostTicket:
 class TestUpdateTicketStatus:
     @pytest.mark.asyncio
     async def update_ticket_status_test(self):
-        logger = Mock()
 
         ticket_id = 123
         detail_id = 321
         ticket_status = "O"
         successful_status_change = "Success"
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=successful_status_change)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=successful_status_change)
         response_mock.status = 200
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "put", new=CoroutineMock(return_value=response_mock)) as mock_put:
+        with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)) as mock_put:
             update_ticket_status = await bruin_client.update_ticket_status(ticket_id, detail_id, ticket_status)
             mock_put.assert_called_once()
             assert update_ticket_status["body"] == successful_status_change
@@ -673,52 +626,47 @@ class TestUpdateTicketStatus:
 
     @pytest.mark.asyncio
     async def update_ticket_status_400_error_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
 
         ticket_id = 123
         detail_id = 321
         ticket_status = "X"
         failure_status_change = "failed"
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=failure_status_change)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=failure_status_change)
         response_mock.status = 400
 
-        bruin_client = BruinClient(logger, config)
-        bruin_client.login = CoroutineMock()
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "put", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)):
             update_ticket_status = await bruin_client.update_ticket_status(ticket_id, detail_id, ticket_status)
-
-            logger.error.assert_called()
 
             assert update_ticket_status["body"] == failure_status_change
             assert update_ticket_status["status"] == 400
 
     @pytest.mark.asyncio
     async def update_ticket_status_401_error_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
 
         ticket_id = 123
         detail_id = 321
         ticket_status = "X"
         failure_status_change = "failed"
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=failure_status_change)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=failure_status_change)
         response_mock.status = 401
 
-        bruin_client = BruinClient(logger, config)
-        bruin_client.login = CoroutineMock()
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "put", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)):
             update_ticket_status = await bruin_client.update_ticket_status(ticket_id, detail_id, ticket_status)
 
-            logger.error.assert_called()
             bruin_client.login.assert_awaited()
 
             assert update_ticket_status["body"] == "Got 401 from Bruin"
@@ -726,78 +674,69 @@ class TestUpdateTicketStatus:
 
     @pytest.mark.asyncio
     async def update_ticket_status_403_error_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
 
         ticket_id = 123
         detail_id = 321
         ticket_status = "X"
         failure_status_change = "failed"
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=failure_status_change)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=failure_status_change)
         response_mock.status = 403
 
-        bruin_client = BruinClient(logger, config)
-        bruin_client.login = CoroutineMock()
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "put", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)):
             update_ticket_status = await bruin_client.update_ticket_status(ticket_id, detail_id, ticket_status)
-
-            logger.error.assert_called()
 
             assert update_ticket_status["body"] == failure_status_change
             assert update_ticket_status["status"] == 403
 
     @pytest.mark.asyncio
     async def update_ticket_status_404_error_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
 
         ticket_id = 123
         detail_id = 321
         ticket_status = "X"
         failure_status_change = "failed"
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=failure_status_change)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=failure_status_change)
         response_mock.status = 404
 
-        bruin_client = BruinClient(logger, config)
-        bruin_client.login = CoroutineMock()
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "put", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)):
             update_ticket_status = await bruin_client.update_ticket_status(ticket_id, detail_id, ticket_status)
-
-            logger.error.assert_called()
 
             assert update_ticket_status["body"] == "Resource not found"
             assert update_ticket_status["status"] == 404
 
     @pytest.mark.asyncio
     async def update_ticket_status_500_error_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
 
         ticket_id = 123
         detail_id = 321
         ticket_status = "X"
         failure_status_change = "failed"
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=failure_status_change)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=failure_status_change)
         response_mock.status = 500
 
-        bruin_client = BruinClient(logger, config)
-        bruin_client.login = CoroutineMock()
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "put", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)):
             update_ticket_status = await bruin_client.update_ticket_status(ticket_id, detail_id, ticket_status)
-
-            logger.error.assert_called()
 
             assert update_ticket_status["body"] == "Got internal error from Bruin"
             assert update_ticket_status["status"] == 500
@@ -806,7 +745,6 @@ class TestUpdateTicketStatus:
 class TestGetInventoryAttributes:
     @pytest.mark.asyncio
     async def get_inventory_attributes_pascalize_with_ok_test(self):
-        logger = Mock()
 
         filters = {"client_id": 9994, "status": "A", "service_number": "VC05400009999"}
         pascalized_filter = {"ClientId": 9994, "Status": "A", "ServiceNumber": "VC05400009999"}
@@ -817,15 +755,16 @@ class TestGetInventoryAttributes:
             "attributes": [{"key": "Management Status", "value": "Active – Platinum Monitoring"}],
         }
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=valid_inventory_attributes_status)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=valid_inventory_attributes_status)
         response_mock.status = 200
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             await bruin_client.get_inventory_attributes(filters)
             bruin_client._session.get.assert_awaited_once_with(
                 f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Inventory/Attribute',
@@ -837,22 +776,22 @@ class TestGetInventoryAttributes:
 
     @pytest.mark.asyncio
     async def get_inventory_attributes_with_ko_401_test(self):
-        logger = Mock()
 
         filters = {"client_id": 9994, "status": "A", "service_number": "VC05400009999"}
         pascalized_filter = {"ClientId": 9994, "Status": "A", "ServiceNumber": "VC05400009999"}
 
         empty_response = {}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=empty_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=empty_response)
         response_mock.status = 401
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             with raises(Exception):
                 await bruin_client.get_inventory_attributes(filters)
                 bruin_client._session.get.assert_awaited_once_with(
@@ -866,7 +805,6 @@ class TestGetInventoryAttributes:
 
     @pytest.mark.asyncio
     async def get_inventory_attributes_with_ko_400_test(self):
-        logger = Mock()
 
         filters = {"client_id": 9994, "service_number": "VC05400009999"}
         pascalized_filter = {"ClientId": 9994, "ServiceNumber": "VC05400009999"}
@@ -879,15 +817,16 @@ class TestGetInventoryAttributes:
             "code": 400,
         }
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=response_400)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=response_400)
         response_mock.status = 400
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             await bruin_client.get_inventory_attributes(filters)
             bruin_client._session.get.assert_awaited_once_with(
                 f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Inventory/Attribute',
@@ -898,7 +837,6 @@ class TestGetInventoryAttributes:
 
     @pytest.mark.asyncio
     async def get_inventory_attributes_with_ko_403_test(self):
-        logger = Mock()
 
         filters = {"client_id": 9994, "service_number": "VC05400009999"}
         pascalized_filter = {"ClientId": 9994, "ServiceNumber": "VC05400009999"}
@@ -911,15 +849,16 @@ class TestGetInventoryAttributes:
             "code": 403,
         }
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=response_403)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=response_403)
         response_mock.status = 403
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             await bruin_client.get_inventory_attributes(filters)
             bruin_client._session.get.assert_awaited_once_with(
                 f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Inventory/Attribute',
@@ -930,7 +869,6 @@ class TestGetInventoryAttributes:
 
     @pytest.mark.asyncio
     async def get_inventory_attributes_with_ko_500_test(self):
-        logger = Mock()
 
         filters = {"client_id": 9994, "service_number": "VC05400009999"}
         pascalized_filter = {"ClientId": 9994, "ServiceNumber": "VC05400009999"}
@@ -939,15 +877,16 @@ class TestGetInventoryAttributes:
             "body": "Resource not found",
         }
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=response_500)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=response_500)
         response_mock.status = 500
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             await bruin_client.get_inventory_attributes(filters)
             bruin_client._session.get.assert_called_with(
                 f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Inventory/Attribute',
@@ -958,7 +897,6 @@ class TestGetInventoryAttributes:
 
     @pytest.mark.asyncio
     async def get_inventory_attributes_with_connection_error_test(self):
-        logger = Mock()
 
         filters = {"client_id": 9994, "service_number": "VC05400009999"}
         pascalized_filter = {"ClientId": 9994, "ServiceNumber": "VC05400009999"}
@@ -966,11 +904,12 @@ class TestGetInventoryAttributes:
 
         message = {"body": f"Connection error in Bruin API. {cause}", "status": 500}
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(side_effect=ClientConnectionError(cause))):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(side_effect=ClientConnectionError(cause))):
             result = await bruin_client.get_inventory_attributes(filters)
             bruin_client._session.get.assert_awaited_with(
                 f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Inventory/Attribute',
@@ -985,7 +924,6 @@ class TestGetInventoryAttributes:
 class TestGetPossibleDetailNextResult:
     @pytest.mark.asyncio
     async def get_possible_detail_next_result_200_test(self):
-        logger = Mock()
 
         ticket_id = 99
         filters = {"ServiceNumber": "VCO10199919", "DetailId": 191919}
@@ -1013,15 +951,16 @@ class TestGetPossibleDetailNextResult:
 
         expected_result = {"body": valid_next_result, "status": 200}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=valid_next_result)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=valid_next_result)
         response_mock.status = 200
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             next_result = await bruin_client.get_possible_detail_next_result(ticket_id, filters)
             bruin_client._session.get.assert_awaited_once_with(
                 f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/nextresult',
@@ -1034,8 +973,6 @@ class TestGetPossibleDetailNextResult:
 
     @pytest.mark.asyncio
     async def get_possible_detail_next_result_400_test(self):
-        logger = Mock()
-        logger.error = Mock()
 
         ticket_id = 99
         filters = {"ServiceNumber": "", "DetailId": None}
@@ -1050,15 +987,16 @@ class TestGetPossibleDetailNextResult:
 
         expected_result = {"body": response_400, "status": 400}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=response_400)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=response_400)
         response_mock.status = 400
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             next_result = await bruin_client.get_possible_detail_next_result(ticket_id, filters)
             bruin_client._session.get.assert_awaited_once_with(
                 f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/nextresult',
@@ -1067,28 +1005,26 @@ class TestGetPossibleDetailNextResult:
                 ssl=False,
             )
             response_mock.json.assert_called()
-            logger.error.assert_called_once()
             assert next_result == expected_result
 
     @pytest.mark.asyncio
     async def get_possible_detail_next_result_401_test(self):
-        logger = Mock()
-        logger.error = Mock()
 
         ticket_id = 99
         filters = {"ServiceNumber": "VCO10199919", "DetailId": 191919}
 
         response_401 = {}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=response_401)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=response_401)
         response_mock.status = 401
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             with raises(Exception):
                 bruin_client.get_possible_detail_next_result(ticket_id, filters)
                 bruin_client._session.get.assert_awaited_once_with(
@@ -1102,23 +1038,22 @@ class TestGetPossibleDetailNextResult:
 
     @pytest.mark.asyncio
     async def get_possible_detail_next_result_500_test(self):
-        logger = Mock()
-        logger.error = Mock()
 
         ticket_id = 99
         filters = {"ServiceNumber": "VCO10199919", "DetailId": 191919}
 
         response_500 = {"Internal server error"}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=response_500)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=response_500)
         response_mock.status = 500
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             with raises(Exception):
                 bruin_client.get_possible_detail_next_result(ticket_id, filters)
                 bruin_client._session.get.assert_awaited_once_with(
@@ -1134,7 +1069,6 @@ class TestGetPossibleDetailNextResult:
 class TestChangeWorkQueue:
     @pytest.mark.asyncio
     async def change_work_queue_200_test(self):
-        logger = Mock()
 
         ticket_id = 99
         filters = {
@@ -1152,15 +1086,16 @@ class TestChangeWorkQueue:
 
         expected_result = {"body": valid_put_response, "status": 200}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=valid_put_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=valid_put_response)
         response_mock.status = 200
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "put", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)):
             put_result = await bruin_client.change_detail_work_queue(ticket_id, filters)
             bruin_client._session.put.assert_awaited_once_with(
                 f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/details/work',
@@ -1173,8 +1108,6 @@ class TestChangeWorkQueue:
 
     @pytest.mark.asyncio
     async def change_work_queue_400_test(self):
-        logger = Mock()
-        logger.error = Mock()
 
         ticket_id = 99
         filters = {
@@ -1200,15 +1133,16 @@ class TestChangeWorkQueue:
 
         expected_result = {"body": put_response_400, "status": 400}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=put_response_400)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=put_response_400)
         response_mock.status = 400
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "put", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)):
             put_result = await bruin_client.change_detail_work_queue(ticket_id, filters)
             bruin_client._session.put.assert_awaited_once_with(
                 f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/details/work',
@@ -1217,12 +1151,10 @@ class TestChangeWorkQueue:
                 ssl=False,
             )
             response_mock.json.assert_called()
-            logger.error.assert_called_once()
             assert put_result == expected_result
 
     @pytest.mark.asyncio
     async def change_work_queue_401_test(self):
-        logger = Mock()
 
         ticket_id = 99
         filters = {
@@ -1238,15 +1170,16 @@ class TestChangeWorkQueue:
 
         response_401 = {}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=response_401)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=response_401)
         response_mock.status = 401
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "put", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)):
             with raises(Exception):
                 bruin_client.change_detail_work_queue(ticket_id, filters)
                 bruin_client._session.put.assert_awaited_once_with(
@@ -1260,7 +1193,6 @@ class TestChangeWorkQueue:
 
     @pytest.mark.asyncio
     async def change_work_queue_500_test(self):
-        logger = Mock()
 
         ticket_id = 99
         filters = {
@@ -1276,15 +1208,16 @@ class TestChangeWorkQueue:
 
         response_500 = {}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=response_500)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=response_500)
         response_mock.status = 500
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "put", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)):
             with raises(Exception):
                 bruin_client.change_detail_work_queue(ticket_id, filters)
                 bruin_client._session.put.assert_awaited_once_with(
@@ -1311,13 +1244,12 @@ class TestPostOutageTicket:
             "RequestDescription": "MetTel's IPA -- Service Outage Trouble",
         }
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         with patch.object(
-            bruin_client._session, "post", new=CoroutineMock(side_effect=ClientConnectionError(connection_error_cause))
+            bruin_client._session, "post", new=AsyncMock(side_effect=ClientConnectionError(connection_error_cause))
         ):
             result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
 
@@ -1354,16 +1286,15 @@ class TestPostOutageTicket:
         bruin_response_body = {"assets": [ticket_data]}
         bruin_response_status = 200
 
-        bruin_response = CoroutineMock()
+        bruin_response = AsyncMock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
 
             bruin_client._session.post.assert_awaited_with(
@@ -1401,16 +1332,15 @@ class TestPostOutageTicket:
         bruin_response_body = {"assets": [ticket_data]}
         bruin_response_status = 200
 
-        bruin_response = CoroutineMock()
+        bruin_response = AsyncMock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
 
             bruin_client._session.post.assert_awaited_with(
@@ -1448,16 +1378,15 @@ class TestPostOutageTicket:
         bruin_response_body = {"assets": [ticket_data]}
         bruin_response_status = 200
 
-        bruin_response = CoroutineMock()
+        bruin_response = AsyncMock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
 
             bruin_client._session.post.assert_awaited_with(
@@ -1501,14 +1430,13 @@ class TestPostOutageTicket:
 
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
 
             bruin_client._session.post.assert_awaited_with(
@@ -1549,14 +1477,13 @@ class TestPostOutageTicket:
 
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
 
             bruin_client._session.post.assert_awaited_with(
@@ -1597,14 +1524,13 @@ class TestPostOutageTicket:
 
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
 
             bruin_client._session.post.assert_awaited_with(
@@ -1645,14 +1571,13 @@ class TestPostOutageTicket:
 
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
 
             bruin_client._session.post.assert_awaited_with(
@@ -1693,14 +1618,13 @@ class TestPostOutageTicket:
 
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
 
             bruin_client._session.post.assert_awaited_with(
@@ -1733,13 +1657,12 @@ class TestPostOutageTicket:
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
 
             post_outage_ticket_call = call(
@@ -1775,13 +1698,12 @@ class TestPostOutageTicket:
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
 
             bruin_client._session.post.assert_awaited_once_with(
@@ -1818,13 +1740,12 @@ class TestPostOutageTicket:
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
 
             bruin_client._session.post.assert_awaited_once_with(
@@ -1854,13 +1775,12 @@ class TestPostOutageTicket:
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
 
             post_outage_ticket_call = call(
@@ -1928,16 +1848,15 @@ class TestGetClientInfo:
         bruin_response_status = 200
 
         bruin_response = Mock()
-        bruin_response.json = CoroutineMock(return_value=bruin_response_message)
+        bruin_response.json = AsyncMock(return_value=bruin_response_message)
         bruin_response.status = bruin_response_status
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.get_client_info(filters)
 
             get_client_info_call = call(
@@ -1967,16 +1886,15 @@ class TestGetClientInfo:
         bruin_response_status = 200
 
         bruin_response = Mock()
-        bruin_response.json = CoroutineMock(return_value=bruin_response_message)
+        bruin_response.json = AsyncMock(return_value=bruin_response_message)
         bruin_response.status = bruin_response_status
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.get_client_info(filters)
 
             get_client_info_call = call(
@@ -2015,16 +1933,15 @@ class TestGetClientInfo:
         bruin_response_status = 400
 
         bruin_response = Mock()
-        bruin_response.json = CoroutineMock(return_value=bruin_response_message)
+        bruin_response.json = AsyncMock(return_value=bruin_response_message)
         bruin_response.status = bruin_response_status
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.get_client_info(filters)
 
             get_client_info_call = call(
@@ -2043,21 +1960,21 @@ class TestGetClientInfo:
 
     @pytest.mark.asyncio
     async def get_client_info_with_ko_401_test(self):
-        logger = Mock()
 
         filters = {"client_id": 9994, "status": "A", "service_number": "VC05400009999"}
 
         empty_response = {}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=empty_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=empty_response)
         response_mock.status = 401
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             with raises(Exception):
                 bruin_client.get_client_info(filters)
                 bruin_client._session.get.assert_awaited_once_with(
@@ -2071,21 +1988,21 @@ class TestGetClientInfo:
 
     @pytest.mark.asyncio
     async def get_client_info_with_ko_5XX_test(self):
-        logger = Mock()
 
         filters = {"client_id": 9994, "service_number": "VC05400009999", "status": "A"}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock()
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock()
         response_mock.status = 500
 
         expected_result = {"body": "Got internal error from Bruin", "status": 500}
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             result = await bruin_client.get_client_info(filters)
             bruin_client._session.get.assert_called_with(
                 f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Inventory',
@@ -2097,18 +2014,18 @@ class TestGetClientInfo:
 
     @pytest.mark.asyncio
     async def get_client_info_with_connection_error_test(self):
-        logger = Mock()
 
         filters = {"client_id": 9994, "service_number": "VC05400009999", "status": "A"}
         cause = "ERROR"
 
         message = {"body": f"Connection error in Bruin API. {cause}", "status": 500}
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(side_effect=ClientConnectionError(cause))):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(side_effect=ClientConnectionError(cause))):
             result = await bruin_client.get_client_info(filters)
             bruin_client._session.get.assert_called_with(
                 f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Inventory',
@@ -2135,14 +2052,13 @@ class TestGetClientInfoByDID:
         bruin_response_status = 200
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.get_client_info_by_did(did)
 
             bruin_client._session.get.assert_called_with(
@@ -2166,15 +2082,13 @@ class TestGetClientInfoByDID:
         bruin_response_status = 400
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-        logger.error = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.get_client_info_by_did(did)
 
             bruin_client._session.get.assert_called_with(
@@ -2187,7 +2101,6 @@ class TestGetClientInfoByDID:
             "body": bruin_response_body,
             "status": bruin_response_status,
         }
-        logger.error.assert_called_once()
         assert result == expected
 
     @pytest.mark.asyncio
@@ -2199,16 +2112,14 @@ class TestGetClientInfoByDID:
         bruin_response_status = 401
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-        logger.error = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.get_client_info_by_did(did)
 
             bruin_client._session.get.assert_called_with(
@@ -2222,7 +2133,6 @@ class TestGetClientInfoByDID:
             "body": "Got 401 from Bruin",
             "status": bruin_response_status,
         }
-        logger.error.assert_called_once()
         assert result == expected
 
     @pytest.mark.asyncio
@@ -2234,15 +2144,13 @@ class TestGetClientInfoByDID:
         bruin_response_status = 500
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-        logger.error = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.get_client_info_by_did(did)
 
             bruin_client._session.get.assert_called_with(
@@ -2267,16 +2175,14 @@ class TestGetClientInfoByDID:
         bruin_response_status = 500
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-        logger.error = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
         cause = "ERROR"
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(side_effect=ClientConnectionError(cause))):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(side_effect=ClientConnectionError(cause))):
             result = await bruin_client.get_client_info_by_did(did)
 
             bruin_client._session.get.assert_called_with(
@@ -2290,7 +2196,6 @@ class TestGetClientInfoByDID:
             "body": f"Connection error in Bruin API. {cause}",
             "status": bruin_response_status,
         }
-        logger.error.assert_called()
         assert result == expected
 
 
@@ -2309,13 +2214,12 @@ class TestPostMultipleTicketNotes:
         }
         connection_error_cause = "Connection timed out"
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         with patch.object(
-            bruin_client._session, "post", new=CoroutineMock(side_effect=ClientConnectionError(connection_error_cause))
+            bruin_client._session, "post", new=AsyncMock(side_effect=ClientConnectionError(connection_error_cause))
         ):
             result = await bruin_client.post_multiple_ticket_notes(ticket_id, payload)
 
@@ -2368,14 +2272,13 @@ class TestPostMultipleTicketNotes:
 
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.post_multiple_ticket_notes(ticket_id, payload)
 
             bruin_client._session.post.assert_awaited_with(
@@ -2409,14 +2312,13 @@ class TestPostMultipleTicketNotes:
 
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.post_multiple_ticket_notes(ticket_id, payload)
 
             bruin_client._session.post.assert_awaited_with(
@@ -2450,15 +2352,14 @@ class TestPostMultipleTicketNotes:
 
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
-        bruin_client.login = CoroutineMock()
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.post_multiple_ticket_notes(ticket_id, payload)
 
             bruin_client._session.post.assert_awaited_with(
@@ -2492,14 +2393,13 @@ class TestPostMultipleTicketNotes:
 
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.post_multiple_ticket_notes(ticket_id, payload)
 
             bruin_client._session.post.assert_awaited_with(
@@ -2533,14 +2433,13 @@ class TestPostMultipleTicketNotes:
 
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.post_multiple_ticket_notes(ticket_id, payload)
 
             bruin_client._session.post.assert_awaited_with(
@@ -2574,14 +2473,13 @@ class TestPostMultipleTicketNotes:
 
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.post_multiple_ticket_notes(ticket_id, payload)
 
             bruin_client._session.post.assert_awaited_with(
@@ -2610,14 +2508,13 @@ class TestGetTicketTaskHistory:
 
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.get_ticket_task_history(filter)
 
             bruin_client._session.get.assert_called_with(
@@ -2642,14 +2539,13 @@ class TestGetTicketTaskHistory:
 
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.get_ticket_task_history(filter)
 
             bruin_client._session.get.assert_called_with(
@@ -2674,14 +2570,13 @@ class TestGetTicketTaskHistory:
 
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.get_ticket_task_history(filter)
 
             bruin_client._session.get.assert_called_with(
@@ -2706,14 +2601,13 @@ class TestGetTicketTaskHistory:
 
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.get_ticket_task_history(filter)
 
             bruin_client._session.get.assert_called_with(
@@ -2735,14 +2629,13 @@ class TestGetTicketTaskHistory:
 
         bruin_response_status = 500
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         error_message = "Failed"
         with patch.object(
-            bruin_client._session, "get", new=CoroutineMock(side_effect=ClientConnectionError(error_message))
+            bruin_client._session, "get", new=AsyncMock(side_effect=ClientConnectionError(error_message))
         ):
             result = await bruin_client.get_ticket_task_history(filter)
 
@@ -2798,16 +2691,15 @@ class TestGetTicketsBasicInfo:
         }
         bruin_response_status = 200
 
-        logger = Mock()
-
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.get_tickets_basic_info(input_payload)
 
             bruin_client._session.get.assert_called_with(
@@ -2836,16 +2728,15 @@ class TestGetTicketsBasicInfo:
         bruin_response_body = "No valid query parameters were sent"
         bruin_response_status = 400
 
-        logger = Mock()
-
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.get_tickets_basic_info(input_payload)
 
             bruin_client._session.get.assert_called_with(
@@ -2882,17 +2773,16 @@ class TestGetTicketsBasicInfo:
         bruin_response_body = "Got 401 from Bruin"
         bruin_response_status = 401
 
-        logger = Mock()
-
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.get_tickets_basic_info(input_payload)
 
             bruin_client._session.get.assert_called_with(
@@ -2930,16 +2820,15 @@ class TestGetTicketsBasicInfo:
         bruin_response_body = "Access to requested resources is forbidden"
         bruin_response_status = 403
 
-        logger = Mock()
-
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.get_tickets_basic_info(input_payload)
 
             bruin_client._session.get.assert_called_with(
@@ -2976,16 +2865,15 @@ class TestGetTicketsBasicInfo:
         bruin_response_body = "Resource not found"
         bruin_response_status = 404
 
-        logger = Mock()
-
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.get_tickets_basic_info(input_payload)
 
             bruin_client._session.get.assert_called_with(
@@ -3022,16 +2910,15 @@ class TestGetTicketsBasicInfo:
         bruin_response_body = "Got internal error from Bruin"
         bruin_response_status = 500
 
-        logger = Mock()
-
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.get_tickets_basic_info(input_payload)
 
             bruin_client._session.get.assert_called_with(
@@ -3065,13 +2952,12 @@ class TestGetTicketsBasicInfo:
             "TicketStatus": ticket_status,
         }
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         err_msg = "Failed"
-        get_mock = CoroutineMock(side_effect=ClientConnectionError(err_msg))
+        get_mock = AsyncMock(side_effect=ClientConnectionError(err_msg))
         with patch.object(bruin_client._session, "get", new=get_mock):
             result = await bruin_client.get_tickets_basic_info(input_payload)
 
@@ -3115,14 +3001,13 @@ class TestGetCircuitId:
         bruin_response_status = 200
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.get_circuit_id(input_payload)
 
             bruin_client._session.get.assert_called_with(
@@ -3156,14 +3041,13 @@ class TestGetCircuitId:
         bruin_response_status = 204
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.get_circuit_id(input_payload)
 
             bruin_client._session.get.assert_called_with(
@@ -3197,15 +3081,13 @@ class TestGetCircuitId:
         bruin_response_status = 400
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-        logger.error = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.get_circuit_id(input_payload)
 
             bruin_client._session.get.assert_called_with(
@@ -3218,7 +3100,6 @@ class TestGetCircuitId:
             "body": bruin_response_body,
             "status": bruin_response_status,
         }
-        logger.error.assert_called_once()
         assert result == expected
 
     @pytest.mark.asyncio
@@ -3240,16 +3121,14 @@ class TestGetCircuitId:
         bruin_response_status = 401
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-        logger.error = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.get_circuit_id(input_payload)
 
             bruin_client._session.get.assert_called_with(
@@ -3263,7 +3142,6 @@ class TestGetCircuitId:
             "body": "Got 401 from Bruin",
             "status": bruin_response_status,
         }
-        logger.error.assert_called_once()
         assert result == expected
 
     @pytest.mark.asyncio
@@ -3285,15 +3163,13 @@ class TestGetCircuitId:
         bruin_response_status = 403
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-        logger.error = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.get_circuit_id(input_payload)
 
             bruin_client._session.get.assert_called_with(
@@ -3307,7 +3183,6 @@ class TestGetCircuitId:
             "body": bruin_response_body,
             "status": bruin_response_status,
         }
-        logger.error.assert_called()
         assert result == expected
 
     @pytest.mark.asyncio
@@ -3329,15 +3204,13 @@ class TestGetCircuitId:
         bruin_response_status = 500
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-        logger.error = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=bruin_response)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.get_circuit_id(input_payload)
 
             bruin_client._session.get.assert_called_with(
@@ -3351,7 +3224,6 @@ class TestGetCircuitId:
             "body": "Got internal error from Bruin",
             "status": bruin_response_status,
         }
-        logger.error.assert_called()
         assert result == expected
 
     @pytest.mark.asyncio
@@ -3373,16 +3245,14 @@ class TestGetCircuitId:
         bruin_response_status = 500
         bruin_response = Mock()
         bruin_response.status = bruin_response_status
-        bruin_response.json = CoroutineMock(return_value=bruin_response_body)
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
 
-        logger = Mock()
-        logger.error = Mock()
-
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
         cause = "ERROR"
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(side_effect=ClientConnectionError(cause))):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(side_effect=ClientConnectionError(cause))):
             result = await bruin_client.get_circuit_id(input_payload)
 
             bruin_client._session.get.assert_called_with(
@@ -3396,28 +3266,26 @@ class TestGetCircuitId:
             "body": f"Connection error in Bruin API. {cause}",
             "status": bruin_response_status,
         }
-        logger.error.assert_called()
         assert result == expected
 
 
 class TestPostEmailTag:
     @pytest.mark.asyncio
     async def post_email_tag_test(self):
-        logger = Mock()
-        logger.error = Mock()
 
         email_id = "A1234576"
         tag_id = "1001"
         expected_post_response = None
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=expected_post_response)
         response_mock.status = 204
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)) as mock_post:
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)) as mock_post:
             post_response = await bruin_client.post_email_tag(email_id, tag_id)
 
             mock_post.assert_called_once()
@@ -3426,138 +3294,126 @@ class TestPostEmailTag:
 
     @pytest.mark.asyncio
     async def post_email_tag_400_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         email_id = "A1234576"
         tag_id = "1001"
         expected_post_response = {"response": "Error 400"}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=expected_post_response)
         response_mock.status = 400
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             post_response = await bruin_client.post_email_tag(email_id, tag_id)
-            logger.error.assert_called()
 
             assert post_response["body"] == expected_post_response
             assert post_response["status"] == 400
 
     @pytest.mark.asyncio
     async def post_email_tag_401_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         email_id = "A1234576"
         tag_id = "1001"
         expected_post_response = {"response": "Error 401"}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=expected_post_response)
         response_mock.status = 401
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             post_response = await bruin_client.post_email_tag(email_id, tag_id)
-            logger.error.assert_called()
 
             assert post_response["body"] == "Got 401 from Bruin"
             assert post_response["status"] == 401
 
     @pytest.mark.asyncio
     async def post_email_tag_403_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         email_id = "A1234576"
         tag_id = "1001"
         expected_post_response = {"response": "Error 403"}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=expected_post_response)
         response_mock.status = 403
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             post_response = await bruin_client.post_email_tag(email_id, tag_id)
-            logger.error.assert_called()
 
             assert post_response["body"] == expected_post_response
             assert post_response["status"] == 403
 
     @pytest.mark.asyncio
     async def post_email_tag_404_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         email_id = "A1234576"
         tag_id = "1001"
         expected_post_response = {"response": "Error 400"}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=expected_post_response)
         response_mock.status = 404
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             post_response = await bruin_client.post_email_tag(email_id, tag_id)
-            logger.error.assert_called()
 
             assert post_response["body"] == "Resource not found"
             assert post_response["status"] == 404
 
     @pytest.mark.asyncio
     async def post_email_tag_409_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         email_id = "A1234576"
         tag_id = "1001"
         expected_post_response = {}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=expected_post_response)
         response_mock.status = 409
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             post_response = await bruin_client.post_email_tag(email_id, tag_id)
-            logger.error.assert_called()
 
             assert post_response["body"] == f"Tag with ID {tag_id} already present in e-mail with ID {email_id}"
             assert post_response["status"] == 409
 
     @pytest.mark.asyncio
     async def post_email_tag_500_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         email_id = "A1234576"
         tag_id = "1001"
         expected_post_response = {}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=expected_post_response)
         response_mock.status = 500
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             post_response = await bruin_client.post_email_tag(email_id, tag_id)
-            logger.error.assert_called()
 
             assert post_response["body"] == "Got internal error from Bruin"
             assert post_response["status"] == 500
@@ -3566,7 +3422,6 @@ class TestPostEmailTag:
 class TestChangeTicketSeverity:
     @pytest.mark.asyncio
     async def change_ticket_severity_ok_test(self):
-        logger = Mock()
 
         ticket_id = 123
         severity_level = 2
@@ -3583,14 +3438,15 @@ class TestChangeTicketSeverity:
         }
         response_status = 200
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=response_json)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=response_json)
         response_mock.status = response_status
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "put", new=CoroutineMock(return_value=response_mock)) as mock_put:
+        with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)) as mock_put:
             result = await bruin_client.change_ticket_severity(ticket_id, payload)
 
         mock_put.assert_called_once()
@@ -3599,7 +3455,6 @@ class TestChangeTicketSeverity:
 
     @pytest.mark.asyncio
     async def change_ticket_severity_with_400_status_test(self):
-        logger = Mock()
 
         ticket_id = 123
         reason_for_change = "WTN has been under troubles for a long time"
@@ -3618,14 +3473,15 @@ class TestChangeTicketSeverity:
             "code": response_status,
         }
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=response_json)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=response_json)
         response_mock.status = response_status
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "put", new=CoroutineMock(return_value=response_mock)) as mock_put:
+        with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)) as mock_put:
             result = await bruin_client.change_ticket_severity(ticket_id, payload)
 
         mock_put.assert_called_once()
@@ -3634,7 +3490,6 @@ class TestChangeTicketSeverity:
 
     @pytest.mark.asyncio
     async def change_ticket_severity_with_401_status_test(self):
-        logger = Mock()
 
         ticket_id = 123
         severity_level = 2
@@ -3647,13 +3502,14 @@ class TestChangeTicketSeverity:
 
         response_status = 401
 
-        response_mock = CoroutineMock()
+        response_mock = AsyncMock()
         response_mock.status = response_status
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "put", new=CoroutineMock(return_value=response_mock)) as mock_put:
+        with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)) as mock_put:
             result = await bruin_client.change_ticket_severity(ticket_id, payload)
 
         mock_put.assert_called_once()
@@ -3662,7 +3518,6 @@ class TestChangeTicketSeverity:
 
     @pytest.mark.asyncio
     async def change_ticket_severity_with_403_status_test(self):
-        logger = Mock()
 
         ticket_id = 123
         severity_level = 2
@@ -3675,13 +3530,14 @@ class TestChangeTicketSeverity:
 
         response_status = 403
 
-        response_mock = CoroutineMock()
+        response_mock = AsyncMock()
         response_mock.status = response_status
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "put", new=CoroutineMock(return_value=response_mock)) as mock_put:
+        with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)) as mock_put:
             result = await bruin_client.change_ticket_severity(ticket_id, payload)
 
         mock_put.assert_called_once()
@@ -3690,7 +3546,6 @@ class TestChangeTicketSeverity:
 
     @pytest.mark.asyncio
     async def change_ticket_severity_with_404_status_test(self):
-        logger = Mock()
 
         ticket_id = 123
         severity_level = 2
@@ -3703,13 +3558,14 @@ class TestChangeTicketSeverity:
 
         response_status = 404
 
-        response_mock = CoroutineMock()
+        response_mock = AsyncMock()
         response_mock.status = response_status
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "put", new=CoroutineMock(return_value=response_mock)) as mock_put:
+        with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)) as mock_put:
             result = await bruin_client.change_ticket_severity(ticket_id, payload)
 
         mock_put.assert_called_once()
@@ -3718,7 +3574,6 @@ class TestChangeTicketSeverity:
 
     @pytest.mark.asyncio
     async def change_ticket_severity_with_500_status_test(self):
-        logger = Mock()
 
         ticket_id = 123
         severity_level = 2
@@ -3731,13 +3586,14 @@ class TestChangeTicketSeverity:
 
         response_status = 500
 
-        response_mock = CoroutineMock()
+        response_mock = AsyncMock()
         response_mock.status = response_status
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "put", new=CoroutineMock(return_value=response_mock)) as mock_put:
+        with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)) as mock_put:
             result = await bruin_client.change_ticket_severity(ticket_id, payload)
 
         mock_put.assert_called_once()
@@ -3746,7 +3602,6 @@ class TestChangeTicketSeverity:
 
     @pytest.mark.asyncio
     async def change_ticket_severity_with_connection_error_test(self):
-        logger = Mock()
 
         ticket_id = 123
         severity_level = 2
@@ -3757,11 +3612,12 @@ class TestChangeTicketSeverity:
             "Reason": reason_for_change,
         }
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         error = "Connection was closed by Bruin server"
-        with patch.object(bruin_client._session, "put", new=CoroutineMock(side_effect=ClientConnectionError(error))):
+        with patch.object(bruin_client._session, "put", new=AsyncMock(side_effect=ClientConnectionError(error))):
             result = await bruin_client.change_ticket_severity(ticket_id, payload)
 
         expected = {
@@ -3774,7 +3630,6 @@ class TestChangeTicketSeverity:
 class TestGetSite:
     @pytest.mark.asyncio
     async def get_site_test(self):
-        logger = Mock()
         client_id = 72959
         site_id = 343443
         params = {"client_id": client_id, "site_id": site_id}
@@ -3805,14 +3660,15 @@ class TestGetSite:
             ]
         }
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=get_site_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=get_site_response)
         response_mock.status = 200
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             ticket_details = await bruin_client.get_site(params)
 
             mock_get.assert_called_once()
@@ -3821,118 +3677,108 @@ class TestGetSite:
 
     @pytest.mark.asyncio
     async def get_site_with_400_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         client_id = 72959
         site_id = 343443
         params = {"client_id": client_id, "site_id": site_id}
         error_response = {"error": "400 error"}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=error_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=error_response)
         response_mock.status = 400
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             ticket_details = await bruin_client.get_site(params)
-            logger.error.assert_called()
 
             assert ticket_details["body"] == error_response
             assert ticket_details["status"] == 400
 
     @pytest.mark.asyncio
     async def get_site_with_401_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         client_id = 72959
         site_id = 343443
         params = {"client_id": client_id, "site_id": site_id}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value={})
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value={})
         response_mock.status = 401
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             ticket_details = await bruin_client.get_site(params)
             bruin_client.login.assert_awaited()
-            logger.error.assert_called()
 
             assert ticket_details["body"] == "Got 401 from Bruin"
             assert ticket_details["status"] == 401
 
     @pytest.mark.asyncio
     async def get_site_with_403_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         client_id = 72959
         site_id = 343443
         params = {"client_id": client_id, "site_id": site_id}
         error_response = {"error": "403 error"}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=error_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=error_response)
         response_mock.status = 403
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             ticket_details = await bruin_client.get_site(params)
-            logger.error.assert_called()
 
             assert ticket_details["body"] == error_response
             assert ticket_details["status"] == 403
 
     @pytest.mark.asyncio
     async def get_site_with_404_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         client_id = 72959
         site_id = 343443
         params = {"client_id": client_id, "site_id": site_id}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value={})
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value={})
         response_mock.status = 404
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             ticket_details = await bruin_client.get_site(params)
-            logger.error.assert_called()
 
             assert ticket_details["body"] == "Resource not found"
             assert ticket_details["status"] == 404
 
     @pytest.mark.asyncio
     async def get_site_with_500_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         client_id = 72959
         site_id = 343443
         params = {"client_id": client_id, "site_id": site_id}
 
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value={})
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value={})
         response_mock.status = 500
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "get", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             ticket_details = await bruin_client.get_site(params)
-            logger.error.assert_called()
 
             assert ticket_details["body"] == "Got internal error from Bruin"
             assert ticket_details["status"] == 500
@@ -3943,17 +3789,16 @@ class TestMarkEmailAsDone:
     async def mark_email_as_done_test(self):
         email_id = 1234
 
-        logger = Mock()
-
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value={"success": True, "email_id": email_id})
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value={"success": True, "email_id": email_id})
         response_mock.status = 200
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             response = await bruin_client.mark_email_as_done(email_id)
 
         assert response["status"] == 200
@@ -3964,17 +3809,16 @@ class TestMarkEmailAsDone:
     async def mark_email_as_done_400_test(self):
         email_id = 1234
 
-        logger = Mock()
-
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value="Error 400")
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value="Error 400")
         response_mock.status = 400
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             response = await bruin_client.mark_email_as_done(email_id)
 
         assert response["status"] == 400
@@ -3984,20 +3828,18 @@ class TestMarkEmailAsDone:
     async def mark_email_as_done_401_test(self):
         email_id = 1234
 
-        logger = Mock()
-
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value="Error 400")
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value="Error 400")
         response_mock.status = 401
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             response = await bruin_client.mark_email_as_done(email_id)
 
-        logger.error.assert_called_once_with("Got 401 from Bruin. Re-logging in...")
         assert response["status"] == 401
         assert response["body"] == "Got 401 from Bruin"
 
@@ -4005,20 +3847,18 @@ class TestMarkEmailAsDone:
     async def mark_email_as_done_5xx_test(self):
         email_id = 1234
 
-        logger = Mock()
-
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value="Error 400")
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value="Error 400")
         response_mock.status = 505
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             response = await bruin_client.mark_email_as_done(email_id)
 
-        logger.error.assert_called_once_with("Got HTTP 505 from Bruin")
         assert response["status"] == 500
         assert response["body"] == "Got internal error from Bruin"
 
@@ -4036,17 +3876,16 @@ class TestLinkTicketToEmail:
             "warnings": [],
         }
 
-        logger = Mock()
-
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=response_dict)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=response_dict)
         response_mock.status = 200
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             response = await bruin_client.link_ticket_to_email(ticket_id, email_id)
 
         assert response["status"] == 200
@@ -4057,20 +3896,18 @@ class TestLinkTicketToEmail:
         email_id = 1234
         ticket_id = 5678
 
-        logger = Mock()
-
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value={})
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value={})
         response_mock.status = 401
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             response = await bruin_client.link_ticket_to_email(ticket_id, email_id)
 
-        logger.error.assert_called_once_with("Got 401 from Bruin. Re-logging in...")
         assert response["status"] == 401
         assert response["body"] == "Got 401 from Bruin"
 
@@ -4079,20 +3916,18 @@ class TestLinkTicketToEmail:
         email_id = 1234
         ticket_id = 5678
 
-        logger = Mock()
-
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value={})
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value={})
         response_mock.status = 500
 
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        bruin_client.login = CoroutineMock()
+        bruin_client.login = AsyncMock()
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             response = await bruin_client.link_ticket_to_email(ticket_id, email_id)
 
-        logger.error.assert_called_once_with("Got HTTP 500 from Bruin")
         assert response["status"] == 500
         assert response["body"] == "Got internal error from Bruin"
 
@@ -4100,7 +3935,6 @@ class TestLinkTicketToEmail:
 class TestPostNotificationEmailMilestone:
     @pytest.mark.asyncio
     async def post_notification_email_milestone_test(self):
-        logger = Mock()
         payload = {
             "ticket_id": 321,
             "detail": {
@@ -4109,13 +3943,14 @@ class TestPostNotificationEmailMilestone:
             "notification_type": "Some Notification type",
         }
         expected_post_response = {"eventId": 12, "jobId": 5}
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=expected_post_response)
         response_mock.status = 200
-        bruin_client = BruinClient(logger, config)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)) as mock_post:
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)) as mock_post:
             post_notification_email_milestone = await bruin_client.post_notification_email_milestone(payload)
             mock_post.assert_called_once()
 
@@ -4124,8 +3959,6 @@ class TestPostNotificationEmailMilestone:
 
     @pytest.mark.asyncio
     async def post_notification_email_milestone_400_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         payload = {
             "ticket_id": 321,
             "detail": {
@@ -4134,24 +3967,22 @@ class TestPostNotificationEmailMilestone:
             "notification_type": "Some Notification type",
         }
         expected_post_response = "Bad request"
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=expected_post_response)
         response_mock.status = 400
-        bruin_client = BruinClient(logger, config)
-        bruin_client.login = CoroutineMock()
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             post_notification_email_milestone = await bruin_client.post_notification_email_milestone(payload)
-            logger.error.assert_called()
 
             assert post_notification_email_milestone["body"] == expected_post_response
             assert post_notification_email_milestone["status"] == 400
 
     @pytest.mark.asyncio
     async def post_notification_email_milestone_401_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         payload = {
             "ticket_id": 321,
             "detail": {
@@ -4160,16 +3991,16 @@ class TestPostNotificationEmailMilestone:
             "notification_type": "Some Notification type",
         }
         expected_post_response = "Unauthorized request. Please authorize first"
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=expected_post_response)
         response_mock.status = 401
-        bruin_client = BruinClient(logger, config)
-        bruin_client.login = CoroutineMock()
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             post_notification_email_milestone = await bruin_client.post_notification_email_milestone(payload)
-            logger.error.assert_called()
             bruin_client.login.assert_awaited()
 
             assert post_notification_email_milestone["body"] == "Got 401 from Bruin"
@@ -4177,8 +4008,6 @@ class TestPostNotificationEmailMilestone:
 
     @pytest.mark.asyncio
     async def post_notification_email_milestone_403_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         payload = {
             "ticket_id": 321,
             "detail": {
@@ -4187,24 +4016,22 @@ class TestPostNotificationEmailMilestone:
             "notification_type": "Some Notification type",
         }
         expected_post_response = "Forbidden. You don't have the permission to access this function"
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=expected_post_response)
         response_mock.status = 403
-        bruin_client = BruinClient(logger, config)
-        bruin_client.login = CoroutineMock()
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             post_notification_email_milestone = await bruin_client.post_notification_email_milestone(payload)
-            logger.error.assert_called()
 
             assert post_notification_email_milestone["body"] == expected_post_response
             assert post_notification_email_milestone["status"] == 403
 
     @pytest.mark.asyncio
     async def post_notification_email_milestone_404_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         payload = {
             "ticket_id": 321,
             "detail": {
@@ -4213,24 +4040,22 @@ class TestPostNotificationEmailMilestone:
             "notification_type": "Some Notification type",
         }
         expected_post_response = "Could not find the specified ticket ID"
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=expected_post_response)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=expected_post_response)
         response_mock.status = 404
-        bruin_client = BruinClient(logger, config)
-        bruin_client.login = CoroutineMock()
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             post_notification_email_milestone = await bruin_client.post_notification_email_milestone(payload)
-            logger.error.assert_called()
 
             assert post_notification_email_milestone["body"] == "Resource not found"
             assert post_notification_email_milestone["status"] == 404
 
     @pytest.mark.asyncio
     async def post_notification_email_milestone_500_status_test(self):
-        logger = Mock()
-        logger.error = Mock()
         payload = {
             "ticket_id": 321,
             "detail": {
@@ -4238,15 +4063,15 @@ class TestPostNotificationEmailMilestone:
             },
             "notification_type": "Some Notification type",
         }
-        response_mock = CoroutineMock()
-        bruin_client = BruinClient(logger, config)
-        bruin_client.login = CoroutineMock()
+        response_mock = AsyncMock()
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
         response_mock.status = 500
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
-        with patch.object(bruin_client._session, "post", new=CoroutineMock(return_value=response_mock)):
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)):
             post_notification_email_milestone = await bruin_client.post_notification_email_milestone(payload)
-            logger.error.assert_called()
 
             assert post_notification_email_milestone["body"] == "Got internal error from Bruin"
             assert post_notification_email_milestone["status"] == 500
@@ -4275,9 +4100,10 @@ class TestGetAssetTopics:
             },
         )
 
-        logger = Mock()
-        bruin_client = BruinClient(logger, config)
-        bruin_client._bruin_session.get = CoroutineMock(return_value=mocked_response)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client._bruin_session = Mock(spec_set=BruinSession)
+        bruin_client._bruin_session.get = AsyncMock(return_value=mocked_response)
 
         # When
         response = await bruin_client.get_asset_topics(params)
@@ -4299,12 +4125,13 @@ class TestGetAssetTopics:
         mocked_response = BruinResponse(status=HTTPStatus.UNAUTHORIZED, body="")
         mocked_access_token = "access_token"
         login_response = Mock()
-        login_response.json = CoroutineMock(return_value={"access_token": mocked_access_token})
+        login_response.json = AsyncMock(return_value={"access_token": mocked_access_token})
 
-        logger = Mock()
-        bruin_client = BruinClient(logger, config)
-        bruin_client._session.post = CoroutineMock(return_value=login_response)
-        bruin_client._bruin_session.get = CoroutineMock(return_value=mocked_response)
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client._bruin_session = Mock(spec_set=BruinSession)
+        bruin_client._session.post = AsyncMock(return_value=login_response)
+        bruin_client._bruin_session.get = AsyncMock(return_value=mocked_response)
 
         # When
         response = await bruin_client.get_asset_topics(params)

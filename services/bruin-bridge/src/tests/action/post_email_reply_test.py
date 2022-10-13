@@ -1,14 +1,14 @@
-from logging import Logger
+from http import HTTPStatus
 from typing import Any, Callable, Dict
-from unittest.mock import ANY, Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
-from application.actions.get_asset_topics import *
+from nats.aio.msg import Msg
+
 from application.actions.post_email_reply import BRUIN_PATH, PostBody, PostEmailReply, PostParams
 from application.clients.bruin_client import BruinClient
 from application.clients.bruin_session import BruinPostRequest, BruinResponse, BruinSession
-from asynctest import CoroutineMock
-from igz.packages.eventbus.eventbus import EventBus
+from application.repositories.utils_repository import to_json_bytes
 
 
 class TestPostEmailReply:
@@ -22,6 +22,10 @@ class TestPostEmailReply:
             reply_body=reply_body,
             html_reply_body=False,
         )
+
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(message)
+
         response = BruinResponse(status=HTTPStatus.OK, body="OK")
 
         expected_request = BruinPostRequest(
@@ -29,45 +33,54 @@ class TestPostEmailReply:
             params=PostParams(isContentHTMLEncoded=False),
             body=PostBody(content=reply_body, email_id=parent_email_id),
         )
-        post_email_reply.event_bus.publish_message = CoroutineMock()
-        post_email_reply.bruin_client._bruin_session.post = CoroutineMock(
+        post_email_reply.bruin_client._bruin_session.post = AsyncMock(
             side_effect=lambda request: response if request == expected_request else None
         )
 
         # When
-        await post_email_reply.post_email_reply(message)
+        await post_email_reply(request_msg)
 
         # Then
-        post_email_reply.event_bus.publish_message.assert_awaited_once_with(
-            message.get("response_topic"),
-            {"request_id": message.get("request_id"), "status": response.status, "body": response.body},
-        )
+        request_msg.respond.assert_awaited_once_with(to_json_bytes({"status": response.status, "body": response.body}))
 
     @pytest.mark.asyncio
     async def request_validation_errors_are_properly_handled_test(self, post_email_reply, make_email_reply_message):
-        post_email_reply.event_bus.publish_message = CoroutineMock()
-
         # Mandatory ticket_id and subscription_type are missing
-        await post_email_reply.post_email_reply(make_email_reply_message(body={}))
+        message = make_email_reply_message(body={})
 
-        post_email_reply.event_bus.publish_message.assert_awaited_once_with(
-            ANY, {"request_id": ANY, "status": HTTPStatus.BAD_REQUEST, "body": ANY}
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(message)
+
+        await post_email_reply(request_msg)
+
+        request_msg.respond.assert_awaited_once_with(
+            to_json_bytes(
+                {
+                    "status": HTTPStatus.BAD_REQUEST,
+                    "body": [
+                        {"loc": ["parent_email_id"], "msg": "field required", "type": "value_error.missing"},
+                        {"loc": ["reply_body"], "msg": "field required", "type": "value_error.missing"},
+                    ],
+                }
+            )
         )
 
     @pytest.mark.asyncio
     async def unauthorized_requests_are_properly_handled_test(self, post_email_reply, make_email_reply_message):
-        post_email_reply.event_bus.publish_message = CoroutineMock()
-        post_email_reply.bruin_client.login = CoroutineMock()
-        post_email_reply.bruin_client._bruin_session.post = CoroutineMock(
+        message = make_email_reply_message()
+
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(message)
+
+        post_email_reply.bruin_client.login = AsyncMock()
+        post_email_reply.bruin_client._bruin_session.post = AsyncMock(
             return_value=BruinResponse(status=HTTPStatus.UNAUTHORIZED)
         )
 
-        await post_email_reply.post_email_reply(make_email_reply_message())
+        await post_email_reply(request_msg)
 
         post_email_reply.bruin_client.login.assert_awaited_once()
-        post_email_reply.event_bus.publish_message.assert_awaited_once_with(
-            ANY, {"request_id": ANY, "status": HTTPStatus.UNAUTHORIZED, "body": ANY}
-        )
+        request_msg.respond.assert_awaited_once_with(to_json_bytes({"status": HTTPStatus.UNAUTHORIZED, "body": None}))
 
 
 #
@@ -78,8 +91,6 @@ class TestPostEmailReply:
 @pytest.fixture()
 def make_email_reply_message() -> Callable[..., Dict[str, Any]]:
     def builder(
-        request_id: str = "any_request_id",
-        response_topic: str = "any_response_topic",
         body: Dict[str, Any] = None,
         parent_email_id: str = str(hash("any_parent_email_id")),
         reply_body: str = "any_reply_body",
@@ -92,7 +103,7 @@ def make_email_reply_message() -> Callable[..., Dict[str, Any]]:
                 "html_reply_body": html_reply_body,
             }
 
-        return {"request_id": request_id, "response_topic": response_topic, "body": body}
+        return {"body": body}
 
     return builder
 
@@ -101,4 +112,4 @@ def make_email_reply_message() -> Callable[..., Dict[str, Any]]:
 def post_email_reply() -> PostEmailReply:
     bruin_client = Mock(BruinClient)
     bruin_client._bruin_session = Mock(BruinSession)
-    return PostEmailReply(Mock(Logger), Mock(EventBus), bruin_client)
+    return PostEmailReply(bruin_client)

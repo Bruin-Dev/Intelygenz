@@ -1,93 +1,84 @@
-import json
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
+from nats.aio.msg import Msg
+
 from application.actions.get_management_status import GetManagementStatus
-from asynctest import CoroutineMock
+from application.repositories.utils_repository import to_json_bytes
 
 
 class TestGetManagementStatus:
     def instance_test(self):
-        logger = Mock()
-        event_bus = Mock()
         bruin_repository = Mock()
 
-        get_management_status = GetManagementStatus(logger, event_bus, bruin_repository)
+        get_management_status = GetManagementStatus(bruin_repository)
 
-        assert get_management_status._logger is logger
-        assert get_management_status._event_bus is event_bus
         assert get_management_status._bruin_repository is bruin_repository
 
     @pytest.mark.asyncio
     async def get_management_status_ok_test(self):
-        logger = Mock()
-        logger.info = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
         bruin_repository = Mock()
 
         management_status = {"body": "Active – Platinum Monitoring", "status": 200}
-        bruin_repository.get_management_status = CoroutineMock(return_value=management_status)
+        bruin_repository.get_management_status = AsyncMock(return_value=management_status)
 
         filters = {"client_id": 9994, "status": "A", "service_number": "VC05400009999"}
 
-        event_bus_request = {"request_id": 19, "body": filters, "response_topic": "some.topic"}
+        event_bus_request = {"body": filters}
 
-        event_bus_response = {"request_id": 19, "body": management_status["body"], "status": 200}
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(event_bus_request)
 
-        get_management_status = GetManagementStatus(logger, event_bus, bruin_repository)
-        await get_management_status.get_management_status(event_bus_request)
+        event_bus_response = {"body": management_status["body"], "status": 200}
+
+        get_management_status = GetManagementStatus(bruin_repository)
+        await get_management_status(request_msg)
         bruin_repository.get_management_status.assert_awaited_once_with(filters)
-        event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
-        assert logger.info.called
+        request_msg.respond.assert_awaited_once_with(to_json_bytes(event_bus_response))
 
     @pytest.mark.asyncio
     async def get_management_status_no_filters_test(self):
-        logger = Mock()
-        logger.info = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
         bruin_repository = Mock()
 
-        bruin_repository.get_management_status = CoroutineMock()
+        bruin_repository.get_management_status = AsyncMock()
 
-        event_bus_request = {"request_id": 19, "response_topic": "some.topic"}
+        event_bus_request = {}
+
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(event_bus_request)
 
         event_bus_response = {
-            "request_id": 19,
             "body": 'You must specify {.."body":{"client_id", "status", "service_number"}...} in the request',
             "status": 400,
         }
 
-        get_management_status = GetManagementStatus(logger, event_bus, bruin_repository)
-        await get_management_status.get_management_status(event_bus_request)
+        get_management_status = GetManagementStatus(bruin_repository)
+        await get_management_status(request_msg)
         bruin_repository.get_management_status.assert_not_awaited()
-        event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
+        request_msg.respond.assert_awaited_once_with(to_json_bytes(event_bus_response))
 
     @pytest.mark.asyncio
     async def get_management_status_filters_incomplete_test(self):
-        logger = Mock()
-        logger.info = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
         bruin_repository = Mock()
 
-        bruin_repository.get_management_status = CoroutineMock()
+        bruin_repository.get_management_status = AsyncMock()
 
         filters = {
             "client_id": 9994,
             "status": "A",
         }
 
-        event_bus_request = {"request_id": 19, "body": filters, "response_topic": "some.topic"}
+        event_bus_request = {"body": filters}
+
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(event_bus_request)
 
         event_bus_response = {
-            "request_id": 19,
             "body": 'You must specify "client_id", "status", "service_number" in the filter',
             "status": 400,
         }
 
-        get_management_status = GetManagementStatus(logger, event_bus, bruin_repository)
-        await get_management_status.get_management_status(event_bus_request)
+        get_management_status = GetManagementStatus(bruin_repository)
+        await get_management_status(request_msg)
         bruin_repository.get_management_status.assert_not_awaited()
-        event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
+        request_msg.respond.assert_awaited_once_with(to_json_bytes(event_bus_response))

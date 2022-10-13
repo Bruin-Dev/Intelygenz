@@ -1,16 +1,22 @@
 #NOTE: This dockerfile is made to be run with context in the root of the monorepo
-FROM registry.gitlab.intelygenz.com/mettel/dockers/images/python3.6-alpine-base:1.0.0
+ARG REPOSITORY_URL
+ARG DOCKER_BASE_IMAGE_VERSION
+FROM registry.gitlab.intelygenz.com/mettel/dockers/images/python3.10-base:1.0.0
 
-RUN apk --no-cache add curl gcc musl-dev
-RUN pip install --upgrade pip
+ENV PYTHONUNBUFFERED 1
+ENV PATH="/root/.local/bin:$PATH"
+ENV POETRY_VIRTUALENVS_CREATE=false
 
-COPY pyutils_automation/py36 /pyutils_automation/py36
-WORKDIR /pyutils_automation/py36
-RUN python setup.py install
+RUN wget https://install.python-poetry.org -O poetry-install.py
+RUN python poetry-install.py
+
+COPY pyutils_automation/py310 /pyutils_automation/py310
+WORKDIR /pyutils_automation/py310
+RUN poetry install --only main
 
 COPY services/bruin-bridge/ /service/app
 WORKDIR /service/app
-RUN pip install -r requirements.txt
+RUN poetry install --only main
 
 # This ugly block adds a certificate that is missing in the trust chain: DigiCert Global G2 TLS RSA SHA256 2020 CA1
 # This certificate is mandatory to be able to log into Bruin
@@ -44,7 +50,5 @@ chDYABPPTHPbqjc1qCmBaZx2vN4Ye5DUys/vZwP9BFohFrH/6j/f3IL16/RZkiMN\n\
 JCqVJUzKoZHm1Lesh3Sz8W2jmdv51b2EQJ8HmA==\n\
 -----END CERTIFICATE-----\n\
 ' >> $(python -m certifi)
-
-ENV PYTHONUNBUFFERED 1
 
 CMD ["python3", "-u", "src/app.py"]
