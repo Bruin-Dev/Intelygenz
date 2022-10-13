@@ -158,6 +158,14 @@ class InterMapperMonitor:
 
         parsed_email_dict = self._parse_email_body(body)
 
+        if not self._config.INTERMAPPER_CONFIG["monitor_piab_devices"] and self._is_piab_device(parsed_email_dict):
+            logger.info(
+                f'Skipping {parsed_email_dict["event"]} event for device "{parsed_email_dict["name"]}" '
+                f'with condition {parsed_email_dict["condition"]} since PIAB monitoring is disabled'
+            )
+            await self._mark_email_as_read(msg_uid)
+            return
+
         if parsed_email_dict["event"] in self._config.INTERMAPPER_CONFIG["intermapper_up_events"]:
             logger.info(
                 f'Event from InterMapper was {parsed_email_dict["event"]}, there is no need to create a new ticket'

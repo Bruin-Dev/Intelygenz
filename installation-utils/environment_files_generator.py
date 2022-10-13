@@ -146,6 +146,7 @@ INTERMAPPER_OUTAGE_MONITOR__BATTERY_ALERT_PROBE_TYPES = parameters["common"]["in
 INTERMAPPER_OUTAGE_MONITOR__BATTERY_ALERT_PROBE_CONDITIONS = parameters["common"]["intermapper-outage-monitor"]["battery-alert-probe-conditions"]
 INTERMAPPER_OUTAGE_MONITOR__FORWARD_TO_HNOC_JOB_INTERVAL = parameters["common"]["intermapper-outage-monitor"]["forward-to-hnoc-job-interval"]
 INTERMAPPER_OUTAGE_MONITOR__FORWARD_TO_IPA_JOB_INTERVAL = parameters["common"]["intermapper-outage-monitor"]["forward-to-ipa-job-interval"]
+INTERMAPPER_OUTAGE_MONITOR__MONITOR_PIAB_DEVICES = parameters["common"]["intermapper-outage-monitor"]["monitor-piab-devices"]
 
 # Last Contact Report variables
 LAST_CONTACT_REPORT__MONITORED_VELOCLOUD_HOSTS = parameters["dev"]["last-contact-report"]["monitored-velocloud-hosts"]
@@ -594,6 +595,7 @@ env_dict = {
         f"BATTERY_ALERT_PROBE_CONDITIONS={INTERMAPPER_OUTAGE_MONITOR__BATTERY_ALERT_PROBE_CONDITIONS}",
         f"FORWARD_TO_HNOC_JOB_INTERVAL={INTERMAPPER_OUTAGE_MONITOR__FORWARD_TO_HNOC_JOB_INTERVAL}",
         f"FORWARD_TO_IPA_JOB_INTERVAL={INTERMAPPER_OUTAGE_MONITOR__FORWARD_TO_IPA_JOB_INTERVAL}",
+        f"MONITOR_PIAB_DEVICES={INTERMAPPER_OUTAGE_MONITOR__MONITOR_PIAB_DEVICES}",
     ],
     os.path.join("services", "last-contact-report", "src", "config", "env"): [
         f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",

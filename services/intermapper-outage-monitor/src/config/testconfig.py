@@ -67,6 +67,7 @@ INTERMAPPER_CONFIG = {
     "battery_alert_probe_conditions": ["Device Lost Power - Battery is in use"],
     "forward_to_hnoc_job_interval": 30,
     "forward_to_ipa_job_interval": 60,
+    "monitor_piab_devices": True,
 }
 
 METRICS_SERVER_CONFIG = {"port": 9090}

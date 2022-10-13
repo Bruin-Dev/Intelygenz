@@ -236,3 +236,23 @@ resource "aws_ssm_parameter" "parameter-intermapper-outage-monitor-events-lookup
     note = "can be updated from the parameter store dashboard"
   })
 }
+
+resource "aws_ssm_parameter" "parameter-intermapper-outage-monitor-monitor-piab-devices" {
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  name        = "/automation-engine/common/intermapper-outage-monitor/monitor-piab-devices"
+  description = "Enable or disable monitoring of PIAB devices"
+  type        = "SecureString"
+  value       = "-"  # to edit go to parameter store dashboard.
+  key_id      =  aws_kms_alias.kms_key.name
+
+  lifecycle {
+    ignore_changes = [
+      value,
+    ]
+  }
+
+  tags = merge(var.common_info, {
+    Name = "MONITOR_PIAB_DEVICES"
+    note = "can be updated from the parameter store dashboard"
+  })
+}

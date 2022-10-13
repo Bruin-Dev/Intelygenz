@@ -49,6 +49,7 @@ INTERMAPPER_CONFIG = {
     "battery_alert_probe_conditions": json.loads(os.environ["BATTERY_ALERT_PROBE_CONDITIONS"]),
     "forward_to_hnoc_job_interval": int(os.environ["FORWARD_TO_HNOC_JOB_INTERVAL"]),
     "forward_to_ipa_job_interval": int(os.environ["FORWARD_TO_IPA_JOB_INTERVAL"]),
+    "monitor_piab_devices": os.environ["MONITOR_PIAB_DEVICES"] == "true",
 }
 
 LOG_CONFIG = {
