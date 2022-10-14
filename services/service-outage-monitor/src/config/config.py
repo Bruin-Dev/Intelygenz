@@ -40,6 +40,7 @@ if ENABLE_TRIAGE_MONITORING:
     }
 else:
     VELOCLOUD_HOST = os.environ["MONITORING__VELOCLOUD_HOST"]
+    UMBRELLA_HOSTS = json.loads(os.environ["UMBRELLA_HOSTS"])
     METRICS_RELEVANT_CLIENTS = json.loads(os.environ["METRICS_RELEVANT_CLIENTS"])
     IPA_SYSTEM_USERNAME_IN_BRUIN = os.environ["IPA_SYSTEM_USERNAME_IN_BRUIN"]
     DIGI_HEADERS = json.loads(os.environ["DIGI_HEADERS"])

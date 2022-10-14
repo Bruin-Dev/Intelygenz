@@ -21,6 +21,8 @@ PRODUCT_CATEGORY = "SD-WAN"
 
 VELOCLOUD_HOST = "test-host"
 
+UMBRELLA_HOSTS = {}
+
 MONITOR_CONFIG = {
     "recipient": "some.recipient@email.com",
     "contact_by_host_and_client_id": {

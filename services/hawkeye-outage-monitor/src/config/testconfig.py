@@ -15,6 +15,8 @@ TIMEZONE = "US/Eastern"
 
 IPA_SYSTEM_USERNAME_IN_BRUIN = "Intelygenz Ai"
 
+UMBRELLA_HOSTS = {}
+
 MONITOR_CONFIG = {
     "multiplier": 1,
     "min": 1,

@@ -20,6 +20,8 @@ PRODUCT_CATEGORY = "SD-WAN"
 
 IPA_SYSTEM_USERNAME_IN_BRUIN = "Intelygenz Ai"
 
+UMBRELLA_HOSTS = {}
+
 MONITOR_CONFIG = {
     "monitoring_interval_seconds": 60 * 5,
     "blacklisted_edges": [{"host": "some-host", "enterprise_id": 1, "edge_id": 1}],

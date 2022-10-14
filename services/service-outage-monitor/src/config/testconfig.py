@@ -21,6 +21,7 @@ SEVERITY_LEVELS = {
 }
 
 VELOCLOUD_HOST = "mettel.velocloud.net"
+UMBRELLA_HOSTS = {}
 ENVIRONMENT_NAME = "dev"
 CURRENT_ENVIRONMENT = "dev"
 

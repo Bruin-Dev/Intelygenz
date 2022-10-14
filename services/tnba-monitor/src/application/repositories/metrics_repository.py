@@ -17,11 +17,14 @@ class MetricsRepository:
         }
 
     def _get_client_label(self, client: str) -> str:
+        umbrella_clients = self._config.UMBRELLA_HOSTS.values()
         relevant_clients = self._config.METRICS_RELEVANT_CLIENTS
 
-        if client.startswith("FIS-"):
-            return "FIS"
-        elif client in relevant_clients:
+        for umbrella_client in umbrella_clients:
+            if client.startswith(umbrella_client):
+                return umbrella_client
+
+        if client in relevant_clients:
             return client
         else:
             return "Other"

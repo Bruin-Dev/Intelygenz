@@ -77,3 +77,23 @@ resource "aws_ssm_parameter" "parameter-timezone" {
     note = "can be updated from the parameter store dashboard"
   })
 }
+
+resource "aws_ssm_parameter" "parameter-umbrella-hosts" {
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  name        = "/automation-engine/common/umbrella-hosts"
+  description = "VeloCloud hosts that act as an umbrella for all clients hosted on them"
+  type        = "SecureString"
+  value       = "-"  # to edit go to parameter store dashboard.
+  key_id      =  aws_kms_alias.kms_key.name
+
+  lifecycle {
+    ignore_changes = [
+      value,
+    ]
+  }
+
+  tags = merge(var.common_info, {
+    Name = "UMBRELLA_HOSTS"
+    note = "can be updated from the parameter store dashboard"
+  })
+}
