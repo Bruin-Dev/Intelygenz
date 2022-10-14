@@ -1,8 +1,10 @@
+from datetime import datetime
+
 import pytest
 
 from application.models.device import Device, DeviceId, DeviceStatus, DeviceType
 from application.models.note import Note
-from application.models.ticket import CreatedTicket, TicketStatus
+from application.models.ticket import CreatedTicket, Ticket, TicketStatus
 
 
 @pytest.fixture
@@ -46,6 +48,11 @@ def any_note():
 @pytest.fixture
 def any_in_progress_ticket_status():
     return TicketStatus.REOPENED_SAME_LOCATION
+
+
+@pytest.fixture
+def any_ticket():
+    return Ticket(id="any_id", created_at=datetime.utcnow())
 
 
 @pytest.fixture

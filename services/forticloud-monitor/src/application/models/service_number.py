@@ -1,0 +1,2 @@
+class ServiceNumber(str):
+    pass
