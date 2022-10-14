@@ -168,7 +168,7 @@ class TestServiceAffectingMonitor:
         )
 
         custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
-        custom_monitor_config["contact_by_host_and_client_id"] = {
+        custom_monitor_config["contact_info_by_host_and_client_id"] = {
             "test-host": {
                 client_1_id: make_contact_info(),
                 client_2_id: make_contact_info(),
@@ -346,7 +346,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._customer_cache = customer_cache
 
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
-        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+        service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
         result = await service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(
             structured_metrics
@@ -413,7 +413,7 @@ class TestServiceAffectingMonitor:
         contact_info_by_client_id = {
             client_id: default_contact_info,
         }
-        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+        service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
         result = await service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(
             structured_metrics
@@ -458,8 +458,8 @@ class TestServiceAffectingMonitor:
         edge_1_serial_number = "VCO123"
         edge_2_serial_number = "VC4567"
 
-        client_id_1 = 1234
-        client_id_2 = 5678
+        client_id_1 = 1
+        client_id_2 = 2
         default_contact_info = make_contact_info(
             email="some-email",
             phone="some-phone",
@@ -473,7 +473,7 @@ class TestServiceAffectingMonitor:
             bruin_client_info=bruin_client_info_1,
             site_details=site_details,
         )
-        full_id = make_edge_full_id(host="metvco04.mettel.net")
+        full_id = make_edge_full_id(host="host-2")
         edge_2_cache_info = make_cached_edge(
             full_id=full_id,
             serial_number=edge_2_serial_number,
@@ -497,7 +497,7 @@ class TestServiceAffectingMonitor:
             client_id_1: default_contact_info,
             client_id_2: default_contact_info,
         }
-        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+        service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
         result = await service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(
             structured_metrics
@@ -564,7 +564,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._customer_cache = customer_cache
 
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
-        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+        service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
         result = await service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(
             structured_metrics
@@ -618,7 +618,7 @@ class TestServiceAffectingMonitor:
             )
         )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
-        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+        service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
         await service_affecting_monitor._latency_check()
 
@@ -669,7 +669,7 @@ class TestServiceAffectingMonitor:
             )
         )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
-        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+        service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
         await service_affecting_monitor._latency_check()
 
@@ -727,7 +727,7 @@ class TestServiceAffectingMonitor:
         )
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
-        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+        service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
         await service_affecting_monitor._latency_check()
 
@@ -781,7 +781,7 @@ class TestServiceAffectingMonitor:
             )
         )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
-        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+        service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
         await service_affecting_monitor._packet_loss_check()
 
@@ -832,7 +832,7 @@ class TestServiceAffectingMonitor:
             )
         )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
-        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+        service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
         await service_affecting_monitor._packet_loss_check()
 
@@ -890,7 +890,7 @@ class TestServiceAffectingMonitor:
             )
         )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
-        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+        service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
         await service_affecting_monitor._packet_loss_check()
 
@@ -944,7 +944,7 @@ class TestServiceAffectingMonitor:
             )
         )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
-        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+        service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
         await service_affecting_monitor._jitter_check()
 
@@ -995,7 +995,7 @@ class TestServiceAffectingMonitor:
             )
         )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
-        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+        service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
         await service_affecting_monitor._jitter_check()
 
@@ -1053,7 +1053,7 @@ class TestServiceAffectingMonitor:
             )
         )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
-        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+        service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
         await service_affecting_monitor._jitter_check()
 
@@ -1107,7 +1107,7 @@ class TestServiceAffectingMonitor:
             )
         )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
-        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+        service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
         await service_affecting_monitor._bandwidth_check()
 
@@ -1165,7 +1165,7 @@ class TestServiceAffectingMonitor:
             )
         )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
-        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+        service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
         custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
         custom_monitor_config["customers_with_bandwidth_enabled"] = []
@@ -1226,7 +1226,7 @@ class TestServiceAffectingMonitor:
             )
         )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
-        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+        service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
         custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
         custom_monitor_config["customers_with_bandwidth_enabled"] = [client_id]
@@ -1290,7 +1290,7 @@ class TestServiceAffectingMonitor:
             )
         )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
-        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+        service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
         custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
         custom_monitor_config["customers_with_bandwidth_enabled"] = [client_id]
@@ -1366,7 +1366,7 @@ class TestServiceAffectingMonitor:
             )
         )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
-        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+        service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
         custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
         custom_monitor_config["customers_with_bandwidth_enabled"] = [client_id]
@@ -1426,7 +1426,7 @@ class TestServiceAffectingMonitor:
             )
         )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
-        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+        service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
         await service_affecting_monitor._bouncing_check()
 
@@ -1491,7 +1491,7 @@ class TestServiceAffectingMonitor:
             events_by_serial_and_interface
         )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
-        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+        service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
         await service_affecting_monitor._bouncing_check()
 
@@ -1565,7 +1565,7 @@ class TestServiceAffectingMonitor:
             events_by_serial_and_interface
         )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
-        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+        service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
         await service_affecting_monitor._bouncing_check()
 
@@ -2691,7 +2691,7 @@ class TestServiceAffectingMonitor:
             )
         )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
-        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+        service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
         await service_affecting_monitor._run_autoresolve_process()
 
@@ -2786,7 +2786,7 @@ class TestServiceAffectingMonitor:
             )
         )
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
-        service_affecting_monitor._default_contact_info_by_client = contact_info_by_client_id
+        service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
         await service_affecting_monitor._run_autoresolve_process()
 
@@ -4854,3 +4854,86 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._logger.error.assert_called_once_with(
             f"Reminder note of edge {serial_number} could not be appended to ticket" f" {ticket_id}!"
         )
+
+    def get_default_contact_info_by_client_id_test(
+        self,
+        service_affecting_monitor,
+        make_bruin_client_info,
+        make_edge_full_id,
+        make_cached_edge,
+        make_customer_cache,
+    ):
+        contact_info_by_host_and_client_id = testconfig.MONITOR_CONFIG["contact_info_by_host_and_client_id"]
+
+        host_1 = "host-1"
+        host_2 = "host-2"
+        host_3 = "host-3"
+
+        client_id_1 = 1
+        client_id_2 = 2
+        client_id_3 = 3
+        client_id_4 = 4
+        client_id_5 = 5
+        client_id_6 = 6
+
+        bruin_client_info_1 = make_bruin_client_info(client_id=client_id_1)
+        bruin_client_info_2 = make_bruin_client_info(client_id=client_id_2)
+        bruin_client_info_3 = make_bruin_client_info(client_id=client_id_3)
+        bruin_client_info_4 = make_bruin_client_info(client_id=client_id_4)
+        bruin_client_info_5 = make_bruin_client_info(client_id=client_id_5)
+        bruin_client_info_6 = make_bruin_client_info(client_id=client_id_6)
+
+        full_id_1 = make_edge_full_id(host=host_1)
+        full_id_2 = make_edge_full_id(host=host_2)
+        full_id_3 = make_edge_full_id(host=host_3)
+
+        edge_1 = make_cached_edge(full_id=full_id_1, bruin_client_info=bruin_client_info_1)
+        edge_2 = make_cached_edge(full_id=full_id_1, bruin_client_info=bruin_client_info_2)
+        edge_3 = make_cached_edge(full_id=full_id_2, bruin_client_info=bruin_client_info_3)
+        edge_4 = make_cached_edge(full_id=full_id_2, bruin_client_info=bruin_client_info_4)
+        edge_5 = make_cached_edge(full_id=full_id_3, bruin_client_info=bruin_client_info_5)
+        edge_6 = make_cached_edge(full_id=full_id_3, bruin_client_info=bruin_client_info_6)
+
+        customer_cache = make_customer_cache(edge_1, edge_2, edge_3, edge_4, edge_5, edge_6)
+        service_affecting_monitor._customer_cache = customer_cache
+
+        result = service_affecting_monitor._get_default_contact_info_by_client_id()
+
+        assert result == {
+            client_id_1: contact_info_by_host_and_client_id[host_1][client_id_1],
+            client_id_2: contact_info_by_host_and_client_id[host_1][client_id_2],
+            client_id_3: contact_info_by_host_and_client_id[host_2]["*"],
+            client_id_4: contact_info_by_host_and_client_id[host_2]["*"],
+            client_id_5: contact_info_by_host_and_client_id[host_3]["*"],
+            client_id_6: contact_info_by_host_and_client_id[host_3]["*"],
+        }
+
+    def should_use_default_contact_info_test(
+        self,
+        service_affecting_monitor,
+        make_bruin_client_info,
+        make_edge_full_id,
+        make_cached_edge,
+    ):
+        client_id_1 = 1
+        client_id_2 = 2
+        client_id_3 = 3
+
+        bruin_client_info_1 = make_bruin_client_info(client_id=client_id_1)
+        bruin_client_info_2 = make_bruin_client_info(client_id=client_id_2)
+        bruin_client_info_3 = make_bruin_client_info(client_id=client_id_3)
+
+        full_id_1 = make_edge_full_id(host="host-2")
+
+        edge_1 = make_cached_edge(bruin_client_info=bruin_client_info_1)
+        edge_2 = make_cached_edge(bruin_client_info=bruin_client_info_2, full_id=full_id_1)
+        edge_3 = make_cached_edge(bruin_client_info=bruin_client_info_3)
+
+        result = service_affecting_monitor._should_use_default_contact_info(client_id_1, edge_1)
+        assert result is True
+
+        result = service_affecting_monitor._should_use_default_contact_info(client_id_2, edge_2)
+        assert result is True
+
+        result = service_affecting_monitor._should_use_default_contact_info(client_id_3, edge_3)
+        assert result is False

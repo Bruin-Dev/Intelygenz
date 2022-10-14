@@ -82,11 +82,12 @@ class ServiceAffectingMonitor:
         if not self._customer_cache:
             self._logger.info("Got an empty customer cache. Process cannot keep going.")
             return
-        self._default_contact_info_by_client = self._get_default_contact_info_by_client()
-        self._customer_cache: list = [
+
+        self._default_contact_info_by_client_id = self._get_default_contact_info_by_client_id()
+        self._customer_cache = [
             edge
             for edge in customer_cache_response["body"]
-            if edge["bruin_client_info"]["client_id"] in self._default_contact_info_by_client.keys()
+            if edge["bruin_client_info"]["client_id"] in self._default_contact_info_by_client_id
         ]
 
         await self._latency_check()
@@ -99,40 +100,29 @@ class ServiceAffectingMonitor:
 
         self._logger.info(f"Finished processing all links! Took {round((time.time() - start_time) / 60, 2)} minutes")
 
-    def _get_default_contact_info_by_client(self):
+    def _get_default_contact_info_by_client_id(self):
+        contact_info_by_host_and_client_id = self._config.MONITOR_CONFIG["contact_info_by_host_and_client_id"]
+        contact_info_by_client_id = {}
 
-        contact_info_by_client = dict(
-            ChainMap(
-                *[
-                    default_contact_info_by_client_id
-                    for default_contact_info_by_client_id in self._config.MONITOR_CONFIG[
-                        "contact_by_host_and_client_id"
-                    ].values()
-                ]
-            )
-        )
+        for host in contact_info_by_host_and_client_id:
+            if "*" in contact_info_by_host_and_client_id[host]:
+                contact_info = contact_info_by_host_and_client_id[host]["*"]
+                for edge in self._customer_cache:
+                    if edge["edge"]["host"] == host:
+                        client_id = edge["bruin_client_info"]["client_id"]
+                        contact_info_by_client_id[client_id] = contact_info
+            else:
+                for client_id, contact_info in contact_info_by_host_and_client_id[host].items():
+                    contact_info_by_client_id[client_id] = contact_info
 
-        if "ALL_FIS_CLIENTS" in contact_info_by_client.keys():
-            fis_contact_info = contact_info_by_client.pop("ALL_FIS_CLIENTS")
-            fis_contact_info_by_client = {
-                edge["bruin_client_info"]["client_id"]: fis_contact_info
-                for edge in self._customer_cache
-                if edge["edge"]["host"] == "metvco04.mettel.net"
-            }
-            contact_info_by_client = {
-                **contact_info_by_client,
-                **fis_contact_info_by_client,
-            }
-
-        return contact_info_by_client
+        return contact_info_by_client_id
 
     def _should_use_default_contact_info(self, client_id: int, edge: dict):
         if client_id in self._config.MONITOR_CONFIG["customers_to_always_use_default_contact_info"]:
             return True
 
-        if "ALL_FIS_CLIENTS" in self._config.MONITOR_CONFIG["customers_to_always_use_default_contact_info"]:
-            if edge["edge"]["host"] == "metvco04.mettel.net":
-                return True
+        if edge["edge"]["host"] in self._config.UMBRELLA_HOSTS:
+            return True
 
         return False
 
@@ -252,7 +242,7 @@ class ServiceAffectingMonitor:
             client_id = cached_edge["bruin_client_info"]["client_id"]
             site_details = cached_edge["site_details"]
 
-            default_contacts = self._default_contact_info_by_client.get(client_id)
+            default_contacts = self._default_contact_info_by_client_id.get(client_id)
             if self._should_use_default_contact_info(client_id, cached_edge):
                 contacts = default_contacts
             else:

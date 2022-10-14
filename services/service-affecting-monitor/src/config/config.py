@@ -5,9 +5,20 @@ import json
 import logging
 import os
 import sys
-from collections import defaultdict
 
 from application import AffectingTroubles
+
+
+def parse_client_ids(data_by_host_and_client_id):
+    # JSON only allows string keys, but client IDs are ints so we need to parse them before loading the config,
+    # except for placeholders that will be replaced by multiple client IDs at run time
+    for host in data_by_host_and_client_id:
+        data_by_host_and_client_id[host] = {
+            int(client_id) if client_id.isnumeric() else client_id: data
+            for client_id, data in data_by_host_and_client_id[host].items()
+        }
+    return data_by_host_and_client_id
+
 
 NATS_CONFIG = {
     "servers": [os.environ["NATS_SERVER1"]],
@@ -17,19 +28,6 @@ NATS_CONFIG = {
     "stop_delay": 300,
     "reconnects": 150,
 }
-
-# JSON only allows string keys, but client IDs are ints so we need to parse them before loading the config
-default_contact_info_raw = json.loads(os.environ["MONITORING__DEFAULT_CONTACT_INFO_PER_CUSTOMER"])
-default_contact_info = defaultdict(dict)
-for host in default_contact_info_raw.keys():
-    default_contact_info.setdefault(host, {})
-    for client_id in default_contact_info_raw[host]:
-        if client_id.isnumeric():
-            default_contact_info[host][int(client_id)] = default_contact_info_raw[host][client_id]
-        else:
-            # Possibly a placeholder that will be replaced by multiple client IDs at run time, these should remain
-            # the same
-            default_contact_info[host][client_id] = default_contact_info_raw[host][client_id]
 
 TIMEZONE = os.environ["TIMEZONE"]
 
@@ -44,7 +42,9 @@ UMBRELLA_HOSTS = json.loads(os.environ["UMBRELLA_HOSTS"])
 METRICS_RELEVANT_CLIENTS = json.loads(os.environ["METRICS_RELEVANT_CLIENTS"])
 
 MONITOR_CONFIG = {
-    "contact_by_host_and_client_id": default_contact_info,
+    "contact_info_by_host_and_client_id": parse_client_ids(
+        json.loads(os.environ["MONITORING__DEFAULT_CONTACT_INFO_PER_CUSTOMER"])
+    ),
     "customers_to_always_use_default_contact_info": json.loads(
         os.environ["MONITORING__CUSTOMERS_TO_ALWAYS_USE_DEFAULT_CONTACT_INFO"]
     ),
@@ -99,16 +99,6 @@ MONITOR_CONFIG = {
     ),
 }
 
-# JSON only allows string keys, but client IDs are ints so we need to parse them before loading the config
-recipients_by_host_and_client_id_raw = json.loads(
-    os.environ["REOCCURRING_TROUBLE_REPORT__RECIPIENTS_PER_HOST_AND_CUSTOMER"]
-)
-recipients_by_host_and_client_id = defaultdict(dict)
-for host in recipients_by_host_and_client_id_raw.keys():
-    recipients_by_host_and_client_id.setdefault(host, {})
-    for client_id in recipients_by_host_and_client_id_raw[host]:
-        recipients_by_host_and_client_id[host][int(client_id)] = recipients_by_host_and_client_id_raw[host][client_id]
-
 MONITOR_REPORT_CONFIG = {
     "exec_on_start": os.environ["EXEC_MONITOR_REPORTS_ON_START"].lower() == "true",
     "semaphore": 5,
@@ -119,7 +109,9 @@ MONITOR_REPORT_CONFIG = {
     "active_reports": json.loads(os.environ["REOCCURRING_TROUBLE_REPORT__REPORTED_TROUBLES"]),
     "trailing_days": int(os.environ["REOCCURRING_TROUBLE_REPORT__TICKETS_LOOKUP_INTERVAL"]) // 60 // 60 // 24,
     "default_contacts": json.loads(os.environ["REOCCURRING_TROUBLE_REPORT__DEFAULT_CONTACTS"]),
-    "recipients_by_host_and_client_id": recipients_by_host_and_client_id,
+    "recipients_by_host_and_client_id": parse_client_ids(
+        json.loads(os.environ["REOCCURRING_TROUBLE_REPORT__RECIPIENTS_PER_HOST_AND_CUSTOMER"])
+    ),
 }
 
 BANDWIDTH_REPORT_CONFIG = {

@@ -21,31 +21,72 @@ PRODUCT_CATEGORY = "SD-WAN"
 
 VELOCLOUD_HOST = "test-host"
 
-UMBRELLA_HOSTS = {}
+UMBRELLA_HOSTS = {
+    "host-2": "Client 3",
+    "host-3": "Client 4",
+}
 
 MONITOR_CONFIG = {
-    "recipient": "some.recipient@email.com",
-    "contact_by_host_and_client_id": {
-        "test-host": {
-            1234: [
+    "contact_info_by_host_and_client_id": {
+        "host-1": {
+            1: [
                 {
-                    "email": "test@test.com",
-                    "name": "Test",
+                    "email": "test@client1.com",
+                    "name": "Client 1",
                     "type": "ticket",
                 },
                 {
-                    "email": "test@test.com",
-                    "name": "Test",
+                    "email": "test@client1.com",
+                    "name": "Client 1",
+                    "type": "site",
+                },
+            ],
+            2: [
+                {
+                    "email": "test@client2.com",
+                    "name": "Client 2",
+                    "type": "ticket",
+                },
+                {
+                    "email": "test@client2.com",
+                    "name": "Client 2",
                     "type": "site",
                 },
             ],
         },
+        "host-2": {
+            "*": [
+                {
+                    "email": "test@client3.com",
+                    "name": "Client 3",
+                    "type": "ticket",
+                },
+                {
+                    "email": "test@client3.com",
+                    "name": "Client 3",
+                    "type": "site",
+                },
+            ]
+        },
+        "host-3": {
+            "*": [
+                {
+                    "email": "test@client4.com",
+                    "name": "Client 4",
+                    "type": "ticket",
+                },
+                {
+                    "email": "test@client4.com",
+                    "name": "Client 4",
+                    "type": "site",
+                },
+            ]
+        },
     },
-    "customers_to_always_use_default_contact_info": [1234, "ALL_FIS_CLIENTS"],
+    "customers_to_always_use_default_contact_info": [1],
     "velo_filter": {
         "test-host": [],
     },
-    "environment": "test",
     "monitoring_minutes_interval": 10,
     "thresholds": {
         AffectingTroubles.LATENCY: 140,  # milliseconds
