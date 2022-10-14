@@ -10,9 +10,9 @@ hawkeye-outage-monitor-linter:
         - services/hawkeye-outage-monitor/src/application/**/*
         - services/hawkeye-outage-monitor/src/config/**/*
         - services/hawkeye-outage-monitor/src/app.py
-        - services/hawkeye-outage-monitor/Dockerfile
-        - services/hawkeye-outage-monitor/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/hawkeye-outage-monitor/pyproject.toml
+        - services/hawkeye-outage-monitor/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
@@ -29,10 +29,11 @@ hawkeye-outage-monitor-test:
         - services/hawkeye-outage-monitor/src/config/**/*
         - services/hawkeye-outage-monitor/src/app.py
         - services/hawkeye-outage-monitor/Dockerfile
-        - services/hawkeye-outage-monitor/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/hawkeye-outage-monitor/pyproject.toml
+        - services/hawkeye-outage-monitor/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
-  extends: .unittest_module_python_36
+  extends: .unittest_module_python_310
   needs: ["hawkeye-outage-monitor-linter"]
 
 # ====================================================
@@ -49,9 +50,9 @@ hawkeye-outage-monitor-build:
         - services/hawkeye-outage-monitor/src/application/**/*
         - services/hawkeye-outage-monitor/src/config/**/*
         - services/hawkeye-outage-monitor/src/app.py
-        - services/hawkeye-outage-monitor/Dockerfile
-        - services/hawkeye-outage-monitor/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/hawkeye-outage-monitor/pyproject.toml
+        - services/hawkeye-outage-monitor/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $HAWKEYE_OUTAGE_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:

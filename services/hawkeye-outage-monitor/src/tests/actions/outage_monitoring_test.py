@@ -1,52 +1,62 @@
 import os
 from datetime import datetime, timedelta
-from unittest.mock import Mock, call, patch
+from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
-from application.actions import outage_monitoring as outage_monitoring_module
-from application.actions.outage_monitoring import OutageMonitor
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
-from asynctest import CoroutineMock
-from config import testconfig
 from dateutil.parser import parse
 from pytz import timezone, utc
 from shortuuid import uuid
+
+from application.actions import outage_monitoring as outage_monitoring_module
+from application.actions.outage_monitoring import OutageMonitor
+from config import testconfig
 
 uuid_ = uuid()
 uuid_mock = patch.object(outage_monitoring_module, "uuid", return_value=uuid_)
 
 
+@pytest.fixture(scope="function")
+def outage_monitor_instance():
+    return OutageMonitor(
+        nats_client=Mock(),
+        scheduler=Mock(),
+        config=testconfig,
+        metrics_repository=Mock(),
+        bruin_repository=Mock(),
+        hawkeye_repository=Mock(),
+        notifications_repository=Mock(),
+        customer_cache_repository=Mock(),
+        utils_repository=Mock(),
+    )
+
+
 class TestServiceOutageMonitor:
-    def instance_test(self):
-        event_bus = Mock()
-        logger = Mock()
+    def instance_test(self, outage_monitor_instance):
+        nats_client = Mock()
         scheduler = Mock()
-        config = testconfig
         metrics_repository = Mock()
         bruin_repository = Mock()
         hawkeye_repository = Mock()
         notifications_repository = Mock()
         customer_cache_repository = Mock()
         utils_repository = Mock()
-
         outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+            nats_client=nats_client,
+            scheduler=scheduler,
+            config=testconfig,
+            metrics_repository=metrics_repository,
+            bruin_repository=bruin_repository,
+            hawkeye_repository=hawkeye_repository,
+            notifications_repository=notifications_repository,
+            customer_cache_repository=customer_cache_repository,
+            utils_repository=utils_repository,
         )
 
-        assert outage_monitor._event_bus is event_bus
-        assert outage_monitor._logger is logger
+        assert outage_monitor._nats_client is nats_client
         assert outage_monitor._scheduler is scheduler
-        assert outage_monitor._config is config
+        assert outage_monitor._config is testconfig
         assert outage_monitor._metrics_repository is metrics_repository
         assert outage_monitor._bruin_repository is bruin_repository
         assert outage_monitor._hawkeye_repository is hawkeye_repository
@@ -54,130 +64,60 @@ class TestServiceOutageMonitor:
         assert outage_monitor._customer_cache_repository is customer_cache_repository
 
     @pytest.mark.asyncio
-    async def start_hawkeye_outage_monitoring_with_exec_on_start_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        hawkeye_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
-        )
+    async def start_hawkeye_outage_monitoring_with_exec_on_start_test(self, outage_monitor_instance):
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
         with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
             with patch.object(outage_monitoring_module, "timezone", new=Mock()):
-                await outage_monitor.start_hawkeye_outage_monitoring(exec_on_start=True)
+                await outage_monitor_instance.start_hawkeye_outage_monitoring(exec_on_start=True)
 
-        scheduler.add_job.assert_called_once_with(
-            outage_monitor._outage_monitoring_process,
+        outage_monitor_instance._scheduler.add_job.assert_called_once_with(
+            outage_monitor_instance._outage_monitoring_process,
             "interval",
-            seconds=config.MONITOR_CONFIG["jobs_intervals"]["outage_monitor"],
+            seconds=outage_monitor_instance._config.MONITOR_CONFIG["jobs_intervals"]["outage_monitor"],
             next_run_time=next_run_time,
             replace_existing=False,
             id="_hawkeye_outage_monitor_process",
         )
 
     @pytest.mark.asyncio
-    async def start_hawkeye_outage_monitoring_with_no_exec_on_start_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        hawkeye_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
+    async def start_hawkeye_outage_monitoring_with_no_exec_on_start_test(self, outage_monitor_instance):
 
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
-        )
+        await outage_monitor_instance.start_hawkeye_outage_monitoring(exec_on_start=False)
 
-        await outage_monitor.start_hawkeye_outage_monitoring(exec_on_start=False)
-
-        scheduler.add_job.assert_called_once_with(
-            outage_monitor._outage_monitoring_process,
+        outage_monitor_instance._scheduler.add_job.assert_called_once_with(
+            outage_monitor_instance._outage_monitoring_process,
             "interval",
-            seconds=config.MONITOR_CONFIG["jobs_intervals"]["outage_monitor"],
+            seconds=outage_monitor_instance._config.MONITOR_CONFIG["jobs_intervals"]["outage_monitor"],
             next_run_time=undefined,
             replace_existing=False,
             id="_hawkeye_outage_monitor_process",
         )
 
     @pytest.mark.asyncio
-    async def start_hawkeye_outage_monitoring_with_job_id_already_executing_test(self):
+    async def start_hawkeye_outage_monitoring_with_job_id_already_executing_test(self, outage_monitor_instance):
         job_id = "some-duplicated-id"
         exception_instance = ConflictingIdError(job_id)
 
-        event_bus = Mock()
-        logger = Mock()
-        config = testconfig
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        hawkeye_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-
-        scheduler = Mock()
-        scheduler.add_job = Mock(side_effect=exception_instance)
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
-        )
+        outage_monitor_instance._scheduler.add_job = Mock(side_effect=exception_instance)
 
         try:
-            await outage_monitor.start_hawkeye_outage_monitoring(exec_on_start=False)
+            await outage_monitor_instance.start_hawkeye_outage_monitoring(exec_on_start=False)
             # TODO: The test should fail at this point if no exception was raised
         except ConflictingIdError:
-            scheduler.add_job.assert_called_once_with(
-                outage_monitor._outage_monitoring_process,
+            outage_monitor_instance._scheduler.add_job.assert_called_once_with(
+                outage_monitor_instance._outage_monitoring_process,
                 "interval",
-                seconds=config.MONITOR_CONFIG["jobs_intervals"]["outage_monitor"],
+                seconds=outage_monitor_instance._config.MONITOR_CONFIG["jobs_intervals"]["outage_monitor"],
                 next_run_time=undefined,
                 replace_existing=False,
                 id="_hawkeye_outage_monitor_process",
             )
 
     @pytest.mark.asyncio
-    async def outage_monitoring_process_ok_test(self):
+    async def outage_monitoring_process_ok_test(self, outage_monitor_instance):
         device_1_cached_info = {
             "serial_number": "B827EB76A8DE",
             "last_contact": "2020-01-16T14:59:56.245Z",
@@ -364,139 +304,86 @@ class TestServiceOutageMonitor:
             active_probe_with_cached_info_3,
         ]
 
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        notifications_repository = Mock()
-        utils_repository = Mock()
-
-        customer_cache_repository = Mock()
-        customer_cache_repository.get_cache_for_outage_monitoring = CoroutineMock(return_value=customer_cache_response)
-
-        hawkeye_repository = Mock()
-        hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        outage_monitor_instance._customer_cache_repository.get_cache_for_outage_monitoring = AsyncMock(
+            return_value=customer_cache_response
         )
-        outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=active_probes_with_customer_cache_info)
-        outage_monitor._schedule_recheck_job_for_devices = Mock()
-        outage_monitor._run_ticket_autoresolve = CoroutineMock()
 
-        await outage_monitor._outage_monitoring_process()
+        outage_monitor_instance._hawkeye_repository.get_probes = AsyncMock(return_value=probes_response)
 
-        customer_cache_repository.get_cache_for_outage_monitoring.assert_awaited_once()
-        hawkeye_repository.get_probes.assert_awaited_once()
-        outage_monitor._map_probes_info_with_customer_cache.assert_called_once_with(active_probes, customer_cache)
-        outage_monitor._schedule_recheck_job_for_devices.assert_called_once_with(outage_devices_info)
-        outage_monitor._run_ticket_autoresolve.assert_awaited_once_with(healthy_devices_info[0])
+        outage_monitor_instance._map_probes_info_with_customer_cache = Mock(
+            return_value=active_probes_with_customer_cache_info
+        )
+        outage_monitor_instance._schedule_recheck_job_for_devices = Mock()
+        outage_monitor_instance._run_ticket_autoresolve = AsyncMock()
+
+        await outage_monitor_instance._outage_monitoring_process()
+
+        outage_monitor_instance._customer_cache_repository.get_cache_for_outage_monitoring.assert_awaited_once()
+        outage_monitor_instance._hawkeye_repository.get_probes.assert_awaited_once()
+        outage_monitor_instance._map_probes_info_with_customer_cache.assert_called_once_with(
+            active_probes, customer_cache
+        )
+        outage_monitor_instance._schedule_recheck_job_for_devices.assert_called_once_with(outage_devices_info)
+        outage_monitor_instance._run_ticket_autoresolve.assert_awaited_once_with(healthy_devices_info[0])
 
     @pytest.mark.asyncio
-    async def outage_monitoring_process_with_customer_cache_response_having_202_status_test(self):
+    async def outage_monitoring_process_with_customer_cache_response_having_202_status_test(
+        self, outage_monitor_instance
+    ):
         customer_cache_response = {
             "body": "Cache is still being built",
             "status": 202,
         }
 
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        notifications_repository = Mock()
-        utils_repository = Mock()
-
-        customer_cache_repository = Mock()
-        customer_cache_repository.get_cache_for_outage_monitoring = CoroutineMock(return_value=customer_cache_response)
-
-        hawkeye_repository = Mock()
-        hawkeye_repository.get_probes = CoroutineMock()
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        outage_monitor_instance._customer_cache_repository.get_cache_for_outage_monitoring = AsyncMock(
+            return_value=customer_cache_response
         )
-        outage_monitor._map_probes_info_with_customer_cache = Mock()
-        outage_monitor._schedule_recheck_job_for_devices = Mock()
-        outage_monitor._run_ticket_autoresolve = CoroutineMock()
 
-        await outage_monitor._outage_monitoring_process()
+        outage_monitor_instance._hawkeye_repository.get_probes = AsyncMock()
 
-        customer_cache_repository.get_cache_for_outage_monitoring.assert_awaited_once()
-        hawkeye_repository.get_probes.assert_not_awaited()
-        outage_monitor._map_probes_info_with_customer_cache.assert_not_called()
-        outage_monitor._schedule_recheck_job_for_devices.assert_not_called()
-        outage_monitor._run_ticket_autoresolve.assert_not_awaited()
+        outage_monitor_instance._map_probes_info_with_customer_cache = Mock()
+        outage_monitor_instance._schedule_recheck_job_for_devices = Mock()
+        outage_monitor_instance._run_ticket_autoresolve = AsyncMock()
+
+        await outage_monitor_instance._outage_monitoring_process()
+
+        outage_monitor_instance._customer_cache_repository.get_cache_for_outage_monitoring.assert_awaited_once()
+        outage_monitor_instance._hawkeye_repository.get_probes.assert_not_awaited()
+        outage_monitor_instance._map_probes_info_with_customer_cache.assert_not_called()
+        outage_monitor_instance._schedule_recheck_job_for_devices.assert_not_called()
+        outage_monitor_instance._run_ticket_autoresolve.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def outage_monitoring_process_with_customer_cache_response_having_non_2xx_status_test(self):
+    async def outage_monitoring_process_with_customer_cache_response_having_non_2xx_status_test(
+        self, outage_monitor_instance
+    ):
         customer_cache_response = {
             "body": "No devices were found for the specified filters",
             "status": 404,
         }
 
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        notifications_repository = Mock()
-        utils_repository = Mock()
-
-        customer_cache_repository = Mock()
-        customer_cache_repository.get_cache_for_outage_monitoring = CoroutineMock(return_value=customer_cache_response)
-
-        hawkeye_repository = Mock()
-        hawkeye_repository.get_probes = CoroutineMock()
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        outage_monitor_instance._customer_cache_repository.get_cache_for_outage_monitoring = AsyncMock(
+            return_value=customer_cache_response
         )
-        outage_monitor._map_probes_info_with_customer_cache = Mock()
-        outage_monitor._schedule_recheck_job_for_devices = Mock()
-        outage_monitor._run_ticket_autoresolve = CoroutineMock()
 
-        await outage_monitor._outage_monitoring_process()
+        outage_monitor_instance._hawkeye_repository.get_probes = AsyncMock()
 
-        customer_cache_repository.get_cache_for_outage_monitoring.assert_awaited_once()
-        hawkeye_repository.get_probes.assert_not_awaited()
-        outage_monitor._map_probes_info_with_customer_cache.assert_not_called()
-        outage_monitor._schedule_recheck_job_for_devices.assert_not_called()
-        outage_monitor._run_ticket_autoresolve.assert_not_awaited()
+        outage_monitor_instance._map_probes_info_with_customer_cache = Mock()
+        outage_monitor_instance._schedule_recheck_job_for_devices = Mock()
+        outage_monitor_instance._run_ticket_autoresolve = AsyncMock()
+
+        await outage_monitor_instance._outage_monitoring_process()
+
+        outage_monitor_instance._customer_cache_repository.get_cache_for_outage_monitoring.assert_awaited_once()
+        outage_monitor_instance._hawkeye_repository.get_probes.assert_not_awaited()
+        outage_monitor_instance._map_probes_info_with_customer_cache.assert_not_called()
+        outage_monitor_instance._schedule_recheck_job_for_devices.assert_not_called()
+        outage_monitor_instance._run_ticket_autoresolve.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def outage_monitoring_process_with_get_probes_response_having_non_2xx_status_test(self):
+    async def outage_monitoring_process_with_get_probes_response_having_non_2xx_status_test(
+        self, outage_monitor_instance
+    ):
         device_1_cached_info = {
             "serial_number": "B827EB76A8DE",
             "last_contact": "2020-01-16T14:59:56.245Z",
@@ -536,47 +423,26 @@ class TestServiceOutageMonitor:
             "status": 500,
         }
 
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        notifications_repository = Mock()
-        utils_repository = Mock()
-
-        customer_cache_repository = Mock()
-        customer_cache_repository.get_cache_for_outage_monitoring = CoroutineMock(return_value=customer_cache_response)
-
-        hawkeye_repository = Mock()
-        hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        outage_monitor_instance._customer_cache_repository.get_cache_for_outage_monitoring = AsyncMock(
+            return_value=customer_cache_response
         )
-        outage_monitor._map_probes_info_with_customer_cache = Mock()
-        outage_monitor._schedule_recheck_job_for_devices = Mock()
-        outage_monitor._run_ticket_autoresolve = CoroutineMock()
 
-        await outage_monitor._outage_monitoring_process()
+        outage_monitor_instance._hawkeye_repository.get_probes = AsyncMock(return_value=probes_response)
 
-        customer_cache_repository.get_cache_for_outage_monitoring.assert_awaited_once()
-        hawkeye_repository.get_probes.assert_awaited_once()
-        outage_monitor._map_probes_info_with_customer_cache.assert_not_called()
-        outage_monitor._schedule_recheck_job_for_devices.assert_not_called()
-        outage_monitor._run_ticket_autoresolve.assert_not_awaited()
+        outage_monitor_instance._map_probes_info_with_customer_cache = Mock()
+        outage_monitor_instance._schedule_recheck_job_for_devices = Mock()
+        outage_monitor_instance._run_ticket_autoresolve = AsyncMock()
+
+        await outage_monitor_instance._outage_monitoring_process()
+
+        outage_monitor_instance._customer_cache_repository.get_cache_for_outage_monitoring.assert_awaited_once()
+        outage_monitor_instance._hawkeye_repository.get_probes.assert_awaited_once()
+        outage_monitor_instance._map_probes_info_with_customer_cache.assert_not_called()
+        outage_monitor_instance._schedule_recheck_job_for_devices.assert_not_called()
+        outage_monitor_instance._run_ticket_autoresolve.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def outage_monitoring_process_with_empty_list_of_probes_test(self):
+    async def outage_monitoring_process_with_empty_list_of_probes_test(self, outage_monitor_instance):
         device_1_cached_info = {
             "serial_number": "B827EB76A8DE",
             "last_contact": "2020-01-16T14:59:56.245Z",
@@ -616,47 +482,25 @@ class TestServiceOutageMonitor:
             "status": 200,
         }
 
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        notifications_repository = Mock()
-        utils_repository = Mock()
-
-        customer_cache_repository = Mock()
-        customer_cache_repository.get_cache_for_outage_monitoring = CoroutineMock(return_value=customer_cache_response)
-
-        hawkeye_repository = Mock()
-        hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        outage_monitor_instance._customer_cache_repository.get_cache_for_outage_monitoring = AsyncMock(
+            return_value=customer_cache_response
         )
-        outage_monitor._map_probes_info_with_customer_cache = Mock()
-        outage_monitor._schedule_recheck_job_for_devices = Mock()
-        outage_monitor._run_ticket_autoresolve = CoroutineMock()
 
-        await outage_monitor._outage_monitoring_process()
+        outage_monitor_instance._hawkeye_repository.get_probes = AsyncMock(return_value=probes_response)
+        outage_monitor_instance._map_probes_info_with_customer_cache = Mock()
+        outage_monitor_instance._schedule_recheck_job_for_devices = Mock()
+        outage_monitor_instance._run_ticket_autoresolve = AsyncMock()
 
-        customer_cache_repository.get_cache_for_outage_monitoring.assert_awaited_once()
-        hawkeye_repository.get_probes.assert_awaited_once()
-        outage_monitor._map_probes_info_with_customer_cache.assert_not_called()
-        outage_monitor._schedule_recheck_job_for_devices.assert_not_called()
-        outage_monitor._run_ticket_autoresolve.assert_not_awaited()
+        await outage_monitor_instance._outage_monitoring_process()
+
+        outage_monitor_instance._customer_cache_repository.get_cache_for_outage_monitoring.assert_awaited_once()
+        outage_monitor_instance._hawkeye_repository.get_probes.assert_awaited_once()
+        outage_monitor_instance._map_probes_info_with_customer_cache.assert_not_called()
+        outage_monitor_instance._schedule_recheck_job_for_devices.assert_not_called()
+        outage_monitor_instance._run_ticket_autoresolve.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def outage_monitoring_process_with_no_active_probes_test(self):
+    async def outage_monitoring_process_with_no_active_probes_test(self, outage_monitor_instance):
         device_1_cached_info = {
             "serial_number": "B827EB76A8DE",
             "last_contact": "2020-01-16T14:59:56.245Z",
@@ -736,46 +580,25 @@ class TestServiceOutageMonitor:
             "status": 200,
         }
 
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        notifications_repository = Mock()
-        utils_repository = Mock()
-
-        customer_cache_repository = Mock()
-        customer_cache_repository.get_cache_for_outage_monitoring = CoroutineMock(return_value=customer_cache_response)
-
-        hawkeye_repository = Mock()
-        hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        outage_monitor_instance._customer_cache_repository.get_cache_for_outage_monitoring = AsyncMock(
+            return_value=customer_cache_response
         )
-        outage_monitor._map_probes_info_with_customer_cache = Mock()
-        outage_monitor._schedule_recheck_job_for_devices = Mock()
-        outage_monitor._run_ticket_autoresolve = CoroutineMock()
 
-        await outage_monitor._outage_monitoring_process()
+        outage_monitor_instance._hawkeye_repository.get_probes = AsyncMock(return_value=probes_response)
 
-        customer_cache_repository.get_cache_for_outage_monitoring.assert_awaited_once()
-        hawkeye_repository.get_probes.assert_awaited_once()
-        outage_monitor._map_probes_info_with_customer_cache.assert_not_called()
-        outage_monitor._schedule_recheck_job_for_devices.assert_not_called()
-        outage_monitor._run_ticket_autoresolve.assert_not_awaited()
+        outage_monitor_instance._map_probes_info_with_customer_cache = Mock()
+        outage_monitor_instance._schedule_recheck_job_for_devices = Mock()
+        outage_monitor_instance._run_ticket_autoresolve = AsyncMock()
 
-    def is_active_probe_test(self):
+        await outage_monitor_instance._outage_monitoring_process()
+
+        outage_monitor_instance._customer_cache_repository.get_cache_for_outage_monitoring.assert_awaited_once()
+        outage_monitor_instance._hawkeye_repository.get_probes.assert_awaited_once()
+        outage_monitor_instance._map_probes_info_with_customer_cache.assert_not_called()
+        outage_monitor_instance._schedule_recheck_job_for_devices.assert_not_called()
+        outage_monitor_instance._run_ticket_autoresolve.assert_not_awaited()
+
+    def is_active_probe_test(self, outage_monitor_instance):
         probe = {
             "probeId": "1",
             "uid": "b8:27:eb:76:a8:de",
@@ -802,30 +625,7 @@ class TestServiceOutageMonitor:
         result = OutageMonitor._is_active_probe(probe)
         assert result is False
 
-    def is_there_an_outage_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        hawkeye_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
-        )
+    def is_there_an_outage_test(self, outage_monitor_instance):
 
         probe = {
             "probeId": "1",
@@ -839,7 +639,7 @@ class TestServiceOutageMonitor:
             "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
             "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
-        result = outage_monitor._is_there_an_outage(probe)
+        result = outage_monitor_instance._is_there_an_outage(probe)
         assert result is False
 
         probe = {
@@ -854,7 +654,7 @@ class TestServiceOutageMonitor:
             "nodetonode": {"status": 0, "lastUpdate": "2020-11-11T13:00:11Z"},
             "realservice": {"status": 1, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
-        result = outage_monitor._is_there_an_outage(probe)
+        result = outage_monitor_instance._is_there_an_outage(probe)
         assert result is True
 
         probe = {
@@ -869,7 +669,7 @@ class TestServiceOutageMonitor:
             "nodetonode": {"status": 1, "lastUpdate": "2020-11-11T13:00:11Z"},
             "realservice": {"status": 0, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
-        result = outage_monitor._is_there_an_outage(probe)
+        result = outage_monitor_instance._is_there_an_outage(probe)
         assert result is True
 
         probe = {
@@ -884,10 +684,10 @@ class TestServiceOutageMonitor:
             "nodetonode": {"status": 0, "lastUpdate": "2020-11-11T13:00:11Z"},
             "realservice": {"status": 0, "lastUpdate": "2020-10-15T02:18:28Z"},
         }
-        result = outage_monitor._is_there_an_outage(probe)
+        result = outage_monitor_instance._is_there_an_outage(probe)
         assert result is True
 
-    def map_probes_info_with_customer_cache_test(self):
+    def map_probes_info_with_customer_cache_test(self, outage_monitor_instance):
         serial_number_1 = "B827EB76A8DE"
         serial_number_2 = "C827FC76B8EF"
         serial_number_3 = "D827GD76C8FG"
@@ -972,31 +772,7 @@ class TestServiceOutageMonitor:
             device_4_cached_info,
         ]
 
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        hawkeye_repository = Mock()
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
-        )
-
-        result = outage_monitor._map_probes_info_with_customer_cache(probes, customer_cache)
+        result = outage_monitor_instance._map_probes_info_with_customer_cache(probes, customer_cache)
 
         expected = [
             {
@@ -1010,7 +786,7 @@ class TestServiceOutageMonitor:
         ]
         assert result == expected
 
-    def schedule_recheck_job_for_devices_test(self):
+    def schedule_recheck_job_for_devices_test(self, outage_monitor_instance):
         devices = [
             {
                 "cached_info": {
@@ -1037,40 +813,18 @@ class TestServiceOutageMonitor:
             }
         ]
 
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        hawkeye_repository = Mock()
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
-        )
-
         next_run_time = datetime.now()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
         with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
             with patch.object(outage_monitoring_module, "timezone", new=Mock()):
-                outage_monitor._schedule_recheck_job_for_devices(devices)
+                outage_monitor_instance._schedule_recheck_job_for_devices(devices)
 
-        expected_run_date = next_run_time + timedelta(seconds=config.MONITOR_CONFIG["jobs_intervals"]["quarantine"])
-        scheduler.add_job.assert_called_once_with(
-            outage_monitor._recheck_devices_for_ticket_creation,
+        expected_run_date = next_run_time + timedelta(
+            seconds=outage_monitor_instance._config.MONITOR_CONFIG["jobs_intervals"]["quarantine"]
+        )
+        outage_monitor_instance._scheduler.add_job.assert_called_once_with(
+            outage_monitor_instance._recheck_devices_for_ticket_creation,
             "date",
             args=[devices],
             run_date=expected_run_date,
@@ -1080,7 +834,9 @@ class TestServiceOutageMonitor:
         )
 
     @pytest.mark.asyncio
-    async def recheck_devices_with_just_devices_in_outage_state_and_creation_response_having_2xx_status_test(self):
+    async def recheck_devices_with_just_devices_in_outage_state_and_creation_response_having_2xx_status_test(
+        self, outage_monitor_instance
+    ):
         serial_number_1 = "B827EB76A8DE"
         serial_number_2 = "D827GD76C8FG"
 
@@ -1215,67 +971,48 @@ class TestServiceOutageMonitor:
 
         triage_note = "This is Hawkeye's triage note"
 
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        config = testconfig
+        outage_monitor_instance._bruin_repository.create_outage_ticket = AsyncMock(return_value=create_ticket_response)
+        outage_monitor_instance._bruin_repository.append_triage_note_to_ticket = AsyncMock()
 
-        bruin_repository = Mock()
-        bruin_repository.create_outage_ticket = CoroutineMock(return_value=create_ticket_response)
-        bruin_repository.append_triage_note_to_ticket = CoroutineMock()
+        outage_monitor_instance._hawkeye_repository.get_probes = AsyncMock(return_value=probes_response)
 
-        hawkeye_repository = Mock()
-        hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
+        outage_monitor_instance._notifications_repository.send_slack_message = AsyncMock()
 
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        outage_monitor_instance._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
+        outage_monitor_instance._build_triage_note = Mock(return_value=triage_note)
+        outage_monitor_instance._run_ticket_autoresolve = AsyncMock()
 
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        with patch.object(outage_monitor_instance._config, "CURRENT_ENVIRONMENT", "production"):
+            await outage_monitor_instance._recheck_devices_for_ticket_creation(devices_info)
+
+        outage_monitor_instance._hawkeye_repository.get_probes.assert_awaited_once()
+        outage_monitor_instance._map_probes_info_with_customer_cache.assert_called_once_with(
+            probes, devices_cached_info
         )
-        outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
-        outage_monitor._build_triage_note = Mock(return_value=triage_note)
-        outage_monitor._run_ticket_autoresolve = CoroutineMock()
-
-        with patch.object(config, "CURRENT_ENVIRONMENT", "production"):
-            await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
-
-        hawkeye_repository.get_probes.assert_awaited_once()
-        outage_monitor._map_probes_info_with_customer_cache.assert_called_once_with(probes, devices_cached_info)
-        bruin_repository.create_outage_ticket.assert_has_awaits(
+        outage_monitor_instance._bruin_repository.create_outage_ticket.assert_has_awaits(
             [
                 call(bruin_client_id, serial_number_1),
                 call(bruin_client_id, serial_number_2),
             ]
         )
-        outage_monitor._build_triage_note.assert_has_calls(
+        outage_monitor_instance._build_triage_note.assert_has_calls(
             [
                 call(probe_1_info),
                 call(probe_2_info),
             ]
         )
-        bruin_repository.append_triage_note_to_ticket.assert_has_awaits(
+        outage_monitor_instance._bruin_repository.append_triage_note_to_ticket.assert_has_awaits(
             [
                 call(ticket_id, serial_number_1, triage_note),
                 call(ticket_id, serial_number_2, triage_note),
             ]
         )
-        outage_monitor._run_ticket_autoresolve.assert_not_awaited()
+        outage_monitor_instance._run_ticket_autoresolve.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def recheck_devices_with_just_devices_in_outage_state_and_creation_response_having_409_status_test(self):
+    async def recheck_devices_with_just_devices_in_outage_state_and_creation_response_having_409_status_test(
+        self, outage_monitor_instance
+    ):
         serial_number_1 = "B827EB76A8DE"
         serial_number_2 = "D827GD76C8FG"
 
@@ -1408,62 +1145,43 @@ class TestServiceOutageMonitor:
             "status": 409,
         }
 
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        config = testconfig
+        outage_monitor_instance._bruin_repository.create_outage_ticket = AsyncMock(return_value=create_ticket_response)
+        outage_monitor_instance._bruin_repository.append_triage_note_to_ticket = AsyncMock()
 
-        bruin_repository = Mock()
-        bruin_repository.create_outage_ticket = CoroutineMock(return_value=create_ticket_response)
-        bruin_repository.append_triage_note_to_ticket = CoroutineMock()
+        outage_monitor_instance._hawkeye_repository.get_probes = AsyncMock(return_value=probes_response)
 
-        hawkeye_repository = Mock()
-        hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
+        outage_monitor_instance._notifications_repository.send_slack_message = AsyncMock()
 
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        outage_monitor_instance._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
+        outage_monitor_instance._build_triage_note = Mock()
+        outage_monitor_instance._append_triage_note_if_needed = AsyncMock()
+        outage_monitor_instance._run_ticket_autoresolve = AsyncMock()
 
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        with patch.object(outage_monitor_instance._config, "CURRENT_ENVIRONMENT", "production"):
+            await outage_monitor_instance._recheck_devices_for_ticket_creation(devices_info)
+
+        outage_monitor_instance._hawkeye_repository.get_probes.assert_awaited_once()
+        outage_monitor_instance._map_probes_info_with_customer_cache.assert_called_once_with(
+            probes, devices_cached_info
         )
-        outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
-        outage_monitor._build_triage_note = Mock()
-        outage_monitor._append_triage_note_if_needed = CoroutineMock()
-        outage_monitor._run_ticket_autoresolve = CoroutineMock()
-
-        with patch.object(config, "CURRENT_ENVIRONMENT", "production"):
-            await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
-
-        hawkeye_repository.get_probes.assert_awaited_once()
-        outage_monitor._map_probes_info_with_customer_cache.assert_called_once_with(probes, devices_cached_info)
-        bruin_repository.create_outage_ticket.assert_has_awaits(
+        outage_monitor_instance._bruin_repository.create_outage_ticket.assert_has_awaits(
             [
                 call(bruin_client_id, serial_number_1),
                 call(bruin_client_id, serial_number_2),
             ]
         )
-        outage_monitor._append_triage_note_if_needed.assert_has_awaits(
+        outage_monitor_instance._append_triage_note_if_needed.assert_has_awaits(
             [
                 call(ticket_id, probe_1_info),
                 call(ticket_id, probe_2_info),
             ]
         )
-        outage_monitor._run_ticket_autoresolve.assert_not_awaited()
+        outage_monitor_instance._run_ticket_autoresolve.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def recheck_devices_with_just_devices_in_outage_state_and_creation_response_having_471_status_test(self):
+    async def recheck_devices_with_just_devices_in_outage_state_and_creation_response_having_471_status_test(
+        self, outage_monitor_instance
+    ):
         serial_number_1 = "B827EB76A8DE"
         serial_number_2 = "D827GD76C8FG"
 
@@ -1596,56 +1314,35 @@ class TestServiceOutageMonitor:
             "status": 471,
         }
 
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        config = testconfig
+        outage_monitor_instance._bruin_repository.create_outage_ticket = AsyncMock(return_value=create_ticket_response)
+        outage_monitor_instance._bruin_repository.append_triage_note_to_ticket = AsyncMock()
 
-        bruin_repository = Mock()
-        bruin_repository.create_outage_ticket = CoroutineMock(return_value=create_ticket_response)
-        bruin_repository.append_triage_note_to_ticket = CoroutineMock()
+        outage_monitor_instance._hawkeye_repository.get_probes = AsyncMock(return_value=probes_response)
 
-        hawkeye_repository = Mock()
-        hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
+        outage_monitor_instance._notifications_repository.send_slack_message = AsyncMock()
 
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        outage_monitor_instance._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
+        outage_monitor_instance._build_triage_note = Mock()
+        outage_monitor_instance._reopen_outage_ticket = AsyncMock()
+        outage_monitor_instance._run_ticket_autoresolve = AsyncMock()
 
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        with patch.object(outage_monitor_instance._config, "CURRENT_ENVIRONMENT", "production"):
+            await outage_monitor_instance._recheck_devices_for_ticket_creation(devices_info)
+
+        outage_monitor_instance._hawkeye_repository.get_probes.assert_awaited_once()
+        outage_monitor_instance._map_probes_info_with_customer_cache.assert_called_once_with(
+            probes, devices_cached_info
         )
-        outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
-        outage_monitor._build_triage_note = Mock()
-        outage_monitor._reopen_outage_ticket = CoroutineMock()
-        outage_monitor._run_ticket_autoresolve = CoroutineMock()
-
-        with patch.object(config, "CURRENT_ENVIRONMENT", "production"):
-            await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
-
-        hawkeye_repository.get_probes.assert_awaited_once()
-        outage_monitor._map_probes_info_with_customer_cache.assert_called_once_with(probes, devices_cached_info)
-        bruin_repository.create_outage_ticket.assert_has_awaits(
+        outage_monitor_instance._bruin_repository.create_outage_ticket.assert_has_awaits(
             [
                 call(bruin_client_id, serial_number_1),
                 call(bruin_client_id, serial_number_2),
             ]
         )
-        outage_monitor._build_triage_note.assert_not_called()
-        bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
-        outage_monitor._run_ticket_autoresolve.assert_not_awaited()
-        outage_monitor._reopen_outage_ticket.assert_has_awaits(
+        outage_monitor_instance._build_triage_note.assert_not_called()
+        outage_monitor_instance._bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
+        outage_monitor_instance._run_ticket_autoresolve.assert_not_awaited()
+        outage_monitor_instance._reopen_outage_ticket.assert_has_awaits(
             [
                 call(ticket_id, device_1_info),
                 call(ticket_id, device_2_info),
@@ -1653,7 +1350,9 @@ class TestServiceOutageMonitor:
         )
 
     @pytest.mark.asyncio
-    async def recheck_devices_with_just_devices_in_outage_state_and_creation_response_having_472_status_test(self):
+    async def recheck_devices_with_just_devices_in_outage_state_and_creation_response_having_472_status_test(
+        self, outage_monitor_instance
+    ):
         serial_number_1 = "B827EB76A8DE"
         serial_number_2 = "D827GD76C8FG"
 
@@ -1788,69 +1487,50 @@ class TestServiceOutageMonitor:
 
         reopen_note = "#*MetTel's IPA*#\nRe-opening task"
 
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        config = testconfig
+        outage_monitor_instance._bruin_repository.create_outage_ticket = AsyncMock(return_value=create_ticket_response)
+        outage_monitor_instance._bruin_repository.append_triage_note_to_ticket = AsyncMock()
+        outage_monitor_instance._bruin_repository.append_note_to_ticket = AsyncMock()
 
-        bruin_repository = Mock()
-        bruin_repository.create_outage_ticket = CoroutineMock(return_value=create_ticket_response)
-        bruin_repository.append_triage_note_to_ticket = CoroutineMock()
-        bruin_repository.append_note_to_ticket = CoroutineMock()
+        outage_monitor_instance._hawkeye_repository.get_probes = AsyncMock(return_value=probes_response)
 
-        hawkeye_repository = Mock()
-        hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
+        outage_monitor_instance._notifications_repository.send_slack_message = AsyncMock()
 
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        outage_monitor_instance._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
+        outage_monitor_instance._build_triage_note = Mock()
+        outage_monitor_instance._run_ticket_autoresolve = AsyncMock()
+        outage_monitor_instance._build_triage_note = Mock(return_value=reopen_note)
 
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        with patch.object(outage_monitor_instance._config, "CURRENT_ENVIRONMENT", "production"):
+            await outage_monitor_instance._recheck_devices_for_ticket_creation(devices_info)
+
+        outage_monitor_instance._hawkeye_repository.get_probes.assert_awaited_once()
+        outage_monitor_instance._map_probes_info_with_customer_cache.assert_called_once_with(
+            probes, devices_cached_info
         )
-        outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
-        outage_monitor._build_triage_note = Mock()
-        outage_monitor._run_ticket_autoresolve = CoroutineMock()
-        outage_monitor._build_triage_note = Mock(return_value=reopen_note)
-
-        with patch.object(config, "CURRENT_ENVIRONMENT", "production"):
-            await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
-
-        hawkeye_repository.get_probes.assert_awaited_once()
-        outage_monitor._map_probes_info_with_customer_cache.assert_called_once_with(probes, devices_cached_info)
-        bruin_repository.create_outage_ticket.assert_has_awaits(
+        outage_monitor_instance._bruin_repository.create_outage_ticket.assert_has_awaits(
             [
                 call(bruin_client_id, serial_number_1),
                 call(bruin_client_id, serial_number_2),
             ]
         )
-        outage_monitor._build_triage_note.assert_has_calls(
+        outage_monitor_instance._build_triage_note.assert_has_calls(
             [
                 call(device_1_info["device_info"], is_reopen_note=True),
                 call(device_2_info["device_info"], is_reopen_note=True),
             ]
         )
-        bruin_repository.append_note_to_ticket.assert_has_awaits(
+        outage_monitor_instance._bruin_repository.append_note_to_ticket.assert_has_awaits(
             [
                 call(ticket_id, reopen_note, service_numbers=[serial_number_1]),
                 call(ticket_id, reopen_note, service_numbers=[serial_number_2]),
             ]
         )
-        outage_monitor._run_ticket_autoresolve.assert_not_awaited()
+        outage_monitor_instance._run_ticket_autoresolve.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def recheck_devices_with_just_devices_in_outage_state_and_creation_response_having_473_status_test(self):
+    async def recheck_devices_with_just_devices_in_outage_state_and_creation_response_having_473_status_test(
+        self, outage_monitor_instance
+    ):
         serial_number_1 = "B827EB76A8DE"
         serial_number_2 = "D827GD76C8FG"
 
@@ -1985,70 +1665,49 @@ class TestServiceOutageMonitor:
 
         triage_note = "This is a triage note"
 
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        config = testconfig
+        outage_monitor_instance._bruin_repository.create_outage_ticket = AsyncMock(return_value=create_ticket_response)
+        outage_monitor_instance._bruin_repository.append_triage_note_to_ticket = AsyncMock()
+        outage_monitor_instance._bruin_repository.append_note_to_ticket = AsyncMock()
 
-        bruin_repository = Mock()
-        bruin_repository.create_outage_ticket = CoroutineMock(return_value=create_ticket_response)
-        bruin_repository.append_triage_note_to_ticket = CoroutineMock()
-        bruin_repository.append_note_to_ticket = CoroutineMock()
+        outage_monitor_instance._hawkeye_repository.get_probes = AsyncMock(return_value=probes_response)
 
-        hawkeye_repository = Mock()
-        hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
+        outage_monitor_instance._notifications_repository.send_slack_message = AsyncMock()
 
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        outage_monitor_instance._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
+        outage_monitor_instance._build_triage_note = Mock(return_value=triage_note)
+        outage_monitor_instance._run_ticket_autoresolve = AsyncMock()
+        outage_monitor_instance._reopen_outage_ticket = AsyncMock()
 
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        with patch.object(outage_monitor_instance._config, "CURRENT_ENVIRONMENT", "production"):
+            await outage_monitor_instance._recheck_devices_for_ticket_creation(devices_info)
+
+        outage_monitor_instance._hawkeye_repository.get_probes.assert_awaited_once()
+        outage_monitor_instance._map_probes_info_with_customer_cache.assert_called_once_with(
+            probes, devices_cached_info
         )
-        outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
-        outage_monitor._build_triage_note = Mock(return_value=triage_note)
-        outage_monitor._run_ticket_autoresolve = CoroutineMock()
-        outage_monitor._reopen_outage_ticket = CoroutineMock()
-
-        with patch.object(config, "CURRENT_ENVIRONMENT", "production"):
-            await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
-
-        hawkeye_repository.get_probes.assert_awaited_once()
-        outage_monitor._map_probes_info_with_customer_cache.assert_called_once_with(probes, devices_cached_info)
-        bruin_repository.create_outage_ticket.assert_has_awaits(
+        outage_monitor_instance._bruin_repository.create_outage_ticket.assert_has_awaits(
             [
                 call(bruin_client_id, serial_number_1),
                 call(bruin_client_id, serial_number_2),
             ]
         )
-        outage_monitor._build_triage_note.assert_has_calls(
+        outage_monitor_instance._build_triage_note.assert_has_calls(
             [
                 call(probe_1_info),
                 call(probe_2_info),
             ]
         )
-        bruin_repository.append_triage_note_to_ticket.assert_has_awaits(
+        outage_monitor_instance._bruin_repository.append_triage_note_to_ticket.assert_has_awaits(
             [
                 call(ticket_id, serial_number_1, triage_note),
                 call(ticket_id, serial_number_2, triage_note),
             ]
         )
-        outage_monitor._reopen_outage_ticket.assert_not_awaited()
-        outage_monitor._run_ticket_autoresolve.assert_not_awaited()
+        outage_monitor_instance._reopen_outage_ticket.assert_not_awaited()
+        outage_monitor_instance._run_ticket_autoresolve.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def recheck_devices_with_just_devices_in_healthy_state_test(self):
+    async def recheck_devices_with_just_devices_in_healthy_state_test(self, outage_monitor_instance):
         serial_number_1 = "B827EB76A8DE"
         serial_number_2 = "D827GD76C8FG"
 
@@ -2267,49 +1926,28 @@ class TestServiceOutageMonitor:
             fresh_device_2_info,
         ]
 
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        config = testconfig
+        outage_monitor_instance._bruin_repository.create_outage_ticket = AsyncMock()
+        outage_monitor_instance._bruin_repository.append_triage_note_to_ticket = AsyncMock()
 
-        bruin_repository = Mock()
-        bruin_repository.create_outage_ticket = CoroutineMock()
-        bruin_repository.append_triage_note_to_ticket = CoroutineMock()
+        outage_monitor_instance._hawkeye_repository.get_probes = AsyncMock(return_value=probes_response)
 
-        hawkeye_repository = Mock()
-        hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
+        outage_monitor_instance._notifications_repository.send_slack_message = AsyncMock()
 
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        outage_monitor_instance._map_probes_info_with_customer_cache = Mock(return_value=fresh_devices_info)
+        outage_monitor_instance._build_triage_note = Mock()
+        outage_monitor_instance._run_ticket_autoresolve = AsyncMock()
 
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        with patch.object(outage_monitor_instance._config, "CURRENT_ENVIRONMENT", "production"):
+            await outage_monitor_instance._recheck_devices_for_ticket_creation(devices_info)
+
+        outage_monitor_instance._hawkeye_repository.get_probes.assert_awaited_once()
+        outage_monitor_instance._map_probes_info_with_customer_cache.assert_called_once_with(
+            fresh_probes, devices_cached_info
         )
-        outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=fresh_devices_info)
-        outage_monitor._build_triage_note = Mock()
-        outage_monitor._run_ticket_autoresolve = CoroutineMock()
-
-        with patch.object(config, "CURRENT_ENVIRONMENT", "production"):
-            await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
-
-        hawkeye_repository.get_probes.assert_awaited_once()
-        outage_monitor._map_probes_info_with_customer_cache.assert_called_once_with(fresh_probes, devices_cached_info)
-        bruin_repository.create_outage_ticket.assert_not_awaited()
-        outage_monitor._build_triage_note.assert_not_called()
-        bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
-        outage_monitor._run_ticket_autoresolve.assert_has_awaits(
+        outage_monitor_instance._bruin_repository.create_outage_ticket.assert_not_awaited()
+        outage_monitor_instance._build_triage_note.assert_not_called()
+        outage_monitor_instance._bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
+        outage_monitor_instance._run_ticket_autoresolve.assert_has_awaits(
             [
                 call(fresh_device_1_info),
                 call(fresh_device_2_info),
@@ -2318,7 +1956,7 @@ class TestServiceOutageMonitor:
         )
 
     @pytest.mark.asyncio
-    async def recheck_devices_with_get_probes_response_having_non_2xx_status_test(self):
+    async def recheck_devices_with_get_probes_response_having_non_2xx_status_test(self, outage_monitor_instance):
         serial_number_1 = "B827EB76A8DE"
         serial_number_2 = "D827GD76C8FG"
 
@@ -2437,49 +2075,26 @@ class TestServiceOutageMonitor:
             "status": 500,
         }
 
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
+        outage_monitor_instance._bruin_repository.create_outage_ticket = AsyncMock()
+        outage_monitor_instance._bruin_repository.append_triage_note_to_ticket = AsyncMock()
 
-        bruin_repository = Mock()
-        bruin_repository.create_outage_ticket = CoroutineMock()
-        bruin_repository.append_triage_note_to_ticket = CoroutineMock()
+        outage_monitor_instance._hawkeye_repository.get_probes = AsyncMock(return_value=probes_response)
 
-        hawkeye_repository = Mock()
-        hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
+        outage_monitor_instance._notifications_repository.send_slack_message = AsyncMock()
 
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        outage_monitor_instance._map_probes_info_with_customer_cache = Mock()
+        outage_monitor_instance._build_triage_note = Mock()
 
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
-        )
-        outage_monitor._map_probes_info_with_customer_cache = Mock()
-        outage_monitor._build_triage_note = Mock()
+        await outage_monitor_instance._recheck_devices_for_ticket_creation(devices_info)
 
-        await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
-
-        hawkeye_repository.get_probes.assert_awaited_once()
-        outage_monitor._map_probes_info_with_customer_cache.assert_not_called()
-        bruin_repository.create_outage_ticket.assert_not_awaited()
-        outage_monitor._build_triage_note.assert_not_called()
-        bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
+        outage_monitor_instance._hawkeye_repository.get_probes.assert_awaited_once()
+        outage_monitor_instance._map_probes_info_with_customer_cache.assert_not_called()
+        outage_monitor_instance._bruin_repository.create_outage_ticket.assert_not_awaited()
+        outage_monitor_instance._build_triage_note.assert_not_called()
+        outage_monitor_instance._bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def recheck_devices_with_empty_list_of_probes_test(self):
+    async def recheck_devices_with_empty_list_of_probes_test(self, outage_monitor_instance):
         serial_number_1 = "B827EB76A8DE"
         serial_number_2 = "D827GD76C8FG"
 
@@ -2598,49 +2213,26 @@ class TestServiceOutageMonitor:
             "status": 200,
         }
 
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
+        outage_monitor_instance._bruin_repository.create_outage_ticket = AsyncMock()
+        outage_monitor_instance._bruin_repository.append_triage_note_to_ticket = AsyncMock()
 
-        bruin_repository = Mock()
-        bruin_repository.create_outage_ticket = CoroutineMock()
-        bruin_repository.append_triage_note_to_ticket = CoroutineMock()
+        outage_monitor_instance._hawkeye_repository.get_probes = AsyncMock(return_value=probes_response)
 
-        hawkeye_repository = Mock()
-        hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
+        outage_monitor_instance._notifications_repository.send_slack_message = AsyncMock()
 
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        outage_monitor_instance._map_probes_info_with_customer_cache = Mock()
+        outage_monitor_instance._build_triage_note = Mock()
 
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
-        )
-        outage_monitor._map_probes_info_with_customer_cache = Mock()
-        outage_monitor._build_triage_note = Mock()
+        await outage_monitor_instance._recheck_devices_for_ticket_creation(devices_info)
 
-        await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
-
-        hawkeye_repository.get_probes.assert_awaited_once()
-        outage_monitor._map_probes_info_with_customer_cache.assert_not_called()
-        bruin_repository.create_outage_ticket.assert_not_awaited()
-        outage_monitor._build_triage_note.assert_not_called()
-        bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
+        outage_monitor_instance._hawkeye_repository.get_probes.assert_awaited_once()
+        outage_monitor_instance._map_probes_info_with_customer_cache.assert_not_called()
+        outage_monitor_instance._bruin_repository.create_outage_ticket.assert_not_awaited()
+        outage_monitor_instance._build_triage_note.assert_not_called()
+        outage_monitor_instance._bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def recheck_devices_with_no_active_probes_test(self):
+    async def recheck_devices_with_no_active_probes_test(self, outage_monitor_instance):
         serial_number_1 = "B827EB76A8DE"
         serial_number_2 = "D827GD76C8FG"
 
@@ -2800,49 +2392,26 @@ class TestServiceOutageMonitor:
             "status": 200,
         }
 
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
+        outage_monitor_instance._bruin_repository.create_outage_ticket = AsyncMock()
+        outage_monitor_instance._bruin_repository.append_triage_note_to_ticket = AsyncMock()
 
-        bruin_repository = Mock()
-        bruin_repository.create_outage_ticket = CoroutineMock()
-        bruin_repository.append_triage_note_to_ticket = CoroutineMock()
+        outage_monitor_instance._hawkeye_repository.get_probes = AsyncMock(return_value=probes_response)
 
-        hawkeye_repository = Mock()
-        hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
+        outage_monitor_instance._notifications_repository.send_slack_message = AsyncMock()
 
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        outage_monitor_instance._map_probes_info_with_customer_cache = Mock()
+        outage_monitor_instance._build_triage_note = Mock()
 
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
-        )
-        outage_monitor._map_probes_info_with_customer_cache = Mock()
-        outage_monitor._build_triage_note = Mock()
+        await outage_monitor_instance._recheck_devices_for_ticket_creation(devices_info)
 
-        await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
-
-        hawkeye_repository.get_probes.assert_awaited_once()
-        outage_monitor._map_probes_info_with_customer_cache.assert_not_called()
-        bruin_repository.create_outage_ticket.assert_not_awaited()
-        outage_monitor._build_triage_note.assert_not_called()
-        bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
+        outage_monitor_instance._hawkeye_repository.get_probes.assert_awaited_once()
+        outage_monitor_instance._map_probes_info_with_customer_cache.assert_not_called()
+        outage_monitor_instance._bruin_repository.create_outage_ticket.assert_not_awaited()
+        outage_monitor_instance._build_triage_note.assert_not_called()
+        outage_monitor_instance._bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def recheck_devices_with_environment_other_than_production_test(self):
+    async def recheck_devices_with_environment_other_than_production_test(self, outage_monitor_instance):
         serial_number_1 = "B827EB76A8DE"
         serial_number_2 = "D827GD76C8FG"
 
@@ -2977,82 +2546,61 @@ class TestServiceOutageMonitor:
 
         triage_note = "This is Hawkeye's triage note"
 
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        config = testconfig
+        outage_monitor_instance._bruin_repository.create_outage_ticket = AsyncMock(return_value=create_ticket_response)
+        outage_monitor_instance._bruin_repository.append_triage_note_to_ticket = AsyncMock()
 
-        bruin_repository = Mock()
-        bruin_repository.create_outage_ticket = CoroutineMock(return_value=create_ticket_response)
-        bruin_repository.append_triage_note_to_ticket = CoroutineMock()
+        outage_monitor_instance._hawkeye_repository.get_probes = AsyncMock(return_value=probes_response)
 
-        hawkeye_repository = Mock()
-        hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
+        outage_monitor_instance._notifications_repository.send_slack_message = AsyncMock()
 
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        outage_monitor_instance._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
+        outage_monitor_instance._build_triage_note = Mock(return_value=triage_note)
 
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        with patch.object(outage_monitor_instance._config, "CURRENT_ENVIRONMENT", "dev"):
+            await outage_monitor_instance._recheck_devices_for_ticket_creation(devices_info)
+
+        outage_monitor_instance._hawkeye_repository.get_probes.assert_awaited_once()
+        outage_monitor_instance._map_probes_info_with_customer_cache.assert_called_once_with(
+            probes, devices_cached_info
         )
-        outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
-        outage_monitor._build_triage_note = Mock(return_value=triage_note)
-
-        with patch.object(config, "CURRENT_ENVIRONMENT", "dev"):
-            await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
-
-        hawkeye_repository.get_probes.assert_awaited_once()
-        outage_monitor._map_probes_info_with_customer_cache.assert_called_once_with(probes, devices_cached_info)
-        bruin_repository.create_outage_ticket.assert_not_awaited()
-        outage_monitor._build_triage_note.assert_not_called()
-        bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
+        outage_monitor_instance._bruin_repository.create_outage_ticket.assert_not_awaited()
+        outage_monitor_instance._build_triage_note.assert_not_called()
+        outage_monitor_instance._bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def reopen_outage_ticket_test(
-        self, probes_response, outage_monitor, devices_info, ticket_response_reopen, bruin_response_ok
+        self, probes_response, outage_monitor_instance, devices_info, ticket_response_reopen, bruin_response_ok
     ):
-        outage_monitor._bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_response_reopen)
-        outage_monitor._bruin_repository.append_triage_note = CoroutineMock()
-        outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=bruin_response_ok)
-        outage_monitor._bruin_repository.open_ticket = CoroutineMock(return_value={"status": 200, "body": None})
+        outage_monitor_instance._bruin_repository.create_outage_ticket = AsyncMock(return_value=ticket_response_reopen)
+        outage_monitor_instance._bruin_repository.append_note_to_ticket = AsyncMock()
+        outage_monitor_instance._bruin_repository.get_ticket_details = AsyncMock(return_value=bruin_response_ok)
+        outage_monitor_instance._bruin_repository.open_ticket = AsyncMock(return_value={"status": 200, "body": None})
 
-        outage_monitor._hawkeye_repository.get_probes = CoroutineMock(return_value=probes_response)
+        outage_monitor_instance._hawkeye_repository.get_probes = AsyncMock(return_value=probes_response)
 
-        outage_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        outage_monitor_instance._notifications_repository.send_slack_message = AsyncMock()
 
-        outage_monitor._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
-        with patch.object(testconfig, "CURRENT_ENVIRONMENT", "production"):
-            await outage_monitor._recheck_devices_for_ticket_creation(devices_info)
+        outage_monitor_instance._map_probes_info_with_customer_cache = Mock(return_value=devices_info)
+        with patch.object(outage_monitor_instance._config, "CURRENT_ENVIRONMENT", "production"):
+            await outage_monitor_instance._recheck_devices_for_ticket_creation(devices_info)
 
-        outage_monitor._hawkeye_repository.get_probes.assert_awaited_once()
-        outage_monitor._map_probes_info_with_customer_cache.assert_called()
-        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited()
+        outage_monitor_instance._hawkeye_repository.get_probes.assert_awaited_once()
+        outage_monitor_instance._map_probes_info_with_customer_cache.assert_called()
+        outage_monitor_instance._bruin_repository.create_outage_ticket.assert_awaited()
 
     @pytest.mark.asyncio
     async def reopen_outage_ticket_bad_get_ticket_detail_test(
-        self, device_1_info, ticket_id, bruin_exception_response, outage_monitor
+        self, device_1_info, ticket_id, bruin_exception_response, outage_monitor_instance
     ):
-        outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=bruin_exception_response)
-        outage_monitor._bruin_repository.open_ticket = CoroutineMock()
+        outage_monitor_instance._bruin_repository.get_ticket_details = AsyncMock(return_value=bruin_exception_response)
+        outage_monitor_instance._bruin_repository.open_ticket = AsyncMock()
 
-        outage_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        outage_monitor_instance._notifications_repository.send_slack_message = AsyncMock()
 
-        await outage_monitor._reopen_outage_ticket(ticket_id, device_1_info)
+        await outage_monitor_instance._reopen_outage_ticket(ticket_id, device_1_info)
 
-        outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        outage_monitor._bruin_repository.open_ticket.assert_not_awaited()
+        outage_monitor_instance._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        outage_monitor_instance._bruin_repository.open_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def reopen_outage_ticket_with_reopen_request_having_non_2xx_status_test(
@@ -3062,19 +2610,21 @@ class TestServiceOutageMonitor:
         ticket_detail_for_serial_1,
         bruin_response_ok,
         bruin_exception_response,
-        outage_monitor,
+        outage_monitor_instance,
     ):
         ticket_detail_for_serial_1_id = ticket_detail_for_serial_1["detailID"]
 
-        outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=bruin_response_ok)
-        outage_monitor._bruin_repository.open_ticket = CoroutineMock(return_value=bruin_exception_response)
-        outage_monitor._bruin_repository.append_note_to_ticket = CoroutineMock()
+        outage_monitor_instance._bruin_repository.get_ticket_details = AsyncMock(return_value=bruin_response_ok)
+        outage_monitor_instance._bruin_repository.open_ticket = AsyncMock(return_value=bruin_exception_response)
+        outage_monitor_instance._bruin_repository.append_note_to_ticket = AsyncMock()
 
-        await outage_monitor._reopen_outage_ticket(ticket_id, device_1_info)
+        await outage_monitor_instance._reopen_outage_ticket(ticket_id, device_1_info)
 
-        outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        outage_monitor._bruin_repository.open_ticket.assert_awaited_once_with(ticket_id, ticket_detail_for_serial_1_id)
-        outage_monitor._bruin_repository.append_note_to_ticket.assert_not_awaited()
+        outage_monitor_instance._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        outage_monitor_instance._bruin_repository.open_ticket.assert_awaited_once_with(
+            ticket_id, ticket_detail_for_serial_1_id
+        )
+        outage_monitor_instance._bruin_repository.append_note_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def reopen_outage_ticket_ok_test(
@@ -3084,31 +2634,35 @@ class TestServiceOutageMonitor:
         ticket_detail_for_serial_1,
         bruin_response_ok,
         bruin_reopen_response_ok,
-        outage_monitor,
+        outage_monitor_instance,
     ):
         ticket_detail_for_serial_1_id = ticket_detail_for_serial_1["detailID"]
         serial_number = ticket_detail_for_serial_1["detailValue"]
         reopen_note = "#*MetTel's IPA*#\nRe-opening task"
 
-        outage_monitor._bruin_repository.get_ticket_details = CoroutineMock(return_value=bruin_response_ok)
-        outage_monitor._bruin_repository.open_ticket = CoroutineMock(return_value=bruin_reopen_response_ok)
-        outage_monitor._build_triage_note = Mock(return_value=reopen_note)
-        outage_monitor._bruin_repository.append_note_to_ticket = CoroutineMock()
-        outage_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        outage_monitor_instance._bruin_repository.get_ticket_details = AsyncMock(return_value=bruin_response_ok)
+        outage_monitor_instance._bruin_repository.open_ticket = AsyncMock(return_value=bruin_reopen_response_ok)
+        outage_monitor_instance._build_triage_note = Mock(return_value=reopen_note)
+        outage_monitor_instance._bruin_repository.append_note_to_ticket = AsyncMock()
+        outage_monitor_instance._notifications_repository.send_slack_message = AsyncMock()
 
-        await outage_monitor._reopen_outage_ticket(ticket_id, device_1_info)
+        await outage_monitor_instance._reopen_outage_ticket(ticket_id, device_1_info)
 
-        outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        outage_monitor._bruin_repository.open_ticket.assert_awaited_once_with(ticket_id, ticket_detail_for_serial_1_id)
-        outage_monitor._build_triage_note.assert_called_once_with(device_1_info["device_info"], is_reopen_note=True)
-        outage_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
+        outage_monitor_instance._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        outage_monitor_instance._bruin_repository.open_ticket.assert_awaited_once_with(
+            ticket_id, ticket_detail_for_serial_1_id
+        )
+        outage_monitor_instance._build_triage_note.assert_called_once_with(
+            device_1_info["device_info"], is_reopen_note=True
+        )
+        outage_monitor_instance._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
             ticket_id, reopen_note, service_numbers=[serial_number]
         )
-        outage_monitor._notifications_repository.send_slack_message.assert_awaited()
+        outage_monitor_instance._notifications_repository.send_slack_message.assert_awaited()
 
-    def build_reopen_note_test(self, device_1_info, outage_monitor):
+    def build_reopen_note_test(self, device_1_info, outage_monitor_instance):
         device_info = device_1_info["device_info"]
-        tz_object = timezone(outage_monitor._config.TIMEZONE)
+        tz_object = timezone(outage_monitor_instance._config.TIMEZONE)
         current_datetime = datetime.now(utc).astimezone(tz_object)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
@@ -3138,12 +2692,14 @@ class TestServiceOutageMonitor:
         )
 
         with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
-            result = outage_monitor._build_triage_note(device_1_info["device_info"], is_reopen_note=True)
+            result = outage_monitor_instance._build_triage_note(device_1_info["device_info"], is_reopen_note=True)
 
             assert result == expected
 
     @pytest.mark.asyncio
-    async def append_triage_note_if_needed_with_ticket_details_response_having_non_2xx_status_test(self):
+    async def append_triage_note_if_needed_with_ticket_details_response_having_non_2xx_status_test(
+        self, outage_monitor_instance
+    ):
         ticket_id = 12345
 
         serial_number = "B827EB92EB72"
@@ -3192,44 +2748,21 @@ class TestServiceOutageMonitor:
             "status": 500,
         }
 
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        hawkeye_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
+        outage_monitor_instance._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
+        outage_monitor_instance._bruin_repository.append_triage_note_to_ticket = AsyncMock()
 
-        bruin_repository = Mock()
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-        bruin_repository.append_triage_note_to_ticket = CoroutineMock()
+        outage_monitor_instance._build_triage_note = Mock()
+        outage_monitor_instance._get_triage_note = Mock()
 
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
-        )
-        outage_monitor._build_triage_note = Mock()
-        outage_monitor._get_triage_note = Mock()
+        await outage_monitor_instance._append_triage_note_if_needed(ticket_id, device_info)
 
-        await outage_monitor._append_triage_note_if_needed(ticket_id, device_info)
-
-        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        outage_monitor._get_triage_note.assert_not_called()
-        outage_monitor._build_triage_note.assert_not_called()
-        bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
+        outage_monitor_instance._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        outage_monitor_instance._get_triage_note.assert_not_called()
+        outage_monitor_instance._build_triage_note.assert_not_called()
+        outage_monitor_instance._bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def append_triage_note_if_needed_with_triage_note_found_in_ticket_test(self):
+    async def append_triage_note_if_needed_with_triage_note_found_in_ticket_test(self, outage_monitor_instance):
         ticket_id = 12345
 
         serial_number = "B827EB92EB72"
@@ -3298,44 +2831,21 @@ class TestServiceOutageMonitor:
             "status": 200,
         }
 
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        hawkeye_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
+        outage_monitor_instance._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
+        outage_monitor_instance._bruin_repository.append_triage_note_to_ticket = AsyncMock()
 
-        bruin_repository = Mock()
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-        bruin_repository.append_triage_note_to_ticket = CoroutineMock()
+        outage_monitor_instance._build_triage_note = Mock()
+        outage_monitor_instance._get_triage_note = Mock(return_value={"noteValue": "Some irrelevant note"})
 
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
-        )
-        outage_monitor._build_triage_note = Mock()
-        outage_monitor._get_triage_note = Mock(return_value={"noteValue": "Some irrelevant note"})
+        await outage_monitor_instance._append_triage_note_if_needed(ticket_id, device_info)
 
-        await outage_monitor._append_triage_note_if_needed(ticket_id, device_info)
-
-        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        outage_monitor._get_triage_note.assert_called_once_with(ticket_notes)
-        outage_monitor._build_triage_note.assert_not_called()
-        bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
+        outage_monitor_instance._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        outage_monitor_instance._get_triage_note.assert_called_once_with(ticket_notes)
+        outage_monitor_instance._build_triage_note.assert_not_called()
+        outage_monitor_instance._bruin_repository.append_triage_note_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def append_triage_note_if_needed_with_triage_note_not_found_in_ticket_test(self):
+    async def append_triage_note_if_needed_with_triage_note_not_found_in_ticket_test(self, outage_monitor_instance):
         ticket_id = 12345
 
         serial_number = "B827EB92EB72"
@@ -3397,69 +2907,25 @@ class TestServiceOutageMonitor:
 
         triage_note = "This is a triage note"
 
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        hawkeye_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
+        outage_monitor_instance._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
+        outage_monitor_instance._bruin_repository.append_triage_note_to_ticket = AsyncMock()
 
-        bruin_repository = Mock()
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-        bruin_repository.append_triage_note_to_ticket = CoroutineMock()
+        outage_monitor_instance._build_triage_note = Mock(return_value=triage_note)
+        outage_monitor_instance._get_triage_note = Mock(return_value=None)
 
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        await outage_monitor_instance._append_triage_note_if_needed(ticket_id, device_info)
+
+        outage_monitor_instance._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        outage_monitor_instance._get_triage_note.assert_called_once_with(ticket_notes)
+        outage_monitor_instance._build_triage_note.assert_called_once_with(device_info)
+        outage_monitor_instance._bruin_repository.append_triage_note_to_ticket.assert_awaited_once_with(
+            ticket_id, serial_number, triage_note
         )
-        outage_monitor._build_triage_note = Mock(return_value=triage_note)
-        outage_monitor._get_triage_note = Mock(return_value=None)
 
-        await outage_monitor._append_triage_note_if_needed(ticket_id, device_info)
-
-        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        outage_monitor._get_triage_note.assert_called_once_with(ticket_notes)
-        outage_monitor._build_triage_note.assert_called_once_with(device_info)
-        bruin_repository.append_triage_note_to_ticket.assert_awaited_once_with(ticket_id, serial_number, triage_note)
-
-    def get_triage_note_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        hawkeye_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
-        )
+    def get_triage_note_test(self, outage_monitor_instance):
 
         ticket_notes = []
-        triage_note = outage_monitor._get_triage_note(ticket_notes)
+        triage_note = outage_monitor_instance._get_triage_note(ticket_notes)
         assert triage_note is None
 
         ticket_notes = [
@@ -3472,7 +2938,7 @@ class TestServiceOutageMonitor:
                 ],
             },
         ]
-        triage_note = outage_monitor._get_triage_note(ticket_notes)
+        triage_note = outage_monitor_instance._get_triage_note(ticket_notes)
         assert triage_note is None
 
         ticket_notes = [
@@ -3485,7 +2951,7 @@ class TestServiceOutageMonitor:
                 ],
             },
         ]
-        triage_note = outage_monitor._get_triage_note(ticket_notes)
+        triage_note = outage_monitor_instance._get_triage_note(ticket_notes)
         assert triage_note is ticket_notes[0]
 
         ticket_notes = [
@@ -3498,10 +2964,10 @@ class TestServiceOutageMonitor:
                 ],
             },
         ]
-        triage_note = outage_monitor._get_triage_note(ticket_notes)
+        triage_note = outage_monitor_instance._get_triage_note(ticket_notes)
         assert triage_note is ticket_notes[0]
 
-    def build_triage_note_test(self):
+    def build_triage_note_test(self, outage_monitor_instance):
         device_info = {
             "probeId": "1",
             "uid": "b8:27:eb:76:a8:de",
@@ -3542,35 +3008,11 @@ class TestServiceOutageMonitor:
             "realservice": {"status": 1, "lastUpdate": "2020-11-15T10:18:28Z"},
         }
 
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        hawkeye_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
-        )
-
         current_datetime = datetime.now(utc)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
-            triage_note = outage_monitor._build_triage_note(device_info)
+            triage_note = outage_monitor_instance._build_triage_note(device_info)
 
         expected_note = os.linesep.join(
             [
@@ -3591,13 +3033,15 @@ class TestServiceOutageMonitor:
                 "Device Real Service Status: UP",
                 "Real Service Last Update: 2020-11-15 05:18:28-05:00",
                 "",
-                f"TimeStamp: {str(current_datetime.astimezone(timezone(config.TIMEZONE)))}",
+                f"TimeStamp: {str(current_datetime.astimezone(timezone(outage_monitor_instance._config.TIMEZONE)))}",
             ]
         )
         assert triage_note == expected_note
 
     @pytest.mark.asyncio
-    async def run_ticket_autoresolve_with_retrieval_of_ticket_returning_non_2xx_status_test(self):
+    async def run_ticket_autoresolve_with_retrieval_of_ticket_returning_non_2xx_status_test(
+        self, outage_monitor_instance
+    ):
         serial_number = "B827EB92EB72"
         client_id = 9994
 
@@ -3656,40 +3100,20 @@ class TestServiceOutageMonitor:
             "status": 400,
         }
 
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        config = testconfig
-        hawkeye_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_ticket_details = CoroutineMock()
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        outage_monitor_instance._bruin_repository.get_open_outage_tickets = AsyncMock(
+            return_value=outage_ticket_response
         )
+        outage_monitor_instance._bruin_repository.get_ticket_details = AsyncMock()
 
-        await outage_monitor._run_ticket_autoresolve(device)
+        await outage_monitor_instance._run_ticket_autoresolve(device)
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
-        bruin_repository.get_ticket_details.assert_not_awaited()
+        outage_monitor_instance._bruin_repository.get_open_outage_tickets.assert_awaited_once_with(
+            client_id, service_number=serial_number
+        )
+        outage_monitor_instance._bruin_repository.get_ticket_details.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def run_ticket_autoresolve_with_no_open_outage_ticket_found_test(self):
+    async def run_ticket_autoresolve_with_no_open_outage_ticket_found_test(self, outage_monitor_instance):
         serial_number = "B827EB92EB72"
         client_id = 9994
 
@@ -3748,40 +3172,20 @@ class TestServiceOutageMonitor:
             "status": 200,
         }
 
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        config = testconfig
-        hawkeye_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_ticket_details = CoroutineMock()
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        outage_monitor_instance._bruin_repository.get_open_outage_tickets = AsyncMock(
+            return_value=outage_ticket_response
         )
+        outage_monitor_instance._bruin_repository.get_ticket_details = AsyncMock()
 
-        await outage_monitor._run_ticket_autoresolve(device)
+        await outage_monitor_instance._run_ticket_autoresolve(device)
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
-        bruin_repository.get_ticket_details.assert_not_awaited()
+        outage_monitor_instance._bruin_repository.get_open_outage_tickets.assert_awaited_once_with(
+            client_id, service_number=serial_number
+        )
+        outage_monitor_instance._bruin_repository.get_ticket_details.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def run_ticket_autoresolve_with_ticket_not_created_by_automation_engine_test(self):
+    async def run_ticket_autoresolve_with_ticket_not_created_by_automation_engine_test(self, outage_monitor_instance):
         serial_number = "B827EB92EB72"
         client_id = 9994
 
@@ -3851,42 +3255,25 @@ class TestServiceOutageMonitor:
             "status": 200,
         }
 
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        config = testconfig
-        hawkeye_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_ticket_details = CoroutineMock()
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        outage_monitor_instance._bruin_repository.get_open_outage_tickets = AsyncMock(
+            return_value=outage_ticket_response
         )
-        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=False)
+        outage_monitor_instance._bruin_repository.get_ticket_details = AsyncMock()
 
-        await outage_monitor._run_ticket_autoresolve(device)
+        outage_monitor_instance._was_ticket_created_by_automation_engine = Mock(return_value=False)
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
-        outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(ticket)
-        bruin_repository.get_ticket_details.assert_not_awaited()
+        await outage_monitor_instance._run_ticket_autoresolve(device)
+
+        outage_monitor_instance._bruin_repository.get_open_outage_tickets.assert_awaited_once_with(
+            client_id, service_number=serial_number
+        )
+        outage_monitor_instance._was_ticket_created_by_automation_engine.assert_called_once_with(ticket)
+        outage_monitor_instance._bruin_repository.get_ticket_details.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def run_ticket_autoresolve_with_retrieval_of_ticket_details_returning_non_2xx_status_test(self):
+    async def run_ticket_autoresolve_with_retrieval_of_ticket_details_returning_non_2xx_status_test(
+        self, outage_monitor_instance
+    ):
         serial_number = "B827EB92EB72"
         client_id = 9994
 
@@ -3961,43 +3348,26 @@ class TestServiceOutageMonitor:
             "status": 500,
         }
 
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        config = testconfig
-        hawkeye_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        outage_monitor_instance._bruin_repository.get_open_outage_tickets = AsyncMock(
+            return_value=outage_ticket_response
         )
-        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
-        outage_monitor._was_last_outage_detected_recently = Mock()
+        outage_monitor_instance._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
 
-        await outage_monitor._run_ticket_autoresolve(device)
+        outage_monitor_instance._was_ticket_created_by_automation_engine = Mock(return_value=True)
+        outage_monitor_instance._was_last_outage_detected_recently = Mock()
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
-        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        outage_monitor._was_last_outage_detected_recently.assert_not_called()
+        await outage_monitor_instance._run_ticket_autoresolve(device)
+
+        outage_monitor_instance._bruin_repository.get_open_outage_tickets.assert_awaited_once_with(
+            client_id, service_number=serial_number
+        )
+        outage_monitor_instance._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        outage_monitor_instance._was_last_outage_detected_recently.assert_not_called()
 
     @pytest.mark.asyncio
-    async def run_ticket_autoresolve_with_retrieval_of_ticket_details_returning_non_2xx_status_test(self):
+    async def run_ticket_autoresolve_with_retrieval_of_ticket_details_returning_non_2xx_status_2_test(
+        self, outage_monitor_instance
+    ):
         serial_number = "B827EB92EB72"
         client_id = 9994
 
@@ -4072,43 +3442,24 @@ class TestServiceOutageMonitor:
             "status": 500,
         }
 
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        config = testconfig
-        hawkeye_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        outage_monitor_instance._bruin_repository.get_open_outage_tickets = AsyncMock(
+            return_value=outage_ticket_response
         )
-        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
-        outage_monitor._was_last_outage_detected_recently = Mock()
+        outage_monitor_instance._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
 
-        await outage_monitor._run_ticket_autoresolve(device)
+        outage_monitor_instance._was_ticket_created_by_automation_engine = Mock(return_value=True)
+        outage_monitor_instance._was_last_outage_detected_recently = Mock()
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
-        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        outage_monitor._was_last_outage_detected_recently.assert_not_called()
+        await outage_monitor_instance._run_ticket_autoresolve(device)
+
+        outage_monitor_instance._bruin_repository.get_open_outage_tickets.assert_awaited_once_with(
+            client_id, service_number=serial_number
+        )
+        outage_monitor_instance._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        outage_monitor_instance._was_last_outage_detected_recently.assert_not_called()
 
     @pytest.mark.asyncio
-    async def run_ticket_autoresolve_with_last_outage_detected_long_ago_test(self):
+    async def run_ticket_autoresolve_with_last_outage_detected_long_ago_test(self, outage_monitor_instance):
         serial_number = "B827EB92EB72"
         client_id = 9994
 
@@ -4238,45 +3589,28 @@ class TestServiceOutageMonitor:
             ticket_note_3,
         ]
 
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        config = testconfig
-        hawkeye_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        outage_monitor_instance._bruin_repository.get_open_outage_tickets = AsyncMock(
+            return_value=outage_ticket_response
         )
-        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
-        outage_monitor._was_last_outage_detected_recently = Mock(return_value=False)
-        outage_monitor.is_outage_ticket_auto_resolvable = Mock()
+        outage_monitor_instance._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
 
-        await outage_monitor._run_ticket_autoresolve(device)
+        outage_monitor_instance._was_ticket_created_by_automation_engine = Mock(return_value=True)
+        outage_monitor_instance._was_last_outage_detected_recently = Mock(return_value=False)
+        outage_monitor_instance.is_outage_ticket_auto_resolvable = Mock()
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
-        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        outage_monitor._was_last_outage_detected_recently.assert_called_once_with(relevant_notes, ticket_creation_date)
-        outage_monitor.is_outage_ticket_auto_resolvable.assert_not_called()
+        await outage_monitor_instance._run_ticket_autoresolve(device)
+
+        outage_monitor_instance._bruin_repository.get_open_outage_tickets.assert_awaited_once_with(
+            client_id, service_number=serial_number
+        )
+        outage_monitor_instance._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        outage_monitor_instance._was_last_outage_detected_recently.assert_called_once_with(
+            relevant_notes, ticket_creation_date
+        )
+        outage_monitor_instance.is_outage_ticket_auto_resolvable.assert_not_called()
 
     @pytest.mark.asyncio
-    async def run_ticket_autoresolve_with_resolve_limit_exceeded_test(self):
+    async def run_ticket_autoresolve_with_resolve_limit_exceeded_test(self, outage_monitor_instance):
         serial_number = "B827EB92EB72"
         client_id = 9994
 
@@ -4415,47 +3749,32 @@ class TestServiceOutageMonitor:
             ticket_note_4,
         ]
 
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        config = testconfig
-        hawkeye_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        outage_monitor_instance._bruin_repository.get_open_outage_tickets = AsyncMock(
+            return_value=outage_ticket_response
         )
-        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
-        outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
-        outage_monitor.is_outage_ticket_auto_resolvable = Mock(return_value=False)
-        outage_monitor._is_detail_resolved = Mock()
+        outage_monitor_instance._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
 
-        await outage_monitor._run_ticket_autoresolve(device)
+        outage_monitor_instance._was_ticket_created_by_automation_engine = Mock(return_value=True)
+        outage_monitor_instance._was_last_outage_detected_recently = Mock(return_value=True)
+        outage_monitor_instance.is_outage_ticket_auto_resolvable = Mock(return_value=False)
+        outage_monitor_instance._is_detail_resolved = Mock()
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
-        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        outage_monitor._was_last_outage_detected_recently.assert_called_once_with(relevant_notes, ticket_creation_date)
-        outage_monitor.is_outage_ticket_auto_resolvable.assert_called_once_with(relevant_notes, max_autoresolves=3)
-        outage_monitor._is_detail_resolved.assert_not_called()
+        await outage_monitor_instance._run_ticket_autoresolve(device)
+
+        outage_monitor_instance._bruin_repository.get_open_outage_tickets.assert_awaited_once_with(
+            client_id, service_number=serial_number
+        )
+        outage_monitor_instance._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        outage_monitor_instance._was_last_outage_detected_recently.assert_called_once_with(
+            relevant_notes, ticket_creation_date
+        )
+        outage_monitor_instance.is_outage_ticket_auto_resolvable.assert_called_once_with(
+            relevant_notes, max_autoresolves=3
+        )
+        outage_monitor_instance._is_detail_resolved.assert_not_called()
 
     @pytest.mark.asyncio
-    async def run_ticket_autoresolve_with_ticket_detail_already_resolved_test(self):
+    async def run_ticket_autoresolve_with_ticket_detail_already_resolved_test(self, outage_monitor_instance):
         serial_number = "B827EB92EB72"
         client_id = 9994
 
@@ -4594,49 +3913,34 @@ class TestServiceOutageMonitor:
             ticket_note_4,
         ]
 
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        config = testconfig
-        hawkeye_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-        bruin_repository.resolve_ticket = CoroutineMock()
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        outage_monitor_instance._bruin_repository.get_open_outage_tickets = AsyncMock(
+            return_value=outage_ticket_response
         )
-        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
-        outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
-        outage_monitor.is_outage_ticket_auto_resolvable = Mock(return_value=True)
-        outage_monitor._is_detail_resolved = Mock(return_value=True)
+        outage_monitor_instance._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
+        outage_monitor_instance._bruin_repository.resolve_ticket = AsyncMock()
 
-        await outage_monitor._run_ticket_autoresolve(device)
+        outage_monitor_instance._was_ticket_created_by_automation_engine = Mock(return_value=True)
+        outage_monitor_instance._was_last_outage_detected_recently = Mock(return_value=True)
+        outage_monitor_instance.is_outage_ticket_auto_resolvable = Mock(return_value=True)
+        outage_monitor_instance._is_detail_resolved = Mock(return_value=True)
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
-        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        outage_monitor._was_last_outage_detected_recently.assert_called_once_with(relevant_notes, ticket_creation_date)
-        outage_monitor.is_outage_ticket_auto_resolvable.assert_called_once_with(relevant_notes, max_autoresolves=3)
-        outage_monitor._is_detail_resolved.assert_called_once_with(ticket_detail_1)
-        bruin_repository.resolve_ticket.assert_not_awaited()
+        await outage_monitor_instance._run_ticket_autoresolve(device)
+
+        outage_monitor_instance._bruin_repository.get_open_outage_tickets.assert_awaited_once_with(
+            client_id, service_number=serial_number
+        )
+        outage_monitor_instance._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        outage_monitor_instance._was_last_outage_detected_recently.assert_called_once_with(
+            relevant_notes, ticket_creation_date
+        )
+        outage_monitor_instance.is_outage_ticket_auto_resolvable.assert_called_once_with(
+            relevant_notes, max_autoresolves=3
+        )
+        outage_monitor_instance._is_detail_resolved.assert_called_once_with(ticket_detail_1)
+        outage_monitor_instance._bruin_repository.resolve_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def run_ticket_autoresolve_with_environment_different_from_production_test(self):
+    async def run_ticket_autoresolve_with_environment_different_from_production_test(self, outage_monitor_instance):
         serial_number = "B827EB92EB72"
         client_id = 9994
 
@@ -4775,50 +4079,35 @@ class TestServiceOutageMonitor:
             ticket_note_4,
         ]
 
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        hawkeye_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        config = testconfig
-
-        bruin_repository = Mock()
-        bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-        bruin_repository.resolve_ticket = CoroutineMock()
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        outage_monitor_instance._bruin_repository.get_open_outage_tickets = AsyncMock(
+            return_value=outage_ticket_response
         )
-        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
-        outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
-        outage_monitor.is_outage_ticket_auto_resolvable = Mock(return_value=True)
-        outage_monitor._is_detail_resolved = Mock(return_value=False)
+        outage_monitor_instance._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
+        outage_monitor_instance._bruin_repository.resolve_ticket = AsyncMock()
 
-        with patch.object(config, "CURRENT_ENVIRONMENT", "dev"):
-            await outage_monitor._run_ticket_autoresolve(device)
+        outage_monitor_instance._was_ticket_created_by_automation_engine = Mock(return_value=True)
+        outage_monitor_instance._was_last_outage_detected_recently = Mock(return_value=True)
+        outage_monitor_instance.is_outage_ticket_auto_resolvable = Mock(return_value=True)
+        outage_monitor_instance._is_detail_resolved = Mock(return_value=False)
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
-        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        outage_monitor._was_last_outage_detected_recently.assert_called_once_with(relevant_notes, ticket_creation_date)
-        outage_monitor.is_outage_ticket_auto_resolvable.assert_called_once_with(relevant_notes, max_autoresolves=3)
-        outage_monitor._is_detail_resolved.assert_called_once_with(ticket_detail_1)
-        bruin_repository.resolve_ticket.assert_not_awaited()
+        with patch.object(outage_monitor_instance._config, "CURRENT_ENVIRONMENT", "dev"):
+            await outage_monitor_instance._run_ticket_autoresolve(device)
+
+        outage_monitor_instance._bruin_repository.get_open_outage_tickets.assert_awaited_once_with(
+            client_id, service_number=serial_number
+        )
+        outage_monitor_instance._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        outage_monitor_instance._was_last_outage_detected_recently.assert_called_once_with(
+            relevant_notes, ticket_creation_date
+        )
+        outage_monitor_instance.is_outage_ticket_auto_resolvable.assert_called_once_with(
+            relevant_notes, max_autoresolves=3
+        )
+        outage_monitor_instance._is_detail_resolved.assert_called_once_with(ticket_detail_1)
+        outage_monitor_instance._bruin_repository.resolve_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def run_ticket_autoresolve_with_resolve_outage_return_non_2xx_status_test(self):
+    async def run_ticket_autoresolve_with_resolve_outage_return_non_2xx_status_test(self, outage_monitor_instance):
         serial_number = "B827EB92EB72"
         client_id = 9994
 
@@ -4962,57 +4251,42 @@ class TestServiceOutageMonitor:
             "status": 500,
         }
 
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        hawkeye_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        config = testconfig
-
-        bruin_repository = Mock()
-        bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-        bruin_repository.unpause_ticket_detail = CoroutineMock()
-        bruin_repository.resolve_ticket = CoroutineMock(return_value=resolve_ticket_response)
-        bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        outage_monitor_instance._bruin_repository.get_open_outage_tickets = AsyncMock(
+            return_value=outage_ticket_response
         )
-        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
-        outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
-        outage_monitor.is_outage_ticket_auto_resolvable = Mock(return_value=True)
-        outage_monitor._is_detail_resolved = Mock(return_value=False)
-        outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
+        outage_monitor_instance._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
+        outage_monitor_instance._bruin_repository.unpause_ticket_detail = AsyncMock()
+        outage_monitor_instance._bruin_repository.resolve_ticket = AsyncMock(return_value=resolve_ticket_response)
+        outage_monitor_instance._bruin_repository.append_autoresolve_note_to_ticket = AsyncMock()
 
-        with patch.object(config, "CURRENT_ENVIRONMENT", "production"):
-            await outage_monitor._run_ticket_autoresolve(device)
+        outage_monitor_instance._was_ticket_created_by_automation_engine = Mock(return_value=True)
+        outage_monitor_instance._was_last_outage_detected_recently = Mock(return_value=True)
+        outage_monitor_instance.is_outage_ticket_auto_resolvable = Mock(return_value=True)
+        outage_monitor_instance._is_detail_resolved = Mock(return_value=False)
+        outage_monitor_instance._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
-        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        outage_monitor._was_last_outage_detected_recently.assert_called_once_with(relevant_notes, ticket_creation_date)
-        outage_monitor.is_outage_ticket_auto_resolvable.assert_called_once_with(relevant_notes, max_autoresolves=3)
-        outage_monitor._is_detail_resolved.assert_called_once_with(ticket_detail_1)
-        bruin_repository.unpause_ticket_detail.assert_awaited_once_with(
+        with patch.object(outage_monitor_instance._config, "CURRENT_ENVIRONMENT", "production"):
+            await outage_monitor_instance._run_ticket_autoresolve(device)
+
+        outage_monitor_instance._bruin_repository.get_open_outage_tickets.assert_awaited_once_with(
+            client_id, service_number=serial_number
+        )
+        outage_monitor_instance._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        outage_monitor_instance._was_last_outage_detected_recently.assert_called_once_with(
+            relevant_notes, ticket_creation_date
+        )
+        outage_monitor_instance.is_outage_ticket_auto_resolvable.assert_called_once_with(
+            relevant_notes, max_autoresolves=3
+        )
+        outage_monitor_instance._is_detail_resolved.assert_called_once_with(ticket_detail_1)
+        outage_monitor_instance._bruin_repository.unpause_ticket_detail.assert_awaited_once_with(
             ticket_id, service_number=serial_number, detail_id=ticket_detail_1_id
         )
-        bruin_repository.resolve_ticket.assert_awaited_once_with(ticket_id, ticket_detail_1_id)
-        bruin_repository.append_autoresolve_note_to_ticket.assert_not_awaited()
+        outage_monitor_instance._bruin_repository.resolve_ticket.assert_awaited_once_with(ticket_id, ticket_detail_1_id)
+        outage_monitor_instance._bruin_repository.append_autoresolve_note_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def run_ticket_autoresolve_with_all_conditions_met_test(self):
+    async def run_ticket_autoresolve_with_all_conditions_met_test(self, outage_monitor_instance):
         serial_number = "B827EB92EB72"
         client_id = 9994
 
@@ -5156,81 +4430,45 @@ class TestServiceOutageMonitor:
             "status": 200,
         }
 
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        hawkeye_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        metrics_repository = Mock()
-        config = testconfig
-
-        bruin_repository = Mock()
-        bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=outage_ticket_response)
-        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details_response)
-        bruin_repository.unpause_ticket_detail = CoroutineMock()
-        bruin_repository.resolve_ticket = CoroutineMock(return_value=resolve_ticket_response)
-        bruin_repository.append_autoresolve_note_to_ticket = CoroutineMock()
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        outage_monitor_instance._bruin_repository.get_open_outage_tickets = AsyncMock(
+            return_value=outage_ticket_response
         )
-        outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
-        outage_monitor._was_last_outage_detected_recently = Mock(return_value=True)
-        outage_monitor.is_outage_ticket_auto_resolvable = Mock(return_value=True)
-        outage_monitor._is_detail_resolved = Mock(return_value=False)
-        outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
-        outage_monitor._notify_successful_autoresolve = CoroutineMock()
+        outage_monitor_instance._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
+        outage_monitor_instance._bruin_repository.unpause_ticket_detail = AsyncMock()
+        outage_monitor_instance._bruin_repository.resolve_ticket = AsyncMock(return_value=resolve_ticket_response)
+        outage_monitor_instance._bruin_repository.append_autoresolve_note_to_ticket = AsyncMock()
 
-        with patch.object(config, "CURRENT_ENVIRONMENT", "production"):
-            await outage_monitor._run_ticket_autoresolve(device)
+        outage_monitor_instance._was_ticket_created_by_automation_engine = Mock(return_value=True)
+        outage_monitor_instance._was_last_outage_detected_recently = Mock(return_value=True)
+        outage_monitor_instance.is_outage_ticket_auto_resolvable = Mock(return_value=True)
+        outage_monitor_instance._is_detail_resolved = Mock(return_value=False)
+        outage_monitor_instance._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
+        outage_monitor_instance._notify_successful_autoresolve = AsyncMock()
 
-        bruin_repository.get_open_outage_tickets.assert_awaited_once_with(client_id, service_number=serial_number)
-        bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
-        outage_monitor._was_last_outage_detected_recently.assert_called_once_with(relevant_notes, ticket_creation_date)
-        outage_monitor.is_outage_ticket_auto_resolvable.assert_called_once_with(relevant_notes, max_autoresolves=3)
-        outage_monitor._is_detail_resolved.assert_called_once_with(ticket_detail_1)
-        bruin_repository.unpause_ticket_detail.assert_awaited_once_with(
+        with patch.object(outage_monitor_instance._config, "CURRENT_ENVIRONMENT", "production"):
+            await outage_monitor_instance._run_ticket_autoresolve(device)
+
+        outage_monitor_instance._bruin_repository.get_open_outage_tickets.assert_awaited_once_with(
+            client_id, service_number=serial_number
+        )
+        outage_monitor_instance._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
+        outage_monitor_instance._was_last_outage_detected_recently.assert_called_once_with(
+            relevant_notes, ticket_creation_date
+        )
+        outage_monitor_instance.is_outage_ticket_auto_resolvable.assert_called_once_with(
+            relevant_notes, max_autoresolves=3
+        )
+        outage_monitor_instance._is_detail_resolved.assert_called_once_with(ticket_detail_1)
+        outage_monitor_instance._bruin_repository.unpause_ticket_detail.assert_awaited_once_with(
             ticket_id, service_number=serial_number, detail_id=ticket_detail_1_id
         )
-        bruin_repository.resolve_ticket.assert_awaited_once_with(ticket_id, ticket_detail_1_id)
-        bruin_repository.append_autoresolve_note_to_ticket.assert_awaited_once_with(ticket_id, serial_number)
-        outage_monitor._notify_successful_autoresolve.assert_awaited_once_with(ticket_id, ticket_detail_1_id)
-
-    def was_ticket_created_by_automation_engine_test(self):
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        hawkeye_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-        config = testconfig
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
+        outage_monitor_instance._bruin_repository.resolve_ticket.assert_awaited_once_with(ticket_id, ticket_detail_1_id)
+        outage_monitor_instance._bruin_repository.append_autoresolve_note_to_ticket.assert_awaited_once_with(
+            ticket_id, serial_number
         )
+        outage_monitor_instance._notify_successful_autoresolve.assert_awaited_once_with(ticket_id, ticket_detail_1_id)
+
+    def was_ticket_created_by_automation_engine_test(self, outage_monitor_instance):
 
         ticket = {
             "clientID": 12345,
@@ -5242,7 +4480,7 @@ class TestServiceOutageMonitor:
             "createDate": "9/25/2020 6:31:54 AM",
             "createdBy": "Intelygenz Ai",
         }
-        result = outage_monitor._was_ticket_created_by_automation_engine(ticket)
+        result = outage_monitor_instance._was_ticket_created_by_automation_engine(ticket)
         assert result is True
 
         ticket = {
@@ -5255,33 +4493,10 @@ class TestServiceOutageMonitor:
             "createDate": "9/25/2020 6:31:54 AM",
             "createdBy": "InterMapper Service",
         }
-        result = outage_monitor._was_ticket_created_by_automation_engine(ticket)
+        result = outage_monitor_instance._was_ticket_created_by_automation_engine(ticket)
         assert result is False
 
-    def is_outage_ticket_detail_auto_resolvable_test(self):
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        config = testconfig
-        hawkeye_repository = Mock()
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
-        )
+    def is_outage_ticket_detail_auto_resolvable_test(self, outage_monitor_instance):
 
         autoresolve_limit = 3
 
@@ -5305,7 +4520,7 @@ class TestServiceOutageMonitor:
                 ],
             },
         ]
-        result = outage_monitor.is_outage_ticket_auto_resolvable(ticket_notes, autoresolve_limit)
+        result = outage_monitor_instance.is_outage_ticket_auto_resolvable(ticket_notes, autoresolve_limit)
         assert result is True
 
         ticket_notes = [
@@ -5337,97 +4552,53 @@ class TestServiceOutageMonitor:
                 ],
             },
         ]
-        result = outage_monitor.is_outage_ticket_auto_resolvable(ticket_notes, autoresolve_limit)
+        result = outage_monitor_instance.is_outage_ticket_auto_resolvable(ticket_notes, autoresolve_limit)
         assert result is False
 
     @pytest.mark.asyncio
-    async def notify_successful_autoresolve_test(self):
+    async def notify_successful_autoresolve_test(self, outage_monitor_instance):
         ticket_id = 12345
         detail_id = 67890
 
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        config = testconfig
-        hawkeye_repository = Mock()
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
+        outage_monitor_instance._notifications_repository.send_slack_message = AsyncMock()
 
-        notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
-        )
-
-        await outage_monitor._notify_successful_autoresolve(ticket_id, detail_id)
+        await outage_monitor_instance._notify_successful_autoresolve(ticket_id, detail_id)
 
         autoresolve_slack_message = (
             f"Detail {detail_id} of outage ticket {ticket_id} was autoresolved: https://app.bruin.com/t/{ticket_id}"
         )
-        notifications_repository.send_slack_message.assert_awaited_once_with(autoresolve_slack_message)
+        outage_monitor_instance._notifications_repository.send_slack_message.assert_awaited_once_with(
+            autoresolve_slack_message
+        )
 
-    def was_last_outage_detected_recently_with_reopen_note_not_found_and_triage_not_found_test(self):
+    def was_last_outage_detected_recently_with_reopen_note_not_found_and_triage_not_found_test(
+        self, outage_monitor_instance
+    ):
         ticket_creation_date = "9/25/2020 6:31:54 AM"
         ticket_notes = []
-
-        logger = Mock()
-        scheduler = Mock()
-        event_bus = Mock()
-        config = testconfig
-        hawkeye_repository = Mock()
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
-        )
 
         new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(minutes=59, seconds=59)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor_instance._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(hours=1)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor_instance._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(ticket_creation_date).replace(tzinfo=utc) + timedelta(hours=1, seconds=1)
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor_instance._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is False
 
-    def was_last_outage_detected_recently_with_reopen_note_found_test(self):
+    def was_last_outage_detected_recently_with_reopen_note_found_test(self, outage_monitor_instance):
         ticket_creation_date = "9/25/2020 6:31:54 AM"
         triage_timestamp = "2021-01-02T10:18:16.71-05:00"
         reopen_timestamp = "2021-01-02T11:00:16.71-05:00"
@@ -5454,51 +4625,29 @@ class TestServiceOutageMonitor:
             ticket_note_2,
         ]
 
-        logger = Mock()
-        scheduler = Mock()
-        event_bus = Mock()
-        config = testconfig
-        hawkeye_repository = Mock()
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
-        )
-
         datetime_mock = Mock()
 
         new_now = parse(reopen_timestamp) + timedelta(minutes=59, seconds=59)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor_instance._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(reopen_timestamp) + timedelta(hours=1)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor_instance._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(reopen_timestamp) + timedelta(hours=1, seconds=1)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor_instance._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is False
 
-    def was_last_outage_detected_recently_with_reopen_note_having_old_watermark_found_test(self):
+    def was_last_outage_detected_recently_with_reopen_note_having_old_watermark_found_test(
+        self, outage_monitor_instance
+    ):
         ticket_creation_date = "9/25/2020 6:31:54 AM"
         triage_timestamp = "2021-01-02T10:18:16.71-05:00"
         reopen_timestamp = "2021-01-02T11:00:16.71-05:00"
@@ -5525,51 +4674,29 @@ class TestServiceOutageMonitor:
             ticket_note_2,
         ]
 
-        logger = Mock()
-        scheduler = Mock()
-        event_bus = Mock()
-        config = testconfig
-        hawkeye_repository = Mock()
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
-        )
-
         datetime_mock = Mock()
 
         new_now = parse(reopen_timestamp) + timedelta(minutes=59, seconds=59)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor_instance._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(reopen_timestamp) + timedelta(hours=1)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor_instance._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(reopen_timestamp) + timedelta(hours=1, seconds=1)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor_instance._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is False
 
-    def was_last_outage_detected_recently_with_reopen_note_not_found_and_triage_note_found_test(self):
+    def was_last_outage_detected_recently_with_reopen_note_not_found_and_triage_note_found_test(
+        self, outage_monitor_instance
+    ):
         ticket_creation_date = "9/25/2020 6:31:54 AM"
         triage_timestamp = "2021-01-02T10:18:16.71-05:00"
 
@@ -5586,52 +4713,28 @@ class TestServiceOutageMonitor:
             ticket_note_1,
         ]
 
-        logger = Mock()
-        scheduler = Mock()
-        event_bus = Mock()
-        config = testconfig
-        hawkeye_repository = Mock()
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
-        )
-
         datetime_mock = Mock()
 
         new_now = parse(triage_timestamp) + timedelta(minutes=59, seconds=59)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor_instance._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(triage_timestamp) + timedelta(hours=1)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor_instance._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(triage_timestamp) + timedelta(hours=1, seconds=1)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor_instance._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is False
 
     def was_last_outage_detected_recently_with_reopen_note_not_found_and_triage_note_having_old_watermark_found_test(
-        self,
+        self, outage_monitor_instance
     ):
         ticket_creation_date = "9/25/2020 6:31:54 AM"
         triage_timestamp = "2021-01-02T10:18:16.71-05:00"
@@ -5649,46 +4752,22 @@ class TestServiceOutageMonitor:
             ticket_note_1,
         ]
 
-        logger = Mock()
-        scheduler = Mock()
-        event_bus = Mock()
-        config = testconfig
-        hawkeye_repository = Mock()
-        metrics_repository = Mock()
-        bruin_repository = Mock()
-        notifications_repository = Mock()
-        customer_cache_repository = Mock()
-        utils_repository = Mock()
-
-        outage_monitor = OutageMonitor(
-            event_bus,
-            logger,
-            scheduler,
-            config,
-            metrics_repository,
-            bruin_repository,
-            hawkeye_repository,
-            notifications_repository,
-            customer_cache_repository,
-            utils_repository,
-        )
-
         datetime_mock = Mock()
 
         new_now = parse(triage_timestamp) + timedelta(minutes=59, seconds=59)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor_instance._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(triage_timestamp) + timedelta(hours=1)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor_instance._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is True
 
         new_now = parse(triage_timestamp) + timedelta(hours=1, seconds=1)
         datetime_mock.now = Mock(return_value=new_now)
         with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
-            result = outage_monitor._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
+            result = outage_monitor_instance._was_last_outage_detected_recently(ticket_notes, ticket_creation_date)
             assert result is False

@@ -287,6 +287,9 @@ services:
       - nats-server
       - redis
       - notifications-bridge
+      - bruin-bridge
+      - hawkeye-customer-cache
+      - hawkeye-bridge
     ports:
       - 5607:5000
       - 9270:9090
