@@ -60,7 +60,7 @@ def any_ticket():
 @pytest.fixture
 def any_task():
     return TicketTask(
-        id="any_id",
+        id=str(hash("any_id")),
         service_number=ServiceNumber("any_service_number"),
         auto_resolution_grace_period=timedelta(minutes=90),
         max_auto_resolutions=3,

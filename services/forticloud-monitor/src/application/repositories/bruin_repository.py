@@ -75,8 +75,18 @@ class BruinRepository:
     async def find_open_automation_ticket_for(self, device_id: DeviceId) -> Ticket:
         pass
 
-    async def unpause_task(self, ticket_id, task):
-        pass
+    async def unpause_task(self, ticket_id: str, task: TicketTask):
+        log.debug(f"unpause_task(ticket_id={ticket_id}, task={task})")
+        request = BruinRequest(
+            method="POST",
+            path=f"/api/Ticket/{ticket_id}/detail/unpause",
+            json={"serviceNumber": task.service_number, "detailId": int(task.id)},
+        )
+        response = await self.bruin_client.send(request)
+        log.debug(f"bruin_client.send({request})={response}")
+
+        if not response.status == HTTPStatus.OK:
+            raise UnexpectedStatusError(response.status)
 
     async def resolve_task(self, ticket_id: str, task: TicketTask):
         log.debug(f"resolve_task(ticket_id={ticket_id}, task={task})")
