@@ -1,10 +1,12 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytest
 
-from application.models.device import Device, DeviceId, DeviceStatus, DeviceType
-from application.models.note import Note
-from application.models.ticket import CreatedTicket, Ticket, TicketStatus
+from application.domain.device import Device, DeviceId, DeviceStatus, DeviceType
+from application.domain.note import Note
+from application.domain.service_number import ServiceNumber
+from application.domain.task import TaskStatus, TicketTask
+from application.domain.ticket import CreatedTicket, Ticket, TicketStatus
 
 
 @pytest.fixture
@@ -13,7 +15,7 @@ def any_device_id():
         id="any_id",
         network_id="any_network_id",
         client_id=str(hash("any_client_id")),
-        service_number=str(hash("any_service_number")),
+        service_number=ServiceNumber(str(hash("any_service_number"))),
         type=DeviceType.AP,
     )
 
@@ -53,6 +55,18 @@ def any_in_progress_ticket_status():
 @pytest.fixture
 def any_ticket():
     return Ticket(id="any_id", created_at=datetime.utcnow())
+
+
+@pytest.fixture
+def any_task():
+    return TicketTask(
+        id="any_id",
+        service_number=ServiceNumber("any_service_number"),
+        auto_resolution_grace_period=timedelta(minutes=90),
+        max_auto_resolutions=3,
+        status=TaskStatus.ONGOING,
+        cycles=[],
+    )
 
 
 @pytest.fixture

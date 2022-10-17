@@ -3,8 +3,9 @@ from datetime import datetime, timedelta
 from enum import IntEnum
 from typing import Dict
 
-from application.models.service_number import ServiceNumber
-from application.models.task import TaskCycleStatus, TaskStatus, TicketTask
+from application.domain.errors import AutoResolutionError
+from application.domain.service_number import ServiceNumber
+from application.domain.task import TaskCycleStatus, TaskStatus, TicketTask
 
 
 class TicketStatus(IntEnum):
@@ -27,7 +28,7 @@ class Ticket:
     created_at: datetime
     tasks: Dict[ServiceNumber, TicketTask] = field(default_factory=dict)
 
-    def auto_resolve_task_for(self, service_number: ServiceNumber) -> TicketTask:
+    def auto_resolve(self, service_number: ServiceNumber) -> TicketTask:
         task = self.tasks.get(service_number)
 
         if not task:
@@ -55,17 +56,17 @@ class Ticket:
         return self.created_at + duration >= datetime.utcnow()
 
 
-class AutoResolutionGracePeriodExpiredError(Exception):
+class AutoResolutionGracePeriodExpiredError(AutoResolutionError):
     pass
 
 
-class MaxTaskAutoResolutionsReachedError(Exception):
+class MaxTaskAutoResolutionsReachedError(AutoResolutionError):
     pass
 
 
-class ServiceNumberHasNoTaskError(Exception):
+class ServiceNumberHasNoTaskError(AutoResolutionError):
     pass
 
 
-class ServiceNumberTaskWasAlreadyResolvedError(Exception):
+class ServiceNumberTaskWasAlreadyResolvedError(AutoResolutionError):
     pass

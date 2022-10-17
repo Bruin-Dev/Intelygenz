@@ -5,9 +5,9 @@ from http import HTTPStatus
 from bruin_client import BruinClient, BruinRequest
 from pydantic import ValidationError
 
-from application.models.device import DeviceId
-from application.models.note import Note
-from application.models.ticket import CreatedTicket, TicketStatus
+from application.domain.device import DeviceId
+from application.domain.note import Note
+from application.domain.ticket import CreatedTicket, Ticket, TicketStatus
 from application.repositories.bruin_repository_models.post_repair_ticket import (
     PostRepairTicketBody,
     PostRepairTicketResponse,
@@ -70,3 +70,12 @@ class BruinRepository:
 
         if not response.status == HTTPStatus.OK:
             raise UnexpectedStatusError(response.status)
+
+    async def find_open_automation_ticket_for(self, device_id: DeviceId) -> Ticket:
+        pass
+
+    async def unpause_task(self, ticket_id, task):
+        pass
+
+    async def resolve_task(self, ticket_id, task):
+        pass

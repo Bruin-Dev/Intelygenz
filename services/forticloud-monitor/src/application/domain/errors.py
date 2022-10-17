@@ -1,0 +1,2 @@
+class AutoResolutionError(Exception):
+    pass

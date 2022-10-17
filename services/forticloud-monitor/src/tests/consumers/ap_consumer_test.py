@@ -6,7 +6,8 @@ from framework.nats.models import Subscription
 from nats.aio.msg import Msg
 
 from application.consumers import ApConsumer, ConsumerSettings
-from application.models.device import DeviceId, DeviceType
+from application.domain.device import DeviceId, DeviceType
+from application.domain.service_number import ServiceNumber
 
 any_serialized_message = b'{"serial_number":1,"network_id":1,"client_id":1}'
 
@@ -33,7 +34,7 @@ async def messages_are_properly_consumed_test(any_switch_consumer):
         id="any_serial_number",
         network_id="1",
         client_id="True",
-        service_number="any_serial_number",
+        service_number=ServiceNumber("any_serial_number"),
         type=DeviceType.AP,
     )
     check_device.assert_awaited_once_with(expected_device_id)

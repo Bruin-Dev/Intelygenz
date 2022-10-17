@@ -1,4 +1,4 @@
-from application.models.device import DeviceStatus
+from application.domain.device import DeviceStatus
 
 
 def device_status_is_properly_checked_test(any_device):

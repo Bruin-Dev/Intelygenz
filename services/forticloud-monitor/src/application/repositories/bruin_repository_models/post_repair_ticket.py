@@ -5,7 +5,7 @@ from bruin_client import BruinRequest
 from pydantic import Field, root_validator
 from pydantic.main import BaseModel
 
-from application.models.device import DeviceId
+from application.domain.device import DeviceId
 
 
 @dataclass
@@ -21,7 +21,13 @@ class PostRepairTicketBody(BaseModel):
 
     @classmethod
     def build_for(cls, device_id: DeviceId, description: str):
-        return cls(ClientID=device_id.client_id, WTNs=[device_id.service_number], RequestDescription=description)
+        return cls.parse_obj(
+            dict(
+                ClientID=device_id.client_id,
+                WTNs=[device_id.service_number],
+                RequestDescription=description,
+            )
+        )
 
 
 class Item(BaseModel):

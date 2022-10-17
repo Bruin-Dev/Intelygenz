@@ -6,8 +6,9 @@ from nats.aio.msg import Msg
 from pydantic import BaseModel
 
 from application.actions.check_device import CheckDevice
-from application.models.device import DeviceId, DeviceType
+from application.domain.device import DeviceId, DeviceType
 
+from ..domain.service_number import ServiceNumber
 from .consumer_settings import ConsumerSettings
 
 log = logging.getLogger(__name__)
@@ -44,6 +45,6 @@ def to_device_id(switch_message: SwitchMessage) -> DeviceId:
         id=switch_message.serial_number,
         network_id=switch_message.network_id,
         client_id=switch_message.client_id,
-        service_number=switch_message.serial_number,
+        service_number=ServiceNumber(switch_message.serial_number),
         type=DeviceType.SWITCH,
     )

@@ -6,7 +6,7 @@ from forticloud_client.client import ForticloudClient
 from tenacity import stop_after_attempt
 from tenacity.stop import stop_base
 
-from application.models.device import Device, DeviceStatus, DeviceType
+from application.domain.device import Device, DeviceStatus, DeviceType
 from application.repositories import (
     DEFAULT_RETRY_CONFIG,
     ForticloudRepository,

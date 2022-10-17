@@ -5,7 +5,7 @@ import pytest
 from bruin_client import BruinClient, BruinRequest, BruinResponse
 from pydantic import ValidationError
 
-from application.models.ticket import CreatedTicket, TicketStatus
+from application.domain.ticket import CreatedTicket, TicketStatus
 from application.repositories import BruinRepository, UnexpectedResponseError, UnexpectedStatusError
 
 

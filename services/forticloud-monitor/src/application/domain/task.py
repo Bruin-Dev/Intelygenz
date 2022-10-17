@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from enum import Enum, auto
 from typing import List, Optional
 
-from application.models.service_number import ServiceNumber
+from application.domain.service_number import ServiceNumber
 
 
 class TaskCycleStatus(Enum):
@@ -45,3 +45,7 @@ class TicketTask:
     @property
     def times_auto_resolved(self):
         return len([cycle for cycle in self.cycles if cycle.status == TaskCycleStatus.AUTO_RESOLVED])
+
+    @property
+    def auto_resolution_note_text(self) -> str:
+        return ""

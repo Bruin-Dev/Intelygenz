@@ -2,6 +2,8 @@ import logging
 from dataclasses import dataclass
 from enum import IntEnum
 
+from application.domain.service_number import ServiceNumber
+
 log = logging.getLogger(__name__)
 
 
@@ -21,7 +23,7 @@ class DeviceId:
     id: str
     network_id: str
     client_id: str
-    service_number: str
+    service_number: ServiceNumber
     type: DeviceType
 
 

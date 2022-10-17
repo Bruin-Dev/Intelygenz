@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 from bruin_client import BruinClient, BruinRequest, BruinResponse
 
-from application.models.note import Note
+from application.domain.note import Note
 from application.repositories import BruinRepository, UnexpectedStatusError
 
 

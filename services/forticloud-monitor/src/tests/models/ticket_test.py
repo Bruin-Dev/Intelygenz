@@ -3,8 +3,8 @@ from typing import Dict, List, Optional
 
 import pytest
 
-from application.models.task import ServiceNumber, TaskCycle, TaskCycleStatus, TaskStatus, TicketTask
-from application.models.ticket import (
+from application.domain.task import ServiceNumber, TaskCycle, TaskCycleStatus, TaskStatus, TicketTask
+from application.domain.ticket import (
     AutoResolutionGracePeriodExpiredError,
     MaxTaskAutoResolutionsReachedError,
     ServiceNumberHasNoTaskError,
@@ -61,7 +61,7 @@ def unexisting_service_number_tasks_cannot_be_auto_resolved_test(ticket_tasks):
 
     # then
     with pytest.raises(ServiceNumberHasNoTaskError):
-        ticket.auto_resolve_task_for(ServiceNumber("any_unexisting_service_number"))
+        ticket.auto_resolve(ServiceNumber("any_unexisting_service_number"))
 
 
 def resolved_tasks_cannot_be_auto_resolved_test():
@@ -75,7 +75,7 @@ def resolved_tasks_cannot_be_auto_resolved_test():
 
     # then
     with pytest.raises(ServiceNumberTaskWasAlreadyResolvedError):
-        ticket.auto_resolve_task_for(service_number)
+        ticket.auto_resolve(service_number)
 
 
 @pytest.mark.parametrize(
@@ -101,7 +101,7 @@ def tasks_can_only_be_auto_resolved_a_number_of_times_test(max_task_auto_resolut
 
     # then
     with pytest.raises(MaxTaskAutoResolutionsReachedError):
-        ticket.auto_resolve_task_for(service_number)
+        ticket.auto_resolve(service_number)
 
 
 @pytest.mark.parametrize(
@@ -164,7 +164,7 @@ def auto_resolution_grace_period_expired_tasks_cannot_be_auto_resolved_test(auto
 
     # then
     with pytest.raises(AutoResolutionGracePeriodExpiredError):
-        ticket.auto_resolve_task_for(service_number)
+        ticket.auto_resolve(service_number)
 
 
 @pytest.mark.parametrize(
@@ -207,7 +207,7 @@ def recent_tasks_can_be_auto_resolved_test(auto_resolution_grace_period, task_cy
     ticket = any_ticket(tasks={service_number: task})
 
     # when
-    auto_resolved_task = ticket.auto_resolve_task_for(service_number)
+    auto_resolved_task = ticket.auto_resolve(service_number)
 
     # then
     assert auto_resolved_task.status == TaskStatus.RESOLVED
@@ -251,7 +251,7 @@ def corner_case_task_cycles_are_properly_auto_resolved_test(
     ticket = any_ticket(created_at=ticket_created_at, tasks={service_number: task})
 
     # when
-    auto_resolved_task = ticket.auto_resolve_task_for(service_number)
+    auto_resolved_task = ticket.auto_resolve(service_number)
 
     # then
     assert auto_resolved_task.status == TaskStatus.RESOLVED
@@ -287,4 +287,4 @@ def corner_case_task_cycles_raise_a_proper_exception_test(ticket_created_at, aut
 
     # then
     with pytest.raises(AutoResolutionGracePeriodExpiredError):
-        ticket.auto_resolve_task_for(service_number)
+        ticket.auto_resolve(service_number)
