@@ -1,20 +1,18 @@
 from http.cookies import SimpleCookie
-from unittest.mock import Mock, call, patch
+from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
 from aiohttp import ClientConnectionError
+
 from application.clients.hawkeye_client import HawkeyeClient
-from asynctest import CoroutineMock
 from config import testconfig as config
 
 
 class TestHawkeyeClient:
     def instance_test(self):
-        logger = Mock()
 
-        hawkeye_client = HawkeyeClient(logger, config)
+        hawkeye_client = HawkeyeClient(config)
 
-        assert hawkeye_client._logger is logger
         assert hawkeye_client._config is config
 
     @pytest.mark.asyncio
@@ -26,13 +24,13 @@ class TestHawkeyeClient:
         response_status = 200
 
         response_mock = Mock()
-        response_mock.json = CoroutineMock(return_value=response_body)
+        response_mock.json = AsyncMock(return_value=response_body)
         response_mock.status = response_status
         response_mock.cookies = auth_cookies
 
         hawkeye_client._session.cookie_jar.update_cookies = Mock()
 
-        with patch.object(hawkeye_client._session, "post", new=CoroutineMock(return_value=response_mock)) as mock_post:
+        with patch.object(hawkeye_client._session, "post", new=AsyncMock(return_value=response_mock)) as mock_post:
             result = await hawkeye_client.login()
 
         mock_post.assert_called_once_with(
@@ -77,7 +75,7 @@ class TestHawkeyeClient:
 
         hawkeye_client._session.cookie_jar.update_cookies = Mock()
 
-        with patch.object(hawkeye_client._session, "post", new=CoroutineMock(return_value=response_mock)) as mock_post:
+        with patch.object(hawkeye_client._session, "post", new=AsyncMock(return_value=response_mock)) as mock_post:
             result = await hawkeye_client.login()
 
         mock_post.assert_called_once_with(
@@ -102,7 +100,7 @@ class TestHawkeyeClient:
 
         hawkeye_client._session.cookie_jar.update_cookies = Mock()
 
-        with patch.object(hawkeye_client._session, "post", new=CoroutineMock(return_value=response_mock)) as mock_post:
+        with patch.object(hawkeye_client._session, "post", new=AsyncMock(return_value=response_mock)) as mock_post:
             result = await hawkeye_client.login()
 
         mock_post.assert_called_once_with(
@@ -121,10 +119,10 @@ class TestHawkeyeClient:
     @pytest.mark.asyncio
     async def get_probes_ok_test(self, hawkeye_client, get_probes_down, default_call_without_params):
         filters = default_call_without_params
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=get_probes_down)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=get_probes_down)
         response_mock.status = 200
-        with patch.object(hawkeye_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        with patch.object(hawkeye_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             result = await hawkeye_client.get_probes(filters)
             mock_get.assert_called_once()
             assert result["body"] == get_probes_down
@@ -139,15 +137,15 @@ class TestHawkeyeClient:
     async def get_probes_retries_ok_test(self, hawkeye_client, get_probes_down):
         topic = "some.hawkeye.url/probes"
         filters = {"request_id": "1234", "body": {}}
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock()
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock()
         response_mock.status = 401
-        hawkeye_client.login = CoroutineMock()
-        response_mock_2 = CoroutineMock()
-        response_mock_2.json = CoroutineMock(return_value=get_probes_down)
+        hawkeye_client.login = AsyncMock()
+        response_mock_2 = AsyncMock()
+        response_mock_2.json = AsyncMock(return_value=get_probes_down)
         response_mock_2.status = 200
         with patch.object(
-            hawkeye_client._session, "get", new=CoroutineMock(side_effect=[response_mock, response_mock_2])
+            hawkeye_client._session, "get", new=AsyncMock(side_effect=[response_mock, response_mock_2])
         ) as mock_get:
             result = await hawkeye_client.get_probes(filters)
             mock_get.assert_has_calls([call(topic, params=filters, ssl=True), call(topic, params=filters, ssl=True)])
@@ -157,11 +155,11 @@ class TestHawkeyeClient:
     @pytest.mark.asyncio
     async def get_probes_401_test(self, hawkeye_client):
         filters = {"request_id": "1234", "body": {}}
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock()
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock()
         response_mock.status = 401
-        hawkeye_client.login = CoroutineMock()
-        with patch.object(hawkeye_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        hawkeye_client.login = AsyncMock()
+        with patch.object(hawkeye_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             result = await hawkeye_client.get_probes(filters)
             assert result["body"] == "Got 401 from Hawkeye"
             assert result["status"] == 401
@@ -170,11 +168,11 @@ class TestHawkeyeClient:
     async def get_probes_retries_ko_test(self, hawkeye_client):
         topic = "some.hawkeye.url/probes"
         filters = {"request_id": "1234", "body": {}}
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock()
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock()
         response_mock.status = 401
-        hawkeye_client.login = CoroutineMock()
-        with patch.object(hawkeye_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        hawkeye_client.login = AsyncMock()
+        with patch.object(hawkeye_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             result = await hawkeye_client.get_probes(filters)
             mock_get.assert_has_calls(
                 [
@@ -192,10 +190,10 @@ class TestHawkeyeClient:
     @pytest.mark.asyncio
     async def get_probes_500_test(self, hawkeye_client):
         filters = {"request_id": "1234", "body": {}}
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock()
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock()
         response_mock.status = 500
-        with patch.object(hawkeye_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        with patch.object(hawkeye_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             result = await hawkeye_client.get_probes(filters)
             mock_get.assert_called_once()
             assert result["body"] == "Got internal error from Hawkeye"
@@ -204,8 +202,8 @@ class TestHawkeyeClient:
     @pytest.mark.asyncio
     async def get_probes_exception_test(self, hawkeye_client):
         filters = {"request_id": "1234", "body": {}}
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock()
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock()
         response_mock.status = 500
         with patch.object(hawkeye_client._session, "get", side_effect=Exception) as mock_get:
             result = await hawkeye_client.get_probes(filters)
@@ -216,10 +214,10 @@ class TestHawkeyeClient:
     @pytest.mark.asyncio
     async def get_test_results_ok_test(self, hawkeye_client, get_test_result):
         filters = {"request_id": "1234", "body": {}}
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=get_test_result)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=get_test_result)
         response_mock.status = 200
-        with patch.object(hawkeye_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        with patch.object(hawkeye_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             result = await hawkeye_client.get_tests_results(filters)
             mock_get.assert_called_once()
             assert result["body"] == get_test_result
@@ -234,15 +232,15 @@ class TestHawkeyeClient:
     async def get_test_result_retries_ok_test(self, hawkeye_client, get_test_result):
         topic = "some.hawkeye.url/testsresults"
         filters = {"request_id": "1234", "body": {}}
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock()
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock()
         response_mock.status = 401
-        hawkeye_client.login = CoroutineMock()
-        response_mock_2 = CoroutineMock()
-        response_mock_2.json = CoroutineMock(return_value=get_test_result)
+        hawkeye_client.login = AsyncMock()
+        response_mock_2 = AsyncMock()
+        response_mock_2.json = AsyncMock(return_value=get_test_result)
         response_mock_2.status = 200
         with patch.object(
-            hawkeye_client._session, "get", new=CoroutineMock(side_effect=[response_mock, response_mock_2])
+            hawkeye_client._session, "get", new=AsyncMock(side_effect=[response_mock, response_mock_2])
         ) as mock_get:
             result = await hawkeye_client.get_tests_results(filters)
             mock_get.assert_has_calls([call(topic, params=filters, ssl=True), call(topic, params=filters, ssl=True)])
@@ -252,11 +250,11 @@ class TestHawkeyeClient:
     @pytest.mark.asyncio
     async def get_test_result_401_test(self, hawkeye_client):
         filters = {"request_id": "1234", "body": {}}
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock()
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock()
         response_mock.status = 401
-        hawkeye_client.login = CoroutineMock()
-        with patch.object(hawkeye_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        hawkeye_client.login = AsyncMock()
+        with patch.object(hawkeye_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             result = await hawkeye_client.get_tests_results(filters)
             assert result["body"] == "Got 401 from Hawkeye"
             assert result["status"] == 401
@@ -265,11 +263,11 @@ class TestHawkeyeClient:
     async def get_test_result_retries_ko_test(self, hawkeye_client):
         topic = "some.hawkeye.url/testsresults"
         filters = {"request_id": "1234", "body": {}}
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock()
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock()
         response_mock.status = 401
-        hawkeye_client.login = CoroutineMock()
-        with patch.object(hawkeye_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        hawkeye_client.login = AsyncMock()
+        with patch.object(hawkeye_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             result = await hawkeye_client.get_tests_results(filters)
             mock_get.assert_has_calls(
                 [
@@ -287,10 +285,10 @@ class TestHawkeyeClient:
     @pytest.mark.asyncio
     async def get_test_result_500_test(self, hawkeye_client):
         filters = {"request_id": "1234", "body": {}}
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock()
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock()
         response_mock.status = 500
-        with patch.object(hawkeye_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        with patch.object(hawkeye_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             result = await hawkeye_client.get_tests_results(filters)
             mock_get.assert_called_once()
             assert result["body"] == "Got internal error from Hawkeye"
@@ -299,10 +297,10 @@ class TestHawkeyeClient:
     @pytest.mark.asyncio
     async def get_test_result_400_test(self, hawkeye_client):
         filters = {"request_id": "1234", "body": {}}
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock()
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock()
         response_mock.status = 400
-        with patch.object(hawkeye_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        with patch.object(hawkeye_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             result = await hawkeye_client.get_tests_results(filters)
             mock_get.assert_called_once()
             assert result["body"] == "Parameters or body were in an incorrect format"
@@ -311,8 +309,8 @@ class TestHawkeyeClient:
     @pytest.mark.asyncio
     async def get_test_result_exception_test(self, hawkeye_client):
         filters = {"request_id": "1234", "body": {}}
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock()
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock()
         response_mock.status = 500
         with patch.object(hawkeye_client._session, "get", side_effect=Exception) as mock_get:
             result = await hawkeye_client.get_tests_results(filters)
@@ -324,10 +322,10 @@ class TestHawkeyeClient:
     async def get_test_results_details_ok_test(self, hawkeye_client, get_test_result_details):
         id_test = "12345"
         topic = f"some.hawkeye.url/testsresults/{id_test}"
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock(return_value=get_test_result_details)
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=get_test_result_details)
         response_mock.status = 200
-        with patch.object(hawkeye_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        with patch.object(hawkeye_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             result = await hawkeye_client.get_test_result_details(id_test)
             mock_get.assert_called_once()
             assert result["body"] == get_test_result_details
@@ -341,15 +339,15 @@ class TestHawkeyeClient:
     async def get_test_result_retries_details_ok_test(self, hawkeye_client, get_test_result):
         id_test = "12345"
         topic = f"some.hawkeye.url/testsresults/{id_test}"
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock()
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock()
         response_mock.status = 401
-        hawkeye_client.login = CoroutineMock()
-        response_mock_2 = CoroutineMock()
-        response_mock_2.json = CoroutineMock(return_value=get_test_result)
+        hawkeye_client.login = AsyncMock()
+        response_mock_2 = AsyncMock()
+        response_mock_2.json = AsyncMock(return_value=get_test_result)
         response_mock_2.status = 200
         with patch.object(
-            hawkeye_client._session, "get", new=CoroutineMock(side_effect=[response_mock, response_mock_2])
+            hawkeye_client._session, "get", new=AsyncMock(side_effect=[response_mock, response_mock_2])
         ) as mock_get:
             result = await hawkeye_client.get_test_result_details(id_test)
             mock_get.assert_has_calls([call(topic, ssl=True), call(topic, ssl=True)])
@@ -359,11 +357,11 @@ class TestHawkeyeClient:
     @pytest.mark.asyncio
     async def get_test_result_details_401_test(self, hawkeye_client):
         id_test = "12345"
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock()
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock()
         response_mock.status = 401
-        hawkeye_client.login = CoroutineMock()
-        with patch.object(hawkeye_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        hawkeye_client.login = AsyncMock()
+        with patch.object(hawkeye_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             result = await hawkeye_client.get_test_result_details(id_test)
             assert result["body"] == "Got 401 from Hawkeye"
             assert result["status"] == 401
@@ -372,11 +370,11 @@ class TestHawkeyeClient:
     async def get_test_result_retries_details_ko_test(self, hawkeye_client):
         id_test = "12345"
         topic = f"some.hawkeye.url/testsresults/{id_test}"
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock()
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock()
         response_mock.status = 401
-        hawkeye_client.login = CoroutineMock()
-        with patch.object(hawkeye_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        hawkeye_client.login = AsyncMock()
+        with patch.object(hawkeye_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             result = await hawkeye_client.get_test_result_details(id_test)
             mock_get.assert_has_calls(
                 [
@@ -394,10 +392,10 @@ class TestHawkeyeClient:
     @pytest.mark.asyncio
     async def get_test_result_details_500_test(self, hawkeye_client):
         id_test = "12345"
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock()
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock()
         response_mock.status = 500
-        with patch.object(hawkeye_client._session, "get", new=CoroutineMock(return_value=response_mock)) as mock_get:
+        with patch.object(hawkeye_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             result = await hawkeye_client.get_test_result_details(id_test)
             mock_get.assert_called_once()
             assert result["body"] == "Got internal error from Hawkeye"
@@ -406,8 +404,8 @@ class TestHawkeyeClient:
     @pytest.mark.asyncio
     async def get_test_result_details_exception_test(self, hawkeye_client):
         id_test = "12345"
-        response_mock = CoroutineMock()
-        response_mock.json = CoroutineMock()
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock()
         response_mock.status = 500
         with patch.object(hawkeye_client._session, "get", side_effect=Exception) as mock_get:
             result = await hawkeye_client.get_test_result_details(id_test)

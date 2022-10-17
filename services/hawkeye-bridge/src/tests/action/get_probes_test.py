@@ -1,45 +1,51 @@
+import json
+from typing import Any
+from unittest.mock import AsyncMock, Mock
+
 import pytest
+from nats.aio.msg import Msg
+
 from application.actions.get_probes import GetProbes
-from asynctest import CoroutineMock
-from config import testconfig as config
+
+
+def to_json_bytes(message: dict[str, Any]):
+    return json.dumps(message, default=str, separators=(",", ":")).encode()
+
+
+@pytest.fixture(scope="function")
+def any_msg():
+    return Mock(spec_set=Msg)
 
 
 class TestGetProbesClient:
-    def instance_test(self, logger, event_bus, hawkeye_repository):
-        get_probes = GetProbes(logger, config, event_bus, hawkeye_repository)
+    def instance_test(self, hawkeye_repository):
+        get_probes = GetProbes(hawkeye_repository)
 
-        assert get_probes._logger is logger
-        assert get_probes._config is config
-        assert get_probes._event_bus is event_bus
         assert get_probes._hawkeye_repository is hawkeye_repository
 
     @pytest.mark.asyncio
     async def get_probes_ok_test(
-        self, get_probes_init, default_call_with_params, response_get_probes_down_ok, init_msg
+        self, get_probes_init, default_call_with_params, response_get_probes_down_ok, any_msg, init_msg
     ):
-        get_probes_init._hawkeye_repository.get_probes = CoroutineMock(return_value=response_get_probes_down_ok)
-        get_probes_init._event_bus.publish_message = CoroutineMock()
-        await get_probes_init.get_probes(default_call_with_params)
+        get_probes_init._hawkeye_repository.get_probes = AsyncMock(return_value=response_get_probes_down_ok)
+        any_msg.data = to_json_bytes(default_call_with_params)
+        await get_probes_init(any_msg)
 
-        get_probes_init._event_bus.publish_message.assert_awaited_once_with(
-            "hawkeye.probe.request", {**init_msg, **response_get_probes_down_ok}
-        )
+        any_msg.respond.assert_awaited_once_with(data=json.dumps({**init_msg, **response_get_probes_down_ok}).encode())
 
     @pytest.mark.asyncio
     async def get_probes_no_filters_ok_test(
-        self, get_probes_init, default_call_without_params, response_get_probes_down_ok, init_msg
+        self, get_probes_init, default_call_without_params, response_get_probes_down_ok, init_msg, any_msg
     ):
-        get_probes_init._hawkeye_repository.get_probes = CoroutineMock(return_value=response_get_probes_down_ok)
-        get_probes_init._event_bus.publish_message = CoroutineMock()
-        await get_probes_init.get_probes(default_call_without_params)
+        get_probes_init._hawkeye_repository.get_probes = AsyncMock(return_value=response_get_probes_down_ok)
+        any_msg.data = to_json_bytes(default_call_without_params)
+        await get_probes_init(any_msg)
 
-        get_probes_init._event_bus.publish_message.assert_awaited_once_with(
-            "hawkeye.probe.request", {**init_msg, **response_get_probes_down_ok}
-        )
+        any_msg.respond.assert_awaited_once_with(data=json.dumps({**init_msg, **response_get_probes_down_ok}).encode())
 
     @pytest.mark.asyncio
-    async def get_probes_not_body_test(self, get_probes_init, default_call_without_body, response_not_body):
-        get_probes_init._event_bus.publish_message = CoroutineMock()
-        await get_probes_init.get_probes(default_call_without_body)
+    async def get_probes_not_body_test(self, get_probes_init, default_call_without_body, response_not_body, any_msg):
+        any_msg.data = to_json_bytes(default_call_without_body)
+        await get_probes_init(any_msg)
 
-        get_probes_init._event_bus.publish_message.assert_awaited_once_with("hawkeye.probe.request", response_not_body)
+        any_msg.respond.assert_awaited_once_with(data=json.dumps(response_not_body).encode())

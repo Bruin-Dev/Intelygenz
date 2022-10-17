@@ -1,6 +1,7 @@
 from unittest.mock import Mock
 
 import pytest
+
 from application.actions.get_probes import GetProbes
 from application.actions.get_test_results import GetTestResults
 from application.clients.hawkeye_client import HawkeyeClient
@@ -24,23 +25,30 @@ def event_bus():
 
 
 @pytest.fixture(scope="function")
-def get_probes_init(logger, event_bus, hawkeye_repository):
-    return GetProbes(logger, config, event_bus, hawkeye_repository)
+def get_probes_init(hawkeye_repository):
+    return GetProbes(hawkeye_repository)
 
 
 @pytest.fixture(scope="function")
-def get_test_result_init(logger, event_bus, hawkeye_repository):
-    return GetTestResults(logger, config, event_bus, hawkeye_repository)
+def get_test_result_init(hawkeye_repository):
+    return GetTestResults(hawkeye_repository)
 
 
 @pytest.fixture(scope="function")
-def hawkeye_client(logger):
-    return HawkeyeClient(logger, config)
+async def hawkeye_client():
+    hawkeye_client = HawkeyeClient(config)
+    await hawkeye_client.init_session()
+    return hawkeye_client
+
+
+@pytest.mark.asyncio(scope="module", autouse=True)
+async def clean(hawkeye_client):
+    return await hawkeye_client._session.close()
 
 
 @pytest.fixture(scope="function")
-def hawkeye_repository(logger, hawkeye_client):
-    return HawkeyeRepository(logger, hawkeye_client, config)
+def hawkeye_repository(hawkeye_client):
+    return HawkeyeRepository(hawkeye_client=hawkeye_client, config=config)
 
 
 @pytest.fixture(scope="function")

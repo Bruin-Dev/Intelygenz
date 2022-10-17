@@ -1,19 +1,25 @@
+import json
+import logging
+
+from nats.aio.msg import Msg
+
+logger = logging.getLogger(__name__)
+
+
 class GetProbes:
-    def __init__(self, logger, config, event_bus, hawkeye_repository):
-        self._config = config
-        self._logger = logger
-        self._event_bus = event_bus
+    def __init__(self, hawkeye_repository):
         self._hawkeye_repository = hawkeye_repository
 
-    async def get_probes(self, msg: dict):
-        probes_response = {"request_id": msg["request_id"], "body": None, "status": None}
+    async def __call__(self, msg: Msg):
+        payload = json.loads(msg.data)
+        probes_response = {"request_id": payload["request_id"], "body": None, "status": None}
         filters = {}
-        body = msg.get("body")
+        body = payload.get("body")
 
         if body is None:
             probes_response["status"] = 400
             probes_response["body"] = 'Must include "body" in request'
-            await self._event_bus.publish_message(msg["response_topic"], probes_response)
+            await msg.respond(data=json.dumps(probes_response).encode())
             return
 
         if "serial_number" in body:
@@ -21,10 +27,10 @@ class GetProbes:
         if "status" in body:
             filters["status"] = body["status"]
 
-        self._logger.info(f"Collecting all probes ...")
+        logger.info(f"Collecting all probes ...")
 
         filtered_probes = await self._hawkeye_repository.get_probes(filters)
 
         filtered_probes_response = {**probes_response, **filtered_probes}
 
-        await self._event_bus.publish_message(msg["response_topic"], filtered_probes_response)
+        await msg.respond(data=json.dumps(filtered_probes_response).encode())

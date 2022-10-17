@@ -1,33 +1,39 @@
+import json
+import logging
+
+from nats.aio.msg import Msg
+
+logger = logging.getLogger(__name__)
+
+
 class GetTestResults:
-    def __init__(self, logger, config, event_bus, hawkeye_repository):
-        self._config = config
-        self._logger = logger
-        self._event_bus = event_bus
+    def __init__(self, hawkeye_repository):
         self._hawkeye_repository = hawkeye_repository
 
-    async def get_test_results(self, msg: dict):
-        probes_response = {"request_id": msg["request_id"], "body": None, "status": None}
-        body = msg.get("body")
+    async def __call__(self, msg: Msg):
+        payload = json.loads(msg.data)
+        probes_response = {"request_id": payload["request_id"], "body": None, "status": None}
+        body = payload.get("body")
         if body is None:
             probes_response["status"] = 400
             probes_response["body"] = 'Must include "body" in request'
-            await self._event_bus.publish_message(msg["response_topic"], probes_response)
+            await msg.respond(data=json.dumps(probes_response).encode())
             return
 
         if "probe_uids" not in body:
             probes_response["status"] = 400
             probes_response["body"] = 'Must include "probe_uids" in the body of the request'
-            await self._event_bus.publish_message(msg["response_topic"], probes_response)
+            await msg.respond(data=json.dumps(probes_response).encode())
             return
         if "interval" not in body:
             probes_response["status"] = 400
             probes_response["body"] = 'Must include "interval" in the body of the request'
-            await self._event_bus.publish_message(msg["response_topic"], probes_response)
+            await msg.respond(data=json.dumps(probes_response).encode())
             return
-        self._logger.info(f"Collecting all test results ...")
+        logger.info(f"Collecting all test results ...")
 
         filtered_tests = await self._hawkeye_repository.get_test_results(body["probe_uids"], body["interval"])
 
         filtered_tests_response = {**probes_response, **filtered_tests}
 
-        await self._event_bus.publish_message(msg["response_topic"], filtered_tests_response)
+        await msg.respond(data=json.dumps(filtered_tests_response).encode())

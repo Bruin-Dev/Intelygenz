@@ -1,12 +1,13 @@
+import logging
 from collections import defaultdict
-from datetime import datetime, timedelta
 from typing import Callable
+
+logger = logging.getLogger(__name__)
 
 
 class HawkeyeRepository:
-    def __init__(self, logger, hawkeye_client, config):
+    def __init__(self, hawkeye_client, config):
         self._config = config
-        self._logger = logger
         self._hawkeye_client = hawkeye_client
 
     async def get_probes(self, params):
@@ -31,9 +32,7 @@ class HawkeyeRepository:
                 test_result_id = test_result["id"]
                 response_details = await self._hawkeye_client.get_test_result_details(test_result_id)
                 if response_details["status"] not in range(200, 300):
-                    self._logger.error(
-                        f"Error when calling get_tests_result_details using test result ID {test_result_id})"
-                    )
+                    logger.error(f"Error when calling get_tests_result_details using test result ID {test_result_id})")
                     continue
                 result_details_with_probe[probe_uid].append(
                     {"summary": test_result, "metrics": response_details["body"]["metrics"]}
@@ -50,8 +49,8 @@ class HawkeyeRepository:
         remaining_items = -1
         offset = 0
         params["limit"] = params.get("limit") or 100
-        self._logger.info(f"Check all pages")
-        self._logger.info(f"Fetching all pages using {fn.__name__}...")
+        logger.info(f"Check all pages")
+        logger.info(f"Fetching all pages using {fn.__name__}...")
         while remaining_items:
             params["offset"] = offset
             response = await fn(params)
@@ -59,7 +58,7 @@ class HawkeyeRepository:
                 if retries < self._config.HAWKEYE_CONFIG["retries"]:
                     retries += 1
                     continue
-                self._logger.error(f"There have been 5 or more errors when calling {fn.__name__}. ")
+                logger.error(f"There have been 5 or more errors when calling {fn.__name__}. ")
                 return result
             retries = 0
             result["body"] += response["body"]["records"]
