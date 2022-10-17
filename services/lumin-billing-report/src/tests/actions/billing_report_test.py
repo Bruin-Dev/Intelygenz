@@ -1,15 +1,16 @@
 from datetime import date, datetime, timedelta
-from unittest.mock import Mock, patch
+from unittest import mock
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from apscheduler.events import EVENT_JOB_ERROR, JobExecutionEvent
+from apscheduler.util import undefined
+from pytz import timezone
+
 from application.actions import billing_report as alert_module
 from application.actions.billing_report import BillingReport
 from application.repositories.template_renderer import TemplateRenderer
-from apscheduler.events import EVENT_JOB_ERROR, JobExecutionEvent
-from apscheduler.util import undefined
-from asynctest import CoroutineMock
 from config.testconfig import BILLING_REPORT_CONFIG
-from pytz import timezone
 
 
 @pytest.fixture
@@ -75,18 +76,17 @@ class TestBillingReport:
         templ = TemplateRenderer(BILLING_REPORT_CONFIG)
         scheduler = Mock()
 
-        opts = {"logger": Mock(), "config": BILLING_REPORT_CONFIG}
+        opts = {"config": BILLING_REPORT_CONFIG}
 
         report = BillingReport(lumin_repo, email_client, templ, scheduler, **opts)
 
         assert report._email_client is email_client
         assert report._lumin_repo is lumin_repo
         assert report._scheduler is scheduler
-        assert report._logger is opts["logger"]
         assert report._config is opts["config"]
 
     def start_billing_report_job_with_exec_on_start_test(self):
-        opts = {"logger": Mock(), "config": BILLING_REPORT_CONFIG}
+        opts = {"config": BILLING_REPORT_CONFIG}
 
         email_client = Mock()
         lumin_repo = Mock()
@@ -113,7 +113,7 @@ class TestBillingReport:
         )
 
     def start_billing_report_job_with_no_exec_on_start_test(self):
-        opts = {"logger": Mock(), "config": BILLING_REPORT_CONFIG}
+        opts = {"config": BILLING_REPORT_CONFIG}
 
         email_client = Mock()
         lumin_repo = Mock()
@@ -134,7 +134,7 @@ class TestBillingReport:
         )
 
     def register_error_handler_test(self):
-        opts = {"logger": Mock(), "config": BILLING_REPORT_CONFIG}
+        opts = {"config": BILLING_REPORT_CONFIG}
 
         email_client = Mock()
         lumin_repo = Mock()
@@ -147,9 +147,7 @@ class TestBillingReport:
         scheduler.add_listener.assert_called_with(report._event_listener, EVENT_JOB_ERROR)
 
     def event_listener_test(self):
-        logger = Mock()
-
-        opts = {"logger": logger, "config": BILLING_REPORT_CONFIG}
+        opts = {"config": BILLING_REPORT_CONFIG}
 
         email_client = Mock()
         lumin_repo = Mock()
@@ -166,30 +164,29 @@ class TestBillingReport:
             exception=Exception("Test exception"),
         )
 
-        report._event_listener(mock_event)
-
-        logger.exception.assert_called_with("Execution failed for billing report", mock_event.exception)
-        logger.exception.reset_mock()
+        with mock.patch("application.actions.billing_report.logger") as log:
+            report._event_listener(mock_event)
+            log.exception.assert_called_with("Execution failed for billing report", mock_event.exception)
 
         mock_event.job_id = "foo"
 
-        report._event_listener(mock_event)
-
-        logger.exception.assert_not_called()
+        with mock.patch("application.actions.billing_report.logger") as log:
+            report._event_listener(mock_event)
+            log.exception.assert_not_called()
 
     @pytest.mark.asyncio
     async def billing_process_test(self, lumin_repo_responses, summary):
         email_contents = {"email": "<div>Some email</div>"}
 
         email_client = Mock()
-        email_client.send_to_email = CoroutineMock()
+        email_client.send_to_email = Mock()
         lumin_repo = Mock()
-        lumin_repo.get_billing_data_for_period = CoroutineMock(return_value=lumin_repo_responses)
+        lumin_repo.get_billing_data_for_period = AsyncMock(return_value=lumin_repo_responses)
         scheduler = Mock()
         templ = Mock()
         templ.compose_email_object = Mock(return_value=email_contents)
 
-        opts = {"logger": Mock(), "config": BILLING_REPORT_CONFIG}
+        opts = {"config": BILLING_REPORT_CONFIG}
 
         report = BillingReport(lumin_repo, email_client, templ, scheduler, **opts)
 

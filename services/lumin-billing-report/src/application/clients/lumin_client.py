@@ -5,6 +5,8 @@ from typing import List
 import aiohttp
 from tenacity import RetryError, after_log, retry, stop_after_delay, wait_exponential
 
+logger = logging.getLogger(__name__)
+
 
 class LuminClientError(Exception):
     pass
@@ -19,7 +21,6 @@ class LuminBillingClient:
 
     def __init__(self, config: dict, **opts):
         self.config = config
-        self.logger = opts.get("logger")
         self.http_client = opts.get("http_client", aiohttp.ClientSession)
         self.headers = opts.get("headers", {})
         self.headers.setdefault("Authorization", f'Bearer {self.config["token"]}')
@@ -43,7 +44,7 @@ class LuminBillingClient:
         config = self.config
 
         @retry(
-            after=after_log(self.logger, logging.WARNING),
+            after=after_log(logger, logging.WARNING),
             wait=wait_exponential(multiplier=config["multiplier"], min=config["min"]),
             stop=stop_after_delay(config["stop_delay"]),
         )
@@ -64,5 +65,5 @@ class LuminBillingClient:
                 # raise as custom error
                 msg = "Could not connect to {} with headers {}, body {}".format(self.config["uri"], self.headers, d)
 
-                self.logger.exception(msg)
+                logger.exception(msg)
                 raise LuminClientError(msg) from exc

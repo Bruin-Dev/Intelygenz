@@ -55,10 +55,10 @@ Starting a standalone version of the service to locally generate a html and csv 
 ````
 python src/script.py
 ````
-This command will generate a new folder ``report`` which contains an html and a csv file
+This command will generate a new folder ``report`` which contains a html and a csv file
 
 ## Configuration, environment variables and configuration files
-Some of the configuration parameters can change between environments.
+Some configuration parameters can change between environments.
 That's why the config module is there: a centralized file to keep both environment and constant parameters
 needed for our service to work.
 
@@ -72,8 +72,8 @@ The module [config](src/config/config.py) loads in a map all variables from the 
 The module [testconfig](src/config/testconfig.py) loads values in a map that is the same as the [config module](src/config/config.py) one, but the values are **NEVER FETCHED FROM ENVIRONMENT VARIABLES** that way we keep our pipelines of unit tests clean.
 
 ## Testing
-Currently we are working with pytest.
-The test configurations can be found in the files [pytest.ini](pytest.ini) and [.coveragerc](.coveragerc)
+Currently, we are working with pytest.
+The test configurations can be found in the pyproject toml file
 
 For writing new tests you must replicate the application directory folder structure inside the test folder.
 
@@ -85,7 +85,7 @@ So we have something like
         -somepackage
             -somemodule_test.py
             
-Test files put under tests directory will be auto-discovered by pytest as long as their module name ends with *_test.py
+Test files put under tests' directory will be auto-discovered by pytest as long as their module name ends with *_test.py
 To run the test suite of a service, navigate to the root of the project (in this case, bruin-bridge) and type `pytest --cov` in a shell.
 Pycharm can also be easily configured for that purpose, in order to debug tests.
 

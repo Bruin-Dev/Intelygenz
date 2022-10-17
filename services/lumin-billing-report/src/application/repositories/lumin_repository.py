@@ -1,8 +1,11 @@
+import logging
 from datetime import datetime
 from enum import Enum
 from typing import List
 
 from application.clients.lumin_client import LuminBillingClient
+
+logger = logging.getLogger(__name__)
 
 
 class LuminBillingTypes(Enum):
@@ -15,8 +18,7 @@ class LuminBillingTypes(Enum):
 
 
 class LuminBillingRepository:
-    def __init__(self, logger, client: LuminBillingClient):
-        self.logger = logger
+    def __init__(self, client: LuminBillingClient):
         self.client = client
 
     async def get_billing_data_for_period(self, billing_types: List[str], start: datetime, end: datetime) -> List[dict]:
@@ -32,7 +34,7 @@ class LuminBillingRepository:
         ret = []
 
         while True:
-            self.logger.info(
+            logger.info(
                 "fetching billing data for {}".format(
                     {"type": ",".join(billing_types), "start": str(start), "end": str(end), "start_token": start_token}
                 )

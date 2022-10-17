@@ -11,8 +11,9 @@ lumin-billing-report-linter:
         - services/lumin-billing-report/src/config/**/*
         - services/lumin-billing-report/src/app.py
         - services/lumin-billing-report/Dockerfile
-        - services/lumin-billing-report/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/lumin-billing-report/pyproject.toml
+        - services/lumin-billing-report/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
@@ -22,10 +23,6 @@ lumin-billing-report-linter:
 lumin-billing-report-test:
   variables:
     MODULE: lumin-billing-report
-  before_script:
-    - cd services/${MODULE}
-    - pip install -r requirements.txt
-    - pip install -r requirements_test.txt
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
@@ -33,10 +30,11 @@ lumin-billing-report-test:
         - services/lumin-billing-report/src/config/**/*
         - services/lumin-billing-report/src/app.py
         - services/lumin-billing-report/Dockerfile
-        - services/lumin-billing-report/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/lumin-billing-report/pyproject.toml
+        - services/lumin-billing-report/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
-  extends: .unittest_module_python_36
+  extends: .unittest_module_python_310
   needs: ["lumin-billing-report-linter"]
 
 # =================================================
@@ -54,8 +52,9 @@ lumin-billing-report-build:
         - services/lumin-billing-report/src/config/**/*
         - services/lumin-billing-report/src/app.py
         - services/lumin-billing-report/Dockerfile
-        - services/lumin-billing-report/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/lumin-billing-report/pyproject.toml
+        - services/lumin-billing-report/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $LUMIN_BILLING_REPORT_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:

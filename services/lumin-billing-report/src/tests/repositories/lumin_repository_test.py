@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta, timezone
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+
 from application.repositories.lumin_repository import LuminBillingRepository, LuminBillingTypes
-from asynctest import CoroutineMock
 
 
 @pytest.fixture
@@ -55,23 +55,18 @@ def lumin_client_responses():
     ]
 
 
-@pytest.mark.asyncio
 class TestLuminBillingRepository:
     def instance_test(self):
-        logger = MagicMock()
         lumin_client = MagicMock()
-        repo = LuminBillingRepository(logger, lumin_client)
-        assert repo.logger is logger
+        repo = LuminBillingRepository(lumin_client)
         assert repo.client is lumin_client
 
     async def get_billing_data_for_period_test(self, lumin_client_responses):
-        logger = MagicMock()
-
-        mock_get = CoroutineMock(side_effect=lumin_client_responses)
+        mock_get = AsyncMock(side_effect=lumin_client_responses)
         lumin_client = MagicMock()
         lumin_client.get_billing_data_for_period = mock_get
 
-        repo = LuminBillingRepository(logger, lumin_client)
+        repo = LuminBillingRepository(lumin_client)
 
         billing_types = [LuminBillingTypes.SCHEDULED.value]
         end = datetime.now(tz=timezone.utc)

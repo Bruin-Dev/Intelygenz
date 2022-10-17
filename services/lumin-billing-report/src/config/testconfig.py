@@ -1,6 +1,5 @@
 # You must replicate the structure of config.py, changing os.environ calls for mock values
 import logging
-import os
 import sys
 
 LUMIN_CONFIG = {"uri": "https://foo.bar", "token": "foobarbaz", "multiplier": 1, "min": 0.1, "stop_delay": 0.1}

@@ -1,13 +1,17 @@
+import logging
 from collections import defaultdict
 from datetime import date, datetime, time, timedelta
 
-from application.clients.email_client import EmailClient
-from application.repositories.lumin_repository import LuminBillingRepository, LuminBillingTypes
-from application.repositories.template_renderer import TemplateRenderer
 from apscheduler.events import EVENT_JOB_ERROR, JobExecutionEvent
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.util import undefined
 from pytz import timezone
+
+from application.clients.email_client import EmailClient
+from application.repositories.lumin_repository import LuminBillingRepository, LuminBillingTypes
+from application.repositories.template_renderer import TemplateRenderer
+
+logger = logging.getLogger(__name__)
 
 
 class BillingReport:
@@ -26,17 +30,16 @@ class BillingReport:
         self._email_client = email_client
         self._template_renderer = template_renderer
         self._scheduler = scheduler
-        self._logger = opts.get("logger")
         self._config = opts.get("config")
 
     def start_billing_report_job(self, exec_on_start=False):
-        self._logger.info("Scheduled task: billing report process configured to run first day of each month")
+        logger.info("Scheduled task: billing report process configured to run first day of each month")
 
         next_run_time = undefined
 
         if exec_on_start:
             next_run_time = datetime.now(timezone(self._config["timezone"]))
-            self._logger.info(f"It will be executed now")
+            logger.info(f"It will be executed now")
 
         self._scheduler.add_job(
             self._billing_report_process,
@@ -55,7 +58,7 @@ class BillingReport:
         if event.job_id != self.JOB_ID:
             return
 
-        self._logger.exception("Execution failed for billing report", event.exception)
+        logger.exception("Execution failed for billing report", event.exception)
         self.start_billing_report_job(exec_on_start=True)
 
     async def generate_billing_report_data(self):
@@ -84,9 +87,9 @@ class BillingReport:
         return self._template_renderer.compose_email_object(summary, items)
 
     async def _billing_report_process(self):
-        self._logger.info("Requesting lumin.AI usage details for billing report")
+        logger.info("Requesting lumin.AI usage details for billing report")
 
         email_obj = await self.generate_billing_report_data()
         self._email_client.send_to_email(email_obj)
 
-        self._logger.info("Lumin.AI Billing Report sent")
+        logger.info("Lumin.AI Billing Report sent")

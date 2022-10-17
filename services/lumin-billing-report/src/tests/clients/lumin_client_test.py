@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta, timezone
-from unittest.mock import Mock
 
 import pytest
 from aioresponses import aioresponses
+
 from application.clients.lumin_client import LuminBillingClient, LuminClientError
 from config.testconfig import LUMIN_CONFIG as testconfig
 
@@ -38,17 +38,14 @@ def mock_response():
     }
 
 
-@pytest.mark.asyncio
 class TestLuminBillingClient:
     def instance_test(self, test_config):
-        logger = Mock()
-        client = LuminBillingClient(test_config, logger=logger)
+        client = LuminBillingClient(test_config)
 
-        assert client.logger is logger
+        assert client.config is test_config
 
     def check_headers_test(self, test_config):
-        logger = Mock()
-        client = LuminBillingClient(test_config, logger=logger)
+        client = LuminBillingClient(test_config)
 
         assert isinstance(client.headers, dict)
         assert "Bearer" in client.headers["Authorization"]
@@ -58,8 +55,7 @@ class TestLuminBillingClient:
         with aioresponses() as m:
             m.post(test_config["uri"], payload=mock_response)
 
-            logger = Mock()
-            client = LuminBillingClient(test_config, logger=logger)
+            client = LuminBillingClient(test_config)
 
             billing_types = ["billing.scheduled"]
             end = datetime.now(tz=timezone.utc)
@@ -73,8 +69,7 @@ class TestLuminBillingClient:
         with aioresponses() as m:
             m.post(test_config["uri"], status=400)
 
-            logger = Mock()
-            client = LuminBillingClient(test_config, logger=logger)
+            client = LuminBillingClient(test_config)
 
             billing_types = ["billing.scheduled"]
             end = datetime.now(tz=timezone.utc)

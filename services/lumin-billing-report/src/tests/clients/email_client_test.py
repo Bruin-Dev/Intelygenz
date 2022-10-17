@@ -9,17 +9,12 @@ from config import testconfig as config
 
 class TestEmailClient:
     def instantiation_test(self):
-        mock_logger = Mock()
-
-        test_client = EmailClient(config, mock_logger)
+        test_client = EmailClient(config)
 
         assert test_client._config is config
-        assert test_client._logger is mock_logger
 
     def email_login_test(self):
-        mock_logger = Mock()
-
-        test_client = EmailClient(config, mock_logger)
+        test_client = EmailClient(config)
 
         with patch.object(application.clients.email_client.smtplib, "SMTP"):
             test_client.email_login()
@@ -33,7 +28,6 @@ class TestEmailClient:
 
     def send_to_email_test(self):
         mock_image = base64.b64encode(open("src/templates/images/logo.png", "rb").read()).decode("utf-8")
-        mock_logger = Mock()
         test_msg = {
             "subject": "subject",
             "message": "message",
@@ -45,18 +39,15 @@ class TestEmailClient:
         }
 
         with patch.object(application.clients.email_client, "MIMEImage", wraps=MIMEImage) as mock:
-            test_client = EmailClient(config, mock_logger)
+            test_client = EmailClient(config)
             test_client.email_login = Mock()
             test_client._email_server = Mock()
             test_client._email_server.quit = Mock()
             test_client._email_server.sendmail = Mock()
-            test_client._logger.info = Mock()
-            test_client._logger.exception = Mock()
 
             status = test_client.send_to_email(test_msg)
             mock.assert_called_with(base64.b64decode(mock_image.encode()))
 
-        test_client._logger.info.assert_called_once()
         assert status == 200
 
         # Checking the MIME attachment can be too much verbose, so we cannot
@@ -66,21 +57,14 @@ class TestEmailClient:
         assert test_client._email_server.sendmail.call_args[0][1] == test_msg["recipient"]
         assert isinstance(test_client._email_server.sendmail.call_args[0][2], str)
         test_client._email_server.quit.assert_called_once()
-        test_client._logger.exception.assert_not_called()
 
     def send_to_email_with_failure_test(self):
-        mock_logger = Mock()
         test_msg = {}
 
-        test_client = EmailClient(config, mock_logger)
+        test_client = EmailClient(config)
         test_client._email_server = Mock()
         test_client._email_server.sendmail = Mock(side_effect=Exception)
-
-        test_client._logger.info = Mock()
-        test_client._logger.exception = Mock()
 
         status = test_client.send_to_email(test_msg)
 
         assert status == 500
-        test_client._logger.info.assert_not_called()
-        test_client._logger.exception.assert_called_once()

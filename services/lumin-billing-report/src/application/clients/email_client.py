@@ -1,4 +1,5 @@
 import base64
+import logging
 import smtplib
 from email.charset import BASE64, Charset
 from email.mime.image import MIMEImage
@@ -6,11 +7,12 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.nonmultipart import MIMENonMultipart
 from email.mime.text import MIMEText
 
+logger = logging.getLogger(__name__)
+
 
 class EmailClient:
-    def __init__(self, config, logger):
+    def __init__(self, config):
         self._config = config
-        self._logger = logger
         self._email_server = None
 
     def email_login(self):
@@ -53,10 +55,10 @@ class EmailClient:
                 self._config.EMAIL_CONFIG["sender_email"], msg["recipient"], mime_msg.as_string()
             )
 
-            self._logger.info("Success: Email sent!")
+            logger.info("Success: Email sent!")
             self._email_server.quit()
             return 200
 
         except Exception:
-            self._logger.exception("Error: Email not sent")
+            logger.exception("Error: Email not sent")
             return 500

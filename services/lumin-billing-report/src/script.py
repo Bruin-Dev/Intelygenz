@@ -15,10 +15,10 @@ class ScriptContainer:
     def __init__(self):
         self._logger = logging.getLogger(__name__)
         # init clients
-        self._lumin_client = LuminBillingClient(config.LUMIN_CONFIG, logger=self._logger)
+        self._lumin_client = LuminBillingClient(config.LUMIN_CONFIG)
 
         # init repositories
-        self._lumin_repository = LuminBillingRepository(self._logger, self._lumin_client)
+        self._lumin_repository = LuminBillingRepository(self._lumin_client)
         self._template_renderer = TemplateRenderer(config.BILLING_REPORT_CONFIG)
 
         # init actions
@@ -27,7 +27,6 @@ class ScriptContainer:
             email_client=Mock(),
             template_renderer=self._template_renderer,
             scheduler=Mock(),
-            logger=self._logger,
             config=config.BILLING_REPORT_CONFIG,
         )
 
@@ -48,5 +47,7 @@ class ScriptContainer:
 if __name__ == "__main__":
     container = ScriptContainer()
 
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
     loop.run_until_complete(container.run_report())

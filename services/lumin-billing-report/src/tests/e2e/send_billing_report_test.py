@@ -1,15 +1,15 @@
 from datetime import date, datetime, timedelta
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 from aioresponses import aioresponses
+from pytz import timezone
+
 from application.actions.billing_report import BillingReport
 from application.clients.lumin_client import LuminBillingClient
 from application.repositories.lumin_repository import LuminBillingRepository
 from application.repositories.template_renderer import TemplateRenderer
-from asynctest import CoroutineMock
 from config import testconfig
-from pytz import timezone
 
 
 @pytest.fixture
@@ -88,13 +88,13 @@ class TestSendBillingReport:
             m.post(testconfig.LUMIN_CONFIG["uri"], payload=mock_responses[1])
 
             client = LuminBillingClient(testconfig.LUMIN_CONFIG)
-            repo = LuminBillingRepository(Mock(), client)
+            repo = LuminBillingRepository(client)
             email = Mock()
-            email.send_to_email = CoroutineMock()
+            email.send_to_email = Mock()
             templ = TemplateRenderer(testconfig.BILLING_REPORT_CONFIG)
             templ.compose_email_object = Mock(wraps=templ.compose_email_object)
 
-            opts = {"logger": Mock(), "config": testconfig.BILLING_REPORT_CONFIG}
+            opts = {"config": testconfig.BILLING_REPORT_CONFIG}
 
             report = BillingReport(repo, email, templ, Mock(), **opts)
             await report._billing_report_process()
