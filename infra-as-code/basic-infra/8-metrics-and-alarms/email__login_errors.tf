@@ -1,36 +1,36 @@
-resource "aws_cloudwatch_log_metric_filter" "intermapper_outage__events_processed" {
-  name           = "intermapper_outage__events_processed"
+resource "aws_cloudwatch_log_metric_filter" "email__login_errors" {
+  name           = "email__login_errors"
   pattern        = "{ $.environment = \"production\" && $.hostname = \"email-bridge-*\" && $.message = \"There was an error trying to login into the inbox*\" }"
-  log_group_name = aws_cloudwatch_log_group.eks_log_group.name
+  log_group_name = data.aws_cloudwatch_log_group.eks_log_group.name
 
   metric_transformation {
-    name      = "intermapper_outage__events_processed"
+    name      = "email__login_errors"
     namespace = "mettel_automation/alarms"
     value     = "1"
   }
 }
 
-resource "aws_cloudwatch_metric_alarm" "intermapper-outage-no-events-processed-in-the-last-hour" {
-  alarm_name                = "intermapper-outage-no-events-processed-in-the-last-hour"
-  comparison_operator       = "LowerThanOrEqualToThreshold"
+resource "aws_cloudwatch_metric_alarm" "emails-error-loggings-in-to-the-inbox" {
+  alarm_name                = "emails-error-loggings-in-to-the-inbox"
+  comparison_operator       = "LessThanOrEqualToThreshold"
   evaluation_periods        = "1"
-  metric_name               = aws_cloudwatch_log_metric_filter.intermapper_outage__events_processed.name
+  metric_name               = aws_cloudwatch_log_metric_filter.email__login_errors.name
   namespace                 = "mettel_automation/alarms"
   period                    = "3600"
   statistic                 = "Sum"
   threshold                 = "0"
-  alarm_description         = "Triggers an alarm if no InterMapper events were processed in the last hour"
+  alarm_description         = "Triggers an alarm if there is an error while logging in to the email inbox"
   insufficient_data_actions = []
 alarm_actions = []
 }
 
-resource "aws_sns_topic" "intermapper-outage-no-events-processed-in-the-last-hou" {
-  name = "intermapper-outage-no-events-processed-in-the-last-hou"
+resource "aws_sns_topic" "emails-error-loggings-in-to-the-inbox" {
+  name = "emails-error-loggings-in-to-the-inbox"
 }
 
-resource "aws_sns_topic_subscription" "intermapper-outage-no-events-processed-in-the-last-hou"{
+resource "aws_sns_topic_subscription" "emails-error-loggings-in-to-the-inbox"{
   for_each  = toset(["mettel.team@intelygenz.com"])
-  topic_arn = aws_sns_topic.intermapper-outage-no-events-processed-in-the-last-hou.arn
+  topic_arn = aws_sns_topic.emails-error-loggings-in-to-the-inbox.arn
   protocol = "email"
   endpoint = each.value
 }
