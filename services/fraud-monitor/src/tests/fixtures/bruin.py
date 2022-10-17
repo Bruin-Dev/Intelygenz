@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import List, Optional
 
 import pytest
+
 from config import testconfig
 
 
@@ -295,8 +296,8 @@ def make_create_ticket_request(make_contact_info, make_rpc_request):
         contact_info = contact_info or make_contact_info()
 
         payload = {
-            "clientId": bruin_client_id,
             "category": "VAS",
+            "clientId": bruin_client_id,
             "services": [
                 {
                     "serviceNumber": service_number,
@@ -334,8 +335,8 @@ def make_change_detail_work_queue_request(make_rpc_request):
     def _inner(*, request_id: str = "", ticket_id: int = 0, service_number: str = "", target_queue: str = ""):
         payload = {
             "ticket_id": ticket_id,
-            "service_number": service_number,
             "queue_name": target_queue,
+            "service_number": service_number,
         }
 
         return make_rpc_request(

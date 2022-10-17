@@ -1,20 +1,19 @@
 from unittest.mock import patch
 
 import pytest
-from application.repositories import nats_error_response
-from application.repositories import notifications_repository as notifications_repository_module
-from asynctest import CoroutineMock
-from config import testconfig
 from shortuuid import uuid
+
+from application.repositories import notifications_repository as notifications_repository_module
+from application.repositories.utils_repository import to_json_bytes
+from config import testconfig
 
 uuid_ = uuid()
 uuid_mock = patch.object(notifications_repository_module, "uuid", return_value=uuid_)
 
 
 class TestNotificationsRepository:
-    def instance_test(self, notifications_repository, logger, event_bus):
-        assert notifications_repository._logger is logger
-        assert notifications_repository._event_bus is event_bus
+    def instance_test(self, notifications_repository, nats_client):
+        assert notifications_repository._nats_client is nats_client
         assert notifications_repository._config is testconfig
 
     @pytest.mark.asyncio
@@ -25,12 +24,14 @@ class TestNotificationsRepository:
         with uuid_mock:
             await notifications_repository.send_slack_message(message)
 
-        notifications_repository._event_bus.rpc_request.assert_awaited_once_with(
+        notifications_repository._nats_client.request.assert_awaited_once_with(
             "notification.slack.request",
-            {
-                "request_id": uuid_,
-                "body": {"message": f"[{prefix}] {message}"},
-            },
+            to_json_bytes(
+                {
+                    "request_id": uuid_,
+                    "body": {"message": f"[{prefix}] {message}"},
+                }
+            ),
             timeout=10,
         )
 

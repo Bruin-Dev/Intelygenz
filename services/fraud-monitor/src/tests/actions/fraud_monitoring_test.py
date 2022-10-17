@@ -2,13 +2,14 @@ from datetime import datetime
 from unittest.mock import Mock, patch
 
 import pytest
+from apscheduler.jobstores.base import ConflictingIdError
+from apscheduler.util import undefined
+from shortuuid import uuid
+
 from application.actions import fraud_monitoring as fraud_monitor_module
 from application.actions.fraud_monitoring import EMAIL_REGEXES
 from application.repositories import bruin_repository as bruin_repository_module
-from apscheduler.jobstores.base import ConflictingIdError
-from apscheduler.util import undefined
 from config import testconfig
-from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(bruin_repository_module, "uuid", return_value=uuid_)
@@ -20,8 +21,7 @@ class TestFraudMonitor:
     def instance_test(
         self,
         fraud_monitor,
-        event_bus,
-        logger,
+        nats_client,
         scheduler,
         notifications_repository,
         email_repository,
@@ -29,8 +29,7 @@ class TestFraudMonitor:
         ticket_repository,
         utils_repository,
     ):
-        assert fraud_monitor._event_bus == event_bus
-        assert fraud_monitor._logger == logger
+        assert fraud_monitor._nats_client == nats_client
         assert fraud_monitor._scheduler == scheduler
         assert fraud_monitor._config == testconfig
         assert fraud_monitor._notifications_repository == notifications_repository

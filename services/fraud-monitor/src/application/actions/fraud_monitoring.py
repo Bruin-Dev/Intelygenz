@@ -1,13 +1,17 @@
+import logging
 import re
 import time
 from datetime import datetime
 from typing import List, Optional
 
-from application import ForwardQueues
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from dateutil.parser import parse
 from pytz import timezone
+
+from application import ForwardQueues
+
+logger = logging.getLogger(__name__)
 
 EMAIL_REGEXES = [
     {
@@ -28,8 +32,7 @@ EMAIL_REGEXES = [
 class FraudMonitor:
     def __init__(
         self,
-        event_bus,
-        logger,
+        nats_client,
         scheduler,
         config,
         metrics_repository,
@@ -39,8 +42,7 @@ class FraudMonitor:
         ticket_repository,
         utils_repository,
     ):
-        self._event_bus = event_bus
-        self._logger = logger
+        self._nats_client = nats_client
         self._scheduler = scheduler
         self._config = config
         self._metrics_repository = metrics_repository
@@ -51,13 +53,13 @@ class FraudMonitor:
         self._utils_repository = utils_repository
 
     async def start_fraud_monitoring(self, exec_on_start=False):
-        self._logger.info("Scheduling Fraud Monitor job...")
+        logger.info("Scheduling Fraud Monitor job...")
         next_run_time = undefined
 
         if exec_on_start:
             tz = timezone(self._config.TIMEZONE)
             next_run_time = datetime.now(tz)
-            self._logger.info("Fraud Monitor job is going to be executed immediately")
+            logger.info("Fraud Monitor job is going to be executed immediately")
 
         try:
             self._scheduler.add_job(
@@ -69,17 +71,17 @@ class FraudMonitor:
                 id="_fraud_monitor_process",
             )
         except ConflictingIdError as conflict:
-            self._logger.info(f"Skipping start of Fraud Monitoring job. Reason: {conflict}")
+            logger.info(f"Skipping start of Fraud Monitoring job. Reason: {conflict}")
 
     async def _fraud_monitoring_process(self):
-        self._logger.info(f'Processing all unread email from {self._config.FRAUD_CONFIG["inbox_email"]}')
+        logger.info(f'Processing all unread email from {self._config.FRAUD_CONFIG["inbox_email"]}')
         start = time.time()
         unread_emails_response = await self._email_repository.get_unread_emails()
         unread_emails_body = unread_emails_response["body"]
         unread_emails_status = unread_emails_response["status"]
 
         if unread_emails_status not in range(200, 300):
-            self._logger.warning(f"Bad status calling to get unread emails. Skipping fraud monitor process")
+            logger.warning(f"Bad status calling to get unread emails. Skipping fraud monitor process")
             return
 
         for email in unread_emails_body:
@@ -93,18 +95,18 @@ class FraudMonitor:
             )
 
             if message is None or msg_uid == -1:
-                self._logger.error(f"Invalid message: {email}")
+                logger.error(f"Invalid message: {email}")
                 continue
 
             if not email_regex:
-                self._logger.info(f"Email with msg_uid {msg_uid} is not a fraud warning. Skipping...")
+                logger.info(f"Email with msg_uid {msg_uid} is not a fraud warning. Skipping...")
                 continue
 
             if not email_regex["body"].search(body):
-                self._logger.error(f"Email with msg_uid {msg_uid} has an unexpected body")
+                logger.error(f"Email with msg_uid {msg_uid} has an unexpected body")
                 continue
 
-            self._logger.info(f"Processing email with msg_uid {msg_uid}")
+            logger.info(f"Processing email with msg_uid {msg_uid}")
             processed = await self._process_fraud(email_regex, body, msg_uid)
 
             if processed and self._config.CURRENT_ENVIRONMENT == "production":
@@ -112,15 +114,15 @@ class FraudMonitor:
                 mark_email_as_read_status = mark_email_as_read_response["status"]
 
                 if mark_email_as_read_status not in range(200, 300):
-                    self._logger.error(f"Could not mark email with msg_uid {msg_uid} as read")
+                    logger.error(f"Could not mark email with msg_uid {msg_uid} as read")
 
             if processed:
-                self._logger.info(f"Processed email with msg_uid {msg_uid}")
+                logger.info(f"Processed email with msg_uid {msg_uid}")
             else:
-                self._logger.info(f"Failed to process email with msg_uid {msg_uid}")
+                logger.info(f"Failed to process email with msg_uid {msg_uid}")
 
         stop = time.time()
-        self._logger.info(
+        logger.info(
             f'Finished processing all unread email from {self._config.FRAUD_CONFIG["inbox_email"]}. '
             f"Elapsed time: {round((stop - start) / 60, 2)} minutes"
         )
@@ -134,14 +136,14 @@ class FraudMonitor:
             client_id = client_info_by_did_response["body"]["clientId"]
             service_number = client_info_by_did_response["body"]["btn"]
         else:
-            self._logger.warning(f"Failed to get client info by DID {did}, using default client info")
+            logger.warning(f"Failed to get client info by DID {did}, using default client info")
             default_client_info = self._config.FRAUD_CONFIG["default_client_info"]
             client_id = default_client_info["client_id"]
             service_number = default_client_info["service_number"]
 
         open_fraud_tickets_response = await self._bruin_repository.get_open_fraud_tickets(client_id, service_number)
         if open_fraud_tickets_response["status"] not in range(200, 300):
-            self._logger.warning(
+            logger.warning(
                 f"Bad status calling to get open fraud tickets for client id: {client_id} and "
                 f"service number: {service_number}. Process fraud FALSE ..."
             )
@@ -153,12 +155,12 @@ class FraudMonitor:
 
         if open_fraud_ticket:
             ticket_id = open_fraud_ticket["ticket_overview"]["ticketID"]
-            self._logger.info(f"An open Fraud ticket was found for {service_number}. Ticket ID: {ticket_id}")
+            logger.info(f"An open Fraud ticket was found for {service_number}. Ticket ID: {ticket_id}")
 
             # The task can be in Resolved state, even if the ticket is reported as Open by Bruin.
             # If that's the case, the task should be re-opened instead.
             if self._ticket_repository.is_task_resolved(open_fraud_ticket["ticket_task"]):
-                self._logger.info(
+                logger.info(
                     f"Fraud ticket with ID {ticket_id} is open, but the task related to {service_number} is resolved. "
                     f"Therefore, the ticket will be considered as Resolved."
                 )
@@ -167,12 +169,12 @@ class FraudMonitor:
                 return await self._append_note_to_ticket(open_fraud_ticket, service_number, email_body, msg_uid)
         else:
             # If we didn't find an Open ticket, we need look for a Resolved ticket
-            self._logger.info(f"No open Fraud ticket was found for {service_number}")
+            logger.info(f"No open Fraud ticket was found for {service_number}")
             resolved_fraud_tickets_response = await self._bruin_repository.get_resolved_fraud_tickets(
                 client_id, service_number
             )
             if resolved_fraud_tickets_response["status"] not in range(200, 300):
-                self._logger.warning(
+                logger.warning(
                     f"bad status calling to get resolved fraud tickets for client id: {client_id} "
                     f"and service number: {service_number}. Skipping process fraud ..."
                 )
@@ -184,13 +186,13 @@ class FraudMonitor:
         # If the Open ticket flow or the Resolved ticket flow returned a Resolved ticket task, we need to unresolve it
         if resolved_fraud_ticket:
             ticket_id = resolved_fraud_ticket["ticket_overview"]["ticketID"]
-            self._logger.info(f"A resolved Fraud ticket was found for {service_number}. Ticket ID: {ticket_id}")
+            logger.info(f"A resolved Fraud ticket was found for {service_number}. Ticket ID: {ticket_id}")
             return await self._unresolve_task_for_ticket(
                 resolved_fraud_ticket, service_number, email_regex, email_body, msg_uid
             )
 
         # If not a single ticket was found, create a new one
-        self._logger.info(f"No open or resolved Fraud ticket was found for {service_number}")
+        logger.info(f"No open or resolved Fraud ticket was found for {service_number}")
         return await self._create_fraud_ticket(client_id, service_number, email_regex, email_body, msg_uid)
 
     async def _get_oldest_fraud_ticket(self, tickets: List[dict], service_number: str) -> Optional[dict]:
@@ -201,7 +203,7 @@ class FraudMonitor:
             ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
 
             if ticket_details_response["status"] not in range(200, 300):
-                self._logger.warning(
+                logger.warning(
                     f"Bad status calling to get ticket details for ticket id: {ticket_id}."
                     f"Skipping get oldest fraud ticket ..."
                 )
@@ -232,7 +234,7 @@ class FraudMonitor:
         self, ticket_info: dict, service_number: str, email_body: str, msg_uid: str
     ) -> bool:
         ticket_id = ticket_info["ticket_overview"]["ticketID"]
-        self._logger.info(f"Appending Fraud note to ticket {ticket_id}")
+        logger.info(f"Appending Fraud note to ticket {ticket_id}")
 
         # Get notes since latest re-open or ticket creation
         latest_notes = self._ticket_repository.get_latest_notes(ticket_info["ticket_notes"])
@@ -240,14 +242,14 @@ class FraudMonitor:
         # If there is a Fraud note for the current email since the latest re-open note, skip
         # Otherwise, append Fraud note to ticket using the callback passed as parameter
         if self._ticket_repository.note_already_exists(latest_notes, msg_uid):
-            self._logger.info(
+            logger.info(
                 f"No Fraud trouble note will be appended to ticket {ticket_id}. "
                 f"A note for this email was already appended to the ticket after the latest re-open or ticket creation."
             )
             return True
 
         if self._config.CURRENT_ENVIRONMENT != "production":
-            self._logger.info(
+            logger.info(
                 f"No Fraud note will be appended to ticket {ticket_id} since the current environment is not production"
             )
             return True
@@ -256,12 +258,10 @@ class FraudMonitor:
             ticket_id, service_number, email_body, msg_uid
         )
         if append_note_response["status"] not in range(200, 300):
-            self._logger.warning(
-                f"Bad status calling to append note to ticket id: {ticket_id}. Skipping append note ..."
-            )
+            logger.warning(f"Bad status calling to append note to ticket id: {ticket_id}. Skipping append note ...")
             return False
 
-        self._logger.info(f"Fraud note was successfully appended to ticket {ticket_id}!")
+        logger.info(f"Fraud note was successfully appended to ticket {ticket_id}!")
         await self._notifications_repository.notify_successful_note_append(ticket_id, service_number)
 
         return True
@@ -271,10 +271,10 @@ class FraudMonitor:
     ) -> bool:
         ticket_id = ticket_info["ticket_overview"]["ticketID"]
         task_id = ticket_info["ticket_task"]["detailID"]
-        self._logger.info(f"Unresolving task related to {service_number} of Fraud ticket {ticket_id}...")
+        logger.info(f"Unresolving task related to {service_number} of Fraud ticket {ticket_id}...")
 
         if self._config.CURRENT_ENVIRONMENT != "production":
-            self._logger.info(
+            logger.info(
                 f"Task related to {service_number} of Fraud ticket {ticket_id} will not be unresolved "
                 f"since the current environment is not production"
             )
@@ -282,13 +282,13 @@ class FraudMonitor:
 
         unresolve_task_response = await self._bruin_repository.open_ticket(ticket_id, task_id)
         if unresolve_task_response["status"] not in range(200, 300):
-            self._logger.warning(
+            logger.warning(
                 f"Bad status calling to open ticket with ticket id: {ticket_id}. "
                 f"Unresolve task for ticket return FALSE"
             )
             return False
 
-        self._logger.info(f"Task related to {service_number} of Fraud ticket {ticket_id} was successfully unresolved!")
+        logger.info(f"Task related to {service_number} of Fraud ticket {ticket_id} was successfully unresolved!")
         self._metrics_repository.increment_tasks_reopened(trouble=email_regex["type"])
         await self._notifications_repository.notify_successful_reopen(ticket_id, service_number)
 
@@ -296,13 +296,13 @@ class FraudMonitor:
             ticket_id, service_number, email_body, msg_uid, reopening=True
         )
         if append_note_response["status"] not in range(200, 300):
-            self._logger.warning(
+            logger.warning(
                 f"Bad status calling to append note to ticket id: {ticket_id} and service number:"
                 f"{service_number}. Unresolve task for ticket return FALSE"
             )
             return False
 
-        self._logger.info(f"Fraud note was successfully appended to ticket {ticket_id}!")
+        logger.info(f"Fraud note was successfully appended to ticket {ticket_id}!")
         await self._notifications_repository.notify_successful_note_append(ticket_id, service_number)
 
         return True
@@ -310,29 +310,29 @@ class FraudMonitor:
     async def _create_fraud_ticket(
         self, client_id: int, service_number: str, email_regex: dict, email_body: str, msg_uid: str
     ) -> bool:
-        self._logger.info(f"Creating Fraud ticket for client {client_id} and service number {service_number}")
+        logger.info(f"Creating Fraud ticket for client {client_id} and service number {service_number}")
         contacts = await self._get_contacts(client_id, service_number)
 
         if not contacts:
-            self._logger.warning(f"Not found contacts to create the fraud ticket")
+            logger.warning(f"Not found contacts to create the fraud ticket")
             return False
 
         if self._config.CURRENT_ENVIRONMENT != "production":
-            self._logger.info(f"No Fraud ticket will be created since the current environment is not production")
+            logger.info(f"No Fraud ticket will be created since the current environment is not production")
             return True
 
         create_fraud_ticket_response = await self._bruin_repository.create_fraud_ticket(
             client_id, service_number, contacts
         )
         if create_fraud_ticket_response["status"] not in range(200, 300):
-            self._logger.warning(
+            logger.warning(
                 f"Bad status calling to create fraud ticket with client id: {client_id} and"
                 f"service number: {service_number}. Create fraud ticket return FALSE ..."
             )
             return False
 
         ticket_id = create_fraud_ticket_response["body"]["ticketIds"][0]
-        self._logger.info(f"Fraud ticket was successfully created! Ticket ID is {ticket_id}")
+        logger.info(f"Fraud ticket was successfully created! Ticket ID is {ticket_id}")
         self._metrics_repository.increment_tasks_created(trouble=email_regex["type"])
         await self._notifications_repository.notify_successful_ticket_creation(ticket_id, service_number)
 
@@ -340,16 +340,16 @@ class FraudMonitor:
             ticket_id, service_number, email_body, msg_uid
         )
         if append_note_response["status"] not in range(200, 300):
-            self._logger.warning(
+            logger.warning(
                 f"Bad status calling to append note to ticket id: {ticket_id} and service number:"
                 f"{service_number}. Create fraud ticket return FALSE ..."
             )
             return False
 
-        self._logger.info(f"Fraud note was successfully appended to ticket {ticket_id}!")
+        logger.info(f"Fraud note was successfully appended to ticket {ticket_id}!")
         await self._notifications_repository.notify_successful_note_append(ticket_id, service_number)
 
-        self._logger.info(f"Forwarding ticket {ticket_id} to HNOC")
+        logger.info(f"Forwarding ticket {ticket_id} to HNOC")
         change_work_queue_response = await self._bruin_repository.change_detail_work_queue_to_hnoc(
             ticket_id=ticket_id, service_number=service_number
         )
@@ -367,15 +367,13 @@ class FraudMonitor:
 
         client_info_response = await self._bruin_repository.get_client_info(service_number)
         if client_info_response["status"] not in range(200, 300) or not client_info_response["body"]:
-            self._logger.warning(
-                f"Failed to get client info for service number {service_number}, using default contacts"
-            )
+            logger.warning(f"Failed to get client info for service number {service_number}, using default contacts")
             return default_contacts
 
         site_id = client_info_response["body"][0]["site_id"]
         site_details_response = await self._bruin_repository.get_site_details(client_id, site_id)
         if site_details_response["status"] not in range(200, 300):
-            self._logger.warning(
+            logger.warning(
                 f"Failed to get site details for client {client_id} and site {site_id}, using default contacts"
             )
             return default_contacts

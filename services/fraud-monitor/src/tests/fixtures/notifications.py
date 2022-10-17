@@ -1,4 +1,5 @@
 import pytest
+
 from config import testconfig
 
 
@@ -44,8 +45,8 @@ def make_mark_email_as_read_request(make_rpc_request):
         email_account = email_account or testconfig.FRAUD_CONFIG["inbox_email"]
 
         payload = {
-            "msg_uid": msg_uid,
             "email_account": email_account,
+            "msg_uid": msg_uid,
         }
 
         return make_rpc_request(
