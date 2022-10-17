@@ -24,7 +24,7 @@ async def offline_devices_have_a_repair_ticket_posted_test(any_check_device, any
 
 
 @patch("application.actions.check_device.build_note")
-async def created_tickets_note_texts_are_properly_built_test(
+async def created_ticket_note_texts_are_properly_built_test(
     build_note: Mock,
     any_check_offline_device,
     any_offline_device,

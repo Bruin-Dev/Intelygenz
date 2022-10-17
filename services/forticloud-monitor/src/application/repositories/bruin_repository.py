@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 from application.domain.device import DeviceId
 from application.domain.note import Note
+from application.domain.task import TicketTask
 from application.domain.ticket import CreatedTicket, Ticket, TicketStatus
 from application.repositories.bruin_repository_models.post_repair_ticket import (
     PostRepairTicketBody,
@@ -77,5 +78,15 @@ class BruinRepository:
     async def unpause_task(self, ticket_id, task):
         pass
 
-    async def resolve_task(self, ticket_id, task):
-        pass
+    async def resolve_task(self, ticket_id: str, task: TicketTask):
+        log.debug(f"resolve_task(ticket_id={ticket_id}, task={task})")
+        request = BruinRequest(
+            method="POST",
+            path=f"/api/Ticket/{ticket_id}/details/{task.id}/status",
+            json={"Status": "R"},
+        )
+        response = await self.bruin_client.send(request)
+        log.debug(f"bruin_client.send({request})={response}")
+
+        if not response.status == HTTPStatus.OK:
+            raise UnexpectedStatusError(response.status)

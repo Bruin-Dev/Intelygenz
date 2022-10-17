@@ -22,9 +22,9 @@ async def online_devices_have_no_repair_ticket_posted_test(any_check_device, any
     post_repair_ticket.assert_not_awaited()
 
 
-async def open_automation_tickets_are_properly_queried_test(any_check_online_device, any_device_id, any_ticket):
+async def open_automation_tickets_are_properly_queried_test(any_check_online_device, any_device_id):
     # given
-    find_open_automation_ticket_for = AsyncMock(return_value=any_ticket)
+    find_open_automation_ticket_for = AsyncMock(return_value=None)
     check_device = any_check_online_device(find_open_automation_ticket_for=find_open_automation_ticket_for)
 
     # when
@@ -65,7 +65,7 @@ async def auto_resolution_errors_are_properly_handled_test(any_check_online_devi
     resolve_task.assert_not_awaited()
 
 
-async def auto_resolved_tasks_are_properly_unpaused_test(
+async def auto_resolved_tasks_are_properly_unpaused_in_bruin_test(
     any_auto_resolved_task_scenario,
     any_device_id,
     any_task,
@@ -85,7 +85,11 @@ async def auto_resolved_tasks_are_properly_unpaused_test(
     unpause_task.assert_awaited_once_with(ticket_id="any_ticket_id", task=any_task)
 
 
-async def auto_resolved_tasks_are_properly_handled_test(any_auto_resolved_task_scenario, any_device_id, any_task):
+async def auto_resolved_tasks_are_resolved_in_bruin_test(
+    any_auto_resolved_task_scenario,
+    any_device_id,
+    any_task,
+):
     # given
     resolve_task = AsyncMock()
     check_device = any_auto_resolved_task_scenario(
@@ -101,7 +105,7 @@ async def auto_resolved_tasks_are_properly_handled_test(any_auto_resolved_task_s
     resolve_task.assert_awaited_once_with(ticket_id="any_ticket_id", task=any_task)
 
 
-async def tasks_that_could_not_be_unpaused_are_properly_resolved_test(
+async def tasks_are_resolved_in_bruin_regardless_they_were_unpaused_test(
     any_auto_resolved_task_scenario,
     any_device_id,
     any_exception,
@@ -120,7 +124,7 @@ async def tasks_that_could_not_be_unpaused_are_properly_resolved_test(
     resolve_task.assert_awaited_once()
 
 
-async def auto_resolved_tasks_are_properly_monitored_test(any_auto_resolved_task_scenario, any_device_id):
+async def auto_resolved_tasks_are_monitored_test(any_auto_resolved_task_scenario, any_device_id):
     # given
     add_auto_resolved_task_metric = AsyncMock()
     check_device = any_auto_resolved_task_scenario(add_auto_resolved_task_metric=add_auto_resolved_task_metric)
