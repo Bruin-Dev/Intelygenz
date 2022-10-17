@@ -6,7 +6,7 @@ resource "aws_cloudwatch_log_metric_filter" "velocloud_outage__triage_job_finish
   metric_transformation {
     name      = "velocloud_outage__triage_job_finished"
     namespace = "mettel_automation/alarms"
-    value     = "$.message"
+    value     = "1"
   }
 }
 

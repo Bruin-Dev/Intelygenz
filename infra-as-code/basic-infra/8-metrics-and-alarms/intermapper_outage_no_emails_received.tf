@@ -6,7 +6,7 @@ resource "aws_cloudwatch_log_metric_filter" "intermapper_outage__no_emails_recei
   metric_transformation {
     name      = "intermapper_outage__no_emails_received"
     namespace = "mettel_automation/alarms"
-    value     = "$.message"
+    value     = "1"
   }
 }
 

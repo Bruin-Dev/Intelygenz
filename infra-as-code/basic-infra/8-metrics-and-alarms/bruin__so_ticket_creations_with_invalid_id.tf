@@ -6,7 +6,7 @@ resource "aws_cloudwatch_log_metric_filter" "bruin__so_ticket_creations_with_inv
   metric_transformation {
     name      = "bruin__so_ticket_creations_with_invalid_id"
     namespace = "mettel_automation/alarms"
-    value     = "$.message"
+    value     = "1"
   }
 }
 

@@ -6,7 +6,7 @@ resource "aws_cloudwatch_log_metric_filter" "velocloud_affecting__tickets_create
   metric_transformation {
     name      = "velocloud_affecting__tickets_created"
     namespace = "mettel_automation/alarms"
-    value     = "$.message"
+    value     = "1"
   }
 }
 

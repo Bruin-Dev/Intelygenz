@@ -6,7 +6,7 @@ resource "aws_cloudwatch_log_metric_filter" "intermapper_outage__events_processe
   metric_transformation {
     name      = "intermapper_outage__events_processed"
     namespace = "mettel_automation/alarms"
-    value     = "$.message"
+    value     = "1"
   }
 }
 

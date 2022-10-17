@@ -6,7 +6,7 @@ resource "aws_cloudwatch_log_metric_filter" "velocloud_bridge__error" {
   metric_transformation {
     name      = "velocloud_bridge__error"
     namespace = "mettel_automation/alarms"
-    value     = "$.message"
+    value     = "1"
   }
 }
 

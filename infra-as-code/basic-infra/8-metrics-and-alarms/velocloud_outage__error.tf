@@ -6,7 +6,7 @@ resource "aws_cloudwatch_log_metric_filter" "velocloud_outage__error" {
   metric_transformation {
     name      = "velocloud_outage__error"
     namespace = "mettel_automation/alarms"
-    value     = "$.message"
+    value     = "1"
   }
 }
 
