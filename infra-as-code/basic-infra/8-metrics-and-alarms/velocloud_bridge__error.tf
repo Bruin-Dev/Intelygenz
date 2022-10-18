@@ -25,7 +25,7 @@ alarm_actions = []
 }
 
 resource "aws_sns_topic" "velocloud-bridge-too-many-errors" {
-  name = "bruin-bridge-too-many-errors"
+  name = "velocloud-bridge-too-many-errors"
 }
 
 resource "aws_sns_topic_subscription" "velocloud-bridge-too-many-errors"{

@@ -10,8 +10,8 @@ resource "aws_cloudwatch_log_metric_filter" "email__login_errors" {
   }
 }
 
-resource "aws_cloudwatch_metric_alarm" "emails-error-loggings-in-to-the-inbox" {
-  alarm_name                = "emails-error-loggings-in-to-the-inbox"
+resource "aws_cloudwatch_metric_alarm" "emails-error-logging-in-to-the-inbox" {
+  alarm_name                = "emails-error-logging-in-to-the-inbox"
   comparison_operator       = "LessThanOrEqualToThreshold"
   evaluation_periods        = "1"
   metric_name               = aws_cloudwatch_log_metric_filter.email__login_errors.name
@@ -24,13 +24,13 @@ resource "aws_cloudwatch_metric_alarm" "emails-error-loggings-in-to-the-inbox" {
 alarm_actions = []
 }
 
-resource "aws_sns_topic" "emails-error-loggings-in-to-the-inbox" {
-  name = "emails-error-loggings-in-to-the-inbox"
+resource "aws_sns_topic" "emails-error-logging-in-to-the-inbox" {
+  name = "emails-error-logging-in-to-the-inbox"
 }
 
-resource "aws_sns_topic_subscription" "emails-error-loggings-in-to-the-inbox"{
+resource "aws_sns_topic_subscription" "emails-error-logging-in-to-the-inbox"{
   for_each  = toset(["mettel.team@intelygenz.com"])
-  topic_arn = aws_sns_topic.emails-error-loggings-in-to-the-inbox.arn
+  topic_arn = aws_sns_topic.emails-error-logging-in-to-the-inbox.arn
   protocol = "email"
   endpoint = each.value
 }
