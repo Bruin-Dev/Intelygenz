@@ -21,7 +21,8 @@ resource "aws_cloudwatch_metric_alarm" "velocloud-affecting-too-many-tickets" {
   threshold                 = "50"
   alarm_description         = "Alarm description: Triggers an alarm if the average number of Service Affecting tickets created is exceeded"
   insufficient_data_actions = []
-alarm_actions = []
+  actions_enabled           = "true"
+  alarm_actions             = [aws_sns_topic.velocloud-affecting-too-many-tickets.arn]
 }
 
 resource "aws_sns_topic" "velocloud-affecting-too-many-tickets" {

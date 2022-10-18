@@ -21,7 +21,8 @@ resource "aws_cloudwatch_metric_alarm" "bruin-too-many-invalid-service-outage-ti
   threshold                 = "10"
   alarm_description         = "Triggers an alarm if a fixed number of invalid ticket creations is exceeded"
   insufficient_data_actions = []
-alarm_actions = []
+  actions_enabled           = "true"
+  alarm_actions             = [aws_sns_topic.bruin-too-many-invalid-service-outage-ticket-creations.arn]
 }
 
 resource "aws_sns_topic" "bruin-too-many-invalid-service-outage-ticket-creations" {

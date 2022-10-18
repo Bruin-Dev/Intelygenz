@@ -21,7 +21,8 @@ resource "aws_cloudwatch_metric_alarm" "intermapper-outage-too-many-down-events"
   threshold                 = "100"
   alarm_description         = "Triggers an alarm if a fixed number of InterMapper down events received is exceeded"
   insufficient_data_actions = []
-alarm_actions = []
+  actions_enabled           = "true"
+  alarm_actions             = [aws_sns_topic.intermapper-outage-too-many-down-events.arn]
 }
 
 resource "aws_sns_topic" "intermapper-outage-too-many-down-events" {

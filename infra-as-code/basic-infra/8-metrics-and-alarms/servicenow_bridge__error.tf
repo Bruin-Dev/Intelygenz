@@ -21,7 +21,8 @@ resource "aws_cloudwatch_metric_alarm" "servicenow-bridge-too-many-errors" {
   threshold                 = "100"
   alarm_description         = "Triggers an alarm if the ServiceNow Bridge reported too many errors"
   insufficient_data_actions = []
-alarm_actions = []
+  actions_enabled           = "true"
+  alarm_actions             = [aws_sns_topic.servicenow-bridge-too-many-errors.arn]
 }
 
 resource "aws_sns_topic" "servicenow-bridge-too-many-errors" {

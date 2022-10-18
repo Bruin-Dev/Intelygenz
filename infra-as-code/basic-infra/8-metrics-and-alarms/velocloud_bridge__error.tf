@@ -21,7 +21,8 @@ resource "aws_cloudwatch_metric_alarm" "velocloud-bridge-too-many-errors" {
   threshold                 = "300"
   alarm_description         = "Triggers an alarm if the Velocloud Bridge reported too many errors"
   insufficient_data_actions = []
-alarm_actions = []
+  actions_enabled           = "true"
+  alarm_actions             = [aws_sns_topic.velocloud-bridge-too-many-errors.arn]
 }
 
 resource "aws_sns_topic" "velocloud-bridge-too-many-errors" {

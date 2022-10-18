@@ -21,7 +21,8 @@ resource "aws_cloudwatch_metric_alarm" "intermapper-outage-no-emails-received" {
   threshold                 = "50"
   alarm_description         = "Triggers an alarm if no emails get into the inbox"
   insufficient_data_actions = []
-alarm_actions = []
+  actions_enabled           = "true"
+  alarm_actions             = [aws_sns_topic.intermapper-outage-no-emails-received.arn]
 }
 
 resource "aws_sns_topic" "intermapper-outage-no-emails-received" {

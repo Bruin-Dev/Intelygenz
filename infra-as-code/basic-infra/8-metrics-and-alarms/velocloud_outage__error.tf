@@ -21,7 +21,8 @@ resource "aws_cloudwatch_metric_alarm" "velocloud-outage-too-many-errors" {
   threshold                 = "500"
   alarm_description         = "Triggers an alarm if the Velocloud Outage reported too many errors"
   insufficient_data_actions = []
-alarm_actions = []
+  actions_enabled           = "true"
+  alarm_actions             = [aws_sns_topic.velocloud-outage-too-many-errors.arn]
 }
 
 resource "aws_sns_topic" "velocloud-outage-too-many-errors" {

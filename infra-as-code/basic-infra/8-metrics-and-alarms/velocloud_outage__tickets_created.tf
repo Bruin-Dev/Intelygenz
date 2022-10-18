@@ -46,7 +46,8 @@ resource "aws_cloudwatch_metric_alarm" "velocloud-outage-no-tickets-created" {
   threshold                 = "0"
   alarm_description         = "Triggers an alarm if the average number of Service Outage tickets created is exceeded"
   insufficient_data_actions = []
-alarm_actions = []
+  actions_enabled           = "true"
+  alarm_actions             = [aws_sns_topic.velocloud-outage-no-tickets-created.arn]
 }
 
 resource "aws_sns_topic" "velocloud-outage-no-tickets-created" {
