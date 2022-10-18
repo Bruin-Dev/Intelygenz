@@ -35,3 +35,30 @@ resource "aws_sns_topic_subscription" "velocloud-affecting-too-many-tickets"{
   protocol = "email"
   endpoint = each.value
 }
+
+resource "aws_cloudwatch_metric_alarm" "velocloud-affecting-no-tickets-created" {
+  alarm_name                = "velocloud-affecting-no-tickets-created"
+  comparison_operator       = "LessThanOrEqualToThreshold"
+  evaluation_periods        = "1"
+  metric_name               = aws_cloudwatch_log_metric_filter.velocloud_affecting__tickets_created.name
+  namespace                 = "mettel_automation/alarms"
+  period                    = "3600"
+  statistic                 = "Sum"
+  threshold                 = "0"
+  alarm_description         = "Triggers an alarm if the average number of Service Affecting tickets created is exceeded"
+  insufficient_data_actions = []
+  actions_enabled           = "true"
+  alarm_actions             = [aws_sns_topic.velocloud-affecting-no-tickets-created.arn]
+}
+
+resource "aws_sns_topic" "velocloud-affecting-no-tickets-created" {
+  name = "velocloud-affecting-no-tickets-created"
+}
+
+
+resource "aws_sns_topic_subscription" "velocloud-affecting-no-tickets-created"{
+  for_each  = toset(["mettel.team@intelygenz.com"])
+  topic_arn = aws_sns_topic.velocloud-affecting-no-tickets-created.arn
+  protocol = "email"
+  endpoint = each.value
+}
