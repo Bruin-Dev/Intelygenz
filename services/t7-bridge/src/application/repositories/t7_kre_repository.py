@@ -5,8 +5,7 @@ import humps
 
 
 class T7KRERepository:
-    def __init__(self, logger, t7_kre_client):
-        self._logger = logger
+    def __init__(self, t7_kre_client):
         self._t7_kre_client = t7_kre_client
 
     def get_prediction(self, ticket_id: int, ticket_rows: List[dict], assets_to_predict: List[str]) -> dict:

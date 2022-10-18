@@ -53,12 +53,10 @@ class TestT7KRERepository:
     ]
 
     def instance_test(self):
-        logger = Mock()
         t7_kre_client = Mock()
 
-        t7_kre_repository = T7KRERepository(logger, t7_kre_client)
+        t7_kre_repository = T7KRERepository(t7_kre_client)
 
-        assert t7_kre_repository._logger is logger
         assert t7_kre_repository._t7_kre_client is t7_kre_client
 
     def get_prediction_200_test(self):
@@ -88,12 +86,10 @@ class TestT7KRERepository:
             "status": 200,
         }
 
-        logger = Mock()
-
         t7_kre_client = Mock()
         t7_kre_client.get_prediction = Mock(return_value=raw_predictions)
 
-        t7_kre_repository = T7KRERepository(logger, t7_kre_client)
+        t7_kre_repository = T7KRERepository(t7_kre_client)
         predictions = t7_kre_repository.get_prediction(
             ticket_id=self.valid_ticket_id,
             ticket_rows=self.valid_ticket_rows,
@@ -108,12 +104,10 @@ class TestT7KRERepository:
     def get_prediction_not_200_from_client_test(self):
         expected_response = {"body": "Error from get_prediction client", "status": 500}
 
-        logger = Mock()
-
         t7_kre_client = Mock()
         t7_kre_client.get_prediction = Mock(return_value=expected_response)
 
-        t7_kre_repository = T7KRERepository(logger, t7_kre_client)
+        t7_kre_repository = T7KRERepository(t7_kre_client)
         response = t7_kre_repository.get_prediction(
             ticket_id=self.valid_ticket_id,
             ticket_rows=self.valid_ticket_rows,
@@ -129,11 +123,10 @@ class TestT7KRERepository:
         params = {"ticket_id": self.valid_ticket_id, "ticket_rows": self.valid_ticket_rows}
         return_value = {"body": "Saved 1 metrics", "status": 200}
 
-        logger = Mock()
         t7_kre_client = Mock()
         t7_kre_client.post_automation_metrics = Mock(return_value=return_value)
 
-        t7_kre_repository = T7KRERepository(logger, t7_kre_client)
+        t7_kre_repository = T7KRERepository(t7_kre_client)
 
         post_automation_metrics = t7_kre_repository.post_automation_metrics(params)
         t7_kre_repository._t7_kre_client.post_automation_metrics.assert_called_once_with(
@@ -148,11 +141,10 @@ class TestT7KRERepository:
 
         return_value = {"body": "Metric saved successfully", "status": 200}
 
-        logger = Mock()
         t7_kre_client = Mock()
         t7_kre_client.post_live_automation_metrics = Mock(return_value=return_value)
 
-        t7_kre_repository = T7KRERepository(logger, t7_kre_client)
+        t7_kre_repository = T7KRERepository(t7_kre_client)
 
         post_automation_metrics = t7_kre_repository.post_live_automation_metrics(
             ticket_id=valid_ticket_id, asset_id=valid_asset_id, automated_successfully=automated_successfully

@@ -1,23 +1,18 @@
-import json
 from unittest.mock import Mock
 
 import pytest
+from nats.aio.msg import Msg
+
 from application.actions.post_automation_metrics import PostAutomationMetrics
-from asynctest import CoroutineMock
+from application.repositories.utils_repository import to_json_bytes
 
 
 class TestPostAutomationMetrics:
     def instance_test(self):
-        config = Mock()
-        logger = Mock()
-        event_bus = Mock()
         t7_kre_repository = Mock()
 
-        automation_metrics = PostAutomationMetrics(logger, config, event_bus, t7_kre_repository)
+        automation_metrics = PostAutomationMetrics(t7_kre_repository)
 
-        assert automation_metrics._config == config
-        assert automation_metrics._logger == logger
-        assert automation_metrics._event_bus == event_bus
         assert automation_metrics._t7_kre_repository == t7_kre_repository
 
     @pytest.mark.parametrize(
@@ -36,27 +31,25 @@ class TestPostAutomationMetrics:
         response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
         msg_published_in_topic = {"request_id": request_id, "response_topic": response_topic, "body": body_in_topic}
 
-        config = Mock()
-        logger = Mock()
-
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-
         t7_kre_repository = Mock()
         t7_kre_repository.post_automation_metrics = Mock()
 
-        automation_metrics = PostAutomationMetrics(logger, config, event_bus, t7_kre_repository)
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(msg_published_in_topic)
 
-        await automation_metrics.post_automation_metrics(msg_published_in_topic)
+        automation_metrics = PostAutomationMetrics(t7_kre_repository)
+
+        await automation_metrics(request_msg)
 
         t7_kre_repository.post_automation_metrics.assert_not_called()
-        event_bus.publish_message.assert_awaited_once_with(
-            response_topic,
-            {
-                "request_id": request_id,
-                "body": 'You must specify {.."body": {"ticket_id", "ticket_rows"}..} in the request',
-                "status": 400,
-            },
+        request_msg.respond.assert_awaited_once_with(
+            to_json_bytes(
+                {
+                    "request_id": request_id,
+                    "body": 'You must specify {.."body": {"ticket_id", "ticket_rows"}..} in the request',
+                    "status": 400,
+                }
+            ),
         )
 
     @pytest.mark.asyncio
@@ -71,25 +64,19 @@ class TestPostAutomationMetrics:
             "response_topic": response_topic,
         }
 
-        config = Mock()
-        logger = Mock()
-        logger.info = Mock()
-
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(msg_published_in_topic)
 
         return_value = {"body": "No content", "status": 204}
 
         t7_kre_repository = Mock()
         t7_kre_repository.post_automation_metrics = Mock(return_value=return_value)
 
-        automation_metrics = PostAutomationMetrics(logger, config, event_bus, t7_kre_repository)
+        automation_metrics = PostAutomationMetrics(t7_kre_repository)
 
-        await automation_metrics.post_automation_metrics(msg_published_in_topic)
+        await automation_metrics(request_msg)
 
         t7_kre_repository.post_automation_metrics.assert_called()
-        event_bus.publish_message.assert_awaited_once_with(
-            response_topic, {"request_id": request_id, "body": return_value["body"], "status": return_value["status"]}
+        request_msg.respond.assert_awaited_once_with(
+            to_json_bytes({"request_id": request_id, "body": return_value["body"], "status": return_value["status"]})
         )
-
-        assert logger.info.call_count == 1

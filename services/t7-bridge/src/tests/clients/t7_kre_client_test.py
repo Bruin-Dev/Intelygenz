@@ -3,11 +3,12 @@ from unittest.mock import Mock, call, patch
 
 import grpc
 import pytest
+from google.protobuf.json_format import Parse
+
 from application.clients.generated_grpc import public_input_pb2 as pb2
 from application.clients.generated_grpc import public_input_pb2_grpc as pb2_grpc
 from application.clients.t7_kre_client import T7KREClient
 from config import testconfig
-from google.protobuf.json_format import Parse
 
 
 class TestT7KREClient:
@@ -68,12 +69,10 @@ class TestT7KREClient:
         return grpc_e
 
     def instance_test(self):
-        logger = Mock()
         config = Mock()
 
-        t7_kre_client = T7KREClient(logger, config)
+        t7_kre_client = T7KREClient(config)
 
-        assert t7_kre_client._logger is logger
         assert t7_kre_client._config is config
 
     def get_prediction_200_test(self):
@@ -84,9 +83,6 @@ class TestT7KREClient:
         }
 
         mock_stub_prediction_response = self.__data_to_grpc_message(mock_prediction_response, pb2.PredictionResponse())
-
-        logger = Mock()
-        logger.info = Mock()
 
         stub = Mock()
         stub.Prediction = Mock(return_value=mock_stub_prediction_response)
@@ -110,7 +106,7 @@ class TestT7KREClient:
             )
         ]
 
-        t7_kre_client = T7KREClient(logger, testconfig)
+        t7_kre_client = T7KREClient(testconfig)
 
         with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
             prediction_response = t7_kre_client.get_prediction(
@@ -119,16 +115,11 @@ class TestT7KREClient:
                 assets_to_predict=self.valid_assets_to_predict,
             )
 
-        assert logger.info.call_count == 1
         assert stub.Prediction.call_args_list == exp_stub_prediction_call_args_list
         assert prediction_response == exp_prediction_response
 
     @pytest.mark.parametrize("grpc_code, grpc_detail, expected_status", grpc_errors_cases, ids=grpc_errors_cases_ids)
     def get_prediction_grpc_exception_test(self, grpc_code, grpc_detail, expected_status):
-        logger = Mock()
-        logger.info = Mock()
-        logger.error = Mock()
-
         stub = Mock()
         stub.Prediction = Mock()
         stub.Prediction.side_effect = self.__mock_grpc_exception(grpc_code, grpc_detail)
@@ -152,7 +143,7 @@ class TestT7KREClient:
             )
         ]
 
-        t7_kre_client = T7KREClient(logger, testconfig)
+        t7_kre_client = T7KREClient(testconfig)
 
         with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
             prediction_response = t7_kre_client.get_prediction(
@@ -161,16 +152,11 @@ class TestT7KREClient:
                 assets_to_predict=self.valid_assets_to_predict,
             )
 
-        assert logger.info.call_count == 0
-        assert logger.error.call_count == 1
         assert stub.Prediction.call_args_list == exp_stub_prediction_call_args_list
         assert prediction_response == exp_prediction_response
 
     def get_prediction_exception_test(self):
         raised_error = "Error current exception test"
-        logger = Mock()
-        logger.info = Mock()
-        logger.error = Mock()
 
         stub = Mock()
         stub.Prediction = Mock()
@@ -195,7 +181,7 @@ class TestT7KREClient:
             )
         ]
 
-        t7_kre_client = T7KREClient(logger, testconfig)
+        t7_kre_client = T7KREClient(testconfig)
 
         with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
             prediction_response = t7_kre_client.get_prediction(
@@ -204,8 +190,6 @@ class TestT7KREClient:
                 assets_to_predict=self.valid_assets_to_predict,
             )
 
-        assert logger.info.call_count == 0
-        assert logger.error.call_count == 1
         assert stub.Prediction.call_args_list == exp_stub_prediction_call_args_list
         assert prediction_response == exp_prediction_response
 
@@ -215,9 +199,6 @@ class TestT7KREClient:
         mock_stub_metric_response = self.__data_to_grpc_message(
             {"message": mock_metric_response}, pb2.SaveMetricsResponse()
         )
-
-        logger = Mock()
-        logger.info = Mock()
 
         stub = Mock()
         stub.SaveMetrics = Mock(return_value=mock_stub_metric_response)
@@ -236,23 +217,18 @@ class TestT7KREClient:
             )
         ]
 
-        t7_kre_client = T7KREClient(logger, testconfig)
+        t7_kre_client = T7KREClient(testconfig)
 
         with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
             save_metrics_response = t7_kre_client.post_automation_metrics(
                 ticket_id=self.valid_ticket_id, ticket_rows=self.valid_ticket_rows
             )
 
-            assert logger.info.call_count == 1
             assert stub.SaveMetrics.call_args_list == exp_stub_save_metrics_call_args_list
             assert save_metrics_response == exp_save_metric_response
 
     @pytest.mark.parametrize("grpc_code, grpc_detail, expected_status", grpc_errors_cases, ids=grpc_errors_cases_ids)
     def post_automation_metrics_exception_errors_test(self, grpc_code, grpc_detail, expected_status):
-        logger = Mock()
-        logger.info = Mock()
-        logger.error = Mock()
-
         stub = Mock()
         stub.SaveMetrics = Mock()
         stub.SaveMetrics.side_effect = self.__mock_grpc_exception(grpc_code, grpc_detail)
@@ -271,23 +247,18 @@ class TestT7KREClient:
             )
         ]
 
-        t7_kre_client = T7KREClient(logger, testconfig)
+        t7_kre_client = T7KREClient(testconfig)
 
         with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
             save_metrics_response = t7_kre_client.post_automation_metrics(
                 ticket_id=self.valid_ticket_id, ticket_rows=self.valid_ticket_rows
             )
 
-        assert logger.info.call_count == 0
-        assert logger.error.call_count == 1
         assert stub.SaveMetrics.call_args_list == exp_stub_save_metrics_call_args_list
         assert save_metrics_response == exp_save_metric_response
 
     def post_automation_metrics_exception_test(self):
         raised_error = "Error current exception test"
-        logger = Mock()
-        logger.info = Mock()
-        logger.error = Mock()
 
         stub = Mock()
         stub.SaveMetrics = Mock()
@@ -307,15 +278,13 @@ class TestT7KREClient:
             )
         ]
 
-        t7_kre_client = T7KREClient(logger, testconfig)
+        t7_kre_client = T7KREClient(testconfig)
 
         with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
             save_metrics_response = t7_kre_client.post_automation_metrics(
                 ticket_id=self.valid_ticket_id, ticket_rows=self.valid_ticket_rows
             )
 
-        assert logger.info.call_count == 0
-        assert logger.error.call_count == 1
         assert stub.SaveMetrics.call_args_list == exp_stub_save_metrics_call_args_list
         assert save_metrics_response == exp_save_metric_response
 
@@ -329,9 +298,6 @@ class TestT7KREClient:
         mock_stub_metric_response = self.__data_to_grpc_message(
             {"message": mock_live_metric_response}, pb2.SaveLiveMetricsResponse()
         )
-
-        logger = Mock()
-        logger.info = Mock()
 
         stub = Mock()
         stub.SaveLiveMetrics = Mock(return_value=mock_stub_metric_response)
@@ -355,7 +321,7 @@ class TestT7KREClient:
             )
         ]
 
-        t7_kre_client = T7KREClient(logger, testconfig)
+        t7_kre_client = T7KREClient(testconfig)
 
         with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
             save_metrics_response = t7_kre_client.post_live_automation_metrics(
@@ -364,7 +330,6 @@ class TestT7KREClient:
                 automated_successfully=automated_successfully,
             )
 
-            assert logger.info.call_count == 1
             assert stub.SaveLiveMetrics.call_args_list == exp_stub_save_metrics_call_args_list
             assert save_metrics_response == exp_save_metric_response
 
@@ -373,10 +338,6 @@ class TestT7KREClient:
         valid_ticket_id = 99999999
         valid_asset_id = "VC0000000"
         automated_successfully = False
-
-        logger = Mock()
-        logger.info = Mock()
-        logger.error = Mock()
 
         stub = Mock()
         stub.SaveLiveMetrics = Mock()
@@ -401,15 +362,13 @@ class TestT7KREClient:
             )
         ]
 
-        t7_kre_client = T7KREClient(logger, testconfig)
+        t7_kre_client = T7KREClient(testconfig)
 
         with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
             save_metrics_response = t7_kre_client.post_live_automation_metrics(
                 ticket_id=valid_ticket_id, asset_id=valid_asset_id, automated_successfully=automated_successfully
             )
 
-        assert logger.info.call_count == 0
-        assert logger.error.call_count == 1
         assert stub.SaveLiveMetrics.call_args_list == exp_stub_save_metrics_call_args_list
         assert save_metrics_response == exp_save_metric_response
 
@@ -419,10 +378,6 @@ class TestT7KREClient:
         valid_ticket_id = 99999999
         valid_asset_id = "VC0000000"
         automated_successfully = False
-
-        logger = Mock()
-        logger.info = Mock()
-        logger.error = Mock()
 
         stub = Mock()
         stub.SaveLiveMetrics = Mock()
@@ -447,7 +402,7 @@ class TestT7KREClient:
             )
         ]
 
-        t7_kre_client = T7KREClient(logger, testconfig)
+        t7_kre_client = T7KREClient(testconfig)
 
         with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
             save_metrics_response = t7_kre_client.post_live_automation_metrics(
@@ -456,7 +411,5 @@ class TestT7KREClient:
                 automated_successfully=automated_successfully,
             )
 
-        assert logger.info.call_count == 0
-        assert logger.error.call_count == 1
         assert stub.SaveLiveMetrics.call_args_list == exp_stub_save_metrics_call_args_list
         assert save_metrics_response == exp_save_metric_response
