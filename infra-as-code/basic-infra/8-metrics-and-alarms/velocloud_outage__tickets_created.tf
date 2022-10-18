@@ -4,7 +4,7 @@ resource "aws_cloudwatch_log_metric_filter" "velocloud_outage__tickets_created" 
   log_group_name = data.aws_cloudwatch_log_group.eks_log_group.name
 
   metric_transformation {
-    name      = "velocloud_outage_tickets_created"
+    name      = "velocloud_outage__tickets_created"
     namespace = "mettel_automation/alarms"
     value     = "1"
   }
@@ -21,7 +21,8 @@ resource "aws_cloudwatch_metric_alarm" "velocloud-outage-too-many-tickets" {
   threshold                 = "50"
   alarm_description         = "Triggers an alarm if the average number of Service Outage tickets created is exceeded"
   insufficient_data_actions = []
-alarm_actions = []
+  actions_enabled           = "true"
+  alarm_actions             = [aws_sns_topic.velocloud-outage-too-many-tickets.arn]
 }
 
 resource "aws_sns_topic" "velocloud-outage-too-many-tickets" {
@@ -39,7 +40,7 @@ resource "aws_cloudwatch_metric_alarm" "velocloud-outage-no-tickets-created" {
   alarm_name                = "velocloud-outage-no-tickets-created"
   comparison_operator       = "LessThanOrEqualToThreshold"
   evaluation_periods        = "1"
-  metric_name               = aws_cloudwatch_log_metric_filter.velocloud_affecting__tickets_created.name
+  metric_name               = aws_cloudwatch_log_metric_filter.velocloud_outage__tickets_created.name
   namespace                 = "mettel_automation/alarms"
   period                    = "3600"
   statistic                 = "Sum"

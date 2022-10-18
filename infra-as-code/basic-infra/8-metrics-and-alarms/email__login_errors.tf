@@ -22,7 +22,7 @@ resource "aws_cloudwatch_metric_alarm" "emails-error-logging-in-to-the-inbox" {
   alarm_description         = "Triggers an alarm if there is an error while logging in to the email inbox"
   insufficient_data_actions = []
   actions_enabled           = "true"
-  alarm_actions             = [aws_sns_topic.emails-error-loggings-in-to-the-inbox.arn]
+  alarm_actions             = [aws_sns_topic.emails-error-logging-in-to-the-inbox.arn]
 }
 
 resource "aws_sns_topic" "emails-error-logging-in-to-the-inbox" {
