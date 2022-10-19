@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import List, Optional
 
 import pytest
+
 from tests.fixtures._helpers import _missing, _undefined, bruinize_date
 
 
@@ -206,8 +207,8 @@ def make_get_tickets_request(make_rpc_request):
         payload = {
             "client_id": bruin_client_id,
             "ticket_statuses": ticket_statuses,
-            "product_category": product_category,
             "ticket_topic": ticket_topic,
+            "product_category": product_category,
         }
 
         if service_number is not _undefined:
@@ -324,9 +325,9 @@ def make_change_detail_work_queue_request(make_rpc_request):
     ):
         payload = {
             "ticket_id": ticket_id,
-            "detail_id": detail_id,
-            "service_number": service_number,
             "queue_name": target_queue,
+            "service_number": service_number,
+            "detail_id": detail_id,
         }
 
         return make_rpc_request(

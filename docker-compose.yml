@@ -498,6 +498,9 @@ services:
       - redis
       - notifications-bridge
       - email-bridge
+      - bruin-bridge
+      - velocloud-bridge
+      - customer-cache
     ports:
       - 5008:5000
       - 9130:9090

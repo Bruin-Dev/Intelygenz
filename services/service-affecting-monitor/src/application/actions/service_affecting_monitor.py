@@ -1,21 +1,23 @@
 import asyncio
+import logging
 import time
-from collections import ChainMap
 from datetime import datetime, timedelta
 from typing import List, Optional
 
-from application import AFFECTING_NOTE_REGEX, LINK_INFO_REGEX, REMINDER_NOTE_REGEX, AffectingTroubles, ForwardQueues
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from dateutil.parser import parse
-from igz.packages.storage.task_dispatcher_client import TaskTypes
+from framework.storage.task_dispatcher_client import TaskTypes
 from pytz import timezone
+
+from application import AFFECTING_NOTE_REGEX, LINK_INFO_REGEX, REMINDER_NOTE_REGEX, AffectingTroubles, ForwardQueues
+
+logger = logging.getLogger(__name__)
 
 
 class ServiceAffectingMonitor:
     def __init__(
         self,
-        logger,
         scheduler,
         task_dispatcher_client,
         config,
@@ -28,7 +30,6 @@ class ServiceAffectingMonitor:
         trouble_repository,
         utils_repository,
     ):
-        self._logger = logger
         self._scheduler = scheduler
         self._task_dispatcher_client = task_dispatcher_client
         self._config = config
@@ -49,12 +50,12 @@ class ServiceAffectingMonitor:
         self._customer_cache = []
 
     async def start_service_affecting_monitor(self, exec_on_start=False):
-        self._logger.info("Scheduling Service Affecting Monitor job...")
+        logger.info("Scheduling Service Affecting Monitor job...")
         next_run_time = undefined
 
         if exec_on_start:
             next_run_time = datetime.now(timezone(self._config.TIMEZONE))
-            self._logger.info("Service Affecting Monitor job is going to be executed immediately")
+            logger.info("Service Affecting Monitor job is going to be executed immediately")
 
         try:
             self._scheduler.add_job(
@@ -66,12 +67,12 @@ class ServiceAffectingMonitor:
                 id="_service_affecting_monitor_process",
             )
         except ConflictingIdError as conflict:
-            self._logger.error(f"Skipping start of Service Affecting Monitoring job. Reason: {conflict}")
+            logger.error(f"Skipping start of Service Affecting Monitoring job. Reason: {conflict}")
 
     async def _service_affecting_monitor_process(self):
         self.__reset_state()
 
-        self._logger.info(f"Starting Service Affecting Monitor process now...")
+        logger.info(f"Starting Service Affecting Monitor process now...")
         start_time = time.time()
 
         customer_cache_response = await self._customer_cache_repository.get_cache_for_affecting_monitoring()
@@ -80,7 +81,7 @@ class ServiceAffectingMonitor:
 
         self._customer_cache: list = customer_cache_response["body"]
         if not self._customer_cache:
-            self._logger.info("Got an empty customer cache. Process cannot keep going.")
+            logger.info("Got an empty customer cache. Process cannot keep going.")
             return
 
         self._default_contact_info_by_client_id = self._get_default_contact_info_by_client_id()
@@ -98,7 +99,7 @@ class ServiceAffectingMonitor:
 
         await self._run_autoresolve_process()
 
-        self._logger.info(f"Finished processing all links! Took {round((time.time() - start_time) / 60, 2)} minutes")
+        logger.info(f"Finished processing all links! Took {round((time.time() - start_time) / 60, 2)} minutes")
 
     def _get_default_contact_info_by_client_id(self):
         contact_info_by_host_and_client_id = self._config.MONITOR_CONFIG["contact_info_by_host_and_client_id"]
@@ -137,14 +138,14 @@ class ServiceAffectingMonitor:
             edge_state = link_info["link"]["edgeState"]
 
             if edge_state is None:
-                self._logger.info(
+                logger.info(
                     f"Edge in host {velocloud_host} and enterprise {enterprise_name} (ID: {enterprise_id}) "
                     f"has an invalid state. Skipping..."
                 )
                 continue
 
             if edge_state == "NEVER_ACTIVATED":
-                self._logger.info(
+                logger.info(
                     f"Edge {edge_name} in host {velocloud_host} and enterprise {enterprise_name} (ID: {enterprise_id}) "
                     f"has never been activated. Skipping..."
                 )
@@ -236,7 +237,7 @@ class ServiceAffectingMonitor:
             serial_number = elem["edge_status"]["edgeSerialNumber"]
             cached_edge = cached_edges_by_serial.get(serial_number)
             if not cached_edge:
-                self._logger.info(f"No cached info was found for edge {serial_number}. Skipping...")
+                logger.info(f"No cached info was found for edge {serial_number}. Skipping...")
                 continue
 
             client_id = cached_edge["bruin_client_info"]["client_id"]
@@ -259,13 +260,13 @@ class ServiceAffectingMonitor:
         return result
 
     async def _run_autoresolve_process(self):
-        self._logger.info("Starting auto-resolve process...")
+        logger.info("Starting auto-resolve process...")
 
         links_metrics_response = await self._velocloud_repository.get_links_metrics_for_autoresolve()
         links_metrics: list = links_metrics_response["body"]
 
         if not links_metrics:
-            self._logger.info("List of links metrics arrived empty while running auto-resolve process. Skipping...")
+            logger.info("List of links metrics arrived empty while running auto-resolve process. Skipping...")
             return
 
         events = await self._velocloud_repository.get_events_by_serial_and_interface(self._customer_cache)
@@ -275,11 +276,11 @@ class ServiceAffectingMonitor:
         )
         edges_with_links_info = self._group_links_by_edge(metrics_with_cache_and_contact_info)
 
-        self._logger.info(f"Running auto-resolve for {len(edges_with_links_info)} edges")
+        logger.info(f"Running auto-resolve for {len(edges_with_links_info)} edges")
         autoresolve_tasks = [self._run_autoresolve_for_edge(edge) for edge in edges_with_links_info]
         await asyncio.gather(*autoresolve_tasks)
 
-        self._logger.info("Auto-resolve process finished!")
+        logger.info("Auto-resolve process finished!")
 
     async def _run_autoresolve_for_edge(self, edge: dict):
         async with self.__autoresolve_semaphore:
@@ -287,7 +288,7 @@ class ServiceAffectingMonitor:
             client_id = edge["cached_info"]["bruin_client_info"]["client_id"]
             client_name = edge["cached_info"]["bruin_client_info"]["client_name"]
 
-            self._logger.info(f"Starting autoresolve for edge {serial_number}...")
+            logger.info(f"Starting autoresolve for edge {serial_number}...")
 
             check_bandwidth_troubles = client_id in self._config.MONITOR_CONFIG["customers_with_bandwidth_enabled"]
             metrics_lookup_interval = self._config.MONITOR_CONFIG["autoresolve"]["metrics_lookup_interval_minutes"]
@@ -297,7 +298,7 @@ class ServiceAffectingMonitor:
                 check_bandwidth_troubles=check_bandwidth_troubles,
             )
             if not all_metrics_within_thresholds:
-                self._logger.info(
+                logger.info(
                     f"At least one metric of edge {serial_number} is not within the threshold. Skipping autoresolve..."
                 )
                 return
@@ -311,7 +312,7 @@ class ServiceAffectingMonitor:
 
             affecting_tickets: list = affecting_ticket_response["body"]
             if not affecting_tickets:
-                self._logger.info(
+                logger.info(
                     f"No affecting ticket found for edge with serial number {serial_number}. Skipping autoresolve..."
                 )
                 return
@@ -321,7 +322,7 @@ class ServiceAffectingMonitor:
                 affecting_ticket_creation_date = affecting_ticket["createDate"]
 
                 if not self._ticket_repository.was_ticket_created_by_automation_engine(affecting_ticket):
-                    self._logger.info(
+                    logger.info(
                         f"Ticket {affecting_ticket_id} was not created by Automation Engine. Skipping autoresolve..."
                     )
                     continue
@@ -364,13 +365,13 @@ class ServiceAffectingMonitor:
 
                 is_task_in_ipa_queue = self._ticket_repository.is_ticket_task_in_ipa_queue(detail_for_ticket_resolution)
                 if is_byob and is_task_in_ipa_queue:
-                    self._logger.info(
+                    logger.info(
                         f"Task for serial {serial_number} in ticket {affecting_ticket_id} is related to a BYOB link "
                         f"and is in the IPA Investigate queue. Ignoring auto-resolution restrictions..."
                     )
                 else:
                     if not last_trouble_was_detected_recently:
-                        self._logger.info(
+                        logger.info(
                             f"Edge with serial number {serial_number} has been under an affecting trouble for a long "
                             f"time, so the detail of ticket {affecting_ticket_id} related to it will not be "
                             f"autoresolved. Skipping autoresolve..."
@@ -378,14 +379,14 @@ class ServiceAffectingMonitor:
                         continue
 
                     if self._ticket_repository.is_autoresolve_threshold_maxed_out(relevant_notes):
-                        self._logger.info(
+                        logger.info(
                             f"Limit to autoresolve detail of ticket {affecting_ticket_id} related to serial "
                             f"{serial_number} has been maxed out already. Skipping autoresolve..."
                         )
                         continue
 
                 if self._ticket_repository.is_task_resolved(detail_for_ticket_resolution):
-                    self._logger.info(
+                    logger.info(
                         f"Detail of ticket {affecting_ticket_id} related to serial {serial_number} is already "
                         "resolved. Skipping autoresolve..."
                     )
@@ -393,13 +394,13 @@ class ServiceAffectingMonitor:
 
                 working_environment = self._config.CURRENT_ENVIRONMENT
                 if working_environment != "production":
-                    self._logger.info(
+                    logger.info(
                         f"Skipping autoresolve for detail of ticket {affecting_ticket_id} related to serial number "
                         f"{serial_number} since the current environment is {working_environment.upper()}"
                     )
                     continue
 
-                self._logger.info(
+                logger.info(
                     f"Autoresolving detail of ticket {affecting_ticket_id} related to serial number {serial_number}..."
                 )
                 await self._bruin_repository.unpause_ticket_detail(affecting_ticket_id, serial_number)
@@ -415,7 +416,7 @@ class ServiceAffectingMonitor:
                 await self._bruin_repository.append_autoresolve_note_to_ticket(affecting_ticket_id, serial_number)
                 await self._notifications_repository.notify_successful_autoresolve(affecting_ticket_id, serial_number)
 
-                self._logger.info(
+                logger.info(
                     f"Detail of ticket {affecting_ticket_id} related to serial number {serial_number} was autoresolved!"
                 )
 
@@ -423,12 +424,12 @@ class ServiceAffectingMonitor:
                 task_key = f"{affecting_ticket_id}-{serial_number}-{ForwardQueues.HNOC.name}"
 
                 if self._task_dispatcher_client.clear_task(task_type, task_key):
-                    self._logger.info(
+                    logger.info(
                         f"Removed scheduled task to forward to {ForwardQueues.HNOC.value} "
                         f"for autoresolved ticket {affecting_ticket_id} and serial number {serial_number}"
                     )
 
-            self._logger.info(f"Finished autoresolve for edge {serial_number}!")
+            logger.info(f"Finished autoresolve for edge {serial_number}!")
 
     @staticmethod
     def _group_links_by_edge(links: List[dict]) -> List[dict]:
@@ -455,13 +456,13 @@ class ServiceAffectingMonitor:
         return list(edge_info_by_serial.values())
 
     async def _latency_check(self):
-        self._logger.info("Looking for latency issues...")
+        logger.info("Looking for latency issues...")
 
         links_metrics_response = await self._velocloud_repository.get_links_metrics_for_latency_checks()
         links_metrics: list = links_metrics_response["body"]
 
         if not links_metrics:
-            self._logger.info("List of links arrived empty while checking latency issues. Skipping...")
+            logger.info("List of links arrived empty while checking latency issues. Skipping...")
             return
 
         links_metrics = self._structure_links_metrics(links_metrics)
@@ -479,23 +480,21 @@ class ServiceAffectingMonitor:
             serial_number = cached_info["serial_number"]
 
             if self._trouble_repository.are_latency_metrics_within_threshold(metrics):
-                self._logger.info(
-                    f"Link {link_status['interface']} from {serial_number} didn't exceed latency thresholds"
-                )
+                logger.info(f"Link {link_status['interface']} from {serial_number} didn't exceed latency thresholds")
                 continue
 
             await self._process_latency_trouble(elem)
 
-        self._logger.info("Finished looking for latency issues!")
+        logger.info("Finished looking for latency issues!")
 
     async def _packet_loss_check(self):
-        self._logger.info("Looking for packet loss issues...")
+        logger.info("Looking for packet loss issues...")
 
         links_metrics_response = await self._velocloud_repository.get_links_metrics_for_packet_loss_checks()
         links_metrics: list = links_metrics_response["body"]
 
         if not links_metrics:
-            self._logger.info("List of links arrived empty while checking packet loss issues. Skipping...")
+            logger.info("List of links arrived empty while checking packet loss issues. Skipping...")
             return
 
         links_metrics = self._structure_links_metrics(links_metrics)
@@ -513,23 +512,23 @@ class ServiceAffectingMonitor:
             serial_number = cached_info["serial_number"]
 
             if self._trouble_repository.are_packet_loss_metrics_within_threshold(metrics):
-                self._logger.info(
+                logger.info(
                     f"Link {link_status['interface']} from {serial_number} didn't exceed packet loss thresholds"
                 )
                 continue
 
             await self._process_packet_loss_trouble(elem)
 
-        self._logger.info("Finished looking for packet loss issues!")
+        logger.info("Finished looking for packet loss issues!")
 
     async def _jitter_check(self):
-        self._logger.info("Looking for jitter issues...")
+        logger.info("Looking for jitter issues...")
 
         links_metrics_response = await self._velocloud_repository.get_links_metrics_for_jitter_checks()
         links_metrics: list = links_metrics_response["body"]
 
         if not links_metrics:
-            self._logger.info("List of links arrived empty while checking jitter issues. Skipping...")
+            logger.info("List of links arrived empty while checking jitter issues. Skipping...")
             return
 
         links_metrics = self._structure_links_metrics(links_metrics)
@@ -547,23 +546,21 @@ class ServiceAffectingMonitor:
             serial_number = cached_info["serial_number"]
 
             if self._trouble_repository.are_jitter_metrics_within_threshold(metrics):
-                self._logger.info(
-                    f"Link {link_status['interface']} from {serial_number} didn't exceed jitter thresholds"
-                )
+                logger.info(f"Link {link_status['interface']} from {serial_number} didn't exceed jitter thresholds")
                 continue
 
             await self._process_jitter_trouble(elem)
 
-        self._logger.info("Finished looking for jitter issues!")
+        logger.info("Finished looking for jitter issues!")
 
     async def _bandwidth_check(self):
-        self._logger.info("Looking for bandwidth issues...")
+        logger.info("Looking for bandwidth issues...")
 
         links_metrics_response = await self._velocloud_repository.get_links_metrics_for_bandwidth_checks()
         links_metrics: list = links_metrics_response["body"]
 
         if not links_metrics:
-            self._logger.info("List of links arrived empty while checking bandwidth issues. Skipping...")
+            logger.info("List of links arrived empty while checking bandwidth issues. Skipping...")
             return
 
         links_metrics = self._structure_links_metrics(links_metrics)
@@ -606,23 +603,23 @@ class ServiceAffectingMonitor:
                 continue
 
             if within_threshold:
-                self._logger.info(
+                logger.info(
                     f"Link {link_status['interface']} from {serial_number} didn't exceed any bandwidth thresholds"
                 )
                 continue
 
             await self._process_bandwidth_trouble(elem)
 
-        self._logger.info("Finished looking for bandwidth issues!")
+        logger.info("Finished looking for bandwidth issues!")
 
     async def _bouncing_check(self):
-        self._logger.info("Looking for bouncing issues...")
+        logger.info("Looking for bouncing issues...")
 
         links_metrics_response = await self._velocloud_repository.get_links_metrics_for_bouncing_checks()
         links_metrics: list = links_metrics_response["body"]
 
         if not links_metrics:
-            self._logger.info("List of links arrived empty while checking bouncing issues. Skipping...")
+            logger.info("List of links arrived empty while checking bouncing issues. Skipping...")
             return
 
         events = await self._velocloud_repository.get_events_by_serial_and_interface(self._customer_cache)
@@ -641,21 +638,19 @@ class ServiceAffectingMonitor:
             serial_number = cached_info["serial_number"]
 
             if not events:
-                self._logger.info(
+                logger.info(
                     f"No events were found for {link_status['interface']} from {serial_number} "
                     f"while looking for bouncing troubles"
                 )
                 continue
 
             if self._trouble_repository.are_bouncing_events_within_threshold(events):
-                self._logger.info(
-                    f"Link {link_status['interface']} from {serial_number} didn't exceed bouncing thresholds"
-                )
+                logger.info(f"Link {link_status['interface']} from {serial_number} didn't exceed bouncing thresholds")
                 continue
 
             await self._process_bouncing_trouble(elem)
 
-        self._logger.info("Finished looking for bouncing issues!")
+        logger.info("Finished looking for bouncing issues!")
 
     async def _process_latency_trouble(self, link_data: dict):
         trouble = AffectingTroubles.LATENCY
@@ -687,7 +682,7 @@ class ServiceAffectingMonitor:
         interface = link_data["link_status"]["interface"]
         client_id = link_data["cached_info"]["bruin_client_info"]["client_id"]
 
-        self._logger.info(
+        logger.info(
             f"Service Affecting trouble of type {trouble.value} detected in interface {interface} of edge "
             f"{serial_number}"
         )
@@ -707,14 +702,12 @@ class ServiceAffectingMonitor:
 
         if open_affecting_ticket:
             ticket_id = open_affecting_ticket["ticket_overview"]["ticketID"]
-            self._logger.info(
-                f"An open Service Affecting ticket was found for edge {serial_number}. Ticket ID: {ticket_id}"
-            )
+            logger.info(f"An open Service Affecting ticket was found for edge {serial_number}. Ticket ID: {ticket_id}")
 
             # The task related to the serial we're checking can be in Resolved state, even if the ticket is returned as
             # open by Bruin. If that's the case, the task should be re-opened instead.
             if self._ticket_repository.is_task_resolved(open_affecting_ticket["ticket_task"]):
-                self._logger.info(
+                logger.info(
                     f"Service Affecting ticket with ID {ticket_id} is open, but the task related to edge "
                     f"{serial_number} is Resolved. Therefore, the ticket will be considered as Resolved."
                 )
@@ -728,7 +721,7 @@ class ServiceAffectingMonitor:
                 if not self._should_forward_to_hnoc(link_label):
                     await self._send_reminder(open_affecting_ticket)
         else:
-            self._logger.info(f"No open Service Affecting ticket was found for edge {serial_number}")
+            logger.info(f"No open Service Affecting ticket was found for edge {serial_number}")
 
         # If we didn't get a Resolved ticket in the Open Tickets flow, we need to go look for it
         if not trouble_processed and not resolved_affecting_ticket:
@@ -746,20 +739,20 @@ class ServiceAffectingMonitor:
         # If any of Open Ticket or Resolved Tickets flows returned a Resolved ticket task, keep going
         if not trouble_processed and resolved_affecting_ticket:
             ticket_id = resolved_affecting_ticket["ticket_overview"]["ticketID"]
-            self._logger.info(
+            logger.info(
                 f"A resolved Service Affecting ticket was found for edge {serial_number}. Ticket ID: {ticket_id}"
             )
             await self._unresolve_task_for_affecting_ticket(resolved_affecting_ticket, trouble, link_data)
             trouble_processed = True
         else:
-            self._logger.info(f"No resolved Service Affecting ticket was found for edge {serial_number}")
+            logger.info(f"No resolved Service Affecting ticket was found for edge {serial_number}")
 
         # If not a single ticket was found for the serial, create a new one
         if not trouble_processed and not open_affecting_ticket and not resolved_affecting_ticket:
-            self._logger.info(f"No open or resolved Service Affecting ticket was found for edge {serial_number}")
+            logger.info(f"No open or resolved Service Affecting ticket was found for edge {serial_number}")
             ticket_id = await self._create_affecting_ticket(trouble, link_data)
 
-        self._logger.info(
+        logger.info(
             f"Service Affecting trouble of type {trouble.value} detected in interface {interface} of edge "
             f"{serial_number} has been processed"
         )
@@ -803,7 +796,7 @@ class ServiceAffectingMonitor:
         serial_number = link_data["cached_info"]["serial_number"]
         interface = link_data["link_status"]["interface"]
 
-        self._logger.info(
+        logger.info(
             f"Appending Service Affecting trouble note to ticket {ticket_id} for {trouble.value} trouble detected in "
             f"interface {interface} of edge {serial_number}..."
         )
@@ -817,7 +810,7 @@ class ServiceAffectingMonitor:
         # If there is a SA trouble note for the current trouble since the latest re-open note, skip
         # Otherwise, append SA trouble note to ticket using the callback passed as parameter
         if self._ticket_repository.is_there_any_note_for_trouble(filtered_notes, trouble):
-            self._logger.info(
+            logger.info(
                 f"No Service Affecting trouble note will be appended to ticket {ticket_id} for {trouble.value} trouble "
                 f"detected in interface {interface} of edge {serial_number}. A note for this trouble was already "
                 f"appended to the ticket after the latest re-open (or ticket creation)"
@@ -829,7 +822,7 @@ class ServiceAffectingMonitor:
 
         working_environment = self._config.CURRENT_ENVIRONMENT
         if not working_environment == "production":
-            self._logger.info(
+            logger.info(
                 f"No Service Affecting trouble note will be appended to ticket {ticket_id} for {trouble.value} trouble "
                 f"detected in interface {interface} of edge {serial_number}, since the current environment is "
                 f"{working_environment.upper()}"
@@ -844,7 +837,7 @@ class ServiceAffectingMonitor:
         if append_note_response["status"] not in range(200, 300):
             return
 
-        self._logger.info(
+        logger.info(
             f"Service Affecting trouble note for {trouble.value} trouble detected in interface {interface} "
             f"of edge {serial_number} was successfully appended to ticket {ticket_id}!"
         )
@@ -863,7 +856,7 @@ class ServiceAffectingMonitor:
         is_byob = self._is_link_label_blacklisted_from_hnoc(link_label)
         link_type = self._get_link_type(interface, links_configuration)
 
-        self._logger.info(
+        logger.info(
             f"Unresolving task related to edge {serial_number} of Service Affecting ticket {ticket_id} due to a "
             f"{trouble.value} trouble detected in interface {interface}..."
         )
@@ -873,7 +866,7 @@ class ServiceAffectingMonitor:
 
         working_environment = self._config.CURRENT_ENVIRONMENT
         if not working_environment == "production":
-            self._logger.info(
+            logger.info(
                 f"Task related to edge {serial_number} of Service Affecting ticket {ticket_id} will not be unresolved "
                 f"because of the {trouble.value} trouble detected in interface {interface}, since the current "
                 f"environment is {working_environment.upper()}"
@@ -884,7 +877,7 @@ class ServiceAffectingMonitor:
         if unresolve_task_response["status"] not in range(200, 300):
             return
 
-        self._logger.info(
+        logger.info(
             f"Task related to edge {serial_number} of Service Affecting ticket {ticket_id} was successfully "
             f"unresolved! The cause was a {trouble.value} trouble detected in interface {interface}"
         )
@@ -905,18 +898,18 @@ class ServiceAffectingMonitor:
         link_label = link_data["link_status"]["displayName"]
         if self._should_forward_to_hnoc(link_label):
             forward_time = self._get_max_seconds_since_last_trouble(link_data) / 60
-            self._logger.info(
+            logger.info(
                 f"Forwarding reopened task for serial {serial_number} of ticket {ticket_id} to the HNOC queue..."
             )
             self._schedule_forward_to_hnoc_queue(forward_time, ticket_id, serial_number, link_data, trouble)
         else:
-            self._logger.info(
+            logger.info(
                 f"Ticket_id: {ticket_id} for serial: {serial_number} with link_label: "
                 f"{link_data['link_status']['displayName']} is a blacklisted link and "
                 f"should not be forwarded to HNOC. Skipping forward to HNOC..."
             )
 
-            self._logger.info(
+            logger.info(
                 f"Sending an email for the reopened task of ticket_id: {ticket_id} "
                 f"with serial: {serial_number} instead of scheduling forward to HNOC..."
             )
@@ -924,14 +917,12 @@ class ServiceAffectingMonitor:
                 ticket_id, serial_number
             )
             if email_response["status"] not in range(200, 300):
-                self._logger.error(f"Reminder email of edge {serial_number} could not be sent for ticket {ticket_id}!")
+                logger.error(f"Reminder email of edge {serial_number} could not be sent for ticket {ticket_id}!")
                 return
 
             append_note_response = await self._append_reminder_note(ticket_id, serial_number)
             if append_note_response["status"] not in range(200, 300):
-                self._logger.error(
-                    f"Reminder note of edge {serial_number} could not be appended to ticket {ticket_id}!"
-                )
+                logger.error(f"Reminder note of edge {serial_number} could not be appended to ticket {ticket_id}!")
                 return
 
     async def _create_affecting_ticket(self, trouble: AffectingTroubles, link_data: dict) -> Optional[int]:
@@ -946,14 +937,14 @@ class ServiceAffectingMonitor:
         is_byob = self._is_link_label_blacklisted_from_hnoc(link_label)
         link_type = self._get_link_type(interface, links_configuration)
 
-        self._logger.info(
+        logger.info(
             f"Creating Service Affecting ticket to report a {trouble.value} trouble detected in interface {interface} "
             f"of edge {serial_number}..."
         )
 
         working_environment = self._config.CURRENT_ENVIRONMENT
         if not working_environment == "production":
-            self._logger.info(
+            logger.info(
                 f"No Service Affecting ticket will be created to report a {trouble.value} trouble detected in "
                 f"interface {interface} of edge {serial_number}, since the current environment is "
                 f"{working_environment.upper()}"
@@ -967,7 +958,7 @@ class ServiceAffectingMonitor:
             return
 
         ticket_id = create_affecting_ticket_response["body"]["ticketIds"][0]
-        self._logger.info(
+        logger.info(
             f"Service Affecting ticket to report {trouble.value} trouble detected in interface {interface} "
             f"of edge {serial_number} was successfully created! Ticket ID is {ticket_id}"
         )
@@ -992,13 +983,13 @@ class ServiceAffectingMonitor:
                 forward_time = self._get_max_seconds_since_last_trouble(link_data) / 60
                 self._schedule_forward_to_hnoc_queue(forward_time, ticket_id, serial_number, link_data, trouble)
             else:
-                self._logger.info(
+                logger.info(
                     f"Ticket_id: {ticket_id} for serial: {serial_number} with link_label: "
                     f"{link_data['link_status']['displayName']} is a blacklisted link and "
                     f"should not be forwarded to HNOC. Skipping forward to HNOC..."
                 )
 
-                self._logger.info(
+                logger.info(
                     f"Sending an email for ticket_id: {ticket_id} "
                     f"with serial: {serial_number} instead of scheduling forward to HNOC..."
                 )
@@ -1006,16 +997,12 @@ class ServiceAffectingMonitor:
                     ticket_id, serial_number
                 )
                 if email_response["status"] not in range(200, 300):
-                    self._logger.error(
-                        f"Reminder email of edge {serial_number} could not be sent for ticket {ticket_id}!"
-                    )
+                    logger.error(f"Reminder email of edge {serial_number} could not be sent for ticket {ticket_id}!")
                     return
 
                 append_note_response = await self._append_reminder_note(ticket_id, serial_number)
                 if append_note_response["status"] not in range(200, 300):
-                    self._logger.error(
-                        f"Reminder note of edge {serial_number} could not be appended to ticket {ticket_id}!"
-                    )
+                    logger.error(f"Reminder note of edge {serial_number} could not be appended to ticket {ticket_id}!")
                     return
 
         return ticket_id
@@ -1038,7 +1025,7 @@ class ServiceAffectingMonitor:
         is_byob = self._is_link_label_blacklisted_from_hnoc(link_label)
         link_type = self._get_link_type(interface, links_configuration)
 
-        self._logger.info(
+        logger.info(
             f"Scheduling forward to {target_queue.value} for ticket {ticket_id} and serial number {serial_number} "
             f"to happen in {forward_time} minutes"
         )
@@ -1067,7 +1054,7 @@ class ServiceAffectingMonitor:
             return
 
         serial_number = link_data["cached_info"]["serial_number"]
-        self._logger.info(
+        logger.info(
             f"Attempting to forward task of ticket {ticket_id} related to serial {serial_number} to ASR Investigate..."
         )
 
@@ -1087,19 +1074,19 @@ class ServiceAffectingMonitor:
 
         if link_interface_type != "WIRED":
             forward_time = 0
-            self._logger.info(
+            logger.info(
                 f"Link {interface} is of type {link_interface_type} and not WIRED. Attempting to forward to HNOC..."
             )
             self._schedule_forward_to_hnoc_queue(forward_time, ticket_id, serial_number, link_data, trouble)
             return
 
-        self._logger.info(
+        logger.info(
             f"Filtering out any of the wired links of serial {serial_number} that contains any of the following: "
             f"{self._config.MONITOR_CONFIG['blacklisted_link_labels_for_asr_forwards']} in the link label"
         )
 
         if not self._should_forward_to_asr(link_data):
-            self._logger.info(
+            logger.info(
                 f"No links with whitelisted labels were found for serial {serial_number}. "
                 f"Related detail of ticket {ticket_id} will not be forwarded to {target_queue}."
             )
@@ -1133,7 +1120,7 @@ class ServiceAffectingMonitor:
         )
 
         if other_troubles_in_ticket:
-            self._logger.info(
+            logger.info(
                 f"Other service affecting troubles were found in ticket id {ticket_id}. Skipping forwardto asr..."
             )
             return
@@ -1144,7 +1131,7 @@ class ServiceAffectingMonitor:
         )
 
         if task_result_note is not None:
-            self._logger.info(
+            logger.info(
                 f"Detail related to serial {serial_number} of ticket {ticket_id} has already been forwarded to "
                 f'"{task_result}"'
             )
@@ -1251,7 +1238,7 @@ class ServiceAffectingMonitor:
     async def _send_reminder(self, ticket: dict):
         ticket_id = ticket["ticket_overview"]["ticketID"]
         service_number = ticket["ticket_task"]["detailValue"]
-        self._logger.info(f"Attempting to send reminder for service number {service_number} to ticket {ticket_id}")
+        logger.info(f"Attempting to send reminder for service number {service_number} to ticket {ticket_id}")
 
         notes_from_ticket = ticket["ticket_notes"]
         filtered_notes = self._ticket_repository.get_notes_appended_since_latest_reopen_or_ticket_creation(
@@ -1268,7 +1255,7 @@ class ServiceAffectingMonitor:
             filtered_notes, last_documentation_cycle_start_date, wait_time_before_sending_new_milestone_reminder
         )
         if not should_send_reminder_notification:
-            self._logger.info(
+            logger.info(
                 f"No Reminder note will be appended for service number {service_number} to ticket {ticket_id},"
                 f" since either the last documentation cycle started or the last reminder"
                 f" was sent too recently"
@@ -1277,7 +1264,7 @@ class ServiceAffectingMonitor:
 
         working_environment = self._config.CURRENT_ENVIRONMENT
         if not working_environment == "production":
-            self._logger.info(
+            logger.info(
                 f"No Reminder note will be appended for service number {service_number} to ticket {ticket_id} since "
                 f"the current environment is {working_environment.upper()}"
             )
@@ -1287,15 +1274,15 @@ class ServiceAffectingMonitor:
             ticket_id, service_number
         )
         if email_response["status"] not in range(200, 300):
-            self._logger.error(f"Reminder email of edge {service_number} could not be sent for ticket {ticket_id}!")
+            logger.error(f"Reminder email of edge {service_number} could not be sent for ticket {ticket_id}!")
             return
 
         append_note_response = await self._append_reminder_note(ticket_id, service_number)
         if append_note_response["status"] not in range(200, 300):
-            self._logger.error(f"Reminder note of edge {service_number} could not be appended to ticket {ticket_id}!")
+            logger.error(f"Reminder note of edge {service_number} could not be appended to ticket {ticket_id}!")
             return
 
-        self._logger.info(f"Reminder note of edge {service_number} was successfully appended to ticket {ticket_id}!")
+        logger.info(f"Reminder note of edge {service_number} was successfully appended to ticket {ticket_id}!")
         await self._notifications_repository.notify_successful_reminder_note_append(ticket_id, service_number)
 
     def _was_last_reminder_sent_recently(

@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 import pytest
+
 from application.actions.bandwidth_reports import BandwidthReports
 from application.actions.service_affecting_monitor_reports import ServiceAffectingMonitorReports
 from config import testconfig
@@ -20,8 +21,6 @@ from tests.fixtures.velocloud import *
 
 @pytest.fixture(scope="function")
 def service_affecting_monitor_reports(
-    event_bus,
-    logger,
     scheduler,
     template_repository,
     bruin_repository,
@@ -30,21 +29,18 @@ def service_affecting_monitor_reports(
     customer_cache_repository,
 ):
     return ServiceAffectingMonitorReports(
-        event_bus,
-        logger,
-        scheduler,
-        testconfig,
-        template_repository,
-        bruin_repository,
-        notifications_repository,
-        email_repository,
-        customer_cache_repository,
+        scheduler=scheduler,
+        config=testconfig,
+        template_repository=template_repository,
+        bruin_repository=bruin_repository,
+        notifications_repository=notifications_repository,
+        email_repository=email_repository,
+        customer_cache_repository=customer_cache_repository,
     )
 
 
 @pytest.fixture(scope="function")
 def bandwidth_reports(
-    logger,
     scheduler,
     velocloud_repository,
     bruin_repository,
@@ -55,7 +51,6 @@ def bandwidth_reports(
     template_repository,
 ):
     return BandwidthReports(
-        logger,
         scheduler,
         testconfig,
         velocloud_repository,

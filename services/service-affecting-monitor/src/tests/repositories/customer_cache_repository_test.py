@@ -1,20 +1,26 @@
-from unittest.mock import patch
+import json
+from typing import Any
+from unittest.mock import AsyncMock, patch
 
 import pytest
+from nats.aio.msg import Msg
+from shortuuid import uuid
+
 from application.repositories import customer_cache_repository as customer_cache_repository_module
 from application.repositories import nats_error_response
-from asynctest import CoroutineMock
 from config import testconfig
-from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(customer_cache_repository_module, "uuid", return_value=uuid_)
 
 
+def to_json_bytes(message: dict[str, Any]):
+    return json.dumps(message, default=str, separators=(",", ":")).encode()
+
+
 class TestCustomerCacheRepository:
-    def instance_test(self, customer_cache_repository, event_bus, logger, notifications_repository):
-        assert customer_cache_repository._event_bus is event_bus
-        assert customer_cache_repository._logger is logger
+    def instance_test(self, customer_cache_repository, nats_client, notifications_repository):
+        assert customer_cache_repository._nats_client is nats_client
         assert customer_cache_repository._notifications_repository is notifications_repository
         assert customer_cache_repository._config is testconfig
 
@@ -37,14 +43,14 @@ class TestCustomerCacheRepository:
             body=customer_cache,
             status=200,
         )
-
-        customer_cache_repository._event_bus.rpc_request.return_value = response
+        NATS_AIO_MSG = Msg(_client="NATS", data=to_json_bytes(response))
+        customer_cache_repository._nats_client.request = AsyncMock(return_value=NATS_AIO_MSG)
 
         with uuid_mock:
             result = await customer_cache_repository.get_cache()
 
-        customer_cache_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "customer.cache.get", request, timeout=60
+        customer_cache_repository._nats_client.request.assert_awaited_once_with(
+            "customer.cache.get", to_json_bytes(request), timeout=60
         )
         assert result == response
 
@@ -72,14 +78,14 @@ class TestCustomerCacheRepository:
             body=customer_cache,
             status=200,
         )
-
-        customer_cache_repository._event_bus.rpc_request.return_value = response
+        NATS_AIO_MSG = Msg(_client="NATS", data=to_json_bytes(response))
+        customer_cache_repository._nats_client.request = AsyncMock(return_value=NATS_AIO_MSG)
 
         with uuid_mock:
             result = await customer_cache_repository.get_cache(velo_filter=filter_)
 
-        customer_cache_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "customer.cache.get", request, timeout=60
+        customer_cache_repository._nats_client.request.assert_awaited_once_with(
+            "customer.cache.get", to_json_bytes(request), timeout=60
         )
         assert result == response
 
@@ -87,17 +93,16 @@ class TestCustomerCacheRepository:
     async def get_cache__rpc_request_failing_test(self, customer_cache_repository, make_get_cache_request):
         request = make_get_cache_request(request_id=uuid_)
 
-        customer_cache_repository._event_bus.rpc_request.side_effect = Exception
-        customer_cache_repository._notifications_repository.send_slack_message = CoroutineMock()
+        customer_cache_repository._nats_client.request = AsyncMock(side_effect=Exception)
+        customer_cache_repository._notifications_repository.send_slack_message = AsyncMock()
 
         with uuid_mock:
             result = await customer_cache_repository.get_cache()
 
-        customer_cache_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "customer.cache.get", request, timeout=60
+        customer_cache_repository._nats_client.request.assert_awaited_once_with(
+            "customer.cache.get", to_json_bytes(request), timeout=60
         )
         customer_cache_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        customer_cache_repository._logger.error.assert_called_once()
         assert result == nats_error_response
 
     @pytest.mark.asyncio
@@ -105,18 +110,17 @@ class TestCustomerCacheRepository:
         self, customer_cache_repository, make_get_cache_request, get_customer_cache_202_response
     ):
         request = make_get_cache_request(request_id=uuid_)
-
-        customer_cache_repository._event_bus.rpc_request.return_value = get_customer_cache_202_response
-        customer_cache_repository._notifications_repository.send_slack_message = CoroutineMock()
+        NATS_AIO_MSG = Msg(_client="NATS", data=to_json_bytes(get_customer_cache_202_response))
+        customer_cache_repository._nats_client.request = AsyncMock(return_value=NATS_AIO_MSG)
+        customer_cache_repository._notifications_repository.send_slack_message = AsyncMock()
 
         with uuid_mock:
             result = await customer_cache_repository.get_cache()
 
-        customer_cache_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "customer.cache.get", request, timeout=60
+        customer_cache_repository._nats_client.request.assert_awaited_once_with(
+            "customer.cache.get", to_json_bytes(request), timeout=60
         )
         customer_cache_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        customer_cache_repository._logger.error.assert_called_once()
         assert result == get_customer_cache_202_response
 
     @pytest.mark.asyncio

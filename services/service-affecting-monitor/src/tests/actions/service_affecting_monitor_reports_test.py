@@ -1,12 +1,12 @@
 from datetime import datetime
 from datetime import timezone as tz
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from application.actions import service_affecting_monitor_reports as service_affecting_monitor_module
-from asynctest import CoroutineMock
-from config import testconfig
 from shortuuid import uuid
+
+from application.actions import service_affecting_monitor_reports as service_affecting_monitor_module
+from config import testconfig
 
 uuid_ = uuid()
 uuid_mock = patch.object(service_affecting_monitor_module, "uuid", return_value=uuid_)
@@ -16,8 +16,6 @@ class TestServiceAffectingMonitorReports:
     def instance_test(
         self,
         service_affecting_monitor_reports,
-        event_bus,
-        logger,
         scheduler,
         template_repository,
         bruin_repository,
@@ -25,8 +23,6 @@ class TestServiceAffectingMonitorReports:
         email_repository,
         customer_cache_repository,
     ):
-        assert service_affecting_monitor_reports._event_bus is event_bus
-        assert service_affecting_monitor_reports._logger is logger
         assert service_affecting_monitor_reports._scheduler is scheduler
         assert service_affecting_monitor_reports._config is testconfig
         assert service_affecting_monitor_reports._template_repository is template_repository
@@ -37,14 +33,14 @@ class TestServiceAffectingMonitorReports:
 
     @pytest.mark.asyncio
     async def start_service_affecting_monitor_job_with_exec_on_start_test(self, service_affecting_monitor_reports):
-        service_affecting_monitor_reports.monitor_reports = CoroutineMock()
+        service_affecting_monitor_reports.monitor_reports = AsyncMock()
         await service_affecting_monitor_reports.start_service_affecting_monitor_reports_job(exec_on_start=True)
         service_affecting_monitor_reports.monitor_reports.assert_awaited_once()
         service_affecting_monitor_reports._scheduler.add_job.assert_called_once()
 
     @pytest.mark.asyncio
     async def start_service_affecting_monitor_job_with_no_exec_on_start_test(self, service_affecting_monitor_reports):
-        service_affecting_monitor_reports.monitor_reports = CoroutineMock()
+        service_affecting_monitor_reports.monitor_reports = AsyncMock()
         await service_affecting_monitor_reports.start_service_affecting_monitor_reports_job()
         service_affecting_monitor_reports.monitor_reports.assert_not_awaited()
         service_affecting_monitor_reports._scheduler.add_job.assert_called_once()
@@ -59,16 +55,16 @@ class TestServiceAffectingMonitorReports:
         datetime_mock.utcnow = Mock(return_value=end_date)
         datetime_mock.now = Mock(return_value=end_date)
 
-        service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report = CoroutineMock(
+        service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report = AsyncMock(
             side_effect=[response_bruin_with_all_tickets_complete, None, None]
         )
-        service_affecting_monitor_reports._email_repository.send_email = CoroutineMock()
+        service_affecting_monitor_reports._email_repository.send_email = AsyncMock()
 
-        service_affecting_monitor_reports._customer_cache_repository.get_cache = CoroutineMock(
+        service_affecting_monitor_reports._customer_cache_repository.get_cache = AsyncMock(
             return_value=response_customer_cache
         )
 
-        service_affecting_monitor_reports._notifications_repository.send_slack_message = CoroutineMock()
+        service_affecting_monitor_reports._notifications_repository.send_slack_message = AsyncMock()
         service_affecting_monitor_reports._config.CURRENT_ENVIRONMENT = "production"
 
         with patch.object(service_affecting_monitor_module, "datetime", new=datetime_mock):
@@ -87,8 +83,8 @@ class TestServiceAffectingMonitorReports:
         datetime_mock.utcnow = Mock(return_value=end_date)
         datetime_mock.now = Mock(return_value=end_date)
 
-        service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report = CoroutineMock()
-        service_affecting_monitor_reports._customer_cache_repository.get_cache = CoroutineMock(
+        service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report = AsyncMock()
+        service_affecting_monitor_reports._customer_cache_repository.get_cache = AsyncMock(
             return_value=response_empty_customer_cache
         )
         with patch.object(service_affecting_monitor_module, "datetime", new=datetime_mock):
@@ -105,8 +101,8 @@ class TestServiceAffectingMonitorReports:
         datetime_mock.utcnow = Mock(return_value=end_date)
         datetime_mock.now = Mock(return_value=end_date)
 
-        service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report = CoroutineMock()
-        service_affecting_monitor_reports._customer_cache_repository.get_cache = CoroutineMock(
+        service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report = AsyncMock()
+        service_affecting_monitor_reports._customer_cache_repository.get_cache = AsyncMock(
             return_value=response_bad_status_customer_cache
         )
         with patch.object(service_affecting_monitor_module, "datetime", new=datetime_mock):
@@ -123,16 +119,16 @@ class TestServiceAffectingMonitorReports:
         datetime_mock.utcnow = Mock(return_value=end_date)
         datetime_mock.now = Mock(return_value=end_date)
 
-        service_affecting_monitor_reports._customer_cache_repository.get_cache = CoroutineMock(
+        service_affecting_monitor_reports._customer_cache_repository.get_cache = AsyncMock(
             return_value=response_empty_customer_cache
         )
-        service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report = CoroutineMock(
+        service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report = AsyncMock(
             side_effect=[response_bruin_with_all_tickets, None]
         )
         template_repository = service_affecting_monitor_reports._template_repository
         template_repository.compose_email_bandwidth_over_utilization_report_object = Mock()
-        service_affecting_monitor_reports._email_repository.send_email = CoroutineMock()
-        service_affecting_monitor_reports._notifications_repository.send_slack_message = CoroutineMock()
+        service_affecting_monitor_reports._email_repository.send_email = AsyncMock()
+        service_affecting_monitor_reports._notifications_repository.send_slack_message = AsyncMock()
 
         with patch.object(service_affecting_monitor_module, "datetime", new=datetime_mock):
             await service_affecting_monitor_reports.monitor_reports()
@@ -156,19 +152,19 @@ class TestServiceAffectingMonitorReports:
         datetime_mock.utcnow = Mock(return_value=end_date)
         datetime_mock.now = Mock(return_value=end_date)
 
-        service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report = CoroutineMock(
+        service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report = AsyncMock(
             return_value=response_bruin_with_all_tickets_with_exception
         )
         service_affecting_monitor_reports._bruin_repository.map_ticket_details_and_notes_with_serial_numbers = Mock()
         service_affecting_monitor_reports._bruin_repository.prepare_items_for_report = Mock()
         template_repository = service_affecting_monitor_reports._template_repository
         template_repository.compose_email_bandwidth_over_utilization_report_object = Mock()
-        service_affecting_monitor_reports._email_repository.send_email = CoroutineMock()
-        service_affecting_monitor_reports._customer_cache_repository.get_cache = CoroutineMock(
+        service_affecting_monitor_reports._email_repository.send_email = AsyncMock()
+        service_affecting_monitor_reports._customer_cache_repository.get_cache = AsyncMock(
             return_value=response_customer_cache
         )
 
-        service_affecting_monitor_reports._notifications_repository.send_slack_message = CoroutineMock()
+        service_affecting_monitor_reports._notifications_repository.send_slack_message = AsyncMock()
 
         with patch.object(service_affecting_monitor_module, "datetime", new=datetime_mock):
             await service_affecting_monitor_reports.monitor_reports()
@@ -191,12 +187,12 @@ class TestServiceAffectingMonitorReports:
         datetime_mock.utcnow = Mock(return_value=end_date)
         datetime_mock.now = Mock(return_value=end_date)
 
-        service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report = CoroutineMock(
+        service_affecting_monitor_reports._bruin_repository.get_affecting_ticket_for_report = AsyncMock(
             return_value=response_bruin_with_all_tickets_complete
         )
-        service_affecting_monitor_reports._email_repository.send_email = CoroutineMock()
+        service_affecting_monitor_reports._email_repository.send_email = AsyncMock()
 
-        service_affecting_monitor_reports._customer_cache_repository.get_cache = CoroutineMock(
+        service_affecting_monitor_reports._customer_cache_repository.get_cache = AsyncMock(
             return_value=response_customer_cache
         )
         with patch.object(service_affecting_monitor_module, "datetime", new=datetime_mock):

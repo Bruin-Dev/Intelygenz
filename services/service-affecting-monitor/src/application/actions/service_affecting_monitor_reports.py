@@ -1,17 +1,16 @@
 import asyncio
+import logging
 from datetime import datetime, timedelta
-from typing import Set
 
 from apscheduler.triggers.cron import CronTrigger
-from igz.packages.eventbus.eventbus import EventBus
 from pytz import timezone
+
+logger = logging.getLogger(__name__)
 
 
 class ServiceAffectingMonitorReports:
     def __init__(
         self,
-        event_bus: EventBus,
-        logger,
         scheduler,
         config,
         template_repository,
@@ -20,8 +19,6 @@ class ServiceAffectingMonitorReports:
         email_repository,
         customer_cache_repository,
     ):
-        self._event_bus = event_bus
-        self._logger = logger
         self._scheduler = scheduler
         self._config = config
         self._template_repository = template_repository
@@ -32,7 +29,7 @@ class ServiceAffectingMonitorReports:
         self._customer_cache_repository = customer_cache_repository
 
     async def start_service_affecting_monitor_reports_job(self, exec_on_start=False):
-        self._logger.info(f"Scheduled task: service affecting monitor reports")
+        logger.info(f"Scheduled task: service affecting monitor reports")
 
         if exec_on_start:
             await self.monitor_reports()
@@ -52,9 +49,7 @@ class ServiceAffectingMonitorReports:
         )
         customer_cache = customer_cache_response["body"]
         if not customer_cache:
-            self._logger.error(
-                "[service-affecting-monitor-reports] Got an empty customer cache. Process cannot keep going."
-            )
+            logger.error("[service-affecting-monitor-reports] Got an empty customer cache. Process cannot keep going.")
             return
 
         clients_id = configuration.keys()
@@ -76,7 +71,7 @@ class ServiceAffectingMonitorReports:
                     f"[service-affecting-monitor-reports] Reports could not be generated for client: {client_id}. "
                     f"No tickets were found."
                 )
-                self._logger.error(err_msg)
+                logger.error(err_msg)
                 await self._notifications_repository.send_slack_message(err_msg)
             affecting_tickets_per_client[client_id] = tickets
 
@@ -88,7 +83,7 @@ class ServiceAffectingMonitorReports:
         )
 
         monitor_report_end_time = datetime.utcnow()
-        self._logger.info(
+        logger.info(
             f"[service-affecting-monitor-reports] Reports generation finished. "
             f"Took {round((monitor_report_end_time - monitor_report_init_time).total_seconds() / 60, 2)} minutes."
         )
@@ -97,7 +92,7 @@ class ServiceAffectingMonitorReports:
         self, affecting_tickets_per_client, cached_names_by_serial, customer_cache, trailing_interval
     ):
 
-        self._logger.info(f"Generating all reports for {len(affecting_tickets_per_client)} Bruin clients...")
+        logger.info(f"Generating all reports for {len(affecting_tickets_per_client)} Bruin clients...")
 
         active_reports = self._config.MONITOR_REPORT_CONFIG["active_reports"]
         client_names_by_id = self.get_clients_names_and_ids_for_client(customer_cache)
@@ -119,7 +114,7 @@ class ServiceAffectingMonitorReports:
             final_report_list.sort(key=lambda item: item["serial_number"])
 
             if self._config.CURRENT_ENVIRONMENT != "production":
-                self._logger.info(
+                logger.info(
                     f"No report for client {client_id} will be sent as the current environment is for environments "
                     f"different that production"
                 )
@@ -134,12 +129,12 @@ class ServiceAffectingMonitorReports:
 
             await self._email_repository.send_email(email_object=email)
 
-            self._logger.info(f"Report for client {client_id} sent via email")
+            logger.info(f"Report for client {client_id} sent via email")
 
     def get_ticket_details_for_serial_and_trouble(
         self, active_reports, affecting_tickets, cached_names_by_serial, client_id
     ):
-        self._logger.info(f"[service-affecting-monitor-reports] Starting all report for client {client_id}")
+        logger.info(f"[service-affecting-monitor-reports] Starting all report for client {client_id}")
         ticket_details = self._bruin_repository.transform_tickets_into_ticket_details(affecting_tickets)
         filtered_ticket_details = self._bruin_repository.filter_ticket_details_by_serials(
             ticket_details, cached_names_by_serial

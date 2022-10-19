@@ -1,18 +1,25 @@
+import json
+from typing import Any
 from unittest.mock import patch
 
 import pytest
+from shortuuid import uuid
+
 from application import AffectingTroubles
 from application.repositories import notifications_repository as notifications_repository_module
 from config import testconfig
-from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(notifications_repository_module, "uuid", return_value=uuid_)
 
 
+def to_json_bytes(message: dict[str, Any]):
+    return json.dumps(message, default=str, separators=(",", ":")).encode()
+
+
 class TestNotificationsRepository:
-    def instance_test(self, notifications_repository, event_bus):
-        assert notifications_repository._event_bus is event_bus
+    def instance_test(self, notifications_repository, nats_client):
+        assert notifications_repository._nats_client is nats_client
         assert notifications_repository._config is testconfig
 
     @pytest.mark.asyncio
@@ -23,12 +30,14 @@ class TestNotificationsRepository:
         with uuid_mock:
             await notifications_repository.send_slack_message(message)
 
-        notifications_repository._event_bus.rpc_request.assert_awaited_once_with(
+        notifications_repository._nats_client.request.assert_awaited_once_with(
             "notification.slack.request",
-            {
-                "request_id": uuid_,
-                "body": {"message": f"[{prefix}] {message}"},
-            },
+            to_json_bytes(
+                {
+                    "request_id": uuid_,
+                    "body": {"message": f"[{prefix}] {message}"},
+                }
+            ),
             timeout=10,
         )
 

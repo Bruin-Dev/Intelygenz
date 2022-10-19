@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from application.actions import bandwidth_reports as bandwidth_reports_module
-from asynctest import CoroutineMock
-from config import testconfig
 from shortuuid import uuid
+
+from application.actions import bandwidth_reports as bandwidth_reports_module
+from config import testconfig
 
 uuid_ = uuid()
 uuid_mock = patch.object(bandwidth_reports_module, "uuid", return_value=uuid_)
@@ -19,7 +19,6 @@ class TestBandwidthReports:
     def instance_test(
         self,
         bandwidth_reports,
-        logger,
         scheduler,
         velocloud_repository,
         bruin_repository,
@@ -29,7 +28,6 @@ class TestBandwidthReports:
         utils_repository,
         template_repository,
     ):
-        assert bandwidth_reports._logger is logger
         assert bandwidth_reports._scheduler is scheduler
         assert bandwidth_reports._config is testconfig
         assert bandwidth_reports._velocloud_repository is velocloud_repository
@@ -42,14 +40,14 @@ class TestBandwidthReports:
 
     @pytest.mark.asyncio
     async def start_bandwidth_reports_job__exec_on_start_test(self, bandwidth_reports):
-        bandwidth_reports._bandwidth_reports_job = CoroutineMock()
+        bandwidth_reports._bandwidth_reports_job = AsyncMock()
         await bandwidth_reports.start_bandwidth_reports_job(exec_on_start=True)
         bandwidth_reports._bandwidth_reports_job.assert_awaited_once()
         bandwidth_reports._scheduler.add_job.assert_called_once()
 
     @pytest.mark.asyncio
     async def start_bandwidth_reports_job__schedule_test(self, bandwidth_reports):
-        bandwidth_reports._bandwidth_reports_job = CoroutineMock()
+        bandwidth_reports._bandwidth_reports_job = AsyncMock()
         await bandwidth_reports.start_bandwidth_reports_job()
         bandwidth_reports._bandwidth_reports_job.assert_not_awaited()
         bandwidth_reports._scheduler.add_job.assert_called_once()
@@ -90,7 +88,7 @@ class TestBandwidthReports:
 
         bandwidth_reports._customer_cache_repository.get_cache.return_value = response_1
         bandwidth_reports._velocloud_repository.get_links_metrics_by_host.return_value = response_2
-        bandwidth_reports._generate_bandwidth_report_for_client = CoroutineMock()
+        bandwidth_reports._generate_bandwidth_report_for_client = AsyncMock()
 
         await bandwidth_reports._bandwidth_reports_job()
 
@@ -171,7 +169,7 @@ class TestBandwidthReports:
         }
 
         bandwidth_reports._bruin_repository.get_affecting_ticket_for_report.return_value = tickets
-
+        bandwidth_reports._email_repository.send_email = AsyncMock()
         with patch.object(bandwidth_reports._config, "CURRENT_ENVIRONMENT", "production"):
             await bandwidth_reports._generate_bandwidth_report_for_client(
                 client_id, client_name, {serial_number}, links_metrics, customer_cache, interval_for_metrics

@@ -1,28 +1,33 @@
+import json
 import os
 from datetime import datetime, timedelta
-from unittest.mock import Mock, call, patch
+from typing import Any
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from apscheduler.util import undefined
+from framework.storage.task_dispatcher_client import TaskTypes
+from nats.aio.msg import Msg
+from shortuuid import uuid
+
 from application import REMINDER_NOTE_REGEX, AffectingTroubles, ForwardQueues
 from application.actions import service_affecting_monitor as service_affecting_monitor_module
 from application.repositories import utils_repository as utils_repository_module
-from apscheduler.jobstores.base import ConflictingIdError
-from apscheduler.util import undefined
-from asynctest import CoroutineMock
 from config import testconfig
-from igz.packages.storage.task_dispatcher_client import TaskTypes
-from shortuuid import uuid
 from tests.fixtures._constants import CURRENT_DATETIME
 
 uuid_ = uuid()
 uuid_mock = patch.object(service_affecting_monitor_module, "uuid", return_value=uuid_)
 
 
+def to_json_bytes(message: dict[str, Any]):
+    return json.dumps(message, default=str, separators=(",", ":")).encode()
+
+
 class TestServiceAffectingMonitor:
     def instance_test(
         self,
         service_affecting_monitor,
-        logger,
         scheduler,
         customer_cache_repository,
         bruin_repository,
@@ -33,7 +38,6 @@ class TestServiceAffectingMonitor:
         metrics_repository,
         utils_repository,
     ):
-        assert service_affecting_monitor._logger is logger
         assert service_affecting_monitor._scheduler is scheduler
         assert service_affecting_monitor._config is testconfig
         assert service_affecting_monitor._customer_cache_repository is customer_cache_repository
@@ -74,15 +78,6 @@ class TestServiceAffectingMonitor:
             replace_existing=False,
             id="_service_affecting_monitor_process",
         )
-
-    @pytest.mark.asyncio
-    async def start_service_affecting_monitor_job__job_already_executing_test(self, service_affecting_monitor):
-        job_id = "some-duplicated-id"
-        exception_instance = ConflictingIdError(job_id)
-
-        service_affecting_monitor._scheduler.add_job = Mock(side_effect=exception_instance)
-        await service_affecting_monitor.start_service_affecting_monitor()
-        service_affecting_monitor._logger.error.assert_called_once()
 
     @pytest.mark.asyncio
     async def service_affecting_monitor_process__get_cache_request_has_202_status_test(
@@ -163,8 +158,8 @@ class TestServiceAffectingMonitor:
             status=200,
         )
 
-        service_affecting_monitor._customer_cache_repository.get_cache_for_affecting_monitoring.return_value = (
-            get_cache_response
+        service_affecting_monitor._customer_cache_repository.get_cache_for_affecting_monitoring = AsyncMock(
+            return_value=get_cache_response
         )
 
         custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
@@ -3181,14 +3176,7 @@ class TestServiceAffectingMonitor:
             client_id,
             service_number=serial_number,
         )
-        assert (
-            call(
-                f"Task for serial {serial_number} in ticket {ticket_id} is in the IPA Investigate"
-                f" queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last"
-                f" documented trouble..."
-            )
-            not in service_affecting_monitor._bruin_repository._logger.info.mock_calls
-        )
+
         service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_not_awaited()
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
         service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_not_awaited()
@@ -3261,14 +3249,6 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
             client_id,
             service_number=serial_number,
-        )
-        assert (
-            call(
-                f"Task for serial {serial_number} in ticket {ticket_id} is in the IPA Investigate"
-                f" queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last"
-                f" documented trouble..."
-            )
-            not in service_affecting_monitor._bruin_repository._logger.info.mock_calls
         )
         service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_not_awaited()
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
@@ -3350,14 +3330,6 @@ class TestServiceAffectingMonitor:
             client_id,
             service_number=serial_number,
         )
-        assert (
-            call(
-                f"Task for serial {serial_number} in ticket {ticket_id} is in the IPA Investigate"
-                f" queue. Skipping checks for max auto-resolves and grace period to auto-resolve after last"
-                f" documented trouble..."
-            )
-            not in service_affecting_monitor._bruin_repository._logger.info.mock_calls
-        )
         service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_not_awaited()
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
         service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_not_awaited()
@@ -3438,13 +3410,6 @@ class TestServiceAffectingMonitor:
             service_number=serial_number,
         )
         service_affecting_monitor._ticket_repository.is_ticket_task_in_ipa_queue.assert_called_with(detail_item)
-        assert (
-            call(
-                f"Task for serial {serial_number} in ticket {ticket_id} is related to a BYOB link "
-                f"and is in the IPA Investigate queue. Ignoring auto-resolution restrictions..."
-            )
-            in service_affecting_monitor._bruin_repository._logger.info.mock_calls
-        )
         service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_awaited()
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_awaited()
         service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_awaited()
@@ -3528,13 +3493,6 @@ class TestServiceAffectingMonitor:
             service_number=serial_number,
         )
         service_affecting_monitor._ticket_repository.is_ticket_task_in_ipa_queue.assert_called_with(detail_item)
-        assert (
-            call(
-                f"Task for serial {serial_number} in ticket {ticket_id} is related to a BYOB link "
-                f"and is in the IPA Investigate queue. Ignoring auto-resolution restrictions..."
-            )
-            in service_affecting_monitor._bruin_repository._logger.info.mock_calls
-        )
         service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_awaited()
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_awaited()
         service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_awaited()
@@ -3625,13 +3583,6 @@ class TestServiceAffectingMonitor:
             service_number=serial_number,
         )
         service_affecting_monitor._ticket_repository.is_ticket_task_in_ipa_queue.assert_called_with(detail_item)
-        assert (
-            call(
-                f"Task for serial {serial_number} in ticket {ticket_id} is related to a BYOB link "
-                f"and is in the IPA Investigate queue. Ignoring auto-resolution restrictions..."
-            )
-            in service_affecting_monitor._bruin_repository._logger.info.mock_calls
-        )
         service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_awaited()
         service_affecting_monitor._bruin_repository.resolve_ticket.assert_awaited()
         service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_awaited()
@@ -4086,7 +4037,7 @@ class TestServiceAffectingMonitor:
         )
 
         service_affecting_monitor._notifications_repository = Mock()
-        service_affecting_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        service_affecting_monitor._notifications_repository.send_slack_message = AsyncMock()
 
         service_affecting_monitor._schedule_forward_to_hnoc_queue = Mock()
 
@@ -4144,7 +4095,7 @@ class TestServiceAffectingMonitor:
         )
 
         service_affecting_monitor._notifications_repository = Mock()
-        service_affecting_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        service_affecting_monitor._notifications_repository.send_slack_message = AsyncMock()
 
         service_affecting_monitor._schedule_forward_to_hnoc_queue = Mock()
 
@@ -4200,7 +4151,7 @@ class TestServiceAffectingMonitor:
         )
 
         service_affecting_monitor._notifications_repository = Mock()
-        service_affecting_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        service_affecting_monitor._notifications_repository.send_slack_message = AsyncMock()
 
         service_affecting_monitor._schedule_forward_to_hnoc_queue = Mock()
 
@@ -4255,7 +4206,7 @@ class TestServiceAffectingMonitor:
         )
 
         service_affecting_monitor._notifications_repository = Mock()
-        service_affecting_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        service_affecting_monitor._notifications_repository.send_slack_message = AsyncMock()
 
         service_affecting_monitor._schedule_forward_to_hnoc_queue = Mock()
 
@@ -4301,7 +4252,7 @@ class TestServiceAffectingMonitor:
         )
 
         service_affecting_monitor._notifications_repository = Mock()
-        service_affecting_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        service_affecting_monitor._notifications_repository.send_slack_message = AsyncMock()
 
         service_affecting_monitor._schedule_forward_to_hnoc_queue = Mock()
 
@@ -4356,7 +4307,7 @@ class TestServiceAffectingMonitor:
         )
 
         service_affecting_monitor._notifications_repository = Mock()
-        service_affecting_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        service_affecting_monitor._notifications_repository.send_slack_message = AsyncMock()
 
         service_affecting_monitor._schedule_forward_to_hnoc_queue = Mock()
 
@@ -4411,7 +4362,7 @@ class TestServiceAffectingMonitor:
         )
 
         service_affecting_monitor._notifications_repository = Mock()
-        service_affecting_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        service_affecting_monitor._notifications_repository.send_slack_message = AsyncMock()
 
         service_affecting_monitor._schedule_forward_to_hnoc_queue = Mock()
 
@@ -4462,7 +4413,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._bruin_repository.change_detail_work_queue.return_value = bruin_500_response
 
         service_affecting_monitor._notifications_repository = Mock()
-        service_affecting_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        service_affecting_monitor._notifications_repository.send_slack_message = AsyncMock()
 
         service_affecting_monitor._schedule_forward_to_hnoc_queue = Mock()
 
@@ -4576,7 +4527,6 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._utils_repository.has_last_event_happened_recently.assert_called_with(
             notes, ticket_creation_date, max_seconds_since_last_event=86400.0, regex=REMINDER_NOTE_REGEX
         )
-        service_affecting_monitor._logger.error.assert_not_called()
 
     def was_last_reminder_sent_recently_without_previous_reminder_test(
         self, service_affecting_monitor, make_ticket_note, make_list_of_ticket_notes
@@ -4616,7 +4566,6 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._utils_repository.has_last_event_happened_recently.assert_called_with(
             notes, ticket_creation_date, max_seconds_since_last_event=86400.0, regex=REMINDER_NOTE_REGEX
         )
-        service_affecting_monitor._logger.error.assert_not_called()
 
     @pytest.mark.asyncio
     async def send_reminder__last_trouble_documented_on_ticket_creation_and_detected_one_day_ago_test(
@@ -4643,7 +4592,8 @@ class TestServiceAffectingMonitor:
             "wait_time_before_sending_new_milestone_reminder"
         ]
         reminder_note = os.linesep.join(["#*MetTel's IPA*#", "Client Reminder"])
-        service_affecting_monitor._bruin_repository._event_bus.rpc_request.return_value = bruin_generic_200_response
+        NATS_AIO_MSG = Msg(_client="NATS", data=to_json_bytes(bruin_generic_200_response))
+        service_affecting_monitor._bruin_repository._nats_client.request = AsyncMock(return_value=NATS_AIO_MSG)
         service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
 
         with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
@@ -4666,10 +4616,6 @@ class TestServiceAffectingMonitor:
         )
         service_affecting_monitor._notifications_repository.notify_successful_reminder_note_append.assert_awaited_with(
             ticket_id, serial_number
-        )
-        service_affecting_monitor._logger.error.assert_not_called()
-        service_affecting_monitor._logger.info.assert_called_with(
-            f"Reminder note of edge {serial_number} was successfully appended to ticket" f" {ticket_id}!"
         )
 
     @pytest.mark.asyncio
@@ -4703,12 +4649,6 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._append_reminder_note.assert_not_awaited()
         service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_not_awaited()
         service_affecting_monitor._notifications_repository.notify_successful_reminder_note_append.assert_not_awaited()
-        service_affecting_monitor._logger.error.assert_not_called()
-        service_affecting_monitor._logger.info.assert_called_with(
-            f"No Reminder note will be appended for service number {serial_number} to ticket {ticket_id},"
-            f" since either the last documentation cycle started or the last reminder"
-            f" was sent too recently"
-        )
 
     @pytest.mark.asyncio
     async def send_reminder__last_note_less_than_24_hours_test(
@@ -4750,12 +4690,6 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._append_reminder_note.assert_not_awaited()
         service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_not_awaited()
         service_affecting_monitor._notifications_repository.notify_successful_reminder_note_append.assert_not_awaited()
-        service_affecting_monitor._logger.error.assert_not_called()
-        service_affecting_monitor._logger.info.assert_called_with(
-            f"No Reminder note will be appended for service number {serial_number} to ticket {ticket_id},"
-            f" since either the last documentation cycle started or the last reminder"
-            f" was sent too recently"
-        )
 
     @pytest.mark.asyncio
     async def send_reminder__failed_to_send_email_test(
@@ -4782,7 +4716,7 @@ class TestServiceAffectingMonitor:
         wait_time_before_sending_new_milestone_reminder = service_affecting_monitor._config.MONITOR_CONFIG[
             "wait_time_before_sending_new_milestone_reminder"
         ]
-        service_affecting_monitor._bruin_repository._event_bus.rpc_request.return_value = bruin_generic_200_response
+        service_affecting_monitor._bruin_repository._nats_client.request.return_value = bruin_generic_200_response
         service_affecting_monitor._bruin_repository.send_reminder_email_milestone_notification.return_value = (
             bruin_500_response
         )
@@ -4799,9 +4733,6 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._append_reminder_note.assert_not_awaited()
         service_affecting_monitor._bruin_repository.append_note_to_ticket.assert_not_awaited()
         service_affecting_monitor._notifications_repository.notify_successful_reminder_note_append.assert_not_awaited()
-        service_affecting_monitor._logger.error.assert_called_once_with(
-            f"Reminder email of edge {serial_number} could not be sent for ticket {ticket_id}!"
-        )
 
     @pytest.mark.asyncio
     async def send_reminder__failed_to_append_note_test(
@@ -4829,7 +4760,8 @@ class TestServiceAffectingMonitor:
         wait_time_before_sending_new_milestone_reminder = service_affecting_monitor._config.MONITOR_CONFIG[
             "wait_time_before_sending_new_milestone_reminder"
         ]
-        service_affecting_monitor._bruin_repository._event_bus.rpc_request.return_value = bruin_generic_200_response
+        NATS_AIO_MSG = Msg(_client="NATS", data=to_json_bytes(bruin_generic_200_response))
+        service_affecting_monitor._bruin_repository._nats_client.request = AsyncMock(return_value=NATS_AIO_MSG)
         service_affecting_monitor._bruin_repository.append_note_to_ticket.return_value = bruin_500_response
 
         with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
@@ -4851,9 +4783,6 @@ class TestServiceAffectingMonitor:
             service_numbers=[serial_number],
         )
         service_affecting_monitor._notifications_repository.notify_successful_reminder_note_append.assert_not_awaited()
-        service_affecting_monitor._logger.error.assert_called_once_with(
-            f"Reminder note of edge {serial_number} could not be appended to ticket" f" {ticket_id}!"
-        )
 
     def get_default_contact_info_by_client_id_test(
         self,

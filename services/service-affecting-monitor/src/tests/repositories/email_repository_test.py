@@ -1,17 +1,23 @@
+import json
+from typing import Any
 from unittest.mock import patch
 
 import pytest
-from application.repositories import email_repository as email_repository_module
-from config import testconfig
 from shortuuid import uuid
+
+from application.repositories import email_repository as email_repository_module
 
 uuid_ = uuid()
 uuid_mock = patch.object(email_repository_module, "uuid", return_value=uuid_)
 
 
+def to_json_bytes(message: dict[str, Any]):
+    return json.dumps(message, default=str, separators=(",", ":")).encode()
+
+
 class TestEmailRepository:
-    def instance_test(self, email_repository, event_bus):
-        assert email_repository._event_bus is event_bus
+    def instance_test(self, email_repository, nats_client):
+        assert email_repository._nats_client is nats_client
 
     @pytest.mark.asyncio
     async def send_email_test(self, email_repository):
@@ -31,6 +37,6 @@ class TestEmailRepository:
 
         await email_repository.send_email(email_data)
 
-        email_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "notification.email.request", email_data, timeout=60
+        email_repository._nats_client.request.assert_awaited_once_with(
+            "notification.email.request", to_json_bytes(email_data), timeout=60
         )

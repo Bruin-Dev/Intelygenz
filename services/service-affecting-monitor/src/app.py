@@ -1,10 +1,29 @@
 import asyncio
+import logging
+import sys
+from dataclasses import asdict
 
 import redis
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from framework.http.server import Config as QuartConfig
+from framework.http.server import Server as QuartServer
+from framework.logging.formatters import Papertrail as PapertrailFormatter
+from framework.logging.formatters import Standard as StandardFormatter
+from framework.logging.handlers import Papertrail as PapertrailHandler
+from framework.logging.handlers import Stdout as StdoutHandler
+from framework.nats.client import Client
+from framework.nats.exceptions import NatsException
+from framework.nats.models import Connection
+from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
+from framework.storage.task_dispatcher_client import TaskDispatcherClient, TaskTypes
+from prometheus_client import start_http_server
+from pytz import timezone
+
 from application.actions.bandwidth_reports import BandwidthReports
 from application.actions.handle_ticket_forward import HandleTicketForward
 from application.actions.service_affecting_monitor import ServiceAffectingMonitor
 from application.actions.service_affecting_monitor_reports import ServiceAffectingMonitorReports
+from application.models import subscriptions
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.customer_cache_repository import CustomerCacheRepository
 from application.repositories.email_repository import EmailRepository
@@ -15,45 +34,57 @@ from application.repositories.ticket_repository import TicketRepository
 from application.repositories.trouble_repository import TroubleRepository
 from application.repositories.utils_repository import UtilsRepository
 from application.repositories.velocloud_repository import VelocloudRepository
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import config
-from igz.packages.eventbus.action import ActionWrapper
-from igz.packages.eventbus.eventbus import EventBus
-from igz.packages.eventbus.storage_managers import RedisStorageManager
-from igz.packages.Logger.logger_client import LoggerClient
-from igz.packages.nats.clients import NATSClient
-from igz.packages.server.api import QuartServer
-from igz.packages.storage.task_dispatcher_client import TaskDispatcherClient, TaskTypes
-from prometheus_client import start_http_server
-from pytz import timezone
+
+base_handler = StdoutHandler()
+base_handler.setFormatter(StandardFormatter(environment_name=config.ENVIRONMENT_NAME))
+
+app_logger = logging.getLogger("application")
+app_logger.setLevel(logging.DEBUG)
+app_logger.addHandler(base_handler)
+
+framework_logger = logging.getLogger("framework")
+framework_logger.setLevel(logging.DEBUG)
+framework_logger.addHandler(base_handler)
+
+if config.LOG_CONFIG["papertrail"]["active"]:
+    pt_handler = PapertrailHandler(
+        host=config.LOG_CONFIG["papertrail"]["host"],
+        port=config.LOG_CONFIG["papertrail"]["port"],
+    )
+    pt_handler.setFormatter(
+        PapertrailFormatter(
+            environment_name=config.ENVIRONMENT_NAME,
+            papertrail_prefix=config.LOG_CONFIG["papertrail"]["prefix"],
+        )
+    )
+    app_logger.addHandler(pt_handler)
+    framework_logger.addHandler(pt_handler)
+
+
+def bail_out():
+    app_logger.critical("Stopping application...")
+    sys.exit(1)
 
 
 class Container:
     def __init__(self):
         # LOGGER
-        self._logger = LoggerClient(config).get_logger()
-        self._logger.info(
+        app_logger.info(
             f"Service Affecting Monitor starting for host {config.VELOCLOUD_HOST} in {config.CURRENT_ENVIRONMENT}..."
         )
 
         # REDIS
-        self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
-        self._redis_client.ping()
-        self._task_dispatcher_client = TaskDispatcherClient(config, self._redis_client)
+        redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
+        redis_client.ping()
+
+        tmp_redis_storage = RedisStorage(storage_client=redis_client)
+        self._nats_client = Client(temp_payload_storage=tmp_redis_storage)
+
+        self._task_dispatcher_client = TaskDispatcherClient(config, redis_client)
 
         # SCHEDULER
         self._scheduler = AsyncIOScheduler(timezone=timezone(config.TIMEZONE))
-
-        # HEALTHCHECK ENDPOINT
-        self._server = QuartServer(config)
-
-        # MESSAGES STORAGE MANAGER
-        self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
-
-        # EVENT BUS
-        self._publisher = NATSClient(config, logger=self._logger)
-        self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
-        self._event_bus.set_producer(self._publisher)
 
         # METRICS
         self._metrics_repository = MetricsRepository(config=config)
@@ -61,24 +92,21 @@ class Container:
         # REPOSITORIES
         self._utils_repository = UtilsRepository()
         self._template_repository = TemplateRepository(config=config)
-        self._notifications_repository = NotificationsRepository(event_bus=self._event_bus, config=config)
-        self._email_repository = EmailRepository(event_bus=self._event_bus)
+        self._notifications_repository = NotificationsRepository(nats_client=self._nats_client, config=config)
+        self._email_repository = EmailRepository(nats_client=self._nats_client)
         self._bruin_repository = BruinRepository(
-            event_bus=self._event_bus,
-            logger=self._logger,
+            nats_client=self._nats_client,
             config=config,
             notifications_repository=self._notifications_repository,
         )
         self._velocloud_repository = VelocloudRepository(
-            event_bus=self._event_bus,
-            logger=self._logger,
+            nats_client=self._nats_client,
             config=config,
             utils_repository=self._utils_repository,
             notifications_repository=self._notifications_repository,
         )
         self._customer_cache_repository = CustomerCacheRepository(
-            event_bus=self._event_bus,
-            logger=self._logger,
+            nats_client=self._nats_client,
             config=config,
             notifications_repository=self._notifications_repository,
         )
@@ -89,7 +117,6 @@ class Container:
 
         # ACTIONS
         self._service_affecting_monitor = ServiceAffectingMonitor(
-            logger=self._logger,
             scheduler=self._scheduler,
             task_dispatcher_client=self._task_dispatcher_client,
             config=config,
@@ -104,8 +131,6 @@ class Container:
         )
 
         self._service_affecting_monitor_reports = ServiceAffectingMonitorReports(
-            event_bus=self._event_bus,
-            logger=self._logger,
             scheduler=self._scheduler,
             config=config,
             template_repository=self._template_repository,
@@ -116,7 +141,6 @@ class Container:
         )
 
         self._bandwidth_reports = BandwidthReports(
-            logger=self._logger,
             scheduler=self._scheduler,
             config=config,
             velocloud_repository=self._velocloud_repository,
@@ -127,29 +151,22 @@ class Container:
             utils_repository=self._utils_repository,
             template_repository=self._template_repository,
         )
+        self._server = QuartServer(QuartConfig(port=config.QUART_CONFIG["port"]))
 
-    async def _add_consumers(self):
-        handle_ticket_forward_subscriber = NATSClient(config, logger=self._logger)
-        handle_ticket_forward = HandleTicketForward(self._logger, self._metrics_repository)
-        self._handle_ticket_forward_success = ActionWrapper(
-            handle_ticket_forward, "success", is_async=True, logger=self._logger
-        )
-        self._event_bus.add_consumer(handle_ticket_forward_subscriber, consumer_name="handle_ticket_forward")
+    async def _init_subscriptions(self):
+        try:
+            # NOTE: Using dataclasses::asdict() throws a pickle error, so we need to use <dataclass>.__dict__ instead
+            cb = HandleTicketForward(self._metrics_repository)
+            await self._nats_client.subscribe(**subscriptions.HandleTicketForward(cb=cb.success).__dict__)
+        except NatsException as e:
+            app_logger.exception(e)
+            bail_out()
 
-    async def _subscribe_consumers(self):
-        await self._event_bus.subscribe_consumer(
-            consumer_name="handle_ticket_forward",
-            topic=f"task_dispatcher.{config.LOG_CONFIG['name']}.{TaskTypes.TICKET_FORWARDS.value}.success",
-            action_wrapper=self._handle_ticket_forward_success,
-            queue="task_dispatcher",
-        )
-
-    async def _start(self):
+    async def start(self):
         self._start_prometheus_metrics_server()
 
-        await self._add_consumers()
-        await self._event_bus.connect()
-        await self._subscribe_consumers()
+        await self._init_nats_conn()
+        await self._init_subscriptions()
 
         await self._service_affecting_monitor.start_service_affecting_monitor(exec_on_start=True)
 
@@ -158,7 +175,7 @@ class Container:
                 exec_on_start=config.MONITOR_REPORT_CONFIG["exec_on_start"]
             )
         else:
-            self._logger.warning(
+            app_logger.warning(
                 f"Job for Reoccurring Affecting Trouble Reports will not be scheduled for {config.VELOCLOUD_HOST} "
                 "as these reports are disabled for this host"
             )
@@ -168,27 +185,36 @@ class Container:
                 exec_on_start=config.BANDWIDTH_REPORT_CONFIG["exec_on_start"]
             )
         else:
-            self._logger.warning(
+            app_logger.warning(
                 f"Job for Daily Bandwidth Reports will not be scheduled for {config.VELOCLOUD_HOST} "
                 "as these reports are disabled for this host"
             )
 
         self._scheduler.start()
 
+    async def _init_nats_conn(self):
+        conn = Connection(servers=config.NATS_CONFIG["servers"])
+
+        try:
+            await self._nats_client.connect(**asdict(conn))
+        except NatsException as e:
+            app_logger.exception(e)
+            bail_out()
+
     @staticmethod
     def _start_prometheus_metrics_server():
         start_http_server(config.METRICS_SERVER_CONFIG["port"])
 
     async def start_server(self):
-        await self._server.run_server()
-
-    async def run(self):
-        await self._start()
+        await self._server.run()
 
 
 if __name__ == "__main__":
     container = Container()
-    loop = asyncio.get_event_loop()
-    asyncio.ensure_future(container.run(), loop=loop)
-    asyncio.ensure_future(container.start_server(), loop=loop)
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    loop.run_until_complete(container.start())
+    loop.run_until_complete(container.start_server())
     loop.run_forever()

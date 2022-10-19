@@ -1,15 +1,18 @@
 import asyncio
+import logging
 from datetime import datetime, timedelta
 
-from application import AffectingTroubles
 from apscheduler.triggers.cron import CronTrigger
 from pytz import timezone
+
+from application import AffectingTroubles
+
+logger = logging.getLogger(__name__)
 
 
 class BandwidthReports:
     def __init__(
         self,
-        logger,
         scheduler,
         config,
         velocloud_repository,
@@ -20,7 +23,6 @@ class BandwidthReports:
         utils_repository,
         template_repository,
     ):
-        self._logger = logger
         self._scheduler = scheduler
         self._config = config
         self._velocloud_repository = velocloud_repository
@@ -32,7 +34,7 @@ class BandwidthReports:
         self._template_repository = template_repository
 
     async def start_bandwidth_reports_job(self, exec_on_start=False):
-        self._logger.info(f"Scheduled task: bandwidth reports")
+        logger.info(f"Scheduled task: bandwidth reports")
 
         if exec_on_start:
             await self._bandwidth_reports_job()
@@ -46,7 +48,7 @@ class BandwidthReports:
         bandwidth_report_init_time = datetime.utcnow()
         host = self._config.VELOCLOUD_HOST
         clients = self._config.BANDWIDTH_REPORT_CONFIG["client_ids_by_host"][host]
-        self._logger.info(f"Running bandwidth reports process for {len(clients)} client(s)")
+        logger.info(f"Running bandwidth reports process for {len(clients)} client(s)")
 
         rounded_now = self.get_rounded_date(datetime.utcnow())
 
@@ -56,7 +58,7 @@ class BandwidthReports:
         customer_cache = customer_cache_response["body"]
 
         if customer_cache_response["status"] not in range(200, 300) or customer_cache_response["status"] == 202:
-            self._logger.error("[bandwidth-reports] Error getting customer cache. Process cannot keep going.")
+            logger.error("[bandwidth-reports] Error getting customer cache. Process cannot keep going.")
             return
 
         interval_for_metrics = self._velocloud_repository.get_interval_for_bandwidth_reports(rounded_now)
@@ -66,7 +68,7 @@ class BandwidthReports:
         links_metrics = links_metrics_response["body"]
 
         if links_metrics_response["status"] not in range(200, 300):
-            self._logger.info("[bandwidth-reports] Error getting links metrics. Process cannot keep going.")
+            logger.info("[bandwidth-reports] Error getting links metrics. Process cannot keep going.")
             return
 
         serial_numbers = await self.get_serials_by_client_id(clients, customer_cache)
@@ -84,7 +86,7 @@ class BandwidthReports:
             )
 
         bandwidth_report_end_time = datetime.utcnow()
-        self._logger.info(
+        logger.info(
             f"[bandwidth-reports] Report generation for all clients finished. "
             f"Took {round((bandwidth_report_end_time - bandwidth_report_init_time).total_seconds() / 60, 2)} minutes."
         )
@@ -146,7 +148,7 @@ class BandwidthReports:
             report_items = []
 
         if self._config.CURRENT_ENVIRONMENT != "production":
-            self._logger.info(
+            logger.info(
                 f"[bandwidth-reports] No report will be sent for client {client_id} "
                 f"since the current environment is not production"
             )
@@ -160,7 +162,7 @@ class BandwidthReports:
                 interval_for_metrics=interval_for_metrics,
             )
         )
-        self._logger.info(f"[bandwidth-reports] Report for client {client_id} sent via email")
+        logger.info(f"[bandwidth-reports] Report for client {client_id} sent via email")
 
     async def get_ticket_details_for_serial_and_trouble(self, serial_numbers, tickets):
         ticket_details = self._bruin_repository.transform_tickets_into_ticket_details(tickets)

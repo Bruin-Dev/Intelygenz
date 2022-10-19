@@ -1,6 +1,14 @@
+import json
+from typing import Any
+
+
+def to_json_bytes(message: dict[str, Any]):
+    return json.dumps(message, default=str, separators=(",", ":")).encode()
+
+
 class EmailRepository:
-    def __init__(self, event_bus):
-        self._event_bus = event_bus
+    def __init__(self, nats_client):
+        self._nats_client = nats_client
 
     async def send_email(self, email_object: dict):
-        await self._event_bus.rpc_request("notification.email.request", email_object, timeout=60)
+        await self._nats_client.request("notification.email.request", to_json_bytes(email_object), timeout=60)
