@@ -1,0 +1,10 @@
+Hi Nick,
+
+While working on the forticloud auto-resolve user story I stumbled across some corner cases that involve the following situations:
+- we failed adding a starting Triage note to a newly created ticket
+- a Bruin user manually unresolves a previously auto-resolved service_number task
+
+We mimicked the Ixia behaviour so that:
+- if no previous notes are found on a ticket, the grace period to auto-resolve a Forticloud outage will be calculated taking the ticket creation date as a reference
+  (when dealing with a normal case in which we correctly added a Triage or Reopen note, we calculate the grace period taking the last Triage or Reopen note as a reference).
+- if a Bruin user manually changes3 

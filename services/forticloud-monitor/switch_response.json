@@ -1,0 +1,197 @@
+{
+  "status": 200,
+  "body": {
+    "count": 2,
+    "currentPage": 1,
+    "totalPage": 1,
+    "sizePerPage": 10,
+    "result": [
+      {
+        "sn": "S248EPTF21000977",
+        "network": 145585,
+        "hostname": "Lee_Trevino_Sw_1",
+        "bios": "04000011",
+        "bios_upgrade_alert": null,
+        "model": "FortiSwitch-248E-POE",
+        "version": "v6.4.5,build0461,201215 (GA)",
+        "mac": "d4:76:a0:73:58:c8",
+        "systemPart": "P22169-04",
+        "status": "online",
+        "ip": "192.226.69.22",
+        "connectTime": "2022-08-30T08:16:58.472655+00:00",
+        "local_interface": "",
+        "local_ip": "",
+        "poe_warning": false,
+        "tags": [],
+        "auto_network_enable": false,
+        "rma_from_serial_number": "",
+        "rma_to_serial_number": "",
+        "rma_date": "2021-07-27T11:16:50.592797-07:00",
+        "rma_contact_number": "",
+        "rma_comment": "",
+        "rma_complete": false,
+        "created_at": "2021-07-27T11:16:50.595801-07:00",
+        "registration_date": "2021-07-27T11:14:49-07:00",
+        "nvp": {},
+        "licensed": 1,
+        "config": {},
+        "license": "Active",
+        "firmware_status": "New version available v7.2.2,build0419,220902",
+        "upgrade_schedule": null,
+        "grace_period_days": 0,
+        "deactive": 0,
+        "deactive_time": null,
+        "license_data": [],
+        "last_seen": "2022-08-25T05:11:05.457673+00:00",
+        "physical_interface": [
+          {
+            "title": "onboard",
+            "interface": [
+              {
+                "name": "internal",
+                "mode": "static",
+                "ipv4": {
+                  "address": "0.0.0.0",
+                  "mask": "0.0.0.0"
+                },
+                "ipv6": {
+                  "address": "::",
+                  "length": 0
+                },
+                "status": "up",
+                "speed": {
+                  "value": 0,
+                  "unit": "Mbps"
+                },
+                "duplex": "n/a",
+                "stats": {
+                  "rx-bytes": 3290977624,
+                  "rx-packets": 18431701,
+                  "tx-bytes": 5183788080,
+                  "tx-packets": 15271017
+                }
+              },
+              {
+                "name": "mgmt",
+                "mode": "dhcp",
+                "ipv4": {
+                  "address": "0.0.0.0",
+                  "mask": "0.0.0.0"
+                },
+                "ipv6": {
+                  "address": "::",
+                  "length": 0
+                },
+                "status": "down",
+                "speed": {
+                  "value": 0,
+                  "unit": "Mbps"
+                },
+                "duplex": "",
+                "stats": {
+                  "rx-bytes": 0,
+                  "rx-packets": 0,
+                  "tx-bytes": 0,
+                  "tx-packets": 0
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "sn": "S248EPTF21001000",
+        "network": 145585,
+        "hostname": "Lee_Trevino_Sw_2",
+        "bios": "04000011",
+        "bios_upgrade_alert": null,
+        "model": "FortiSwitch-248E-POE",
+        "version": "v6.4.5,build0461,201215 (GA)",
+        "mac": "d4:76:a0:73:5d:a2",
+        "systemPart": "P22169-04",
+        "status": "online",
+        "ip": "192.226.69.22",
+        "connectTime": "2022-08-30T08:11:30.868414+00:00",
+        "local_interface": "",
+        "local_ip": "",
+        "poe_warning": false,
+        "tags": [],
+        "auto_network_enable": false,
+        "rma_from_serial_number": "",
+        "rma_to_serial_number": "",
+        "rma_date": "2021-07-27T11:16:50.595411-07:00",
+        "rma_contact_number": "",
+        "rma_comment": "",
+        "rma_complete": false,
+        "created_at": "2021-07-27T11:16:50.596099-07:00",
+        "registration_date": "2021-07-27T11:16:12-07:00",
+        "nvp": {},
+        "licensed": 1,
+        "config": {},
+        "license": "Active",
+        "firmware_status": "New version available v7.2.2,build0419,220902",
+        "upgrade_schedule": null,
+        "grace_period_days": 0,
+        "deactive": 0,
+        "deactive_time": null,
+        "license_data": [],
+        "last_seen": "2022-08-25T05:10:29.990081+00:00",
+        "physical_interface": [
+          {
+            "title": "onboard",
+            "interface": [
+              {
+                "name": "internal",
+                "mode": "static",
+                "ipv4": {
+                  "address": "0.0.0.0",
+                  "mask": "0.0.0.0"
+                },
+                "ipv6": {
+                  "address": "::",
+                  "length": 0
+                },
+                "status": "up",
+                "speed": {
+                  "value": 0,
+                  "unit": "Mbps"
+                },
+                "duplex": "n/a",
+                "stats": {
+                  "rx-bytes": 3233119672,
+                  "rx-packets": 18206390,
+                  "tx-bytes": 5054213771,
+                  "tx-packets": 15054891
+                }
+              },
+              {
+                "name": "mgmt",
+                "mode": "dhcp",
+                "ipv4": {
+                  "address": "0.0.0.0",
+                  "mask": "0.0.0.0"
+                },
+                "ipv6": {
+                  "address": "::",
+                  "length": 0
+                },
+                "status": "down",
+                "speed": {
+                  "value": 0,
+                  "unit": "Mbps"
+                },
+                "duplex": "",
+                "stats": {
+                  "rx-bytes": 0,
+                  "rx-packets": 0,
+                  "tx-bytes": 0,
+                  "tx-packets": 0
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

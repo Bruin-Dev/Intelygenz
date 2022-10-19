@@ -1,0 +1,20 @@
+task status
+cycle status
+
+task_status = ONGOING y cycle_status = ONGOING
+task_status = ONGOING y cycle_status = AUTO_RESOLVED => 
+- usuario ha cambiado manualmente el estado de la task
+task_status = RESOLVED y cycle_status = AUTO_RESOLVED
+task_status = RESOLVED y cycle_status = ONGOING =>
+- usuario ha cambiado manualmente el estado de la task
+- Bruin haya petado al añadir la nota de auto-resolve
+
+
+margen para auto resolver: 30 minutos
+Ticket
+- arrancó hace 45 minutos
+- notas:
+  - triage hace 45 minutos
+  - autoresolve hace 40 minutos
+  - triage hace 15 minutos
+  - autoresolve hace 10 minutos
