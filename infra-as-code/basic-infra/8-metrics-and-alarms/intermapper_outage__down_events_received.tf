@@ -30,7 +30,7 @@ resource "aws_sns_topic" "intermapper-outage-too-many-down-events" {
 }
 
 resource "aws_sns_topic_subscription" "intermapper-outage-too-many-down-events"{
-  for_each  = toset(["managedservices@mettel.net", "ndimuro@mettel.net", "bsullivan@mettel.net", "mettel.team@intelygenz.com"])
+  for_each  = toset(["managedservices@mettel.net", "ndimuro@mettel.net", "bsullivan@mettel.net", "jhicks@mettel.net", "mettel.team@intelygenz.com"])
   topic_arn = aws_sns_topic.intermapper-outage-too-many-down-events.arn
   protocol  = "email"
   endpoint  = each.value
