@@ -1,6 +1,6 @@
 resource "aws_cloudwatch_log_metric_filter" "velocloud_outage__triage_job_finished" {
   name           = "velocloud_outage__triage_job_finished"
-  pattern        = "{ $.environment = \"production\" && $.hostname = \"service-outage-monitor*\" && $.message = \"Triage process finished*\" }"
+  pattern        = "{ $.environment = \"production\" && $.hostname = \"service-outage-monitor-triage-*\" && $.message = \"Triage process finished*\" }"
   log_group_name = data.aws_cloudwatch_log_group.eks_log_group.name
 
   metric_transformation {

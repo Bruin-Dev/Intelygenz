@@ -1,6 +1,6 @@
 resource "aws_cloudwatch_log_metric_filter" "intermapper_outage__no_emails_received" {
   name           = "intermapper_outage__no_emails_received"
-  pattern        = "{ $.environment = \"production\" && $.hostname = \"intermapper-outage-monitor-*\" && $.message = \"Received the following from the gmail account mettel.automation@intelygenz.com: []\" }"
+  pattern        = "{ $.log=\"*production*intermapper-outage-monitor-*Received the following from the gmail account mettel.automation@intelygenz.com: []*\" }"
   log_group_name = data.aws_cloudwatch_log_group.eks_log_group.name
 
   metric_transformation {
