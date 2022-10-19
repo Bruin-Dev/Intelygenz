@@ -32,6 +32,6 @@ resource "aws_sns_topic" "velocloud-bridge-too-many-errors" {
 resource "aws_sns_topic_subscription" "velocloud-bridge-too-many-errors"{
   for_each  = toset(["mettel.team@intelygenz.com"])
   topic_arn = aws_sns_topic.velocloud-bridge-too-many-errors.arn
-  protocol = "email"
-  endpoint = each.value
+  protocol  = "email"
+  endpoint  = each.value
 }

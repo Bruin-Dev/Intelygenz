@@ -32,6 +32,6 @@ resource "aws_sns_topic" "velocloud-outage-triage-job-failed" {
 resource "aws_sns_topic_subscription" "velocloud-outage-triage-job-failed"{
   for_each  = toset(["mettel.team@intelygenz.com"])
   topic_arn = aws_sns_topic.velocloud-outage-triage-job-failed.arn
-  protocol = "email"
-  endpoint = each.value
+  protocol  = "email"
+  endpoint  = each.value
 }

@@ -32,6 +32,6 @@ resource "aws_sns_topic" "intermapper-outage-no-events-processed" {
 resource "aws_sns_topic_subscription" "intermapper-outage-no-events-processed"{
   for_each  = toset(["mettel.team@intelygenz.com"])
   topic_arn = aws_sns_topic.intermapper-outage-no-events-processed.arn
-  protocol = "email"
-  endpoint = each.value
+  protocol  = "email"
+  endpoint  = each.value
 }

@@ -55,10 +55,9 @@ resource "aws_sns_topic" "velocloud-outage-no-tickets-created" {
   name = "velocloud-outage-no-tickets-created"
 }
 
-
 resource "aws_sns_topic_subscription" "velocloud-outage-no-tickets-created"{
   for_each  = toset(["mettel.team@intelygenz.com"])
   topic_arn = aws_sns_topic.velocloud-outage-no-tickets-created.arn
-  protocol = "email"
-  endpoint = each.value
+  protocol  = "email"
+  endpoint  = each.value
 }
