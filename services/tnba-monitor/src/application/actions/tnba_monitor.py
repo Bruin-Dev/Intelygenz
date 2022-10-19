@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import re
 import time
 from datetime import datetime
@@ -19,11 +20,13 @@ TRIAGE_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nTriage
 REOPEN_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nRe-opening")
 
 
+logger = logging.getLogger(__name__)
+
+
 class TNBAMonitor:
     def __init__(
         self,
-        event_bus,
-        logger,
+        nats_client,
         scheduler,
         config,
         metrics_repository,
@@ -37,8 +40,7 @@ class TNBAMonitor:
         utils_repository,
         trouble_repository,
     ):
-        self._event_bus = event_bus
-        self._logger = logger
+        self._nats_client = nats_client
         self._scheduler = scheduler
         self._config = config
         self._metrics_repository = metrics_repository
@@ -63,13 +65,13 @@ class TNBAMonitor:
         self._tnba_notes_to_append = []
 
     async def start_tnba_automated_process(self, exec_on_start=False):
-        self._logger.info("Scheduling TNBA automated process job...")
+        logger.info("Scheduling TNBA automated process job...")
         next_run_time = undefined
 
         if exec_on_start:
             tz = timezone(self._config.TIMEZONE)
             next_run_time = datetime.now(tz)
-            self._logger.info("TNBA automated process job is going to be executed immediately")
+            logger.info("TNBA automated process job is going to be executed immediately")
 
         try:
             self._scheduler.add_job(
@@ -81,30 +83,30 @@ class TNBAMonitor:
                 id="_run_tickets_polling",
             )
         except ConflictingIdError as conflict:
-            self._logger.info(f"Skipping start of TNBA automated process job. Reason: {conflict}")
+            logger.info(f"Skipping start of TNBA automated process job. Reason: {conflict}")
 
     async def _run_tickets_polling(self):
         start_time = time.time()
 
         self.__reset_state()
 
-        self._logger.info("Starting TNBA process...")
+        logger.info("Starting TNBA process...")
 
         customer_cache_response = await self._customer_cache_repository.get_cache_for_tnba_monitoring()
         if customer_cache_response["status"] not in range(200, 300) or customer_cache_response["status"] == 202:
-            self._logger.warning(f"Bad status calling to get cache. Skipping run ticket polling ...")
+            logger.warning(f"Bad status calling to get cache. Skipping run ticket polling ...")
             return
 
         edges_statuses = await self._velocloud_repository.get_edges_for_tnba_monitoring()
         if not edges_statuses:
             err_msg = "No edges statuses were received from VeloCloud. Aborting TNBA monitoring..."
-            self._logger.error(err_msg)
+            logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
             return
 
         customer_cache = customer_cache_response["body"]
 
-        self._logger.info("Keeping serials that exist in both the customer cache and the set of edges statuses...")
+        logger.info("Keeping serials that exist in both the customer cache and the set of edges statuses...")
         customer_cache, edges_statuses = self._filter_edges_in_customer_cache_and_edges_statuses(
             customer_cache, edges_statuses
         )
@@ -112,14 +114,14 @@ class TNBAMonitor:
         links_metrics_response = await self._velocloud_repository.get_links_metrics_for_autoresolve()
         links_metrics: list = links_metrics_response["body"]
         if not links_metrics:
-            self._logger.info("List of links metrics arrived empty. Skipping...")
+            logger.info("List of links metrics arrived empty. Skipping...")
             return
         events = await self._velocloud_repository.get_events_by_serial_and_interface(customer_cache)
         self._link_metrics_and_events_by_serial = self._velocloud_repository._structure_link_and_event_metrics(
             links_metrics, events
         )
 
-        self._logger.info("Loading customer cache and edges statuses by serial into the monitor instance...")
+        logger.info("Loading customer cache and edges statuses by serial into the monitor instance...")
         self._customer_cache_by_serial = {cached_info["serial_number"]: cached_info for cached_info in customer_cache}
         self._client_info_by_id = {
             cached_info["bruin_client_info"]["client_id"]: {
@@ -130,57 +132,57 @@ class TNBAMonitor:
         }
         self._edge_status_by_serial = {edge_status["edgeSerialNumber"]: edge_status for edge_status in edges_statuses}
 
-        self._logger.info("Getting all open tickets for all customers...")
+        logger.info("Getting all open tickets for all customers...")
         open_tickets = await self._get_all_open_tickets_with_details_for_monitored_companies()
 
-        self._logger.info(
+        logger.info(
             f"Got {len(open_tickets)} open tickets for all customers. "
             f"Filtering them (and their details) to get only the ones under the device list"
         )
         relevant_open_tickets = self._filter_tickets_and_details_related_to_edges_under_monitoring(open_tickets)
 
-        self._logger.info(
+        logger.info(
             f"Got {len(relevant_open_tickets)} relevant tickets for all customers. "
             f"Cleaning them up to exclude all invalid notes..."
         )
         relevant_open_tickets = self._filter_irrelevant_notes_in_tickets(relevant_open_tickets)
 
-        self._logger.info("Getting T7 predictions for all relevant open tickets...")
+        logger.info("Getting T7 predictions for all relevant open tickets...")
         predictions_by_ticket_id = await self._get_predictions_by_ticket_id(relevant_open_tickets)
 
-        self._logger.info("Removing erroneous T7 predictions...")
+        logger.info("Removing erroneous T7 predictions...")
         predictions_by_ticket_id = self._remove_erroneous_predictions(predictions_by_ticket_id)
 
-        self._logger.info("Creating detail objects based on all tickets...")
+        logger.info("Creating detail objects based on all tickets...")
         ticket_detail_objects = self._transform_tickets_into_detail_objects(relevant_open_tickets)
 
-        self._logger.info("Discarding resolved ticket details...")
+        logger.info("Discarding resolved ticket details...")
         ticket_detail_objects = self._filter_resolved_ticket_details(ticket_detail_objects)
 
-        self._logger.info("Discarding ticket details of outage tickets whose last outage happened too recently...")
+        logger.info("Discarding ticket details of outage tickets whose last outage happened too recently...")
         ticket_detail_objects = self._filter_outage_ticket_details_based_on_last_outage(ticket_detail_objects)
 
-        self._logger.info("Mapping all ticket details with their predictions...")
+        logger.info("Mapping all ticket details with their predictions...")
         ticket_detail_objects = self._map_ticket_details_with_predictions(
             ticket_detail_objects, predictions_by_ticket_id
         )
 
-        self._logger.info(
+        logger.info(
             f"{len(ticket_detail_objects)} ticket details were successfully mapped to predictions. "
             "Processing all details..."
         )
         tasks = [self._process_ticket_detail(detail_object) for detail_object in ticket_detail_objects]
         await asyncio.gather(*tasks)
-        self._logger.info("All ticket details were processed.")
+        logger.info("All ticket details were processed.")
 
         if not self._tnba_notes_to_append:
-            self._logger.info("No TNBA notes for append were built for any detail processed.")
+            logger.info("No TNBA notes for append were built for any detail processed.")
         else:
-            self._logger.info(f"{len(self._tnba_notes_to_append)} TNBA notes were built for append.")
+            logger.info(f"{len(self._tnba_notes_to_append)} TNBA notes were built for append.")
             await self._append_tnba_notes()
 
         end_time = time.time()
-        self._logger.info(f"TNBA process finished! Took {round((end_time - start_time) / 60, 2)} minutes.")
+        logger.info(f"TNBA process finished! Took {round((end_time - start_time) / 60, 2)} minutes.")
 
     @staticmethod
     def _filter_edges_in_customer_cache_and_edges_statuses(customer_cache: list, edges_statuses: list) -> tuple:
@@ -220,19 +222,19 @@ class TNBAMonitor:
                 open_outage_tickets_response_body = open_outage_tickets_response["body"]
                 open_outage_tickets_response_status = open_outage_tickets_response["status"]
                 if open_outage_tickets_response_status not in range(200, 300):
-                    self._logger.warning(f"Bad status calling to get outage tickets. Return empty list ...")
+                    logger.warning(f"Bad status calling to get outage tickets. Return empty list ...")
                     open_outage_tickets_response_body = []
 
                 open_affecting_tickets_response = await self._bruin_repository.get_open_affecting_tickets(client_id)
                 open_affecting_tickets_response_body = open_affecting_tickets_response["body"]
                 open_affecting_tickets_response_status = open_affecting_tickets_response["status"]
                 if open_affecting_tickets_response_status not in range(200, 300):
-                    self._logger.warning(f"Bad status calling to get affecting tickets. Return empty list ...")
+                    logger.warning(f"Bad status calling to get affecting tickets. Return empty list ...")
                     open_affecting_tickets_response_body = []
 
                 all_open_tickets: list = open_outage_tickets_response_body + open_affecting_tickets_response_body
 
-                self._logger.info(f"Getting all opened tickets for Bruin customer {client_id}...")
+                logger.info(f"Getting all opened tickets for Bruin customer {client_id}...")
                 for ticket in all_open_tickets:
                     ticket_id = ticket["ticketID"]
                     ticket_creation_date = ticket["createDate"]
@@ -246,19 +248,17 @@ class TNBAMonitor:
                     ticket_details_response_status = ticket_details_response["status"]
 
                     if ticket_details_response_status not in range(200, 300):
-                        self._logger.warning(
+                        logger.warning(
                             f"Bad status calling to get tickets details with id: {ticket_id}. Skipping ticket ..."
                         )
                         continue
 
                     ticket_details_list = ticket_details_response_body["ticketDetails"]
                     if not ticket_details_list:
-                        self._logger.info(
-                            f"Ticket {ticket_id} doesn't have any detail under ticketDetails key. Skipping..."
-                        )
+                        logger.info(f"Ticket {ticket_id} doesn't have any detail under ticketDetails key. Skipping...")
                         continue
 
-                    self._logger.info(f"Got details for ticket {ticket_id} of Bruin customer {client_id}!")
+                    logger.info(f"Got details for ticket {ticket_id} of Bruin customer {client_id}!")
 
                     result.append(
                         {
@@ -274,14 +274,14 @@ class TNBAMonitor:
                         }
                     )
 
-                self._logger.info(f"Finished getting all opened tickets for Bruin customer {client_id}!")
+                logger.info(f"Finished getting all opened tickets for Bruin customer {client_id}!")
                 for ticket_item in result:
                     open_tickets.append(ticket_item)
 
         try:
             await get_open_tickets_with_details_by_client_id()
         except Exception as e:
-            self._logger.error(
+            logger.error(
                 f"An error occurred while trying to get open tickets with details for Bruin client {client_id} -> {e}"
             )
 
@@ -297,7 +297,7 @@ class TNBAMonitor:
             ]
 
             if not relevant_details:
-                self._logger.warning(f"Don't found relevant tickets. Skipping ticket ...")
+                logger.warning(f"Don't found relevant tickets. Skipping ticket ...")
                 # Having no relevant details means the ticket is not relevant either
                 continue
 
@@ -346,19 +346,17 @@ class TNBAMonitor:
 
         for ticket in tickets:
             ticket_id = ticket["ticket_id"]
-            self._logger.info(f"Claiming T7 predictions for ticket {ticket_id}...")
+            logger.info(f"Claiming T7 predictions for ticket {ticket_id}...")
 
             task_history_response = await self._bruin_repository.get_ticket_task_history(ticket_id)
             if task_history_response["status"] not in range(200, 300):
-                self._logger.warning(
-                    f"Bad status calling to get ticket history. Skipping for ticket id: {ticket_id} ..."
-                )
+                logger.warning(f"Bad status calling to get ticket history. Skipping for ticket id: {ticket_id} ...")
                 continue
 
             task_history: list = task_history_response["body"]
             any_ticket_row_has_asset = any(row.get("Asset") for row in task_history)
             if not any_ticket_row_has_asset:
-                self._logger.info(f"Task history of ticket {ticket_id} doesn't have any asset. Skipping...")
+                logger.info(f"Task history of ticket {ticket_id} doesn't have any asset. Skipping...")
                 continue
 
             assets_to_predict = [td["detailValue"] for td in ticket["ticket_details"]]
@@ -367,18 +365,16 @@ class TNBAMonitor:
                 ticket_id, task_history, assets_to_predict
             )
             if t7_prediction_response["status"] not in range(200, 300):
-                self._logger.warning(
-                    f"Bad status calling to t7 predictions. Skipping predictions for ticket id: {ticket_id}"
-                )
+                logger.warning(f"Bad status calling to t7 predictions. Skipping predictions for ticket id: {ticket_id}")
                 continue
 
             ticket_predictions: list = t7_prediction_response["body"]
             if not ticket_predictions:
-                self._logger.info(f"There are no predictions for ticket {ticket_id}. Skipping...")
+                logger.info(f"There are no predictions for ticket {ticket_id}. Skipping...")
                 continue
 
             result[ticket_id] = ticket_predictions
-            self._logger.info(f"T7 predictions found for ticket {ticket_id}!")
+            logger.info(f"T7 predictions found for ticket {ticket_id}!")
 
         return result
 
@@ -392,7 +388,7 @@ class TNBAMonitor:
                 serial_number = prediction_obj["assetId"]
 
                 if "error" in prediction_obj.keys():
-                    self._logger.info(
+                    logger.info(
                         f"Prediction for serial {serial_number} in ticket {ticket_id} was found but it contains an "
                         f"error from T7 API -> {prediction_obj['error']}"
                     )
@@ -401,7 +397,7 @@ class TNBAMonitor:
                 valid_predictions.append(prediction_obj)
 
             if not valid_predictions:
-                self._logger.info(f"All predictions in ticket {ticket_id} were erroneous. Skipping ticket...")
+                logger.info(f"All predictions in ticket {ticket_id} were erroneous. Skipping ticket...")
                 continue
 
             result[ticket_id] = valid_predictions
@@ -453,7 +449,7 @@ class TNBAMonitor:
 
             if self._ticket_repository.is_detail_in_outage_ticket(detail_object):
                 if self._was_last_outage_detected_recently(ticket_notes, ticket_creation_date):
-                    self._logger.info(
+                    logger.info(
                         f"Last outage detected for serial {serial_number} in Service Outage ticket {ticket_id} is "
                         "too recent. Skipping..."
                     )
@@ -498,7 +494,7 @@ class TNBAMonitor:
             predictions_for_ticket: list = predictions_by_ticket_id.get(ticket_id)
 
             if not predictions_for_ticket:
-                self._logger.info(
+                logger.info(
                     f"Ticket {ticket_id} does not have any prediction associated. Skipping serial "
                     f"{serial_number}..."
                 )
@@ -509,9 +505,7 @@ class TNBAMonitor:
                 serial_number=serial_number,
             )
             if not prediction_object_related_to_serial:
-                self._logger.info(
-                    f"No predictions were found for ticket {ticket_id} and serial {serial_number}. Skipping..."
-                )
+                logger.info(f"No predictions were found for ticket {ticket_id} and serial {serial_number}. Skipping...")
                 continue
 
             predictions: list = prediction_object_related_to_serial["predictions"]
@@ -538,9 +532,7 @@ class TNBAMonitor:
             client_name = self._client_info_by_id[client_id]["name"]
             host = self._client_info_by_id[client_id]["host"]
 
-            self._logger.info(
-                f"Processing detail {ticket_detail_id} (serial: {serial_number}) of ticket {ticket_id}..."
-            )
+            logger.info(f"Processing detail {ticket_detail_id} (serial: {serial_number}) of ticket {ticket_id}...")
 
             newest_tnba_note = self._ticket_repository.find_newest_tnba_note_by_service_number(
                 ticket_notes, serial_number
@@ -551,7 +543,7 @@ class TNBAMonitor:
                     f"TNBA note found for ticket {ticket_id} and detail {ticket_detail_id} is too recent. "
                     f"Skipping detail..."
                 )
-                self._logger.info(msg)
+                logger.info(msg)
                 return
 
             mapped_predictions = self._prediction_repository.map_request_and_repair_completed_predictions(predictions)
@@ -562,14 +554,14 @@ class TNBAMonitor:
             next_results_response_body = next_results_response["body"]
             next_results_response_status = next_results_response["status"]
             if next_results_response_status not in range(200, 300):
-                self._logger.warning(
+                logger.warning(
                     f"Bad status calling get next result for ticket details."
                     f"Skipping process ticket details for ticket id: {ticket_id} and"
                     f"ticket detail id: {ticket_detail_id}"
                 )
                 return
 
-            self._logger.info(
+            logger.info(
                 f"Filtering predictions available in next results for ticket {ticket_id}, "
                 f"detail {ticket_detail_id} and serial {serial_number}..."
             )
@@ -584,10 +576,10 @@ class TNBAMonitor:
                     f"No predictions with name appearing in the next results were found for ticket {ticket_id}, "
                     f"detail {ticket_detail_id} and serial {serial_number}!"
                 )
-                self._logger.info(msg)
+                logger.info(msg)
                 return
 
-            self._logger.info(
+            logger.info(
                 f"Predictions available in next results found for ticket {ticket_id}, detail {ticket_detail_id} "
                 f"and serial {serial_number}: {relevant_predictions}"
             )
@@ -602,17 +594,17 @@ class TNBAMonitor:
                         f"Best prediction for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number} "
                         f"didn't change since the last TNBA note was appended. Skipping detail..."
                     )
-                    self._logger.info(msg)
+                    logger.info(msg)
                     return
 
-            self._logger.info(
+            logger.info(
                 f"Building TNBA note from prediction {best_prediction['name']} for ticket {ticket_id}, "
                 f"detail {ticket_detail_id} and serial {serial_number}..."
             )
 
             tnba_note = None
             if self._prediction_repository.is_request_or_repair_completed_prediction(best_prediction):
-                self._logger.info(
+                logger.info(
                     f"Best prediction found for serial {serial_number} of ticket {ticket_id} is "
                     f'{best_prediction["name"]}. Running autoresolve...'
                 )
@@ -629,7 +621,7 @@ class TNBAMonitor:
                     )
                     tnba_note: str = self._ticket_repository.build_tnba_note_for_AI_autoresolve(serial_number)
                 elif autoresolve_status is self.AutoresolveTicketDetailStatus.SKIPPED:
-                    self._logger.info(
+                    logger.info(
                         f"Autoresolve was triggered because the best prediction found for serial {serial_number} of "
                         f'ticket {ticket_id} was {best_prediction["name"]}, but the process failed. A TNBA note with '
                         "this prediction will be built and appended to the ticket later on."
@@ -641,15 +633,13 @@ class TNBAMonitor:
                     await self._t7_repository.post_live_automation_metrics(
                         ticket_id, serial_number, automated_successfully=False
                     )
-                    self._logger.info(
-                        f"The prediction for serial {serial_number} of ticket {ticket_id} is considered wrong."
-                    )
+                    logger.info(f"The prediction for serial {serial_number} of ticket {ticket_id} is considered wrong.")
 
             else:
                 tnba_note: str = self._ticket_repository.build_tnba_note_from_prediction(best_prediction, serial_number)
 
             if not tnba_note:
-                self._logger.info(f"No TNBA note will be appended for serial {serial_number} of ticket {ticket_id}.")
+                logger.info(f"No TNBA note will be appended for serial {serial_number} of ticket {ticket_id}.")
                 return
 
             if self._config.CURRENT_ENVIRONMENT == "production":
@@ -666,10 +656,10 @@ class TNBAMonitor:
                     f"TNBA note would have been appended to ticket {ticket_id} and detail {ticket_detail_id} "
                     f"(serial: {serial_number}). Note: {tnba_note}. Details at app.bruin.com/t/{ticket_id}"
                 )
-                self._logger.info(tnba_message)
+                logger.info(tnba_message)
                 await self._notifications_repository.send_slack_message(tnba_message)
 
-            self._logger.info(
+            logger.info(
                 f"Finished processing detail {ticket_detail_id} (serial: {serial_number}) of ticket {ticket_id}!"
             )
 
@@ -684,40 +674,38 @@ class TNBAMonitor:
         ticket_id = detail_object["ticket_id"]
         serial_number = detail_object["ticket_detail"]["detailValue"]
 
-        self._logger.info(f"Running autoresolve for serial {serial_number} of ticket {ticket_id}...")
+        logger.info(f"Running autoresolve for serial {serial_number} of ticket {ticket_id}...")
 
         if not self._ticket_repository.was_ticket_created_by_automation_engine(detail_object):
-            self._logger.info(
+            logger.info(
                 f"Ticket {ticket_id}, where serial {serial_number} is, was not created by Automation Engine. "
                 "Skipping autoresolve..."
             )
             return self.AutoresolveTicketDetailStatus.SKIPPED
         edge_status = self._edge_status_by_serial[serial_number]
         if self._ticket_repository.is_detail_in_outage_ticket(detail_object) and self._is_there_an_outage(edge_status):
-            self._logger.info(
-                f"Serial {serial_number} of ticket {ticket_id} is in outage state. Skipping autoresolve..."
-            )
+            logger.info(f"Serial {serial_number} of ticket {ticket_id} is in outage state. Skipping autoresolve...")
             return self.AutoresolveTicketDetailStatus.BAD_PREDICTION
 
         link_metrics_and_events = self._link_metrics_and_events_by_serial[serial_number]
         if self._ticket_repository.is_detail_in_affecting_ticket(
             detail_object
         ) and not self._trouble_repository.are_all_metrics_within_thresholds(link_metrics_and_events):
-            self._logger.info(
+            logger.info(
                 f"At least one metric from serial {serial_number} of ticket {ticket_id} is not within the threshold."
                 f" Skipping autoresolve..."
             )
             return self.AutoresolveTicketDetailStatus.BAD_PREDICTION
 
         if not self._prediction_repository.is_prediction_confident_enough(best_prediction):
-            self._logger.info(
+            logger.info(
                 f"The confidence of the best prediction found for ticket {ticket_id}, where serial {serial_number} is, "
                 f"did not exceed the minimum threshold. Skipping autoresolve..."
             )
             return self.AutoresolveTicketDetailStatus.SKIPPED
 
         if not self._config.CURRENT_ENVIRONMENT == "production":
-            self._logger.info(
+            logger.info(
                 f"Detail related to serial {serial_number} of ticket {ticket_id} was about to be resolved, but the "
                 f"current environment is {self._config.CURRENT_ENVIRONMENT.upper()}. Skipping autoresolve..."
             )
@@ -732,7 +720,7 @@ class TNBAMonitor:
         if resolve_detail_response["status"] in range(200, 300):
             return self.AutoresolveTicketDetailStatus.SUCCESS
         else:
-            self._logger.warning(
+            logger.warning(
                 f"Bad status calling resolve ticket detail for ticket id: {ticket_id} "
                 f"and ticket detail id: {ticket_detail_id} . Skipping resolve ticket detail"
             )
@@ -757,14 +745,12 @@ class TNBAMonitor:
             )
 
         for ticket_id, notes in notes_by_ticket_id.items():
-            self._logger.info(f"Appending {len(notes)} TNBA notes to ticket {ticket_id}...")
+            logger.info(f"Appending {len(notes)} TNBA notes to ticket {ticket_id}...")
 
             append_notes_response = await self._bruin_repository.append_multiple_notes_to_ticket(ticket_id, notes)
             append_notes_response_status = append_notes_response["status"]
             if append_notes_response_status not in range(200, 300):
-                self._logger.warning(
-                    f"Bad status calling append multiple notes to ticket id: {ticket_id}. Skipping ..."
-                )
+                logger.warning(f"Bad status calling append multiple notes to ticket id: {ticket_id}. Skipping ...")
                 continue
 
             slack_message = TNBA_NOTE_APPENDED_SUCCESS_MSG.format(notes_count=len(notes), ticket_id=ticket_id)

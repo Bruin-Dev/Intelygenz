@@ -2,6 +2,7 @@ from collections import defaultdict
 from typing import List, Optional
 
 import pytest
+
 from tests.fixtures._constants import CURRENT_DATETIME
 from tests.fixtures._helpers import velocloudize_date
 

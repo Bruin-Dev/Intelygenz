@@ -1,10 +1,4 @@
-from datetime import timedelta
-from unittest.mock import Mock, patch
-
-from application.repositories import trouble_repository as trouble_repository_module
 from config import testconfig
-from dateutil.parser import parse
-from pytz import utc
 
 
 class TestTroubleRepository:

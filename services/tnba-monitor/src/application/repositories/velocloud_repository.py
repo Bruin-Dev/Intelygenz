@@ -1,16 +1,21 @@
+import json
+import logging
 from collections import defaultdict
 from datetime import datetime, timedelta
 
-from application import AffectingTroubles
-from application.repositories import nats_error_response
 from pytz import utc
 from shortuuid import uuid
 
+from application import AffectingTroubles
+from application.repositories import nats_error_response
+from application.repositories.utils_repository import to_json_bytes
+
+logger = logging.getLogger(__name__)
+
 
 class VelocloudRepository:
-    def __init__(self, event_bus, logger, config, notifications_repository, utils_repository):
-        self._event_bus = event_bus
-        self._logger = logger
+    def __init__(self, nats_client, config, notifications_repository, utils_repository):
+        self._nats_client = nats_client
         self._config = config
         self._notifications_repository = notifications_repository
         self._utils_repository = utils_repository
@@ -26,8 +31,9 @@ class VelocloudRepository:
         }
 
         try:
-            self._logger.info(f"Getting links with edge info from Velocloud for host {velocloud_host}...")
-            response = await self._event_bus.rpc_request("get.links.with.edge.info", request, timeout=30)
+            logger.info(f"Getting links with edge info from Velocloud for host {velocloud_host}...")
+            response = await self._nats_client.request("get.links.with.edge.info", to_json_bytes(request), timeout=30)
+            response = json.loads(response.data)
         except Exception as e:
             err_msg = f"An error occurred when requesting edge list from Velocloud -> {e}"
             response = nats_error_response
@@ -36,7 +42,7 @@ class VelocloudRepository:
             response_status = response["status"]
 
             if response_status in range(200, 300):
-                self._logger.info(f"Got links with edge info from Velocloud for host {velocloud_host}!")
+                logger.info(f"Got links with edge info from Velocloud for host {velocloud_host}!")
             else:
                 err_msg = (
                     f"Error while retrieving links with edge info in {self._config.ENVIRONMENT_NAME.upper()} "
@@ -44,7 +50,7 @@ class VelocloudRepository:
                 )
 
         if err_msg:
-            self._logger.error(err_msg)
+            logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response
@@ -54,7 +60,7 @@ class VelocloudRepository:
         for host in self._config.MONITOR_CONFIG["velo_filter"]:
             response = await self.get_links_with_edge_info(velocloud_host=host)
             if response["status"] not in range(200, 300):
-                self._logger.info(f"Error: could not retrieve edges links by host: {host}")
+                logger.info(f"Error: could not retrieve edges links by host: {host}")
                 continue
             all_edges += response["body"]
         links_grouped_by_edge = self.group_links_by_serial(all_edges)
@@ -72,14 +78,14 @@ class VelocloudRepository:
             serial_number = link["edgeSerialNumber"]
 
             if edge_state is None:
-                self._logger.info(
+                logger.info(
                     f"Edge in host {velocloud_host} and enterprise {enterprise_name} (ID: {enterprise_id}) "
                     f"has an invalid state. Skipping..."
                 )
                 continue
 
             if edge_state == "NEVER_ACTIVATED":
-                self._logger.info(
+                logger.info(
                     f"Edge {edge_name} in host {velocloud_host} and enterprise {enterprise_name} (ID: {enterprise_id}) "
                     f"has never been activated. Skipping..."
                 )
@@ -142,7 +148,7 @@ class VelocloudRepository:
         for host in self._config.MONITOR_CONFIG["velo_filter"]:
             response = await self.get_links_metrics_by_host(host=host, interval=interval)
             if response["status"] not in range(200, 300):
-                self._logger.info(f"Error: could not retrieve links metrics from Velocloud host {host}")
+                logger.info(f"Error: could not retrieve links metrics from Velocloud host {host}")
                 continue
             all_links_metrics += response["body"]
 
@@ -165,11 +171,12 @@ class VelocloudRepository:
         }
 
         try:
-            self._logger.info(
+            logger.info(
                 f"Getting links metrics between {interval['start']} and {interval['end']} "
                 f"from Velocloud host {host}..."
             )
-            response = await self._event_bus.rpc_request("get.links.metric.info", request, timeout=30)
+            response = await self._nats_client.request("get.links.metric.info", to_json_bytes(request), timeout=30)
+            response = json.loads(response.data)
         except Exception as e:
             err_msg = f"An error occurred when requesting links metrics from Velocloud -> {e}"
             response = nats_error_response
@@ -183,10 +190,10 @@ class VelocloudRepository:
                     f"environment: Error {response_status} - {response_body}"
                 )
             else:
-                self._logger.info(f"Got links metrics from Velocloud host {host}!")
+                logger.info(f"Got links metrics from Velocloud host {host}!")
 
         if err_msg:
-            self._logger.error(err_msg)
+            logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response
@@ -204,7 +211,7 @@ class VelocloudRepository:
                 enterprise_events = enterprise_events_response["body"]
 
                 if enterprise_events_response["status"] not in range(200, 300):
-                    self._logger.warning(
+                    logger.warning(
                         f" Bad status calling get enterprise events for host: {host} and enterprise"
                         f"{enterprise_id}. Skipping enterprise events ..."
                     )
@@ -215,13 +222,11 @@ class VelocloudRepository:
                         edges, lambda edge: edge["edge_name"] == event["edgeName"]
                     )
                     if not matching_edge:
-                        self._logger.info(
-                            f'No edge in the customer cache had edge name {event["edgeName"]}. Skipping...'
-                        )
+                        logger.info(f'No edge in the customer cache had edge name {event["edgeName"]}. Skipping...')
                         continue
 
                     serial = matching_edge["serial_number"]
-                    self._logger.info(
+                    logger.info(
                         f'Event with edge name {event["edgeName"]} matches edge from customer cache with'
                         f"serial number {serial}"
                     )
@@ -232,7 +237,7 @@ class VelocloudRepository:
         return events
 
     def _structure_edges_by_host_and_enterprise(self, customer_cache):
-        self._logger.info("Organizing customer cache by host and enterprise_id")
+        logger.info("Organizing customer cache by host and enterprise_id")
         edges = defaultdict(lambda: defaultdict(list))
 
         for edge in customer_cache:
@@ -263,11 +268,14 @@ class VelocloudRepository:
         }
 
         try:
-            self._logger.info(
+            logger.info(
                 f"Getting events of host {host} and enterprise id {enterprise_id} having any type of {event_types} "
                 f"that took place between {past_moment} and {now} from Velocloud..."
             )
-            response = await self._event_bus.rpc_request("alert.request.event.enterprise", request, timeout=180)
+            response = await self._nats_client.request(
+                "alert.request.event.enterprise", to_json_bytes(request), timeout=180
+            )
+            response = json.loads(response.data)
         except Exception as e:
             err_msg = (
                 f"An error occurred when requesting edge events from Velocloud for host {host} "
@@ -279,7 +287,7 @@ class VelocloudRepository:
             response_status = response["status"]
 
             if response_status in range(200, 300):
-                self._logger.info(
+                logger.info(
                     f"Got events of host {host} and enterprise id {enterprise_id} having any type in {event_types} "
                     f"that took place between {past_moment} and {now} from Velocloud!"
                 )
@@ -292,7 +300,7 @@ class VelocloudRepository:
                 )
 
         if err_msg:
-            self._logger.error(err_msg)
+            logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response

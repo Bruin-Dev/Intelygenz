@@ -1,10 +1,12 @@
 from unittest.mock import Mock
 
 import pytest
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from framework.nats.client import Client as NatsClient
+
 from application.actions.tnba_monitor import TNBAMonitor
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.customer_cache_repository import CustomerCacheRepository
-from application.repositories.metrics_repository import MetricsRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.prediction_repository import PredictionRepository
 from application.repositories.t7_repository import T7Repository
@@ -12,47 +14,37 @@ from application.repositories.ticket_repository import TicketRepository
 from application.repositories.trouble_repository import TroubleRepository
 from application.repositories.utils_repository import UtilsRepository
 from application.repositories.velocloud_repository import VelocloudRepository
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from asynctest import create_autospec
 from config import testconfig as config
-from igz.packages.eventbus.eventbus import EventBus
 from tests.fixtures._helpers import wrap_all_methods
 
 
 @pytest.fixture(scope="function")
-def logger():
-    # Let's suppress all logs in tests
-    return Mock()
-
-
-@pytest.fixture(scope="function")
-def event_bus():
-    return create_autospec(EventBus)
+def nats_client():
+    return Mock(spec_set=NatsClient)
 
 
 @pytest.fixture(scope="function")
 def scheduler():
-    return create_autospec(AsyncIOScheduler)
+    return Mock(spec_set=AsyncIOScheduler)
 
 
 @pytest.fixture(scope="function")
 def metrics_repository():
-    return create_autospec(MetricsRepository)
+    return Mock()
 
 
 @pytest.fixture(scope="function")
-def notifications_repository(event_bus):
-    instance = NotificationsRepository(event_bus=event_bus, config=config)
+def notifications_repository(nats_client):
+    instance = NotificationsRepository(nats_client=nats_client, config=config)
     wrap_all_methods(instance)
 
     return instance
 
 
 @pytest.fixture(scope="function")
-def bruin_repository(logger, event_bus, notifications_repository):
+def bruin_repository(nats_client, notifications_repository):
     instance = BruinRepository(
-        logger=logger,
-        event_bus=event_bus,
+        nats_client=nats_client,
         notifications_repository=notifications_repository,
         config=config,
     )
@@ -62,10 +54,9 @@ def bruin_repository(logger, event_bus, notifications_repository):
 
 
 @pytest.fixture(scope="function")
-def velocloud_repository(logger, event_bus, notifications_repository, utils_repository):
+def velocloud_repository(nats_client, notifications_repository, utils_repository):
     instance = VelocloudRepository(
-        logger=logger,
-        event_bus=event_bus,
+        nats_client=nats_client,
         notifications_repository=notifications_repository,
         config=config,
         utils_repository=utils_repository,
@@ -76,10 +67,9 @@ def velocloud_repository(logger, event_bus, notifications_repository, utils_repo
 
 
 @pytest.fixture(scope="function")
-def t7_repository(logger, event_bus, notifications_repository):
+def t7_repository(nats_client, notifications_repository):
     instance = T7Repository(
-        logger=logger,
-        event_bus=event_bus,
+        nats_client=nats_client,
         notifications_repository=notifications_repository,
         config=config,
     )
@@ -89,10 +79,9 @@ def t7_repository(logger, event_bus, notifications_repository):
 
 
 @pytest.fixture(scope="function")
-def customer_cache_repository(logger, event_bus, notifications_repository):
+def customer_cache_repository(nats_client, notifications_repository):
     instance = CustomerCacheRepository(
-        logger=logger,
-        event_bus=event_bus,
+        nats_client=nats_client,
         notifications_repository=notifications_repository,
         config=config,
     )
@@ -144,8 +133,7 @@ def trouble_repository(utils_repository):
 
 @pytest.fixture(scope="function")
 def tnba_monitor(
-    event_bus,
-    logger,
+    nats_client,
     scheduler,
     metrics_repository,
     t7_repository,
@@ -159,8 +147,7 @@ def tnba_monitor(
     trouble_repository,
 ):
     instance = TNBAMonitor(
-        event_bus=event_bus,
-        logger=logger,
+        nats_client=nats_client,
         scheduler=scheduler,
         config=config,
         bruin_repository=bruin_repository,

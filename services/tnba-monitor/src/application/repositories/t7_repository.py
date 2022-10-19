@@ -1,13 +1,18 @@
+import json
+import logging
 from typing import List
 
-from application.repositories import nats_error_response
 from shortuuid import uuid
+
+from application.repositories import nats_error_response
+from application.repositories.utils_repository import to_json_bytes
+
+logger = logging.getLogger(__name__)
 
 
 class T7Repository:
-    def __init__(self, event_bus, logger, config, notifications_repository):
-        self._event_bus = event_bus
-        self._logger = logger
+    def __init__(self, nats_client, config, notifications_repository):
+        self._nats_client = nats_client
         self._config = config
         self._notifications_repository = notifications_repository
 
@@ -24,9 +29,10 @@ class T7Repository:
         }
 
         try:
-            self._logger.info(f"Claiming T7 prediction for ticket {ticket_id}...")
-            response = await self._event_bus.rpc_request("t7.prediction.request", request, timeout=60)
-            self._logger.info(f"Got T7 prediction for ticket {ticket_id}!")
+            logger.info(f"Claiming T7 prediction for ticket {ticket_id}...")
+            response = await self._nats_client.request("t7.prediction.request", to_json_bytes(request), timeout=60)
+            response = json.loads(response.data)
+            logger.info(f"Got T7 prediction for ticket {ticket_id}!")
         except Exception as e:
             err_msg = f"An error occurred when claiming T7 prediction for ticket {ticket_id}. Error: {e}"
             response = nats_error_response
@@ -42,7 +48,7 @@ class T7Repository:
                 )
 
         if err_msg:
-            self._logger.error(err_msg)
+            logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response
@@ -56,8 +62,9 @@ class T7Repository:
         }
 
         try:
-            self._logger.info(f"Posting live metric for ticket {ticket_id} to T7...")
-            response = await self._event_bus.rpc_request("t7.live.automation.metrics", request, timeout=60)
+            logger.info(f"Posting live metric for ticket {ticket_id} to T7...")
+            response = await self._nats_client.request("t7.live.automation.metrics", to_json_bytes(request), timeout=60)
+            response = json.loads(response.data)
         except Exception as e:
             err_msg = f"An error occurred when posting live metrics for ticket {ticket_id} to T7. Error: {e}"
             response = nats_error_response
@@ -66,7 +73,7 @@ class T7Repository:
             response_status = response["status"]
 
             if response_status in range(200, 300):
-                self._logger.info(f"Live metrics posted for ticket {ticket_id}!")
+                logger.info(f"Live metrics posted for ticket {ticket_id}!")
             else:
                 err_msg = (
                     f"Error when posting live metrics for ticket {ticket_id} to T7 in "
@@ -75,7 +82,7 @@ class T7Repository:
                 )
 
         if err_msg:
-            self._logger.error(err_msg)
+            logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response

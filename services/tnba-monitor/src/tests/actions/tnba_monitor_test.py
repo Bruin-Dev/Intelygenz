@@ -1,22 +1,21 @@
 from datetime import datetime, timedelta
-from unittest.mock import Mock, call, patch
+from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
-from application.actions import tnba_monitor as tnba_monitor_module
-from application.actions.tnba_monitor import TNBAMonitor
 from apscheduler.util import undefined
-from asynctest import CoroutineMock
-from config import testconfig
 from dateutil.parser import parse
 from pytz import utc
+
+from application.actions import tnba_monitor as tnba_monitor_module
+from application.actions.tnba_monitor import TNBAMonitor
+from config import testconfig
 
 
 class TestTNBAMonitor:
     def instance_test(
         self,
         tnba_monitor,
-        event_bus,
-        logger,
+        nats_client,
         scheduler,
         metrics_repository,
         t7_repository,
@@ -28,8 +27,7 @@ class TestTNBAMonitor:
         notifications_repository,
         utils_repository,
     ):
-        assert tnba_monitor._event_bus is event_bus
-        assert tnba_monitor._logger is logger
+        assert tnba_monitor._nats_client is nats_client
         assert tnba_monitor._scheduler is scheduler
         assert tnba_monitor._config is testconfig
         assert tnba_monitor._metrics_repository is metrics_repository
@@ -126,7 +124,7 @@ class TestTNBAMonitor:
 
         tnba_monitor._customer_cache_repository.get_cache_for_tnba_monitoring.return_value = get_cache_response
         tnba_monitor._velocloud_repository.get_edges_for_tnba_monitoring.return_value = edges_statuses
-        tnba_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        tnba_monitor._notifications_repository.send_slack_message = AsyncMock()
 
         await tnba_monitor._run_tickets_polling()
 
@@ -175,15 +173,15 @@ class TestTNBAMonitor:
         tnba_monitor._filter_tickets_and_details_related_to_edges_under_monitoring.return_value = []
         tnba_monitor._map_ticket_details_with_predictions.return_value = []
 
-        tnba_monitor._get_all_open_tickets_with_details_for_monitored_companies = CoroutineMock()
+        tnba_monitor._get_all_open_tickets_with_details_for_monitored_companies = AsyncMock()
         tnba_monitor._filter_irrelevant_notes_in_tickets = Mock()
-        tnba_monitor._get_predictions_by_ticket_id = CoroutineMock()
+        tnba_monitor._get_predictions_by_ticket_id = AsyncMock()
         tnba_monitor._remove_erroneous_predictions = Mock()
         tnba_monitor._transform_tickets_into_detail_objects = Mock(return_value=[])
         tnba_monitor._filter_resolved_ticket_details = Mock()
         tnba_monitor._filter_outage_ticket_details_based_on_last_outage = Mock()
-        tnba_monitor._process_ticket_detail = CoroutineMock()
-        tnba_monitor._append_tnba_notes = CoroutineMock()
+        tnba_monitor._process_ticket_detail = AsyncMock()
+        tnba_monitor._append_tnba_notes = AsyncMock()
 
         await tnba_monitor._run_tickets_polling()
 
@@ -236,15 +234,15 @@ class TestTNBAMonitor:
         tnba_monitor._map_ticket_details_with_predictions.return_value = []
 
         # Skip most of the logic, since the relevant part is to check if TNBA notes are appended or not
-        tnba_monitor._get_all_open_tickets_with_details_for_monitored_companies = CoroutineMock()
+        tnba_monitor._get_all_open_tickets_with_details_for_monitored_companies = AsyncMock()
         tnba_monitor._filter_irrelevant_notes_in_tickets = Mock()
-        tnba_monitor._get_predictions_by_ticket_id = CoroutineMock()
+        tnba_monitor._get_predictions_by_ticket_id = AsyncMock()
         tnba_monitor._remove_erroneous_predictions = Mock()
         tnba_monitor._transform_tickets_into_detail_objects = Mock(return_value=[])
         tnba_monitor._filter_resolved_ticket_details = Mock()
         tnba_monitor._filter_outage_ticket_details_based_on_last_outage = Mock()
-        tnba_monitor._process_ticket_detail = CoroutineMock()
-        tnba_monitor._append_tnba_notes = CoroutineMock()
+        tnba_monitor._process_ticket_detail = AsyncMock()
+        tnba_monitor._append_tnba_notes = AsyncMock()
 
         await tnba_monitor._run_tickets_polling()
 
@@ -297,14 +295,14 @@ class TestTNBAMonitor:
         tnba_monitor._filter_tickets_and_details_related_to_edges_under_monitoring.return_value = []
 
         # Skip most of the logic, since the relevant part is to check if TNBA notes are appended or not
-        tnba_monitor._get_all_open_tickets_with_details_for_monitored_companies = CoroutineMock()
+        tnba_monitor._get_all_open_tickets_with_details_for_monitored_companies = AsyncMock()
         tnba_monitor._filter_irrelevant_notes_in_tickets = Mock()
-        tnba_monitor._get_predictions_by_ticket_id = CoroutineMock()
+        tnba_monitor._get_predictions_by_ticket_id = AsyncMock()
         tnba_monitor._remove_erroneous_predictions = Mock()
         tnba_monitor._transform_tickets_into_detail_objects = Mock(return_value=[])
         tnba_monitor._filter_resolved_ticket_details = Mock()
         tnba_monitor._filter_outage_ticket_details_based_on_last_outage = Mock()
-        tnba_monitor._append_tnba_notes = CoroutineMock()
+        tnba_monitor._append_tnba_notes = AsyncMock()
 
         # Let's simulate that, after processing some details, a few TNBA notes were created to be appended to a ticket
         detail_object = make_detail_object_with_predictions()
@@ -321,7 +319,7 @@ class TestTNBAMonitor:
             for note in tnba_notes:
                 tnba_monitor._tnba_notes_to_append.append(note)
 
-        tnba_monitor._process_ticket_detail = CoroutineMock(side_effect=__fake_process_ticket_detail)
+        tnba_monitor._process_ticket_detail = AsyncMock(side_effect=__fake_process_ticket_detail)
 
         await tnba_monitor._run_tickets_polling()
 
@@ -357,7 +355,7 @@ class TestTNBAMonitor:
             serial_number_2: edge_cached_info_2,
         }
         tnba_monitor._customer_cache_by_serial = customer_cache_by_serial
-        tnba_monitor._get_open_tickets_with_details_by_client_id = CoroutineMock()
+        tnba_monitor._get_open_tickets_with_details_by_client_id = AsyncMock()
 
         await tnba_monitor._get_all_open_tickets_with_details_for_monitored_companies()
 
@@ -2638,7 +2636,7 @@ class TestTNBAMonitor:
         append_notes_response = make_rpc_response(body="ok", status=200)
 
         tnba_monitor._bruin_repository.append_multiple_notes_to_ticket.return_value = append_notes_response
-        tnba_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        tnba_monitor._notifications_repository.send_slack_message = AsyncMock()
 
         ticket_1_note_1_with_ticket_id = make_payload_for_note_append_with_ticket_id(
             ticket_id=ticket_1_id,

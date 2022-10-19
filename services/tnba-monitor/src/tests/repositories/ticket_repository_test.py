@@ -2,9 +2,10 @@ import os
 from datetime import timedelta
 from unittest.mock import Mock, patch
 
+from dateutil.parser import parse
+
 from application.repositories import ticket_repository as ticket_repository_module
 from application.repositories.ticket_repository import TicketRepository
-from dateutil.parser import parse
 
 
 class TestTicketRepository:

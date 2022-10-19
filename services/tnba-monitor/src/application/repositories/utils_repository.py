@@ -1,10 +1,15 @@
+import json
 import re
-from typing import Callable
+from typing import Any, Callable
 
 EVENT_INTERFACE_REGEX = re.compile(
     r"(^Interface (?P<interface>[a-zA-Z0-9]+) is (up|down)$)|"
     r"(^Link (?P<link_interface>[a-zA-Z0-9]+) is (no longer|now) DEAD$)"
 )
+
+
+def to_json_bytes(message: dict[str, Any]):
+    return json.dumps(message, default=str, separators=(",", ":")).encode()
 
 
 class UtilsRepository:

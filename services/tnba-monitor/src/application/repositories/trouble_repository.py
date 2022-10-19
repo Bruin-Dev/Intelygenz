@@ -1,8 +1,4 @@
-from datetime import datetime
-
 from application import AffectingTroubles
-from dateutil.parser import parse
-from pytz import utc
 
 
 class TroubleRepository:

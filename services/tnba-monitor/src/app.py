@@ -1,6 +1,24 @@
 import asyncio
+import logging
+import sys
+from dataclasses import asdict
 
 import redis
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from framework.http.server import Config as HealthConfig
+from framework.http.server import Server as HealthServer
+from framework.logging.formatters import Papertrail as PapertrailFormatter
+from framework.logging.formatters import Standard as StandardFormatter
+from framework.logging.handlers import Papertrail as PapertrailHandler
+from framework.logging.handlers import Stdout as StdoutHandler
+from framework.nats.client import Client
+from framework.nats.exceptions import NatsException
+from framework.nats.models import *
+from framework.nats.models import Connection
+from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
+from prometheus_client import start_http_server
+from pytz import timezone
+
 from application.actions.tnba_monitor import TNBAMonitor
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.customer_cache_repository import CustomerCacheRepository
@@ -12,69 +30,81 @@ from application.repositories.ticket_repository import TicketRepository
 from application.repositories.trouble_repository import TroubleRepository
 from application.repositories.utils_repository import UtilsRepository
 from application.repositories.velocloud_repository import VelocloudRepository
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import config
-from igz.packages.eventbus.eventbus import EventBus
-from igz.packages.eventbus.storage_managers import RedisStorageManager
-from igz.packages.Logger.logger_client import LoggerClient
-from igz.packages.nats.clients import NATSClient
-from igz.packages.server.api import QuartServer
-from prometheus_client import start_http_server
-from pytz import timezone
+
+base_handler = StdoutHandler()
+base_handler.setFormatter(StandardFormatter(environment_name=config.ENVIRONMENT_NAME))
+
+app_logger = logging.getLogger("application")
+app_logger.setLevel(logging.DEBUG)
+app_logger.addHandler(base_handler)
+
+framework_logger = logging.getLogger("framework")
+framework_logger.setLevel(logging.DEBUG)
+framework_logger.addHandler(base_handler)
+
+if config.LOG_CONFIG["papertrail"]["active"]:
+    pt_handler = PapertrailHandler(
+        host=config.LOG_CONFIG["papertrail"]["host"],
+        port=config.LOG_CONFIG["papertrail"]["port"],
+    )
+    pt_handler.setFormatter(
+        PapertrailFormatter(
+            environment_name=config.ENVIRONMENT_NAME,
+            papertrail_prefix=config.LOG_CONFIG["papertrail"]["prefix"],
+        )
+    )
+    app_logger.addHandler(pt_handler)
+    framework_logger.addHandler(pt_handler)
+
+
+def bail_out():
+    app_logger.critical("Stopping application...")
+    sys.exit(1)
 
 
 class Container:
     def __init__(self):
-        self._logger = LoggerClient(config).get_logger()
-        self._logger.info("TNBA Monitor starting...")
+        app_logger.info("TNBA Monitor starting...")
 
         self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._redis_client.ping()
-        self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
+        tmp_redis_storage = RedisStorage(self._redis_client)
+        self._nats_client = Client(temp_payload_storage=tmp_redis_storage)
 
         self._scheduler = AsyncIOScheduler(timezone=timezone(config.TIMEZONE))
-        self._server = QuartServer(config)
-
-        self._publisher = NATSClient(config, logger=self._logger)
-        self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
-        self._event_bus.set_producer(self._publisher)
 
         self._metrics_repository = MetricsRepository(config=config)
 
         self._utils_repository = UtilsRepository()
         self._ticket_repo = TicketRepository(config, self._utils_repository)
         self._prediction_repo = PredictionRepository(config, self._utils_repository)
-        self._notifications_repository = NotificationsRepository(event_bus=self._event_bus, config=config)
+        self._notifications_repository = NotificationsRepository(nats_client=self._nats_client, config=config)
         self._bruin_repository = BruinRepository(
-            event_bus=self._event_bus,
-            logger=self._logger,
+            nats_client=self._nats_client,
             config=config,
             notifications_repository=self._notifications_repository,
         )
         self._velocloud_repository = VelocloudRepository(
-            event_bus=self._event_bus,
-            logger=self._logger,
+            nats_client=self._nats_client,
             config=config,
             notifications_repository=self._notifications_repository,
             utils_repository=self._utils_repository,
         )
         self._t7_repository = T7Repository(
-            event_bus=self._event_bus,
-            logger=self._logger,
+            nats_client=self._nats_client,
             config=config,
             notifications_repository=self._notifications_repository,
         )
         self._trouble_repository = TroubleRepository(config, self._utils_repository)
         self._customer_cache_repository = CustomerCacheRepository(
-            event_bus=self._event_bus,
-            logger=self._logger,
+            nats_client=self._nats_client,
             config=config,
             notifications_repository=self._notifications_repository,
         )
 
         self._tnba_monitor = TNBAMonitor(
-            self._event_bus,
-            self._logger,
+            self._nats_client,
             self._scheduler,
             config,
             self._metrics_repository,
@@ -89,21 +119,35 @@ class Container:
             self._trouble_repository,
         )
 
-    async def _start(self):
+        self._server = HealthServer(HealthConfig(port=config.QUART_CONFIG["port"]))
+
+    async def _init_nats_conn(self):
+        conn = Connection(servers=config.NATS_CONFIG["servers"])
+
+        try:
+            await self._nats_client.connect(**asdict(conn))
+        except NatsException as e:
+            app_logger.exception(e)
+            bail_out()
+
+    async def start(self):
+        # Setup prometheus
         self._start_prometheus_metrics_server()
 
-        await self._event_bus.connect()
+        # Setup NATS
+        await self._init_nats_conn()
+
+        # Setup scheduler
+        self._scheduler.start()
 
         await self._tnba_monitor.start_tnba_automated_process(exec_on_start=True)
-
-        self._scheduler.start()
 
     @staticmethod
     def _start_prometheus_metrics_server():
         start_http_server(config.METRICS_SERVER_CONFIG["port"])
 
     async def start_server(self):
-        await self._server.run_server()
+        await self._server.run()
 
     async def run(self):
         await self._start()
@@ -111,7 +155,11 @@ class Container:
 
 if __name__ == "__main__":
     container = Container()
-    loop = asyncio.get_event_loop()
-    asyncio.ensure_future(container.run(), loop=loop)
-    asyncio.ensure_future(container.start_server(), loop=loop)
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    loop.run_until_complete(container.start())
+    loop.run_until_complete(container.start_server())
+
     loop.run_forever()

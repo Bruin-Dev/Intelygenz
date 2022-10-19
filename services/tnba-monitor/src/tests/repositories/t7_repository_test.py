@@ -1,20 +1,21 @@
-from unittest.mock import patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from nats.aio.msg import Msg
+from shortuuid import uuid
+
 from application.repositories import nats_error_response
 from application.repositories import t7_repository as t7_repository_module
-from asynctest import CoroutineMock
+from application.repositories.utils_repository import to_json_bytes
 from config import testconfig
-from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(t7_repository_module, "uuid", return_value=uuid_)
 
 
 class TestT7Repository:
-    def instance_test(self, t7_repository, event_bus, logger, notifications_repository):
-        assert t7_repository._event_bus is event_bus
-        assert t7_repository._logger is logger
+    def instance_test(self, t7_repository, nats_client, notifications_repository):
+        assert t7_repository._nats_client is nats_client
         assert t7_repository._config is testconfig
         assert t7_repository._notifications_repository is notifications_repository
 
@@ -57,12 +58,16 @@ class TestT7Repository:
             status=200,
         )
 
-        t7_repository._event_bus.rpc_request.return_value = response
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        t7_repository._nats_client.request = AsyncMock(return_value=response_msg)
 
         with uuid_mock:
             result = await t7_repository.get_prediction(ticket_id, task_history, assets_to_predict)
 
-        t7_repository._event_bus.rpc_request.assert_awaited_once_with("t7.prediction.request", request, timeout=60)
+        t7_repository._nats_client.request.assert_awaited_once_with(
+            "t7.prediction.request", to_json_bytes(request), timeout=60
+        )
         assert result == response
 
     @pytest.mark.asyncio
@@ -90,15 +95,16 @@ class TestT7Repository:
             assets_to_predict=assets_to_predict,
         )
 
-        t7_repository._event_bus.rpc_request.side_effect = Exception
-        t7_repository._notifications_repository.send_slack_message = CoroutineMock()
+        t7_repository._nats_client.request.side_effect = Exception
+        t7_repository._notifications_repository.send_slack_message = AsyncMock()
 
         with uuid_mock:
             result = await t7_repository.get_prediction(ticket_id, task_history, assets_to_predict)
 
-        t7_repository._event_bus.rpc_request.assert_awaited_once_with("t7.prediction.request", request, timeout=60)
+        t7_repository._nats_client.request.assert_awaited_once_with(
+            "t7.prediction.request", to_json_bytes(request), timeout=60
+        )
         t7_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        t7_repository._logger.error.assert_called()
         assert result == nats_error_response
 
     @pytest.mark.asyncio
@@ -133,15 +139,19 @@ class TestT7Repository:
             status=500,
         )
 
-        t7_repository._event_bus.rpc_request.return_value = response
-        t7_repository._notifications_repository.send_slack_message = CoroutineMock()
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        t7_repository._nats_client.request = AsyncMock(return_value=response_msg)
+
+        t7_repository._notifications_repository.send_slack_message = AsyncMock()
 
         with uuid_mock:
             result = await t7_repository.get_prediction(ticket_id, task_history, assets_to_predict)
 
-        t7_repository._event_bus.rpc_request.assert_awaited_once_with("t7.prediction.request", request, timeout=60)
+        t7_repository._nats_client.request.assert_awaited_once_with(
+            "t7.prediction.request", to_json_bytes(request), timeout=60
+        )
         t7_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        t7_repository._logger.error.assert_called()
         assert result == response
 
     @pytest.mark.asyncio
@@ -163,12 +173,16 @@ class TestT7Repository:
             status=200,
         )
 
-        t7_repository._event_bus.rpc_request.return_value = response
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        t7_repository._nats_client.request = AsyncMock(return_value=response_msg)
 
         with uuid_mock:
             result = await t7_repository.post_live_automation_metrics(ticket_id, asset_id, automated_successfully)
 
-        t7_repository._event_bus.rpc_request.assert_awaited_once_with("t7.live.automation.metrics", request, timeout=60)
+        t7_repository._nats_client.request.assert_awaited_once_with(
+            "t7.live.automation.metrics", to_json_bytes(request), timeout=60
+        )
         assert result == response
 
     @pytest.mark.asyncio
@@ -184,15 +198,16 @@ class TestT7Repository:
             automated_successfully=automated_successfully,
         )
 
-        t7_repository._event_bus.rpc_request.side_effect = Exception
-        t7_repository._notifications_repository.send_slack_message = CoroutineMock()
+        t7_repository._nats_client.request.side_effect = Exception
+        t7_repository._notifications_repository.send_slack_message = AsyncMock()
 
         with uuid_mock:
             result = await t7_repository.post_live_automation_metrics(ticket_id, asset_id, automated_successfully)
 
-        t7_repository._event_bus.rpc_request.assert_awaited_once_with("t7.live.automation.metrics", request, timeout=60)
+        t7_repository._nats_client.request.assert_awaited_once_with(
+            "t7.live.automation.metrics", to_json_bytes(request), timeout=60
+        )
         t7_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        t7_repository._logger.error.assert_called()
         assert result == nats_error_response
 
     @pytest.mark.asyncio
@@ -216,13 +231,17 @@ class TestT7Repository:
             status=500,
         )
 
-        t7_repository._event_bus.rpc_request.return_value = response
-        t7_repository._notifications_repository.send_slack_message = CoroutineMock()
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        t7_repository._nats_client.request = AsyncMock(return_value=response_msg)
+
+        t7_repository._notifications_repository.send_slack_message = AsyncMock()
 
         with uuid_mock:
             result = await t7_repository.post_live_automation_metrics(ticket_id, asset_id, automated_successfully)
 
-        t7_repository._event_bus.rpc_request.assert_awaited_once_with("t7.live.automation.metrics", request, timeout=60)
+        t7_repository._nats_client.request.assert_awaited_once_with(
+            "t7.live.automation.metrics", to_json_bytes(request), timeout=60
+        )
         t7_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        t7_repository._logger.error.assert_called()
         assert result == response

@@ -1,22 +1,21 @@
-from datetime import datetime
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from nats.aio.msg import Msg
+from shortuuid import uuid
+
 from application.repositories import bruin_repository as bruin_repository_module
 from application.repositories import nats_error_response
-from application.repositories.bruin_repository import BruinRepository
-from asynctest import CoroutineMock
+from application.repositories.utils_repository import to_json_bytes
 from config import testconfig
-from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(bruin_repository_module, "uuid", return_value=uuid_)
 
 
 class TestBruinRepository:
-    def instance_test(self, bruin_repository, event_bus, logger, notifications_repository):
-        assert bruin_repository._event_bus is event_bus
-        assert bruin_repository._logger is logger
+    def instance_test(self, bruin_repository, nats_client, notifications_repository):
+        assert bruin_repository._nats_client is nats_client
         assert bruin_repository._config is testconfig
         assert bruin_repository._notifications_repository is notifications_repository
 
@@ -30,18 +29,20 @@ class TestBruinRepository:
             request_id=uuid_,
             client_id=bruin_client_id,
             ticket_statuses=ticket_statuses,
-            product_category=testconfig.PRODUCT_CATEGORY,
             ticket_topic=ticket_topic,
+            product_category=testconfig.PRODUCT_CATEGORY,
         )
         response = make_rpc_response(request_id=uuid_, body=[open_affecting_ticket], status=200)
 
-        bruin_repository._event_bus.rpc_request.return_value = response
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        bruin_repository._nats_client.request = AsyncMock(return_value=response_msg)
 
         with uuid_mock:
             result = await bruin_repository.get_tickets(bruin_client_id, ticket_topic, ticket_statuses)
 
-        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "bruin.ticket.basic.request", request, timeout=90
+        bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.basic.request", to_json_bytes(request), timeout=90
         )
         assert result == response
 
@@ -55,21 +56,20 @@ class TestBruinRepository:
             request_id=uuid_,
             client_id=bruin_client_id,
             ticket_statuses=ticket_statuses,
-            product_category=testconfig.PRODUCT_CATEGORY,
             ticket_topic=ticket_topic,
+            product_category=testconfig.PRODUCT_CATEGORY,
         )
 
-        bruin_repository._event_bus.rpc_request.side_effect = Exception
-        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+        bruin_repository._nats_client.request.side_effect = Exception
+        bruin_repository._notifications_repository.send_slack_message = AsyncMock()
 
         with uuid_mock:
             result = await bruin_repository.get_tickets(bruin_client_id, ticket_topic, ticket_statuses)
 
-        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "bruin.ticket.basic.request", request, timeout=90
+        bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.basic.request", to_json_bytes(request), timeout=90
         )
         bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        bruin_repository._logger.error.assert_called_once()
         assert result == nats_error_response
 
     @pytest.mark.asyncio
@@ -84,8 +84,8 @@ class TestBruinRepository:
             request_id=uuid_,
             client_id=bruin_client_id,
             ticket_statuses=ticket_statuses,
-            product_category=testconfig.PRODUCT_CATEGORY,
             ticket_topic=ticket_topic,
+            product_category=testconfig.PRODUCT_CATEGORY,
         )
         response = make_rpc_response(
             request_id=uuid_,
@@ -93,17 +93,19 @@ class TestBruinRepository:
             status=500,
         )
 
-        bruin_repository._event_bus.rpc_request.return_value = response
-        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        bruin_repository._nats_client.request = AsyncMock(return_value=response_msg)
+
+        bruin_repository._notifications_repository.send_slack_message = AsyncMock()
 
         with uuid_mock:
             result = await bruin_repository.get_tickets(bruin_client_id, ticket_topic, ticket_statuses)
 
-        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "bruin.ticket.basic.request", request, timeout=90
+        bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.basic.request", to_json_bytes(request), timeout=90
         )
         bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        bruin_repository._logger.error.assert_called_once()
         assert result == response
 
     @pytest.mark.asyncio
@@ -129,32 +131,32 @@ class TestBruinRepository:
             status=200,
         )
 
-        bruin_repository._event_bus.rpc_request.return_value = response
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        bruin_repository._nats_client.request = AsyncMock(return_value=response_msg)
 
         with uuid_mock:
-            result = await bruin_repository.get_ticket_details(ticket_id)
+            await bruin_repository.get_ticket_details(ticket_id)
 
-        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "bruin.ticket.details.request", request, timeout=15
+        bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.details.request", to_json_bytes(request), timeout=15
         )
-        assert result == response
 
     @pytest.mark.asyncio
     async def get_ticket_details_with_rpc_request_failing_test(self, bruin_repository, make_rpc_request):
         ticket_id = 11111
         request = make_rpc_request(request_id=uuid_, ticket_id=ticket_id)
 
-        bruin_repository._event_bus.rpc_request.side_effect = Exception
-        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+        bruin_repository._nats_client.request.side_effect = Exception
+        bruin_repository._notifications_repository.send_slack_message = AsyncMock()
 
         with uuid_mock:
             result = await bruin_repository.get_ticket_details(ticket_id)
 
-        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "bruin.ticket.details.request", request, timeout=15
+        bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.details.request", to_json_bytes(request), timeout=15
         )
         bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        bruin_repository._logger.error.assert_called_once()
         assert result == nats_error_response
 
     @pytest.mark.asyncio
@@ -170,17 +172,19 @@ class TestBruinRepository:
             status=500,
         )
 
-        bruin_repository._event_bus.rpc_request.return_value = response
-        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        bruin_repository._nats_client.request = AsyncMock(return_value=response_msg)
+
+        bruin_repository._notifications_repository.send_slack_message = AsyncMock()
 
         with uuid_mock:
             result = await bruin_repository.get_ticket_details(ticket_id)
 
-        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "bruin.ticket.details.request", request, timeout=15
+        bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.details.request", to_json_bytes(request), timeout=15
         )
         bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        bruin_repository._logger.error.assert_called_once()
         assert result == response
 
     @pytest.mark.asyncio
@@ -207,13 +211,15 @@ class TestBruinRepository:
             status=200,
         )
 
-        bruin_repository._event_bus.rpc_request.return_value = response
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        bruin_repository._nats_client.request = AsyncMock(return_value=response_msg)
 
         with uuid_mock:
             result = await bruin_repository.get_ticket_task_history(ticket_id)
 
-        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "bruin.ticket.get.task.history", request, timeout=15
+        bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.get.task.history", to_json_bytes(request), timeout=15
         )
         assert result == response
 
@@ -222,17 +228,16 @@ class TestBruinRepository:
         ticket_id = 11111
         request = make_rpc_request(request_id=uuid_, ticket_id=ticket_id)
 
-        bruin_repository._event_bus.rpc_request.side_effect = Exception
-        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+        bruin_repository._nats_client.request.side_effect = Exception
+        bruin_repository._notifications_repository.send_slack_message = AsyncMock()
 
         with uuid_mock:
             result = await bruin_repository.get_ticket_task_history(ticket_id)
 
-        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "bruin.ticket.get.task.history", request, timeout=15
+        bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.get.task.history", to_json_bytes(request), timeout=15
         )
         bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        bruin_repository._logger.error.assert_called_once()
         assert result == nats_error_response
 
     @pytest.mark.asyncio
@@ -248,17 +253,19 @@ class TestBruinRepository:
             status=500,
         )
 
-        bruin_repository._event_bus.rpc_request.return_value = response
-        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        bruin_repository._nats_client.request = AsyncMock(return_value=response_msg)
+
+        bruin_repository._notifications_repository.send_slack_message = AsyncMock()
 
         with uuid_mock:
             result = await bruin_repository.get_ticket_task_history(ticket_id)
 
-        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "bruin.ticket.get.task.history", request, timeout=15
+        bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.get.task.history", to_json_bytes(request), timeout=15
         )
         bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        bruin_repository._logger.error.assert_called_once()
         assert result == response
 
     @pytest.mark.asyncio
@@ -283,15 +290,16 @@ class TestBruinRepository:
         next_results = make_next_results(next_result_1, next_result_2)
         response = make_rpc_response(request_id=uuid_, body=next_results, status=200)
 
-        bruin_repository._event_bus.rpc_request.return_value = response
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        bruin_repository._nats_client.request = AsyncMock(return_value=response_msg)
 
         with uuid_mock:
-            result = await bruin_repository.get_next_results_for_ticket_detail(ticket_id, detail_id, serial_number_1)
+            await bruin_repository.get_next_results_for_ticket_detail(ticket_id, detail_id, serial_number_1)
 
-        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "bruin.ticket.detail.get.next.results", request, timeout=15
+        bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.detail.get.next.results", to_json_bytes(request), timeout=15
         )
-        assert result == response
 
     @pytest.mark.asyncio
     async def get_next_results_for_ticket_detail_with_rpc_request_failing_test(
@@ -304,17 +312,16 @@ class TestBruinRepository:
             request_id=uuid_, ticket_id=ticket_id, detail_id=detail_id, service_number=serial_number_1
         )
 
-        bruin_repository._event_bus.rpc_request.side_effect = Exception
-        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+        bruin_repository._nats_client.request.side_effect = Exception
+        bruin_repository._notifications_repository.send_slack_message = AsyncMock()
 
         with uuid_mock:
             result = await bruin_repository.get_next_results_for_ticket_detail(ticket_id, detail_id, serial_number_1)
 
-        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "bruin.ticket.detail.get.next.results", request, timeout=15
+        bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.detail.get.next.results", to_json_bytes(request), timeout=15
         )
         bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        bruin_repository._logger.error.assert_called_once()
         assert result == nats_error_response
 
     @pytest.mark.asyncio
@@ -333,17 +340,19 @@ class TestBruinRepository:
             status=500,
         )
 
-        bruin_repository._event_bus.rpc_request.return_value = response
-        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        bruin_repository._nats_client.request = AsyncMock(return_value=response_msg)
+
+        bruin_repository._notifications_repository.send_slack_message = AsyncMock()
 
         with uuid_mock:
             result = await bruin_repository.get_next_results_for_ticket_detail(ticket_id, detail_id, serial_number_1)
 
-        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "bruin.ticket.detail.get.next.results", request, timeout=15
+        bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.detail.get.next.results", to_json_bytes(request), timeout=15
         )
         bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        bruin_repository._logger.error.assert_called_once()
         assert result == response
 
     @pytest.mark.asyncio
@@ -365,13 +374,15 @@ class TestBruinRepository:
         request = make_rpc_request(request_id=uuid_, ticket_id=ticket_id, notes=notes)
         response = make_rpc_response(request_id=uuid_, body={"ticketNotes": notes}, status=200)
 
-        bruin_repository._event_bus.rpc_request.return_value = response
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        bruin_repository._nats_client.request = AsyncMock(return_value=response_msg)
 
         with uuid_mock:
             result = await bruin_repository.append_multiple_notes_to_ticket(ticket_id, notes)
 
-        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "bruin.ticket.multiple.notes.append.request", request, timeout=15
+        bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.multiple.notes.append.request", to_json_bytes(request), timeout=15
         )
         assert result == response
 
@@ -393,17 +404,16 @@ class TestBruinRepository:
 
         request = make_rpc_request(request_id=uuid_, ticket_id=ticket_id, notes=notes)
 
-        bruin_repository._event_bus.rpc_request.side_effect = Exception
-        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+        bruin_repository._nats_client.request.side_effect = Exception
+        bruin_repository._notifications_repository.send_slack_message = AsyncMock()
 
         with uuid_mock:
             result = await bruin_repository.append_multiple_notes_to_ticket(ticket_id, notes)
 
-        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "bruin.ticket.multiple.notes.append.request", request, timeout=15
+        bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.multiple.notes.append.request", to_json_bytes(request), timeout=15
         )
         bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        bruin_repository._logger.error.assert_called_once()
         assert result == nats_error_response
 
     @pytest.mark.asyncio
@@ -429,17 +439,19 @@ class TestBruinRepository:
             status=500,
         )
 
-        bruin_repository._event_bus.rpc_request.return_value = response
-        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        bruin_repository._nats_client.request = AsyncMock(return_value=response_msg)
+
+        bruin_repository._notifications_repository.send_slack_message = AsyncMock()
 
         with uuid_mock:
             result = await bruin_repository.append_multiple_notes_to_ticket(ticket_id, notes)
 
-        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "bruin.ticket.multiple.notes.append.request", request, timeout=15
+        bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.multiple.notes.append.request", to_json_bytes(request), timeout=15
         )
         bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        bruin_repository._logger.error.assert_called_once()
         assert result == response
 
     @pytest.mark.asyncio
@@ -450,13 +462,15 @@ class TestBruinRepository:
         request = make_rpc_request(request_id=uuid_, ticket_id=ticket_id, detail_id=detail_id)
         response = make_rpc_response(request_id=uuid_, body="ok", status=200)
 
-        bruin_repository._event_bus.rpc_request.return_value = response
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        bruin_repository._nats_client.request = AsyncMock(return_value=response_msg)
 
         with uuid_mock:
             result = await bruin_repository.resolve_ticket_detail(ticket_id, detail_id)
 
-        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "bruin.ticket.status.resolve", request, timeout=15
+        bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.status.resolve", to_json_bytes(request), timeout=15
         )
         assert result == response
 
@@ -467,17 +481,16 @@ class TestBruinRepository:
 
         request = make_rpc_request(request_id=uuid_, ticket_id=ticket_id, detail_id=detail_id)
 
-        bruin_repository._event_bus.rpc_request.side_effect = Exception
-        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+        bruin_repository._nats_client.request.side_effect = Exception
+        bruin_repository._notifications_repository.send_slack_message = AsyncMock()
 
         with uuid_mock:
             result = await bruin_repository.resolve_ticket_detail(ticket_id, detail_id)
 
-        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "bruin.ticket.status.resolve", request, timeout=15
+        bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.status.resolve", to_json_bytes(request), timeout=15
         )
         bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        bruin_repository._logger.error.assert_called_once()
         assert result == nats_error_response
 
     @pytest.mark.asyncio
@@ -494,17 +507,19 @@ class TestBruinRepository:
             status=500,
         )
 
-        bruin_repository._event_bus.rpc_request.return_value = response
-        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        bruin_repository._nats_client.request = AsyncMock(return_value=response_msg)
+
+        bruin_repository._notifications_repository.send_slack_message = AsyncMock()
 
         with uuid_mock:
             result = await bruin_repository.resolve_ticket_detail(ticket_id, detail_id)
 
-        bruin_repository._event_bus.rpc_request.assert_awaited_once_with(
-            "bruin.ticket.status.resolve", request, timeout=15
+        bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.status.resolve", to_json_bytes(request), timeout=15
         )
         bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        bruin_repository._logger.error.assert_called_once()
         assert result == response
 
     @pytest.mark.asyncio
@@ -521,12 +536,16 @@ class TestBruinRepository:
         )
         response = make_rpc_response(request_id=uuid_, body="ok", status=200)
 
-        bruin_repository._event_bus.rpc_request.return_value = response
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        bruin_repository._nats_client.request = AsyncMock(return_value=response_msg)
 
         with uuid_mock:
             result = await bruin_repository.unpause_ticket_detail(ticket_id, detail_id=detail_id)
 
-        bruin_repository._event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.unpause", request, timeout=30)
+        bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.unpause", to_json_bytes(request), timeout=30
+        )
         assert result == response
 
     @pytest.mark.asyncio
@@ -543,12 +562,16 @@ class TestBruinRepository:
         )
         response = make_rpc_response(request_id=uuid_, body="ok", status=200)
 
-        bruin_repository._event_bus.rpc_request.return_value = response
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        bruin_repository._nats_client.request = AsyncMock(return_value=response_msg)
 
         with uuid_mock:
             result = await bruin_repository.unpause_ticket_detail(ticket_id, service_number=service_number)
 
-        bruin_repository._event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.unpause", request, timeout=30)
+        bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.unpause", to_json_bytes(request), timeout=30
+        )
         assert result == response
 
     @pytest.mark.asyncio
@@ -567,14 +590,18 @@ class TestBruinRepository:
         )
         response = make_rpc_response(request_id=uuid_, body="ok", status=200)
 
-        bruin_repository._event_bus.rpc_request.return_value = response
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        bruin_repository._nats_client.request = AsyncMock(return_value=response_msg)
 
         with uuid_mock:
             result = await bruin_repository.unpause_ticket_detail(
                 ticket_id, detail_id=detail_id, service_number=service_number
             )
 
-        bruin_repository._event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.unpause", request, timeout=30)
+        bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.unpause", to_json_bytes(request), timeout=30
+        )
         assert result == response
 
     @pytest.mark.asyncio
@@ -588,15 +615,16 @@ class TestBruinRepository:
             detail_id=detail_id,
         )
 
-        bruin_repository._event_bus.rpc_request.side_effect = Exception
-        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+        bruin_repository._nats_client.request.side_effect = Exception
+        bruin_repository._notifications_repository.send_slack_message = AsyncMock()
 
         with uuid_mock:
             result = await bruin_repository.unpause_ticket_detail(ticket_id, detail_id=detail_id)
 
-        bruin_repository._event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.unpause", request, timeout=30)
+        bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.unpause", to_json_bytes(request), timeout=30
+        )
         bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        bruin_repository._logger.error.assert_called_once()
         assert result == nats_error_response
 
     @pytest.mark.asyncio
@@ -617,15 +645,19 @@ class TestBruinRepository:
             status=500,
         )
 
-        bruin_repository._event_bus.rpc_request.return_value = response
-        bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        bruin_repository._nats_client.request = AsyncMock(return_value=response_msg)
+
+        bruin_repository._notifications_repository.send_slack_message = AsyncMock()
 
         with uuid_mock:
             result = await bruin_repository.unpause_ticket_detail(ticket_id, detail_id=detail_id)
 
-        bruin_repository._event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.unpause", request, timeout=30)
+        bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.unpause", to_json_bytes(request), timeout=30
+        )
         bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        bruin_repository._logger.error.assert_called_once()
         assert result == response
 
     @pytest.mark.asyncio
@@ -634,7 +666,7 @@ class TestBruinRepository:
         ticket_statuses = ["New", "InProgress", "Draft"]
         ticket_topic = "VOO"
 
-        bruin_repository.get_tickets = CoroutineMock()
+        bruin_repository.get_tickets = AsyncMock()
 
         await bruin_repository.get_outage_tickets(bruin_client_id, ticket_statuses)
 
@@ -646,7 +678,7 @@ class TestBruinRepository:
         ticket_statuses = ["New", "InProgress", "Draft"]
         ticket_topic = "VOO"
 
-        bruin_repository.get_tickets = CoroutineMock()
+        bruin_repository.get_tickets = AsyncMock()
 
         await bruin_repository.get_open_outage_tickets(bruin_client_id)
 
@@ -658,7 +690,7 @@ class TestBruinRepository:
         ticket_statuses = ["New", "InProgress", "Draft"]
         ticket_topic = "VAS"
 
-        bruin_repository.get_tickets = CoroutineMock()
+        bruin_repository.get_tickets = AsyncMock()
 
         await bruin_repository.get_affecting_tickets(bruin_client_id, ticket_statuses)
 
@@ -670,7 +702,7 @@ class TestBruinRepository:
         ticket_statuses = ["New", "InProgress", "Draft"]
         ticket_topic = "VAS"
 
-        bruin_repository.get_tickets = CoroutineMock()
+        bruin_repository.get_tickets = AsyncMock()
 
         await bruin_repository.get_open_affecting_tickets(bruin_client_id)
 

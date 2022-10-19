@@ -246,7 +246,7 @@ def make_serial_to_link_metrics_and_events_interface(make_link_status_and_metric
         make_link_status_and_metrics = defaultdict(lambda: defaultdict(dict))
 
         for serial in serials:
-            for interface in interfaces:
+            for _ in interfaces:
                 make_link_status_and_metrics_object[serial].append(make_link_metrics_and_events_object(**kwargs))
 
         return make_link_status_and_metrics
