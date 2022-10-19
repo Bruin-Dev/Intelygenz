@@ -1,14 +1,23 @@
 import logging
 from dataclasses import dataclass, field
+from typing import List
 
 from application.domain.device import Device, DeviceId
 from application.domain.errors import AutoResolutionError
 from application.domain.note import Note
 from application.domain.ticket import TicketStatus
 from application.repositories import BruinRepository, ForticloudRepository, build_note
+from application.repositories.bruin_repository_models.find_ticket import FindTicketQuery
 from application.repositories.metrics_repository import MetricsRepository
 
 log = logging.getLogger(__name__)
+
+
+@dataclass
+class AutoResolveSettings:
+    creation_user: str
+    ticket_topic: str
+    ticket_statuses: List[str]
 
 
 @dataclass
@@ -16,6 +25,7 @@ class CheckDevice:
     forticloud_repository: ForticloudRepository = field(repr=False)
     bruin_repository: BruinRepository = field(repr=False)
     metrics_repository: MetricsRepository = field(repr=False)
+    auto_resolve_settings: AutoResolveSettings
 
     async def __call__(self, device_id: DeviceId):
         log.debug(f"check_device(device_id={device_id}")
@@ -32,7 +42,13 @@ class CheckDevice:
         log.debug(f"Device {online_device.id} is online. Trying to auto-resolve corresponding task.")
 
         # Find a corresponding open ticket for the online device
-        current_ticket = await self.bruin_repository.find_open_automation_ticket_for(device_id=online_device.id)
+        query = FindTicketQuery(
+            created_by=self.auto_resolve_settings.creation_user,
+            ticket_topic=self.auto_resolve_settings.ticket_topic,
+            statuses=self.auto_resolve_settings.ticket_statuses,
+            device_id=online_device.id,
+        )
+        current_ticket = await self.bruin_repository.find_ticket(query=query)
         if not current_ticket:
             log.debug(f"Device {online_device.id} has no open ticket at the moment.")
             return

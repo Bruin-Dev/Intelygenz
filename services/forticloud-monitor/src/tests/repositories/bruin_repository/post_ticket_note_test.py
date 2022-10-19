@@ -1,11 +1,11 @@
 from http import HTTPStatus
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock
 
 import pytest
-from bruin_client import BruinClient, BruinRequest, BruinResponse
+from bruin_client import BruinRequest, BruinResponse
 
 from application.domain.note import Note
-from application.repositories import BruinRepository, UnexpectedStatusError
+from application.repositories import UnexpectedStatusError
 
 
 async def ticket_notes_are_properly_posted_test(any_bruin_repository, any_response):
@@ -43,17 +43,6 @@ async def unexpected_response_status_raise_an_exception_test(any_bruin_repositor
     # then
     with pytest.raises(UnexpectedStatusError):
         await bruin_repository.post_ticket_note(any_note)
-
-
-@pytest.fixture
-def any_bruin_repository(any_response):
-    def builder(send: AsyncMock = AsyncMock(return_value=any_response)):
-        bruin_client = Mock(BruinClient)
-        bruin_client.send = send
-
-        return BruinRepository(bruin_client)
-
-    return builder
 
 
 @pytest.fixture

@@ -1,11 +1,11 @@
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import IntEnum
 from typing import Dict
 
-from application.domain.errors import AutoResolutionError
+from application.domain.errors import ServiceNumberHasNoTaskError
 from application.domain.service_number import ServiceNumber
-from application.domain.task import TaskCycleStatus, TaskStatus, TicketTask
+from application.domain.task import TicketTask
 
 
 class TicketStatus(IntEnum):
@@ -33,40 +33,6 @@ class Ticket:
 
         if not task:
             raise ServiceNumberHasNoTaskError()
-        elif task.status == TaskStatus.RESOLVED:
-            raise ServiceNumberTaskWasAlreadyResolvedError()
-        elif task.max_auto_resolutions <= task.times_auto_resolved:
-            raise MaxTaskAutoResolutionsReachedError()
 
-        last_cycle = task.last_cycle
-        # If the task has no cycles, check the ticket date for auto resolution
-        if not last_cycle and not self.started_in_the_last(task.auto_resolution_grace_period):
-            raise AutoResolutionGracePeriodExpiredError()
-        # else, check the last cycle date for auto resolution
-        elif last_cycle and not last_cycle.started_in_the_last(task.auto_resolution_grace_period):
-            raise AutoResolutionGracePeriodExpiredError()
-
-        task.status = TaskStatus.RESOLVED
-        if last_cycle:
-            last_cycle.status = TaskCycleStatus.AUTO_RESOLVED
-
+        task.auto_resolve(ticket_creation_date=self.created_at)
         return task
-
-    def started_in_the_last(self, duration: timedelta) -> bool:
-        return self.created_at + duration >= datetime.utcnow()
-
-
-class AutoResolutionGracePeriodExpiredError(AutoResolutionError):
-    pass
-
-
-class MaxTaskAutoResolutionsReachedError(AutoResolutionError):
-    pass
-
-
-class ServiceNumberHasNoTaskError(AutoResolutionError):
-    pass
-
-
-class ServiceNumberTaskWasAlreadyResolvedError(AutoResolutionError):
-    pass

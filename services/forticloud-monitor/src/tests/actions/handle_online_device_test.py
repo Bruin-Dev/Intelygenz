@@ -2,9 +2,11 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
+from application.actions import AutoResolveSettings
 from application.domain.errors import AutoResolutionError
 from application.domain.note import Note
 from application.domain.task import TicketTask
+from application.repositories.bruin_repository_models.find_ticket import FindTicketQuery
 
 
 async def online_devices_have_no_repair_ticket_posted_test(any_check_device, any_online_device, any_device_id):
@@ -24,23 +26,32 @@ async def online_devices_have_no_repair_ticket_posted_test(any_check_device, any
 
 async def open_automation_tickets_are_properly_queried_test(any_check_online_device, any_device_id):
     # given
-    find_open_automation_ticket_for = AsyncMock(return_value=None)
-    check_device = any_check_online_device(find_open_automation_ticket_for=find_open_automation_ticket_for)
+    find_ticket = AsyncMock(return_value=None)
+    auto_resolve_settings = AutoResolveSettings(
+        creation_user="any_creation_user",
+        ticket_topic="any_ticket_topic",
+        ticket_statuses=["any_ticket_status"],
+    )
+    check_device = any_check_online_device(find_ticket=find_ticket, auto_resolve_settings=auto_resolve_settings)
 
     # when
     await check_device(any_device_id)
 
     # then
-    find_open_automation_ticket_for.assert_awaited_once_with(device_id=any_device_id)
+    find_ticket.assert_awaited_once_with(
+        query=FindTicketQuery(
+            created_by="any_creation_user",
+            ticket_topic="any_ticket_topic",
+            device_id=any_device_id,
+            statuses=["any_ticket_status"],
+        )
+    )
 
 
 async def ticketless_devices_arent_auto_resolved_test(any_check_online_device, any_device_id):
     # given
     resolve_task = AsyncMock()
-    check_device = any_check_online_device(
-        find_open_automation_ticket_for=AsyncMock(return_value=None),
-        resolve_task=resolve_task,
-    )
+    check_device = any_check_online_device(find_ticket=AsyncMock(return_value=None), resolve_task=resolve_task)
 
     # when
     await check_device(any_device_id)
@@ -53,10 +64,7 @@ async def auto_resolution_errors_are_properly_handled_test(any_check_online_devi
     # given
     resolve_task = AsyncMock()
     any_ticket.auto_resolve = Mock(side_effect=AutoResolutionError)
-    check_device = any_check_online_device(
-        find_open_automation_ticket_for=AsyncMock(return_value=any_ticket),
-        resolve_task=resolve_task,
-    )
+    check_device = any_check_online_device(find_ticket=AsyncMock(return_value=any_ticket), resolve_task=resolve_task)
 
     # when
     await check_device(any_device_id)
@@ -229,7 +237,7 @@ def any_auto_resolved_task_scenario(any_check_device, any_online_device, any_tic
         any_ticket.auto_resolve = Mock(return_value=found_ticket_task)
         return any_check_device(
             get_device=AsyncMock(return_value=any_online_device),
-            find_open_automation_ticket_for=AsyncMock(return_value=any_ticket),
+            find_ticket=AsyncMock(return_value=any_ticket),
             unpause_task=unpause_task,
             resolve_task=resolve_task,
             add_auto_resolved_task_metric=add_auto_resolved_task_metric,
@@ -240,21 +248,23 @@ def any_auto_resolved_task_scenario(any_check_device, any_online_device, any_tic
 
 
 @pytest.fixture
-def any_check_online_device(any_check_device, any_online_device, any_ticket):
+def any_check_online_device(any_check_device, any_online_device, any_ticket, any_auto_resolve_settings):
     def builder(
-        find_open_automation_ticket_for: AsyncMock = AsyncMock(return_value=any_ticket),
+        find_ticket: AsyncMock = AsyncMock(return_value=any_ticket),
         unpause_task: AsyncMock = AsyncMock(),
         resolve_task: AsyncMock = AsyncMock(),
         add_auto_resolved_task_metric: AsyncMock = AsyncMock(),
         post_ticket_note: AsyncMock = AsyncMock(),
+        auto_resolve_settings: AutoResolveSettings = any_auto_resolve_settings,
     ):
         return any_check_device(
             get_device=AsyncMock(return_value=any_online_device),
-            find_open_automation_ticket_for=find_open_automation_ticket_for,
+            find_ticket=find_ticket,
             unpause_task=unpause_task,
             resolve_task=resolve_task,
             add_auto_resolved_task_metric=add_auto_resolved_task_metric,
             post_ticket_note=post_ticket_note,
+            auto_resolve_settings=auto_resolve_settings,
         )
 
     return builder

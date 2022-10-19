@@ -97,6 +97,10 @@ BRUIN_BASE_URL = parameters["dev"]["bruin"]["base-url"]
 FORTICLOUD_CACHE__TIME_TO_REFRESH_INTERVAL = parameters["common"]["forticloud-cache"]["time-to-refresh-interval"]
 FORTICLOUD_CACHE__MONITORABLE_MANAGEMENT_STATUSES = parameters["common"]["forticloud-cache"]["monitorable-management-statuses"]
 
+# Forticloud monitor variables
+FORTICLOUD_MONITOR__TASK_AUTO_RESOLUTION_GRACE_SECONDS = parameters["common"]["forticloud-monitor"]["task-auto-resolution-grace-seconds"]
+FORTICLOUD_MONITOR__TASK_MAX_AUTO_RESOLUTIONS = parameters["common"]["forticloud-monitor"]["task-max-auto-resolutions"]
+
 # Forticloud Poller variables
 FORTICLOUD_POLLER__MONITORING_JOB_INTERVAL = parameters["common"]["forticloud-poller"]["monitoring-job-interval"]
 
@@ -485,6 +489,9 @@ env_dict = {
         f"FORTICLOUD_USERNAME={FORTICLOUD_USERNAME}",
         f"FORTICLOUD_PASSWORD={FORTICLOUD_PASSWORD}",
         f"FORTICLOUD_ACCOUNT={FORTICLOUD_ACCOUNT}",
+        f"IPA_SYSTEM_USERNAME_IN_BRUIN={IPA_SYSTEM_USERNAME_IN_BRUIN}",
+        f"TASK_AUTO_RESOLUTION_GRACE_SECONDS={FORTICLOUD_MONITOR__TASK_AUTO_RESOLUTION_GRACE_SECONDS}",
+        f"TASK_MAX_AUTO_RESOLUTIONS={FORTICLOUD_MONITOR__TASK_MAX_AUTO_RESOLUTIONS}",
     ],
     os.path.join("services", "forticloud-poller", "src", "config", "env"): [
         f"ENVIRONMENT_NAME={ENVIRONMENT_NAME}",

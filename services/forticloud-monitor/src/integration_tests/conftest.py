@@ -34,6 +34,9 @@ def config():
         forticloud_account_id="any_account_id",
         forticloud_username="any_username",
         forticloud_password="any_password",
+        task_auto_resolution_grace_seconds=3600,
+        task_max_auto_resolutions=3,
+        auto_resolve_creation_user="any_user",
     )
 
 

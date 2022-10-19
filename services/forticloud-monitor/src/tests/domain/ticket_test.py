@@ -3,14 +3,13 @@ from typing import Dict, List, Optional
 
 import pytest
 
-from application.domain.task import ServiceNumber, TaskCycle, TaskCycleStatus, TaskStatus, TicketTask
-from application.domain.ticket import (
+from application.domain.errors import (
     AutoResolutionGracePeriodExpiredError,
     MaxTaskAutoResolutionsReachedError,
-    ServiceNumberHasNoTaskError,
     ServiceNumberTaskWasAlreadyResolvedError,
-    Ticket,
 )
+from application.domain.task import ServiceNumber, TaskCycle, TaskCycleStatus, TicketTask
+from application.domain.ticket import ServiceNumberHasNoTaskError, Ticket
 
 
 def any_ticket(
@@ -26,7 +25,7 @@ def any_ticket_task(
     service_number: ServiceNumber = "any_service_number",
     auto_resolution_grace_period: timedelta = timedelta(minutes=90),
     max_auto_resolutions: int = 3,
-    status: TaskStatus = TaskStatus.ONGOING,
+    is_resolved: bool = False,
     cycles: Optional[List[TaskCycle]] = None,
 ):
     return TicketTask(
@@ -34,7 +33,7 @@ def any_ticket_task(
         service_number=service_number,
         auto_resolution_grace_period=auto_resolution_grace_period,
         max_auto_resolutions=max_auto_resolutions,
-        status=status,
+        is_resolved=is_resolved,
         cycles=cycles or [],
     )
 
@@ -69,7 +68,7 @@ def resolved_tasks_cannot_be_auto_resolved_test():
     service_number = ServiceNumber("any_service_number")
     ticket = any_ticket(
         tasks={
-            service_number: any_ticket_task(status=TaskStatus.RESOLVED),
+            service_number: any_ticket_task(is_resolved=True),
         }
     )
 
@@ -210,7 +209,7 @@ def recent_tasks_can_be_auto_resolved_test(auto_resolution_grace_period, task_cy
     auto_resolved_task = ticket.auto_resolve(service_number)
 
     # then
-    assert auto_resolved_task.status == TaskStatus.RESOLVED
+    assert auto_resolved_task.is_resolved
 
 
 #
@@ -244,7 +243,7 @@ def corner_case_task_cycles_are_properly_auto_resolved_test(
     # given
     service_number = ServiceNumber("any_service_number")
     task = any_ticket_task(
-        status=TaskStatus.ONGOING,
+        is_resolved=False,
         auto_resolution_grace_period=auto_resolution_grace_period,
         cycles=task_cycles,
     )
@@ -254,7 +253,7 @@ def corner_case_task_cycles_are_properly_auto_resolved_test(
     auto_resolved_task = ticket.auto_resolve(service_number)
 
     # then
-    assert auto_resolved_task.status == TaskStatus.RESOLVED
+    assert auto_resolved_task.is_resolved
 
 
 @pytest.mark.parametrize(
@@ -279,7 +278,7 @@ def corner_case_task_cycles_raise_a_proper_exception_test(ticket_created_at, aut
     # given
     service_number = ServiceNumber("any_service_number")
     task = any_ticket_task(
-        status=TaskStatus.ONGOING,
+        is_resolved=False,
         auto_resolution_grace_period=auto_resolution_grace_period,
         cycles=task_cycles,
     )

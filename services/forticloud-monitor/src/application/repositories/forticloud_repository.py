@@ -10,6 +10,7 @@ from pydantic import ValidationError
 from tenacity import AsyncRetrying, retry_if_exception_type, stop_after_attempt, wait_chain, wait_random
 
 from application.domain.device import Device, DeviceId, DeviceStatus, DeviceType
+from application.domain.task import REOPEN_HEADER, TRIAGE_HEADER
 from application.repositories import UnexpectedResponseError, UnexpectedStatusError
 from application.repositories.errors import UnknownStatusError
 from application.repositories.forticloud_repository_models.get_device import (
@@ -19,11 +20,6 @@ from application.repositories.forticloud_repository_models.get_device import (
 )
 
 log = logging.getLogger(__name__)
-
-TRIAGE_HEADER = ["#*MetTel's IPA*#", "Forticloud triage.", ""]
-REOPEN_HEADER = ["#*MetTel's IPA*#", "Re-opening ticket.", ""]
-DEVICE_UP_EVENT = "Event: Device Up"
-DEVICE_DOWN_EVENT = "Event: Device Down"
 
 DEFAULT_RETRY_CONFIG = dict(
     reraise=True,

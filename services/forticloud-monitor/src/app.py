@@ -16,6 +16,7 @@ from application.actions import CheckDevice
 from application.clients import NatsClient
 from application.consumers import ApConsumer, SwitchConsumer
 from application.repositories import BruinRepository, ForticloudRepository
+from application.repositories.metrics_repository import MetricsRepository
 from config.config import Config
 from health_server import HealthServer
 
@@ -67,10 +68,16 @@ class Application:
         log.info("==> NATS connected")
 
         # Repositories
-        bruin_repository = BruinRepository(self.bruin_client)
+        bruin_repository = BruinRepository(self.bruin_client, config.ticket_task_settings)
         forticloud_repository = ForticloudRepository(self.forticloud_client)
+        metrics_repository = MetricsRepository()
         # Actions
-        check_device = CheckDevice(forticloud_repository, bruin_repository)
+        check_device = CheckDevice(
+            forticloud_repository,
+            bruin_repository,
+            metrics_repository,
+            config.auto_resolve_settings,
+        )
         # Consumers
         await self.nats_client.add(ApConsumer(config.ap_consumer_settings, check_device))
         await self.nats_client.add(SwitchConsumer(config.switch_consumer_settings, check_device))

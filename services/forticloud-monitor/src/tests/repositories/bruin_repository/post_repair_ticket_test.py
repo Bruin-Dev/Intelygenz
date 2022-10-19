@@ -1,12 +1,12 @@
 from http import HTTPStatus
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock
 
 import pytest
-from bruin_client import BruinClient, BruinRequest, BruinResponse
+from bruin_client import BruinRequest, BruinResponse
 from pydantic import ValidationError
 
 from application.domain.ticket import CreatedTicket, TicketStatus
-from application.repositories import BruinRepository, UnexpectedResponseError, UnexpectedStatusError
+from application.repositories import UnexpectedResponseError, UnexpectedStatusError
 
 
 async def repair_tickets_are_properly_posted_test(any_bruin_repository, any_response, any_device_id):
@@ -160,17 +160,6 @@ async def unexpected_responses_raise_an_exception_test(any_bruin_repository, any
     # then
     with pytest.raises(UnexpectedResponseError):
         await bruin_repository.post_repair_ticket(any_device_id)
-
-
-@pytest.fixture
-def any_bruin_repository(any_response):
-    def builder(send: AsyncMock = AsyncMock(return_value=any_response)):
-        bruin_client = Mock(BruinClient)
-        bruin_client.send = send
-
-        return BruinRepository(bruin_client)
-
-    return builder
 
 
 @pytest.fixture

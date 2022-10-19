@@ -5,7 +5,7 @@ import pytest
 from application.domain.device import Device, DeviceId, DeviceStatus, DeviceType
 from application.domain.note import Note
 from application.domain.service_number import ServiceNumber
-from application.domain.task import TaskStatus, TicketTask
+from application.domain.task import TicketTask
 from application.domain.ticket import CreatedTicket, Ticket, TicketStatus
 
 
@@ -64,7 +64,7 @@ def any_task():
         service_number=ServiceNumber("any_service_number"),
         auto_resolution_grace_period=timedelta(minutes=90),
         max_auto_resolutions=3,
-        status=TaskStatus.ONGOING,
+        is_resolved=True,
         cycles=[],
     )
 

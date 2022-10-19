@@ -1,4 +1,5 @@
-from typing import Optional
+from datetime import timedelta
+from typing import List, Optional
 
 from bruin_client import BruinCredentials
 from framework.logging.formatters import Papertrail as PapertrailFormatter
@@ -7,8 +8,10 @@ from framework.logging.handlers import Papertrail as PapertrailHandler
 from framework.logging.handlers import Stdout as StdoutHandler
 from pydantic import BaseSettings, Field
 
+from application.actions import AutoResolveSettings
 from application.clients import NatsSettings
 from application.consumers import ConsumerSettings
+from application.repositories import TaskSettings
 
 
 class Config(BaseSettings):
@@ -30,6 +33,11 @@ class Config(BaseSettings):
     forticloud_account_id: str = Field(..., env="FORTICLOUD_ACCOUNT")
     forticloud_username: str = Field(..., env="FORTICLOUD_USERNAME")
     forticloud_password: str = Field(..., env="FORTICLOUD_PASSWORD")
+    task_auto_resolution_grace_seconds: int = Field(..., env="TASK_AUTO_RESOLUTION_GRACE_SECONDS")
+    task_max_auto_resolutions: int = Field(..., env="TASK_MAX_AUTO_RESOLUTIONS")
+    auto_resolve_creation_user: str = Field(..., env="IPA_SYSTEM_USERNAME_IN_BRUIN")
+    auto_resolve_ticket_topic: str = "VOO"
+    auto_resolve_ticket_statuses: List[str] = ["New", "In Progress", "Draft"]
     ap_consumer_queue: str = "forticloud-monitor.aps"
     ap_consumer_subject: str = "forticloud.aps"
     switch_consumer_queue: str = "forticloud-monitor.switches"
@@ -63,6 +71,21 @@ class Config(BaseSettings):
     @property
     def nats_settings(self) -> NatsSettings:
         return NatsSettings(servers=[self.nats_server])
+
+    @property
+    def ticket_task_settings(self) -> TaskSettings:
+        return TaskSettings(
+            auto_resolution_grace_period=timedelta(seconds=self.task_auto_resolution_grace_seconds),
+            max_auto_resolutions=self.task_max_auto_resolutions,
+        )
+
+    @property
+    def auto_resolve_settings(self) -> AutoResolveSettings:
+        return AutoResolveSettings(
+            creation_user=self.auto_resolve_creation_user,
+            ticket_topic=self.auto_resolve_ticket_topic,
+            ticket_statuses=self.auto_resolve_ticket_statuses,
+        )
 
     @property
     def is_papertrail_active(self) -> bool:
