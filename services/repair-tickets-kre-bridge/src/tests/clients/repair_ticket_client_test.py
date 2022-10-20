@@ -1,14 +1,15 @@
 import json
-from unittest.mock import Mock, call, patch
+from unittest import mock
+from unittest.mock import AsyncMock, Mock, patch
 
 import grpc
 import pytest
+from google.protobuf.json_format import Parse
+
 from application.clients.generated_grpc import public_input_pb2 as pb2
 from application.clients.generated_grpc import public_input_pb2_grpc as pb2_grpc
 from application.clients.repair_ticket_client import RepairTicketClient
-from asynctest import CoroutineMock
 from config import testconfig
-from google.protobuf.json_format import Parse
 
 
 class TestRepairTicketClient:
@@ -42,12 +43,10 @@ class TestRepairTicketClient:
         return grpc_e
 
     def instance_test(self):
-        logger = Mock()
         config = Mock()
 
-        kre_client = RepairTicketClient(logger, config)
+        kre_client = RepairTicketClient(config)
 
-        assert kre_client._logger is logger
         assert kre_client._config is config
 
     @pytest.mark.asyncio
@@ -59,12 +58,11 @@ class TestRepairTicketClient:
         inference_response_data = valid_inference_response["body"]
         mock_stub_prediction_response = self.__data_to_grpc_message(inference_response_data, pb2.PredictionResponse())
 
-        logger = Mock()
         stub = Mock()
 
-        stub.GetPrediction = CoroutineMock(return_value=mock_stub_prediction_response)
+        stub.GetPrediction = AsyncMock(return_value=mock_stub_prediction_response)
 
-        kre_client = RepairTicketClient(logger, testconfig)
+        kre_client = RepairTicketClient(testconfig)
 
         with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
             inference_response = await kre_client.get_email_inference(valid_inference_request)
@@ -79,10 +77,9 @@ class TestRepairTicketClient:
     async def get_email_inference_grpc_exception_test(
         self, grpc_code, grpc_detail, expected_status, valid_inference_request
     ):
-        logger = Mock()
 
         stub = Mock()
-        stub.GetPrediction = CoroutineMock()
+        stub.GetPrediction = AsyncMock()
         stub.GetPrediction.side_effect = self.__mock_grpc_exception(grpc_code, grpc_detail)
 
         exp_prediction_response = {
@@ -90,22 +87,22 @@ class TestRepairTicketClient:
             "status": expected_status,
         }
 
-        kre_client = RepairTicketClient(logger, testconfig)
+        kre_client = RepairTicketClient(testconfig)
 
-        with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
-            prediction_response = await kre_client.get_email_inference(valid_inference_request)
+        with mock.patch("application.clients.repair_ticket_client.logger") as logger:
+            with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
+                prediction_response = await kre_client.get_email_inference(valid_inference_request)
 
-        assert logger.info.call_count == 0
-        assert logger.error.call_count == 1
-        assert prediction_response == exp_prediction_response
+                assert logger.info.call_count == 0
+                assert logger.error.call_count == 1
+                assert prediction_response == exp_prediction_response
 
     @pytest.mark.asyncio
     async def get_email_inference_exception_test(self, valid_inference_request):
         raised_error = "Error current exception test"
-        logger = Mock()
 
         stub = Mock()
-        stub.GetPrediction = CoroutineMock()
+        stub.GetPrediction = AsyncMock()
         stub.GetPrediction.side_effect = Exception(raised_error)
 
         exp_prediction_response = {
@@ -113,14 +110,15 @@ class TestRepairTicketClient:
             "status": 500,
         }
 
-        kre_client = RepairTicketClient(logger, testconfig)
+        kre_client = RepairTicketClient(testconfig)
 
-        with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
-            prediction_response = await kre_client.get_email_inference(valid_inference_request)
+        with mock.patch("application.clients.repair_ticket_client.logger") as logger:
+            with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
+                prediction_response = await kre_client.get_email_inference(valid_inference_request)
 
-        assert logger.info.call_count == 0
-        assert logger.error.call_count == 1
-        assert prediction_response == exp_prediction_response
+                assert logger.info.call_count == 0
+                assert logger.error.call_count == 1
+                assert prediction_response == exp_prediction_response
 
     @pytest.mark.asyncio
     async def save_outputs_200_test(self, valid_output_response, valid_output_request):
@@ -128,12 +126,10 @@ class TestRepairTicketClient:
             valid_output_response["body"], pb2.SaveOutputsResponse()
         )
 
-        logger = Mock()
-
         stub = Mock()
-        stub.SaveOutputs = CoroutineMock(return_value=mock_stub_save_outputs_response)
+        stub.SaveOutputs = AsyncMock(return_value=mock_stub_save_outputs_response)
 
-        kre_client = RepairTicketClient(logger, testconfig)
+        kre_client = RepairTicketClient(testconfig)
 
         with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
             save_outputs_response = await kre_client.save_outputs(valid_output_request)
@@ -148,10 +144,9 @@ class TestRepairTicketClient:
     async def save_outputs_grpc_exception_errors_test(
         self, grpc_code, grpc_detail, expected_status, valid_output_request
     ):
-        logger = Mock()
 
         stub = Mock()
-        stub.SaveOutputs = CoroutineMock()
+        stub.SaveOutputs = AsyncMock()
         stub.SaveOutputs.side_effect = self.__mock_grpc_exception(grpc_code, grpc_detail)
 
         exp_save_outputs_response = {
@@ -159,22 +154,22 @@ class TestRepairTicketClient:
             "status": expected_status,
         }
 
-        kre_client = RepairTicketClient(logger, testconfig)
+        kre_client = RepairTicketClient(testconfig)
 
-        with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
-            save_outputs_response = await kre_client.save_outputs(valid_output_request)
+        with mock.patch("application.clients.repair_ticket_client.logger") as logger:
+            with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
+                save_outputs_response = await kre_client.save_outputs(valid_output_request)
 
-        assert logger.info.call_count == 0
-        assert logger.error.call_count == 1
-        assert save_outputs_response == exp_save_outputs_response
+                assert logger.info.call_count == 0
+                assert logger.error.call_count == 1
+                assert save_outputs_response == exp_save_outputs_response
 
     @pytest.mark.asyncio
     async def save_outputs_exception_test(self, valid_output_request):
         raised_error = "Error current exception test"
-        logger = Mock()
 
         stub = Mock()
-        stub.SaveOutputs = CoroutineMock()
+        stub.SaveOutputs = AsyncMock()
         stub.SaveOutputs.side_effect = Exception(raised_error)
 
         exp_save_output_response = {
@@ -182,16 +177,17 @@ class TestRepairTicketClient:
             "status": 500,
         }
 
-        kre_client = RepairTicketClient(logger, testconfig)
+        kre_client = RepairTicketClient(testconfig)
 
-        with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
-            save_outputs_response = await kre_client.save_outputs(
-                valid_output_request,
-            )
+        with mock.patch("application.clients.repair_ticket_client.logger") as logger:
+            with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
+                save_outputs_response = await kre_client.save_outputs(
+                    valid_output_request,
+                )
 
-        assert logger.info.call_count == 0
-        assert logger.error.call_count == 1
-        assert save_outputs_response == exp_save_output_response
+                assert logger.info.call_count == 0
+                assert logger.error.call_count == 1
+                assert save_outputs_response == exp_save_output_response
 
     @pytest.mark.asyncio
     async def save_created_ticket_feedback_200_test(
@@ -203,12 +199,10 @@ class TestRepairTicketClient:
             valid_created_ticket_response["body"], pb2.SaveCreatedTicketsFeedbackResponse()
         )
 
-        logger = Mock()
-
         stub = Mock()
-        stub.SaveCreatedTicketsFeedback = CoroutineMock(return_value=mock_stub_save_create_tickets_feedback_response)
+        stub.SaveCreatedTicketsFeedback = AsyncMock(return_value=mock_stub_save_create_tickets_feedback_response)
 
-        kre_client = RepairTicketClient(logger, testconfig)
+        kre_client = RepairTicketClient(testconfig)
 
         with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
             saved_created_ticket_response = await kre_client.save_created_ticket_feedback(valid_created_ticket_request)
@@ -224,10 +218,9 @@ class TestRepairTicketClient:
     async def save_created_ticket_grpc_feedback_exception_test(
         self, grpc_code, grpc_detail, expected_status, valid_created_ticket_request
     ):
-        logger = Mock()
 
         stub = Mock()
-        stub.SaveCreatedTicketsFeedback = CoroutineMock()
+        stub.SaveCreatedTicketsFeedback = AsyncMock()
         stub.SaveCreatedTicketsFeedback.side_effect = self.__mock_grpc_exception(grpc_code, grpc_detail)
 
         exp_save_created_ticket_response = {
@@ -235,22 +228,24 @@ class TestRepairTicketClient:
             "status": expected_status,
         }
 
-        kre_client = RepairTicketClient(logger, testconfig)
+        kre_client = RepairTicketClient(testconfig)
 
-        with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
-            save_created_ticket_response = await kre_client.save_created_ticket_feedback(valid_created_ticket_request)
+        with mock.patch("application.clients.repair_ticket_client.logger") as logger:
+            with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
+                save_created_ticket_response = await kre_client.save_created_ticket_feedback(
+                    valid_created_ticket_request
+                )
 
-        assert logger.info.call_count == 0
-        assert logger.error.call_count == 1
-        assert save_created_ticket_response == exp_save_created_ticket_response
+                assert logger.info.call_count == 0
+                assert logger.error.call_count == 1
+                assert save_created_ticket_response == exp_save_created_ticket_response
 
     @pytest.mark.asyncio
     async def save_created_ticket_feedback_non_2xx_test(self, valid_created_ticket_request):
         raised_error = "Error current exception test"
-        logger = Mock()
 
         stub = Mock()
-        stub.SaveCreatedTicketsFeedback = CoroutineMock()
+        stub.SaveCreatedTicketsFeedback = AsyncMock()
         stub.SaveCreatedTicketsFeedback.side_effect = Exception(raised_error)
 
         exp_save_created_ticket_response = {
@@ -258,16 +253,17 @@ class TestRepairTicketClient:
             "status": 500,
         }
 
-        kre_client = RepairTicketClient(logger, testconfig)
+        kre_client = RepairTicketClient(testconfig)
 
-        with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
-            save_created_ticket_response = await kre_client.save_created_ticket_feedback(
-                valid_created_ticket_request,
-            )
+        with mock.patch("application.clients.repair_ticket_client.logger") as logger:
+            with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
+                save_created_ticket_response = await kre_client.save_created_ticket_feedback(
+                    valid_created_ticket_request,
+                )
 
-        assert logger.info.call_count == 0
-        assert logger.error.call_count == 1
-        assert save_created_ticket_response == exp_save_created_ticket_response
+                assert logger.info.call_count == 0
+                assert logger.error.call_count == 1
+                assert save_created_ticket_response == exp_save_created_ticket_response
 
     @pytest.mark.asyncio
     async def save_closed_ticket_feedback_200_cancelled_test(
@@ -279,11 +275,10 @@ class TestRepairTicketClient:
             valid_closed_ticket_response["body"], pb2.SaveClosedTicketsFeedbackResponse()
         )
 
-        logger = Mock()
         stub = Mock()
-        stub.SaveClosedTicketsFeedback = CoroutineMock(return_value=mock_stub_save_closed_tickets_feedback_response)
+        stub.SaveClosedTicketsFeedback = AsyncMock(return_value=mock_stub_save_closed_tickets_feedback_response)
 
-        kre_client = RepairTicketClient(logger, testconfig)
+        kre_client = RepairTicketClient(testconfig)
 
         with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
             saved_closed_ticket_response = await kre_client.save_closed_ticket_feedback(
@@ -306,11 +301,10 @@ class TestRepairTicketClient:
             valid_closed_ticket_response["body"], pb2.SaveClosedTicketsFeedbackResponse()
         )
 
-        logger = Mock()
         stub = Mock()
-        stub.SaveClosedTicketsFeedback = CoroutineMock(return_value=mock_stub_save_closed_tickets_feedback_response)
+        stub.SaveClosedTicketsFeedback = AsyncMock(return_value=mock_stub_save_closed_tickets_feedback_response)
 
-        kre_client = RepairTicketClient(logger, testconfig)
+        kre_client = RepairTicketClient(testconfig)
 
         with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
             saved_closed_ticket_response = await kre_client.save_closed_ticket_feedback(
@@ -326,10 +320,9 @@ class TestRepairTicketClient:
     @pytest.mark.asyncio
     async def save_closed_ticket_feedback_exception_test(self, valid_closed_ticket_request__resolved):
         raised_error = "Error current exception test"
-        logger = Mock()
 
         stub = Mock()
-        stub.SaveClosedTicketsFeedback = CoroutineMock()
+        stub.SaveClosedTicketsFeedback = AsyncMock()
         stub.SaveClosedTicketsFeedback.side_effect = Exception(raised_error)
 
         exp_save_closed_ticket_response = {
@@ -337,26 +330,26 @@ class TestRepairTicketClient:
             "status": 500,
         }
 
-        kre_client = RepairTicketClient(logger, testconfig)
+        kre_client = RepairTicketClient(testconfig)
 
-        with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
-            save_closed_ticket_response = await kre_client.save_closed_ticket_feedback(
-                valid_closed_ticket_request__resolved,
-            )
+        with mock.patch("application.clients.repair_ticket_client.logger") as logger:
+            with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
+                save_closed_ticket_response = await kre_client.save_closed_ticket_feedback(
+                    valid_closed_ticket_request__resolved,
+                )
 
-        assert logger.info.call_count == 0
-        assert logger.error.call_count == 1
-        assert save_closed_ticket_response == exp_save_closed_ticket_response
+                assert logger.info.call_count == 0
+                assert logger.error.call_count == 1
+                assert save_closed_ticket_response == exp_save_closed_ticket_response
 
     @pytest.mark.parametrize("grpc_code, grpc_detail, expected_status", grpc_errors_cases, ids=grpc_errors_cases_ids)
     @pytest.mark.asyncio
     async def save_closed_ticket_grpc_feedback_exception_test(
         self, grpc_code, grpc_detail, expected_status, valid_closed_ticket_request__cancelled
     ):
-        logger = Mock()
 
         stub = Mock()
-        stub.SaveClosedTicketsFeedback = CoroutineMock()
+        stub.SaveClosedTicketsFeedback = AsyncMock()
         stub.SaveClosedTicketsFeedback.side_effect = self.__mock_grpc_exception(grpc_code, grpc_detail)
 
         exp_save_closed_ticket_response = {
@@ -364,13 +357,14 @@ class TestRepairTicketClient:
             "status": expected_status,
         }
 
-        kre_client = RepairTicketClient(logger, testconfig)
+        kre_client = RepairTicketClient(testconfig)
 
-        with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
-            save_closed_ticket_response = await kre_client.save_closed_ticket_feedback(
-                valid_closed_ticket_request__cancelled
-            )
+        with mock.patch("application.clients.repair_ticket_client.logger") as logger:
+            with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
+                save_closed_ticket_response = await kre_client.save_closed_ticket_feedback(
+                    valid_closed_ticket_request__cancelled
+                )
 
-        assert logger.info.call_count == 0
-        assert logger.error.call_count == 1
-        assert save_closed_ticket_response == exp_save_closed_ticket_response
+                assert logger.info.call_count == 0
+                assert logger.error.call_count == 1
+                assert save_closed_ticket_response == exp_save_closed_ticket_response

@@ -1,6 +1,7 @@
 from typing import Any, Dict
 
 import pytest
+
 from tests.fixtures.email import *
 from tests.fixtures.rta import *
 
@@ -19,8 +20,8 @@ def valid_inference_response(make_inference_data) -> Dict[str, Any]:
     potential_service_numbers = ["1234"]
     body = make_inference_data(potential_service_numbers=potential_service_numbers, predicted_class="VOO")
     return {
-        "status": 200,
         "body": body,
+        "status": 200,
     }
 
 
@@ -48,7 +49,7 @@ def valid_output_request(make_save_outputs_request_payload, make_rta_ticket_payl
 @pytest.fixture
 def valid_output_response():
     payload = {"success": True}
-    return {"status": 200, "body": payload}
+    return {"body": payload, "status": 200}
 
 
 @pytest.fixture
@@ -67,7 +68,7 @@ def valid_created_ticket_request(make_created_ticket_request_payload):
 @pytest.fixture
 def valid_created_ticket_response():
     payload = {"success": True}
-    return {"status": 200, "body": payload}
+    return {"body": payload, "status": 200}
 
 
 @pytest.fixture
@@ -88,4 +89,4 @@ def valid_closed_ticket_request__resolved(make_closed_ticket_request_payload):
 @pytest.fixture
 def valid_closed_ticket_response():
     payload = {"success": True}
-    return {"status": 200, "body": payload}
+    return {"body": payload, "status": 200}

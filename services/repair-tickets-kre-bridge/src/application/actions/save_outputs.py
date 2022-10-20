@@ -1,37 +1,37 @@
 import json
+import logging
+
+from nats.aio.msg import Msg
+
+from application.repositories.utils_repository import to_json_bytes
+
+logger = logging.getLogger(__name__)
 
 
 class SaveOutputs:
-    def __init__(self, logger, config, event_bus, repository):
-        self._config = config
-        self._logger = logger
-        self._event_bus = event_bus
+    def __init__(self, repository):
         self._kre_repository = repository
 
-    async def save_outputs(self, msg: dict):
-        """Call KRE workflow to store validationa and ticket creation outputs.
+    async def __call__(self, msg: Msg):
+        payload = json.loads(msg.data)
 
-        Args:
-            msg (dict): The request.
-        """
-        request_id = msg["request_id"]
-        response_topic = msg["response_topic"]
+        request_id = payload["request_id"]
         response = {"request_id": request_id, "body": None, "status": None}
 
-        msg_body = msg.get("body")
-        if not msg_body:
-            self._logger.error(f"Cannot post automation outputs using {json.dumps(msg)}. JSON malformed")
+        payload = payload.get("body")
+        if not payload:
+            logger.error(f"Cannot post automation outputs using {json.dumps(payload)}. JSON malformed")
             response["body"] = "You must specify body in the request"
             response["status"] = 400
-            await self._event_bus.publish_message(response_topic, response)
+            await msg.respond(to_json_bytes(response))
             return
 
-        post_outputs_response = await self._kre_repository.save_outputs(msg_body)
+        post_outputs_response = await self._kre_repository.save_outputs(payload)
         response = {
-            "request_id": msg["request_id"],
+            "request_id": request_id,
             "body": post_outputs_response["body"],
             "status": post_outputs_response["status"],
         }
 
-        await self._event_bus.publish_message(msg["response_topic"], response)
-        self._logger.info(f'Save outputs response for email {msg_body["email_id"]} published in event bus!')
+        await msg.respond(to_json_bytes(response))
+        logger.info(f'Save outputs response for email {payload["email_id"]} published in event bus!')

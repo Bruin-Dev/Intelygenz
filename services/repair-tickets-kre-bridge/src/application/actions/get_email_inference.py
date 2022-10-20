@@ -1,39 +1,39 @@
 import json
+import logging
+
+from nats.aio.msg import Msg
+
+from application.repositories.utils_repository import to_json_bytes
+
+logger = logging.getLogger(__name__)
 
 
 class GetInference:
-    def __init__(self, logger, config, event_bus, repository):
-        self._config = config
-        self._logger = logger
-        self._event_bus = event_bus
+    def __init__(self, repository):
         self._kre_repository = repository
 
-    async def get_inference(self, msg: dict):
-        """Get the email inference from the KRE process and publish it.
+    async def __call__(self, msg: Msg):
+        payload = json.loads(msg.data)
 
-        Args:
-            msg (dict): The request.
-        """
+        request_id = payload["request_id"]
         response = {
-            "request_id": msg["request_id"],
+            "request_id": request_id,
             "body": None,
             "status": None,
         }
 
-        response_topic = msg["response_topic"]
-
-        msg_body = msg.get("body", {})
-        email_id = msg_body.get("email_id")
-        if not msg_body or not email_id:
-            self._logger.error(f"Cannot get inference using {json.dumps(msg)}. JSON malformed")
+        payload = payload.get("body")
+        email_id = payload.get("email_id")
+        if not payload or not email_id:
+            logger.error(f"Cannot get inference using {json.dumps(payload)}. JSON malformed")
             response["body"] = 'You must specify {.."body": { "email_id", "subject", ...}} in the request'
             response["status"] = 400
-            await self._event_bus.publish_message(response_topic, response)
+            await msg.respond(to_json_bytes(response))
             return
 
-        inference = await self._kre_repository.get_email_inference(msg_body)
+        inference = await self._kre_repository.get_email_inference(payload)
         response["body"] = inference["body"]
         response["status"] = inference["status"]
 
-        await self._event_bus.publish_message(msg["response_topic"], response)
-        self._logger.info(f"Inference for email {email_id} published in event bus!")
+        await msg.respond(to_json_bytes(response))
+        logger.info(f"Inference for email {email_id} published in event bus!")
