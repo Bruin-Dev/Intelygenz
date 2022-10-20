@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from unittest.mock import Mock, call, patch
 
 import pytest
-from application import REMINDER_NOTE_REGEX, REOPEN_NOTE_REGEX, ChangeTicketSeverityStatus, ForwardQueues, Outages
+from application import REMINDER_NOTE_REGEX, REOPEN_NOTE_REGEX, ForwardQueues, Outages
 from application.actions import outage_monitoring as outage_monitoring_module
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
@@ -6433,9 +6433,7 @@ class TestServiceOutageMonitor:
         outage_monitor._reopen_outage_ticket = CoroutineMock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._check_for_failed_digi_reboot = CoroutineMock()
-        outage_monitor._change_ticket_severity = CoroutineMock(
-            return_value=ChangeTicketSeverityStatus.CHANGED_TO_LINK_DOWN_SEVERITY
-        )
+        outage_monitor._change_ticket_severity = CoroutineMock()
         outage_monitor._should_forward_to_hnoc = Mock(return_value=True)
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
@@ -6683,9 +6681,7 @@ class TestServiceOutageMonitor:
         outage_monitor._reopen_outage_ticket = CoroutineMock()
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._check_for_failed_digi_reboot = CoroutineMock()
-        outage_monitor._change_ticket_severity = CoroutineMock(
-            return_value=ChangeTicketSeverityStatus.CHANGED_TO_LINK_DOWN_SEVERITY
-        )
+        outage_monitor._change_ticket_severity = CoroutineMock()
         outage_monitor._should_forward_to_hnoc = Mock(return_value=False)
         outage_monitor._send_reminder = CoroutineMock()
         outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
@@ -6708,242 +6704,6 @@ class TestServiceOutageMonitor:
         outage_monitor._append_reminder_note.assert_not_awaited()
         outage_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._send_reminder.assert_awaited()
-        outage_monitor._check_for_failed_digi_reboot.assert_awaited_once_with(
-            ticket_id,
-            logical_id_list,
-            edge_primary_serial,
-            links_grouped_by_primary_edge_with_ha_info,
-            client_name,
-            outage_type,
-            target_severity,
-            has_faulty_digi_link,
-            has_faulty_byob_link,
-            faulty_link_types,
-        )
-        outage_monitor._attempt_forward_to_asr.assert_awaited_once_with(
-            cached_edge_primary,
-            links_grouped_by_primary_edge_with_ha_info,
-            ticket_id,
-            client_name,
-            outage_type,
-            target_severity,
-            has_faulty_digi_link,
-            has_faulty_byob_link,
-            faulty_link_types,
-        )
-        outage_monitor._reopen_outage_ticket.assert_not_awaited()
-        outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
-
-    @pytest.mark.asyncio
-    async def recheck_edges_with_edges_still_in_same_outage_state_and_ticket_creation_return_409_unchanged_test(
-        self, outage_monitor
-    ):
-        outage_type = Outages.LINK_DOWN  # We can use whatever outage type
-        target_severity = outage_monitor._config.MONITOR_CONFIG["severity_by_outage_type"]["edge_down"]
-        has_faulty_digi_link = False
-        has_faulty_byob_link = False
-        faulty_link_types = []
-
-        edge_primary_serial = "VC1234567"
-        edge_standby_serial = "VC5678901"
-        edge_primary_initial_state = "OFFLINE"
-        edge_standby_initial_state_normalized = "OFFLINE"
-        edge_primary_new_state = "OFFLINE"
-        edge_standby_new_state_raw = "FAILED"
-        edge_standby_new_state_normalized = "OFFLINE"
-        velocloud_host = "mettel.velocloud.net"
-        enterprise_id = 1
-        edge_id = 1
-        edge_full_id = {"host": velocloud_host, "enterprise_id": enterprise_id, "edge_id": edge_id}
-        logical_id_list = [{"interface_name": "REX", "logical_id": "123"}]
-        links_configuration = []
-
-        client_id = 9994
-        client_name = "METTEL/NEW YORK"
-        bruin_client_info = {
-            "client_id": client_id,
-            "client_name": client_name,
-        }
-        cached_edge_primary = {
-            "edge": edge_full_id,
-            "last_contact": "2020-08-17T02:23:59",
-            "serial_number": edge_primary_serial,
-            "ha_serial_number": edge_standby_serial,
-            "bruin_client_info": bruin_client_info,
-            "logical_ids": logical_id_list,
-            "links_configuration": links_configuration,
-        }
-        cached_edge_standby = {
-            "edge": edge_full_id,
-            "last_contact": "2020-08-17T02:23:59",
-            "serial_number": edge_standby_serial,
-            "ha_serial_number": edge_primary_serial,
-            "bruin_client_info": bruin_client_info,
-            "logical_ids": logical_id_list,
-            "links_configuration": links_configuration,
-        }
-        edge_link_1_info = {
-            # Some fields omitted for simplicity
-            "interface": "REX",
-            "linkState": "STABLE",
-            "linkId": 5293,
-        }
-        edge_primary_info = {
-            # Some fields omitted for simplicity
-            "host": velocloud_host,
-            "enterpriseId": enterprise_id,
-            "edgeName": "Big Boss",
-            "edgeState": edge_primary_initial_state,
-            "edgeId": edge_id,
-            "edgeSerialNumber": edge_primary_serial,
-            "edgeHASerialNumber": edge_standby_serial,
-            "edgeHAState": edge_standby_initial_state_normalized,
-            "edgeIsHAPrimary": True,
-        }
-        edge_with_links_primary = {
-            **edge_primary_info,
-            "links": [
-                edge_link_1_info,
-            ],
-        }
-        edge_primary_full_info = {
-            "cached_info": cached_edge_primary,
-            "status": edge_with_links_primary,
-        }
-        outage_edges = [
-            edge_primary_full_info,
-        ]
-        edge_primary_network_enterprises = {
-            # Some fields omitted for simplicity
-            "edgeState": edge_primary_new_state,
-            "enterpriseId": enterprise_id,
-            "haSerialNumber": edge_standby_serial,
-            "haState": edge_standby_new_state_raw,
-            "id": edge_id,
-            "name": "Big Boss",
-            "serialNumber": edge_primary_serial,
-        }
-        edges_network_enterprises = [
-            edge_primary_network_enterprises,
-        ]
-        network_enterprises_response = {
-            "body": edges_network_enterprises,
-            "status": 200,
-        }
-        new_links_with_primary_edge_info = {
-            # Some fields omitted for simplicity
-            "host": velocloud_host,
-            "enterpriseId": enterprise_id,
-            "edgeName": "Big Boss",
-            "edgeState": edge_primary_new_state,
-            "edgeId": edge_id,
-            "edgeSerialNumber": edge_primary_serial,
-            "edgeHASerialNumber": edge_standby_serial,
-            **edge_link_1_info,
-        }
-        new_links_with_edge_info = [
-            new_links_with_primary_edge_info,
-        ]
-        links_with_edge_info_response = {
-            "body": new_links_with_edge_info,
-            "status": 200,
-        }
-        new_links_grouped_by_primary_edge = {
-            # Some fields omitted for simplicity
-            "host": velocloud_host,
-            "enterpriseId": enterprise_id,
-            "edgeName": "Big Boss",
-            "edgeState": edge_primary_new_state,
-            "edgeId": edge_id,
-            "edgeSerialNumber": edge_primary_serial,
-            "edgeHASerialNumber": edge_standby_serial,
-            "links": [edge_link_1_info],
-        }
-        new_links_grouped_by_edge = [
-            new_links_grouped_by_primary_edge,
-        ]
-        links_grouped_by_primary_edge_with_ha_info = {
-            **new_links_grouped_by_primary_edge,
-            "edgeHAState": edge_standby_new_state_normalized,
-            "edgeIsHAPrimary": True,
-        }
-        links_grouped_by_standby_edge_with_ha_info = {
-            **new_links_grouped_by_primary_edge,
-            "edgeSerialNumber": edge_standby_serial,
-            "edgeState": edge_standby_new_state_normalized,
-            "edgeHASerialNumber": edge_primary_serial,
-            "edgeHAState": edge_primary_new_state,
-            "edgeIsHAPrimary": False,
-        }
-        links_grouped_by_primary_edges_with_ha_info = [
-            links_grouped_by_primary_edge_with_ha_info,
-        ]
-        all_links_grouped_by_edge_with_ha_info = [
-            links_grouped_by_primary_edge_with_ha_info,
-            links_grouped_by_standby_edge_with_ha_info,
-        ]
-        new_primary_edge_full_info = {
-            "cached_info": cached_edge_primary,
-            "status": links_grouped_by_primary_edge_with_ha_info,
-        }
-        new_standby_edge_full_info = {
-            "cached_info": cached_edge_standby,
-            "status": links_grouped_by_standby_edge_with_ha_info,
-        }
-        new_edges_full_info = [
-            new_primary_edge_full_info,
-            new_standby_edge_full_info,
-        ]
-        edges_in_same_outage_state = [new_primary_edge_full_info]
-        ticket_id = 12345
-        ticket_creation_response = {
-            "request_id": uuid_,
-            "body": ticket_id,
-            "status": 409,
-        }
-        outage_monitor._velocloud_repository.get_links_with_edge_info = CoroutineMock(
-            return_value=links_with_edge_info_response
-        )
-        outage_monitor._velocloud_repository.get_network_enterprises = CoroutineMock(
-            return_value=network_enterprises_response
-        )
-        outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
-        outage_monitor._bruin_repository.create_outage_ticket = CoroutineMock(return_value=ticket_creation_response)
-        outage_monitor._bruin_repository.send_initial_email_milestone_notification = CoroutineMock()
-        outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
-        outage_monitor._outage_repository.is_edge_up = Mock(return_value=False)
-        outage_monitor._ha_repository.map_edges_with_ha_info = Mock(
-            return_value=links_grouped_by_primary_edges_with_ha_info
-        )
-        outage_monitor._ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(
-            return_value=all_links_grouped_by_edge_with_ha_info
-        )
-        outage_monitor._notifications_repository.send_slack_message = CoroutineMock()
-        outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=new_edges_full_info)
-        outage_monitor._reopen_outage_ticket = CoroutineMock()
-        outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
-        outage_monitor._check_for_failed_digi_reboot = CoroutineMock()
-        outage_monitor._change_ticket_severity = CoroutineMock(return_value=ChangeTicketSeverityStatus.NOT_CHANGED)
-        outage_monitor._should_forward_to_hnoc = Mock(return_value=True)
-        outage_monitor._has_faulty_digi_link = Mock(return_value=has_faulty_digi_link)
-        outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
-        outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
-        outage_monitor._schedule_forward_to_hnoc_queue = Mock()
-        outage_monitor._attempt_forward_to_asr = CoroutineMock()
-
-        with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
-            await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
-
-        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
-        outage_monitor._change_ticket_severity.assert_awaited_once_with(
-            ticket_id=ticket_id,
-            edge_status=links_grouped_by_primary_edge_with_ha_info,
-            target_severity=target_severity,
-            check_ticket_tasks=True,
-        )
-        outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
-        outage_monitor._append_reminder_note.assert_not_awaited()
-        outage_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._check_for_failed_digi_reboot.assert_awaited_once_with(
             ticket_id,
             logical_id_list,
@@ -11572,11 +11332,8 @@ class TestServiceOutageMonitor:
         outage_monitor._is_ticket_already_in_severity_level = Mock(return_value=False)
 
         # check_ticket_tasks is irrelevant for edge outages, so it's safe to set it to False
-        severity_return = await outage_monitor._change_ticket_severity(
-            ticket_id, edge_status, target_severity, check_ticket_tasks=False
-        )
+        await outage_monitor._change_ticket_severity(ticket_id, edge_status, target_severity, check_ticket_tasks=False)
 
-        assert severity_return == ChangeTicketSeverityStatus.CHANGED_TO_EDGE_DOWN_SEVERITY
         outage_monitor._bruin_repository.get_ticket.assert_awaited_once_with(ticket_id)
         outage_monitor._is_ticket_already_in_severity_level.assert_called_once_with(ticket_info, target_severity)
         outage_monitor._bruin_repository.change_ticket_severity_for_offline_edge.assert_awaited_once_with(ticket_id)
@@ -11612,11 +11369,8 @@ class TestServiceOutageMonitor:
         outage_monitor._is_ticket_already_in_severity_level = Mock(return_value=False)
 
         # check_ticket_tasks is irrelevant for edge outages, so it's safe to set it to False
-        severity_return = await outage_monitor._change_ticket_severity(
-            ticket_id, edge_status, target_severity, check_ticket_tasks=False
-        )
+        await outage_monitor._change_ticket_severity(ticket_id, edge_status, target_severity, check_ticket_tasks=False)
 
-        assert severity_return == ChangeTicketSeverityStatus.NOT_CHANGED
         outage_monitor._bruin_repository.get_ticket.assert_awaited_once_with(ticket_id)
         outage_monitor._is_ticket_already_in_severity_level.assert_called_once_with(ticket_info, target_severity)
         outage_monitor._bruin_repository.change_ticket_severity_for_offline_edge.assert_awaited_once_with(ticket_id)
@@ -11680,11 +11434,8 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._is_ticket_already_in_severity_level = Mock(return_value=False)
 
-        severity_return = await outage_monitor._change_ticket_severity(
-            ticket_id, edge_status, target_severity, check_ticket_tasks=False
-        )
+        await outage_monitor._change_ticket_severity(ticket_id, edge_status, target_severity, check_ticket_tasks=False)
 
-        assert severity_return == ChangeTicketSeverityStatus.CHANGED_TO_LINK_DOWN_SEVERITY
         outage_monitor._bruin_repository.get_ticket.assert_awaited_once_with(ticket_id)
         outage_monitor._is_ticket_already_in_severity_level.assert_called_once_with(ticket_info, target_severity)
         outage_monitor._bruin_repository.change_ticket_severity_for_disconnected_links.assert_awaited_once_with(
@@ -11769,11 +11520,8 @@ class TestServiceOutageMonitor:
         outage_monitor._has_ticket_multiple_unresolved_tasks = Mock(return_value=False)
         outage_monitor._is_ticket_already_in_severity_level = Mock(return_value=False)
 
-        severity_return = await outage_monitor._change_ticket_severity(
-            ticket_id, edge_status, target_severity, check_ticket_tasks=True
-        )
+        await outage_monitor._change_ticket_severity(ticket_id, edge_status, target_severity, check_ticket_tasks=True)
 
-        assert severity_return == ChangeTicketSeverityStatus.CHANGED_TO_LINK_DOWN_SEVERITY
         outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         outage_monitor._has_ticket_multiple_unresolved_tasks.assert_called_once_with(ticket_tasks)
         outage_monitor._bruin_repository.get_ticket.assert_awaited_once_with(ticket_id)
@@ -11853,11 +11601,8 @@ class TestServiceOutageMonitor:
         outage_monitor._has_ticket_multiple_unresolved_tasks = Mock(return_value=True)
         outage_monitor._is_ticket_already_in_severity_level = Mock()
 
-        severity_return = await outage_monitor._change_ticket_severity(
-            ticket_id, edge_status, target_severity, check_ticket_tasks=True
-        )
+        await outage_monitor._change_ticket_severity(ticket_id, edge_status, target_severity, check_ticket_tasks=True)
 
-        assert severity_return == ChangeTicketSeverityStatus.NOT_CHANGED
         outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         outage_monitor._has_ticket_multiple_unresolved_tasks.assert_called_once_with(ticket_tasks)
         outage_monitor._bruin_repository.get_ticket.assert_not_awaited()
@@ -11918,11 +11663,8 @@ class TestServiceOutageMonitor:
         outage_monitor._has_ticket_multiple_unresolved_tasks = Mock(return_value=True)
         outage_monitor._is_ticket_already_in_severity_level = Mock()
 
-        severity_return = await outage_monitor._change_ticket_severity(
-            ticket_id, edge_status, target_severity, check_ticket_tasks=True
-        )
+        await outage_monitor._change_ticket_severity(ticket_id, edge_status, target_severity, check_ticket_tasks=True)
 
-        assert severity_return == ChangeTicketSeverityStatus.NOT_CHANGED
         outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         outage_monitor._has_ticket_multiple_unresolved_tasks.assert_not_called()
         outage_monitor._bruin_repository.get_ticket.assert_not_awaited()
@@ -11951,11 +11693,8 @@ class TestServiceOutageMonitor:
         outage_monitor._bruin_repository.change_ticket_severity_for_offline_edge = CoroutineMock()
         outage_monitor._is_ticket_already_in_severity_level = Mock()
 
-        severity_return = await outage_monitor._change_ticket_severity(
-            ticket_id, edge_status, target_severity, check_ticket_tasks=False
-        )
+        await outage_monitor._change_ticket_severity(ticket_id, edge_status, target_severity, check_ticket_tasks=False)
 
-        assert severity_return == ChangeTicketSeverityStatus.NOT_CHANGED
         outage_monitor._bruin_repository.get_ticket.assert_awaited_once_with(ticket_id)
         outage_monitor._is_ticket_already_in_severity_level.assert_not_called()
         outage_monitor._bruin_repository.change_ticket_severity_for_offline_edge.assert_not_awaited()
@@ -11987,11 +11726,8 @@ class TestServiceOutageMonitor:
         outage_monitor._bruin_repository.change_ticket_severity_for_offline_edge = CoroutineMock()
         outage_monitor._is_ticket_already_in_severity_level = Mock(return_value=True)
 
-        severity_return = await outage_monitor._change_ticket_severity(
-            ticket_id, edge_status, target_severity, check_ticket_tasks=False
-        )
+        await outage_monitor._change_ticket_severity(ticket_id, edge_status, target_severity, check_ticket_tasks=False)
 
-        assert severity_return == ChangeTicketSeverityStatus.NOT_CHANGED
         outage_monitor._bruin_repository.get_ticket.assert_awaited_once_with(ticket_id)
         outage_monitor._is_ticket_already_in_severity_level.assert_called_once_with(ticket_info, target_severity)
         outage_monitor._bruin_repository.change_ticket_severity_for_offline_edge.assert_not_awaited()

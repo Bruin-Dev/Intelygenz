@@ -17,12 +17,6 @@ class ForwardQueues(Enum):
     WIRELESS = "Wireless Repair Intervention Needed"
 
 
-class ChangeTicketSeverityStatus(Enum):
-    CHANGED_TO_LINK_DOWN_SEVERITY = auto()
-    CHANGED_TO_EDGE_DOWN_SEVERITY = auto()
-    NOT_CHANGED = auto()
-
-
 TRIAGE_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nTriage \(VeloCloud\)")
 REOPEN_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nRe-opening")
 AUTORESOLVE_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nAuto-resolving detail for serial")

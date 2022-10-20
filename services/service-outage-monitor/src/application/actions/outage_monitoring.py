@@ -16,7 +16,6 @@ from application import (
     REMINDER_NOTE_REGEX,
     REOPEN_NOTE_REGEX,
     TRIAGE_NOTE_REGEX,
-    ChangeTicketSeverityStatus,
     ForwardQueues,
     Outages,
 )
@@ -1095,7 +1094,7 @@ class OutageMonitor:
 
     async def _change_ticket_severity(
         self, ticket_id: int, edge_status: dict, target_severity: int, *, check_ticket_tasks: bool
-    ) -> ChangeTicketSeverityStatus:
+    ):
         self._logger.info(f"Attempting to change severity level of ticket {ticket_id}...")
 
         serial_number = edge_status["edgeSerialNumber"]
@@ -1114,7 +1113,7 @@ class OutageMonitor:
                         f"Bad response calling get ticket details for ticket id: {ticket_id}. "
                         f"The ticket severity won't change"
                     )
-                    return ChangeTicketSeverityStatus.NOT_CHANGED
+                    return
 
                 ticket_tasks = ticket_details_response["body"]["ticketDetails"]
                 if self._has_ticket_multiple_unresolved_tasks(ticket_tasks):
@@ -1123,7 +1122,7 @@ class OutageMonitor:
                         f"issue is that at least one link of edge {serial_number} is disconnected, and this ticket "
                         f"has multiple unresolved tasks."
                     )
-                    return ChangeTicketSeverityStatus.NOT_CHANGED
+                    return
 
             self._logger.info(
                 f"Severity level of ticket {ticket_id} is about to be changed, as the root cause of the outage issue "
@@ -1143,7 +1142,7 @@ class OutageMonitor:
                 f"Bad response calling get ticket for ticket id: {ticket_id}. The ticket severity won't change!"
             )
             change_severity_task.close()
-            return ChangeTicketSeverityStatus.NOT_CHANGED
+            return
 
         ticket_info = get_ticket_response["body"]
         if self._is_ticket_already_in_severity_level(ticket_info, target_severity):
@@ -1152,20 +1151,14 @@ class OutageMonitor:
                 "to change it."
             )
             change_severity_task.close()
-            return ChangeTicketSeverityStatus.NOT_CHANGED
+            return
 
         result = await change_severity_task
         if result["status"] not in range(200, 300):
             self._logger.warning(f"Bad response for change severity task. The ticket severity don't change")
-            return ChangeTicketSeverityStatus.NOT_CHANGED
-
-        if target_severity == self._config.MONITOR_CONFIG["severity_by_outage_type"]["link_down"]:
-            change_severity_status = ChangeTicketSeverityStatus.CHANGED_TO_LINK_DOWN_SEVERITY
-        else:
-            change_severity_status = ChangeTicketSeverityStatus.CHANGED_TO_EDGE_DOWN_SEVERITY
+            return
 
         self._logger.info(f"Finished changing severity level of ticket {ticket_id} to {target_severity}!")
-        return change_severity_status
 
     def _has_ticket_multiple_unresolved_tasks(self, ticket_tasks: list) -> bool:
         unresolved_tasks = [task for task in ticket_tasks if not self._is_detail_resolved(task)]
@@ -1453,38 +1446,38 @@ class OutageMonitor:
                     f"progress (ID = {ticket_id}). Skipping outage ticket creation for "
                     "this edge..."
                 )
-                change_severity_result = await self._change_ticket_severity(
+                await self._change_ticket_severity(
                     ticket_id=ticket_id,
                     edge_status=edge_status,
                     target_severity=target_severity,
                     check_ticket_tasks=True,
                 )
 
-                if change_severity_result is not ChangeTicketSeverityStatus.NOT_CHANGED:
-                    if self._should_forward_to_hnoc(edge_links, is_edge_down):
-                        forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, edge)
-                        self._schedule_forward_to_hnoc_queue(
-                            forward_time,
-                            ticket_id,
-                            serial_number,
-                            client_name,
-                            outage_type,
-                            target_severity,
-                            has_faulty_digi_link,
-                            has_faulty_byob_link,
-                            faulty_link_types,
-                        )
-                    else:
-                        self._logger.info(
-                            f"Ticket_id: {ticket_id} for serial: {serial_number} "
-                            f"with link_data: {edge_links} has a blacklisted link and "
-                            f"should not be forwarded to HNOC. Skipping forward to HNOC..."
-                        )
-                        ticket_details = await self._bruin_repository.get_ticket_details(ticket_id)
-                        ticket_notes = ticket_details["body"]["ticketNotes"]
-                        await self._send_reminder(
-                            ticket_id=ticket_id, service_number=serial_number, ticket_notes=ticket_notes
-                        )
+                if self._should_forward_to_hnoc(edge_links, is_edge_down):
+                    forward_time = self._get_hnoc_forward_time_by_outage_type(outage_type, edge)
+                    self._schedule_forward_to_hnoc_queue(
+                        forward_time,
+                        ticket_id,
+                        serial_number,
+                        client_name,
+                        outage_type,
+                        target_severity,
+                        has_faulty_digi_link,
+                        has_faulty_byob_link,
+                        faulty_link_types,
+                    )
+                else:
+                    self._logger.info(
+                        f"Ticket_id: {ticket_id} for serial: {serial_number} "
+                        f"with link_data: {edge_links} has a blacklisted link and "
+                        f"should not be forwarded to HNOC. Skipping forward to HNOC..."
+                    )
+                    ticket_details = await self._bruin_repository.get_ticket_details(ticket_id)
+                    ticket_notes = ticket_details["body"]["ticketNotes"]
+                    await self._send_reminder(
+                        ticket_id=ticket_id, service_number=serial_number, ticket_notes=ticket_notes
+                    )
+
                 await self._check_for_failed_digi_reboot(
                     ticket_id,
                     logical_id_list,
