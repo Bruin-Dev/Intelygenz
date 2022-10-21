@@ -1,13 +1,14 @@
-from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from nats.aio.msg import Msg
+from shortuuid import uuid
+
 from application.repositories import nats_error_response
 from application.repositories import t7_repository as t7_repository_module
 from application.repositories.t7_repository import T7Repository
-from asynctest import CoroutineMock
+from application.repositories.utils_repository import to_json_bytes
 from config import testconfig
-from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(t7_repository_module, "uuid", return_value=uuid_)
@@ -15,15 +16,13 @@ uuid_mock = patch.object(t7_repository_module, "uuid", return_value=uuid_)
 
 class TestT7Repository:
     def instance_test(self):
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         config = testconfig
         notifications_repository = Mock()
 
-        t7_repository = T7Repository(event_bus, logger, config, notifications_repository)
+        t7_repository = T7Repository(nats_client, config, notifications_repository)
 
-        assert t7_repository._event_bus is event_bus
-        assert t7_repository._logger is logger
+        assert t7_repository._nats_client is nats_client
         assert t7_repository._config is config
         assert t7_repository._notifications_repository is notifications_repository
 
@@ -50,23 +49,24 @@ class TestT7Repository:
             "status": 200,
         }
 
-        logger = Mock()
         config = testconfig
         notifications_repository = Mock()
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        nats_client = Mock()
+        nats_client.request = AsyncMock(return_value=response_msg)
 
-        t7_repository = T7Repository(event_bus, logger, config, notifications_repository)
+        t7_repository = T7Repository(nats_client, config, notifications_repository)
 
         with uuid_mock:
             result = await t7_repository.post_metrics(ticket_id, ticket_row)
 
-        event_bus.rpc_request.assert_awaited_once_with("t7.automation.metrics", request, timeout=60)
+        nats_client.request.assert_awaited_once_with("t7.automation.metrics", to_json_bytes(request), timeout=60)
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_closed_tickets_with_rpc_request_failing_test(self):
+    async def get_closed_tickets_with_request_failing_test(self):
         ticket_id = 12345
 
         ticket_row = [
@@ -83,27 +83,25 @@ class TestT7Repository:
             "body": {"ticket_id": ticket_id, "ticket_rows": ticket_row},
         }
 
-        logger = Mock()
         config = testconfig
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=Exception)
+        nats_client = Mock()
+        nats_client.request = AsyncMock(side_effect=Exception)
 
         notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
-        t7_repository = T7Repository(event_bus, logger, config, notifications_repository)
+        t7_repository = T7Repository(nats_client, config, notifications_repository)
 
         with uuid_mock:
             result = await t7_repository.post_metrics(ticket_id, ticket_row)
 
-        event_bus.rpc_request.assert_awaited_once_with("t7.automation.metrics", request, timeout=60)
+        nats_client.request.assert_awaited_once_with("t7.automation.metrics", to_json_bytes(request), timeout=60)
         notifications_repository.send_slack_message.assert_awaited_once()
-        logger.error.assert_called_once()
         assert result == nats_error_response
 
     @pytest.mark.asyncio
-    async def get_closed_tickets_with_rpc_request_returning_non_2xx_status_test(self):
+    async def get_closed_tickets_with_request_returning_non_2xx_status_test(self):
         ticket_id = 12345
 
         ticket_row = [
@@ -126,23 +124,23 @@ class TestT7Repository:
             "status": 500,
         }
 
-        logger = Mock()
         config = testconfig
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        nats_client = Mock()
+        nats_client.request = AsyncMock(return_value=response_msg)
 
         notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
-        t7_repository = T7Repository(event_bus, logger, config, notifications_repository)
+        t7_repository = T7Repository(nats_client, config, notifications_repository)
 
         with uuid_mock:
             result = await t7_repository.post_metrics(ticket_id, ticket_row)
 
-        event_bus.rpc_request.assert_awaited_once_with("t7.automation.metrics", request, timeout=60)
+        nats_client.request.assert_awaited_once_with("t7.automation.metrics", to_json_bytes(request), timeout=60)
         notifications_repository.send_slack_message.assert_awaited_once()
-        logger.error.assert_called_once()
         assert result == response
 
     def tnba_note_in_task_history_return_true_test(self):
@@ -174,12 +172,11 @@ class TestT7Repository:
                 "Ticket Status": "Resolved",
             }
         ]
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         config = testconfig
         notifications_repository = Mock()
 
-        t7_repository = T7Repository(event_bus, logger, config, notifications_repository)
+        t7_repository = T7Repository(nats_client, config, notifications_repository)
         tnba_exists = t7_repository.tnba_note_in_task_history(task_history)
         assert tnba_exists is True
 
@@ -212,11 +209,10 @@ class TestT7Repository:
                 "Ticket Status": "Resolved",
             }
         ]
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         config = testconfig
         notifications_repository = Mock()
 
-        t7_repository = T7Repository(event_bus, logger, config, notifications_repository)
+        t7_repository = T7Repository(nats_client, config, notifications_repository)
         tnba_exists = t7_repository.tnba_note_in_task_history(task_history)
         assert tnba_exists is False

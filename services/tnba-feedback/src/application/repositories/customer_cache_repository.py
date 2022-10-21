@@ -1,11 +1,17 @@
-from application.repositories import nats_error_response
+import json
+import logging
+
 from shortuuid import uuid
+
+from application.repositories import nats_error_response
+from application.repositories.utils_repository import to_json_bytes
+
+logger = logging.getLogger(__name__)
 
 
 class CustomerCacheRepository:
-    def __init__(self, event_bus, logger, config, notifications_repository):
-        self._event_bus = event_bus
-        self._logger = logger
+    def __init__(self, nats_client, config, notifications_repository):
+        self._nats_client = nats_client
         self._config = config
         self._notifications_repository = notifications_repository
 
@@ -24,10 +30,11 @@ class CustomerCacheRepository:
 
         try:
             if filter_:
-                self._logger.info(f"Getting customer cache for Velocloud host(s) {', '.join(filter_.keys())}...")
+                logger.info(f"Getting customer cache for Velocloud host(s) {', '.join(filter_.keys())}...")
             else:
-                self._logger.info(f"Getting customer cache for all Velocloud hosts...")
-            response = await self._event_bus.rpc_request("customer.cache.get", request, timeout=60)
+                logger.info(f"Getting customer cache for all Velocloud hosts...")
+            response = await self._nats_client.request("customer.cache.get", to_json_bytes(request), timeout=60)
+            response = json.loads(response.data)
         except Exception as e:
             err_msg = f"An error occurred when requesting customer cache -> {e}"
             response = nats_error_response
@@ -39,12 +46,12 @@ class CustomerCacheRepository:
                 err_msg = response_body
             else:
                 if filter_:
-                    self._logger.info(f"Got customer cache for Velocloud host(s) {', '.join(filter_.keys())}!")
+                    logger.info(f"Got customer cache for Velocloud host(s) {', '.join(filter_.keys())}!")
                 else:
-                    self._logger.info(f"Got customer cache for all Velocloud hosts!")
+                    logger.info(f"Got customer cache for all Velocloud hosts!")
 
         if err_msg:
-            self._logger.error(err_msg)
+            logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response

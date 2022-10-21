@@ -1,20 +1,19 @@
 from datetime import datetime
-from unittest.mock import Mock, call, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from application.actions import tnba_feedback_action as tnba_feedback_action_module
-from application.actions.tnba_feedback_action import TNBAFeedback
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
-from asynctest import CoroutineMock
-from config import testconfig
 from shortuuid import uuid
+
+from application.actions import tnba_feedback_action as tnba_feedback_action_module
+from application.actions.tnba_feedback_action import TNBAFeedback
+from config import testconfig
 
 
 class TestTNBAMonitor:
     def instance_test(self):
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         scheduler = Mock()
         config = testconfig
         t7_repository = Mock()
@@ -24,8 +23,7 @@ class TestTNBAMonitor:
         redis_client = Mock()
 
         tnba_feedback = TNBAFeedback(
-            event_bus,
-            logger,
+            nats_client,
             scheduler,
             config,
             t7_repository,
@@ -35,8 +33,7 @@ class TestTNBAMonitor:
             redis_client,
         )
 
-        assert tnba_feedback._event_bus == event_bus
-        assert tnba_feedback._logger == logger
+        assert tnba_feedback._nats_client == nats_client
         assert tnba_feedback._scheduler == scheduler
         assert tnba_feedback._config == config
         assert tnba_feedback._t7_repository == t7_repository
@@ -47,8 +44,7 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def start_tnba_automated_process_with_exec_on_start_test(self):
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         scheduler = Mock()
         config = testconfig
         t7_repository = Mock()
@@ -58,8 +54,7 @@ class TestTNBAMonitor:
         redis_client = Mock()
 
         tnba_feedback = TNBAFeedback(
-            event_bus,
-            logger,
+            nats_client,
             scheduler,
             config,
             t7_repository,
@@ -87,8 +82,7 @@ class TestTNBAMonitor:
 
     @pytest.mark.asyncio
     async def start_tnba_automated_process_with_exec_on_start_test(self):
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         scheduler = Mock()
         config = testconfig
         t7_repository = Mock()
@@ -98,8 +92,7 @@ class TestTNBAMonitor:
         redis_client = Mock()
 
         tnba_feedback = TNBAFeedback(
-            event_bus,
-            logger,
+            nats_client,
             scheduler,
             config,
             t7_repository,
@@ -130,8 +123,7 @@ class TestTNBAMonitor:
         job_id = "some-duplicated-id"
         exception_instance = ConflictingIdError(job_id)
 
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
 
         scheduler = Mock()
         scheduler.add_job = Mock(side_effect=exception_instance)
@@ -144,8 +136,7 @@ class TestTNBAMonitor:
         redis_client = Mock()
 
         tnba_feedback = TNBAFeedback(
-            event_bus,
-            logger,
+            nats_client,
             scheduler,
             config,
             t7_repository,
@@ -171,8 +162,7 @@ class TestTNBAMonitor:
     async def run_ticket_polling_test(self):
         ticket_ids_list = [456789, 432568, 43124]
 
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         scheduler = Mock()
         config = testconfig
         t7_repository = Mock()
@@ -182,8 +172,7 @@ class TestTNBAMonitor:
         redis_client = Mock()
 
         tnba_feedback = TNBAFeedback(
-            event_bus,
-            logger,
+            nats_client,
             scheduler,
             config,
             t7_repository,
@@ -193,8 +182,8 @@ class TestTNBAMonitor:
             redis_client,
         )
 
-        tnba_feedback._get_all_closed_tickets_for_monitored_companies = CoroutineMock(return_value=ticket_ids_list)
-        tnba_feedback._send_ticket_task_history_to_t7 = CoroutineMock()
+        tnba_feedback._get_all_closed_tickets_for_monitored_companies = AsyncMock(return_value=ticket_ids_list)
+        tnba_feedback._send_ticket_task_history_to_t7 = AsyncMock()
 
         await tnba_feedback._run_tickets_polling()
 
@@ -222,8 +211,7 @@ class TestTNBAMonitor:
             "status": 200,
         }
 
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         scheduler = Mock()
         config = testconfig
         t7_repository = Mock()
@@ -231,13 +219,12 @@ class TestTNBAMonitor:
         notifications_repository = Mock()
 
         customer_cache_repository = Mock()
-        customer_cache_repository.get_cache_for_feedback_process = CoroutineMock(return_value=customer_cache_response)
+        customer_cache_repository.get_cache_for_feedback_process = AsyncMock(return_value=customer_cache_response)
 
         redis_client = Mock()
 
         tnba_feedback = TNBAFeedback(
-            event_bus,
-            logger,
+            nats_client,
             scheduler,
             config,
             t7_repository,
@@ -247,7 +234,7 @@ class TestTNBAMonitor:
             redis_client,
         )
 
-        tnba_feedback._get_closed_tickets_by_client_id = CoroutineMock()
+        tnba_feedback._get_closed_tickets_by_client_id = AsyncMock()
 
         await tnba_feedback._get_all_closed_tickets_for_monitored_companies()
         customer_cache_repository.get_cache_for_feedback_process.assert_awaited_once()
@@ -269,8 +256,7 @@ class TestTNBAMonitor:
             "body": [{"clientID": client_id, "ticketID": affecting_ticket_id}],
             "status": 200,
         }
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         scheduler = Mock()
         config = testconfig
         t7_repository = Mock()
@@ -278,14 +264,13 @@ class TestTNBAMonitor:
         notifications_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_outage_tickets = CoroutineMock(return_value=closed_outage_ticket_response)
-        bruin_repository.get_affecting_tickets = CoroutineMock(return_value=closed_affecting_ticket_response)
+        bruin_repository.get_outage_tickets = AsyncMock(return_value=closed_outage_ticket_response)
+        bruin_repository.get_affecting_tickets = AsyncMock(return_value=closed_affecting_ticket_response)
 
         redis_client = Mock()
 
         tnba_feedback = TNBAFeedback(
-            event_bus,
-            logger,
+            nats_client,
             scheduler,
             config,
             t7_repository,
@@ -307,8 +292,7 @@ class TestTNBAMonitor:
         client_id = 8594
         closed_outage_ticket_response = {"request_id": uuid(), "body": "Error", "status": 400}
         closed_affecting_ticket_response = {"request_id": uuid(), "body": "Error", "status": 400}
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         scheduler = Mock()
         config = testconfig
         t7_repository = Mock()
@@ -316,14 +300,13 @@ class TestTNBAMonitor:
         notifications_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_outage_tickets = CoroutineMock(return_value=closed_outage_ticket_response)
-        bruin_repository.get_affecting_tickets = CoroutineMock(return_value=closed_affecting_ticket_response)
+        bruin_repository.get_outage_tickets = AsyncMock(return_value=closed_outage_ticket_response)
+        bruin_repository.get_affecting_tickets = AsyncMock(return_value=closed_affecting_ticket_response)
 
         redis_client = Mock()
 
         tnba_feedback = TNBAFeedback(
-            event_bus,
-            logger,
+            nats_client,
             scheduler,
             config,
             t7_repository,
@@ -343,10 +326,8 @@ class TestTNBAMonitor:
     async def get_closed_tickets_by_client_id_exception_test(self):
         closed_ticket_ids = []
         client_id = 8594
-        closed_outage_ticket_response = {"request_id": uuid(), "body": "Error", "status": 400}
         closed_affecting_ticket_response = {"request_id": uuid(), "body": "Error", "status": 400}
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         scheduler = Mock()
         config = testconfig
         t7_repository = Mock()
@@ -354,14 +335,13 @@ class TestTNBAMonitor:
         notifications_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_outage_tickets = CoroutineMock(side_effect=Exception)
-        bruin_repository.get_affecting_tickets = CoroutineMock(return_value=closed_affecting_ticket_response)
+        bruin_repository.get_outage_tickets = AsyncMock(side_effect=Exception)
+        bruin_repository.get_affecting_tickets = AsyncMock(return_value=closed_affecting_ticket_response)
 
         redis_client = Mock()
 
         tnba_feedback = TNBAFeedback(
-            event_bus,
-            logger,
+            nats_client,
             scheduler,
             config,
             t7_repository,
@@ -411,27 +391,25 @@ class TestTNBAMonitor:
         ]
 
         task_history_response = {"request_id": uuid(), "body": task_history, "status": 200}
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         scheduler = Mock()
         config = testconfig
         customer_cache_repository = Mock()
         notifications_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=task_history_response)
+        bruin_repository.get_ticket_task_history = AsyncMock(return_value=task_history_response)
 
         t7_repository = Mock()
         t7_repository.tnba_note_in_task_history = Mock(return_value=True)
-        t7_repository.post_metrics = CoroutineMock(return_value=dict(body="", status=200))
+        t7_repository.post_metrics = AsyncMock(return_value=dict(body="", status=200))
 
         redis_client = Mock()
         redis_client.get = Mock(return_value=None)
         redis_client.set = Mock()
 
         tnba_feedback = TNBAFeedback(
-            event_bus,
-            logger,
+            nats_client,
             scheduler,
             config,
             t7_repository,
@@ -482,27 +460,25 @@ class TestTNBAMonitor:
         ]
 
         task_history_response = {"request_id": uuid(), "body": task_history, "status": 200}
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         scheduler = Mock()
         config = testconfig
         customer_cache_repository = Mock()
         notifications_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=task_history_response)
+        bruin_repository.get_ticket_task_history = AsyncMock(return_value=task_history_response)
 
         t7_repository = Mock()
         t7_repository.tnba_note_in_task_history = Mock(return_value=True)
-        t7_repository.post_metrics = CoroutineMock(return_value=dict(body="", status=200))
+        t7_repository.post_metrics = AsyncMock(return_value=dict(body="", status=200))
 
         redis_client = Mock()
         redis_client.get = Mock(return_value="")
         redis_client.set = Mock()
 
         tnba_feedback = TNBAFeedback(
-            event_bus,
-            logger,
+            nats_client,
             scheduler,
             config,
             t7_repository,
@@ -553,27 +529,25 @@ class TestTNBAMonitor:
         ]
 
         task_history_response = {"request_id": uuid(), "body": task_history, "status": 200}
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         scheduler = Mock()
         config = testconfig
         customer_cache_repository = Mock()
         notifications_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=task_history_response)
+        bruin_repository.get_ticket_task_history = AsyncMock(return_value=task_history_response)
 
         t7_repository = Mock()
         t7_repository.tnba_note_in_task_history = Mock(return_value=True)
-        t7_repository.post_metrics = CoroutineMock(return_value=dict(body="", status=400))
+        t7_repository.post_metrics = AsyncMock(return_value=dict(body="", status=400))
 
         redis_client = Mock()
         redis_client.get = Mock(return_value=None)
         redis_client.set = Mock()
 
         tnba_feedback = TNBAFeedback(
-            event_bus,
-            logger,
+            nats_client,
             scheduler,
             config,
             t7_repository,
@@ -595,25 +569,23 @@ class TestTNBAMonitor:
         ticket_id = 123
 
         task_history_response = {"request_id": uuid(), "body": "Failed", "status": 400}
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         scheduler = Mock()
         config = testconfig
         customer_cache_repository = Mock()
         notifications_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=task_history_response)
+        bruin_repository.get_ticket_task_history = AsyncMock(return_value=task_history_response)
 
         t7_repository = Mock()
         t7_repository.tnba_note_in_task_history = Mock(return_value=True)
-        t7_repository.post_metrics = CoroutineMock()
+        t7_repository.post_metrics = AsyncMock()
 
         redis_client = Mock()
 
         tnba_feedback = TNBAFeedback(
-            event_bus,
-            logger,
+            nats_client,
             scheduler,
             config,
             t7_repository,
@@ -663,25 +635,23 @@ class TestTNBAMonitor:
         ]
 
         task_history_response = {"request_id": uuid(), "body": task_history, "status": 200}
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         scheduler = Mock()
         config = testconfig
         customer_cache_repository = Mock()
         notifications_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=task_history_response)
+        bruin_repository.get_ticket_task_history = AsyncMock(return_value=task_history_response)
 
         t7_repository = Mock()
         t7_repository.tnba_note_in_task_history = Mock(return_value=False)
-        t7_repository.post_metrics = CoroutineMock()
+        t7_repository.post_metrics = AsyncMock()
 
         redis_client = Mock()
 
         tnba_feedback = TNBAFeedback(
-            event_bus,
-            logger,
+            nats_client,
             scheduler,
             config,
             t7_repository,
@@ -730,26 +700,24 @@ class TestTNBAMonitor:
         ]
 
         task_history_response = {"request_id": uuid(), "body": task_history, "status": 200}
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         scheduler = Mock()
         config = testconfig
         customer_cache_repository = Mock()
         notifications_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=task_history_response)
+        bruin_repository.get_ticket_task_history = AsyncMock(return_value=task_history_response)
 
         t7_repository = Mock()
-        t7_repository.post_metrics = CoroutineMock()
+        t7_repository.post_metrics = AsyncMock()
 
         redis_client = Mock()
         redis_client.get = Mock(return_value=None)
         redis_client.set = Mock()
 
         tnba_feedback = TNBAFeedback(
-            event_bus,
-            logger,
+            nats_client,
             scheduler,
             config,
             t7_repository,
@@ -768,25 +736,23 @@ class TestTNBAMonitor:
     async def send_ticket_task_history_to_t7_exception_test(self):
         ticket_id = 123
 
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         scheduler = Mock()
         config = testconfig
         customer_cache_repository = Mock()
         notifications_repository = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_task_history = CoroutineMock(side_effect=Exception)
+        bruin_repository.get_ticket_task_history = AsyncMock(side_effect=Exception)
 
         t7_repository = Mock()
         t7_repository.tnba_note_in_task_history = Mock(return_value=False)
-        t7_repository.post_metrics = CoroutineMock()
+        t7_repository.post_metrics = AsyncMock()
 
         redis_client = Mock()
 
         tnba_feedback = TNBAFeedback(
-            event_bus,
-            logger,
+            nats_client,
             scheduler,
             config,
             t7_repository,

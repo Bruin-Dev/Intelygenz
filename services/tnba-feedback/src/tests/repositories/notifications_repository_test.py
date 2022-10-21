@@ -1,10 +1,11 @@
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from shortuuid import uuid
+
 from application.repositories import notifications_repository as notifications_repository_module
 from application.repositories.notifications_repository import NotificationsRepository
-from asynctest import CoroutineMock
-from shortuuid import uuid
+from application.repositories.utils_repository import to_json_bytes
 
 uuid_ = uuid()
 uuid_mock = patch.object(notifications_repository_module, "uuid", return_value=uuid_)
@@ -12,29 +13,31 @@ uuid_mock = patch.object(notifications_repository_module, "uuid", return_value=u
 
 class TestNotificationsRepository:
     def instance_test(self):
-        event_bus = Mock()
+        nats_client = Mock()
 
-        notifications_repository = NotificationsRepository(event_bus)
+        notifications_repository = NotificationsRepository(nats_client)
 
-        assert notifications_repository._event_bus is event_bus
+        assert notifications_repository._nats_client is nats_client
 
     @pytest.mark.asyncio
     async def send_slack_message_test(self):
         message = "Some message"
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock()
+        nats_client = Mock()
+        nats_client.request = AsyncMock()
 
-        notifications_repository = NotificationsRepository(event_bus)
+        notifications_repository = NotificationsRepository(nats_client)
 
         with uuid_mock:
             await notifications_repository.send_slack_message(message)
 
-        event_bus.rpc_request.assert_awaited_once_with(
+        nats_client.request.assert_awaited_once_with(
             "notification.slack.request",
-            {
-                "request_id": uuid_,
-                "body": {"message": message},
-            },
+            to_json_bytes(
+                {
+                    "request_id": uuid_,
+                    "body": {"message": message},
+                }
+            ),
             timeout=10,
         )

@@ -1,13 +1,15 @@
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from nats.aio.msg import Msg
+from shortuuid import uuid
+
 from application.repositories import bruin_repository as bruin_repository_module
 from application.repositories import nats_error_response
 from application.repositories.bruin_repository import BruinRepository
-from asynctest import CoroutineMock
+from application.repositories.utils_repository import to_json_bytes
 from config import testconfig
-from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(bruin_repository_module, "uuid", return_value=uuid_)
@@ -15,15 +17,13 @@ uuid_mock = patch.object(bruin_repository_module, "uuid", return_value=uuid_)
 
 class TestBruinRepository:
     def instance_test(self):
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         config = testconfig
         notifications_repository = Mock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        bruin_repository = BruinRepository(nats_client, config, notifications_repository)
 
-        assert bruin_repository._event_bus is event_bus
-        assert bruin_repository._logger is logger
+        assert bruin_repository._nats_client is nats_client
         assert bruin_repository._config is config
         assert bruin_repository._notifications_repository is notifications_repository
 
@@ -38,9 +38,9 @@ class TestBruinRepository:
             "request_id": uuid_,
             "body": {
                 "client_id": bruin_client_id,
-                "ticket_statuses": ["Closed"],
                 "product_category": testconfig.PRODUCT_CATEGORY,
                 "ticket_topic": ticket_topic,
+                "ticket_statuses": ["Closed"],
                 "start_date": (next_run_time - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "end_date": next_run_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
             },
@@ -54,14 +54,15 @@ class TestBruinRepository:
             "status": 200,
         }
 
-        logger = Mock()
         config = testconfig
         notifications_repository = Mock()
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        nats_client = Mock()
+        nats_client.request = AsyncMock(return_value=response_msg)
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        bruin_repository = BruinRepository(nats_client, config, notifications_repository)
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
@@ -69,11 +70,11 @@ class TestBruinRepository:
             with uuid_mock:
                 result = await bruin_repository.get_closed_tickets(bruin_client_id, ticket_topic)
 
-        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.basic.request", request, timeout=60)
+        nats_client.request.assert_awaited_once_with("bruin.ticket.basic.request", to_json_bytes(request), timeout=60)
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_closed_tickets_with_rpc_request_failing_test(self):
+    async def get_closed_tickets_with_request_failing_test(self):
         bruin_client_id = 12345
         ticket_topic = "VAS"
 
@@ -83,24 +84,23 @@ class TestBruinRepository:
             "request_id": uuid_,
             "body": {
                 "client_id": bruin_client_id,
-                "ticket_statuses": ["Closed"],
                 "product_category": testconfig.PRODUCT_CATEGORY,
                 "ticket_topic": ticket_topic,
+                "ticket_statuses": ["Closed"],
                 "start_date": (next_run_time - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "end_date": next_run_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
             },
         }
 
-        logger = Mock()
         config = testconfig
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=Exception)
+        nats_client = Mock()
+        nats_client.request = AsyncMock(side_effect=Exception)
 
         notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        bruin_repository = BruinRepository(nats_client, config, notifications_repository)
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
@@ -108,13 +108,12 @@ class TestBruinRepository:
             with uuid_mock:
                 result = await bruin_repository.get_closed_tickets(bruin_client_id, ticket_topic)
 
-        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.basic.request", request, timeout=60)
+        nats_client.request.assert_awaited_once_with("bruin.ticket.basic.request", to_json_bytes(request), timeout=60)
         notifications_repository.send_slack_message.assert_awaited_once()
-        logger.error.assert_called_once()
         assert result == nats_error_response
 
     @pytest.mark.asyncio
-    async def get_closed_tickets_with_rpc_request_returning_non_2xx_status_test(self):
+    async def get_closed_tickets_with_request_returning_non_2xx_status_test(self):
         bruin_client_id = 12345
         ticket_topic = "VAS"
 
@@ -124,9 +123,9 @@ class TestBruinRepository:
             "request_id": uuid_,
             "body": {
                 "client_id": bruin_client_id,
-                "ticket_statuses": ["Closed"],
                 "product_category": testconfig.PRODUCT_CATEGORY,
                 "ticket_topic": ticket_topic,
+                "ticket_statuses": ["Closed"],
                 "start_date": (next_run_time - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "end_date": next_run_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
             },
@@ -138,16 +137,17 @@ class TestBruinRepository:
             "status": 500,
         }
 
-        logger = Mock()
         config = testconfig
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        nats_client = Mock()
+        nats_client.request = AsyncMock(return_value=response_msg)
 
         notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        bruin_repository = BruinRepository(nats_client, config, notifications_repository)
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
@@ -155,22 +155,20 @@ class TestBruinRepository:
             with uuid_mock:
                 result = await bruin_repository.get_closed_tickets(bruin_client_id, ticket_topic)
 
-        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.basic.request", request, timeout=60)
+        nats_client.request.assert_awaited_once_with("bruin.ticket.basic.request", to_json_bytes(request), timeout=60)
         notifications_repository.send_slack_message.assert_awaited_once()
-        logger.error.assert_called_once()
         assert result == response
 
     @pytest.mark.asyncio
     async def get_outage_tickets_test(self):
         bruin_client_id = 12345
 
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         config = testconfig
         notifications_repository = Mock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
-        bruin_repository.get_closed_tickets = CoroutineMock()
+        bruin_repository = BruinRepository(nats_client, config, notifications_repository)
+        bruin_repository.get_closed_tickets = AsyncMock()
 
         await bruin_repository.get_outage_tickets(bruin_client_id)
         bruin_repository.get_closed_tickets.assert_awaited_with(bruin_client_id, "VOO")
@@ -179,13 +177,12 @@ class TestBruinRepository:
     async def get_affecting_tickets_test(self):
         bruin_client_id = 12345
 
-        event_bus = Mock()
-        logger = Mock()
+        nats_client = Mock()
         config = testconfig
         notifications_repository = Mock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
-        bruin_repository.get_closed_tickets = CoroutineMock()
+        bruin_repository = BruinRepository(nats_client, config, notifications_repository)
+        bruin_repository.get_closed_tickets = AsyncMock()
 
         await bruin_repository.get_affecting_tickets(bruin_client_id)
         bruin_repository.get_closed_tickets.assert_awaited_with(bruin_client_id, "VAS")
@@ -231,50 +228,53 @@ class TestBruinRepository:
             "status": 200,
         }
 
-        logger = Mock()
         config = testconfig
         notifications_repository = Mock()
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        nats_client = Mock()
+        nats_client.request = AsyncMock(return_value=response_msg)
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        bruin_repository = BruinRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
             result = await bruin_repository.get_ticket_task_history(ticket_id)
 
-        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.get.task.history", request, timeout=60)
+        nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.get.task.history", to_json_bytes(request), timeout=60
+        )
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_tickets_with_rpc_request_failing_test(self):
+    async def get_tickets_with_request_failing_test(self):
         ticket_id = 11111
 
         request = {
             "request_id": uuid_,
             "body": {"ticket_id": ticket_id},
         }
-        logger = Mock()
         config = testconfig
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=Exception)
+        nats_client = Mock()
+        nats_client.request = AsyncMock(side_effect=Exception)
 
         notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        bruin_repository = BruinRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
             result = await bruin_repository.get_ticket_task_history(ticket_id)
 
-        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.get.task.history", request, timeout=60)
+        nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.get.task.history", to_json_bytes(request), timeout=60
+        )
         notifications_repository.send_slack_message.assert_awaited_once()
-        logger.error.assert_called_once()
         assert result is nats_error_response
 
     @pytest.mark.asyncio
-    async def get_tickets_with_rpc_request_returning_non_2xx_status_test(self):
+    async def get_tickets_with_request_returning_non_2xx_status_test(self):
         ticket_id = 11111
 
         request = {
@@ -287,21 +287,23 @@ class TestBruinRepository:
             "status": 500,
         }
 
-        logger = Mock()
         config = testconfig
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=response)
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        nats_client = Mock()
+        nats_client.request = AsyncMock(return_value=response_msg)
 
         notifications_repository = Mock()
-        notifications_repository.send_slack_message = CoroutineMock()
+        notifications_repository.send_slack_message = AsyncMock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        bruin_repository = BruinRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
             result = await bruin_repository.get_ticket_task_history(ticket_id)
 
-        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.get.task.history", request, timeout=60)
+        nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.get.task.history", to_json_bytes(request), timeout=60
+        )
         notifications_repository.send_slack_message.assert_awaited_once()
-        logger.error.assert_called_once()
         assert result == response

@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import time
 from datetime import datetime
 from typing import Set
@@ -8,12 +9,13 @@ from apscheduler.util import undefined
 from pytz import timezone
 from tenacity import retry, stop_after_delay, wait_exponential
 
+logger = logging.getLogger(__name__)
+
 
 class TNBAFeedback:
     def __init__(
         self,
-        event_bus,
-        logger,
+        nats_client,
         scheduler,
         config,
         t7_repository,
@@ -22,8 +24,7 @@ class TNBAFeedback:
         notifications_repository,
         redis_client,
     ):
-        self._event_bus = event_bus
-        self._logger = logger
+        self._nats_client = nats_client
         self._scheduler = scheduler
         self._config = config
         self._t7_repository = t7_repository
@@ -34,13 +35,13 @@ class TNBAFeedback:
         self._semaphore = asyncio.BoundedSemaphore(self._config.TNBA_FEEDBACK_CONFIG["semaphore"])
 
     async def start_tnba_automated_process(self, exec_on_start=False):
-        self._logger.info("Scheduling TNBA feedback job...")
+        logger.info("Scheduling TNBA feedback job...")
         next_run_time = undefined
 
         if exec_on_start:
             tz = timezone(self._config.TIMEZONE)
             next_run_time = datetime.now(tz)
-            self._logger.info("TNBA feedback job is going to be executed immediately")
+            logger.info("TNBA feedback job is going to be executed immediately")
 
         try:
             self._scheduler.add_job(
@@ -52,16 +53,16 @@ class TNBAFeedback:
                 id="_run_tickets_polling",
             )
         except ConflictingIdError as conflict:
-            self._logger.info(f"Skipping start of TNBA feedback job. Reason: {conflict}")
+            logger.info(f"Skipping start of TNBA feedback job. Reason: {conflict}")
 
     async def _run_tickets_polling(self):
-        self._logger.info("Starting TNBA feedback process...")
+        logger.info("Starting TNBA feedback process...")
 
         start_time = time.time()
 
-        self._logger.info("Getting all closed tickets for all customers...")
+        logger.info("Getting all closed tickets for all customers...")
         closed_ticket_ids = await self._get_all_closed_tickets_for_monitored_companies()
-        self._logger.info(
+        logger.info(
             f"Got {len(closed_ticket_ids)} closed ticket ids for all customers. "
             f"Going through them to find TNBA notes and sending metrics back to T7"
         )
@@ -69,7 +70,7 @@ class TNBAFeedback:
         tasks = [self._send_ticket_task_history_to_t7(ticket_id) for ticket_id in closed_ticket_ids]
         await asyncio.gather(*tasks, return_exceptions=True)
         end_time = time.time()
-        self._logger.info(f"TNBA feedback process finished! Took {(end_time - start_time) // 60} minutes.")
+        logger.info(f"TNBA feedback process finished! Took {(end_time - start_time) // 60} minutes.")
 
     async def _get_all_closed_tickets_for_monitored_companies(self):
         closed_ticket_ids = []
@@ -116,7 +117,7 @@ class TNBAFeedback:
         try:
             await get_closed_tickets_with_task_history_by_client_id()
         except Exception as e:
-            self._logger.error(
+            logger.error(
                 f"An error occurred while trying to getting all closed tickets for Bruin client {client_id} -> {e}"
             )
 
@@ -135,7 +136,7 @@ class TNBAFeedback:
                 ticket_task_history_body: list = ticket_task_history["body"]
                 ticket_task_history_status = ticket_task_history["status"]
                 if ticket_task_history_status not in range(200, 300):
-                    self._logger.info(
+                    logger.info(
                         f"Ticket task status returned {ticket_task_history_status}"
                         f" and task history body returned {ticket_task_history_body}"
                     )
@@ -143,29 +144,27 @@ class TNBAFeedback:
 
                 ticket_task_history_tnba_check = self._t7_repository.tnba_note_in_task_history(ticket_task_history_body)
                 if ticket_task_history_tnba_check is False:
-                    self._logger.info(f"No TNBA note found in task history of ticket id {ticket_id}. Skipping ...")
+                    logger.info(f"No TNBA note found in task history of ticket id {ticket_id}. Skipping ...")
                     return
 
                 any_ticket_row_has_asset = any(row.get("Asset") for row in ticket_task_history_body)
                 if any_ticket_row_has_asset is False:
-                    self._logger.info(f"No asset in history of ticket id {ticket_id}. Skipping ...")
+                    logger.info(f"No asset in history of ticket id {ticket_id}. Skipping ...")
                     return
 
                 if self._redis_client.get(redis_key) is not None:
-                    self._logger.info(
-                        f"Task history of ticket id {ticket_id} has already been sent to T7. Skipping ..."
-                    )
+                    logger.info(f"Task history of ticket id {ticket_id} has already been sent to T7. Skipping ...")
                     return
 
-                self._logger.info(f"TNBA note found in task history of ticket id {ticket_id}")
-                self._logger.info("Sending data to T7")
+                logger.info(f"TNBA note found in task history of ticket id {ticket_id}")
+                logger.info("Sending data to T7")
 
                 post_metrics = await self._t7_repository.post_metrics(ticket_id, ticket_task_history_body)
                 post_metrics_body = post_metrics["body"]
                 post_metrics_status = post_metrics["status"]
 
                 if post_metrics_status not in range(200, 300):
-                    self._logger.info(
+                    logger.info(
                         f"Posting metrics to T7 status returned {post_metrics_status}"
                         f" and posting metrics to T7 body returned {post_metrics_body}"
                     )
@@ -176,4 +175,4 @@ class TNBAFeedback:
         try:
             await send_ticket_task_history_to_t7()
         except Exception as e:
-            self._logger.error(f"An error occurred while trying to send ticket:{ticket_id} task history to T7 -> {e}")
+            logger.error(f"An error occurred while trying to send ticket:{ticket_id} task history to T7 -> {e}")
