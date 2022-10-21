@@ -54,6 +54,7 @@ omit = [
     "*/__init__.py",
     "src/tests/*",
     "src/config/*",
+    "*/clients/generated_grpc/*",
 ]
 
 [tool.coverage.report]
