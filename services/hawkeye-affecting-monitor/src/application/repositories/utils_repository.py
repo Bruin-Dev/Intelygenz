@@ -1,4 +1,9 @@
-from typing import Callable
+import json
+from typing import Any, Callable
+
+
+def to_json_bytes(message: dict[str, Any]):
+    return json.dumps(message, default=str, separators=(",", ":")).encode()
 
 
 class UtilsRepository:

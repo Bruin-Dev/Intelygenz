@@ -1,21 +1,22 @@
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from nats.aio.msg import Msg
+from shortuuid import uuid
+
 from application import nats_error_response
 from application.repositories import hawkeye_repository as hawkeye_repository_module
-from asynctest import CoroutineMock
+from application.repositories.utils_repository import to_json_bytes
 from config import testconfig
-from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(hawkeye_repository_module, "uuid", return_value=uuid_)
 
 
 class TestHawkeyeRepository:
-    def instance_test(self, hawkeye_repository, event_bus, logger, notifications_repository):
-        assert hawkeye_repository._event_bus is event_bus
-        assert hawkeye_repository._logger is logger
+    def instance_test(self, hawkeye_repository, nats_client, notifications_repository):
+        assert hawkeye_repository._nats_client is nats_client
         assert hawkeye_repository._config is testconfig
         assert hawkeye_repository._notifications_repository is notifications_repository
 
@@ -47,16 +48,20 @@ class TestHawkeyeRepository:
             "status": 200,
         }
 
-        hawkeye_repository._event_bus.rpc_request.return_value = response
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+        hawkeye_repository._nats_client.request.return_value = response_msg
 
         with uuid_mock:
             result = await hawkeye_repository.get_tests_results(probe_uids=probe_uids, interval=interval)
 
-        hawkeye_repository._event_bus.rpc_request.assert_awaited_once_with("hawkeye.test.request", request, timeout=60)
+        hawkeye_repository._nats_client.request.assert_awaited_once_with(
+            "hawkeye.test.request", to_json_bytes(request), timeout=60
+        )
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_tests_results_with_rpc_request_failing_test(self, hawkeye_repository, probe_1_uid):
+    async def get_tests_results_with_request_failing_test(self, hawkeye_repository, probe_1_uid):
         probe_uids = [
             probe_1_uid,
         ]
@@ -74,19 +79,20 @@ class TestHawkeyeRepository:
             },
         }
 
-        hawkeye_repository._event_bus.rpc_request.side_effect = Exception
-        hawkeye_repository._notifications_repository.send_slack_message = CoroutineMock()
+        hawkeye_repository._nats_client.request.side_effect = Exception
+        hawkeye_repository._notifications_repository.send_slack_message = AsyncMock()
 
         with uuid_mock:
             result = await hawkeye_repository.get_tests_results(probe_uids=probe_uids, interval=interval)
 
-        hawkeye_repository._event_bus.rpc_request.assert_awaited_once_with("hawkeye.test.request", request, timeout=60)
+        hawkeye_repository._nats_client.request.assert_awaited_once_with(
+            "hawkeye.test.request", to_json_bytes(request), timeout=60
+        )
         hawkeye_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        hawkeye_repository._logger.error.assert_called()
         assert result == nats_error_response
 
     @pytest.mark.asyncio
-    async def get_tests_results_with_rpc_request_returning_non_2xx_status_test(
+    async def get_tests_results_with_request_returning_non_2xx_status_test(
         self, hawkeye_repository, probe_1_uid, hawkeye_500_response
     ):
         probe_uids = [
@@ -106,15 +112,18 @@ class TestHawkeyeRepository:
             },
         }
 
-        hawkeye_repository._event_bus.rpc_request.return_value = hawkeye_500_response
-        hawkeye_repository._notifications_repository.send_slack_message = CoroutineMock()
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(hawkeye_500_response)
+        hawkeye_repository._nats_client.request.return_value = response_msg
+        hawkeye_repository._notifications_repository.send_slack_message = AsyncMock()
 
         with uuid_mock:
             result = await hawkeye_repository.get_tests_results(probe_uids=probe_uids, interval=interval)
 
-        hawkeye_repository._event_bus.rpc_request.assert_awaited_once_with("hawkeye.test.request", request, timeout=60)
+        hawkeye_repository._nats_client.request.assert_awaited_once_with(
+            "hawkeye.test.request", to_json_bytes(request), timeout=60
+        )
         hawkeye_repository._notifications_repository.send_slack_message.assert_awaited_once()
-        hawkeye_repository._logger.error.assert_called()
         assert result == hawkeye_500_response
 
     @pytest.mark.asyncio

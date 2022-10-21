@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 import re
 import time
@@ -8,6 +9,8 @@ from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from dateutil.parser import parse
 from pytz import timezone, utc
+
+logger = logging.getLogger(__name__)
 
 TEST_TYPE_REGEX_TEMPLATE = (
     r"^#\*(Automation Engine|MetTel's IPA)\*#\nService Affecting \(Ixia\).*Test Type: {test_type}"
@@ -23,7 +26,6 @@ FAILED_NOTE_REGEX = re.compile(TEST_STATUS_REGEX_TEMPLATE.format(test_status="FA
 class AffectingMonitor:
     def __init__(
         self,
-        logger,
         scheduler,
         config,
         bruin_repository,
@@ -32,7 +34,6 @@ class AffectingMonitor:
         customer_cache_repository,
         utils_repository,
     ):
-        self._logger = logger
         self._scheduler = scheduler
         self._config = config
         self._bruin_repository = bruin_repository
@@ -49,13 +50,13 @@ class AffectingMonitor:
         self._tickets_by_serial = {}
 
     async def start_hawkeye_affecting_monitoring(self, exec_on_start):
-        self._logger.info("Scheduling Hawkeye Affecting Monitor job...")
+        logger.info("Scheduling Hawkeye Affecting Monitor job...")
         next_run_time = undefined
 
         if exec_on_start:
             tz = timezone(self._config.TIMEZONE)
             next_run_time = datetime.now(tz)
-            self._logger.info("Hawkeye Affecting Monitor job is going to be executed immediately")
+            logger.info("Hawkeye Affecting Monitor job is going to be executed immediately")
 
         try:
             self._scheduler.add_job(
@@ -67,17 +68,17 @@ class AffectingMonitor:
                 id="_hawkeye_affecting_monitor_process",
             )
         except ConflictingIdError as conflict:
-            self._logger.info(f"Skipping start of Hawkeye Affecting Monitoring job. Reason: {conflict}")
+            logger.info(f"Skipping start of Hawkeye Affecting Monitoring job. Reason: {conflict}")
 
     async def _affecting_monitoring_process(self):
         self.__reset_state()
 
-        self._logger.info(f"Starting Hawkeye Affecting Monitor!")
+        logger.info(f"Starting Hawkeye Affecting Monitor!")
         start = time.time()
 
         customer_cache_response = await self._customer_cache_repository.get_cache_for_affecting_monitoring()
         if customer_cache_response["status"] not in range(200, 300) or customer_cache_response["status"] == 202:
-            self._logger.warning(f"Bad status calling to get cache. Skipping hawkeye affecting monitor process ...")
+            logger.warning(f"Bad status calling to get cache. Skipping hawkeye affecting monitor process ...")
             return
 
         customer_cache: list = customer_cache_response["body"]
@@ -87,7 +88,7 @@ class AffectingMonitor:
             probe_uids=probe_uids
         )
         if test_results_response["status"] not in range(200, 300):
-            self._logger.warning(
+            logger.warning(
                 f"Bad request get test results for affecting monitor for probe uids: {probe_uids}."
                 f"Skipping hawkeye affecting monitor ..."
             )
@@ -99,7 +100,7 @@ class AffectingMonitor:
             customer_cache, sorted_tests_results
         )
 
-        self._logger.info(
+        logger.info(
             f"Looking for Service Affecting tickets for {len(cached_devices_mapped_to_tests_results)} devices..."
         )
         tickets_tasks = [
@@ -111,12 +112,12 @@ class AffectingMonitor:
         ]
         await asyncio.gather(*tickets_tasks)
 
-        self._logger.info(f"Processing {len(cached_devices_mapped_to_tests_results)} devices...")
+        logger.info(f"Processing {len(cached_devices_mapped_to_tests_results)} devices...")
         monitoring_tasks = [self._process_device(device_info) for device_info in cached_devices_mapped_to_tests_results]
         await asyncio.gather(*monitoring_tasks)
 
         stop = time.time()
-        self._logger.info(f"Hawkeye Affecting Monitor process finished! Took {round((stop - start) / 60, 2)} minutes")
+        logger.info(f"Hawkeye Affecting Monitor process finished! Took {round((stop - start) / 60, 2)} minutes")
 
     @staticmethod
     def _get_all_probe_uids_from_cache(customer_cache: list) -> list:
@@ -156,7 +157,7 @@ class AffectingMonitor:
             )
 
             if affecting_tickets_response["status"] not in range(200, 300):
-                self._logger.warning(
+                logger.warning(
                     f"Bad status calling to get open affecting ticket to serial number "
                     f"{serial_number}. Skipping add device to ticket mapping ..."
                 )
@@ -164,7 +165,7 @@ class AffectingMonitor:
 
             affecting_tickets: list = affecting_tickets_response["body"]
             if not affecting_tickets:
-                self._logger.info(
+                logger.info(
                     f"No affecting tickets were found for device {serial_number} when building the mapping between "
                     f"this serial and tickets."
                 )
@@ -179,7 +180,7 @@ class AffectingMonitor:
 
             ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
             if ticket_details_response["status"] not in range(200, 300):
-                self._logger.warning(
+                logger.warning(
                     f"Bad status calling to get ticket details to ticket id: {ticket_id}."
                     f"Skipping add devices to ticket mapping ..."
                 )
@@ -231,7 +232,7 @@ class AffectingMonitor:
         cached_info = device_info["cached_info"]
 
         serial_number = cached_info["serial_number"]
-        self._logger.info(f"Processing device {serial_number}...")
+        logger.info(f"Processing device {serial_number}...")
 
         tests_results: list = device_info["tests_results"]
         for test_result in tests_results:
@@ -240,18 +241,18 @@ class AffectingMonitor:
             elif self._test_result_failed(test_result):
                 await self._process_failed_test_result(test_result=test_result, device_cached_info=cached_info)
             else:
-                self._logger.info(
+                logger.info(
                     f'Test result {test_result["summary"]["id"]} has state {test_result["summary"]["status"].upper()}. '
                     "Skipping..."
                 )
 
         await self._append_new_notes_for_device(serial_number)
 
-        self._logger.info(f"Finished processing device {serial_number}!")
+        logger.info(f"Finished processing device {serial_number}!")
 
     async def _append_new_notes_for_device(self, serial_number: str):
         if serial_number not in self._tickets_by_serial:
-            self._logger.info(
+            logger.info(
                 f"Serial {serial_number} could not be added to the tickets mapping at the beginning of the "
                 f"process, so no notes can be posted to any ticket. Skipping..."
             )
@@ -260,20 +261,20 @@ class AffectingMonitor:
         notes_to_append = self._tickets_by_serial[serial_number].get("new_notes")
 
         if not notes_to_append:
-            self._logger.info(f"No notes to append for serial {serial_number} were found. Skipping...")
+            logger.info(f"No notes to append for serial {serial_number} were found. Skipping...")
             return
 
         ticket_id = self._tickets_by_serial[serial_number]["ticket_id"]
 
         working_environment = self._config.CURRENT_ENVIRONMENT
         if working_environment != "production":
-            self._logger.info(
+            logger.info(
                 f"{len(notes_to_append)} affecting notes to append to ticket {ticket_id} were found, but the current "
                 "environment is not PRODUCTION. Skipping..."
             )
             return
 
-        self._logger.info(
+        logger.info(
             f"Posting {len(notes_to_append)} affecting notes to ticket {ticket_id} (serial: {serial_number})..."
         )
 
@@ -300,13 +301,13 @@ class AffectingMonitor:
         test_result_id = test_result["summary"]["id"]
         test_type = test_result["summary"]["testType"]
 
-        self._logger.info(
+        logger.info(
             f"Processing PASSED test result {test_result_id} (type: {test_type}) that was run for serial "
             f"{serial_number}..."
         )
 
         if serial_number not in self._tickets_by_serial:
-            self._logger.info(
+            logger.info(
                 f"Serial {serial_number} could not be added to the tickets mapping at the beginning of the "
                 f"process, so the current PASSED state for test type {test_type} will be ignored. Skipping..."
             )
@@ -314,7 +315,7 @@ class AffectingMonitor:
 
         affecting_ticket = self._tickets_by_serial[serial_number]
         if not affecting_ticket:
-            self._logger.info(
+            logger.info(
                 f"Serial {serial_number} is not under any affecting ticket and all thresholds are normal for "
                 f"test type {test_type}. Skipping..."
             )
@@ -322,7 +323,7 @@ class AffectingMonitor:
 
         ticket_id = affecting_ticket["ticket_id"]
         if affecting_ticket["is_detail_resolved"]:
-            self._logger.info(
+            logger.info(
                 f"Serial {serial_number} is under an affecting ticket (ID {ticket_id}) whose ticket detail is resolved "
                 f"and all thresholds are normal for test type {test_type}, so the current PASSED state will not be "
                 "reported. Skipping..."
@@ -333,7 +334,7 @@ class AffectingMonitor:
 
         last_note = self._get_last_note_by_test_type(ticket_notes, test_type)
         if not last_note:
-            self._logger.info(
+            logger.info(
                 f"No note was found for serial {serial_number} and test type {test_type} in ticket {ticket_id}. "
                 "Skipping..."
             )
@@ -341,13 +342,13 @@ class AffectingMonitor:
 
         note_text = last_note["text"]
         if self._is_passed_note(note_text):
-            self._logger.info(
+            logger.info(
                 f"Last note found for serial {serial_number} and test type {test_type} in ticket {ticket_id} "
                 f"corresponds to a PASSED state. Skipping..."
             )
             return
 
-        self._logger.info(
+        logger.info(
             f"Last note found for serial {serial_number} and test type {test_type} in ticket {ticket_id} "
             "corresponds to a FAILED state. A new note reporting the current PASSED state will be built and appended "
             "to the ticket later on."
@@ -361,7 +362,7 @@ class AffectingMonitor:
             }
         )
 
-        self._logger.info(f"Finished processing PASSED test result {test_result_id}!")
+        logger.info(f"Finished processing PASSED test result {test_result_id}!")
 
     async def _process_failed_test_result(self, test_result: dict, device_cached_info: dict):
         serial_number = device_cached_info["serial_number"]
@@ -370,13 +371,13 @@ class AffectingMonitor:
         test_result_id = test_result["summary"]["id"]
         test_type = test_result["summary"]["testType"]
 
-        self._logger.info(
+        logger.info(
             f"Processing FAILED test result {test_result_id} (type: {test_type}) that was run for serial "
             f"{serial_number}..."
         )
 
         if serial_number not in self._tickets_by_serial:
-            self._logger.info(
+            logger.info(
                 f"Serial {serial_number} could not be added to the tickets mapping at the beginning of the "
                 f"process, so the current FAILED state for test type {test_type} will be ignored. Skipping..."
             )
@@ -386,13 +387,13 @@ class AffectingMonitor:
         if not affecting_ticket:
             working_environment = self._config.CURRENT_ENVIRONMENT
             if working_environment != "production":
-                self._logger.info(
+                logger.info(
                     f"Serial {serial_number} is not under any affecting ticket and some troubles were spotted for "
                     f"test type {test_type}, but the current environment is not PRODUCTION. Skipping ticket creation..."
                 )
                 return
 
-            self._logger.info(
+            logger.info(
                 f"Serial {serial_number} is not under any affecting ticket and some troubles were spotted for "
                 f"test type {test_type}. Creating affecting ticket.."
             )
@@ -401,14 +402,14 @@ class AffectingMonitor:
                 client_id=bruin_client_id, service_number=serial_number
             )
             if ticket_creation_response["status"] not in range(200, 300):
-                self._logger.warning(
+                logger.warning(
                     f"Bad status calling create affecting ticket to serial: {serial_number}."
                     f"Skipping process test failed ..."
                 )
                 return
 
             ticket_id: int = ticket_creation_response["body"]["ticketIds"][0]
-            self._logger.info(
+            logger.info(
                 f"Affecting ticket created for serial {serial_number} (ID: {ticket_id}). A new note reporting the "
                 f"current FAILED state for test type {test_type} will be built and appended to the ticket later on."
             )
@@ -431,26 +432,26 @@ class AffectingMonitor:
             ticket_id = self._tickets_by_serial[serial_number]["ticket_id"]
             detail_id = self._tickets_by_serial[serial_number]["detail_id"]
 
-            self._logger.info(
+            logger.info(
                 f"Serial {serial_number} is under affecting ticket {ticket_id} and some troubles were spotted for "
                 f"test type {test_type}."
             )
 
             if self._tickets_by_serial[serial_number]["is_detail_resolved"]:
-                self._logger.info(
+                logger.info(
                     f"Ticket detail of affecting ticket {ticket_id} that is related to serial {serial_number} is "
                     f"currently unresolved and a FAILED state was spotted. Unresolving detail..."
                 )
 
                 unresolve_detail_response = await self._bruin_repository.unresolve_ticket_detail(ticket_id, detail_id)
                 if unresolve_detail_response["status"] not in range(200, 300):
-                    self._logger.info(
+                    logger.info(
                         f"Ticket detail of affecting ticket {ticket_id} that is related to serial {serial_number} "
                         "could not be unresolved. A note reporting the spotted FAILED state will be built and "
                         "appended to the ticket later on."
                     )
                 else:
-                    self._logger.info(
+                    logger.info(
                         f"Ticket detail of affecting ticket {ticket_id} that is related to serial {serial_number} "
                         "was unresolved successfully. A note reporting the spotted FAILED state will be built and "
                         "appended to the ticket later on."
@@ -470,7 +471,7 @@ class AffectingMonitor:
             ticket_notes: list = affecting_ticket["initial_notes"] + affecting_ticket["new_notes"]
             last_note = self._get_last_note_by_test_type(ticket_notes, test_type)
             if not last_note:
-                self._logger.info(
+                logger.info(
                     f"No note was found for serial {serial_number} and test type {test_type} in ticket {ticket_id}. "
                     "A new note reporting the current FAILED state for this test type will be built and appended "
                     "to the ticket later on."
@@ -486,7 +487,7 @@ class AffectingMonitor:
             else:
                 note_text = last_note["text"]
                 if self._is_passed_note(note_text):
-                    self._logger.info(
+                    logger.info(
                         f"Last note found for serial {serial_number} and test type {test_type} in ticket {ticket_id} "
                         f"corresponds to a PASSED state. A new note reporting the current FAILED state for this test "
                         "type will be built and appended to the ticket later on."
@@ -500,13 +501,13 @@ class AffectingMonitor:
                         }
                     )
                 else:
-                    self._logger.info(
+                    logger.info(
                         f"Last note found for serial {serial_number} and test type {test_type} in ticket {ticket_id} "
                         "corresponds to a previous FAILED state. No new notes will be built to report the current "
                         "FAILED state."
                     )
 
-        self._logger.info(f"Finished processing FAILED test result {test_result_id}!")
+        logger.info(f"Finished processing FAILED test result {test_result_id}!")
 
     def _get_last_note_by_test_type(self, notes: list, test_type: str) -> dict:
         test_type_regex = re.compile(TEST_TYPE_REGEX_TEMPLATE.format(test_type=test_type), re.DOTALL)

@@ -2,14 +2,15 @@ from datetime import datetime
 from unittest.mock import Mock, call, patch
 
 import pytest
-from application.actions import affecting_monitoring as affecting_monitoring_module
-from application.actions.affecting_monitoring import AffectingMonitor
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
-from config import testconfig
 from dateutil.parser import parse
 from pytz import utc
 from shortuuid import uuid
+
+from application.actions import affecting_monitoring as affecting_monitoring_module
+from application.actions.affecting_monitoring import AffectingMonitor
+from config import testconfig
 
 uuid_ = uuid()
 uuid_mock = patch.object(affecting_monitoring_module, "uuid", return_value=uuid_)
@@ -19,7 +20,6 @@ class TestServiceAffectingMonitor:
     def instance_test(
         self,
         affecting_monitor,
-        logger,
         scheduler,
         bruin_repository,
         hawkeye_repository,
@@ -27,7 +27,6 @@ class TestServiceAffectingMonitor:
         notifications_repository,
         utils_repository,
     ):
-        assert affecting_monitor._logger is logger
         assert affecting_monitor._scheduler is scheduler
         assert affecting_monitor._config is testconfig
         assert affecting_monitor._bruin_repository is bruin_repository
