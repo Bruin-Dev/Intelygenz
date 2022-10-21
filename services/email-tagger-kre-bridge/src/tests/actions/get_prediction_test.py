@@ -1,25 +1,21 @@
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
+from nats.aio.msg import Msg
+
 from application.actions.get_prediction import GetPrediction
-from asynctest import CoroutineMock
+from application.repositories.utils_repository import to_json_bytes
 
 
 class TestGetPrediction:
     valid_email_data = {"email": {"email_id": 123, "body": "test body", "subject": "test subject"}}
 
     def instance_test(self):
-        config = Mock()
-        logger = Mock()
-        event_bus = Mock()
-        kre_repository = Mock()
+        email_tagger_repository = Mock()
 
-        prediction = GetPrediction(logger, config, event_bus, kre_repository)
+        prediction = GetPrediction(email_tagger_repository)
 
-        assert prediction._config == config
-        assert prediction._logger == logger
-        assert prediction._event_bus == event_bus
-        assert prediction._kre_repository == kre_repository
+        assert prediction._email_tagger_repository == email_tagger_repository
 
     @pytest.mark.parametrize(
         "body_in_topic",
@@ -35,44 +31,35 @@ class TestGetPrediction:
     @pytest.mark.asyncio
     async def get_prediction_error_400_test(self, body_in_topic):
         request_id = 123
-        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
-        msg_published_in_topic = {"request_id": request_id, "response_topic": response_topic, "body": body_in_topic}
-        config = Mock()
-        logger = Mock()
+        msg_published_in_topic = {"request_id": request_id, "body": body_in_topic}
 
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(msg_published_in_topic)
 
-        kre_repository = Mock()
-        kre_repository.get_prediction = CoroutineMock()
+        email_tagger_repository = Mock()
+        email_tagger_repository.get_prediction = AsyncMock()
 
-        prediction_action = GetPrediction(logger, config, event_bus, kre_repository)
+        prediction_action = GetPrediction(email_tagger_repository)
 
-        await prediction_action.get_prediction(msg_published_in_topic)
+        await prediction_action(request_msg)
 
-        logger.error.assert_called_once()
-        prediction_action._event_bus.publish_message.assert_awaited_once_with(
-            response_topic,
-            {
-                "request_id": request_id,
-                "body": 'You must specify {.."body": { "email": {"email_id", "subject", ...}}} in the request',
-                "status": 400,
-            },
+        request_msg.respond.assert_awaited_once_with(
+            to_json_bytes(
+                {
+                    "request_id": request_id,
+                    "body": 'You must specify {.."body": { "email": {"email_id", "subject", ...}}} in the request',
+                    "status": 400,
+                }
+            ),
         )
-        prediction_action._kre_repository.get_prediction.assert_not_awaited()
-        logger.info.assert_not_called()
+        prediction_action._email_tagger_repository.get_prediction.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def get_prediction_test(self):
-        config = Mock()
-        logger = Mock()
-
         request_id = 123
-        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
         msg_published_in_topic = {
             "request_id": request_id,
             "body": self.valid_email_data,
-            "response_topic": response_topic,
         }
         expected_prediction = {
             "body": {
@@ -86,23 +73,22 @@ class TestGetPrediction:
             "status": 200,
         }
 
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+        request_msg = Mock(spec_set=Msg)
+        request_msg.data = to_json_bytes(msg_published_in_topic)
 
-        kre_repository = Mock()
-        kre_repository.get_prediction = CoroutineMock(return_value=expected_prediction)
+        email_tagger_repository = Mock()
+        email_tagger_repository.get_prediction = AsyncMock(return_value=expected_prediction)
 
-        prediction_action = GetPrediction(logger, config, event_bus, kre_repository)
+        prediction_action = GetPrediction(email_tagger_repository)
 
-        await prediction_action.get_prediction(msg_published_in_topic)
+        await prediction_action(request_msg)
 
-        logger.error.assert_not_called()
-        prediction_action._kre_repository.get_prediction.assert_awaited_once_with(self.valid_email_data)
-        prediction_action._event_bus.publish_message.assert_awaited_once_with(
-            response_topic,
-            {
-                "request_id": request_id,
-                **expected_prediction,
-            },
+        prediction_action._email_tagger_repository.get_prediction.assert_awaited_once_with(self.valid_email_data)
+        request_msg.respond.assert_awaited_once_with(
+            to_json_bytes(
+                {
+                    "request_id": request_id,
+                    **expected_prediction,
+                }
+            ),
         )
-        logger.info.assert_called_once()

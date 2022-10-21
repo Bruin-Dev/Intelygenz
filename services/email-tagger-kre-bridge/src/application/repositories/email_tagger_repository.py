@@ -1,6 +1,5 @@
 class EmailTaggerRepository:
-    def __init__(self, logger, kre_client):
-        self._logger = logger
+    def __init__(self, kre_client):
         self._kre_client = kre_client
 
     async def get_prediction(self, email_data: dict) -> dict:

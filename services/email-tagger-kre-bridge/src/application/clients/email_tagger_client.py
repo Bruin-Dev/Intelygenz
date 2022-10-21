@@ -1,16 +1,19 @@
 import json
+import logging
 
 import grpc
-from application.clients.generated_grpc import public_input_pb2 as pb2
-from application.clients.generated_grpc import public_input_pb2_grpc as pb2_grpc
 from google.protobuf.json_format import MessageToDict, Parse
 from grpc import aio as grpc_aio
 
+from application.clients.generated_grpc import public_input_pb2 as pb2
+from application.clients.generated_grpc import public_input_pb2_grpc as pb2_grpc
+
+logger = logging.getLogger(__name__)
+
 
 class EmailTaggerClient:
-    def __init__(self, logger, config):
+    def __init__(self, config):
         self._config = config
-        self._logger = logger
 
     async def _create_stub(self):
         if self._config.KRE_CONFIG["grpc_secure_mode"]:
@@ -55,18 +58,18 @@ class EmailTaggerClient:
                 "body": dic_prediction_response,
                 "status": 200,
             }
-            self._logger.info(f"Got response getting prediction from Konstellation: {dic_prediction_response}")
+            logger.info(f"Got response getting prediction from Konstellation: {dic_prediction_response}")
 
         except grpc.RpcError as grpc_e:
             response = {
                 "body": f"Grpc error details: {grpc_e.details()}",
                 "status": self.__grpc_to_http_status(grpc_e.code()),
             }
-            self._logger.error(f'Got grpc error getting prediction from Konstellation: {response["body"]}')
+            logger.error(f'Got grpc error getting prediction from Konstellation: {response["body"]}')
 
         except Exception as e:
             response = {"body": f"Error: {e.args[0]}", "status": 500}
-            self._logger.error(f"Got error getting prediction from Konstellation: {e.args[0]}")
+            logger.error(f"Got error getting prediction from Konstellation: {e.args[0]}")
 
         return response
 
@@ -85,17 +88,17 @@ class EmailTaggerClient:
 
             response = {"body": save_metrics_response.message, "status": 200}
 
-            self._logger.info(f'Got response saving metrics from Konstellation: {response["body"]}')
+            logger.info(f'Got response saving metrics from Konstellation: {response["body"]}')
 
         except grpc.RpcError as grpc_e:
             response = {
                 "body": f"Grpc error details: {grpc_e.details()}",
                 "status": self.__grpc_to_http_status(grpc_e.code()),
             }
-            self._logger.error(f'Got grpc error saving metrics from Konstellation: {response["body"]}')
+            logger.error(f'Got grpc error saving metrics from Konstellation: {response["body"]}')
 
         except Exception as e:
             response = {"body": f"Error: {e.args[0]}", "status": 500}
-            self._logger.error(f'Got error saving metrics from Konstellation: {response["body"]}')
+            logger.error(f'Got error saving metrics from Konstellation: {response["body"]}')
 
         return response

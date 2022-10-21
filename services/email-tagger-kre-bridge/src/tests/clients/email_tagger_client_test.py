@@ -1,14 +1,14 @@
 import json
-from unittest.mock import Mock, call, patch
+from unittest.mock import AsyncMock, Mock, call, patch
 
 import grpc
 import pytest
+from google.protobuf.json_format import Parse
+
 from application.clients.email_tagger_client import EmailTaggerClient
 from application.clients.generated_grpc import public_input_pb2 as pb2
 from application.clients.generated_grpc import public_input_pb2_grpc as pb2_grpc
-from asynctest import CoroutineMock
 from config import testconfig
-from google.protobuf.json_format import Parse
 
 
 class TestEmailTaggerClient:
@@ -61,12 +61,10 @@ class TestEmailTaggerClient:
         return grpc_e
 
     def instance_test(self):
-        logger = Mock()
         config = Mock()
 
-        kre_client = EmailTaggerClient(logger, config)
+        kre_client = EmailTaggerClient(config)
 
-        assert kre_client._logger is logger
         assert kre_client._config is config
 
     @pytest.mark.asyncio
@@ -81,17 +79,16 @@ class TestEmailTaggerClient:
 
         mock_stub_prediction_response = self.__data_to_grpc_message(mock_prediction_response, pb2.PredictionResponse())
 
-        logger = Mock()
         stub = Mock()
 
-        stub.GetPrediction = CoroutineMock(return_value=mock_stub_prediction_response)
+        stub.GetPrediction = AsyncMock(return_value=mock_stub_prediction_response)
 
         exp_prediction_response = {
             "body": mock_prediction_response,
             "status": 200,
         }
 
-        kre_client = EmailTaggerClient(logger, testconfig)
+        kre_client = EmailTaggerClient(testconfig)
 
         with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
             prediction_response = await kre_client.get_prediction(self.valid_email_data)
@@ -104,10 +101,8 @@ class TestEmailTaggerClient:
     @pytest.mark.parametrize("grpc_code, grpc_detail, expected_status", grpc_errors_cases, ids=grpc_errors_cases_ids)
     @pytest.mark.asyncio
     async def get_prediction_grpc_exception_test(self, grpc_code, grpc_detail, expected_status):
-        logger = Mock()
-
         stub = Mock()
-        stub.GetPrediction = CoroutineMock()
+        stub.GetPrediction = AsyncMock()
         stub.GetPrediction.side_effect = self.__mock_grpc_exception(grpc_code, grpc_detail)
 
         exp_prediction_response = {
@@ -115,13 +110,11 @@ class TestEmailTaggerClient:
             "status": expected_status,
         }
 
-        kre_client = EmailTaggerClient(logger, testconfig)
+        kre_client = EmailTaggerClient(testconfig)
 
         with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
             prediction_response = await kre_client.get_prediction(self.valid_email_data)
 
-        assert logger.info.call_count == 0
-        assert logger.error.call_count == 1
         assert prediction_response == exp_prediction_response
         stub.GetPrediction.assert_awaited_once_with(
             self.__data_to_grpc_message(self.valid_email_data, pb2.PredictionRequest()), timeout=120
@@ -130,10 +123,8 @@ class TestEmailTaggerClient:
     @pytest.mark.asyncio
     async def get_prediction_exception_test(self):
         raised_error = "Error current exception test"
-        logger = Mock()
-
         stub = Mock()
-        stub.GetPrediction = CoroutineMock()
+        stub.GetPrediction = AsyncMock()
         stub.GetPrediction.side_effect = Exception(raised_error)
 
         exp_prediction_response = {
@@ -141,13 +132,11 @@ class TestEmailTaggerClient:
             "status": 500,
         }
 
-        kre_client = EmailTaggerClient(logger, testconfig)
+        kre_client = EmailTaggerClient(testconfig)
 
         with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
             prediction_response = await kre_client.get_prediction(self.valid_email_data)
 
-        assert logger.info.call_count == 0
-        assert logger.error.call_count == 1
         assert prediction_response == exp_prediction_response
         stub.GetPrediction.assert_awaited_once_with(
             self.__data_to_grpc_message(self.valid_email_data, pb2.PredictionRequest()), timeout=120
@@ -161,24 +150,21 @@ class TestEmailTaggerClient:
             {"message": mock_metric_response}, pb2.SaveMetricsResponse()
         )
 
-        logger = Mock()
-
         stub = Mock()
-        stub.SaveMetrics = CoroutineMock(return_value=mock_stub_metric_response)
+        stub.SaveMetrics = AsyncMock(return_value=mock_stub_metric_response)
 
         exp_save_metric_response = {
             "body": mock_metric_response,
             "status": 200,
         }
 
-        kre_client = EmailTaggerClient(logger, testconfig)
+        kre_client = EmailTaggerClient(testconfig)
 
         with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
             save_metrics_response = await kre_client.save_metrics(
                 email_data=self.valid_metrics_data["original_email"], ticket_data=self.valid_metrics_data["ticket"]
             )
 
-            assert logger.info.call_count == 1
             assert save_metrics_response == exp_save_metric_response
             stub.SaveMetrics.assert_awaited_once_with(
                 self.__data_to_grpc_message(self.valid_metrics_data, pb2.SaveMetricsRequest()), timeout=120
@@ -187,10 +173,8 @@ class TestEmailTaggerClient:
     @pytest.mark.parametrize("grpc_code, grpc_detail, expected_status", grpc_errors_cases, ids=grpc_errors_cases_ids)
     @pytest.mark.asyncio
     async def post_automation_metrics_exception_errors_test(self, grpc_code, grpc_detail, expected_status):
-        logger = Mock()
-
         stub = Mock()
-        stub.SaveMetrics = CoroutineMock()
+        stub.SaveMetrics = AsyncMock()
         stub.SaveMetrics.side_effect = self.__mock_grpc_exception(grpc_code, grpc_detail)
 
         exp_save_metric_response = {
@@ -198,15 +182,13 @@ class TestEmailTaggerClient:
             "status": expected_status,
         }
 
-        kre_client = EmailTaggerClient(logger, testconfig)
+        kre_client = EmailTaggerClient(testconfig)
 
         with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
             save_metrics_response = await kre_client.save_metrics(
                 email_data=self.valid_metrics_data["original_email"], ticket_data=self.valid_metrics_data["ticket"]
             )
 
-        assert logger.info.call_count == 0
-        assert logger.error.call_count == 1
         assert save_metrics_response == exp_save_metric_response
         stub.SaveMetrics.assert_awaited_once_with(
             self.__data_to_grpc_message(self.valid_metrics_data, pb2.SaveMetricsRequest()), timeout=120
@@ -215,10 +197,8 @@ class TestEmailTaggerClient:
     @pytest.mark.asyncio
     async def post_automation_metrics_exception_test(self):
         raised_error = "Error current exception test"
-        logger = Mock()
-
         stub = Mock()
-        stub.SaveMetrics = CoroutineMock()
+        stub.SaveMetrics = AsyncMock()
         stub.SaveMetrics.side_effect = Exception(raised_error)
 
         exp_save_metric_response = {
@@ -226,15 +206,13 @@ class TestEmailTaggerClient:
             "status": 500,
         }
 
-        kre_client = EmailTaggerClient(logger, testconfig)
+        kre_client = EmailTaggerClient(testconfig)
 
         with patch.object(pb2_grpc, "EntrypointStub", return_value=stub):
             save_metrics_response = await kre_client.save_metrics(
                 email_data=self.valid_metrics_data["original_email"], ticket_data=self.valid_metrics_data["ticket"]
             )
 
-        assert logger.info.call_count == 0
-        assert logger.error.call_count == 1
         assert save_metrics_response == exp_save_metric_response
         stub.SaveMetrics.assert_awaited_once_with(
             self.__data_to_grpc_message(self.valid_metrics_data, pb2.SaveMetricsRequest()), timeout=120

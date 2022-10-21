@@ -1,8 +1,8 @@
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
+
 from application.repositories.email_tagger_repository import EmailTaggerRepository
-from asynctest import CoroutineMock
 
 
 class TestEmailTaggerRepository:
@@ -28,12 +28,10 @@ class TestEmailTaggerRepository:
     valid_tag_ids = [3, 2, 1]
 
     def instance_test(self):
-        logger = Mock()
         client = Mock()
 
-        repository = EmailTaggerRepository(logger, client)
+        repository = EmailTaggerRepository(client)
 
-        assert repository._logger is logger
         assert repository._kre_client is client
 
     @pytest.mark.asyncio
@@ -54,46 +52,42 @@ class TestEmailTaggerRepository:
             "status": 200,
         }
 
-        logger = Mock()
-
         kre_client = Mock()
-        kre_client.get_prediction = CoroutineMock(return_value=prediction_mock)
+        kre_client.get_prediction = AsyncMock(return_value=prediction_mock)
 
-        kre_repository = EmailTaggerRepository(logger, kre_client)
-        prediction = await kre_repository.get_prediction(email_data=self.valid_email_data)
+        email_tagger_repository = EmailTaggerRepository(kre_client)
+        prediction = await email_tagger_repository.get_prediction(email_data=self.valid_email_data)
 
-        kre_repository._kre_client.get_prediction.assert_awaited_once_with(self.valid_email_data)
+        email_tagger_repository._kre_client.get_prediction.assert_awaited_once_with(self.valid_email_data)
         assert prediction == expected_prediction
 
     @pytest.mark.asyncio
     async def get_prediction_not_200_from_client_test(self):
         expected_response = {"body": "Error from get_prediction client", "status": 500}
 
-        logger = Mock()
         kre_client = Mock()
-        kre_client.get_prediction = CoroutineMock(return_value=expected_response)
+        kre_client.get_prediction = AsyncMock(return_value=expected_response)
 
-        kre_repository = EmailTaggerRepository(logger, kre_client)
+        email_tagger_repository = EmailTaggerRepository(kre_client)
 
-        response = await kre_repository.get_prediction(self.valid_email_data)
+        response = await email_tagger_repository.get_prediction(self.valid_email_data)
 
-        kre_repository._kre_client.get_prediction.assert_awaited_once_with(self.valid_email_data)
+        email_tagger_repository._kre_client.get_prediction.assert_awaited_once_with(self.valid_email_data)
         assert response == expected_response
 
     @pytest.mark.asyncio
     async def save_metrics_test(self):
         return_value = {"body": "Saved 1 metrics", "status": 200}
 
-        logger = Mock()
         kre_client = Mock()
-        kre_client.save_metrics = CoroutineMock(return_value=return_value)
+        kre_client.save_metrics = AsyncMock(return_value=return_value)
 
-        kre_repository = EmailTaggerRepository(logger, kre_client)
+        email_tagger_repository = EmailTaggerRepository(kre_client)
 
-        save_metrics_response = await kre_repository.save_metrics(
+        save_metrics_response = await email_tagger_repository.save_metrics(
             email_data=self.valid_metrics_data["original_email"], ticket_data=self.valid_metrics_data["ticket"]
         )
-        kre_repository._kre_client.save_metrics.assert_awaited_once_with(
+        email_tagger_repository._kre_client.save_metrics.assert_awaited_once_with(
             self.valid_metrics_data["original_email"],
             self.valid_metrics_data["ticket"],
         )

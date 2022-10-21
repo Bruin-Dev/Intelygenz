@@ -1,44 +1,49 @@
 import json
+import logging
+
+from nats.aio.msg import Msg
+
+from application.repositories.utils_repository import to_json_bytes
+
+logger = logging.getLogger(__name__)
 
 
 class SaveMetrics:
-    def __init__(self, logger, config, event_bus, repository):
-        self._config = config
-        self._logger = logger
-        self._event_bus = event_bus
-        self._kre_repository = repository
+    def __init__(self, repository):
+        self._email_tagger_repository = repository
 
-    async def save_metrics(self, msg: dict):
-        request_id = msg["request_id"]
-        response_topic = msg["response_topic"]
+    async def __call__(self, msg: Msg):
+        payload = json.loads(msg.data)
+
+        request_id = payload["request_id"]
         response = {"request_id": request_id, "body": None, "status": None}
+        payload = payload.get("body")
 
         err_body = 'You must specify {.."body": {"original_email": {...}, "ticket": {...}}} in the request'
-        msg_body = msg.get("body")
-        if not msg_body:
-            self._logger.error(f"Cannot post automation metrics using {json.dumps(msg)}. JSON malformed")
+        if not payload:
+            logger.error(f"Cannot post automation metrics using {json.dumps(payload)}. JSON malformed")
             response["body"] = err_body
             response["status"] = 400
-            await self._event_bus.publish_message(response_topic, response)
+            await msg.respond(to_json_bytes(response))
             return
 
-        if not all(key in msg_body.keys() for key in ("original_email", "ticket")):
-            self._logger.error(
-                f"Cannot save metrics using {json.dumps(msg_body)}. Need parameter 'original_email' and 'ticket'"
+        if not all(key in payload.keys() for key in ("original_email", "ticket")):
+            logger.error(
+                f"Cannot save metrics using {json.dumps(payload)}. Need parameter 'original_email' and 'ticket'"
             )
             response["body"] = err_body
             response["status"] = 400
-            await self._event_bus.publish_message(response_topic, response)
+            await msg.respond(to_json_bytes(response))
             return
 
-        email_data = msg_body.get("original_email")
-        ticket_data = msg_body.get("ticket")
-        post_metrics_response = await self._kre_repository.save_metrics(email_data, ticket_data)
+        email_data = payload.get("original_email")
+        ticket_data = payload.get("ticket")
+        post_metrics_response = await self._email_tagger_repository.save_metrics(email_data, ticket_data)
         response = {
-            "request_id": msg["request_id"],
+            "request_id": request_id,
             "body": post_metrics_response["body"],
             "status": post_metrics_response["status"],
         }
 
-        await self._event_bus.publish_message(msg["response_topic"], response)
-        self._logger.info(f'Metrics posted for email {email_data["email"]["email_id"]} published in event bus!')
+        await msg.respond(to_json_bytes(response))
+        logger.info(f'Metrics posted for email {email_data["email"]["email_id"]} published in event bus!')
