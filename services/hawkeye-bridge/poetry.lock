@@ -8,7 +8,7 @@ python-versions = ">=3.7,<4.0"
 
 [[package]]
 name = "aiohttp"
-version = "3.8.0"
+version = "3.8.3"
 description = "Async http client/server framework (asyncio)"
 category = "main"
 optional = false
@@ -519,7 +519,7 @@ twisted = ["twisted"]
 
 [[package]]
 name = "prompt-toolkit"
-version = "3.0.32"
+version = "3.0.33"
 description = "Library for building powerful interactive command lines in Python"
 category = "dev"
 optional = false
@@ -802,7 +802,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "3.10.4"
-content-hash = "694a5941e86011d33e607659ae7bf6e416b262d50d75b8266a456dd1207bcb6a"
+content-hash = "e0f2873695011071bbd2394714ecaa9029b7db360712d5c6d702ceada3c3aadb"
 
 [metadata.files]
 aiofiles = []
