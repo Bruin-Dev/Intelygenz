@@ -1,21 +1,26 @@
 import asyncio
+import json
+import logging
 from datetime import datetime, timedelta
 
 from apscheduler.jobstores.base import ConflictingIdError
 from pytz import timezone
 from shortuuid import uuid
 
+from application.repositories.utils_repository import to_json_bytes
+
+logger = logging.getLogger(__name__)
+
 
 class StoreLinkMetrics:
-    def __init__(self, logger, config, event_bus, mongo_client, scheduler):
-        self._logger = logger
+    def __init__(self, config, nats_client, mongo_client, scheduler):
         self._config = config
-        self._event_bus = event_bus
+        self._nats_client = nats_client
         self._mongo_client = mongo_client
         self._scheduler = scheduler
 
     async def start_links_metrics_collector(self):
-        self._logger.info("Scheduling links metrics collector job...")
+        logger.info("Scheduling links metrics collector job...")
         tz = timezone(self._config.SCHEDULER_TIMEZONE)
         next_run_time = datetime.now(tz)
         try:
@@ -28,10 +33,10 @@ class StoreLinkMetrics:
                 id="_links_metrics_collector_job",
             )
         except ConflictingIdError as conflict:
-            self._logger.info(f"Skipping start of links metrics collector job. Reason: {conflict}")
+            logger.info(f"Skipping start of links metrics collector job. Reason: {conflict}")
 
     async def _store_links_metrics(self):
-        self._logger.info(
+        logger.info(
             f"Getting all edges metrics for velo: {self._config.VELO_HOST} and client"
             f" {self._config.OREILLY_CLIENT_ID}"
         )
@@ -42,19 +47,19 @@ class StoreLinkMetrics:
         all_edges = await self._get_all_velo_edges(self._config.VELO_HOST, self._config.OREILLY_CLIENT_ID)
         edge_ids_w_link = [edge["id"] for edge in all_edges if edge["links"] != []]
         no_link_edges = [edge["id"] for edge in all_edges if edge["links"] == []]
-        self._logger.info(f"Edges with links: {edge_ids_w_link}")
-        self._logger.info(f"Edges without links (won't be processed): {no_link_edges}")
+        logger.info(f"Edges with links: {edge_ids_w_link}")
+        logger.info(f"Edges without links (won't be processed): {no_link_edges}")
 
         process_tasks = [
             self._get_edge_links_series(self._config.VELO_HOST, edge_id, start, end) for edge_id in edge_ids_w_link
         ]
         all_series = await asyncio.gather(*process_tasks, return_exceptions=False)
         curated_series = [series for series in all_series if series != []]
-        self._logger.info(f"Got {len(curated_series)} after removing series with empty responses, inserting in mongo")
+        logger.info(f"Got {len(curated_series)} after removing series with empty responses, inserting in mongo")
         for series in curated_series:
             insert_data = {"velo": self._config.VELO_HOST, "series": series, "start_date": start, "end_date": end}
             self._mongo_client.insert(insert_data)
-        self._logger.info(f"All series data inserted in mongo successfully!")
+        logger.info(f"All series data inserted in mongo successfully!")
 
     async def _get_all_velo_edges(self, host, enterprise_id):
         err_msg = None
@@ -63,9 +68,10 @@ class StoreLinkMetrics:
             "body": {"host": host, "enterprise_id": enterprise_id},
         }
         try:
-            self._logger.info(f"Getting all edges for {host} and enterprise: {enterprise_id}")
-            response = await self._event_bus.rpc_request("request.enterprises.edges", request, timeout=20)
-            self._logger.info(f"Got all edges Velocloud host {host} and enterprise {enterprise_id}!")
+            logger.info(f"Getting all edges for {host} and enterprise: {enterprise_id}")
+            response = await self._nats_client.request("request.enterprises.edges", to_json_bytes(request), timeout=20)
+            response = json.loads(response.data)
+            logger.info(f"Got all edges Velocloud host {host} and enterprise {enterprise_id}!")
         except Exception as e:
             err_msg = f"An error occurred when getting all edges from Velocloud -> {e}"
             response = None
@@ -80,7 +86,7 @@ class StoreLinkMetrics:
                 )
 
         if err_msg:
-            self._logger.error(err_msg)
+            logger.error(err_msg)
         return response["body"]
 
     async def _get_edge_links_series(self, host, edge_id, start, end):
@@ -99,9 +105,10 @@ class StoreLinkMetrics:
             },
         }
         try:
-            self._logger.info(f"Getting links series for {payload}")
-            response = await self._event_bus.rpc_request("request.edge.links.series", request, timeout=60)
-            self._logger.info(f"Got link series for {payload}!")
+            logger.info(f"Getting links series for {payload}")
+            response = await self._nats_client.request("request.edge.links.series", to_json_bytes(request), timeout=60)
+            response = json.loads(response.data)
+            logger.info(f"Got link series for {payload}!")
         except Exception as e:
             err_msg = f"An error occurred getting link metrics from Velocloud for {payload} -> {e}"
             response = None
@@ -116,5 +123,5 @@ class StoreLinkMetrics:
                 )
 
         if err_msg:
-            self._logger.error(err_msg)
+            logger.error(err_msg)
         return response["body"]

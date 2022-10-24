@@ -11,8 +11,9 @@ links-metrics-collector-linter:
         - services/links-metrics-collector/src/config/**/*
         - services/links-metrics-collector/src/app.py
         - services/links-metrics-collector/Dockerfile
-        - services/links-metrics-collector/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/links-metrics-collector/pyproject.toml
+        - services/links-metrics-collector/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(refactor|feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(refactor|feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
@@ -31,8 +32,9 @@ links-metrics-collector-build:
         - services/links-metrics-collector/src/config/**/*
         - services/links-metrics-collector/src/app.py
         - services/links-metrics-collector/Dockerfile
-        - services/links-metrics-collector/requirements.txt
-        - pyutils_automation/py36/**/*
+        - services/links-metrics-collector/pyproject.toml
+        - services/links-metrics-collector/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $LINKS_METRICS_COLLECTOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:
