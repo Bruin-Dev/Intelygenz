@@ -42,7 +42,7 @@ class MyMongoClient:
     def insert(self, json_data: dict):
         logger.info(f"Inserting data in mongo...")
         db = self._client.get_default_database()
-        list_collections = db.collection_names()
+        list_collections = db.list_collection_names()
         if "links_series" in list_collections:
             logger.info(f"The collection tickets on database links_series exists on mongodb.")
         else:
