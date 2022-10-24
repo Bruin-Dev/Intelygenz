@@ -17,10 +17,7 @@ class EmailTaggerClient:
 
     async def _create_stub(self):
         if self._config.KRE_CONFIG["grpc_secure_mode"]:
-            certificates_file = open("/tmp/root-certificates.txt", "a+")
-            certificates_file.seek(0)
-            root_certificates = bytes(certificates_file.read(), "utf-8")
-            credentials = grpc.ssl_channel_credentials(root_certificates=root_certificates)
+            credentials = grpc.ssl_channel_credentials()
             c = grpc_aio.secure_channel(f"{self._config.KRE_CONFIG['base_url']}", credentials=credentials)
         else:
             # NOTE: To be used with KRE local env
