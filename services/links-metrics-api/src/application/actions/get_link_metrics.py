@@ -36,8 +36,7 @@ METRICS_LIST = [
 
 
 class GetLinkMetrics:
-    def __init__(self, logger, config, mongo_client):
-        self._logger = logger
+    def __init__(self, config, mongo_client):
         self._config = config
         self._mongo_client = mongo_client
 

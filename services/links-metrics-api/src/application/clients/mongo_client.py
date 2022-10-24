@@ -1,9 +1,12 @@
+import logging
+
 from motor.motor_asyncio import AsyncIOMotorClient
+
+logger = logging.getLogger(__name__)
 
 
 class MyMongoClient:
-    def __init__(self, logger, config):
-        self._logger = logger
+    def __init__(self, config):
         self._config = config
         self._client = self._connect_to_mongo()
 
@@ -21,23 +24,23 @@ class MyMongoClient:
         else:
             conn_string = f"mongodb://{username}:{password}@{url}:{port}/velocloud?authSource=admin"
 
-        self._logger.info(
+        logger.info(
             f"Connecting to mongo using: {conn_string}, current environment: {self._config.CURRENT_ENVIRONMENT}"
         )
         try:
             client = AsyncIOMotorClient(conn_string)
             # ping the server here to check login was successful
             client.server_info()
-            self._logger.info(f"Connected to mongo!")
+            logger.info(f"Connected to mongo!")
 
         except Exception as err:
-            self._logger.error(err)
+            logger.error(err)
             raise ValueError("Could not connect to MongoDB!")
         return client
 
     async def get_from_interval(self, interval_start, interval_end):
         # start and end are datetime isoformat objects
-        self._logger.info(f"Trying to fetch data from {interval_start} to {interval_end}")
+        logger.info(f"Trying to fetch data from {interval_start} to {interval_end}")
         db = self._client.get_default_database()
 
         cursor = db["links_series"].find(
@@ -53,5 +56,5 @@ class MyMongoClient:
             del doc["_id"]
             result.append(doc)
 
-        self._logger.info(f"Data fetched from mongo successfully!")
+        logger.info(f"Data fetched from mongo successfully!")
         return result

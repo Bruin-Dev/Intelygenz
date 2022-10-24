@@ -11,7 +11,9 @@ links-metrics-api-linter:
         - services/links-metrics-api/src/config/**/*
         - services/links-metrics-api/src/app.py
         - services/links-metrics-api/Dockerfile
-        - services/links-metrics-api/requirements.txt
+        - services/links-metrics-api/pyproject.toml
+        - services/links-metrics-api/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(refactor|feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(refactor|feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
@@ -30,7 +32,9 @@ links-metrics-api-build:
         - services/links-metrics-api/src/config/**/*
         - services/links-metrics-api/src/app.py
         - services/links-metrics-api/Dockerfile
-        - services/links-metrics-api/requirements.txt
+        - services/links-metrics-api/pyproject.toml
+        - services/links-metrics-api/poetry.lock
+        - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $LINKS_METRICS_API_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   extends: .build_app_image
   needs:

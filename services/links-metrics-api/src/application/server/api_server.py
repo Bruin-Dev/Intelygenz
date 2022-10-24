@@ -11,6 +11,10 @@ MEGABYTE: int = 1024 * 1024
 MAX_CONTENT_LENGTH = 16 * MEGABYTE  # 16mb
 SHA256_PREFIX = re.compile(r"^sha256=")
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class APIServer:
     _title = None
@@ -18,9 +22,8 @@ class APIServer:
     _hypercorn_config = None
     _new_bind = None
 
-    def __init__(self, logger, config, get_link_metrics):
+    def __init__(self, config, get_link_metrics):
         self._config = config
-        self._logger = logger
         self._get_link_metrics = get_link_metrics
         self._max_content_length = MAX_CONTENT_LENGTH
         self._title = config.QUART_CONFIG["title"]
@@ -30,7 +33,7 @@ class APIServer:
 
         self._hypercorn_config = HyperCornConfig()
 
-        self._logger.info(f"env: {os.environ}")
+        logger.info(f"env: {os.environ}")
         self._new_bind = f"0.0.0.0:{self._port}"
         self._app = Pint(__name__, title=self._title, no_openapi=True)
         API_REF = self._app
@@ -41,7 +44,7 @@ class APIServer:
 
         @API_REF.route(f"{self._endpoint_prefix}/metrics", methods=["GET"])
         async def _get_link_metrics():
-            self._logger.info(f"Getting request: {request.url}")
+            logger.info(f"Getting request: {request.url}")
             start_date = request.args.get("start_date")
             end_date = request.args.get("end_date")
             if not end_date or not start_date:
@@ -61,5 +64,5 @@ class APIServer:
 
     async def run_server(self):
         self._hypercorn_config.bind = [self._new_bind]
-        self._logger.info(f"Starting API in port {self._port}")
+        logger.info(f"Starting API in port {self._port}")
         await serve(self._app, self._hypercorn_config)

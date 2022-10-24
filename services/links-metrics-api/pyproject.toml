@@ -1,0 +1,39 @@
+[tool.poetry]
+name = "links-metrics-api"
+version = "1.0.0"
+description = "MetTel's Automation service for Links Metrics API"
+authors = ["Intelygenz"]
+
+[tool.poetry.dependencies]
+python = "3.10.4"
+framework = {path = "../../pyutils_automation/py310", develop = false}
+prometheus-client = "0.14.1"
+python-dateutil = "2.8.2"
+motor = "3.0.0"
+pyhumps = "3.7.2"
+Quart-CORS = "0.5.0"
+quart-openapi = "1.6.0"
+Werkzeug = "2.1.2"
+
+[tool.poetry.dev-dependencies]
+framework = {path = "../../pyutils_automation/py310", develop = true}
+black = "22.3.0"
+isort = "5.10.1"
+ipython = "8.4.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+target-version = ["py310"]
+line-length = 120
+
+[tool.isort]
+py_version=310
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+line_length = 120
