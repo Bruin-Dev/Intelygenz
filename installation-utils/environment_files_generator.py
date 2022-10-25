@@ -26,10 +26,15 @@ response_iterator = paginator.paginate(Path="/automation-engine", Recursive=True
 parameters = {}
 
 print("Getting parameters from AWS")
+
 for response in response_iterator:
     for parameter in response["Parameters"]:
         name = parameter["Name"].replace("/automation-engine/", "")
         set_parameter(parameters, name.split("/"), parameter["Value"])
+
+        if parameter["Value"] == "-":
+            print(f"Parameter {parameter['Name']} is empty, please update it on AWS!")
+
 print("Finished getting parameters")
 
 # Shared variables
