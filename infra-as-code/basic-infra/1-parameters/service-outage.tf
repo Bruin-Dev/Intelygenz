@@ -77,46 +77,6 @@ resource "aws_ssm_parameter" "parameter-service-outage-monitor-grace-period-befo
   })
 }
 
-resource "aws_ssm_parameter" "parameter-service-outage-monitor-link-labels-blacklisted-in-asr-forwards" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
-  name        = "/automation-engine/common/service-outage/monitor/link-labels-blacklisted-in-asr-forwards"
-  description = "List of link labels that are excluded from forwards to the ASR queue"
-  type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
-
-  lifecycle {
-    ignore_changes = [
-      value,
-    ]
-  }
-
-  tags = merge(var.common_info, {
-    Name = "MONITORING__LINK_LABELS_BLACKLISTED_IN_ASR_FORWARDS"
-    note = "can be updated from the parameter store dashboard"
-  })
-}
-
-resource "aws_ssm_parameter" "parameter-service-outage-monitor-link-labels-blacklisted-in-hnoc-forwards" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
-  name        = "/automation-engine/common/service-outage/monitor/link-labels-blacklisted-in-hnoc-forwards"
-  description = "List of link labels that are excluded from forwards to the HNOC queue"
-  type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
-
-  lifecycle {
-    ignore_changes = [
-      value,
-    ]
-  }
-
-  tags = merge(var.common_info, {
-    Name = "MONITORING__LINK_LABELS_BLACKLISTED_IN_HNOC_FORWARDS"
-    note = "can be updated from the parameter store dashboard"
-  })
-}
-
 resource "aws_ssm_parameter" "parameter-service-outage-monitor-max-autoresolves-per-ticket" {
   count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-outage/monitor/max-autoresolves-per-ticket"
