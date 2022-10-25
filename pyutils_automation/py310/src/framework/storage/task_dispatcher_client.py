@@ -35,20 +35,21 @@ class TaskDispatcherClient:
         zkey = f"{self._redis_key_prefix}-z-{task_type.value}"
         timestamp = datetime.utcnow().timestamp()
 
-        task_keys = self._redis.zrangebyscore(zkey, 0, timestamp)
-        tasks = []
+        tasks = self._redis.zrangebyscore(zkey, 0, timestamp, withscores=True)
+        tasks_with_data = []
 
-        for task_key in task_keys:
+        for task_key, task_score in tasks:
             task_data = self._get_task_data(task_type, task_key)
-            tasks.append(
+            tasks_with_data.append(
                 {
+                    "timestamp": task_score,
                     "type": task_type,
                     "key": task_key,
                     "data": task_data,
                 }
             )
 
-        return tasks
+        return tasks_with_data
 
     def _get_task_data(self, task_type: TaskTypes, task_key: str) -> dict:
         hkey = f"{self._redis_key_prefix}-h-{task_type.value}"
