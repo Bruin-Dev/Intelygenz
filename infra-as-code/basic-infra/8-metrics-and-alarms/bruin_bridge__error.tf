@@ -18,7 +18,7 @@ resource "aws_cloudwatch_metric_alarm" "bruin-bridge-too-many-errors" {
   namespace                 = "mettel_automation/alarms"
   period                    = "3600"
   statistic                 = "Sum"
-  threshold                 = "100"
+  threshold                 = "1000"
   alarm_description         = "Triggers an alarm if the Bruin Bridge reported too many errors"
   insufficient_data_actions = []
   actions_enabled           = "true"
