@@ -206,7 +206,7 @@ class OutageMonitor:
                     edge
                     for edge in relevant_down_edges
                     if outage_type in [Outages.LINK_DOWN, Outages.HA_LINK_DOWN]
-                    if self._config.VELOCLOUD_HOST == "metvco04.mettel.net"
+                    if edge["cached_info"]["edge"]["host"] == "metvco04.mettel.net"
                     if self._has_business_grade_link_down(edge["status"]["links"])
                 ]
                 business_grade_tasks = [
@@ -628,8 +628,13 @@ class OutageMonitor:
 
     def _get_hnoc_forward_time_by_outage_type(self, outage_type: Outages, edge: dict) -> float:
         if outage_type in [Outages.LINK_DOWN, Outages.HA_LINK_DOWN]:
-            max_seconds_since_last_outage = self._get_max_seconds_since_last_outage(edge)
-            return max_seconds_since_last_outage / 60
+            if edge["cached_info"]["edge"]["host"] == "metvco04.mettel.net" and self._has_business_grade_link_down(
+                edge["status"]["links"]
+            ):
+                return self._config.MONITOR_CONFIG["jobs_intervals"]["forward_to_hnoc_business_grade"]
+            else:
+                max_seconds_since_last_outage = self._get_max_seconds_since_last_outage(edge)
+                return max_seconds_since_last_outage / 60
         else:
             return self._config.MONITOR_CONFIG["jobs_intervals"]["forward_to_hnoc_edge_down"]
 

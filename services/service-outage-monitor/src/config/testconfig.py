@@ -41,6 +41,7 @@ MONITOR_CONFIG = {
     "jobs_intervals": {
         "outage_monitor": 60 * 3,
         "forward_to_hnoc_edge_down": 1,
+        "forward_to_hnoc_business_grade": 1,
     },
     "quarantine": {
         Outages.LINK_DOWN: 5,
