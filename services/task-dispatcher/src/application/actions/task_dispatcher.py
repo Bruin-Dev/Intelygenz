@@ -64,17 +64,29 @@ class TaskDispatcher:
 
     async def _dispatch_task(self, task: dict):
         logger.info(f"Dispatching task of type {task['type'].value} for key {task['key']}...")
-        success = False
 
         if task["type"] == TaskTypes.TICKET_FORWARDS:
             success = await self._forward_ticket(**task["data"])
+        else:
+            return
 
-        result = "success" if success else "error"
+        if success:
+            self._task_dispatcher_client.clear_task(task["type"], task["key"])
+            logger.info(f"Task of type {task['type'].value} for key {task['key']} was completed!")
+            await self._publish_result(task, "success")
+        elif datetime.utcnow().timestamp() - task["timestamp"] < self._config.DISPATCH_CONFIG["ttl"]:
+            logger.error(f"Task of type {task['type'].value} for key {task['key']} failed, retrying on the next run")
+        else:
+            self._task_dispatcher_client.clear_task(task["type"], task["key"])
+            logger.error(
+                f"Task of type {task['type'].value} for key {task['key']} could not be completed "
+                f"after {self._config.DISPATCH_CONFIG['ttl'] // 60 // 60} hours"
+            )
+            await self._publish_result(task, "error")
+
+    async def _publish_result(self, task: dict, result: str):
         topic = f"task_dispatcher.{task['data']['service']}.{task['type'].value}.{result}"
         await self._nats_client.publish(topic, to_json_bytes(task["data"]))
-
-        self._task_dispatcher_client.clear_task(task["type"], task["key"])
-        logger.info(f"Task of type {task['type'].value} for key {task['key']} was completed!")
 
     async def _forward_ticket(
         self, target_queue: str, ticket_id: int, detail_id: int = None, serial_number: str = None, **_kwargs
