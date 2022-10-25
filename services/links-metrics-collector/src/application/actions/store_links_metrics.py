@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+from asyncio import BoundedSemaphore
 from datetime import datetime, timedelta
 
 from apscheduler.jobstores.base import ConflictingIdError
@@ -18,6 +19,8 @@ class StoreLinkMetrics:
         self._nats_client = nats_client
         self._mongo_client = mongo_client
         self._scheduler = scheduler
+
+        self._semaphore = BoundedSemaphore(10)
 
     async def start_links_metrics_collector(self):
         logger.info("Scheduling links metrics collector job...")
@@ -90,38 +93,42 @@ class StoreLinkMetrics:
         return response["body"]
 
     async def _get_edge_links_series(self, host, edge_id, start, end):
-        err_msg = None
-        payload = {
-            "enterpriseId": 22,
-            "edgeId": edge_id,
-            "interval": {"start": start, "end": end},
-            "metrics": self._config.METRICS_LIST,
-        }
-        request = {
-            "request_id": uuid(),
-            "body": {
-                "host": host,
-                "payload": payload,
-            },
-        }
-        try:
-            logger.info(f"Getting links series for {payload}")
-            response = await self._nats_client.request("request.edge.links.series", to_json_bytes(request), timeout=60)
-            response = json.loads(response.data)
-            logger.info(f"Got link series for {payload}!")
-        except Exception as e:
-            err_msg = f"An error occurred getting link metrics from Velocloud for {payload} -> {e}"
-            response = None
-        else:
-            response_body = response["body"]
-            response_status = response["status"]
-
-            if response_status not in range(200, 300):
-                err_msg = (
-                    f"Error while retrieving link series for {payload} in {self._config.CURRENT_ENVIRONMENT.upper()} "
-                    f"environment: Error {response_status} - {response_body}"
+        async with self._semaphore:
+            err_msg = None
+            payload = {
+                "enterpriseId": 22,
+                "edgeId": edge_id,
+                "interval": {"start": start, "end": end},
+                "metrics": self._config.METRICS_LIST,
+            }
+            request = {
+                "request_id": uuid(),
+                "body": {
+                    "host": host,
+                    "payload": payload,
+                },
+            }
+            try:
+                logger.info(f"Getting links series for {payload}")
+                response = await self._nats_client.request(
+                    "request.edge.links.series", to_json_bytes(request), timeout=60
                 )
+                response = json.loads(response.data)
+                logger.info(f"Got link series for {payload}!")
+            except Exception as e:
+                err_msg = f"An error occurred getting link metrics from Velocloud for {payload} -> {e}"
+                response = None
+            else:
+                response_body = response["body"]
+                response_status = response["status"]
 
-        if err_msg:
-            logger.error(err_msg)
-        return response["body"]
+                if response_status not in range(200, 300):
+                    err_msg = (
+                        f"Error while retrieving link series for {payload} in "
+                        f"{self._config.CURRENT_ENVIRONMENT.upper()} environment: "
+                        f"Error {response_status} - {response_body}"
+                    )
+
+            if err_msg:
+                logger.error(err_msg)
+            return response["body"]
