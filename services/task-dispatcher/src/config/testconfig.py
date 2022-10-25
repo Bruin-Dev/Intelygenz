@@ -28,6 +28,7 @@ TIMEZONE = "US/Eastern"
 
 DISPATCH_CONFIG = {
     "interval": 60,
+    "ttl": 3600,
 }
 
 METRICS_SERVER_CONFIG = {"port": 9090}

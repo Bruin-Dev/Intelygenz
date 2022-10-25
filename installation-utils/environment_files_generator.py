@@ -256,6 +256,7 @@ SERVICENOW__PASSWORD = parameters["common"]["servicenow-bridge"]["password"]
 
 # Task Dispatcher variables
 TASK_DISPATCHER__DISPATCHING_JOB_INTERVAL = parameters["common"]["task-dispatcher"]["dispatching-job-interval"]
+TASK_DISPATCHER__TASK_TTL = parameters["common"]["task-dispatcher"]["task-ttl"]
 
 # TNBA Feedback variables
 TNBA_FEEDBACK__FEEDBACK_JOB_INTERVAL = parameters["common"]["tnba-feedback"]["feedback-job-interval"]
@@ -830,6 +831,7 @@ env_dict = {
         f"PAPERTRAIL_PORT={PAPERTRAIL_PORT}",
         f"TIMEZONE={TIMEZONE}",
         f"DISPATCHING_JOB_INTERVAL={TASK_DISPATCHER__DISPATCHING_JOB_INTERVAL}",
+        f"TASK_TTL={TASK_DISPATCHER__TASK_TTL}",
     ],
 }
 

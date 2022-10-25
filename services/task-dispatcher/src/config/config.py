@@ -21,6 +21,7 @@ TIMEZONE = os.environ["TIMEZONE"]
 
 DISPATCH_CONFIG = {
     "interval": int(os.environ["DISPATCHING_JOB_INTERVAL"]),
+    "ttl": int(os.environ["TASK_TTL"]),
 }
 
 LOG_CONFIG = {
