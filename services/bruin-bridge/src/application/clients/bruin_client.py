@@ -1,12 +1,10 @@
 import base64
 import json
 import logging
-import ssl
 from http import HTTPStatus
 from typing import Dict
 
 import aiohttp
-import certifi
 import humps
 
 from application.clients.bruin_session import BruinGetRequest, BruinResponse, BruinSession
@@ -23,8 +21,6 @@ class BruinClient:
         self._config = config
 
         self._bearer_token = ""
-
-        self.__ssl_context = ssl.create_default_context(cafile=certifi.where())
 
     async def create_session(self):
         self._session = aiohttp.ClientSession(trace_configs=self._config.AIOHTTP_CONFIG["tracers"])
@@ -47,7 +43,6 @@ class BruinClient:
                 f'{self._config.BRUIN_CONFIG["login_url"]}/identity/connect/token',
                 data=form_data,
                 headers=headers,
-                ssl=self.__ssl_context,
             )
 
             self._bearer_token = (await response.json())["access_token"]
