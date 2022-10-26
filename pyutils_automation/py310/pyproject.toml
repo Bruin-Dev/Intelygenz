@@ -9,7 +9,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "3.10.4"
-nats-py = "2.0.0"
+nats-py = "2.2.0"
 quart = "0.17.0"
 tenacity = "8.0.1"
 shortuuid = "1.0.0"
