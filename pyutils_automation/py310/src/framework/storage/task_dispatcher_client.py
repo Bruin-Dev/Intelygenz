@@ -20,8 +20,8 @@ class TaskDispatcherClient:
         hkey = f"{self._redis_key_prefix}-h-{task_type.value}"
         timestamp = date.timestamp()
 
-        self._redis.zadd(zkey, {task_key: timestamp})
-        self._redis.hset(hkey, task_key, json.dumps(task_data))
+        self._redis.zadd(zkey, {task_key: timestamp}, nx=True)
+        self._redis.hsetnx(hkey, task_key, json.dumps(task_data))
 
     def clear_task(self, task_type: TaskTypes, task_key: str) -> int:
         zkey = f"{self._redis_key_prefix}-z-{task_type.value}"
