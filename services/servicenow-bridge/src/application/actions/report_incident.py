@@ -18,6 +18,7 @@ class ReportIncident:
         body = payload.get("body")
 
         if body is None:
+            log.error(f"Cannot report incident with {json.dumps(payload)}. Must include body in request")
             response["status"] = 400
             response["body"] = 'Must include "body" in the request'
             await msg.respond(json.dumps(response).encode())
