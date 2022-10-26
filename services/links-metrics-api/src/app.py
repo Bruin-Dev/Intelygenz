@@ -63,6 +63,8 @@ class Container:
         # Prometheus
         self._start_prometheus_metrics_server()
 
+        await self._mongo_client.create_connection()
+
         await self._api_server.run_server()
 
     @staticmethod

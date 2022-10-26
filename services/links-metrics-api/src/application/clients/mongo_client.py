@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -8,7 +9,10 @@ logger = logging.getLogger(__name__)
 class MyMongoClient:
     def __init__(self, config):
         self._config = config
-        self._client = self._connect_to_mongo()
+        self._client = None
+
+    async def create_connection(self):
+        self._connect_to_mongo()
 
     def _connect_to_mongo(self):
         username = self._config.MONGO_USERNAME
@@ -36,7 +40,8 @@ class MyMongoClient:
         except Exception as err:
             logger.error(err)
             raise ValueError("Could not connect to MongoDB!")
-        return client
+
+        self._client = client
 
     async def get_from_interval(self, interval_start, interval_end):
         # start and end are datetime isoformat objects
