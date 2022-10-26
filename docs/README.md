@@ -65,6 +65,7 @@
           3. [Notifications Bridge](logging/events/13-notifications-bridge.md)
           4. [Email Bridge](logging/events/14-email-bridge.md)
           5. [Service Now Bridge](logging/events/16-servicenow-bridge.md)
+          6. [Dri Bridge](logging/events/17-dri-bridge.md)
     2. Infrastructure
         1. [Lambda Parameter-Replicator](lambda/PARAMETER_REPLICATOR.md)
 
