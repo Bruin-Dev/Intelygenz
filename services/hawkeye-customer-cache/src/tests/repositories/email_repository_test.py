@@ -19,7 +19,7 @@ class TestEmailRepository:
 
     @pytest.mark.asyncio
     async def send_email_test(self, nats_client):
-        nats_client.request = AsyncMock()
+        nats_client.publish = AsyncMock()
         email_repository = EmailRepository(nats_client)
         email_data = {
             "request_id": uuid(),
@@ -37,6 +37,6 @@ class TestEmailRepository:
 
         await email_repository.send_email(email_data)
 
-        email_repository._nats_client.request.assert_awaited_once_with(
-            "notification.email.request", to_json_bytes(email_data), timeout=60
+        email_repository._nats_client.publish.assert_awaited_once_with(
+            "notification.email.request", to_json_bytes(email_data)
         )

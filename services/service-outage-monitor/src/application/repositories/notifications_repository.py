@@ -1,5 +1,6 @@
-from application.repositories.utils_repository import to_json_bytes
 from shortuuid import uuid
+
+from application.repositories.utils_repository import to_json_bytes
 
 
 class NotificationsRepository:
@@ -11,7 +12,7 @@ class NotificationsRepository:
             "request_id": uuid(),
             "body": {"message": message},
         }
-        await self._nats_client.request("notification.slack.request", to_json_bytes(message), timeout=10)
+        await self._nats_client.publish("notification.slack.request", to_json_bytes(message))
 
     async def notify_successful_reminder_note_append(self, ticket_id: int, serial_number: str):
         message = (

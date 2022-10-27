@@ -1,7 +1,9 @@
-from application.repositories.utils import to_json_bytes
 from dataclasses import dataclass
+
 from framework.nats.client import Client as NatsClient
 from shortuuid import uuid
+
+from application.repositories.utils import to_json_bytes
 
 
 @dataclass
@@ -14,4 +16,4 @@ class NotificationsRepository:
             "body": {"message": f"[repair-tickets-monitor] {message}"},
         }
 
-        await self._event_bus.request("notification.slack.request", to_json_bytes(message), timeout=10)
+        await self._event_bus.publish("notification.slack.request", to_json_bytes(message))

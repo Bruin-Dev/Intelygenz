@@ -1,9 +1,10 @@
 from unittest.mock import patch
 
 import pytest
+from shortuuid import uuid
+
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.utils import to_json_bytes
-from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_patch = patch("application.repositories.notifications_repository.uuid", return_value=uuid_)
@@ -22,7 +23,7 @@ class TestNotificationsRepository:
         with uuid_patch:
             await notifications_repository.send_slack_message(message)
 
-        event_bus.request.assert_awaited_once_with(
+        event_bus.publish.assert_awaited_once_with(
             "notification.slack.request",
             to_json_bytes(
                 {
@@ -30,5 +31,4 @@ class TestNotificationsRepository:
                     "body": {"message": f"[repair-tickets-monitor] {message}"},
                 }
             ),
-            timeout=10,
         )

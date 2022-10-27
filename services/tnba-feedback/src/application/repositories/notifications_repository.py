@@ -12,4 +12,4 @@ class NotificationsRepository:
             "request_id": uuid(),
             "body": {"message": message},
         }
-        await self._nats_client.request("notification.slack.request", to_json_bytes(message), timeout=10)
+        await self._nats_client.publish("notification.slack.request", to_json_bytes(message))

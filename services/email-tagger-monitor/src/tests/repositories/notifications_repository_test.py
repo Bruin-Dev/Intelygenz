@@ -24,14 +24,14 @@ class TestNotificationsRepository:
         message = "Some message"
 
         event_bus = Mock()
-        event_bus.request = AsyncMock()
+        event_bus.publish = AsyncMock()
 
         notifications_repository = NotificationsRepository(event_bus)
 
         with uuid_mock:
             await notifications_repository.send_slack_message(message)
 
-        event_bus.request.assert_awaited_once_with(
+        event_bus.publish.assert_awaited_once_with(
             "notification.slack.request",
             to_json_bytes(
                 {
@@ -39,5 +39,4 @@ class TestNotificationsRepository:
                     "body": {"message": f"[email-tagger-monitor] {message}"},
                 }
             ),
-            timeout=10,
         )

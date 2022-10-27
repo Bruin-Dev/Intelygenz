@@ -52,14 +52,14 @@ class TestEmailRepository:
         </html>
         """
 
-        email_repository_instance._nats_client.request = AsyncMock()
+        email_repository_instance._nats_client.publish = AsyncMock()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=datetime_now)
         with patch.object(email_repository_module, "datetime", new=datetime_mock):
             with uuid_mock:
                 await email_repository_instance.send_email("test.csv")
-        request = json.loads(email_repository_instance._nats_client.request.call_args.args[1].decode("utf-8"))
-        assert email_repository_instance._nats_client.request.call_args.args[0] == "notification.email.request"
+        request = json.loads(email_repository_instance._nats_client.publish.call_args.args[1].decode("utf-8"))
+        assert email_repository_instance._nats_client.publish.call_args.args[0] == "notification.email.request"
         assert request["body"]["email_data"]["html"] == html
 
         assert request["body"]["email_data"]["attachments"][0]["name"] == "digi_reboot_report.csv"

@@ -23,12 +23,12 @@ class TestNotificationsRepository:
     async def send_slack_message_test(self, notifications_repository):
         message = "Some message"
 
-        notifications_repository._nats_client.request = AsyncMock()
+        notifications_repository._nats_client.publish = AsyncMock()
 
         with uuid_mock:
             await notifications_repository.send_slack_message(message)
 
-        notifications_repository._nats_client.request.assert_awaited_once_with(
+        notifications_repository._nats_client.publish.assert_awaited_once_with(
             "notification.slack.request",
             to_json_bytes(
                 {
@@ -36,5 +36,4 @@ class TestNotificationsRepository:
                     "body": {"message": f"{message}"},
                 }
             ),
-            timeout=10,
         )

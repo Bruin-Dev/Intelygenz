@@ -14,7 +14,7 @@ uuid_mock = patch.object(email_repository_module, "uuid", return_value=uuid_)
 @pytest.fixture(scope="function")
 def mock_nats_client():
     nats_client = Mock()
-    nats_client.request = AsyncMock()
+    nats_client.publish = AsyncMock()
     return nats_client
 
 
@@ -45,6 +45,6 @@ class TestEmailRepository:
 
         await instance_email_repository.send_email(email_data)
 
-        instance_email_repository._nats_client.request.assert_awaited_once_with(
-            "notification.email.request", to_json_bytes(email_data), timeout=60
+        instance_email_repository._nats_client.publish.assert_awaited_once_with(
+            "notification.email.request", to_json_bytes(email_data)
         )

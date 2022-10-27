@@ -46,4 +46,4 @@ class EmailRepository:
                 }
             },
         }
-        await self._nats_client.request("notification.email.request", to_json_bytes(email_object), timeout=60)
+        await self._nats_client.publish("notification.email.request", to_json_bytes(email_object))

@@ -32,6 +32,6 @@ class TestEmailRepository:
 
         await email_repository.send_email(email_data)
 
-        email_repository._nats_client.request.assert_awaited_once_with(
-            "notification.email.request", to_json_bytes(email_data), timeout=60
+        email_repository._nats_client.publish.assert_awaited_once_with(
+            "notification.email.request", to_json_bytes(email_data)
         )

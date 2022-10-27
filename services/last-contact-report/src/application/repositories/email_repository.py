@@ -10,4 +10,4 @@ class EmailRepository:
         self._nats_client = nats_client
 
     async def send_email(self, email_object: dict):
-        await self._nats_client.request("notification.email.request", to_json_bytes(email_object), timeout=60)
+        await self._nats_client.publish("notification.email.request", to_json_bytes(email_object))

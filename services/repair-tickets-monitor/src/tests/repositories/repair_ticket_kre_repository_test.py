@@ -2,11 +2,12 @@ import asyncio
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from shortuuid import uuid
+
 from application.domain.repair_email_output import RepairEmailOutput, TicketOutput
 from application.repositories.repair_ticket_kre_repository import RepairTicketKreRepository
 from application.repositories.utils import to_json_bytes
 from config import testconfig as config
-from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_patch = patch("application.repositories.repair_ticket_kre_repository.uuid", return_value=uuid_)
@@ -166,7 +167,8 @@ class TestRepairTicketRepository:
             )
 
         event_bus.request.assert_awaited()
-        assert event_bus.request.await_count == 2
+        assert event_bus.request.await_count == 1
+        assert event_bus.publish.await_count == 1
         notifications_repository.send_slack_message.assert_awaited_once()
 
         assert response == error_response

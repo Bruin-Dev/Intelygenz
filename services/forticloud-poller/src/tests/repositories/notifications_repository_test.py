@@ -19,18 +19,17 @@ class TestNotificationsRepository:
     @pytest.mark.asyncio
     async def send_slack_message_test(self, notifications_repository):
         message = "Some message"
-        notifications_repository._nats_client.request = AsyncMock()
+        notifications_repository._nats_client.publish = AsyncMock()
 
         with uuid_mock:
             await notifications_repository.send_slack_message(message)
 
-        notifications_repository._nats_client.request.assert_awaited_once_with(
+        notifications_repository._nats_client.publish.assert_awaited_once_with(
             "notification.slack.request",
-            self.to_json_bytes({
-                "request_id": uuid_,
-                "body": {
-                    "message": f"[{notifications_repository._config.LOG_CONFIG['name']}]: {message}"
-                },
-            }),
-            timeout=10,
+            self.to_json_bytes(
+                {
+                    "request_id": uuid_,
+                    "body": {"message": f"[{notifications_repository._config.LOG_CONFIG['name']}]: {message}"},
+                }
+            ),
         )

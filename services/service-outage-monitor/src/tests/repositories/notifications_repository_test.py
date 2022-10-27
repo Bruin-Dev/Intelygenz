@@ -21,7 +21,7 @@ class TestNotificationsRepository:
         with uuid_mock:
             await notifications_repository.send_slack_message(message)
 
-        notifications_repository._nats_client.request.assert_awaited_once_with(
+        notifications_repository._nats_client.publish.assert_awaited_once_with(
             "notification.slack.request",
             to_json_bytes(
                 {
@@ -29,7 +29,6 @@ class TestNotificationsRepository:
                     "body": {"message": message},
                 }
             ),
-            timeout=10,
         )
 
     @pytest.mark.asyncio

@@ -15,4 +15,4 @@ class NotificationsRepository:
             "request_id": uuid(),
             "body": {"message": f"[email-tagger-monitor] {message}"},
         }
-        await self._event_bus.request("notification.slack.request", to_json_bytes(message), timeout=10)
+        await self._event_bus.publish("notification.slack.request", to_json_bytes(message))
