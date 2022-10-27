@@ -16,7 +16,8 @@ class TestGetEmails:
         response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
         email = "fake@gmail.com"
         email_filter = ["filter@gmail.com"]
-        lookup_days = hash("any_days")
+        lookup_days = 1
+        max_messages = None
         payload = {
             "request_id": request_id,
             "response_topic": response_topic,
@@ -24,6 +25,7 @@ class TestGetEmails:
                 "email_account": email,
                 "email_filter": email_filter,
                 "lookup_days": lookup_days,
+                "max_messages": max_messages,
             },
         }
         msg_mock = Mock(spec_set=Msg)
@@ -36,7 +38,7 @@ class TestGetEmails:
         await get_emails_action(msg_mock)
 
         get_emails_action._email_reader_repository.get_unread_emails.assert_awaited_once_with(
-            email, email_filter, lookup_days
+            email, email_filter, lookup_days, max_messages
         )
 
     @pytest.mark.asyncio

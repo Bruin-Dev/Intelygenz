@@ -19,5 +19,5 @@ logger.info(f"Search resp code: {search_resp_code}. Number of unseen messages: {
 ```
 
 ```python
-logger.info(f"Messages to process in next batch: {messages}")
+logger.info(f"Messages to process in next batch: {len(messages)}")
 ```

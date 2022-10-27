@@ -52,7 +52,12 @@ class EmailReaderClient:
         logger.info(f"Logged out from Gmail!")
 
     async def get_unread_messages(
-        self, email_account: str, email_password: str, email_filter: List[str], lookup_days: int
+        self,
+        email_account: str,
+        email_password: str,
+        email_filter: List[str],
+        lookup_days: int,
+        max_messages: int,
     ) -> List[Dict[str, str]]:
         email_server = self._login(email_account, email_password)
         if email_server is None:
@@ -64,7 +69,7 @@ class EmailReaderClient:
         unread_messages = []
         messages = []
         for sender_email in email_filter:
-            messages += await self._search_messages(sender_email, email_server, lookup_days)
+            messages += await self._search_messages(sender_email, email_server, lookup_days, max_messages)
 
         if messages:
             msgs = ",".join(m.decode("utf-8") for m in messages)
@@ -90,7 +95,7 @@ class EmailReaderClient:
         return unread_messages
 
     async def _search_messages(
-        self, sender_email: str, email_server: imaplib.IMAP4_SSL, lookup_days: int
+        self, sender_email: str, email_server: imaplib.IMAP4_SSL, lookup_days: int, max_messages: int
     ) -> List[bytes]:
 
         try:
@@ -107,7 +112,11 @@ class EmailReaderClient:
         if search_resp_code != "OK":
             logger.error(f"Unable to access the unread mails")
             return []
-        logger.info(f"Messages to process in next batch: {messages}")
+
+        if max_messages:
+            messages = messages[0:max_messages]
+
+        logger.info(f"Messages to process in next batch: {len(messages)}")
         return messages
 
     def _get_body(self, msg):

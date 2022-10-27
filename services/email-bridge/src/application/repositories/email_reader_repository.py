@@ -9,7 +9,9 @@ class EmailReaderRepository:
         self.config = config
         self._email_reader_client = email_reader_client
 
-    async def get_unread_emails(self, email_account: str, email_filter: List[str], lookup_days: int) -> Dict[str, Any]:
+    async def get_unread_emails(
+        self, email_account: str, email_filter: List[str], lookup_days: int, max_messages: int
+    ) -> Dict[str, Any]:
         status = 500
         if email_account in self.config.MONITORABLE_EMAIL_ACCOUNTS.keys():
             email_password = self.config.MONITORABLE_EMAIL_ACCOUNTS[email_account]
@@ -18,6 +20,7 @@ class EmailReaderRepository:
                 email_password,
                 email_filter,
                 lookup_days,
+                max_messages,
             )
 
             if len(unread_emails) == 0:

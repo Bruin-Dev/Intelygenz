@@ -14,7 +14,8 @@ class TestEmailReaderRepository:
     async def get_unread_emails_ok_test(self, email_reader_repository):
         email = "fake@gmail.com"
         email_filter = ["filter@gmail.com"]
-        lookup_days = hash("any_days")
+        lookup_days = 1
+        max_messages = None
 
         message_1 = {
             "message": {
@@ -50,10 +51,10 @@ class TestEmailReaderRepository:
             return_value=expected_unread_emails
         )
 
-        unread_emails = await email_reader_repository.get_unread_emails(email, email_filter, lookup_days)
+        unread_emails = await email_reader_repository.get_unread_emails(email, email_filter, lookup_days, max_messages)
 
         email_reader_repository._email_reader_client.get_unread_messages.assert_awaited_once_with(
-            email, config.MONITORABLE_EMAIL_ACCOUNTS[email], email_filter, lookup_days
+            email, config.MONITORABLE_EMAIL_ACCOUNTS[email], email_filter, lookup_days, max_messages
         )
         assert unread_emails == expected_unread_emails_response
 
@@ -61,7 +62,8 @@ class TestEmailReaderRepository:
     async def get_unread_emails_ko_all_failed_unread_emails_test(self, email_reader_repository):
         email = "fake@gmail.com"
         email_filter = ["filter@gmail.com"]
-        lookup_days = hash("any_days")
+        lookup_days = 1
+        max_messages = None
 
         message_2 = {
             "message": None,
@@ -81,10 +83,10 @@ class TestEmailReaderRepository:
             return_value=expected_unread_emails
         )
 
-        unread_emails = await email_reader_repository.get_unread_emails(email, email_filter, lookup_days)
+        unread_emails = await email_reader_repository.get_unread_emails(email, email_filter, lookup_days, max_messages)
 
         email_reader_repository._email_reader_client.get_unread_messages.assert_awaited_once_with(
-            email, config.MONITORABLE_EMAIL_ACCOUNTS[email], email_filter, lookup_days
+            email, config.MONITORABLE_EMAIL_ACCOUNTS[email], email_filter, lookup_days, max_messages
         )
         assert unread_emails == expected_unread_emails_response
 
@@ -92,7 +94,8 @@ class TestEmailReaderRepository:
     async def get_unread_emails_ko_no_emails_test(self, email_reader_repository):
         email = "fake@gmail.com"
         email_filter = ["filter@gmail.com"]
-        lookup_days = hash("any_days")
+        lookup_days = 1
+        max_messages = None
 
         expected_unread_emails = []
         expected_unread_emails_response = {"body": expected_unread_emails, "status": 200}
@@ -100,10 +103,10 @@ class TestEmailReaderRepository:
             return_value=expected_unread_emails
         )
 
-        unread_emails = await email_reader_repository.get_unread_emails(email, email_filter, lookup_days)
+        unread_emails = await email_reader_repository.get_unread_emails(email, email_filter, lookup_days, max_messages)
 
         email_reader_repository._email_reader_client.get_unread_messages.assert_awaited_once_with(
-            email, config.MONITORABLE_EMAIL_ACCOUNTS[email], email_filter, lookup_days
+            email, config.MONITORABLE_EMAIL_ACCOUNTS[email], email_filter, lookup_days, max_messages
         )
         assert unread_emails == expected_unread_emails_response
 
@@ -111,7 +114,8 @@ class TestEmailReaderRepository:
     async def get_unread_emails_ko_no_password_test(self, email_reader_repository):
         email = "fake123@gmail.com"
         email_filter = ["filter@gmail.com"]
-        lookup_days = hash("any_days")
+        lookup_days = 1
+        max_messages = None
 
         expected_unread_emails_response = {
             "body": f"Email account {email}'s password is not in our MONITORABLE_EMAIL_ACCOUNTS dict",
@@ -119,7 +123,7 @@ class TestEmailReaderRepository:
         }
         email_reader_repository._email_reader_client.get_unread_messages = AsyncMock()
 
-        unread_emails = await email_reader_repository.get_unread_emails(email, email_filter, lookup_days)
+        unread_emails = await email_reader_repository.get_unread_emails(email, email_filter, lookup_days, max_messages)
 
         email_reader_repository._email_reader_client.get_unread_messages.assert_not_awaited()
         assert unread_emails == expected_unread_emails_response

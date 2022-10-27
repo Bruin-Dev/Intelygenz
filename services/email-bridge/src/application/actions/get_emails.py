@@ -45,6 +45,7 @@ class GetEmails:
         email_account = payload["body"]["email_account"]
         email_filter = payload["body"]["email_filter"]
         lookup_days = payload["body"]["lookup_days"]
+        max_messages = payload["body"].get("max_messages")
 
         logger.info(
             f"Attempting to get all unread messages from email account {email_account} from the past {lookup_days} "
@@ -55,6 +56,7 @@ class GetEmails:
             email_account,
             email_filter,
             lookup_days,
+            max_messages,
         )
         response["body"] = unread_messages_response["body"]
         response["status"] = unread_messages_response["status"]
