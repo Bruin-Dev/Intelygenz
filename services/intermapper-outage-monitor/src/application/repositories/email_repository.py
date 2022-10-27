@@ -35,7 +35,7 @@ class EmailRepository:
                 f"Getting the unread emails from the inbox of {email_account} sent from the users: "
                 f"{email_filter} in the last {lookup_days} days"
             )
-            response = await self._nats_client.request("get.email.request", to_json_bytes(request), timeout=90)
+            response = await self._nats_client.request("get.email.request", to_json_bytes(request), timeout=150)
             response = json.loads(response.data)
         except Exception as e:
             err_msg = f"An error occurred while getting the unread emails from the inbox of {email_account} -> {e}"
@@ -69,7 +69,7 @@ class EmailRepository:
 
         try:
             logger.info(f"Marking message {msg_uid} from the inbox of {email_account} as read")
-            response = await self._nats_client.request("mark.email.read.request", to_json_bytes(request), timeout=90)
+            response = await self._nats_client.request("mark.email.read.request", to_json_bytes(request), timeout=150)
             response = json.loads(response.data)
         except Exception as e:
             err_msg = f"An error occurred while marking message {msg_uid} as read -> {e}"

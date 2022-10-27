@@ -57,7 +57,7 @@ class TestCustomerCacheRepository:
         with uuid_mock:
             result = await customer_cache_repository.get_cache()
 
-        nats_client.request.assert_awaited_once_with("customer.cache.get", to_json_bytes(request), timeout=60)
+        nats_client.request.assert_awaited_once_with("customer.cache.get", to_json_bytes(request), timeout=120)
         assert result == response
 
     @pytest.mark.asyncio
@@ -92,7 +92,7 @@ class TestCustomerCacheRepository:
         with uuid_mock:
             result = await customer_cache_repository.get_cache(filter_)
 
-        nats_client.request.assert_awaited_once_with("customer.cache.get", to_json_bytes(request), timeout=60)
+        nats_client.request.assert_awaited_once_with("customer.cache.get", to_json_bytes(request), timeout=120)
         assert result == response
 
     @pytest.mark.asyncio
@@ -119,7 +119,7 @@ class TestCustomerCacheRepository:
         with uuid_mock:
             result = await customer_cache_repository.get_cache(filter_)
 
-        nats_client.request.assert_awaited_once_with("customer.cache.get", to_json_bytes(request), timeout=60)
+        nats_client.request.assert_awaited_once_with("customer.cache.get", to_json_bytes(request), timeout=120)
         notifications_repository.send_slack_message.assert_awaited_once()
         assert result == nats_error_response
 
@@ -159,7 +159,7 @@ class TestCustomerCacheRepository:
         with uuid_mock:
             result = await customer_cache_repository.get_cache(filter_)
 
-        nats_client.request.assert_awaited_once_with("customer.cache.get", to_json_bytes(request), timeout=60)
+        nats_client.request.assert_awaited_once_with("customer.cache.get", to_json_bytes(request), timeout=120)
         notifications_repository.send_slack_message.assert_awaited_once()
         assert result == response
 

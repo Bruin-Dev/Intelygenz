@@ -3,10 +3,11 @@ import logging
 from datetime import datetime
 from typing import List
 
-from application.repositories import nats_error_response
-from application.repositories.utils_repository import to_json_bytes
 from pytz import utc
 from shortuuid import uuid
+
+from application.repositories import nats_error_response
+from application.repositories.utils_repository import to_json_bytes
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +30,7 @@ class VelocloudRepository:
 
         try:
             logger.info(f"Getting links with edge info from Velocloud for host {velocloud_host}...")
-            response = await self._nats_client.request("get.links.with.edge.info", to_json_bytes(request), timeout=30)
+            response = await self._nats_client.request("get.links.with.edge.info", to_json_bytes(request), timeout=90)
             response = json.loads(response.data)
         except Exception as e:
             err_msg = f"An error occurred when requesting edge list from Velocloud -> {e}"
@@ -73,7 +74,7 @@ class VelocloudRepository:
                 f"Getting events of edge {json.dumps(edge_full_id)} having any type of {event_types} that took place "
                 f"between {from_} and {to} from Velocloud..."
             )
-            response = await self._nats_client.request("alert.request.event.edge", to_json_bytes(request), timeout=180)
+            response = await self._nats_client.request("alert.request.event.edge", to_json_bytes(request), timeout=240)
             response = json.loads(response.data)
             logger.info(
                 f"Got events of edge {json.dumps(edge_full_id)} having any type in {event_types} that took place "
@@ -129,7 +130,7 @@ class VelocloudRepository:
                     f"{velocloud_host}..."
                 )
             response = await self._nats_client.request(
-                "request.network.enterprise.edges", to_json_bytes(request), timeout=30
+                "request.network.enterprise.edges", to_json_bytes(request), timeout=90
             )
             response = json.loads(response.data)
         except Exception as e:

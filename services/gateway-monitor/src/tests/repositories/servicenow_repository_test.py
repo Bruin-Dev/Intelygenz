@@ -119,6 +119,6 @@ class TestServiceNowRepository:
         servicenow_repository._build_incident_summary.assert_called_once_with(gateway)
         servicenow_repository._build_incident_note.assert_called_once_with(gateway)
         servicenow_repository._nats_client.request.assert_awaited_once_with(
-            "servicenow.incident.report.request", to_json_bytes(request), timeout=30
+            "servicenow.incident.report.request", to_json_bytes(request), timeout=90
         )
         assert result == response

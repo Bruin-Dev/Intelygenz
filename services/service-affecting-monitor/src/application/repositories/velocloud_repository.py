@@ -45,7 +45,7 @@ class VelocloudRepository:
                 f"from Velocloud host {host}..."
             )
             response = get_data_from_response_message(
-                await self._nats_client.request("get.links.metric.info", to_json_bytes(request), timeout=30)
+                await self._nats_client.request("get.links.metric.info", to_json_bytes(request), timeout=90)
             )
             logger.info(f"Got links metrics from Velocloud host {host}!")
         except Exception as e:
@@ -188,7 +188,7 @@ class VelocloudRepository:
                 f"that took place between {past_moment} and {now} from Velocloud..."
             )
             response = get_data_from_response_message(
-                await self._nats_client.request("alert.request.event.enterprise", to_json_bytes(request), timeout=180)
+                await self._nats_client.request("alert.request.event.enterprise", to_json_bytes(request), timeout=240)
             )
         except Exception as e:
             err_msg = (

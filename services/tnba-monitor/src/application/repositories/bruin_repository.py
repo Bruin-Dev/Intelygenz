@@ -34,7 +34,9 @@ class BruinRepository:
                 f"Getting all tickets with any status of {ticket_statuses}, with ticket topic "
                 f"{ticket_topic} and belonging to client {client_id} from Bruin..."
             )
-            response = await self._nats_client.request("bruin.ticket.basic.request", to_json_bytes(request), timeout=90)
+            response = await self._nats_client.request(
+                "bruin.ticket.basic.request", to_json_bytes(request), timeout=150
+            )
             response = json.loads(response.data)
             logger.info(
                 f"Got all tickets with any status of {ticket_statuses}, with ticket topic "
@@ -74,7 +76,7 @@ class BruinRepository:
         try:
             logger.info(f"Getting details of ticket {ticket_id} from Bruin...")
             response = await self._nats_client.request(
-                "bruin.ticket.details.request", to_json_bytes(request), timeout=15
+                "bruin.ticket.details.request", to_json_bytes(request), timeout=75
             )
             response = json.loads(response.data)
             logger.info(f"Got details of ticket {ticket_id} from Bruin!")
@@ -109,7 +111,7 @@ class BruinRepository:
         try:
             logger.info(f"Getting task history of ticket {ticket_id} from Bruin...")
             response = await self._nats_client.request(
-                "bruin.ticket.get.task.history", to_json_bytes(request), timeout=15
+                "bruin.ticket.get.task.history", to_json_bytes(request), timeout=75
             )
             response = json.loads(response.data)
             logger.info(f"Got task history of ticket {ticket_id} from Bruin!")
@@ -147,7 +149,7 @@ class BruinRepository:
         try:
             logger.info(f"Resolving detail {detail_id} of ticket {ticket_id}...")
             response = await self._nats_client.request(
-                "bruin.ticket.status.resolve", to_json_bytes(request), timeout=15
+                "bruin.ticket.status.resolve", to_json_bytes(request), timeout=75
             )
             response = json.loads(response.data)
         except Exception as e:
@@ -190,7 +192,7 @@ class BruinRepository:
                 f"service number {service_number}..."
             )
             response = await self._nats_client.request(
-                "bruin.ticket.detail.get.next.results", to_json_bytes(request), timeout=15
+                "bruin.ticket.detail.get.next.results", to_json_bytes(request), timeout=75
             )
             response = json.loads(response.data)
             logger.info(
@@ -233,7 +235,7 @@ class BruinRepository:
         try:
             logger.info(f"Posting multiple notes for ticket {ticket_id}...")
             response = await self._nats_client.request(
-                "bruin.ticket.multiple.notes.append.request", to_json_bytes(request), timeout=15
+                "bruin.ticket.multiple.notes.append.request", to_json_bytes(request), timeout=75
             )
             response = json.loads(response.data)
             logger.info(f"Posted multiple notes for ticket {ticket_id}!")
@@ -278,7 +280,7 @@ class BruinRepository:
 
         try:
             logger.info(f"Unpausing detail {detail_id} (serial {service_number}) of ticket {ticket_id}...")
-            response = await self._nats_client.request("bruin.ticket.unpause", to_json_bytes(request), timeout=30)
+            response = await self._nats_client.request("bruin.ticket.unpause", to_json_bytes(request), timeout=90)
             response = json.loads(response.data)
 
         except Exception as e:

@@ -66,7 +66,7 @@ class TestT7Repository:
             result = await t7_repository.get_prediction(ticket_id, task_history, assets_to_predict)
 
         t7_repository._nats_client.request.assert_awaited_once_with(
-            "t7.prediction.request", to_json_bytes(request), timeout=60
+            "t7.prediction.request", to_json_bytes(request), timeout=120
         )
         assert result == response
 
@@ -102,7 +102,7 @@ class TestT7Repository:
             result = await t7_repository.get_prediction(ticket_id, task_history, assets_to_predict)
 
         t7_repository._nats_client.request.assert_awaited_once_with(
-            "t7.prediction.request", to_json_bytes(request), timeout=60
+            "t7.prediction.request", to_json_bytes(request), timeout=120
         )
         t7_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == nats_error_response
@@ -149,7 +149,7 @@ class TestT7Repository:
             result = await t7_repository.get_prediction(ticket_id, task_history, assets_to_predict)
 
         t7_repository._nats_client.request.assert_awaited_once_with(
-            "t7.prediction.request", to_json_bytes(request), timeout=60
+            "t7.prediction.request", to_json_bytes(request), timeout=120
         )
         t7_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == response
@@ -181,7 +181,7 @@ class TestT7Repository:
             result = await t7_repository.post_live_automation_metrics(ticket_id, asset_id, automated_successfully)
 
         t7_repository._nats_client.request.assert_awaited_once_with(
-            "t7.live.automation.metrics", to_json_bytes(request), timeout=60
+            "t7.live.automation.metrics", to_json_bytes(request), timeout=120
         )
         assert result == response
 
@@ -205,7 +205,7 @@ class TestT7Repository:
             result = await t7_repository.post_live_automation_metrics(ticket_id, asset_id, automated_successfully)
 
         t7_repository._nats_client.request.assert_awaited_once_with(
-            "t7.live.automation.metrics", to_json_bytes(request), timeout=60
+            "t7.live.automation.metrics", to_json_bytes(request), timeout=120
         )
         t7_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == nats_error_response
@@ -241,7 +241,7 @@ class TestT7Repository:
             result = await t7_repository.post_live_automation_metrics(ticket_id, asset_id, automated_successfully)
 
         t7_repository._nats_client.request.assert_awaited_once_with(
-            "t7.live.automation.metrics", to_json_bytes(request), timeout=60
+            "t7.live.automation.metrics", to_json_bytes(request), timeout=120
         )
         t7_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == response

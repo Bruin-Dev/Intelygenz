@@ -46,7 +46,9 @@ class BruinRepository:
                     f"{ticket_topic}, service number {service_number} and belonging to client {client_id} from Bruin..."
                 )
 
-            response = await self._nats_client.request("bruin.ticket.basic.request", to_json_bytes(request), timeout=90)
+            response = await self._nats_client.request(
+                "bruin.ticket.basic.request", to_json_bytes(request), timeout=150
+            )
             response = json.loads(response.data)
         except Exception as e:
             err_msg = (
@@ -103,7 +105,7 @@ class BruinRepository:
         try:
             logger.info(f"Getting details of ticket {ticket_id} from Bruin...")
             response = await self._nats_client.request(
-                "bruin.ticket.details.request", to_json_bytes(request), timeout=15
+                "bruin.ticket.details.request", to_json_bytes(request), timeout=75
             )
             response = json.loads(response.data)
         except Exception as e:
@@ -161,7 +163,7 @@ class BruinRepository:
         try:
             logger.info(f"Creating affecting ticket for device {service_number} belonging to client {client_id}...")
             response = await self._nats_client.request(
-                "bruin.ticket.creation.request", to_json_bytes(request), timeout=30
+                "bruin.ticket.creation.request", to_json_bytes(request), timeout=90
             )
             response = json.loads(response.data)
         except Exception as e:
@@ -201,7 +203,7 @@ class BruinRepository:
         try:
             logger.info(f"Posting multiple notes to ticket {ticket_id}...")
             response = await self._nats_client.request(
-                "bruin.ticket.multiple.notes.append.request", to_json_bytes(request), timeout=45
+                "bruin.ticket.multiple.notes.append.request", to_json_bytes(request), timeout=105
             )
             response = json.loads(response.data)
         except Exception as e:
@@ -242,7 +244,7 @@ class BruinRepository:
 
         try:
             logger.info(f"Unresolving detail {detail_id} of ticket {ticket_id}...")
-            response = await self._nats_client.request("bruin.ticket.status.open", to_json_bytes(request), timeout=15)
+            response = await self._nats_client.request("bruin.ticket.status.open", to_json_bytes(request), timeout=75)
             response = json.loads(response.data)
         except Exception as e:
             err_msg = f"An error occurred when unresolving detail {detail_id} of affecting ticket {ticket_id} -> {e}"

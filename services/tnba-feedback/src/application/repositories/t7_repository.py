@@ -25,7 +25,7 @@ class T7Repository:
 
         try:
             logger.info(f"Posting metrics for ticket {ticket_id} to T7...")
-            response = await self._nats_client.request("t7.automation.metrics", to_json_bytes(request), timeout=60)
+            response = await self._nats_client.request("t7.automation.metrics", to_json_bytes(request), timeout=120)
             response = json.loads(response.data)
             logger.info(f"Metrics posted for ticket {ticket_id}!")
         except Exception as e:

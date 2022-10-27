@@ -39,7 +39,7 @@ class TestVelocloudRepository:
             result = await velocloud_repository.get_network_gateway_list(velocloud_host)
 
         velocloud_repository._nats_client.request.assert_awaited_once_with(
-            "request.network.gateway.list", to_json_bytes(request), timeout=30
+            "request.network.gateway.list", to_json_bytes(request), timeout=90
         )
         assert result == response
 
@@ -74,6 +74,6 @@ class TestVelocloudRepository:
                 result = await velocloud_repository.get_gateway_status_metrics(gateway)
 
         velocloud_repository._nats_client.request.assert_awaited_once_with(
-            "request.gateway.status.metrics", to_json_bytes(request), timeout=30
+            "request.gateway.status.metrics", to_json_bytes(request), timeout=90
         )
         assert result == response

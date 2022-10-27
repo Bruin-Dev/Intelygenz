@@ -29,7 +29,7 @@ class BruinClient:
         }
         try:
             get_customer_info_response = await self.nats_client.request(
-                "bruin.customer.get.info", to_json_bytes(request), timeout=30
+                "bruin.customer.get.info", to_json_bytes(request), timeout=90
             )
             get_customer_info_response = json.loads(get_customer_info_response.data)
         except Exception as e:
@@ -55,7 +55,7 @@ class BruinClient:
 
         try:
             get_management_status_response = await self.nats_client.request(
-                "bruin.inventory.management.status", to_json_bytes(request), timeout=30
+                "bruin.inventory.management.status", to_json_bytes(request), timeout=90
             )
             get_management_status_response = json.loads(get_management_status_response.data)
         except Exception as e:

@@ -46,7 +46,7 @@ class TestBruinRepository:
             result = await instance_bruin_repository.get_client_info(service_number)
 
         instance_bruin_repository._nats_client.request.assert_awaited_once_with(
-            "bruin.customer.get.info", to_json_bytes(instance_request_message_without_topic), timeout=30
+            "bruin.customer.get.info", to_json_bytes(instance_request_message_without_topic), timeout=90
         )
         assert result == instance_response_message
 
@@ -68,7 +68,7 @@ class TestBruinRepository:
 
         instance_bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
         instance_bruin_repository._nats_client.request.assert_awaited_once_with(
-            "bruin.customer.get.info", to_json_bytes(instance_request_message_without_topic), timeout=30
+            "bruin.customer.get.info", to_json_bytes(instance_request_message_without_topic), timeout=90
         )
         assert result == nats_error_response
 
@@ -94,7 +94,7 @@ class TestBruinRepository:
             result = await instance_bruin_repository.get_client_info(service_number)
 
         instance_bruin_repository._nats_client.request.assert_awaited_once_with(
-            "bruin.customer.get.info", to_json_bytes(instance_request_message_without_topic), timeout=30
+            "bruin.customer.get.info", to_json_bytes(instance_request_message_without_topic), timeout=90
         )
         instance_bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == instance_response_message
@@ -124,7 +124,7 @@ class TestBruinRepository:
             result = await instance_bruin_repository.get_management_status(client_id, service_number)
 
         instance_bruin_repository._nats_client.request.assert_awaited_once_with(
-            "bruin.inventory.management.status", to_json_bytes(instance_request_message_without_topic), timeout=30
+            "bruin.inventory.management.status", to_json_bytes(instance_request_message_without_topic), timeout=90
         )
         assert result == instance_response_message
 
@@ -149,7 +149,7 @@ class TestBruinRepository:
             result = await instance_bruin_repository.get_management_status(client_id, service_number)
 
         instance_bruin_repository._nats_client.request.assert_awaited_once_with(
-            "bruin.inventory.management.status", to_json_bytes(instance_request_message_without_topic), timeout=30
+            "bruin.inventory.management.status", to_json_bytes(instance_request_message_without_topic), timeout=90
         )
         instance_bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == nats_error_response
@@ -180,7 +180,7 @@ class TestBruinRepository:
             result = await instance_bruin_repository.get_management_status(client_id, service_number)
 
         instance_bruin_repository._nats_client.request.assert_awaited_once_with(
-            "bruin.inventory.management.status", to_json_bytes(instance_request_message_without_topic), timeout=30
+            "bruin.inventory.management.status", to_json_bytes(instance_request_message_without_topic), timeout=90
         )
         instance_bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == instance_response_message
@@ -231,7 +231,7 @@ class TestBruinRepository:
             result = await instance_bruin_repository.get_site_details(client_id, site_id)
 
         instance_bruin_repository._nats_client.request.assert_awaited_once_with(
-            "bruin.get.site", to_json_bytes(instance_request_message_without_topic), timeout=60
+            "bruin.get.site", to_json_bytes(instance_request_message_without_topic), timeout=120
         )
         assert result == instance_response_message
 
@@ -256,7 +256,7 @@ class TestBruinRepository:
             result = await instance_bruin_repository.get_site_details(client_id, site_id)
 
         instance_bruin_repository._nats_client.request.assert_awaited_once_with(
-            "bruin.get.site", to_json_bytes(instance_request_message_without_topic), timeout=60
+            "bruin.get.site", to_json_bytes(instance_request_message_without_topic), timeout=120
         )
         instance_bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == nats_error_response
@@ -288,7 +288,7 @@ class TestBruinRepository:
             result = await instance_bruin_repository.get_site_details(client_id, site_id)
 
         instance_bruin_repository._nats_client.request.assert_awaited_once_with(
-            "bruin.get.site", to_json_bytes(instance_request_message_without_topic), timeout=60
+            "bruin.get.site", to_json_bytes(instance_request_message_without_topic), timeout=120
         )
         instance_bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == instance_response_message

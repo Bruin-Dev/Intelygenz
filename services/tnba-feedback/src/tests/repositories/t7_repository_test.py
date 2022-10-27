@@ -62,7 +62,7 @@ class TestT7Repository:
         with uuid_mock:
             result = await t7_repository.post_metrics(ticket_id, ticket_row)
 
-        nats_client.request.assert_awaited_once_with("t7.automation.metrics", to_json_bytes(request), timeout=60)
+        nats_client.request.assert_awaited_once_with("t7.automation.metrics", to_json_bytes(request), timeout=120)
         assert result == response
 
     @pytest.mark.asyncio
@@ -96,7 +96,7 @@ class TestT7Repository:
         with uuid_mock:
             result = await t7_repository.post_metrics(ticket_id, ticket_row)
 
-        nats_client.request.assert_awaited_once_with("t7.automation.metrics", to_json_bytes(request), timeout=60)
+        nats_client.request.assert_awaited_once_with("t7.automation.metrics", to_json_bytes(request), timeout=120)
         notifications_repository.send_slack_message.assert_awaited_once()
         assert result == nats_error_response
 
@@ -139,7 +139,7 @@ class TestT7Repository:
         with uuid_mock:
             result = await t7_repository.post_metrics(ticket_id, ticket_row)
 
-        nats_client.request.assert_awaited_once_with("t7.automation.metrics", to_json_bytes(request), timeout=60)
+        nats_client.request.assert_awaited_once_with("t7.automation.metrics", to_json_bytes(request), timeout=120)
         notifications_repository.send_slack_message.assert_awaited_once()
         assert result == response
 

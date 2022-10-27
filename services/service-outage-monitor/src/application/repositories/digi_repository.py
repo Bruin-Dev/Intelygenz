@@ -25,7 +25,7 @@ class DiGiRepository:
 
         try:
             logger.info(f"Rebooting DiGi link of ticket {ticket_id} from Bruin...")
-            response = await self._nats_client.request("digi.reboot", to_json_bytes(request), timeout=90)
+            response = await self._nats_client.request("digi.reboot", to_json_bytes(request), timeout=150)
             response = json.loads(response.data)
             logger.info(f"Got details of ticket {ticket_id} from Bruin!")
         except Exception as e:

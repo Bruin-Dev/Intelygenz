@@ -37,7 +37,7 @@ class BruinRepository:
                 f"Changing work queue for ticket {ticket_id}, detail {detail_id} and serial number {serial_number} "
                 f"to the {target_queue} queue..."
             )
-            response = await self._nats_client.request("bruin.ticket.change.work", to_json_bytes(request), timeout=90)
+            response = await self._nats_client.request("bruin.ticket.change.work", to_json_bytes(request), timeout=150)
             response = json.loads(response.data)
         except Exception as e:
             err_msg = (

@@ -50,7 +50,7 @@ class TestCustomerCacheRepository:
             result = await customer_cache_repository.get_cache()
 
         customer_cache_repository._nats_client.request.assert_awaited_once_with(
-            "customer.cache.get", to_json_bytes(request), timeout=60
+            "customer.cache.get", to_json_bytes(request), timeout=120
         )
         assert result == response
 
@@ -85,7 +85,7 @@ class TestCustomerCacheRepository:
             result = await customer_cache_repository.get_cache(velo_filter=filter_)
 
         customer_cache_repository._nats_client.request.assert_awaited_once_with(
-            "customer.cache.get", to_json_bytes(request), timeout=60
+            "customer.cache.get", to_json_bytes(request), timeout=120
         )
         assert result == response
 
@@ -100,7 +100,7 @@ class TestCustomerCacheRepository:
             result = await customer_cache_repository.get_cache()
 
         customer_cache_repository._nats_client.request.assert_awaited_once_with(
-            "customer.cache.get", to_json_bytes(request), timeout=60
+            "customer.cache.get", to_json_bytes(request), timeout=120
         )
         customer_cache_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == nats_error_response
@@ -118,7 +118,7 @@ class TestCustomerCacheRepository:
             result = await customer_cache_repository.get_cache()
 
         customer_cache_repository._nats_client.request.assert_awaited_once_with(
-            "customer.cache.get", to_json_bytes(request), timeout=60
+            "customer.cache.get", to_json_bytes(request), timeout=120
         )
         customer_cache_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == get_customer_cache_202_response

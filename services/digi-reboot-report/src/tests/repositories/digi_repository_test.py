@@ -75,7 +75,7 @@ class TestDiGiRepository:
                 result = await digi_repository_instance.get_digi_recovery_logs()
 
         digi_repository_instance._nats_client.request.assert_awaited_once_with(
-            "get.digi.recovery.logs", to_json_bytes(request), timeout=90
+            "get.digi.recovery.logs", to_json_bytes(request), timeout=150
         )
         assert result == response
 
@@ -99,7 +99,7 @@ class TestDiGiRepository:
                 result = await digi_repository_instance.get_digi_recovery_logs()
 
         digi_repository_instance._nats_client.request.assert_awaited_once_with(
-            "get.digi.recovery.logs", to_json_bytes(request), timeout=90
+            "get.digi.recovery.logs", to_json_bytes(request), timeout=150
         )
         digi_repository_instance._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == nats_error_response
@@ -126,7 +126,7 @@ class TestDiGiRepository:
                 result = await digi_repository_instance.get_digi_recovery_logs()
 
         digi_repository_instance._nats_client.request.assert_awaited_once_with(
-            "get.digi.recovery.logs", to_json_bytes(request), timeout=90
+            "get.digi.recovery.logs", to_json_bytes(request), timeout=150
         )
         digi_repository_instance._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == response

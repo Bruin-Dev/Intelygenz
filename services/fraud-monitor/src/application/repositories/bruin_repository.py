@@ -32,7 +32,7 @@ class BruinRepository:
         try:
             logger.info(f"Getting client info by DID {did}...")
             response = await self._nats_client.request(
-                "bruin.customer.get.info_by_did", to_json_bytes(request), timeout=15
+                "bruin.customer.get.info_by_did", to_json_bytes(request), timeout=75
             )
             response = json.loads(response.data)
         except Exception as e:
@@ -83,7 +83,9 @@ class BruinRepository:
                     f"{ticket_topic}, service number {service_number} and belonging to client {client_id} from Bruin..."
                 )
 
-            response = await self._nats_client.request("bruin.ticket.basic.request", to_json_bytes(request), timeout=90)
+            response = await self._nats_client.request(
+                "bruin.ticket.basic.request", to_json_bytes(request), timeout=150
+            )
             response = json.loads(response.data)
         except Exception as e:
             err_msg = (
@@ -152,7 +154,7 @@ class BruinRepository:
         try:
             logger.info(f"Getting details of ticket {ticket_id} from Bruin...")
             response = await self._nats_client.request(
-                "bruin.ticket.details.request", to_json_bytes(request), timeout=15
+                "bruin.ticket.details.request", to_json_bytes(request), timeout=75
             )
             response = json.loads(response.data)
         except Exception as e:
@@ -189,7 +191,7 @@ class BruinRepository:
 
         try:
             logger.info(f"Claiming client info for service number {service_number}...")
-            response = await self._nats_client.request("bruin.customer.get.info", to_json_bytes(request), timeout=30)
+            response = await self._nats_client.request("bruin.customer.get.info", to_json_bytes(request), timeout=90)
             response = json.loads(response.data)
         except Exception as e:
             err_msg = f"An error occurred when claiming client info for service number {service_number} -> {e}"
@@ -226,7 +228,7 @@ class BruinRepository:
 
         try:
             logger.info(f"Getting site details of site {site_id} and client {client_id}...")
-            response = await self._nats_client.request("bruin.get.site", to_json_bytes(request), timeout=60)
+            response = await self._nats_client.request("bruin.get.site", to_json_bytes(request), timeout=120)
             response = json.loads(response.data)
         except Exception as e:
             err_msg = f"An error occurred while getting site details of site {site_id} and client {client_id}... -> {e}"
@@ -293,7 +295,7 @@ class BruinRepository:
         try:
             logger.info(f"Appending note to ticket {ticket_id}... Note contents:\n{note}")
             response = await self._nats_client.request(
-                "bruin.ticket.note.append.request", to_json_bytes(request), timeout=60
+                "bruin.ticket.note.append.request", to_json_bytes(request), timeout=120
             )
             response = json.loads(response.data)
         except Exception as e:
@@ -339,7 +341,7 @@ class BruinRepository:
                 f"Creating fraud ticket for service number {service_number} that belongs to client {client_id}..."
             )
             response = await self._nats_client.request(
-                "bruin.ticket.creation.request", to_json_bytes(request), timeout=90
+                "bruin.ticket.creation.request", to_json_bytes(request), timeout=150
             )
             response = json.loads(response.data)
         except Exception as e:
@@ -382,7 +384,7 @@ class BruinRepository:
 
         try:
             logger.info(f"Opening ticket {ticket_id} (affected detail ID: {detail_id})...")
-            response = await self._nats_client.request("bruin.ticket.status.open", to_json_bytes(request), timeout=15)
+            response = await self._nats_client.request("bruin.ticket.status.open", to_json_bytes(request), timeout=75)
             response = json.loads(response.data)
         except Exception as e:
             err_msg = f"An error occurred when opening ticket {ticket_id} -> {e}"
@@ -434,7 +436,7 @@ class BruinRepository:
 
         try:
             logger.info(f"Changing task result of serial {service_number} in ticket {ticket_id} to {task_result}...")
-            response = await self._nats_client.request("bruin.ticket.change.work", to_json_bytes(request), timeout=90)
+            response = await self._nats_client.request("bruin.ticket.change.work", to_json_bytes(request), timeout=150)
             response = json.loads(response.data)
         except Exception as e:
             err_msg = (

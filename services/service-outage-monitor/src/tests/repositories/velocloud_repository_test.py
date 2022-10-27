@@ -54,7 +54,7 @@ class TestVelocloudRepository:
         with uuid_mock:
             result = await velocloud_repository.get_links_with_edge_info(host)
 
-        nats_client.request.assert_awaited_once_with("get.links.with.edge.info", to_json_bytes(request), timeout=30)
+        nats_client.request.assert_awaited_once_with("get.links.with.edge.info", to_json_bytes(request), timeout=90)
         assert result == response
 
     @pytest.mark.asyncio
@@ -81,7 +81,7 @@ class TestVelocloudRepository:
         with uuid_mock:
             result = await velocloud_repository.get_links_with_edge_info(host)
 
-        nats_client.request.assert_awaited_once_with("get.links.with.edge.info", to_json_bytes(request), timeout=30)
+        nats_client.request.assert_awaited_once_with("get.links.with.edge.info", to_json_bytes(request), timeout=90)
         notifications_repository.send_slack_message.assert_awaited_once()
         assert result == nats_error_response
 
@@ -117,7 +117,7 @@ class TestVelocloudRepository:
         with uuid_mock:
             result = await velocloud_repository.get_links_with_edge_info(host)
 
-        nats_client.request.assert_awaited_once_with("get.links.with.edge.info", to_json_bytes(request), timeout=30)
+        nats_client.request.assert_awaited_once_with("get.links.with.edge.info", to_json_bytes(request), timeout=90)
         notifications_repository.send_slack_message.assert_awaited_once()
         assert result == response
 
@@ -167,7 +167,7 @@ class TestVelocloudRepository:
                 edge_full_id, past_moment, future_moment, event_types_filter
             )
 
-        nats_client.request.assert_awaited_once_with("alert.request.event.edge", to_json_bytes(request), timeout=180)
+        nats_client.request.assert_awaited_once_with("alert.request.event.edge", to_json_bytes(request), timeout=240)
         assert result == response
 
     @pytest.mark.asyncio
@@ -214,7 +214,7 @@ class TestVelocloudRepository:
         with uuid_mock:
             result = await velocloud_repository.get_edge_events(edge_full_id, past_moment, future_moment)
 
-        nats_client.request.assert_awaited_once_with("alert.request.event.edge", to_json_bytes(request), timeout=180)
+        nats_client.request.assert_awaited_once_with("alert.request.event.edge", to_json_bytes(request), timeout=240)
         assert result == response
 
     @pytest.mark.asyncio
@@ -250,7 +250,7 @@ class TestVelocloudRepository:
                 edge_full_id, past_moment, future_moment, event_types_filter
             )
 
-        nats_client.request.assert_awaited_once_with("alert.request.event.edge", to_json_bytes(request), timeout=180)
+        nats_client.request.assert_awaited_once_with("alert.request.event.edge", to_json_bytes(request), timeout=240)
         notifications_repository.send_slack_message.assert_awaited_once()
         assert result == nats_error_response
 
@@ -295,7 +295,7 @@ class TestVelocloudRepository:
                 edge_full_id, past_moment, future_moment, event_types_filter
             )
 
-        nats_client.request.assert_awaited_once_with("alert.request.event.edge", to_json_bytes(request), timeout=180)
+        nats_client.request.assert_awaited_once_with("alert.request.event.edge", to_json_bytes(request), timeout=240)
         notifications_repository.send_slack_message.assert_awaited_once()
         assert result == response
 
@@ -343,7 +343,7 @@ class TestVelocloudRepository:
             result = await velocloud_repository.get_network_enterprises(host)
 
         nats_client.request.assert_awaited_once_with(
-            "request.network.enterprise.edges", to_json_bytes(request), timeout=30
+            "request.network.enterprise.edges", to_json_bytes(request), timeout=90
         )
         assert result == response
 
@@ -391,7 +391,7 @@ class TestVelocloudRepository:
             result = await velocloud_repository.get_network_enterprises(host, enterprise_ids=enterprise_ids)
 
         nats_client.request.assert_awaited_once_with(
-            "request.network.enterprise.edges", to_json_bytes(request), timeout=30
+            "request.network.enterprise.edges", to_json_bytes(request), timeout=90
         )
         assert result == response
 
@@ -422,7 +422,7 @@ class TestVelocloudRepository:
             result = await velocloud_repository.get_network_enterprises(host)
 
         nats_client.request.assert_awaited_once_with(
-            "request.network.enterprise.edges", to_json_bytes(request), timeout=30
+            "request.network.enterprise.edges", to_json_bytes(request), timeout=90
         )
         notifications_repository.send_slack_message.assert_awaited_once()
         assert result == nats_error_response
@@ -462,7 +462,7 @@ class TestVelocloudRepository:
             result = await velocloud_repository.get_network_enterprises(host)
 
         nats_client.request.assert_awaited_once_with(
-            "request.network.enterprise.edges", to_json_bytes(request), timeout=30
+            "request.network.enterprise.edges", to_json_bytes(request), timeout=90
         )
         notifications_repository.send_slack_message.assert_awaited_once()
         assert result == response

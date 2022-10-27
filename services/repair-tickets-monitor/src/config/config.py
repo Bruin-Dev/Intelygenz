@@ -32,8 +32,8 @@ MONITOR_CONFIG = {
         "old_parent_emails_reprocessing": int(os.environ["OLD_PARENT_EMAILS_REPROCESSING_JOB_INTERVAL"]),
     },
     "nats_request_timeout": {
-        "kre_seconds": 30,
-        "bruin_request_seconds": 30,
+        "kre_seconds": 90,
+        "bruin_request_seconds": 90,
     },
     "semaphores": {
         "repair_tickets_concurrent": int(os.environ["MAX_CONCURRENT_EMAILS_FOR_MONITORING"]),

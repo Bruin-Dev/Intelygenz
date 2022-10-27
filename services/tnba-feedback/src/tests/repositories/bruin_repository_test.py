@@ -70,7 +70,7 @@ class TestBruinRepository:
             with uuid_mock:
                 result = await bruin_repository.get_closed_tickets(bruin_client_id, ticket_topic)
 
-        nats_client.request.assert_awaited_once_with("bruin.ticket.basic.request", to_json_bytes(request), timeout=60)
+        nats_client.request.assert_awaited_once_with("bruin.ticket.basic.request", to_json_bytes(request), timeout=120)
         assert result == response
 
     @pytest.mark.asyncio
@@ -108,7 +108,7 @@ class TestBruinRepository:
             with uuid_mock:
                 result = await bruin_repository.get_closed_tickets(bruin_client_id, ticket_topic)
 
-        nats_client.request.assert_awaited_once_with("bruin.ticket.basic.request", to_json_bytes(request), timeout=60)
+        nats_client.request.assert_awaited_once_with("bruin.ticket.basic.request", to_json_bytes(request), timeout=120)
         notifications_repository.send_slack_message.assert_awaited_once()
         assert result == nats_error_response
 
@@ -155,7 +155,7 @@ class TestBruinRepository:
             with uuid_mock:
                 result = await bruin_repository.get_closed_tickets(bruin_client_id, ticket_topic)
 
-        nats_client.request.assert_awaited_once_with("bruin.ticket.basic.request", to_json_bytes(request), timeout=60)
+        nats_client.request.assert_awaited_once_with("bruin.ticket.basic.request", to_json_bytes(request), timeout=120)
         notifications_repository.send_slack_message.assert_awaited_once()
         assert result == response
 
@@ -242,7 +242,7 @@ class TestBruinRepository:
             result = await bruin_repository.get_ticket_task_history(ticket_id)
 
         nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.get.task.history", to_json_bytes(request), timeout=60
+            "bruin.ticket.get.task.history", to_json_bytes(request), timeout=120
         )
         assert result == response
 
@@ -268,7 +268,7 @@ class TestBruinRepository:
             result = await bruin_repository.get_ticket_task_history(ticket_id)
 
         nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.get.task.history", to_json_bytes(request), timeout=60
+            "bruin.ticket.get.task.history", to_json_bytes(request), timeout=120
         )
         notifications_repository.send_slack_message.assert_awaited_once()
         assert result is nats_error_response
@@ -303,7 +303,7 @@ class TestBruinRepository:
             result = await bruin_repository.get_ticket_task_history(ticket_id)
 
         nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.get.task.history", to_json_bytes(request), timeout=60
+            "bruin.ticket.get.task.history", to_json_bytes(request), timeout=120
         )
         notifications_repository.send_slack_message.assert_awaited_once()
         assert result == response

@@ -74,7 +74,7 @@ class VelocloudRepository:
 
         return edges_with_serials
 
-    async def get_edges_links_by_host(self, host, rpc_timeout=300):
+    async def get_edges_links_by_host(self, host):
         err_msg = None
 
         request = {
@@ -84,9 +84,7 @@ class VelocloudRepository:
 
         try:
             self._logger.info(f"Getting edges links from Velocloud for host {host}...")
-            response = await self._nats_client.request(
-                "get.links.with.edge.info", to_json_bytes(request), timeout=rpc_timeout
-            )
+            response = await self._nats_client.request("get.links.with.edge.info", to_json_bytes(request), timeout=300)
             response = json.loads(response.data)
             self._logger.info("Got edges links from Velocloud!")
         except Exception as e:
@@ -108,7 +106,7 @@ class VelocloudRepository:
 
         return response
 
-    async def _get_all_enterprise_edges(self, host, enterprise_id, rpc_timeout=300):
+    async def _get_all_enterprise_edges(self, host, enterprise_id):
         err_msg = None
 
         request = {
@@ -118,9 +116,7 @@ class VelocloudRepository:
 
         try:
             self._logger.info(f"Getting all edges from Velocloud host {host} and enterprise ID {enterprise_id}...")
-            response = await self._nats_client.request(
-                "request.enterprises.edges", to_json_bytes(request), timeout=rpc_timeout
-            )
+            response = await self._nats_client.request("request.enterprises.edges", to_json_bytes(request), timeout=300)
             response = json.loads(response.data)
             self._logger.info(f"Got all edges from Velocloud host {host} and enterprise ID {enterprise_id}!")
         except Exception as e:
@@ -153,7 +149,7 @@ class VelocloudRepository:
         try:
             self._logger.info(f"Getting links configuration for edge {edge}...")
             response = await self._nats_client.request(
-                "request.links.configuration", to_json_bytes(request), timeout=30
+                "request.links.configuration", to_json_bytes(request), timeout=90
             )
             response = json.loads(response.data)
         except Exception as e:
@@ -256,7 +252,7 @@ class VelocloudRepository:
         logical_id_by_edge_full_id_list = []
         for host in host_to_enterprise_id:
             for enterprise in host_to_enterprise_id[host]:
-                enterprise_edge_list = await self._get_all_enterprise_edges(host, enterprise, rpc_timeout=90)
+                enterprise_edge_list = await self._get_all_enterprise_edges(host, enterprise)
                 if enterprise_edge_list["status"] not in range(200, 300):
                     self._logger.error(f"Error could not get enterprise edges of enterprise {enterprise}")
                     continue

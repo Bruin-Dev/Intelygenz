@@ -27,7 +27,7 @@ class TestVelocloudRepository:
         assert velocloud_repository._notifications_repository is notifications_repository
 
     @pytest.mark.asyncio
-    async def get_edges_with_default_rpc_timeout_test(
+    async def get_edges_test(
         self, instance_velocloud_repository, instance_velocloud_request, instance_velocloud_response
     ):
         instance_velocloud_request["request_id"] = uuid_
@@ -43,28 +43,6 @@ class TestVelocloudRepository:
 
         instance_velocloud_repository._nats_client.request.assert_awaited_once_with(
             "get.links.with.edge.info", to_json_bytes(instance_velocloud_request), timeout=300
-        )
-        assert result == instance_velocloud_response
-
-    @pytest.mark.asyncio
-    async def get_edges_with_custom_rpc_timeout_test(
-        self, instance_velocloud_repository, instance_velocloud_request, instance_velocloud_response
-    ):
-        instance_velocloud_request["request_id"] = uuid_
-        instance_velocloud_response["request_id"] = uuid_
-        rpc_timeout = 1000
-
-        response_msg = Mock(spec_set=Msg)
-        response_msg.data = to_json_bytes(instance_velocloud_response)
-
-        instance_velocloud_repository._nats_client.request = AsyncMock(return_value=response_msg)
-        with uuid_mock:
-            result = await instance_velocloud_repository.get_edges_links_by_host(
-                "mettel.velocloud.net", rpc_timeout=rpc_timeout
-            )
-
-        instance_velocloud_repository._nats_client.request.assert_awaited_once_with(
-            "get.links.with.edge.info", to_json_bytes(instance_velocloud_request), timeout=rpc_timeout
         )
         assert result == instance_velocloud_response
 
@@ -169,7 +147,7 @@ class TestVelocloudRepository:
                 call(
                     "request.enterprises.edges",
                     to_json_bytes({"request_id": uuid_, "body": {"host": host1, "enterprise_id": 1}}),
-                    timeout=90,
+                    timeout=300,
                 ),
             ]
         )
@@ -255,7 +233,7 @@ class TestVelocloudRepository:
 
         instance_velocloud_repository._notifications_repository.send_slack_message.assert_not_awaited()
         instance_velocloud_repository._nats_client.request.assert_awaited_once_with(
-            "request.links.configuration", to_json_bytes(instance_get_configuration_request), timeout=30
+            "request.links.configuration", to_json_bytes(instance_get_configuration_request), timeout=90
         )
         assert result == instance_config_response
 
@@ -282,7 +260,7 @@ class TestVelocloudRepository:
 
         instance_velocloud_repository._notifications_repository.send_slack_message.assert_awaited()
         instance_velocloud_repository._nats_client.request.assert_awaited_once_with(
-            "request.links.configuration", to_json_bytes(instance_get_configuration_request), timeout=30
+            "request.links.configuration", to_json_bytes(instance_get_configuration_request), timeout=90
         )
         assert result["status"] == 400
         assert result["body"] == []
@@ -305,7 +283,7 @@ class TestVelocloudRepository:
 
         instance_velocloud_repository._notifications_repository.send_slack_message.assert_awaited()
         instance_velocloud_repository._nats_client.request.assert_awaited_once_with(
-            "request.links.configuration", to_json_bytes(instance_get_configuration_request), timeout=30
+            "request.links.configuration", to_json_bytes(instance_get_configuration_request), timeout=90
         )
         assert result == nats_error_response
 

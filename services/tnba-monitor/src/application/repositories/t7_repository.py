@@ -30,7 +30,7 @@ class T7Repository:
 
         try:
             logger.info(f"Claiming T7 prediction for ticket {ticket_id}...")
-            response = await self._nats_client.request("t7.prediction.request", to_json_bytes(request), timeout=60)
+            response = await self._nats_client.request("t7.prediction.request", to_json_bytes(request), timeout=120)
             response = json.loads(response.data)
             logger.info(f"Got T7 prediction for ticket {ticket_id}!")
         except Exception as e:
@@ -63,7 +63,9 @@ class T7Repository:
 
         try:
             logger.info(f"Posting live metric for ticket {ticket_id} to T7...")
-            response = await self._nats_client.request("t7.live.automation.metrics", to_json_bytes(request), timeout=60)
+            response = await self._nats_client.request(
+                "t7.live.automation.metrics", to_json_bytes(request), timeout=120
+            )
             response = json.loads(response.data)
         except Exception as e:
             err_msg = f"An error occurred when posting live metrics for ticket {ticket_id} to T7. Error: {e}"

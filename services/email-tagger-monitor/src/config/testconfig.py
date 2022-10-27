@@ -15,7 +15,7 @@ TIMEZONE = "US/Eastern"
 
 MONITOR_CONFIG = {
     "scheduler_config": {"new_emails_seconds": 1, "new_tickets_seconds": 1},
-    "nats_request_timeout": {"kre_seconds": 10, "post_email_tag_seconds": 30},
+    "nats_request_timeout": {"kre_seconds": 70, "post_email_tag_seconds": 90},
     "semaphores": {
         "new_emails_concurrent": 1,
         "new_tickets_concurrent": 1,

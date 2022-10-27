@@ -31,7 +31,7 @@ class BruinRepository:
 
         try:
             logger.info(f"Claiming client info for service number {service_number}...")
-            response = await self._nats_client.request("bruin.customer.get.info", to_json_bytes(request), timeout=30)
+            response = await self._nats_client.request("bruin.customer.get.info", to_json_bytes(request), timeout=90)
             response = json.loads(response.data)
             logger.info(f"Got client info for service number {service_number}!")
         except Exception as e:
@@ -67,7 +67,7 @@ class BruinRepository:
         try:
             logger.info(f"Claiming management status for service number {service_number} and client {client_id}...")
             response = await self._nats_client.request(
-                "bruin.inventory.management.status", to_json_bytes(request), timeout=30
+                "bruin.inventory.management.status", to_json_bytes(request), timeout=90
             )
             response = json.loads(response.data)
             logger.info(f"Got management status for service number {service_number} and client {client_id}!")

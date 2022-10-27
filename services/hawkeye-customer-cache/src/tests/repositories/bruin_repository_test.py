@@ -49,7 +49,7 @@ class TestBruinRepository:
             result = await bruin_repository.get_client_info(service_number)
 
         bruin_repository._nats_client.request.assert_awaited_once_with(
-            "bruin.customer.get.info", to_json_bytes(request_message_without_topic), timeout=30
+            "bruin.customer.get.info", to_json_bytes(request_message_without_topic), timeout=90
         )
         assert result == response_building_cache_message
 
@@ -69,7 +69,7 @@ class TestBruinRepository:
 
         bruin_repository._notify_error.assert_awaited_once()
         bruin_repository._nats_client.request.assert_awaited_once_with(
-            "bruin.customer.get.info", to_json_bytes(request_message_without_topic), timeout=30
+            "bruin.customer.get.info", to_json_bytes(request_message_without_topic), timeout=90
         )
         assert result == nats_error_response
 
@@ -95,7 +95,7 @@ class TestBruinRepository:
             result = await bruin_repository.get_client_info(service_number)
 
         bruin_repository._nats_client.request.assert_awaited_once_with(
-            "bruin.customer.get.info", to_json_bytes(request_message_without_topic), timeout=30
+            "bruin.customer.get.info", to_json_bytes(request_message_without_topic), timeout=90
         )
         bruin_repository._notify_error.assert_awaited_once()
         assert result == response_building_cache_message
@@ -125,7 +125,7 @@ class TestBruinRepository:
             result = await bruin_repository.get_management_status(client_id, service_number)
 
         bruin_repository._nats_client.request.assert_awaited_once_with(
-            "bruin.inventory.management.status", to_json_bytes(request_message_without_topic), timeout=30
+            "bruin.inventory.management.status", to_json_bytes(request_message_without_topic), timeout=90
         )
         assert result == response_building_cache_message
 
@@ -147,7 +147,7 @@ class TestBruinRepository:
             result = await bruin_repository.get_management_status(client_id, service_number)
 
         bruin_repository._nats_client.request.assert_awaited_once_with(
-            "bruin.inventory.management.status", to_json_bytes(request_message_without_topic), timeout=30
+            "bruin.inventory.management.status", to_json_bytes(request_message_without_topic), timeout=90
         )
         bruin_repository._notify_error.assert_awaited_once()
         assert result == nats_error_response
@@ -178,7 +178,7 @@ class TestBruinRepository:
             result = await bruin_repository.get_management_status(client_id, service_number)
 
         bruin_repository._nats_client.request.assert_awaited_once_with(
-            "bruin.inventory.management.status", to_json_bytes(request_message_without_topic), timeout=30
+            "bruin.inventory.management.status", to_json_bytes(request_message_without_topic), timeout=90
         )
         bruin_repository._notify_error.assert_awaited_once()
         assert result == response_building_cache_message

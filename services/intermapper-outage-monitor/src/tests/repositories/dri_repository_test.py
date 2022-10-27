@@ -71,7 +71,7 @@ class TestDRIRepository:
         with uuid_mock:
             result = await dri_repository.get_dri_parameters(serial)
 
-        nats_client.request.assert_awaited_once_with("dri.parameters.request", encoded_request, timeout=120)
+        nats_client.request.assert_awaited_once_with("dri.parameters.request", encoded_request, timeout=180)
         assert result == response
 
     @pytest.mark.asyncio
@@ -109,7 +109,7 @@ class TestDRIRepository:
         with uuid_mock:
             result = await dri_repository.get_dri_parameters(serial)
 
-        nats_client.request.assert_awaited_once_with("dri.parameters.request", encoded_request, timeout=120)
+        nats_client.request.assert_awaited_once_with("dri.parameters.request", encoded_request, timeout=180)
         assert result == nats_error_response
 
     @pytest.mark.asyncio
@@ -156,7 +156,7 @@ class TestDRIRepository:
         with uuid_mock:
             result = await dri_repository.get_dri_parameters(serial)
 
-        nats_client.request.assert_awaited_once_with("dri.parameters.request", encoded_request, timeout=120)
+        nats_client.request.assert_awaited_once_with("dri.parameters.request", encoded_request, timeout=180)
         assert result == response
 
     @pytest.mark.asyncio
@@ -206,6 +206,6 @@ class TestDRIRepository:
         with uuid_mock:
             result = await dri_repository.get_dri_parameters(serial)
 
-        nats_client.request.assert_awaited_once_with("dri.parameters.request", encoded_request, timeout=120)
+        nats_client.request.assert_awaited_once_with("dri.parameters.request", encoded_request, timeout=180)
         notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
         assert result == {"body": err_msg, "status": 400}

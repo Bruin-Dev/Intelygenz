@@ -64,7 +64,7 @@ class TestCustomerCacheRepository:
             result = await customer_cache_repository_instance.get_cache()
 
         customer_cache_repository_instance._nats_client.request.assert_awaited_once_with(
-            "hawkeye.customer.cache.get", to_json_bytes(request), timeout=60
+            "hawkeye.customer.cache.get", to_json_bytes(request), timeout=120
         )
         assert result == response
 
@@ -99,7 +99,7 @@ class TestCustomerCacheRepository:
             result = await customer_cache_repository_instance.get_cache(last_contact_filter=last_contact_filter)
 
         customer_cache_repository_instance._nats_client.request.assert_awaited_once_with(
-            "hawkeye.customer.cache.get", to_json_bytes(request), timeout=60
+            "hawkeye.customer.cache.get", to_json_bytes(request), timeout=120
         )
         assert result == response
 
@@ -118,7 +118,7 @@ class TestCustomerCacheRepository:
             result = await customer_cache_repository_instance.get_cache()
 
         customer_cache_repository_instance._nats_client.request.assert_awaited_once_with(
-            "hawkeye.customer.cache.get", to_json_bytes(request), timeout=60
+            "hawkeye.customer.cache.get", to_json_bytes(request), timeout=120
         )
         customer_cache_repository_instance._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == nats_error_response
@@ -145,7 +145,7 @@ class TestCustomerCacheRepository:
             result = await customer_cache_repository_instance.get_cache()
 
         customer_cache_repository_instance._nats_client.request.assert_awaited_once_with(
-            "hawkeye.customer.cache.get", to_json_bytes(request), timeout=60
+            "hawkeye.customer.cache.get", to_json_bytes(request), timeout=120
         )
         customer_cache_repository_instance._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == response
@@ -172,7 +172,7 @@ class TestCustomerCacheRepository:
             result = await customer_cache_repository_instance.get_cache()
 
         customer_cache_repository_instance._nats_client.request.assert_awaited_once_with(
-            "hawkeye.customer.cache.get", to_json_bytes(request), timeout=60
+            "hawkeye.customer.cache.get", to_json_bytes(request), timeout=120
         )
         customer_cache_repository_instance._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == response

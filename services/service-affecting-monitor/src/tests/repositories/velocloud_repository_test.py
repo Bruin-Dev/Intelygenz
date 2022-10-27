@@ -62,7 +62,7 @@ class TestVelocloudRepository:
             result = await velocloud_repository.get_links_metrics_by_host(velocloud_host, interval)
 
         velocloud_repository._nats_client.request.assert_awaited_once_with(
-            "get.links.metric.info", to_json_bytes(request), timeout=30
+            "get.links.metric.info", to_json_bytes(request), timeout=90
         )
         assert result == response
 
@@ -89,7 +89,7 @@ class TestVelocloudRepository:
             result = await velocloud_repository.get_links_metrics_by_host(velocloud_host, interval)
 
         velocloud_repository._nats_client.request.assert_awaited_once_with(
-            "get.links.metric.info", to_json_bytes(request), timeout=30
+            "get.links.metric.info", to_json_bytes(request), timeout=90
         )
         velocloud_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == nats_error_response
@@ -117,7 +117,7 @@ class TestVelocloudRepository:
             result = await velocloud_repository.get_links_metrics_by_host(velocloud_host, interval)
 
         velocloud_repository._nats_client.request.assert_awaited_once_with(
-            "get.links.metric.info", to_json_bytes(request), timeout=30
+            "get.links.metric.info", to_json_bytes(request), timeout=90
         )
         velocloud_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == velocloud_500_response
@@ -389,7 +389,7 @@ class TestVelocloudRepository:
                 result = await velocloud_repository.get_enterprise_events(host, enterprise_id)
 
         velocloud_repository._nats_client.request.assert_awaited_once_with(
-            "alert.request.event.enterprise", to_json_bytes(request), timeout=180
+            "alert.request.event.enterprise", to_json_bytes(request), timeout=240
         )
         assert result == response
 
@@ -423,7 +423,7 @@ class TestVelocloudRepository:
                 result = await velocloud_repository.get_enterprise_events(host, enterprise_id)
 
         velocloud_repository._nats_client.request.assert_awaited_once_with(
-            "alert.request.event.enterprise", to_json_bytes(request), timeout=180
+            "alert.request.event.enterprise", to_json_bytes(request), timeout=240
         )
         velocloud_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == nats_error_response
@@ -459,7 +459,7 @@ class TestVelocloudRepository:
                 result = await velocloud_repository.get_enterprise_events(host, enterprise_id)
 
         velocloud_repository._nats_client.request.assert_awaited_once_with(
-            "alert.request.event.enterprise", to_json_bytes(request), timeout=180
+            "alert.request.event.enterprise", to_json_bytes(request), timeout=240
         )
         velocloud_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == velocloud_500_response

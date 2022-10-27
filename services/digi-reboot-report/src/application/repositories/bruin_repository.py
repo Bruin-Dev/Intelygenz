@@ -30,7 +30,9 @@ class BruinRepository:
         request_msg = {"request_id": uuid(), "body": {"ticket_id": ticket_id}}
         try:
             response = get_data_from_response_message(
-                await self._nats_client.request("bruin.ticket.get.task.history", to_json_bytes(request_msg), timeout=60)
+                await self._nats_client.request(
+                    "bruin.ticket.get.task.history", to_json_bytes(request_msg), timeout=120
+                )
             )
             logger.info(f"Got task_history of ticket {ticket_id} from Bruin!")
 

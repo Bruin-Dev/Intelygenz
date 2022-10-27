@@ -22,7 +22,7 @@ MONITOR_CONFIG = {
         "new_emails_seconds": int(os.environ["NEW_EMAILS_JOB_INTERVAL"]),
         "new_tickets_seconds": int(os.environ["NEW_TICKETS_JOB_INTERVAL"]),
     },
-    "nats_request_timeout": {"kre_seconds": 10, "post_email_tag_seconds": 30},
+    "nats_request_timeout": {"kre_seconds": 70, "post_email_tag_seconds": 90},
     "semaphores": {
         "new_emails_concurrent": int(os.environ["MAX_CONCURRENT_EMAILS"]),
         "new_tickets_concurrent": int(os.environ["MAX_CONCURRENT_TICKETS"]),

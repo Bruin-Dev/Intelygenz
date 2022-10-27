@@ -82,7 +82,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.get_ticket_details(ticket_id)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.details.request", to_json_bytes(request), timeout=15
+            "bruin.ticket.details.request", to_json_bytes(request), timeout=75
         )
         assert result == response
 
@@ -105,7 +105,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.get_ticket_details(ticket_id)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.details.request", to_json_bytes(request), timeout=15
+            "bruin.ticket.details.request", to_json_bytes(request), timeout=75
         )
         bruin_repository_instance._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == nats_error_response
@@ -134,7 +134,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.get_ticket_details(ticket_id)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.details.request", to_json_bytes(request), timeout=15
+            "bruin.ticket.details.request", to_json_bytes(request), timeout=75
         )
         bruin_repository_instance._notifications_repository.send_slack_message.assert_awaited_once()
 
@@ -164,7 +164,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.append_note_to_ticket(ticket_id, ticket_note)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.note.append.request", to_json_bytes(request), timeout=15
+            "bruin.ticket.note.append.request", to_json_bytes(request), timeout=75
         )
         assert result == response
 
@@ -196,7 +196,7 @@ class TestBruinRepository:
             )
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.note.append.request", to_json_bytes(request), timeout=15
+            "bruin.ticket.note.append.request", to_json_bytes(request), timeout=75
         )
         assert result == response
 
@@ -221,7 +221,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.append_note_to_ticket(ticket_id, ticket_note)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.note.append.request", to_json_bytes(request), timeout=15
+            "bruin.ticket.note.append.request", to_json_bytes(request), timeout=75
         )
         bruin_repository_instance._notifications_repository.send_slack_message.assert_awaited_once()
 
@@ -253,7 +253,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.append_note_to_ticket(ticket_id, ticket_note)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.note.append.request", to_json_bytes(request), timeout=15
+            "bruin.ticket.note.append.request", to_json_bytes(request), timeout=75
         )
         bruin_repository_instance._notifications_repository.send_slack_message.assert_awaited_once()
 
@@ -283,7 +283,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.create_outage_ticket(client_id, service_number)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.creation.outage.request", to_json_bytes(request), timeout=30
+            "bruin.ticket.creation.outage.request", to_json_bytes(request), timeout=90
         )
         assert result == response
 
@@ -311,7 +311,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.create_outage_ticket(client_id, service_number)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.creation.outage.request", to_json_bytes(request), timeout=30
+            "bruin.ticket.creation.outage.request", to_json_bytes(request), timeout=90
         )
         assert result == response
 
@@ -339,7 +339,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.create_outage_ticket(client_id, service_number)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.creation.outage.request", to_json_bytes(request), timeout=30
+            "bruin.ticket.creation.outage.request", to_json_bytes(request), timeout=90
         )
         assert result == response
 
@@ -364,7 +364,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.create_outage_ticket(client_id, service_number)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.creation.outage.request", to_json_bytes(request), timeout=30
+            "bruin.ticket.creation.outage.request", to_json_bytes(request), timeout=90
         )
         bruin_repository_instance._notifications_repository.send_slack_message.assert_awaited_once()
 
@@ -398,7 +398,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.create_outage_ticket(client_id, service_number)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.creation.outage.request", to_json_bytes(request), timeout=30
+            "bruin.ticket.creation.outage.request", to_json_bytes(request), timeout=90
         )
         bruin_repository_instance._notifications_repository.send_slack_message.assert_awaited_once()
 
@@ -515,7 +515,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.get_tickets(bruin_client_id, ticket_topic, ticket_statuses)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.basic.request", to_json_bytes(request), timeout=90
+            "bruin.ticket.basic.request", to_json_bytes(request), timeout=150
         )
         assert result == response
 
@@ -553,7 +553,7 @@ class TestBruinRepository:
             )
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.basic.request", to_json_bytes(request), timeout=90
+            "bruin.ticket.basic.request", to_json_bytes(request), timeout=150
         )
         assert result == response
 
@@ -581,7 +581,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.get_tickets(bruin_client_id, ticket_topic, ticket_statuses)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.basic.request", to_json_bytes(request), timeout=90
+            "bruin.ticket.basic.request", to_json_bytes(request), timeout=150
         )
         bruin_repository_instance._notifications_repository.send_slack_message.assert_awaited_once()
 
@@ -616,7 +616,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.get_tickets(bruin_client_id, ticket_topic, ticket_statuses)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.basic.request", to_json_bytes(request), timeout=90
+            "bruin.ticket.basic.request", to_json_bytes(request), timeout=150
         )
         bruin_repository_instance._notifications_repository.send_slack_message.assert_awaited_once()
 
@@ -646,7 +646,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.resolve_ticket(ticket_id, detail_id)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.status.resolve", to_json_bytes(request), timeout=15
+            "bruin.ticket.status.resolve", to_json_bytes(request), timeout=75
         )
         assert result == response
 
@@ -671,7 +671,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.resolve_ticket(ticket_id, detail_id)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.status.resolve", to_json_bytes(request), timeout=15
+            "bruin.ticket.status.resolve", to_json_bytes(request), timeout=75
         )
         bruin_repository_instance._notifications_repository.send_slack_message.assert_awaited_once()
 
@@ -703,7 +703,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.resolve_ticket(ticket_id, detail_id)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.status.resolve", to_json_bytes(request), timeout=15
+            "bruin.ticket.status.resolve", to_json_bytes(request), timeout=75
         )
         bruin_repository_instance._notifications_repository.send_slack_message.assert_awaited_once()
 
@@ -733,7 +733,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.unpause_ticket_detail(ticket_id, detail_id=detail_id)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.unpause", to_json_bytes(request), timeout=30
+            "bruin.ticket.unpause", to_json_bytes(request), timeout=90
         )
         assert result == response
 
@@ -761,7 +761,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.unpause_ticket_detail(ticket_id, service_number=service_number)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.unpause", to_json_bytes(request), timeout=30
+            "bruin.ticket.unpause", to_json_bytes(request), timeout=90
         )
         assert result == response
 
@@ -793,7 +793,7 @@ class TestBruinRepository:
             )
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.unpause", to_json_bytes(request), timeout=30
+            "bruin.ticket.unpause", to_json_bytes(request), timeout=90
         )
         assert result == response
 
@@ -818,7 +818,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.unpause_ticket_detail(ticket_id, detail_id=detail_id)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.unpause", to_json_bytes(request), timeout=30
+            "bruin.ticket.unpause", to_json_bytes(request), timeout=90
         )
         bruin_repository_instance._notifications_repository.send_slack_message.assert_awaited_once()
 
@@ -850,7 +850,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.unpause_ticket_detail(ticket_id, detail_id=detail_id)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.unpause", to_json_bytes(request), timeout=30
+            "bruin.ticket.unpause", to_json_bytes(request), timeout=90
         )
         bruin_repository_instance._notifications_repository.send_slack_message.assert_awaited_once()
 
@@ -974,7 +974,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.open_ticket(ticket_id, detail_id)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.status.open", to_json_bytes(request), timeout=15
+            "bruin.ticket.status.open", to_json_bytes(request), timeout=75
         )
         assert result == response
 
@@ -999,7 +999,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.open_ticket(ticket_id, detail_id)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.status.open", to_json_bytes(request), timeout=15
+            "bruin.ticket.status.open", to_json_bytes(request), timeout=75
         )
         bruin_repository_instance._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == nats_error_response
@@ -1030,7 +1030,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.open_ticket(ticket_id, detail_id)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.status.open", to_json_bytes(request), timeout=15
+            "bruin.ticket.status.open", to_json_bytes(request), timeout=75
         )
         bruin_repository_instance._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == response
@@ -1059,7 +1059,7 @@ class TestBruinRepository:
             result = await bruin_repository_instance.create_outage_ticket(client_id, service_number)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.creation.outage.request", to_json_bytes(request), timeout=30
+            "bruin.ticket.creation.outage.request", to_json_bytes(request), timeout=90
         )
         assert result == response
 
@@ -1087,6 +1087,6 @@ class TestBruinRepository:
             result = await bruin_repository_instance.create_outage_ticket(client_id, service_number)
 
         bruin_repository_instance._nats_client.request.assert_awaited_once_with(
-            "bruin.ticket.creation.outage.request", to_json_bytes(request), timeout=30
+            "bruin.ticket.creation.outage.request", to_json_bytes(request), timeout=90
         )
         assert result == response

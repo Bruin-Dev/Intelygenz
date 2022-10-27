@@ -32,7 +32,7 @@ class VelocloudRepository:
 
         try:
             logger.info(f"Getting links with edge info from Velocloud for host {velocloud_host}...")
-            response = await self._nats_client.request("get.links.with.edge.info", to_json_bytes(request), timeout=30)
+            response = await self._nats_client.request("get.links.with.edge.info", to_json_bytes(request), timeout=90)
             response = json.loads(response.data)
         except Exception as e:
             err_msg = f"An error occurred when requesting edge list from Velocloud -> {e}"
@@ -175,7 +175,7 @@ class VelocloudRepository:
                 f"Getting links metrics between {interval['start']} and {interval['end']} "
                 f"from Velocloud host {host}..."
             )
-            response = await self._nats_client.request("get.links.metric.info", to_json_bytes(request), timeout=30)
+            response = await self._nats_client.request("get.links.metric.info", to_json_bytes(request), timeout=90)
             response = json.loads(response.data)
         except Exception as e:
             err_msg = f"An error occurred when requesting links metrics from Velocloud -> {e}"
@@ -273,7 +273,7 @@ class VelocloudRepository:
                 f"that took place between {past_moment} and {now} from Velocloud..."
             )
             response = await self._nats_client.request(
-                "alert.request.event.enterprise", to_json_bytes(request), timeout=180
+                "alert.request.event.enterprise", to_json_bytes(request), timeout=240
             )
             response = json.loads(response.data)
         except Exception as e:

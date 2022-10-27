@@ -90,7 +90,7 @@ class ServiceNowRepository:
             )
             response = get_data_from_response_message(
                 await self._nats_client.request(
-                    "servicenow.incident.report.request", to_json_bytes(request), timeout=30
+                    "servicenow.incident.report.request", to_json_bytes(request), timeout=90
                 )
             )
         except Exception as e:

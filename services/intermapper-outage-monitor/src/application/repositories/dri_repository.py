@@ -40,7 +40,7 @@ class DRIRepository:
             try:
                 logger.info(f"Getting DRI parameters of serial number {serial_number}")
                 response = await self._nats_client.request(
-                    "dri.parameters.request", to_json_bytes(request), timeout=120
+                    "dri.parameters.request", to_json_bytes(request), timeout=180
                 )
                 response = json.loads(response.data)
             except Exception as e:

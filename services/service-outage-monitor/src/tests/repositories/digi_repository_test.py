@@ -39,7 +39,9 @@ class TestDiGiRepository:
         with uuid_mock:
             result = await digi_repository.reboot_link(service_number, ticket_id, logical_id)
 
-        digi_repository._nats_client.request.assert_awaited_once_with("digi.reboot", to_json_bytes(request), timeout=90)
+        digi_repository._nats_client.request.assert_awaited_once_with(
+            "digi.reboot", to_json_bytes(request), timeout=150
+        )
         assert result == return_body
 
     @pytest.mark.asyncio
@@ -57,7 +59,9 @@ class TestDiGiRepository:
         with uuid_mock:
             result = await digi_repository.reboot_link(service_number, ticket_id, logical_id)
 
-        digi_repository._nats_client.request.assert_awaited_once_with("digi.reboot", to_json_bytes(request), timeout=90)
+        digi_repository._nats_client.request.assert_awaited_once_with(
+            "digi.reboot", to_json_bytes(request), timeout=150
+        )
         digi_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == nats_error_response
 
@@ -81,7 +85,9 @@ class TestDiGiRepository:
         with uuid_mock:
             result = await digi_repository.reboot_link(service_number, ticket_id, logical_id)
 
-        digi_repository._nats_client.request.assert_awaited_once_with("digi.reboot", to_json_bytes(request), timeout=90)
+        digi_repository._nats_client.request.assert_awaited_once_with(
+            "digi.reboot", to_json_bytes(request), timeout=150
+        )
         digi_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == return_body
 

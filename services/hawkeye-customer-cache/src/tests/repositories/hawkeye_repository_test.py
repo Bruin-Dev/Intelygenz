@@ -42,7 +42,7 @@ class TestHawkeyeRepository:
             result = await hawkeye_repository.get_probes()
 
         hawkeye_repository._nats_client.request.assert_awaited_once_with(
-            "hawkeye.probe.request", to_json_bytes(request), timeout=60
+            "hawkeye.probe.request", to_json_bytes(request), timeout=120
         )
         assert result == response_get_probes_down_ok
 
@@ -61,7 +61,7 @@ class TestHawkeyeRepository:
             result = await hawkeye_repository.get_probes()
 
         hawkeye_repository._nats_client.request.assert_awaited_once_with(
-            "hawkeye.probe.request", to_json_bytes(request), timeout=60
+            "hawkeye.probe.request", to_json_bytes(request), timeout=120
         )
         hawkeye_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == nats_error_response
@@ -84,7 +84,7 @@ class TestHawkeyeRepository:
             result = await hawkeye_repository.get_probes()
 
         hawkeye_repository._nats_client.request.assert_awaited_once_with(
-            "hawkeye.probe.request", to_json_bytes(request), timeout=60
+            "hawkeye.probe.request", to_json_bytes(request), timeout=120
         )
         hawkeye_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == response_internal_error

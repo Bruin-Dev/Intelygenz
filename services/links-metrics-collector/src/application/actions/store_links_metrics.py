@@ -72,7 +72,7 @@ class StoreLinkMetrics:
         }
         try:
             logger.info(f"Getting all edges for {host} and enterprise: {enterprise_id}")
-            response = await self._nats_client.request("request.enterprises.edges", to_json_bytes(request), timeout=20)
+            response = await self._nats_client.request("request.enterprises.edges", to_json_bytes(request), timeout=80)
             response = json.loads(response.data)
             logger.info(f"Got all edges Velocloud host {host} and enterprise {enterprise_id}!")
         except Exception as e:
@@ -111,7 +111,7 @@ class StoreLinkMetrics:
             try:
                 logger.info(f"Getting links series for {payload}")
                 response = await self._nats_client.request(
-                    "request.edge.links.series", to_json_bytes(request), timeout=60
+                    "request.edge.links.series", to_json_bytes(request), timeout=120
                 )
                 response = json.loads(response.data)
                 logger.info(f"Got link series for {payload}!")

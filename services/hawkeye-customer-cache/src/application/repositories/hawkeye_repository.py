@@ -25,7 +25,7 @@ class HawkeyeRepository:
 
         try:
             logger.info(f"Getting all probes from Hawkeye...")
-            response = await self._nats_client.request("hawkeye.probe.request", to_json_bytes(request), timeout=60)
+            response = await self._nats_client.request("hawkeye.probe.request", to_json_bytes(request), timeout=120)
             response = json.loads(response.data)
         except Exception as e:
             err_msg = f"An error occurred when requesting all probes from Hawkeye -> {e}"

@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, patch, Mock
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from nats.aio.msg import Msg
@@ -34,7 +34,7 @@ class TestEmailRepository:
             result = await email_repository.get_unread_emails()
 
         email_repository._nats_client.request.assert_awaited_once_with(
-            "get.email.request", to_json_bytes(request), timeout=90
+            "get.email.request", to_json_bytes(request), timeout=150
         )
         assert result == response
 
@@ -49,7 +49,7 @@ class TestEmailRepository:
             result = await email_repository.get_unread_emails()
 
         email_repository._nats_client.request.assert_awaited_once_with(
-            "get.email.request", to_json_bytes(request), timeout=90
+            "get.email.request", to_json_bytes(request), timeout=150
         )
         email_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == nats_error_response
@@ -70,7 +70,7 @@ class TestEmailRepository:
             result = await email_repository.get_unread_emails()
 
         email_repository._nats_client.request.assert_awaited_once_with(
-            "get.email.request", to_json_bytes(request), timeout=90
+            "get.email.request", to_json_bytes(request), timeout=150
         )
         email_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == response
@@ -91,7 +91,7 @@ class TestEmailRepository:
             result = await email_repository.mark_email_as_read(msg_uid)
 
         email_repository._nats_client.request.assert_awaited_once_with(
-            "mark.email.read.request", to_json_bytes(request), timeout=90
+            "mark.email.read.request", to_json_bytes(request), timeout=150
         )
         assert result == response
 
@@ -107,7 +107,7 @@ class TestEmailRepository:
             result = await email_repository.mark_email_as_read(msg_uid)
 
         email_repository._nats_client.request.assert_awaited_once_with(
-            "mark.email.read.request", to_json_bytes(request), timeout=90
+            "mark.email.read.request", to_json_bytes(request), timeout=150
         )
         email_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == nats_error_response
@@ -129,7 +129,7 @@ class TestEmailRepository:
             result = await email_repository.mark_email_as_read(msg_uid)
 
         email_repository._nats_client.request.assert_awaited_once_with(
-            "mark.email.read.request", to_json_bytes(request), timeout=90
+            "mark.email.read.request", to_json_bytes(request), timeout=150
         )
         email_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == response

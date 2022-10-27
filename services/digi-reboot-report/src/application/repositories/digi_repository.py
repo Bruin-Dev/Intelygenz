@@ -41,7 +41,7 @@ class DiGiRepository:
                 f"day(s) ago"
             )
             response = get_data_from_response_message(
-                await self._nats_client.request("get.digi.recovery.logs", to_json_bytes(request), timeout=90)
+                await self._nats_client.request("get.digi.recovery.logs", to_json_bytes(request), timeout=150)
             )
 
             logger.info(

@@ -16,7 +16,7 @@ class VelocloudRepository:
         self._config = config
         self._notifications_repository = notifications_repository
 
-    async def get_edges_links_by_host(self, host, rpc_timeout=300):
+    async def get_edges_links_by_host(self, host):
         err_msg = None
 
         request = {
@@ -26,9 +26,7 @@ class VelocloudRepository:
 
         try:
             logger.info(f"Getting edges links from Velocloud for host {host}...")
-            response = await self._nats_client.request(
-                "get.links.with.edge.info", to_json_bytes(request), timeout=rpc_timeout
-            )
+            response = await self._nats_client.request("get.links.with.edge.info", to_json_bytes(request), timeout=300)
             response = json.loads(response.data)
             logger.info("Got edges links from Velocloud!")
         except Exception as e:

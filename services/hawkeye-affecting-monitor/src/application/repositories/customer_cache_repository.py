@@ -29,7 +29,9 @@ class CustomerCacheRepository:
 
         try:
             logger.info(f"Getting customer cache for Hawkeye...")
-            response = await self._nats_client.request("hawkeye.customer.cache.get", to_json_bytes(request), timeout=60)
+            response = await self._nats_client.request(
+                "hawkeye.customer.cache.get", to_json_bytes(request), timeout=120
+            )
             response = json.loads(response.data)
         except Exception as e:
             err_msg = f"An error occurred when requesting customer cache -> {e}"

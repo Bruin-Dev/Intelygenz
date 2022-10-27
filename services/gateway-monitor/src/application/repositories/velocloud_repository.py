@@ -35,7 +35,7 @@ class VelocloudRepository:
         try:
             logger.info(f"Getting network gateway list from Velocloud host {velocloud_host}...")
             response = get_data_from_response_message(
-                await self._nats_client.request("request.network.gateway.list", to_json_bytes(request), timeout=30)
+                await self._nats_client.request("request.network.gateway.list", to_json_bytes(request), timeout=90)
             )
         except Exception as e:
             err_msg = f"An error occurred when requesting network gateway list from Velocloud -> {e}"
@@ -83,7 +83,7 @@ class VelocloudRepository:
                 f"for gateway {gateway['id']} for the past {lookup_interval // 60} minutes..."
             )
             response = get_data_from_response_message(
-                await self._nats_client.request("request.gateway.status.metrics", to_json_bytes(request), timeout=30)
+                await self._nats_client.request("request.gateway.status.metrics", to_json_bytes(request), timeout=90)
             )
         except Exception as e:
             err_msg = f"An error occurred when requesting gateway status metrics from Velocloud -> {e}"
