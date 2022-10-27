@@ -25,6 +25,7 @@ INTERMAPPER_CONFIG = {
     "inbox_email": os.environ["OBSERVED_INBOX_EMAIL_ADDRESS"],
     "sender_emails_list": json.loads(os.environ["OBSERVED_INBOX_SENDERS"]),
     "concurrent_email_batches": int(os.environ["MAX_CONCURRENT_EMAIL_BATCHES"]),
+    "max_emails_to_retrieve": int(os.environ["MAX_EMAILS_TO_RETRIEVE"]),
     "intermapper_down_events": json.loads(os.environ["MONITORED_DOWN_EVENTS"]),
     "intermapper_up_events": json.loads(os.environ["MONITORED_UP_EVENTS"]),
     "autoresolve": {

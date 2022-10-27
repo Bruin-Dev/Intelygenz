@@ -20,6 +20,7 @@ class EmailRepository:
         email_account = self._config.INTERMAPPER_CONFIG["inbox_email"]
         email_filter = self._config.INTERMAPPER_CONFIG["sender_emails_list"]
         lookup_days = self._config.INTERMAPPER_CONFIG["events_lookup_days"]
+        max_messages = self._config.INTERMAPPER_CONFIG["max_emails_to_retrieve"]
 
         request = {
             "request_id": uuid(),
@@ -27,6 +28,7 @@ class EmailRepository:
                 "email_account": email_account,
                 "email_filter": email_filter,
                 "lookup_days": lookup_days,
+                "max_messages": max_messages,
             },
         }
 

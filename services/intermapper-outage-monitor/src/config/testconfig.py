@@ -32,6 +32,7 @@ INTERMAPPER_CONFIG = {
     "inbox_email": "fake@gmail.com",
     "sender_emails_list": ["fakesender@email.com"],
     "concurrent_email_batches": 10,
+    "max_emails_to_retrieve": 100,
     "intermapper_down_events": ["Down", "Critical", "Alarm", "Warning", "Link Warning"],
     "intermapper_up_events": ["Up", "OK"],
     "autoresolve": {

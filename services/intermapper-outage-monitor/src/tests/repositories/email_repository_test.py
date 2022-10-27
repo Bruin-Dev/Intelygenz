@@ -27,6 +27,7 @@ class TestEmailRepository:
                 "email_account": email_repository._config.INTERMAPPER_CONFIG["inbox_email"],
                 "email_filter": email_repository._config.INTERMAPPER_CONFIG["sender_emails_list"],
                 "lookup_days": email_repository._config.INTERMAPPER_CONFIG["events_lookup_days"],
+                "max_messages": email_repository._config.INTERMAPPER_CONFIG["max_emails_to_retrieve"],
             },
         }
         encoded_request = to_json_bytes(request)
@@ -69,6 +70,7 @@ class TestEmailRepository:
                 "email_account": email_repository._config.INTERMAPPER_CONFIG["inbox_email"],
                 "email_filter": email_repository._config.INTERMAPPER_CONFIG["sender_emails_list"],
                 "lookup_days": email_repository._config.INTERMAPPER_CONFIG["events_lookup_days"],
+                "max_messages": email_repository._config.INTERMAPPER_CONFIG["max_emails_to_retrieve"],
             },
         }
         encoded_request = to_json_bytes(request)
@@ -92,6 +94,7 @@ class TestEmailRepository:
                 "email_account": email_repository._config.INTERMAPPER_CONFIG["inbox_email"],
                 "email_filter": email_repository._config.INTERMAPPER_CONFIG["sender_emails_list"],
                 "lookup_days": email_repository._config.INTERMAPPER_CONFIG["events_lookup_days"],
+                "max_messages": email_repository._config.INTERMAPPER_CONFIG["max_emails_to_retrieve"],
             },
         }
         encoded_request = to_json_bytes(request)
