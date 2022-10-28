@@ -1,26 +1,26 @@
 # Change detail work queue 
 
 ```python
-self._logger.info(f"Changing work queue for ticket detail: {filters} and ticket id : {ticket_id}")
+logger.info(f"Changing work queue for ticket detail: {filters} and ticket id : {ticket_id}")
 ```
 
 Call Bruin API endpoint `PUT /api/Ticket/{ticket_id}/details/work` with the desired payload.
 
 * If the status of the HTTP response is in range `200 - 299`:
   ```python
-  self._logger.info(f"Work queue changed for ticket detail: {filters}")
+  logger.info(f"Work queue changed for ticket detail: {filters}")
   ```
   END
  
 * If the status of the HTTP response is `400`:
   ```python
-  self._logger.error(f"Got error from Bruin {response_json}")
+  logger.error(f"Got error from Bruin {response_json}")
   ```
   END
 
 * If the status of the HTTP response is `401`:
   ```python
-  self._logger.error(f"Got 401 from Bruin. Re-logging in...")
+  logger.error(f"Got 401 from Bruin. Re-logging in...")
   ```
   [login](../../clients/bruin_client/login.md)
 
@@ -28,6 +28,6 @@ Call Bruin API endpoint `PUT /api/Ticket/{ticket_id}/details/work` with the desi
 
 * If the status of the HTTP response is in range `500 - 513`:
   ```python
-  self._logger.error(f"Got {response.status}.")
+  logger.error(f"Got {response.status}.")
   ```
   END

@@ -1,3 +1,3 @@
 # Resolve ticket
 
-[BruinClient::resolve_ticket](../../clients/bruin_client/resolve_ticket.md)
+[BruinClient::update_ticket_status](../../clients/bruin_client/update_ticket_status.md)

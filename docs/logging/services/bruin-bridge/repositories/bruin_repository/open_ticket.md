@@ -1,3 +1,3 @@
 # Open ticket
 
-[BruinClient::open_ticket](../../clients/bruin_client/open_ticket.md) 
+[BruinClient::update_ticket_status](../../clients/bruin_client/update_ticket_status.md) 

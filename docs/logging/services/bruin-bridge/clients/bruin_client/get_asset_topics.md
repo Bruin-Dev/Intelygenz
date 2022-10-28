@@ -1,14 +1,14 @@
 # Get asset topics
 
 ```python
-self._logger.info(f"Getting asset topics for: {params}")
+logger.info(f"Getting asset topics for: {params}")
 ```
 
 Call Bruin API endpoint `GET /api/Ticket/topics` with the desired payload.
 
 * If the status of the HTTP response is `HTTPStatus.UNAUTHORIZED`:
   ```python
-  self._logger.error(f"Got 401 from Bruin. Re-logging in...")
+  logger.error(f"Got 401 from Bruin. Re-logging in...")
   ```
   [login](../../clients/bruin_client/login.md)
 

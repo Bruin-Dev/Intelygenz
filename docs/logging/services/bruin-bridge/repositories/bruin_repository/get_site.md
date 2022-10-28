@@ -4,7 +4,7 @@
 
 * If response is not ok:
   ```python
-  self._logger.error(
+  logger.error(
       f"Got response with status {response['status']} while getting site information for params {params}."
   )
   ```
@@ -13,6 +13,6 @@
 * If site information is missing in response:
   ```python
   msg = f"No site information was found for site {params['site_id']} and client {params['client_id']}"
-  self._logger.warning(msg)
+  logger.warning(msg)
   ```
   END 

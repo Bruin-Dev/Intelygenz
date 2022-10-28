@@ -4,13 +4,13 @@ _Message arrives at subject_
 
 * If message doesn't have a body:
   ```python
-  self._logger.error(f"Cannot get Bruin client info by DID using {json.dumps(msg)}. JSON malformed")
+  logger.error(f"Cannot get Bruin client info by DID using {json.dumps(msg)}. JSON malformed")
   ```
   END
 
 * If message body doesn't have `did`:
   ```python
-  self._logger.error(f'Cannot get Bruin client info by DID using {json.dumps(body)}. Need "did"') 
+  logger.error(f'Cannot get Bruin client info by DID using {json.dumps(body)}. Need "did"') 
   ```
   END
 

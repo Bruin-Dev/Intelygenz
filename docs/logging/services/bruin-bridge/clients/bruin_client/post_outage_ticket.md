@@ -1,39 +1,39 @@
 # Post outage ticket
 
 ```python
-self._logger.info(
+logger.info(
                 f"Posting outage ticket for client with ID {client_id} and for service number {service_number}"
             )
 
-self._logger.info(f"Posting payload {json.dumps(payload)} to create new outage ticket...")
+logger.info(f"Posting payload {json.dumps(payload)} to create new outage ticket...")
 ```
 
 Call Bruin API endpoint `POST /api/Ticket/repair` with the desired payload.
 
 * If there's an error while connecting to Bruin API:
   ```python
-  self._logger.error(f"A connection error happened while trying to connect to Bruin API. Cause: {err}")
+  logger.error(f"A connection error happened while trying to connect to Bruin API. Cause: {err}")
   ```
   END
 
 * If the status of the HTTP response is in range of `200 - 300` :
   * If `errorCode` field from HTTP response is `409`
     ```python
-    self._logger.info(
+    logger.info(
                         f"Got HTTP 409 from Bruin when posting outage ticket with payload {json.dumps(payload)}. "
                         f"There's no need to create a new ticket as there is an existing one with In-Progress status"
                     )
     ```
   * If `errorCode` field from HTTP response is `471`
     ```python
-    self._logger.info(
+    logger.info(
                         f"Got HTTP 471 from Bruin when posting outage ticket with payload {json.dumps(payload)}. "
                         f"There's no need to create a new ticket as there is an existing one with Resolved status"
                     )
     ```
   * If `errorCode` field from HTTP response is `472`
     ```python
-    self._logger.info(
+    logger.info(
                         f"Got HTTP 472 from Bruin when posting outage ticket with payload {json.dumps(payload)}. "
                         f"There's no need to create a new ticket as there is an existing one with Resolved status. "
                         f"The existing ticket has been unresolved and it's now In-Progress."
@@ -41,7 +41,7 @@ Call Bruin API endpoint `POST /api/Ticket/repair` with the desired payload.
     ```
   * If `errorCode` field from HTTP response is `473`
     ```python
-    self._logger.info(
+    logger.info(
                         f"Got HTTP 473 from Bruin when posting outage ticket with payload {json.dumps(payload)}. "
                         f"There's no need to create a new ticket as there is an existing one with Resolved status for "
                         f"the same location of the service number. The existing ticket has been unresolved and it's "
@@ -52,7 +52,7 @@ Call Bruin API endpoint `POST /api/Ticket/repair` with the desired payload.
 
 * If the status of the HTTP response is `400`:
   ```python
-  self._logger.error(
+  logger.error(
                     f"Got HTTP 400 from Bruin when posting outage ticket with payload {json.dumps(payload)}. "
                     f"Reason: {response_json}"
                 )
@@ -61,7 +61,7 @@ Call Bruin API endpoint `POST /api/Ticket/repair` with the desired payload.
 
 * If the status of the HTTP response is `401`:
   ```python
-  self._logger.error(f"Got 401 from Bruin. Re-logging in...")
+  logger.error(f"Got 401 from Bruin. Re-logging in...")
   ```
   [login](../../clients/bruin_client/login.md)
 
@@ -69,7 +69,7 @@ Call Bruin API endpoint `POST /api/Ticket/repair` with the desired payload.
 
 * If the status of the HTTP response is `403`:
   ```python
-  self._logger.error(
+  logger.error(
                     "Got HTTP 403 from Bruin. Bruin client doesn't have permissions to post a new outage ticket with "
                     f"payload {json.dumps(payload)}"
                 )
@@ -78,7 +78,7 @@ Call Bruin API endpoint `POST /api/Ticket/repair` with the desired payload.
 
 * If the status of the HTTP response is `404`:
   ```python
-  self._logger.error(
+  logger.error(
                     f"Got HTTP 404 from Bruin when posting outage ticket. Payload: {json.dumps(payload)}"
                 )
   ```
@@ -86,7 +86,7 @@ Call Bruin API endpoint `POST /api/Ticket/repair` with the desired payload.
 
 * If the status of the HTTP response is between `500` and `513` (both inclusive):
   ```python
-  self._logger.error(
+  logger.error(
                     f"Got HTTP {status_code} from Bruin when posting outage ticket with payload {json.dumps(payload)}. "
                 )
   ```

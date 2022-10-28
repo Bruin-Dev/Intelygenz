@@ -1,32 +1,32 @@
 # Get ticket task history
 
 ```python
-self._logger.info(f"Getting ticket task history for ticket: {filters}")
+logger.info(f"Getting ticket task history for ticket: {filters}")
 ```
 
 Call Bruin API endpoint `GET /api/Ticket/AITicketData?ticketId={filters["ticket_id"]}` with the desired payload.
 
 * If there's an error while connecting to Bruin API:
   ```python
-  self._logger.error(f"A connection error happened while trying to connect to Bruin API -> {e}")
+  logger.error(f"A connection error happened while trying to connect to Bruin API -> {e}")
   ```
   END
 * 
 * If the status of the HTTP response is in range `200 - 300`:
   ```python
-  self._logger.info(f"Got ticket task history for : {filters}")
+  logger.info(f"Got ticket task history for : {filters}")
   ```
   END
  
 * If the status of the HTTP response is `400`:
   ```python
-  self._logger.error(f"Got error 400 from Bruin {response_json}")
+  logger.error(f"Got error 400 from Bruin {response_json}")
   ```
   END
 
 * If the status of the HTTP response is `401`:
   ```python
-  self._logger.error(f"Got 401 from Bruin. Re-logging in...")
+  logger.error(f"Got 401 from Bruin. Re-logging in...")
   ```
   [login](../../clients/bruin_client/login.md)
 
@@ -34,6 +34,6 @@ Call Bruin API endpoint `GET /api/Ticket/AITicketData?ticketId={filters["ticket_
 
 * If the status of the HTTP response is in range `500 - 513`:
   ```python
-  self._logger.error(f"Got {response.status}.")
+  logger.error(f"Got {response.status}.")
   ```
   END
