@@ -1,0 +1,38 @@
+---
+- name: "[PROVISION] Docker is being installed in the AMI"
+  hosts: localhost
+  connection: local
+  become: true
+  vars:
+    pip_install_packages:
+      - docker
+    docker_users:
+      - ubuntu
+  roles:
+    - geerlingguy.pip
+    - geerlingguy.docker
+
+- name: "[DOCKER] Create a busybox container"
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: true
+  vars:
+    ecr_repository_name: "{{ ecr_repository_name }}"
+    ecr_repository_uri: "{{ ecr_repository_uri }}"
+    ecr_repository_tag: "{{ ecr_repository_tag }}"
+    ecr_repository_image: "{{ ecr_repository_uri }}/{{ ecr_repository_name }}:{{ ecr_repository_tag }}"
+  tasks:
+    - name: Log into AWS ECR docker registry
+      ansible.builtin.shell: "aws ecr get-login-password | docker login --username AWS --password-stdin {{ ecr_repository_uri }}"
+      when: ecr_repository_uri is not none and ecr_repository_uri != ''
+
+    - name: Build image 
+      community.docker.docker_image:
+        build:
+          path: /app
+        name: "{{ ecr_repository_image }}"
+        tag: "{{ ecr_repository_tag }}"
+        push: true
+        source: build
+
