@@ -1,11 +1,11 @@
-import json
 import os
 from datetime import datetime
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import ANY, AsyncMock, Mock, call, patch
 
 import pytest
 from nats.aio.msg import Msg
 from shortuuid import uuid
+from tenacity import wait_none
 
 from application.repositories import bruin_repository as bruin_repository_module
 from application.repositories import nats_error_response
@@ -1486,7 +1486,7 @@ class TestBruinRepository:
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_ticket_details_with_request_failing_test(self):
+    async def get_ticket_details_with_all_attempts_to_request_failing_test(self):
         ticket_id = 11111
 
         request = {
@@ -1507,15 +1507,21 @@ class TestBruinRepository:
 
         bruin_repository = BruinRepository(nats_client, config, notifications_repository)
 
-        with uuid_mock:
+        tenacity_retry_mock = patch.object(bruin_repository._get_ticket_details.retry, "wait", new_callable=wait_none)
+        with uuid_mock, tenacity_retry_mock:
             result = await bruin_repository.get_ticket_details(ticket_id)
 
-        nats_client.request.assert_awaited_once_with("bruin.ticket.details.request", encoded_request, timeout=75)
-        notifications_repository.send_slack_message.assert_awaited_once()
+        nats_client.request.assert_has_awaits(
+            [
+                call("bruin.ticket.details.request", encoded_request, timeout=75),
+                call("bruin.ticket.details.request", encoded_request, timeout=75),
+            ]
+        )
+        notifications_repository.send_slack_message.assert_awaited()
         assert result == nats_error_response
 
     @pytest.mark.asyncio
-    async def get_ticket_details_with_request_returning_non_2xx_status_test(self):
+    async def get_ticket_details_with_request_eventually_succeeding_after_exception_test(self):
         ticket_id = 11111
 
         request = {
@@ -1526,31 +1532,208 @@ class TestBruinRepository:
         }
         encoded_request = to_json_bytes(request)
 
-        response = {
-            "request_id": uuid_,
-            "body": "Got internal error from Bruin",
-            "status": 500,
-        }
-
-        response_msg = Mock(spec_set=Msg)
-        response_msg.data = to_json_bytes(response)
-
         config = testconfig
 
+        success_response = {"body": ANY, "status": 200}
+        success_msg = Mock(spec_set=Msg)
+        success_msg.data = to_json_bytes(success_response)
+
         nats_client = Mock()
-        nats_client.request = AsyncMock(return_value=response_msg)
+        nats_client.request = AsyncMock(side_effect=[Exception, success_msg])
 
         notifications_repository = Mock()
         notifications_repository.send_slack_message = AsyncMock()
 
         bruin_repository = BruinRepository(nats_client, config, notifications_repository)
 
-        with uuid_mock:
+        tenacity_retry_mock = patch.object(bruin_repository._get_ticket_details.retry, "wait", new_callable=wait_none)
+        with uuid_mock, tenacity_retry_mock:
             result = await bruin_repository.get_ticket_details(ticket_id)
 
-        nats_client.request.assert_awaited_once_with("bruin.ticket.details.request", encoded_request, timeout=75)
-        notifications_repository.send_slack_message.assert_awaited_once()
-        assert result == response
+        nats_client.request.assert_has_awaits(
+            [
+                call("bruin.ticket.details.request", encoded_request, timeout=75),
+                call("bruin.ticket.details.request", encoded_request, timeout=75),
+            ]
+        )
+        notifications_repository.send_slack_message.assert_awaited()
+        assert result == success_response
+
+    @pytest.mark.asyncio
+    async def get_ticket_details_with_all_attempts_to_request_returning_non_2xx_status_test(self):
+        ticket_id = 11111
+
+        request = {
+            "request_id": uuid_,
+            "body": {
+                "ticket_id": ticket_id,
+            },
+        }
+        encoded_request = to_json_bytes(request)
+
+        err_response = {
+            "request_id": uuid_,
+            "body": "Got internal error from Bruin",
+            "status": 500,
+        }
+        err_msg = Mock(spec_set=Msg)
+        err_msg.data = to_json_bytes(err_response)
+
+        config = testconfig
+
+        nats_client = Mock()
+        nats_client.request = AsyncMock(return_value=err_msg)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = AsyncMock()
+
+        bruin_repository = BruinRepository(nats_client, config, notifications_repository)
+
+        tenacity_retry_mock = patch.object(bruin_repository._get_ticket_details.retry, "wait", new_callable=wait_none)
+        with uuid_mock, tenacity_retry_mock:
+            result = await bruin_repository.get_ticket_details(ticket_id)
+
+        nats_client.request.assert_has_awaits(
+            [
+                call("bruin.ticket.details.request", encoded_request, timeout=75),
+                call("bruin.ticket.details.request", encoded_request, timeout=75),
+            ]
+        )
+        notifications_repository.send_slack_message.assert_awaited()
+        assert result == err_response
+
+    @pytest.mark.asyncio
+    async def get_ticket_details_with_request_eventually_succeeding_after_returning_non_2xx_status_test(self):
+        ticket_id = 11111
+
+        request = {
+            "request_id": uuid_,
+            "body": {
+                "ticket_id": ticket_id,
+            },
+        }
+        encoded_request = to_json_bytes(request)
+
+        err_response = {
+            "request_id": uuid_,
+            "body": "Got internal error from Bruin",
+            "status": 500,
+        }
+        err_msg = Mock(spec_set=Msg)
+        err_msg.data = to_json_bytes(err_response)
+
+        success_response = {"body": ANY, "status": 200}
+        success_msg = Mock(spec_set=Msg)
+        success_msg.data = to_json_bytes(success_response)
+
+        config = testconfig
+
+        nats_client = Mock()
+        nats_client.request = AsyncMock(side_effect=[err_msg, success_msg])
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = AsyncMock()
+
+        bruin_repository = BruinRepository(nats_client, config, notifications_repository)
+
+        tenacity_retry_mock = patch.object(bruin_repository._get_ticket_details.retry, "wait", new_callable=wait_none)
+        with uuid_mock, tenacity_retry_mock:
+            result = await bruin_repository.get_ticket_details(ticket_id)
+
+        nats_client.request.assert_has_awaits(
+            [
+                call("bruin.ticket.details.request", encoded_request, timeout=75),
+                call("bruin.ticket.details.request", encoded_request, timeout=75),
+            ]
+        )
+        notifications_repository.send_slack_message.assert_awaited()
+        assert result == success_response
+
+    @pytest.mark.asyncio
+    async def get_ticket_details_with_request_returning_non_2xx_status_and_raising_exception_test(self):
+        ticket_id = 11111
+
+        request = {
+            "request_id": uuid_,
+            "body": {
+                "ticket_id": ticket_id,
+            },
+        }
+        encoded_request = to_json_bytes(request)
+
+        err_response = {
+            "request_id": uuid_,
+            "body": "Got internal error from Bruin",
+            "status": 500,
+        }
+        err_msg = Mock(spec_set=Msg)
+        err_msg.data = to_json_bytes(err_response)
+
+        config = testconfig
+
+        nats_client = Mock()
+        nats_client.request = AsyncMock(side_effect=[err_msg, Exception])
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = AsyncMock()
+
+        bruin_repository = BruinRepository(nats_client, config, notifications_repository)
+
+        tenacity_retry_mock = patch.object(bruin_repository._get_ticket_details.retry, "wait", new_callable=wait_none)
+        with uuid_mock, tenacity_retry_mock:
+            result = await bruin_repository.get_ticket_details(ticket_id)
+
+        nats_client.request.assert_has_awaits(
+            [
+                call("bruin.ticket.details.request", encoded_request, timeout=75),
+                call("bruin.ticket.details.request", encoded_request, timeout=75),
+            ]
+        )
+        notifications_repository.send_slack_message.assert_awaited()
+        assert result == nats_error_response
+
+    @pytest.mark.asyncio
+    async def get_ticket_details_with_raising_exception_and_request_returning_non_2xx_status_test(self):
+        ticket_id = 11111
+
+        request = {
+            "request_id": uuid_,
+            "body": {
+                "ticket_id": ticket_id,
+            },
+        }
+        encoded_request = to_json_bytes(request)
+
+        err_response = {
+            "request_id": uuid_,
+            "body": "Got internal error from Bruin",
+            "status": 500,
+        }
+        err_msg = Mock(spec_set=Msg)
+        err_msg.data = to_json_bytes(err_response)
+
+        config = testconfig
+
+        nats_client = Mock()
+        nats_client.request = AsyncMock(side_effect=[Exception, err_msg])
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = AsyncMock()
+
+        bruin_repository = BruinRepository(nats_client, config, notifications_repository)
+
+        tenacity_retry_mock = patch.object(bruin_repository._get_ticket_details.retry, "wait", new_callable=wait_none)
+        with uuid_mock, tenacity_retry_mock:
+            result = await bruin_repository.get_ticket_details(ticket_id)
+
+        nats_client.request.assert_has_awaits(
+            [
+                call("bruin.ticket.details.request", encoded_request, timeout=75),
+                call("bruin.ticket.details.request", encoded_request, timeout=75),
+            ]
+        )
+        notifications_repository.send_slack_message.assert_awaited()
+        assert result == err_response
 
     @pytest.mark.asyncio
     async def resolve_ticket_test(self):

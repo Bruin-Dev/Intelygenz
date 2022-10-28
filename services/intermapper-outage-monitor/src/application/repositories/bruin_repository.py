@@ -5,6 +5,7 @@ from datetime import datetime
 
 from pytz import timezone
 from shortuuid import uuid
+from tenacity import retry, retry_if_result, stop_after_attempt, wait_fixed
 
 from application.repositories import nats_error_response
 from application.repositories.utils_repository import to_json_bytes
@@ -493,7 +494,13 @@ class BruinRepository:
 
         return response
 
-    async def get_ticket_details(self, ticket_id: int):
+    @retry(
+        retry=retry_if_result(lambda r: r["status"] not in range(200, 300)),
+        stop=stop_after_attempt(2),
+        wait=wait_fixed(30),
+        retry_error_callback=lambda retry_state: retry_state.outcome.result(),
+    )
+    async def _get_ticket_details(self, ticket_id):
         err_msg = None
 
         request = {
@@ -527,6 +534,12 @@ class BruinRepository:
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response
+
+    async def get_ticket_details(self, ticket_id: int):
+        try:
+            return await self._get_ticket_details(ticket_id)
+        except Exception as e:
+            logger.error(f"Error trying to get ticket details [ticket_id='{ticket_id}']: {e}")
 
     async def send_forward_email_milestone_notification(self, ticket_id: int, service_number: str) -> dict:
         notification_type = "TicketPIABDeviceLostPower-E-Mail"
