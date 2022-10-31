@@ -11,7 +11,11 @@ class DRIRepository:
     async def get_dri_parameters(self, serial_number, parameter_set):
         task_id_response = await self._get_task_id(serial_number, parameter_set)
         if task_id_response["status"] not in range(200, 300):
+            logger.error(
+                f"An error occurred while getting a task ID for serial number {serial_number}: {task_id_response}"
+            )
             return task_id_response
+
         task_id = task_id_response["body"]
         logger.info(f"Checking task_id status for the task_id {task_id} of serial_number {serial_number}")
         get_task_results_response = await self._get_task_results(serial_number, task_id)
@@ -32,11 +36,19 @@ class DRIRepository:
 
             pending_task_ids = await self._get_pending_task_ids(serial_number)
             if pending_task_ids["status"] not in range(200, 300):
+                logger.error(
+                    f"An error occurred while looking for pending tasks for serial number {serial_number}: "
+                    f"{pending_task_ids}"
+                )
                 task_id_response["status"] = pending_task_ids["status"]
                 task_id_response["body"] = pending_task_ids["body"]
                 return task_id_response
 
             if len(pending_task_ids["body"]) > 0:
+                logger.info(
+                    f"Found {len(pending_task_ids['body'])} pending tasks for serial number {serial_number}: "
+                    f"{pending_task_ids}"
+                )
                 task_id_response["status"] = pending_task_ids["status"]
                 task_id_response["body"] = max(pending_task_ids["body"])
                 self._storage_repository.save(serial_number, task_id_response["body"])
@@ -53,12 +65,16 @@ class DRIRepository:
     async def _get_task_id_from_dri(self, serial_number, parameter_set):
         task_id_response = await self._dri_client.get_task_id(serial_number, parameter_set)
         if task_id_response["status"] not in range(200, 300):
-            logger.error(f"An error occurred when getting task_id from DRI for serial {serial_number}")
+            logger.error(
+                f"An error occurred when getting task_id from DRI for serial {serial_number}: {task_id_response}"
+            )
             return task_id_response
+
         if task_id_response["body"]["status"] != "SUCCESS":
             logger.error(f"Getting task_id of {serial_number} failed. Response returned {task_id_response['body']}")
             task_id_response["status"] = 400
             return task_id_response
+
         dri_task_id = task_id_response["body"]["data"]["Id"]
         self._storage_repository.save(serial_number, dri_task_id)
         logger.info(f"Got task id {dri_task_id} from DRI for serial {serial_number}")
@@ -68,9 +84,17 @@ class DRIRepository:
         task_results_response = await self._dri_client.get_task_results(serial_number, task_id)
 
         if task_results_response["status"] == 401:
+            logger.warning(
+                f"Got authentication error from DRI while looking for results of task {task_id} for "
+                f"serial number {serial_number}"
+            )
             return task_results_response
 
         if task_results_response["status"] not in range(200, 300):
+            logger.error(
+                f"An error occurred while looking for results of task {task_id} for serial number "
+                f"{serial_number}: {task_results_response}"
+            )
             self._storage_repository.remove(serial_number)
             return task_results_response
 
@@ -87,11 +111,13 @@ class DRIRepository:
             return task_results_response
 
         if task_results["data"]["Message"] == "Pending":
+            logger.info(f"Task {task_id} for serial number {serial_number} is still in progress")
             task_results_response["body"] = f"Data is still being fetched from DRI for serial {serial_number}"
             task_results_response["status"] = 204
             return task_results_response
 
         if task_results["data"]["Message"] == "Rejected":
+            logger.warning(f"Task {task_id} for serial number {serial_number} was rejected")
             task_results_response["body"] = f"DRI task was rejected for serial {serial_number}"
             task_results_response["status"] = 403
             self._storage_repository.remove(serial_number)
