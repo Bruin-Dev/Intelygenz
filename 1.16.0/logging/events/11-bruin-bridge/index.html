@@ -781,8 +781,33 @@
 <p>The mission of this service is to act as a proxy to the Bruin API. It accepts requests from other services and yields
 the requested data back to those services so they can make the appropriate business decision.</p>
 <h2 id="process-workflows">Process Workflows</h2>
-<p><img alt="" src="../../../images/11-bruin-bridge.png" /></p>
+<p><img alt="" src="../../../images/11-bruin-bridge.jpg" /></p>
 <h2 id="list-of-decisions-made-by-the-bruin-bridge">List of Decisions made by the Bruin Bridge</h2>
+<h3 id="subject-bruinticketrequest-aims-at-endpoint-get-apiticket">Subject: bruin.ticket.request (aims at endpoint <a href="https://api.bruin.com/index.html#/Ticket/get_api_Ticket">GET /api/Ticket</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from GET /api/Ticket</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+</tbody>
+</table>
 <h3 id="subject-bruinticketbasicrequest-aims-at-endpoint-get-apiticketbasic">Subject: bruin.ticket.basic.request (aims at endpoint <a href="https://api.bruin.com/index.html#/Ticket/get_api_Ticket_basic">GET /api/Ticket/basic</a>)</h3>
 <table>
 <thead>
@@ -864,7 +889,776 @@ the requested data back to those services so they can make the appropriate busin
 </tr>
 </tbody>
 </table>
+<h3 id="subject-bruinsinglebasicrequest-aims-at-endpoint-get-apiticketbasic">Subject: bruin.single.basic.request (aims at endpoint <a href="https://api.bruin.com/index.html#/Ticket/get_api_Ticket_basic">GET /api/Ticket/basic</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from GET /api/Ticket/basic</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruinticketdetailrequest-aims-at-endpoint-get-apiticketticket_iddetails">Subject: bruin.ticket.detail.request (aims at endpoint <a href="https://api.bruin.com/index.html#/Ticket/get_api_Ticket__ticketId__details">GET /api/Ticket/{ticket_id}/details</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from GET /api/Ticket/{ticket_id}/details</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruinticketnoteappendrequest-aims-at-endpoint-post-apiticketticket_idnotes">Subject: bruin.ticket.note.append.request (aims at endpoint <a href="https://api.bruin.com/index.html#/Ticket/post_api_Ticket__ticketId__notes">POST /api/Ticket/{ticket_id}/notes</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from POST /api/Ticket/{ticket_id}/notes</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruinticketmultiplenoteappendrequest-aims-at-endpoint-post-apiticketticket_idnotesadvanced">Subject: bruin.ticket.multiple.note.append.request (aims at endpoint <a href="https://api.bruin.com/index.html#/Ticket/post_api_Ticket__ticketId__notes_advanced">POST /api/Ticket/{ticket_id}/notes/advanced</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from POST /api/Ticket/{ticket_id}/notes/advanced</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruinticketcreationrequest-aims-at-endpoint-post-apiticket">Subject: bruin.ticket.creation.request (aims at endpoint <a href="https://api.bruin.com/index.html#/Ticket/post_api_Ticket">POST /api/Ticket/</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from POST /api/Ticket/</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruinticketstatusopen-aims-at-endpoint-put-apiticketticket_iddetailsdetail_idstatus">Subject: bruin.ticket.status.open (aims at endpoint <a href="https://api.bruin.com/index.html#/Ticket/put_api_Ticket__ticketId__details__detailId__status">PUT /api/Ticket/{ticket_id}/details/{detail_id}/status</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from PUT /api/Ticket/{ticket_id}/details/{detail_id}/status</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruinticketstatusresolve-aims-at-endpoint-put-apiticketticket_iddetailsdetail_idstatus">Subject: bruin.ticket.status.resolve (aims at endpoint <a href="https://api.bruin.com/index.html#/Ticket/put_api_Ticket__ticketId__details__detailId__status">PUT /api/Ticket/{ticket_id}/details/{detail_id}/status</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from PUT /api/Ticket/{ticket_id}/details/{detail_id}/status</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruininventoryattributesserial-aims-at-endpoint-get-apiinventoryattribute">Subject: bruin.inventory.attributes.serial (aims at endpoint <a href="https://api.bruin.com/index.html#/Inventory/get_api_Inventory_Attribute">GET /api/Inventory/Attribute</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from GET /api/Inventory/Attribute</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Check for existence of serial number in attributes response</td>
+<td>Serial number is found</td>
+<td>Serial number is NOT found</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruininventoryattributesserial-aims-at-endpoint-get-apiinventoryattribute_1">Subject: bruin.inventory.attributes.serial (aims at endpoint <a href="https://api.bruin.com/index.html#/Inventory/get_api_Inventory_Attribute">GET /api/Inventory/Attribute</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from GET /api/Inventory/Attribute</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Check for existence of serial number in attributes response</td>
+<td>Serial number is found</td>
+<td>Serial number is NOT found</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruininventorymanagementstatus-aims-at-endpoint-get-apiinventoryattribute">Subject: bruin.inventory.management.status (aims at endpoint <a href="https://api.bruin.com/index.html#/Inventory/get_api_Inventory_Attribute">GET /api/Inventory/Attribute</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from PUT /api/Inventory/Attribute</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Check for existence of Management Status in attributes response</td>
+<td>Management Status is found</td>
+<td>Management Status  is NOT found</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruinticketcreationoutagerequest-aims-at-endpoint-post-apiticketrepair">Subject: bruin.ticket.creation.outage.request (aims at endpoint <a href="https://api.bruin.com/index.html#/Ticket/post_api_Ticket_repair">POST /api/Ticket/repair</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from POST /api/Ticket/repair</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+<th>Decision</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3</td>
+<td>Check errorCode field of a HTTP response that has a status 200</td>
+<td>errorCode is not 409, 471, 472, or 473</td>
+<td>errorCode is 409</td>
+<td>errorCode is 471</td>
+<td>errorCode is 472</td>
+<td>errorCode is 473</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruincustomergetinfo-aims-at-endpoint-get-apiinventory">Subject: bruin.customer.get.info (aims at endpoint <a href="https://api.bruin.com/index.html#/Inventory/get_api_Inventory">GET /api/Inventory</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from GET /api/Inventory</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruincustomergetinfo_by_did-aims-at-endpoint-get-apiinventoryphonenumberlines">Subject: bruin.customer.get.info_by_did (aims at endpoint <a href="https://api.bruin.com/index.html#/Inventory/get_api_Inventory_phoneNumber_Lines">GET /api/Inventory/phoneNumber/Lines</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from GET /api/Inventory/phoneNumber/Lines</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruinticketchangework-aims-at-endpoint-get-apiticketticket_idnextresult-and-put-apiticketticket_iddetailswork">Subject: bruin.ticket.change.work (aims at endpoint <a href="https://api.bruin.com/index.html#/Ticket/get_api_Ticket__ticketId__nextresult">GET /api/Ticket/{ticket_id}/nextresult</a> and <a href="https://api.bruin.com/index.html#/Ticket/put_api_Ticket__ticketId__details_work">PUT /api/Ticket/{ticket_id}/details/work</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+<th>Decision</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2</td>
+<td>Check for status and work queues' existence of response from GET api/Ticket/{ticket_id}/nextresult</td>
+<td>Work queue exists</td>
+<td>Ticket Id is already in that work queue</td>
+<td>No possible work queue exists</td>
+<td>No possible work queue exists with work queue name</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3</td>
+<td>Check for status of response from /api/Ticket/{ticket_id}/details/work</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruinticketgettaskhistory-aims-at-endpoint-get-apiticketaiticketdata">Subject: bruin.ticket.get.task.history (aims at endpoint <a href="https://api.bruin.com/index.html#/Ticket/get_api_Ticket_AITicketData">GET /api/Ticket/AITicketData</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from GET /api/Ticket/AITicketData</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruinticketdetailgetnextresult-aims-at-endpoint-get-apiticketticket_idnextresult">Subject: bruin.ticket.detail.get.next.result (aims at endpoint <a href="https://api.bruin.com/index.html#/Ticket/get_api_Ticket__ticketId__nextresult">GET /api/Ticket/{ticket_id}/nextresult</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from GET /api/Ticket/{ticket_id}/nextresult</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruinticketunpause-aims-at-endpoint-post-apiticketticket_iddetailunpause">Subject: bruin.ticket.unpause (aims at endpoint <a href="https://api.bruin.com/index.html#/Ticket/post_api_Ticket__ticketId__detail_unpause">POST /api/Ticket/{ticket_id}/detail/unpause</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from POST /api/Ticket/{ticket_id}/detail/unpause</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruinemailtagrequest-aims-at-endpoint-post-apiemailemail_idtagtag_id">Subject: bruin.email.tag.request (aims at endpoint <a href="https://api.bruin.com/index.html#/Email/post_api_Email__messageId__tag__tagTypeId_">POST api/Email/{email_id}/tag/{tag_id}</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from POST api/Email/{email_id}/tag/{tag_id}</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruingetcircuitid-aims-at-endpoint-get-apiinventorycircuit">Subject: bruin.get.circuit.id (aims at endpoint <a href="https://api.bruin.com/index.html#/Inventory/get_api_Inventory_circuit">GET /api/Inventory/circuit</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from GET /api/Inventory/circuit</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruingetcircuitid-aims-at-endpoint-get-apiinventorycircuit_1">Subject: bruin.get.circuit.id (aims at endpoint <a href="https://api.bruin.com/index.html#/Inventory/get_api_Inventory_circuit">GET /api/Inventory/circuit</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from GET /api/Inventory/circuit</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruinmarkemaildone-aims-at-endpoint-post-apiemailstatus">Subject: bruin.mark.email.done (aims at endpoint <a href="https://api.bruin.com/index.html#/Email/post_api_Email_status">POST /api/Email/status</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from POST /api/Email/status</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Check for existence of success field</td>
+<td>success field exists</td>
+<td>success field does NOT exists</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruinlinkticketemail-aims-at-endpoint-post-apiemailemail_idlinkticketticket_id">Subject: bruin.link.ticket.email (aims at endpoint <a href="https://api.bruin.com/index.html#/Email/post_api_Email__emailId__link_ticket__ticketId_">POST /api/Email/{email_id}/link/ticket/{ticket_id}</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from POST /api/Email/{email_id}/link/ticket/{ticket_id}</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Check for existence of success field</td>
+<td>success field exists</td>
+<td>success field does NOT exists</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruinnotificationemailmilestone-aims-at-endpoint-post-apinotificationemailmilestone">Subject: bruin.notification.email.milestone (aims at endpoint <a href="https://api.bruin.com/index.html#/Notification/post_api_Notification_email_milestone">POST /api/Notification/email/milestone</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from POST /api/Notification/email/milestone</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruingetassettopics-aims-at-endpoint-get-apitickettopics">Subject: bruin.get.asset.topics (aims at endpoint <a href="https://api.bruin.com/index.html#/Ticket/get_api_Ticket_topics">GET /api/Ticket/topics</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from GET /api/Ticket/topics</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruinsubscribeuser-aims-at-endpoint-post-apiticketticket_idsubscribeuser">Subject: bruin.subscribe.user (aims at endpoint <a href="https://api.bruin.com/index.html#/Ticket/post_api_Ticket__ticketId__subscribeUser">POST /api/Ticket/{ticket_id}/subscribeUser</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from POST /api/Ticket/{ticket_id}/subscribeUser</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruinemailstatus-aims-at-endpoint-post-apiemailstatus">Subject: bruin.email.status (aims at endpoint <a href="https://api.bruin.com/index.html#/Email/post_api_Email_status">POST /api/Email/status</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from POST /api/Email/status</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-bruinemailreply-aims-at-endpoint-get-apinotificationemailreplyall">Subject: bruin.email.reply (aims at endpoint <a href="https://api.bruin.com/index.html#/Notification/post_api_Notification_email_ReplyAll">GET /api/Notification/email/ReplyAll</a>)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for shape and content of incoming request</td>
+<td>Request has valid format</td>
+<td>Request has invalid format</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for status of response from GET /api/Notification/email/ReplyAll</td>
+<td>HTTP response has status 200</td>
+<td>HTTP response has NOT status 200</td>
+</tr>
+</tbody>
+</table>
 <h2 id="event-descriptions">Event Descriptions</h2>
+<h3 id="subject-bruinticketrequest">Subject: bruin.ticket.request</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/get_tickets/">get_tickets</a></li>
+</ul>
 <h3 id="subject-bruinticketbasicrequest">Subject: bruin.ticket.basic.request</h3>
 <ul>
 <li><a href="../../services/bruin-bridge/actions/get_tickets_basic_info/">get_tickets_basic_info</a></li>
@@ -876,6 +1670,110 @@ the requested data back to those services so they can make the appropriate busin
 <h3 id="subject-bruinchangeticketseverity">Subject: bruin.change.ticket.severity</h3>
 <ul>
 <li><a href="../../services/bruin-bridge/actions/change_ticket_severity/">change_ticket_severity</a></li>
+</ul>
+<h3 id="subject-bruinsingle_ticketbasicrequest">Subject: bruin.single_ticket.basic.request</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/get_single_ticket_basic_info/">get_single_ticket_basic_info</a></li>
+</ul>
+<h3 id="subject-bruinticketdetailsrequest">Subject: bruin.ticket.details.request</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/get_ticket_details/">get_ticket_details</a></li>
+</ul>
+<h3 id="subject-bruinticketoverviewrequest">Subject: bruin.ticket.overview.request</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/get_ticket_overview/">get_ticket_overview</a></li>
+</ul>
+<h3 id="subject-bruinticketnoteappendrequest">Subject: bruin.ticket.note.append.request</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/post_note/">post_note</a></li>
+</ul>
+<h3 id="subject-bruinticketmultiplenotesappendrequest">Subject: bruin.ticket.multiple.notes.append.request</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/post_multiple_notes/">post_multiple_note</a></li>
+</ul>
+<h3 id="subject-bruinticketcreationrequest">Subject: bruin.ticket.creation.request</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/post_ticket/">post_ticket</a></li>
+</ul>
+<h3 id="subject-bruinticketstatusopen">Subject: bruin.ticket.status.open</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/open_ticket/">open_ticket</a></li>
+</ul>
+<h3 id="subject-bruinticketstatusresolve">Subject: bruin.ticket.status.resolve</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/resolve_ticket/">resolve_ticket</a></li>
+</ul>
+<h3 id="subject-bruininventoryattributesserial">Subject: bruin.inventory.attributes.serial</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/get_attributes_serial/">get_attributes_serial</a></li>
+</ul>
+<h3 id="subject-bruininventorymanagementstatus">Subject: bruin.inventory.management.status</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/get_management_status/">get_management_status</a></li>
+</ul>
+<h3 id="subject-bruinticketcreationoutagerequest">Subject: bruin.ticket.creation.outage.request</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/post_outage_ticket/">post_outage_ticket</a></li>
+</ul>
+<h3 id="subject-bruincustomergetinfo">Subject: bruin.customer.get.info</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/get_client_info/">get_client_info</a></li>
+</ul>
+<h3 id="subject-bruincustomergetinfo_by_did">Subject: bruin.customer.get.info_by_did</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/get_client_info_by_did/">get_client_info_by_did</a></li>
+</ul>
+<h3 id="subject-bruinticketchangework">Subject: bruin.ticket.change.work</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/change_detail_work_queue/">change_detail_work_queue</a></li>
+</ul>
+<h3 id="subject-bruinticketgettaskhistory">Subject: bruin.ticket.get.task.history</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/get_ticket_task_history/">get_ticket_task_history</a></li>
+</ul>
+<h3 id="subject-bruinticketdetailgetnextresults">Subject: bruin.ticket.detail.get.next.results</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/get_next_results_for_ticket_detail/">get_next_results_for_ticket_details</a></li>
+</ul>
+<h3 id="subject-bruinticketunpause">Subject: bruin.ticket.unpause</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/unpause_ticket/">unpause_ticket</a></li>
+</ul>
+<h3 id="subject-bruinemailtagrequest">Subject: bruin.email.tag.request</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/post_email_tag/">post_email_tag</a></li>
+</ul>
+<h3 id="subject-bruingetcircuitid">Subject: bruin.get.circuit.id</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/get_circuit_id/">get_circuit_id</a></li>
+</ul>
+<h3 id="subject-bruinmarkemaildone">Subject: bruin.mark.email.done</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/mark_email_as_done/">mark_email_as_done</a></li>
+</ul>
+<h3 id="subject-bruinlinkticketemail">Subject: bruin.link.ticket.email</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/link_ticket_to_email/">link_ticket_to_email</a></li>
+</ul>
+<h3 id="subject-bruinnotificationemailmilestone">Subject: bruin.notification.email.milestone</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/post_notification_email_milestone/">post_notification_email_milestone</a></li>
+</ul>
+<h3 id="subject-bruingetassettopics">Subject: bruin.get.asset.topics</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/get_asset_topics/">get_asset_topics</a></li>
+</ul>
+<h3 id="subject-bruinsubscribeuser">Subject: bruin.subscribe.user</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/subscribe_user/">subscribe_user</a></li>
+</ul>
+<h3 id="subject-bruinemailstatus">Subject: bruin.email.status</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/post_email_status/">post_email_status</a></li>
+</ul>
+<h3 id="subject-bruinemailreply">Subject: bruin.email.reply</h3>
+<ul>
+<li><a href="../../services/bruin-bridge/actions/post_email_reply/">post_email_reply</a></li>
 </ul>
 
               
