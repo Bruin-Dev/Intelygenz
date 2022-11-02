@@ -12,7 +12,7 @@
     - geerlingguy.pip
     - geerlingguy.docker
 
-- name: "[DOCKER] Create a busybox container"
+- name: "[DOCKER] Build and push to ECR"
   hosts: localhost
   connection: local
   gather_facts: false
@@ -35,4 +35,3 @@
         tag: "{{ ecr_repository_tag }}"
         push: true
         source: build
-
