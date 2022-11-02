@@ -1,6 +1,6 @@
 resource "aws_cloudwatch_log_metric_filter" "intermapper_outage__events_processed" {
   name           = "intermapper_outage__events_processed"
-  pattern        = "{ $.log=\"*production*intermapper-outage-monitor-*Processing email with msg_uid:*\" }"
+  pattern        = "{ $.environment = \"production\" && $.hostname = \"intermapper-outage-monitor-*\" && $.message = \"Processing email with msg_uid:\" }"
   log_group_name = data.aws_cloudwatch_log_group.eks_log_group.name
 
   metric_transformation {
