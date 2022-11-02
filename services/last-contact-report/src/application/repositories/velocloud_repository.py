@@ -52,7 +52,7 @@ class VelocloudRepository:
         for host in self._config.REPORT_CONFIG["monitored_velocloud_hosts"]:
             response = await self.get_edges_links_by_host(host=host)
             if response["status"] not in range(200, 300):
-                logger.info(f"Error: could not retrieve edges links by host: {host}")
+                logger.warning(f"Error: could not retrieve edges links by host: {host}")
                 continue
             all_edges += response["body"]
 

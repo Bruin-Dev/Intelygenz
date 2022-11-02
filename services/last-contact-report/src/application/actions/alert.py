@@ -44,6 +44,7 @@ class Alert:
         logger.info("Requesting all edges with details for alert report")
         list_edges = await self._velocloud_repository.get_edges()
         if len(list_edges) == 0:
+            logger.warning("Couldn't retrieve any edge from any of the VCOs. Report won't be sent.")
             return
         edges_to_report = []
         for edge in list_edges:
