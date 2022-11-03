@@ -53,18 +53,24 @@ Require that users log out when [they have completed their workday].
 This points must be done by loging out by the user from the laptops computers provided by MetTel.
 
 # AC-3 Access Enforcement
-## 1. Access Enforcement
 #### 1.1 Description
 Enforce approved authorizations for logical access to information and system resources in accordance with applicable access control policies.
 #### 1.2 Implementation
-This part was implemented eliminating all the permisions from terraform and IAM groups, giving only the needed ones for normal procedures and actions on AWS.
+To enforce the authorizations to access information and system resources, the project hast 4 groups, 2 privileged groups and another 2 groups with non privileged permisions. These groups are:
+- OKTA-IPA-FED-INT-PRIVILEGED: Privileged MetTel users.
+- OKTA-IPA-FED-INT-NON-PRIVILEGED: Non privileged MetTel users.
+- OKTA-IPA-FED-EXT-PRIVILEGED: privileged contractor users.
+- OKTA-IPA-FED-EXT-NON-PRIVILEGED: non privileged contractors users.
 #### 1.3 Extra information and links
 - [API Permissions](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/ec2-api-permissions.html)
+- [IAM identity central groups administration page](https://us-east-1.console.aws.amazon.com/singlesignon/identity/home?region=us-east-1#!/groups)
 
 # AC-4 Access Enforcement
 #### 1.1 Description
 Enforce approved authorizations for controlling the flow of information within the system and between connected systems based on [Web Service Security (WS Security), WS-Security Policy, WS Trust, WS Policy Framework, Security Assertion Markup Language (SAML), extensible Access Control Markup Language (XACML)].
 #### 1.2 Implementation
+The enforced authorization are made by Okta and the groups configured in AWS Identity center. Only administrator groups can create/modify/delete information flows but is not recommended doing it in that way because almost everything was made with infrastructure as a code. All
+the security groups are wrote on code and the modification of these securities groups should be made with git and a redeployment of the infrastructure.
 
 # AC-6 Least Privilege
 #### 1. Least Privilege
