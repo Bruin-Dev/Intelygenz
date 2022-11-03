@@ -1,13 +1,11 @@
-
-
 # AC-2 Account Management
-## 1. Automated System Account Management
+## AC-2(1) Account Management | Automated System Account Management
 #### 1.1 Description
 Support the management of system accounts using [GSA S/SO or Contractor recommended automated mechanisms as approved by the GSA CISO and AO]
 #### 1.2 Implementation
 Accounts are managed by Okta software connected to AWS IAM identity provider, the configurations used are following [this guide](../manual_configurations/OKTA_CONFIGURATIONS.md)
 
-## 2. Automated Temporary and Emergency Account Management
+## AC-2(2) Account Management | Automated Temporary and Emergency Account Management
 #### 2.1 Description
 Automatically [disables] temporary and emergency accounts after [no more than 90 days].
 #### 2.2 Implementation
@@ -18,7 +16,7 @@ MetTel is in charge of creation, deactivation or deleting users in their organiz
 After deactivating a user following this [Link to Okta](https://help.okta.com/en-us/Content/Topics/users-groups-profiles/usgp-deactivate-user-account.htm) go to
 the AWS account and check under this [link to IAM Identity center](https://us-east-1.console.aws.amazon.com/singlesignon/identity/home) and check the deactivated user.
 
-## 3. Disable Accounts
+## AC-2(3) Account Management | Disable Accounts
 #### 3.1 Description
 Disable accounts within [30 days] when the accounts:
 (a)        Have expired;
@@ -36,7 +34,7 @@ the AWS account and check under this [link to IAM Identity center](https://us-ea
 - [Deactivate and delete users accounts](https://help.okta.com/en-us/Content/Topics/users-groups-profiles/usgp-deactivate-user-account.htm)
 - [OKTA AWS IDP](https://docs.aws.amazon.com/singlesignon/latest/userguide/okta-idp.html)
 
-## 4. Automated Audit Actions
+## AC-2(4) Account Management | Automated Audit Actions
 #### 4.1 Description
 Automatically audit account creation, modification, enabling, disabling, and removal actions.
 #### 4.2 Implementation
@@ -72,6 +70,8 @@ Enforce approved authorizations for controlling the flow of information within t
 #### 1. Least Privilege
 #### 1.1 Description
 Enforce approved authorizations for controlling the flow of information within the system and between connected systems based on [Web Service Security (WS Security), WS-Security Policy, WS Trust, WS Policy Framework, Security Assertion Markup Language (SAML), extensible Access Control Markup Language (XACML)].
+#### 1.2 Links
+- [IAM Administrator group logs ](https://us-east-1.console.aws.amazon.com/iamv2/home#/groups/details/Administrators?section=access_advisor)
 
 #### 2. AC-6(1) Authorize Access to Security Functions
 #### 2.1 Description
@@ -97,10 +97,19 @@ Priviliged accounts on the system are restricted to the recomended employees and
 #### 5.1 Description
 Log the execution of privileged functions.
 #### 5.2 Implementation
-All functions used are throwing logs on [cloudwatch](https://us-east-1.console.aws.amazon.com/cloudwatch/home). The functions that the project is using are AWS Lambda. All these logs starts with /aws/lamda/* prefix under cloudwatch.
+All functions used are throwing logs on [cloudwatch](https://us-east-1.console.aws.amazon.com/cloudwatch/home). The functions that the project is using are AWS Lambdas, codepipeline and user functions.
 
 #### 5. AC-6(10) Prohibit Non-privileged Users from Executing Privileged Functions
 #### 5.1 Description
 Prevent non-privileged users from executing privileged functions.
 #### 5.2 Implementation
-This is manually configured with specific groups on IAM Indentity center with no privileged credentials, these groups are asociated to users(from Okta), these are not allowed to execute or see privileged resources/functions.
+This is manually configured with specific groups on IAM Indentity center with no privileged credentials, these groups are asociated to users(from Okta), these are not allowed to execute or see privileged resources/functions that should be visible only with privileges. The associated groups with no privilages are OKTA-IPA-FED-INT-NON-PRIVILEGED and OKTA-IPA-FED-EXT-NON-PRIVILEGED. More information about the groups [here](../manual_configurations/OKTA_CONFIGURATIONS.md#steps)
+
+
+# AC-7 Unsuccessful Logon Attempts
+#### 1 Description
+a. Enforce a limit of [not more than ten (10) failed access attempts] consecutive invalid logon attempts by a user during a [30 minute time period]; and
+b. Automatically [locks the account node for [30 minutes]] when the maximum number of unsuccessful attempts is exceeded.
+#### 2 Implementation
+The enforce of a limit on logon attemps is implemented by MetTel from Okta to access from IAM identity central. There are 2 main accounts needed from AWS that does not comes from Okta and Identity central, a MetTel main root account that has access to everything and a deployment account to deploy infra as a code. It´s not posible to limit the number of attempts because AWS does not support this [behaviour](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_passwords_account-policy.html#password-policy-rules).
+
