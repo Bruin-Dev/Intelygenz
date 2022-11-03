@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1gcz5rt" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.1.0">
+  <bpmn:process id="Process_1m2qfds" isExecutable="true">
+    <bpmn:startEvent id="Event_1wbsw3r">
+      <bpmn:outgoing>Flow_1djyy9a</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Activity_0ftlhgu" name="Get DiGi recovery logs events for the last 3 days">
+      <bpmn:incoming>Flow_1djyy9a</bpmn:incoming>
+      <bpmn:outgoing>Flow_0es8c3k</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_1djyy9a" sourceRef="Event_1wbsw3r" targetRef="Activity_0ftlhgu" />
+    <bpmn:task id="Activity_1cp24x4" name="Generate daily report">
+      <bpmn:incoming>Flow_12yoh1w</bpmn:incoming>
+      <bpmn:outgoing>Flow_08j84kp</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Activity_0vzoho2" name="Send report via e-mail">
+      <bpmn:incoming>Flow_08j84kp</bpmn:incoming>
+      <bpmn:outgoing>Flow_129ey7u</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_08j84kp" sourceRef="Activity_1cp24x4" targetRef="Activity_0vzoho2" />
+    <bpmn:endEvent id="Event_0znukgt">
+      <bpmn:incoming>Flow_129ey7u</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_129ey7u" sourceRef="Activity_0vzoho2" targetRef="Event_0znukgt" />
+    <bpmn:task id="Activity_1styjx1" name="Get ticket task history from Bruin for all tickets referred in DiGi logs">
+      <bpmn:incoming>Flow_0es8c3k</bpmn:incoming>
+      <bpmn:outgoing>Flow_1idkxzk</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_0es8c3k" sourceRef="Activity_0ftlhgu" targetRef="Activity_1styjx1" />
+    <bpmn:task id="Activity_0ohh4yl" name="Correlate DiGi logs and ticket task history for all tickets">
+      <bpmn:incoming>Flow_1idkxzk</bpmn:incoming>
+      <bpmn:outgoing>Flow_12yoh1w</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_1idkxzk" sourceRef="Activity_1styjx1" targetRef="Activity_0ohh4yl" />
+    <bpmn:sequenceFlow id="Flow_12yoh1w" sourceRef="Activity_0ohh4yl" targetRef="Activity_1cp24x4" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1m2qfds">
+      <bpmndi:BPMNEdge id="Flow_129ey7u_di" bpmnElement="Flow_129ey7u">
+        <di:waypoint x="1180" y="125" />
+        <di:waypoint x="1292" y="125" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_08j84kp_di" bpmnElement="Flow_08j84kp">
+        <di:waypoint x="970" y="125" />
+        <di:waypoint x="1080" y="125" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1djyy9a_di" bpmnElement="Flow_1djyy9a">
+        <di:waypoint x="188" y="125" />
+        <di:waypoint x="280" y="125" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0es8c3k_di" bpmnElement="Flow_0es8c3k">
+        <di:waypoint x="380" y="125" />
+        <di:waypoint x="480" y="125" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1idkxzk_di" bpmnElement="Flow_1idkxzk">
+        <di:waypoint x="580" y="125" />
+        <di:waypoint x="680" y="125" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_12yoh1w_di" bpmnElement="Flow_12yoh1w">
+        <di:waypoint x="780" y="125" />
+        <di:waypoint x="870" y="125" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_1wbsw3r_di" bpmnElement="Event_1wbsw3r">
+        <dc:Bounds x="152" y="107" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0nf0gsz" bpmnElement="Activity_0ftlhgu">
+        <dc:Bounds x="280" y="85" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ohh4yl_di" bpmnElement="Activity_0ohh4yl">
+        <dc:Bounds x="680" y="85" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1cp24x4_di" bpmnElement="Activity_1cp24x4">
+        <dc:Bounds x="870" y="85" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0vzoho2_di" bpmnElement="Activity_0vzoho2">
+        <dc:Bounds x="1080" y="85" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0znukgt_di" bpmnElement="Event_0znukgt">
+        <dc:Bounds x="1292" y="107" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1styjx1_di" bpmnElement="Activity_1styjx1">
+        <dc:Bounds x="480" y="85" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

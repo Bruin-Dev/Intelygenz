@@ -61,6 +61,7 @@
            11. [Gateway Monitoring](logging/events/15-gateway-monitor.md)
            12. [Last Contact Report](logging/events/20-last-contact-report.md)
            13. [Lumin Billing Report](logging/events/21-lumin-billing-report.md)
+           14. [DiGi Reboot Report](logging/events/22-digi-reboot-report.md)
        3. Bridges
           1. [Bruin Bridge](logging/events/11-bruin-bridge.md)
           2. [VeloCloud Bridge](logging/events/12-velocloud-bridge.md)
