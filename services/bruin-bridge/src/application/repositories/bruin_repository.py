@@ -92,6 +92,13 @@ class BruinRepository:
                 logger.info(f"Finished fetching all pages for {fn.__name__}.")
                 break
 
+            if response["body"]["currentPageSize"] == 0:
+                logger.warning(
+                    f"There are still {remaining_items} remaining items, but the last page returned 0 items."
+                    f"There may be a mismatch, stopping paginated request for {fn.__name__}..."
+                )
+                break
+
             current_page += 1
 
         return result
