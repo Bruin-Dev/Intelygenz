@@ -350,7 +350,7 @@ data:
     [PARSER]
         Name   mettel_logs
         Format regex
-        Regex  ^(?<time_stamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}): (?<environment>.*?): (?<hostname>.*?): (?<module>.*?)::(?<line>\d+) (?<log_level>[A-Z]+): (?<message>.*)$
+        Regex  ^(?<time_stamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}): (?<environment>.*?): (?<hostname>.*?): (?<module>.*?)::(?<line>\d+) (?<log_level>[A-Z]+): (?<message>.*)$
         Time_Key time
         Time_Format %d/%b/%Y:%H:%M:%S %z
     [PARSER]
