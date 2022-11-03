@@ -18,11 +18,13 @@ class DiGiRecoveryLogs:
         request_filters = msg_data.get("body")
 
         if not request_filters:
-            logger.error(f"Cannot reboot DiGi client using {request_msg}. JSON malformed")
+            logger.error(f"Cannot get DiGi recovery logs client using {request_msg}. JSON malformed")
             response["status"] = 400
             response["body"] = 'Must include "body" in request'
 
         else:
+            logger.info(f"Getting DiGi recovery logs")
+
             digi_recovery_logs_response = await self._digi_repository.get_digi_recovery_logs(
                 humps.pascalize(request_filters)
             )
