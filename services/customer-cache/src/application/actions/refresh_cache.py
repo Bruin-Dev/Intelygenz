@@ -72,10 +72,9 @@ class RefreshCache:
                         "to claim the list of edges from Velocloud"
                     )
                     await self._notifications_repository.send_slack_message(error_message)
+                    raise Exception(error_message)
 
-                    logger.error(
-                        f"Couldn't find any edge to refresh the cache. Error: {error_message}. Re-trying job..."
-                    )
+                logger.warning(f"Couldn't find any edge to refresh the cache. Re-trying job...")
                 err_msg = "Couldn't find any edge to refresh the cache"
                 raise Exception(err_msg)
 
@@ -119,8 +118,8 @@ class RefreshCache:
                 id="_refresh_cache",
             )
         except ConflictingIdError:
-            logger.info(
-                f"There is a job scheduled for refreshing the cache already. No new job " "is going to be scheduled."
+            logger.warning(
+                f"There is a job scheduled for refreshing the cache already. No new job is going to be scheduled."
             )
 
     async def _partial_refresh_cache(self, host, edge_list):
@@ -165,9 +164,11 @@ class RefreshCache:
     def _add_ha_devices_to_cache(cache: List[dict]) -> NoReturn:
         new_edges = []
 
+        logger.info(f"Adding HA edges to the cache (current size: {len(cache)} edges)")
         for edge in cache:
             ha_serial = edge.get("ha_serial_number")
             if ha_serial is None:
+                logger.info(f"Edge {edge['serial_number']} doesn't have a HA partner. Skipping...")
                 continue
 
             copy = deepcopy(edge)
@@ -175,6 +176,7 @@ class RefreshCache:
             new_edges.append(copy)
 
         cache.extend(new_edges)
+        logger.info(f"{len(new_edges)} HA edges added to the cache (current size: {len(cache)} edges)")
 
     @staticmethod
     def _cross_stored_cache_and_new_cache(stored_cache: List[dict], new_cache: List[dict]) -> List[dict]:
@@ -209,13 +211,16 @@ class RefreshCache:
                 client_info_response = await self._bruin_repository.get_client_info(serial_number)
                 client_info_response_status = client_info_response["status"]
                 if client_info_response_status not in range(200, 300):
+                    logger.error(f"Error while fetching client info for edge {serial_number}: {client_info_response}")
                     return
 
                 client_info_response_body = client_info_response["body"]
                 if len(client_info_response_body) > 1:
+                    logger.info(f"Edge {serial_number} has {len(client_info_response_body)} inventories in Bruin")
                     self._serials_with_multiple_inventories[serial_number] = client_info_response_body
+
                 if not client_info_response_body:
-                    logger.info(f"Edge with serial {serial_number} doesn't have any Bruin client info associated")
+                    logger.warning(f"Edge with serial {serial_number} doesn't have any Bruin client info associated")
                     self._invalid_edges[host].append(edge_identifier)
                     return
 
@@ -227,11 +232,14 @@ class RefreshCache:
                 )
                 management_status_response_status = management_status_response["status"]
                 if management_status_response_status not in range(200, 300):
+                    logger.error(
+                        f"Error while fetching management status for edge {serial_number}: {management_status_response}"
+                    )
                     return
 
                 management_status_response_body = management_status_response["body"]
                 if not self._bruin_repository.is_management_status_active(management_status_response_body):
-                    logger.info(f"Management status is not active for {edge_identifier}. Skipping...")
+                    logger.warning(f"Management status is not active for {edge_identifier}. Skipping...")
                     self._invalid_edges[host].append(edge_identifier)
                     return
                 else:
@@ -239,7 +247,7 @@ class RefreshCache:
                         management_status_response_body == "Pending"
                         and client_id in self._config.REFRESH_CONFIG["blacklisted_client_ids"]
                     ):
-                        logger.info(
+                        logger.warning(
                             f"Edge ({serial_number}) has management_status: Pending and has a blacklisted"
                             f"client_id: {client_id}. Skipping..."
                         )
@@ -250,6 +258,7 @@ class RefreshCache:
                 site_id = bruin_client_info["site_id"]
                 site_details_response = await self._bruin_repository.get_site_details(client_id, site_id)
                 if site_details_response["status"] not in range(200, 300):
+                    logger.error(f"Error while fetching site details for edge {serial_number}: {site_details_response}")
                     return
 
                 site_details: dict = site_details_response["body"]
@@ -282,7 +291,7 @@ class RefreshCache:
         if self._serials_with_multiple_inventories:
             message = f"Alert. Detected some edges with more than one status. {self._serials_with_multiple_inventories}"
             await self._notifications_repository.send_slack_message(message)
-            logger.info(message)
+            logger.warning(message)
             email_obj = self._format_alert_email_object()
             logger.info(
                 f"Sending mail with serials having multiples inventories to  "
@@ -290,6 +299,8 @@ class RefreshCache:
             )
             response = await self._email_repository.send_email(email_obj)
             logger.info(f"Response from sending email with serials having multiple inventories: {json.dumps(response)}")
+        else:
+            logger.info("No edges with multiple Bruin inventories were detected")
 
     def _format_email_object(self, host, old_cache, new_cache):
         now = datetime.utcnow().strftime("%B %d %Y - %H:%M:%S")

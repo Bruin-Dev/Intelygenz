@@ -13,27 +13,30 @@ logger = logging.getLogger(__name__)
 class VelocloudRepository:
     def __init__(self, config, nats_client, notifications_repository):
         self._config = config
-        self._logger = logger
         self._nats_client = nats_client
         self._notifications_repository = notifications_repository
 
     async def get_all_velo_edges(self):
         start_time = time.time()
 
-        self._logger.info("Getting list of all velo edges")
+        logger.info("Getting list of all velo edges")
         edge_list = await self.get_edges()
-        self._logger.info(f"Got all edges from all velos. Took {(time.time() - start_time) // 60} minutes")
-        self._logger.info("Getting list of logical IDs by each velo edge")
+        logger.info(f"Got all edges from all velos. Took {(time.time() - start_time) // 60} minutes")
+        logger.info("Getting list of logical IDs by each velo edge")
         logical_ids_by_edge_list = await self._get_logical_id_by_edge_list(edge_list)
-        self._logger.info(f"Got all logical IDs by each velo edge. Took {(time.time() - start_time) // 60} minutes")
+        logger.info(f"Got all logical IDs by each velo edge. Took {(time.time() - start_time) // 60} minutes")
 
-        self._logger.info(f"Mapping edges to serials...")
+        logger.info(f"Mapping edges to serials...")
         edges_with_serial = await self._get_all_serials(edge_list, logical_ids_by_edge_list)
-        self._logger.info(f"Amount of edges: {len(edges_with_serial)}")
+        logger.info(f"Amount of edges: {len(edges_with_serial)}")
         edges_with_config = []
+
+        logger.info("Adding links configuration to edges...")
         for edge in edges_with_serial:
             edges_with_config.append(await self.add_edge_config(edge))
-        self._logger.info(f"Finished building velos + serials map. Took {(time.time() - start_time) // 60} minutes")
+        logger.info("Finished adding links configuration to edges. Took {(time.time() - start_time) // 60} minutes")
+
+        logger.info(f"Finished building velos + serials map. Took {(time.time() - start_time) // 60} minutes")
 
         return edges_with_config
 
@@ -41,6 +44,8 @@ class VelocloudRepository:
         edges_with_serials = []
 
         for edge in edge_list:
+            logger.info(f"Mapping links' logical IDs to edge {edge}...")
+
             edge_full_id = {"host": edge["host"], "enterprise_id": edge["enterpriseId"], "edge_id": edge["edgeId"]}
             serial_number = edge.get("edgeSerialNumber")
             ha_serial_number = edge.get("edgeHASerialNumber")
@@ -72,6 +77,8 @@ class VelocloudRepository:
                 }
             )
 
+            logger.info(f"Links' logical IDs mapped to edge {edge}")
+
         return edges_with_serials
 
     async def get_edges_links_by_host(self, host):
@@ -83,10 +90,10 @@ class VelocloudRepository:
         }
 
         try:
-            self._logger.info(f"Getting edges links from Velocloud for host {host}...")
+            logger.info(f"Getting edges links from Velocloud for host {host}...")
             response = await self._nats_client.request("get.links.with.edge.info", to_json_bytes(request), timeout=300)
             response = json.loads(response.data)
-            self._logger.info("Got edges links from Velocloud!")
+            logger.info("Got edges links from Velocloud!")
         except Exception as e:
             err_msg = f"An error occurred when requesting edge list from {host} -> {e}"
             response = nats_error_response
@@ -101,7 +108,7 @@ class VelocloudRepository:
                 )
 
         if err_msg:
-            self._logger.error(err_msg)
+            logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response
@@ -115,10 +122,10 @@ class VelocloudRepository:
         }
 
         try:
-            self._logger.info(f"Getting all edges from Velocloud host {host} and enterprise ID {enterprise_id}...")
+            logger.info(f"Getting all edges from Velocloud host {host} and enterprise ID {enterprise_id}...")
             response = await self._nats_client.request("request.enterprises.edges", to_json_bytes(request), timeout=300)
             response = json.loads(response.data)
-            self._logger.info(f"Got all edges from Velocloud host {host} and enterprise ID {enterprise_id}!")
+            logger.info(f"Got all edges from Velocloud host {host} and enterprise ID {enterprise_id}!")
         except Exception as e:
             err_msg = (
                 f"An error occurred when requesting edge list from host {host} and enterprise "
@@ -136,7 +143,7 @@ class VelocloudRepository:
                 )
 
         if err_msg:
-            self._logger.error(err_msg)
+            logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response
@@ -147,7 +154,7 @@ class VelocloudRepository:
         request = {"request_id": uuid(), "body": edge}
 
         try:
-            self._logger.info(f"Getting links configuration for edge {edge}...")
+            logger.info(f"Getting links configuration for edge {edge}...")
             response = await self._nats_client.request(
                 "request.links.configuration", to_json_bytes(request), timeout=90
             )
@@ -165,10 +172,10 @@ class VelocloudRepository:
                     f"{self._config.ENVIRONMENT_NAME.upper()} environment: Error {response_status} - {response_body}"
                 )
             else:
-                self._logger.info(f"Got links configuration for edge {edge}!")
+                logger.info(f"Got links configuration for edge {edge}!")
 
         if err_msg:
-            self._logger.error(err_msg)
+            logger.error(err_msg)
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response
@@ -178,7 +185,7 @@ class VelocloudRepository:
         for host in self._config.VELOCLOUD_HOST:
             response = await self.get_edges_links_by_host(host=host)
             if response["status"] not in range(200, 300):
-                self._logger.info(f"Error: could not retrieve edges links by host: {host}")
+                logger.warning(f"Error: could not retrieve edges links by host: {host}")
                 continue
             all_edges += response["body"]
 
@@ -196,14 +203,14 @@ class VelocloudRepository:
             serial_number = link["edgeSerialNumber"]
 
             if edge_state is None:
-                self._logger.info(
+                logger.info(
                     f"Edge in host {velocloud_host} and enterprise {enterprise_name} (ID: {enterprise_id}) "
                     f"has an invalid state. Skipping..."
                 )
                 continue
 
             if edge_state == "NEVER_ACTIVATED":
-                self._logger.info(
+                logger.info(
                     f"Edge {edge_name} in host {velocloud_host} and enterprise {enterprise_name} (ID: {enterprise_id}) "
                     f"has never been activated. Skipping..."
                 )
@@ -212,9 +219,7 @@ class VelocloudRepository:
             edge_full_id = {"host": link["host"], "enterprise_id": enterprise_id, "edge_id": link["edgeId"]}
             blacklist_edges = self._config.REFRESH_CONFIG["blacklisted_edges"]
             if edge_full_id in blacklist_edges:
-                self._logger.info(
-                    f"Edge {json.dumps(edge_full_id)} (serial: {serial_number}) is in blacklist. Skipping..."
-                )
+                logger.info(f"Edge {json.dumps(edge_full_id)} (serial: {serial_number}) is in blacklist. Skipping...")
                 continue
 
             edges_by_serial.setdefault(
@@ -254,7 +259,7 @@ class VelocloudRepository:
             for enterprise in host_to_enterprise_id[host]:
                 enterprise_edge_list = await self._get_all_enterprise_edges(host, enterprise)
                 if enterprise_edge_list["status"] not in range(200, 300):
-                    self._logger.error(f"Error could not get enterprise edges of enterprise {enterprise}")
+                    logger.error(f"Error could not get enterprise edges of enterprise {enterprise}")
                     continue
                 for edge in enterprise_edge_list["body"]:
                     edge_full_id_and_logical_id = {
@@ -275,12 +280,14 @@ class VelocloudRepository:
         return self.extract_edge_info(edge_links_list["body"])
 
     async def add_edge_config(self, edge):
+        logger.info(f"Adding links' configuration to edge {edge}...")
+
         edge["links_configuration"] = []
 
         edge_request = edge["edge"]
         configuration_response = await self.get_links_configuration(edge_request)
         if configuration_response["status"] not in range(200, 300):
-            self._logger.error(f"Error while getting links configuration for edge {edge_request}")
+            logger.error(f"Error while getting links configuration for edge {edge_request}")
             return edge
 
         for link in configuration_response["body"]:
@@ -291,4 +298,6 @@ class VelocloudRepository:
                     "type": link["type"],
                 }
             )
+
+        logger.info(f"Links' configuration added to edge {edge}")
         return edge

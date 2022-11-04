@@ -73,8 +73,13 @@ class TestGetCustomers:
         await instance_get_customer_with_last_contact(request_msg)
 
         instance_get_customer_with_last_contact._storage_repository.get_cache.assert_called_once()
+
+        filters_request = {
+            "filter": instance_request_message["body"]["filter"],
+            "last_contact_filter": instance_request_message["body"]["last_contact_filter"],
+        }
         request_msg.respond.assert_awaited_once_with(
-            to_json_bytes({"body": "No edges were found for the specified filters", "status": 404}),
+            to_json_bytes({"body": f"No edges were found for the specified filters: {filters_request}", "status": 404}),
         )
 
     @pytest.mark.asyncio

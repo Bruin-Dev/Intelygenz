@@ -40,6 +40,7 @@ class GetCustomers:
         last_contact_filter = body["last_contact_filter"] if "last_contact_filter" in body else None
         caches = self._storage_repository.get_host_cache(filters=filters)
         if len(caches) == 0:
+            logger.warning(f'Cache is still being built for host(s): {", ".join(body["filter"].keys())}')
             response["body"] = f'Cache is still being built for host(s): {", ".join(body["filter"].keys())}'
             response["status"] = 202
             await msg.respond(to_json_bytes(response))
@@ -56,11 +57,13 @@ class GetCustomers:
         )
 
         if len(filter_cache) == 0:
-            response["body"] = "No edges were found for the specified filters"
+            logger.warning(f"No edges were found for the specified filters: {body}")
+            response["body"] = f"No edges were found for the specified filters: {body}"
             response["status"] = 404
             await msg.respond(to_json_bytes(response))
             return
         else:
+            logger.info(f"{len(filter_cache)} edges were found for the specified filters: {body}")
             response["body"] = filter_cache
             response["status"] = 200
 

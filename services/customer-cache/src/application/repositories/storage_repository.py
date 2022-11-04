@@ -19,26 +19,44 @@ class StorageRepository:
         key = f"{self._redis_key_prefix}-{key}"
 
         if self._redis.exists(key):
+            logger.info(f"Cache found for {key}")
             cache = self._redis.get(key)
             return json.loads(cache)
-        return []
+        else:
+            logger.warning(f"No cache found for {key}")
+            return []
 
     def get_host_cache(self, filters):
         caches = []
         # If not filter add all velocloud servers to search in all
         if len(filters.keys()) == 0:
+            logger.info("No VeloCloud hosts' filter was specified. Fetching caches for all hosts...")
             for velo_dict in self._config.REFRESH_CONFIG["velo_servers"]:
                 filters.update(velo_dict)
+        else:
+            logger.info(f"Fetching caches for VeloCloud hosts: {filters.keys()}...")
+
         for host in filters.keys():
             host_cache = self.get_cache(host)
+
             if len(filters[host]) != 0:
+                logger.info(
+                    f"Filtering cache of {len(host_cache)} edges for host {host} by enterprises: {filters[host]}..."
+                )
                 host_cache = [edge for edge in host_cache if edge["edge"]["enterprise_id"] in filters[host]]
+                logger.info(f"Cache for host {host} and filtered by enterprises has {len(host_cache)} edges")
+            else:
+                logger.info(f"No enterprises were specified to filter cache of {len(host_cache)} edges for host {host}")
+
             caches = caches + host_cache
+
         return caches
 
     def set_cache(self, key, cache):
+        logger.info(f"Saving cache of {len(cache)} edges for {key}...")
         key = f"{self._redis_key_prefix}-{key}"
         self._redis.set(key, json.dumps(cache))
+        logger.info(f"Cache saved for {key}")
 
     def get_refresh_date(self) -> datetime:
         logger.info("Getting next refresh date from Redis...")
