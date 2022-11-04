@@ -1,6 +1,6 @@
 module "mettel-automation-eks-cluster" {
   source                          = "terraform-aws-modules/eks/aws"
-  version                         = "18.28.0"
+  version                         = "17.24.0"
   cluster_name                    = local.cluster_name
   cluster_version                 = local.k8s_version
   subnets                         = data.aws_subnet_ids.mettel-automation-private-subnets.ids
@@ -9,6 +9,8 @@ module "mettel-automation-eks-cluster" {
   worker_ami_name_filter          = local.eks_worker_ami_name_filter
   worker_ami_owner_id             = local.eks_worker_ami_owner_id
   cluster_endpoint_private_access = true
+  cloudwatch_log_group_name       = 
+  cloudwatch_log_group_arn        = 
 
   worker_groups = [
     {
@@ -30,3 +32,11 @@ module "mettel-automation-eks-cluster" {
     "k8s.io/cluster-autoscaler/${local.cluster_name}" = "true"
   })
 } 
+
+resource "aws_cloudwatch_log_group" "eks_log_group" {
+  name = "/aws/eks/${local.cluster_name}/logs"
+
+  tags = merge(local.common_tags, {
+    Name         = local.cluster_name
+  })
+}
