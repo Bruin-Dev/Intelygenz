@@ -24,7 +24,7 @@ variables:
   GITLAB_API_URL: https://gitlab.intelygenz.com/api/v4/projects/1040
 
   # Desired replicas of microservices
-  BRUIN_BRIDGE_DESIRED_TASKS: "2"
+  BRUIN_BRIDGE_DESIRED_TASKS: "4"
   CUSTOMER_CACHE_DESIRED_TASKS: "1"
   DIGI_BRIDGE_DESIRED_TASKS: "1"
   DIGI_REBOOT_REPORT_DESIRED_TASKS: "1"
