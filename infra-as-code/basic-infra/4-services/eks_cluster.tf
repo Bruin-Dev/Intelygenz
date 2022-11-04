@@ -9,8 +9,8 @@ module "mettel-automation-eks-cluster" {
   worker_ami_name_filter          = local.eks_worker_ami_name_filter
   worker_ami_owner_id             = local.eks_worker_ami_owner_id
   cluster_endpoint_private_access = true
-  cloudwatch_log_group_name       = 
-  cloudwatch_log_group_arn        = 
+  cloudwatch_log_group_name       = "/aws/eks/${local.cluster_name}/logs"
+  cloudwatch_log_group_arn        = aws_cloudwatch_log_group.eks_log_group.arn
 
   worker_groups = [
     {
@@ -33,7 +33,7 @@ module "mettel-automation-eks-cluster" {
   })
 } 
 
-resource "aws_cloudwatch_log_group" "eks_log_group" {
+resource "aws_cloudwatch_log_group" "v" {
   name = "/aws/eks/${local.cluster_name}/logs"
 
   tags = merge(local.common_tags, {
