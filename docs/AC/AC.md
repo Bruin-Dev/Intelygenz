@@ -119,3 +119,9 @@ b. Automatically [locks the account node for [30 minutes]] when the maximum numb
 #### 2 Implementation
 The enforce of a limit on logon attemps is implemented by MetTel from Okta to access from IAM identity central. There are 2 main accounts needed from AWS that does not comes from Okta and Identity central, a MetTel main root account that has access to everything and a deployment account to deploy infra as a code. It´s not posible to limit the number of attempts because AWS does not support this [behaviour](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_passwords_account-policy.html#password-policy-rules).
 
+
+# AC-12 Session Termination
+#### 1 Description
+Automatically terminate a user session after [(1) 30 minutes of inactivity (2) the following timeframes, regardless of user activity: a. Thirty (30) days for systems at AAL1 b. Twelve (12) hours for systems at AAL2 and AAL3]. Note: AAL2 and AAL3 require Two Factor Authentication].
+#### 2 Implementation
+The enforce a session termination MetTel implemented Okta users central system conected to their VPN and plataformed laptops. MetTel has the control of the session termination with the two factor aunthentication implemented with Okta.
