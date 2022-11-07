@@ -255,7 +255,7 @@ def response_not_body_message():
 
 @pytest.fixture(scope="function")
 def response_not_found_message():
-    return {"body": "No devices were found for the specified filters", "status": 404}
+    return {"body": "No devices were found for the specified filters: {filters}", "status": 404}
 
 
 @pytest.fixture(scope="function")
@@ -278,12 +278,23 @@ def response_bruin_management_status_ok():
 
 
 @pytest.fixture(scope="function")
-def err_msg_refresh_cache():
+def err_msg_refresh_retry_failed():
     return {
         "request_id": "1234",
         "message": (
             "Maximum retries happened while while refreshing the cache cause of error was Couldn't find any probe"
             " to refresh the cache"
+        ),
+    }
+
+
+@pytest.fixture(scope="function")
+def err_msg_refresh_cache_max_retries():
+    return {
+        "request_id": "1234",
+        "message": (
+            "Maximum retries happened while while refreshing the cache cause of error was [hawkeye-customer-cache] "
+            "Too many consecutive failures happened while trying to claim the list of probes of hawkeye"
         ),
     }
 

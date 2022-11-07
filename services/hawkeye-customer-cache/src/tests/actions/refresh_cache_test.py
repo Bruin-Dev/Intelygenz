@@ -106,9 +106,11 @@ class TestRefreshCache:
         )
 
     @pytest.mark.asyncio
-    async def refresh_cache_probes_list_500_test(self, refresh_cache, err_msg_refresh_cache, response_500_probes):
+    async def refresh_cache_probes_list_500_test(
+        self, refresh_cache, err_msg_refresh_retry_failed, response_500_probes
+    ):
         refresh_cache._notifications_repository.send_slack_message = AsyncMock()
-        err_msg_refresh_cache["request_id"] = uuid_
+        err_msg_refresh_retry_failed["request_id"] = uuid_
         refresh_cache._hawkeye_repository.get_probes = AsyncMock(return_value=response_500_probes)
 
         refresh_cache._partial_refresh_cache = AsyncMock()
@@ -118,12 +120,16 @@ class TestRefreshCache:
         with uuid_mock, tenacity_retry_mock:
             await refresh_cache._refresh_cache()
         refresh_cache._storage_repository.set_hawkeye_cache.assert_not_called()
-        refresh_cache._notifications_repository.send_slack_message.assert_awaited_with(err_msg_refresh_cache["message"])
+        refresh_cache._notifications_repository.send_slack_message.assert_awaited_with(
+            err_msg_refresh_retry_failed["message"]
+        )
 
     @pytest.mark.asyncio
-    async def refresh_cache_probes_list_failed_test(self, refresh_cache, err_msg_refresh_cache, response_none_probes):
+    async def refresh_cache_probes_list_failed_test(
+        self, refresh_cache, err_msg_refresh_retry_failed, response_none_probes
+    ):
         refresh_cache._notifications_repository.send_slack_message = AsyncMock()
-        err_msg_refresh_cache["request_id"] = uuid_
+        err_msg_refresh_retry_failed["request_id"] = uuid_
         refresh_cache._hawkeye_repository.get_probes = AsyncMock(return_value=response_none_probes)
 
         refresh_cache._partial_refresh_cache = AsyncMock()
@@ -133,13 +139,15 @@ class TestRefreshCache:
         with uuid_mock, tenacity_retry_mock:
             await refresh_cache._refresh_cache()
         refresh_cache._storage_repository.set_hawkeye_cache.assert_not_called()
-        refresh_cache._notifications_repository.send_slack_message.assert_awaited_with(err_msg_refresh_cache["message"])
+        refresh_cache._notifications_repository.send_slack_message.assert_awaited_with(
+            err_msg_refresh_retry_failed["message"]
+        )
 
     @pytest.mark.asyncio
     async def refresh_cache_probes_list_failed_with_several_consecutive_failures_test(
-        self, refresh_cache, err_msg_refresh_cache, response_none_probes
+        self, refresh_cache, err_msg_refresh_cache_max_retries, response_none_probes
     ):
-        err_msg_refresh_cache["request_id"] = uuid_
+        err_msg_refresh_cache_max_retries["request_id"] = uuid_
         refresh_cache._notifications_repository.send_slack_message = AsyncMock()
         refresh_cache._hawkeye_repository.get_probes = AsyncMock(return_value=response_none_probes)
 
@@ -152,7 +160,9 @@ class TestRefreshCache:
             await refresh_cache._refresh_cache()
 
         refresh_cache._storage_repository.set_hawkeye_cache.assert_not_called()
-        refresh_cache._notifications_repository.send_slack_message.assert_any_await(err_msg_refresh_cache["message"])
+        refresh_cache._notifications_repository.send_slack_message.assert_any_await(
+            err_msg_refresh_cache_max_retries["message"]
+        )
 
     @pytest.mark.asyncio
     async def send_mail_alert_test(

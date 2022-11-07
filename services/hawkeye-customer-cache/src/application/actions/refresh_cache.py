@@ -51,10 +51,9 @@ class RefreshCache:
                         "to claim the list of probes of hawkeye"
                     )
                     await self._notifications_repository.send_slack_message(error_message)
+                    raise Exception(error_message)
 
-                    logger.error(
-                        f"Couldn't find any probe to refresh the cache. Error: {error_message}. Re-trying job..."
-                    )
+                logger.warning("Couldn't find any probe to refresh the cache. Re-trying job...")
                 err_msg = "Couldn't find any probe to refresh the cache"
                 raise Exception(err_msg)
 
@@ -64,7 +63,7 @@ class RefreshCache:
             cache = []
             for device in probes_list:
                 if device["nodetonode"]["lastUpdate"] == "never" and device["realservice"]["lastUpdate"] == "never":
-                    logger.info(f"Device {device['serialNumber']} has never been contacted. Skipping...")
+                    logger.warning(f"Device {device['serialNumber']} has never been contacted. Skipping...")
                     continue
 
                 filter_device = await self._bruin_repository.filter_probe(device)
@@ -87,11 +86,11 @@ class RefreshCache:
     async def _send_email_multiple_inventories(self):
         if self._bruin_repository._serials_with_multiple_inventories:
             message = (
-                f"Alert. Detected some edges with more than one status. "
+                f"Alert. Detected some Ixia devices with more than one status. "
                 f"{self._bruin_repository._serials_with_multiple_inventories}"
             )
             await self._notifications_repository.send_slack_message(message)
-            logger.info(message)
+            logger.warning(message)
             email_obj = self._format_alert_email_object()
             logger.info(
                 f"Sending mail with serials having multiples inventories to  "
@@ -99,6 +98,8 @@ class RefreshCache:
             )
             response = await self._email_repository.send_email(email_obj)
             logger.info(f"Response from sending email with serials having multiple inventories: {json.dumps(response)}")
+        else:
+            logger.info("No devices with multiple Bruin inventories were detected")
 
     def _format_alert_email_object(self):
         now = datetime.utcnow().strftime("%B %d %Y - %H:%M:%S")
@@ -134,6 +135,6 @@ class RefreshCache:
                 id="_refresh_cache",
             )
         except ConflictingIdError:
-            logger.info(
-                f"There is a job scheduled for refreshing the cache already. No new job " "is going to be scheduled."
+            logger.warning(
+                "There is a job scheduled for refreshing the cache already. No new job is going to be scheduled."
             )

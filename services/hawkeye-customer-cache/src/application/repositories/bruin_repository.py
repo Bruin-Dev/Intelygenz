@@ -116,25 +116,32 @@ class BruinRepository:
                 client_info_response = await self.get_client_info(serial_number)
                 client_info_response_status = client_info_response["status"]
                 if client_info_response_status not in range(200, 300):
+                    logger.error(f"Error while fetching client info for device {serial_number}: {client_info_response}")
                     return
 
                 client_info_response_body = client_info_response["body"]
                 if len(client_info_response_body) > 1:
+                    logger.info(f"Device {serial_number} has {len(client_info_response_body)} inventories in Bruin")
                     self._serials_with_multiple_inventories[serial_number] = client_info_response_body
 
                 if not client_info_response_body:
-                    logger.info(f"Edge with serial {serial_number} doesn't have any Bruin client info associated")
+                    logger.warning(f"Device with serial {serial_number} doesn't have any Bruin client info associated")
                     return
+
                 client_id = client_info_response_body[0].get("client_id")
 
                 management_status_response = await self.get_management_status(client_id, serial_number)
                 management_status_response_status = management_status_response["status"]
                 if management_status_response_status not in range(200, 300):
+                    logger.error(
+                        f"Error while fetching management status for device {serial_number}: "
+                        f"{management_status_response}"
+                    )
                     return
 
                 management_status_response_body = management_status_response["body"]
                 if not self.is_management_status_active(management_status_response_body):
-                    logger.info(f"Management status is not active for serial {serial_number}. Skipping...")
+                    logger.warning(f"Management status is not active for serial {serial_number}. Skipping...")
                     return
                 else:
                     logger.info(f"Management status for serial {serial_number} seems active")

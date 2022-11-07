@@ -45,6 +45,10 @@ class TestGetCustomers:
         await get_customer(request_msg)
 
         get_customer._storage_repository.get_hawkeye_cache.assert_called_once()
+
+        response_not_found_message["body"] = response_not_found_message["body"].format(
+            filters=default_call_with_params["body"]
+        )
         request_msg.respond.assert_awaited_once_with(to_json_bytes(response_not_found_message))
 
     @pytest.mark.asyncio

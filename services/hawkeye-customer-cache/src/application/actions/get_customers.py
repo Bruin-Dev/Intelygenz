@@ -33,6 +33,7 @@ class GetCustomers:
         last_contact_filter = body["last_contact_filter"] if "last_contact_filter" in body else None
         cache = self._storage_repository.get_hawkeye_cache()
         if len(cache) == 0:
+            logger.warning(f"Cache is still being built")
             response["body"] = f"Cache is still being built"
             response["status"] = 202
             await msg.respond(to_json_bytes(response))
@@ -49,11 +50,13 @@ class GetCustomers:
         )
 
         if len(filter_cache) == 0:
-            response["body"] = "No devices were found for the specified filters"
+            logger.warning(f"No devices were found for the specified filters: {body}")
+            response["body"] = f"No devices were found for the specified filters: {body}"
             response["status"] = 404
             await msg.respond(to_json_bytes(response))
             return
         else:
+            logger.info(f"{len(filter_cache)} devices were found for the specified filters: {body}")
             response["body"] = filter_cache
             response["status"] = 200
 
