@@ -1,33 +1,25 @@
-## get cache Documentation
+## Get Hawkeye's customer cache
 
-1. If velo_filter
+```python
+logger.info(f"Getting customer cache for Hawkeye...")
+```
 
-   ```
-   self._logger.info(f"Getting customer cache for Velocloud host(s) {', '.join(velo_filter.keys())}...")
-   ```
-2. Else:
-
-   ```
-   self._logger.info(f"Getting customer cache for all Velocloud hosts...")
-   ```
-3. If `Exception`:
-
-   ```
-   self._logger.error(f"An error occurred when requesting customer cache -> {e}")
-   ```
-
-* If response status == 202:
+* If there's an error while asking for the data to the `hawkeye-customer-cache` service:
+  ```python
+  err_msg = f"An error occurred when requesting customer cache -> {e}" 
+  [...]
+  logger.error(err_msg)
   ```
-  self._logger.error(response_body)
+  END
+
+* If response status for get Hawkeye's customer cache is not ok, or the cache is still building:
+  ```python
+  err_msg = response_body
+  [...]
+  logger.error(err_msg)
   ```
-* Else:
-  * If velo_filter:
+  END
 
-    ```
-    self._logger.info(f"Got customer cache for Velocloud host(s) {', '.join(velo_filter.keys())}!")
-    ```
-  * Else
-
-    ```
-    self._logger.info(f"Got customer cache for all Velocloud hosts!")
-    ```
+```python
+logger.info(f"Got customer cache for Hawkeye!")
+```

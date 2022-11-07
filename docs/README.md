@@ -57,7 +57,7 @@
            7. [Ticket creation outcomes](logging/events/7-ticket-creation-outcome.md)
            8. [Service affecting](logging/events/8-service-affecting.md)
            9. [InterMapper Outage Monitoring](logging/events/9-intermapper-monitor.md)
-           10. [Ixia Outage Monitoring](logging/events/10-ixia-outage-monitoring.md)
+           10. [Hawkeye Outage Monitoring](logging/events/10-hawkeye-outage-monitor.md)
            11. [Gateway Monitoring](logging/events/15-gateway-monitor.md)
            12. [Last Contact Report](logging/events/20-last-contact-report.md)
            13. [Lumin Billing Report](logging/events/21-lumin-billing-report.md)
