@@ -72,6 +72,7 @@
           7. [DiGi Bridge](logging/events/18-digi-bridge.md)
        4. Use cases with bridge capabilities
           1. [Customer Cache](logging/events/23-customer-cache.md)
+          2. [Hawkeye Customer Cache](logging/events/24-hawkeye-customer-cache.md)
     2. Infrastructure
         1. [Lambda Parameter-Replicator](lambda/PARAMETER_REPLICATOR.md)
 
