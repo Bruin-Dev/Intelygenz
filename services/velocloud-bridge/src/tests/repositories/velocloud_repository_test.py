@@ -1,11 +1,9 @@
 from datetime import datetime, timedelta
-from http import HTTPStatus
 from unittest.mock import AsyncMock, Mock
 
 import pytest
 
 from ...application.clients.velocloud_client import VelocloudClient
-from ...application.repositories.utils_repository import GenericResponse
 from ...application.repositories.velocloud_repository import VelocloudRepository
 from ...config import testconfig as config
 
@@ -31,7 +29,7 @@ class TestVelocloudRepository:
         filter_events_status_list = ["EDGE_UP", "EDGE_DOWN", "LINK_ALIVE", "LINK_DEAD"]
 
         test_velocloud_client.get_all_events = AsyncMock(return_value=events_response)
-        edge = {"host": vr._config.VELOCLOUD_CONFIG["servers"][0]["url"], "enterprise_id": 19, "edge_id": 99}
+        edge = {"host": list(config.VELOCLOUD_CONFIG["credentials"])[0], "enterprise_id": 19, "edge_id": 99}
         start = datetime.now() - timedelta(hours=24)
         end = datetime.now()
         limit = None
@@ -55,7 +53,7 @@ class TestVelocloudRepository:
         filter_events_status_list = None
 
         test_velocloud_client.get_all_events = AsyncMock(return_value=events_response)
-        edge = {"host": vr._config.VELOCLOUD_CONFIG["servers"][0]["url"], "enterprise_id": 19, "edge_id": 99}
+        edge = {"host": list(config.VELOCLOUD_CONFIG["credentials"])[0], "enterprise_id": 19, "edge_id": 99}
         start = datetime.now() - timedelta(hours=24)
         end = datetime.now()
         limit = None
@@ -80,7 +78,7 @@ class TestVelocloudRepository:
         filter_events_status_list = None
 
         test_velocloud_client.get_all_events = AsyncMock(return_value=events_response)
-        edge = {"host": vr._config.VELOCLOUD_CONFIG["servers"][0]["url"], "enterprise_id": 19, "edge_id": 99}
+        edge = {"host": list(config.VELOCLOUD_CONFIG["credentials"])[0], "enterprise_id": 19, "edge_id": 99}
         start = datetime.now() - timedelta(hours=24)
         end = datetime.now()
         limit = None
@@ -106,7 +104,7 @@ class TestVelocloudRepository:
         filter_events_status_list = ["EDGE_UP", "EDGE_DOWN", "LINK_ALIVE", "LINK_DEAD"]
 
         test_velocloud_client.get_all_events = AsyncMock(return_value=events_response)
-        host = vr._config.VELOCLOUD_CONFIG["servers"][0]["url"]
+        host = list(config.VELOCLOUD_CONFIG["credentials"])[0]
         enterprise_id = 19
         start = datetime.now() - timedelta(hours=24)
         end = datetime.now()
@@ -132,7 +130,7 @@ class TestVelocloudRepository:
         filter_events_status_list = None
 
         test_velocloud_client.get_all_events = AsyncMock(return_value=events_response)
-        host = vr._config.VELOCLOUD_CONFIG["servers"][0]["url"]
+        host = list(config.VELOCLOUD_CONFIG["credentials"])[0]
         enterprise_id = 19
         start = datetime.now() - timedelta(hours=24)
         end = datetime.now()
@@ -160,7 +158,7 @@ class TestVelocloudRepository:
         filter_events_status_list = None
 
         test_velocloud_client.get_all_events = AsyncMock(return_value=events_response)
-        host = vr._config.VELOCLOUD_CONFIG["servers"][0]["url"]
+        host = list(config.VELOCLOUD_CONFIG["credentials"])[0]
         enterprise_id = 19
         start = datetime.now() - timedelta(hours=24)
         end = datetime.now()
@@ -179,12 +177,12 @@ class TestVelocloudRepository:
         assert enterprise_events == events_response
 
     @pytest.mark.asyncio
-    async def connect_to_all_servers_test(self):
+    async def connect_to_all_hosts_test(self):
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config=config, velocloud_client=test_velocloud_client)
-        test_velocloud_client.instantiate_and_connect_clients = AsyncMock()
-        await vr.connect_to_all_servers()
-        assert test_velocloud_client.instantiate_and_connect_clients.called
+        test_velocloud_client.schedule_connect_to_all_hosts = AsyncMock()
+        await vr.connect_to_all_hosts()
+        assert test_velocloud_client.schedule_connect_to_all_hosts.called
 
     @pytest.mark.asyncio
     async def get_all_enterprise_names_with_filter_test(self):

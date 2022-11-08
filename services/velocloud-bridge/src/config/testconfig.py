@@ -12,13 +12,13 @@ TIMEZONE = "US/Eastern"
 
 VELOCLOUD_CONFIG = {
     "verify_ssl": True,
-    "servers": [
-        {
-            "url": "someurl",
-            "username": "someusername",
-            "password": "somepassword",
-        }
-    ],
+    "credentials": {
+        "some_host": {
+            "username": "some_username",
+            "password": "some_password",
+        },
+    },
+    "login_interval": 60,
 }
 
 LOG_CONFIG = {
