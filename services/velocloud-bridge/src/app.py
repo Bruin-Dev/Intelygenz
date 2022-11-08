@@ -131,7 +131,7 @@ class Container:
     async def start(self):
         # Setup VeloCloud HTTP session
         await self._velocloud_client.create_session()
-        await self._velocloud_repository.connect_to_all_servers()
+        await self._velocloud_repository.connect_to_all_hosts()
 
         # Setup NATS
         await self._init_nats_conn()

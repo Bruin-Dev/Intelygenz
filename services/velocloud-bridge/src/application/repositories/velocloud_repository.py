@@ -9,9 +9,8 @@ class VelocloudRepository:
         self._config = config
         self._velocloud_client = velocloud_client
 
-    async def connect_to_all_servers(self):
-        logger.info("Instantiating and connecting clients in velocloud bridge")
-        await self._velocloud_client.instantiate_and_connect_clients()
+    async def connect_to_all_hosts(self):
+        await self._velocloud_client.schedule_connect_to_all_hosts()
 
     async def get_all_edge_events(self, edge, start, end, limit, filter_events_status_list):
         logger.info(f"Getting events for edge {edge} between {start} and {end}...")

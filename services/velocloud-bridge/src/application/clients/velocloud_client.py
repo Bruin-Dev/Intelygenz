@@ -1,14 +1,11 @@
 import asyncio
 import logging
 from datetime import datetime
-from http import HTTPStatus
-from typing import Any, Dict, List
+from typing import Any, List
 
 import aiohttp
 from apscheduler.jobstores.base import ConflictingIdError
 from pytz import timezone
-
-from ..repositories.utils_repository import GenericResponse
 
 logger = logging.getLogger(__name__)
 
@@ -16,8 +13,8 @@ logger = logging.getLogger(__name__)
 class VelocloudClient:
     def __init__(self, config, scheduler):
         self._config = config
-        self._clients = list()
         self._scheduler = scheduler
+        self._cookies = {host: "" for host in self._config.VELOCLOUD_CONFIG["credentials"]}
 
     async def create_session(self):
         self._session = aiohttp.ClientSession()
@@ -25,126 +22,91 @@ class VelocloudClient:
     def __del__(self):
         asyncio.get_event_loop().run_until_complete(self._session.close())
 
-    async def instantiate_and_connect_clients(self):
-        self._clients = [
-            await self._create_and_connect_client(cred_block["url"], cred_block["username"], cred_block["password"])
-            for cred_block in self._config.VELOCLOUD_CONFIG["servers"]
-        ]
+    async def _connect_to_all_hosts(self):
+        logger.info(f"Connecting to all hosts...")
 
-    async def _start_relogin_job(self, host):
-        logger.info(f"Scheduling relogin job for host {host}...")
+        for host in self._config.VELOCLOUD_CONFIG["credentials"]:
+            await self._login(host)
+
+    async def schedule_connect_to_all_hosts(self):
+        logger.info(f"Scheduling job to connect to all hosts...")
 
         tz = timezone(self._config.TIMEZONE)
-        run_date = datetime.now(tz)
+        next_run_time = datetime.now(tz)
 
         try:
-            params = {
-                "host": host,
-            }
             self._scheduler.add_job(
-                self._relogin_client,
-                "date",
-                run_date=run_date,
+                self._connect_to_all_hosts,
+                "interval",
+                seconds=self._config.VELOCLOUD_CONFIG["login_interval"],
+                next_run_time=next_run_time,
                 replace_existing=False,
-                misfire_grace_time=9999,
-                id=f"_relogin_client{host}",
-                kwargs=params,
+                id="_connect_to_all_hosts",
             )
-            logger.info(f"Relogin job for host {host} has been scheduled")
-
+            logger.info(f"Job to connect to all hosts has been scheduled")
         except ConflictingIdError as conflict:
-            logger.error(f"Skipping start of relogin job for host {host}. Reason: {conflict}")
+            logger.error(f"Skipping start of job to connect to all hosts. Reason: {conflict}")
 
-    def _get_cred_block(self, host):
-        for cred_block in self._config.VELOCLOUD_CONFIG["servers"]:
-            if host == cred_block["url"]:
-                return cred_block
+    def _get_headers_by_host(self, host):
+        return {
+            "Cookie": self._cookies[host],
+            "Content-Type": "application/json-patch+json",
+            "Cache-control": "no-cache, no-store, no-transform, max-age=0, only-if-cached",
+        }
 
-    async def _relogin_client(self, host):
-        logger.info(f"Relogging in host: {host} to velocloud")
+    @staticmethod
+    def _has_cookie(headers):
+        return bool(headers.get("Cookie"))
 
-        creds = self._get_cred_block(host)
+    async def _json_return(self, response, host):
+        if isinstance(response, dict):
+            if "error" in response.keys():
+                if "tokenError" in response["error"]["message"]:
+                    logger.info(f"Response returned: {response}. Logging in...")
+                    await self._login(host)
+                else:
+                    logger.error(f"Error response returned: {response}")
+        return response
 
-        for client in self._clients:
-            if host == client["host"]:
-                logger.info(f"Host {host} is in the list of available clients. Refreshing authentication headers...")
-                client["headers"] = {}
-                connected_client = await self._create_and_connect_client(host, creds["username"], creds["password"])
-                client["headers"] = connected_client["headers"]
-                break
-
-    async def _create_and_connect_client(self, host, user, password):
-        logger.info(f"Logging in host: {host} to velocloud")
-
-        client = dict()
-        client["host"] = host
-        headers = await self._create_headers_by_host(host, user, password)
-        if headers["status"] in range(200, 300):
-            logger.info(f"Authentication headers refreshed for host {host} successfully")
-            client["headers"] = headers["body"]
-        else:
-            logger.error(f"Authentication headers could not be refreshed for host {host}. Got response: {headers}")
-            client["headers"] = {}
-        return client
-
-    async def _create_headers_by_host(self, host, user, password):
+    async def _login(self, host):
         try:
-            post = {
-                "headers": {"Content-Type": "application/json"},
-                "json": {"username": user, "password": password},
-                "allow_redirects": False,
-                "ssl": self._config.VELOCLOUD_CONFIG["verify_ssl"],
-            }
-
             logger.info(f"Logging in to host {host}...")
-            response = await self._session.post(f"https://{host}/portal/rest/login/operatorLogin", **post)
-            return_response = dict.fromkeys(["body", "status"])
+
+            response = await self._session.post(
+                f"https://{host}/portal/rest/login/operatorLogin",
+                headers={"Content-Type": "application/json"},
+                json=self._config.VELOCLOUD_CONFIG["credentials"][host],
+                ssl=self._config.VELOCLOUD_CONFIG["verify_ssl"],
+                allow_redirects=False,
+            )
+
             if response.status in range(200, 300):
                 logger.info(f"Logged in to host {host} successfully")
                 session_index = response.headers["Set-Cookie"].find("velocloud.session")
                 session_end = response.headers["Set-Cookie"].find(";", session_index)
-
-                headers = {
-                    "Cookie": response.headers["Set-Cookie"][session_index:session_end],
-                    "Content-Type": "application/json-patch+json",
-                    "Cache-control": "no-cache, no-store, no-transform, max-age=0, only-if-cached",
-                }
-                return_response["body"] = headers
-                return_response["status"] = response.status
-            if response.status == 302:
-                logger.error(f"Got HTTP 302 while logging in to host {host}")
-                return_response["body"] = f"Got an error trying to login"
-                return_response["status"] = 302
-
-            return return_response
+                self._cookies[host] = response.headers["Set-Cookie"][session_index:session_end]
+            else:
+                logger.error(f"Got HTTP {response.status} while logging in to host {host}")
         except Exception as e:
-            return {"body": e.args[0], "status": 500}
-
-    def _get_header_by_host(self, host):
-        host_client = [client for client in self._clients if host == client["host"]]
-        if len(host_client) > 0:
-            logger.info(f"Found host: {host} in client array")
-            return host_client[0]
-        logger.info(f"Host: {host} not found in client array")
-        return None
+            logger.exception(e)
 
     async def get_all_events(self, host, body):
         try:
             return_response = dict.fromkeys(["body", "status"])
-            target_host_client = self._get_header_by_host(host)
+            headers = self._get_headers_by_host(host)
 
-            if target_host_client is None:
-                logger.error(f"Cannot find a client to connect to {host}")
-                return_response["body"] = f"Cannot find a client to connect to {host}"
+            if not self._has_cookie(headers):
+                logger.error(f"Cannot find a cookie for {host}")
+                return_response["body"] = f"Cannot find a cookie for {host}"
                 return_response["status"] = 404
-                await self._start_relogin_job(host)
+                await self._login(host)
                 return return_response
 
             logger.info(f"Getting all events from host {host} using payload {body}...")
             response = await self._session.post(
                 f"https://{host}/portal/rest/event/getEnterpriseEvents",
                 json=body,
-                headers=target_host_client["headers"],
+                headers=headers,
                 ssl=self._config.VELOCLOUD_CONFIG["verify_ssl"],
             )
 
@@ -170,21 +132,22 @@ class VelocloudClient:
         except Exception as e:
             return {"body": e.args[0], "status": 500}
 
-    async def get_monitoring_aggregates(self, client):
+    async def get_monitoring_aggregates(self, host):
         try:
-            logger.info(f"Getting monitoring aggregates for host {client['host']}")
+            logger.info(f"Getting monitoring aggregates for host {host}")
+            headers = self._get_headers_by_host(host)
             response = await self._session.post(
-                f"https://{client['host']}/portal/rest/monitoring/getAggregates",
+                f"https://{host}/portal/rest/monitoring/getAggregates",
                 json={},
-                headers=client["headers"],
+                headers=headers,
                 ssl=self._config.VELOCLOUD_CONFIG["verify_ssl"],
             )
 
             return_response = dict.fromkeys(["body", "status"])
             if response.status in range(200, 300):
-                logger.info(f"Got HTTP 200 from POST /monitoring/getAggregates for host {client['host']}")
+                logger.info(f"Got HTTP 200 from POST /monitoring/getAggregates for host {host}")
                 response_json = await response.json()
-                return_response["body"] = await self._json_return(response_json, client["host"])
+                return_response["body"] = await self._json_return(response_json, host)
                 return_response["status"] = response.status
                 return return_response
             if response.status == 400:
@@ -204,8 +167,8 @@ class VelocloudClient:
     async def get_all_enterprise_names(self):
         enterprise_names = list()
         response = {"body": None, "status": 200}
-        for client in self._clients:
-            res = await self.get_monitoring_aggregates(client)
+        for host in self._cookies:
+            res = await self.get_monitoring_aggregates(host)
             if res["status"] not in range(200, 300):
                 logger.error(
                     f"Function [get_all_enterprise_names] Error: \n"
@@ -220,28 +183,18 @@ class VelocloudClient:
         response["body"] = enterprise_names
         return response
 
-    async def _json_return(self, response, host):
-        if isinstance(response, dict):
-            if "error" in response.keys():
-                if "tokenError" in response["error"]["message"]:
-                    logger.info(f"Response returned: {response}. Attempting to relogin")
-                    await self._start_relogin_job(host)
-                else:
-                    logger.error(f"Error response returned: {response}")
-        return response
-
     async def get_links_with_edge_info(self, velocloud_host: str):
         result = dict.fromkeys(["body", "status"])
 
         request_body = {}
-        target_host_client = self._get_header_by_host(velocloud_host)
+        headers = self._get_headers_by_host(velocloud_host)
 
-        if target_host_client is None:
-            logger.error(f"Cannot find a client to connect to {velocloud_host}")
+        if not self._has_cookie(headers):
+            logger.error(f"Cannot find a cookie for {velocloud_host}")
 
-            await self._start_relogin_job(velocloud_host)
+            await self._login(velocloud_host)
 
-            result["body"] = f"Cannot find a client to connect to host {velocloud_host}"
+            result["body"] = f"Cannot find a cookie for {velocloud_host}"
             result["status"] = 404
             self.__log_result(result)
 
@@ -253,7 +206,7 @@ class VelocloudClient:
             response = await self._session.post(
                 f"https://{velocloud_host}/portal/rest/monitoring/getEnterpriseEdgeLinkStatus",
                 json=request_body,
-                headers=target_host_client["headers"],
+                headers=headers,
                 ssl=self._config.VELOCLOUD_CONFIG["verify_ssl"],
             )
         except aiohttp.ClientConnectionError:
@@ -268,7 +221,7 @@ class VelocloudClient:
             self.__log_result(result)
             return result
 
-        await self.__schedule_relogin_job_if_needed(velocloud_host, response)
+        await self.__login_if_needed(velocloud_host, response)
 
         logger.info(
             f"Got HTTP {response.status} from Velocloud after claiming links with edge info for host {velocloud_host}"
@@ -287,14 +240,14 @@ class VelocloudClient:
         request_body = {
             "interval": interval,
         }
-        target_host_client = self._get_header_by_host(velocloud_host)
+        headers = self._get_headers_by_host(velocloud_host)
 
-        if target_host_client is None:
-            logger.error(f"Cannot find a client to connect to {velocloud_host}")
+        if not self._has_cookie(headers):
+            logger.error(f"Cannot find a cookie for {velocloud_host}")
 
-            await self._start_relogin_job(velocloud_host)
+            await self._login(velocloud_host)
 
-            result["body"] = f"Cannot find a client to connect to host {velocloud_host}"
+            result["body"] = f"Cannot find a cookie for {velocloud_host}"
             result["status"] = 404
             self.__log_result(result)
 
@@ -306,7 +259,7 @@ class VelocloudClient:
             response = await self._session.post(
                 f"https://{velocloud_host}/portal/rest/monitoring/getAggregateEdgeLinkMetrics",
                 json=request_body,
-                headers=target_host_client["headers"],
+                headers=headers,
                 ssl=self._config.VELOCLOUD_CONFIG["verify_ssl"],
             )
         except aiohttp.ClientConnectionError:
@@ -321,7 +274,7 @@ class VelocloudClient:
             self.__log_result(result)
             return result
 
-        await self.__schedule_relogin_job_if_needed(velocloud_host, response)
+        await self.__login_if_needed(velocloud_host, response)
 
         logger.info(
             f"Got HTTP {response.status} from Velocloud after claiming links metric info for host {velocloud_host} and "
@@ -336,17 +289,17 @@ class VelocloudClient:
         return result
 
     async def get_edge_links_series(self, velocloud_host: str, payload):
-        target_host_client = self._get_header_by_host(velocloud_host)
+        headers = self._get_headers_by_host(velocloud_host)
         result = dict.fromkeys(["body", "status"])
         logger.info(
             f"Trying to get edge links series for payload {payload} and from Velocloud host '{velocloud_host}'..."
         )
-        if target_host_client is None:
-            logger.error(f"Cannot find a client to connect to {velocloud_host}")
+        if not self._has_cookie(headers):
+            logger.error(f"Cannot find a cookie for {velocloud_host}")
 
-            await self._start_relogin_job(velocloud_host)
+            await self._login(velocloud_host)
 
-            result["body"] = f"Cannot find a client to connect to host {velocloud_host}"
+            result["body"] = f"Cannot find a cookie for {velocloud_host}"
             result["status"] = 404
             self.__log_result(result)
 
@@ -357,7 +310,7 @@ class VelocloudClient:
             response = await self._session.post(
                 f"https://{velocloud_host}/portal/rest/metrics/getEdgeLinkSeries",
                 json=payload,
-                headers=target_host_client["headers"],
+                headers=headers,
                 ssl=self._config.VELOCLOUD_CONFIG["verify_ssl"],
             )
         except aiohttp.ClientConnectionError:
@@ -372,7 +325,7 @@ class VelocloudClient:
             self.__log_result(result)
             return result
 
-        await self.__schedule_relogin_job_if_needed(velocloud_host, response)
+        await self.__login_if_needed(velocloud_host, response)
 
         logger.info(
             f"Got HTTP {response.status} from Velocloud after fetching edge link series for {payload}"
@@ -390,13 +343,13 @@ class VelocloudClient:
         result = dict.fromkeys(["body", "status"])
 
         request_body = {"enterpriseId": enterprise_id, "with": ["links"]}
-        target_host_client = self._get_header_by_host(velocloud_host)
+        headers = self._get_headers_by_host(velocloud_host)
 
-        if target_host_client is None:
-            logger.error(f"Cannot find a client to connect to {velocloud_host}")
-            await self._start_relogin_job(velocloud_host)
+        if not self._has_cookie(headers):
+            logger.error(f"Cannot find a cookie for {velocloud_host}")
+            await self._login(velocloud_host)
 
-            result["body"] = f"Cannot find a client to connect to host {velocloud_host}"
+            result["body"] = f"Cannot find a cookie for {velocloud_host}"
             result["status"] = 404
             self.__log_result(result)
 
@@ -411,7 +364,7 @@ class VelocloudClient:
             response = await self._session.post(
                 f"https://{velocloud_host}/portal/rest/enterprise/getEnterpriseEdges",
                 json=request_body,
-                headers=target_host_client["headers"],
+                headers=headers,
                 ssl=self._config.VELOCLOUD_CONFIG["verify_ssl"],
             )
         except aiohttp.ClientConnectionError:
@@ -426,7 +379,7 @@ class VelocloudClient:
             self.__log_result(result)
             return result
 
-        await self.__schedule_relogin_job_if_needed(velocloud_host, response)
+        await self.__login_if_needed(velocloud_host, response)
 
         logger.info(
             f"Got HTTP {response.status} from Velocloud after getting enterprise edges for enterprise {enterprise_id}"
@@ -452,11 +405,12 @@ class VelocloudClient:
                 "WAN",
             ],
         }
-        target_host_client = self._get_header_by_host(velocloud_host)
+        headers = self._get_headers_by_host(velocloud_host)
 
-        if target_host_client is None:
-            await self._start_relogin_job(velocloud_host)
-            result["body"] = f"Cannot find a client to connect to host {velocloud_host}"
+        if not self._has_cookie(headers):
+            logger.error(f"Cannot find a cookie for {velocloud_host}")
+            await self._login(velocloud_host)
+            result["body"] = f"Cannot find a cookie for {velocloud_host}"
             result["status"] = 404
             self.__log_result(result)
             return result
@@ -467,7 +421,7 @@ class VelocloudClient:
             response = await self._session.post(
                 f"https://{velocloud_host}/portal/rest/edge/getEdgeConfigurationModules",
                 json=request_body,
-                headers=target_host_client["headers"],
+                headers=headers,
                 ssl=self._config.VELOCLOUD_CONFIG["verify_ssl"],
             )
         except aiohttp.ClientConnectionError:
@@ -488,7 +442,7 @@ class VelocloudClient:
             result["status"] = 400
             return result
 
-        await self.__schedule_relogin_job_if_needed(velocloud_host, response)
+        await self.__login_if_needed(velocloud_host, response)
 
         logger.info(
             f"Got HTTP {response.status} from Velocloud after claiming edge configuration modules for edge {edge}"
@@ -504,7 +458,7 @@ class VelocloudClient:
         result = dict.fromkeys(["body", "status"])
         request_body = {"enterprises": enterprise_ids, "with": ["edges"]}
 
-        target_host_client = self._get_header_by_host(velocloud_host)
+        headers = self._get_headers_by_host(velocloud_host)
         try:
             logger.info(
                 f"Getting network enterprise edges for host {velocloud_host} and enterprises {enterprise_ids}..."
@@ -513,7 +467,7 @@ class VelocloudClient:
             response = await self._session.post(
                 f"https://{velocloud_host}/portal/rest/network/getNetworkEnterprises",
                 json=request_body,
-                headers=target_host_client["headers"],
+                headers=headers,
                 ssl=self._config.VELOCLOUD_CONFIG["verify_ssl"],
             )
         except aiohttp.ClientConnectionError:
@@ -530,7 +484,7 @@ class VelocloudClient:
                 result["body"] = f"Got 400 from Velocloud --> {message} for enterprise ids: {enterprise_ids}"
                 result["status"] = 400
             else:
-                await self.__schedule_relogin_job_if_needed(velocloud_host, response)
+                await self.__login_if_needed(velocloud_host, response)
                 logger.info(
                     f"Got HTTP {response.status} from Velocloud after getting enterprise ids: {enterprise_ids} "
                     f"from host {velocloud_host}"
@@ -546,14 +500,14 @@ class VelocloudClient:
         request_body = {}
         result = dict.fromkeys(["body", "status"])
 
-        target_host_client = self._get_header_by_host(velocloud_host)
+        headers = self._get_headers_by_host(velocloud_host)
 
-        if target_host_client is None:
-            logger.error(f"Cannot find a client to connect to {velocloud_host}")
+        if not self._has_cookie(headers):
+            logger.error(f"Cannot find a cookie for {velocloud_host}")
 
-            await self._start_relogin_job(velocloud_host)
+            await self._login(velocloud_host)
 
-            result["body"] = f"Cannot find a client to connect to host {velocloud_host}"
+            result["body"] = f"Cannot find a cookie for {velocloud_host}"
             result["status"] = 404
             self.__log_result(result)
             return result
@@ -564,7 +518,7 @@ class VelocloudClient:
             response = await self._session.post(
                 url=f"https://{velocloud_host}/portal/rest/network/getNetworkGateways",
                 json=request_body,
-                headers=target_host_client["headers"],
+                headers=headers,
                 ssl=self._config.VELOCLOUD_CONFIG["verify_ssl"],
             )
         except aiohttp.ClientConnectionError:
@@ -586,7 +540,7 @@ class VelocloudClient:
             self.__log_result(result)
             return result
 
-        await self.__schedule_relogin_job_if_needed(velocloud_host, response)
+        await self.__login_if_needed(velocloud_host, response)
 
         logger.info(
             f"Got HTTP {response.status} from Velocloud after getting network gateways for host {velocloud_host}"
@@ -609,14 +563,14 @@ class VelocloudClient:
         }
         result = dict.fromkeys(["body", "status"])
 
-        target_host_client = self._get_header_by_host(velocloud_host)
+        headers = self._get_headers_by_host(velocloud_host)
 
-        if target_host_client is None:
-            logger.error(f"Cannot find a client to connect to {velocloud_host}")
+        if not self._has_cookie(headers):
+            logger.error(f"Cannot find a cookie for {velocloud_host}")
 
-            await self._start_relogin_job(velocloud_host)
+            await self._login(velocloud_host)
 
-            result["body"] = f"Cannot find a client to connect to host {velocloud_host}"
+            result["body"] = f"Cannot find a cookie for {velocloud_host}"
             result["status"] = 404
             self.__log_result(result)
             return result
@@ -630,7 +584,7 @@ class VelocloudClient:
             response = await self._session.post(
                 url=f"https://{velocloud_host}/portal/rest/metrics/getGatewayStatusMetrics",
                 json=request_body,
-                headers=target_host_client["headers"],
+                headers=headers,
                 ssl=self._config.VELOCLOUD_CONFIG["verify_ssl"],
             )
         except aiohttp.ClientConnectionError:
@@ -655,7 +609,7 @@ class VelocloudClient:
             self.__log_result(result)
             return result
 
-        await self.__schedule_relogin_job_if_needed(velocloud_host, response)
+        await self.__login_if_needed(velocloud_host, response)
 
         logger.info(
             f"Got HTTP {response.status} from Velocloud after getting gateway status metrics for gateway {gateway_id} "
@@ -669,10 +623,10 @@ class VelocloudClient:
 
         return result
 
-    async def __schedule_relogin_job_if_needed(self, velocloud_host: str, response: aiohttp.client.ClientResponse):
+    async def __login_if_needed(self, velocloud_host: str, response: aiohttp.client.ClientResponse):
         if self.__token_expired(response):
-            logger.info(f"Auth token expired for host {velocloud_host}. Scheduling re-login job...")
-            await self._start_relogin_job(velocloud_host)
+            logger.info(f"Auth token expired for host {velocloud_host}. Logging in...")
+            await self._login(velocloud_host)
 
             response._body = f"Auth token expired for host {velocloud_host}"
             response.status = 401

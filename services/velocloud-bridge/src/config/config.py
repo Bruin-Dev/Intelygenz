@@ -15,20 +15,19 @@ NATS_CONFIG = {
 }
 
 
-def parse_velocloud_config():
+def parse_velocloud_credentials():
     credential_blocks = os.environ["VELOCLOUD_CREDENTIALS"].split(";")
-    credential_blocks_splitted = [credential_block.split("+") for credential_block in credential_blocks]
-    return [
-        {"url": cred_block[0], "username": cred_block[1], "password": cred_block[2]}
-        for cred_block in credential_blocks_splitted
-    ]
+    all_credentials = [credential_block.split("+") for credential_block in credential_blocks]
+
+    return {credentials[0]: {"username": credentials[1], "password": credentials[2]} for credentials in all_credentials}
 
 
 TIMEZONE = os.environ["TIMEZONE"]
 
 VELOCLOUD_CONFIG = {
     "verify_ssl": True,
-    "servers": parse_velocloud_config(),
+    "credentials": parse_velocloud_credentials(),
+    "login_interval": 60 * 60 * 23,
 }
 
 ENVIRONMENT_NAME = os.environ["ENVIRONMENT_NAME"]
