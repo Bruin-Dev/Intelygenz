@@ -71,7 +71,7 @@ class OutageMonitor:
                 id="_hawkeye_outage_monitor_process",
             )
         except ConflictingIdError as conflict:
-            logger.info(f"Skipping start of Hawkeye Outage Monitoring job. Reason: {conflict}")
+            logger.warning(f"Skipping start of Hawkeye Outage Monitoring job. Reason: {conflict}")
 
     async def _outage_monitoring_process(self):
         logger.info(f"Starting Hawkeye Outage Monitor!")
@@ -79,24 +79,29 @@ class OutageMonitor:
 
         customer_cache_response = await self._customer_cache_repository.get_cache_for_outage_monitoring()
         if customer_cache_response["status"] not in range(200, 300) or customer_cache_response["status"] == 202:
-            logger.warning(f"Bad status calling to get cache. Skipping hawkeyey outage monitoring process ...")
+            logger.error(
+                f"Error while getting Hawkeye's customer cache: {customer_cache_response}. "
+                f"Skipping outage monitoring process..."
+            )
             return
 
         customer_cache: list = customer_cache_response["body"]
 
         probes_response = await self._hawkeye_repository.get_probes()
         if probes_response["status"] not in range(200, 300):
-            logger.warning(f"Bad status calling to get probes. Skipping hawkeye outage monitoring process ...")
+            logger.error(
+                f"Error while getting Hawkeye's probes: {probes_response}. Skipping outage monitoring process..."
+            )
             return
 
         probes: list = probes_response["body"]
         if not probes:
-            logger.info("The list of probes arrived empty. Skipping monitoring process...")
+            logger.warning("The list of probes arrived empty. Skipping outage monitoring process...")
             return
 
         active_probes = [probe for probe in probes if self._is_active_probe(probe)]
         if not active_probes:
-            logger.info("All probes were detected as inactive. Skipping monitoring process...")
+            logger.warning("All probes were detected as inactive. Skipping outage monitoring process...")
             return
 
         probes_with_cache_info = self._map_probes_info_with_customer_cache(active_probes, customer_cache)
@@ -140,11 +145,14 @@ class OutageMonitor:
             outage_ticket_response_body = outage_ticket_response["body"]
             outage_ticket_response_status = outage_ticket_response["status"]
             if outage_ticket_response_status not in range(200, 300):
-                logger.warning(f"Bad status calling to get open outage tickets. Skipping run ticket autoresolve ...")
+                logger.error(
+                    f"Error while getting open Service Outage tickets for device {serial_number}: "
+                    f"{outage_ticket_response}. Skipping autoresolve..."
+                )
                 return
 
             if not outage_ticket_response_body:
-                logger.info(f"No open outage ticket found for device {serial_number}. Skipping autoresolve...")
+                logger.warning(f"No open outage ticket found for device {serial_number}. Skipping autoresolve...")
                 return
 
             outage_ticket: dict = outage_ticket_response_body[0]
@@ -152,14 +160,19 @@ class OutageMonitor:
             outage_ticket_creation_date = outage_ticket["createDate"]
 
             if not self._was_ticket_created_by_automation_engine(outage_ticket):
-                logger.info(f"Ticket {outage_ticket_id} was not created by Automation Engine. Skipping autoresolve...")
+                logger.warning(
+                    f"Ticket {outage_ticket_id} was not created by Automation Engine. Skipping autoresolve..."
+                )
                 return
 
             ticket_details_response = await self._bruin_repository.get_ticket_details(outage_ticket_id)
             ticket_details_response_body = ticket_details_response["body"]
             ticket_details_response_status = ticket_details_response["status"]
             if ticket_details_response_status not in range(200, 300):
-                logger.warning(f"Bad status calling to get ticket details. Skipping run ticket autoresolve ...")
+                logger.error(
+                    f"Error while getting details of ticket {outage_ticket_id}: {ticket_details_response}. "
+                    f"Skipping autoresolve..."
+                )
                 return
 
             notes_from_outage_ticket = ticket_details_response_body["ticketNotes"]
@@ -171,7 +184,7 @@ class OutageMonitor:
                 if note["noteValue"] is not None
             ]
             if not self._was_last_outage_detected_recently(relevant_notes, outage_ticket_creation_date):
-                logger.info(
+                logger.warning(
                     f"Device {device} has been in outage state for a long time, so detail {client_id} "
                     f"(serial {serial_number}) of ticket {outage_ticket_id} will not be autoresolved. Skipping "
                     f"autoresolve..."
@@ -182,7 +195,7 @@ class OutageMonitor:
                 relevant_notes, max_autoresolves=3
             )
             if not can_ticket_be_autoresolved_one_more_time:
-                logger.info(
+                logger.warning(
                     f"Limit to autoresolve ticket {outage_ticket_id} linked to device "
                     f"{serial_number} has been maxed out already. Skipping autoresolve..."
                 )
@@ -195,16 +208,16 @@ class OutageMonitor:
             )
             ticket_detail_id = detail_for_ticket_resolution["detailID"]
             if self._is_detail_resolved(detail_for_ticket_resolution):
-                logger.info(
-                    f"Detail {ticket_detail_id} of ticket {outage_ticket_id} is already resolved. "
+                logger.warning(
+                    f"Task for {serial_number} of ticket {outage_ticket_id} is already resolved. "
                     f"Skipping autoresolve..."
                 )
                 return
 
             working_environment = self._config.CURRENT_ENVIRONMENT
             if working_environment != "production":
-                logger.info(
-                    f"Skipping autoresolve for device {serial_number} since the "
+                logger.warning(
+                    f"Skipping autoresolve for task for device {serial_number} of ticket {outage_ticket_id} since the "
                     f"current environment is {working_environment.upper()}."
                 )
                 return
@@ -213,22 +226,23 @@ class OutageMonitor:
             triage_note = self._get_triage_note(last_cycle_notes)
             outage_types = self._get_outage_types_from_triage_note(triage_note)
 
-            logger.info(
-                f"Autoresolving detail {ticket_detail_id} (serial: {serial_number}) of ticket {outage_ticket_id}..."
-            )
+            logger.info(f"Autoresolving task for device {serial_number} of ticket {outage_ticket_id}...")
             await self._bruin_repository.unpause_ticket_detail(
                 outage_ticket_id, service_number=serial_number, detail_id=ticket_detail_id
             )
             resolve_ticket_response = await self._bruin_repository.resolve_ticket(outage_ticket_id, ticket_detail_id)
             if resolve_ticket_response["status"] not in range(200, 300):
-                logger.warning(f"Bad status calling resolve ticket. Skipping autoresolve ...")
+                logger.error(
+                    f"Error while resolving task for device {device} of ticket {outage_ticket_id}. "
+                    f"Skipping autoresolve ..."
+                )
                 return
 
             self._metrics_repository.increment_tasks_autoresolved(client=client_name, outage_types=outage_types)
             await self._bruin_repository.append_autoresolve_note_to_ticket(outage_ticket_id, serial_number)
             await self._notify_successful_autoresolve(outage_ticket_id, ticket_detail_id)
 
-            logger.info(f"Ticket {outage_ticket_id} linked to device {serial_number} was autoresolved!")
+            logger.info(f"Task for device {serial_number} of ticket {outage_ticket_id} was autoresolved!")
 
     def _was_ticket_created_by_automation_engine(self, ticket: dict) -> bool:
         return ticket["createdBy"] == self._config.IPA_SYSTEM_USERNAME_IN_BRUIN
@@ -288,7 +302,7 @@ class OutageMonitor:
         for serial_number, probe in probes_by_serial_number.items():
             cached_info = cached_devices_by_serial_number.get(serial_number)
             if not cached_info:
-                logger.info(f"No cached info was found for device {serial_number}. Skipping...")
+                logger.warning(f"No cached info was found for device {serial_number}. Skipping...")
                 continue
 
             result.append(
@@ -324,17 +338,17 @@ class OutageMonitor:
 
         probes_response = await self._hawkeye_repository.get_probes()
         if probes_response["status"] not in range(200, 300):
-            logger.warning(f"Bad status calling to get probes. Skipping hawkeye recheck devices process ...")
+            logger.error(f"Error while getting Hawkeye's probes: {probes_response}. Skipping re-check process...")
             return
 
         probes: list = probes_response["body"]
         if not probes:
-            logger.info("The list of probes arrived empty. Skipping monitoring process...")
+            logger.warning("The list of probes arrived empty. Skipping re-check process...")
             return
 
         active_probes = [probe for probe in probes if self._is_active_probe(probe)]
         if not active_probes:
-            logger.info("All probes were detected as inactive. Skipping monitoring process...")
+            logger.warning("All probes were detected as inactive. Skipping re-check process...")
             return
 
         customer_cache_for_outage_devices = [elem["cached_info"] for elem in devices]
@@ -432,13 +446,18 @@ class OutageMonitor:
         else:
             logger.info("No devices were detected in healthy state after re-check.")
 
+        logger.info(f"Finished re-checking {len(devices)} devices")
+
     async def _append_triage_note_if_needed(self, ticket_id: int, device_info: dict):
         serial_number = device_info["serialNumber"]
         logger.info(f"Checking ticket {ticket_id} to see if device {serial_number} has a triage note already...")
 
         ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
         if ticket_details_response["status"] not in range(200, 300):
-            logger.warning(f"Bad status calling to get ticket details. Skipping append triage note ...")
+            logger.error(
+                f"Error while getting details of ticket {ticket_id}: {ticket_details_response}. "
+                f"Skipping append triage note..."
+            )
             return
 
         ticket_notes = ticket_details_response["body"]["ticketNotes"]
@@ -476,13 +495,16 @@ class OutageMonitor:
             return fallback
 
     async def _reopen_outage_ticket(self, ticket_id, device):
-        logger.info(f"Reopening Hawkeye outage ticket {ticket_id}...")
+        logger.info(f"Reopening task from ticket {ticket_id} for device {device['cached_info']['serial_number']}...")
 
         ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
         ticket_details_response_body = ticket_details_response["body"]
         ticket_details_response_status = ticket_details_response["status"]
         if ticket_details_response_status not in range(200, 300):
-            logger.warning(f"Bad status calling get ticket details. Skipping reopen outage ticket ...")
+            logger.error(
+                f"Error while getting details of ticket {ticket_id}: {ticket_details_response}. "
+                f"Skipping task re-open..."
+            )
             return
 
         ticket_detail_for_reopen = self._get_first_element_matching(
@@ -496,8 +518,8 @@ class OutageMonitor:
         ticket_reopening_response_status = ticket_reopening_response["status"]
 
         if ticket_reopening_response_status == 200:
-            logger.info(f"Hawkeye outage ticket {ticket_id} reopening succeeded.")
-            slack_message = f"Hawkeye outage ticket {ticket_id} reopened: https://app.bruin.com/t/{ticket_id}"
+            logger.info(f"Task from ticket {ticket_id} for device {device['cached_info']['serial_number']} re-opened!")
+            slack_message = f"Hawkeye outage ticket {ticket_id} reopened:  https://app.bruin.com/t/{ticket_id}"
             await self._notifications_repository.send_slack_message(slack_message)
             device_info = device["device_info"]
             reopen_note = self._build_triage_note(device_info, is_reopen_note=True)
@@ -508,7 +530,9 @@ class OutageMonitor:
             )
             return True
         else:
-            logger.error(f"[outage-ticket-creation] Outage ticket {ticket_id} reopening failed.")
+            logger.error(
+                f"Re-open failed for task from ticket {ticket_id} for device {device['cached_info']['serial_number']}"
+            )
             return False
 
     def _build_triage_note(self, device_info: dict, is_reopen_note: bool = False) -> str:

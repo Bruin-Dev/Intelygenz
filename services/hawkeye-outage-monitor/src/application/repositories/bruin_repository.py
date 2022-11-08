@@ -270,14 +270,23 @@ class BruinRepository:
 
     async def append_triage_note_to_ticket(self, ticket_id: int, service_number: str, note: str):
         if len(note) < 1500:
+            logger.info(
+                f"Note for ticket {ticket_id} and {service_number} is {len(note)} characters large. "
+                f"There's no need to split it."
+            )
             return await self.append_note_to_ticket(ticket_id, note, service_numbers=[service_number])
         else:
+            total_notes = (len(note) // 1000) + 1
+            logger.warning(
+                f"Note for ticket {ticket_id} and {service_number} is {len(note)} characters large. "
+                f"Splitting it to {total_notes} notes..."
+            )
+
             watermark = "#*MetTel's IPA*#\nTriage (Ixia)\n\n"
 
             # Let's remove the watermark to ease chunking the note
             note = note.replace(watermark, "")
 
-            total_notes = (len(note) // 1000) + 1
             notes_footer = "\n\nTriage note: {{current_note_number}}/{total_notes}".format(total_notes=total_notes)
 
             current_note_number = 1
@@ -292,12 +301,25 @@ class BruinRepository:
                     current_footer = notes_footer.format(current_note_number=current_note_number)
                     current_note = watermark + current_note + current_footer
 
+                    logger.info(
+                        f"Appending Triage note ({index}/{total_notes}) to task linked to device {service_number} in "
+                        f"ticket {ticket_id}..."
+                    )
                     append_note_response = await self.append_note_to_ticket(
                         ticket_id, current_note, service_numbers=[service_number]
                     )
 
                     if append_note_response["status"] not in range(200, 300):
+                        logger.error(
+                            f"Error while appending Triage note ({index}/{total_notes}) to task linked to device "
+                            f"{service_number} in ticket {ticket_id}. Remaining notes won't be appended"
+                        )
                         return append_note_response
+
+                    logger.info(
+                        f"Triage note ({index}/{total_notes}) appended to task linked to device "
+                        f"{service_number} in ticket {ticket_id}!"
+                    )
 
                     current_note_number += 1
                     current_note = ""
