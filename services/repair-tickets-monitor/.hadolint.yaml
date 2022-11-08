@@ -1,0 +1,7 @@
+failure-threshold: none
+format: tty
+ignored: ["DL3008", "DL3009", "DL3015"]
+no-color: false
+no-fail: false
+strict-labels: true
+disable-ignore-pragma: false
