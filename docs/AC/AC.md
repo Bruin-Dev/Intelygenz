@@ -46,7 +46,7 @@ Following the next [link to cloudtrail](https://us-east-1.console.aws.amazon.com
 - [AWS logging cloudtrail](https://docs.aws.amazon.com/singlesignon/latest/userguide/logging-using-cloudtrail.html)
 - [AWS Cloudwatch integration](https://docs.aws.amazon.com/singlesignon/latest/userguide/cloudwatch-integration.html)
 
-## 5. Inactivity Logout
+## AC-2(5) Account Management | Inactivity Logout
 #### 5.1 Description
 Require that users log out when [they have completed their workday].
 #### 5.2 Implementation
@@ -79,31 +79,36 @@ Enforce approved authorizations for controlling the flow of information within t
 #### 1.2 Links
 - [IAM Administrator group logs ](https://us-east-1.console.aws.amazon.com/iamv2/home#/groups/details/Administrators?section=access_advisor)
 
-#### 2. AC-6(1) Authorize Access to Security Functions
+#### 2. AC-6(1) Least Privilege | Authorize Access to Security Functions
 #### 2.1 Description
 Authorize access for [any individual or role] to: 
 (a)        [GSA S/SO or Contractor recommended security functions (deployed in hardware, software, and firmware) approved by the GSA CISO and AO]; and 
 (b)        [Security-relevant information as approved by the GSA CISO and AO].
 #### 2.2 Implementation
 Priviliged accounts/roles on the system are restricted to the recomended employees and contrators to access recomended security functions and security relevant information.
+#### 2.1 Implementation
+Only contractors recomended by MetTel and GSA are explicitly authorized access to all functions and security-relevant information associated with their systems that are not publicly available.
 
-#### 3. AC-6(2) Non-privileged Access for Nonsecurity Functions
+#### 3. AC-6(2) Least Privilege |  Non-privileged Access for Nonsecurity Functions
 #### 3.1 Description
 Require that users of system accounts (or roles) with access to [all security functions (examples of security functions include but are not limited to: establishing system accounts, configuring access authorizations (i.e., permissions, privileges), setting events to be audited, and setting intrusion detection parameters, system programming, system and security administration, other privileged functions)] use non-privileged accounts or roles, when accessing nonsecurity functions.
 #### 3.2 Implementation
 This is manually configured with specific groups on IAM Indentity center with no privileged credentials, these groups are asociated to users(from Okta), these are not allowed to execute or see privileged resources/functions.
 
-#### 4. AC-6(5) Privileged Accounts
+#### 4. AC-6(5) Least Privilege | Privileged Accounts
 #### 4.1 Description
 Restrict privileged accounts on the system to [GSA S/SO or Contractor recommended employees and contractors as approved by the GSA CISO and AO].
 #### 4.2 Implementation
-Priviliged accounts on the system are restricted to the recomended employees and contrators.
+Priviliged accounts on the system are restricted to the recomended employees and contrators organized by MetTel with Okta Software and AWS groups. Only users in these groups can access priviliged accounts:
+- OKTA-IPA-FED-INT-PRIVILEGED
+- OKTA-IPA-FED-EXT-PRIVILEGED
 
-#### 5. AC-6(9) Log Use of Privileged Functions
+#### 5. AC-6(9) Least Privilege | Log Use of Privileged Functions
 #### 5.1 Description
 Log the execution of privileged functions.
 #### 5.2 Implementation
-All functions used are throwing logs on [cloudwatch](https://us-east-1.console.aws.amazon.com/cloudwatch/home). The functions that the project is using are AWS Lambdas, codepipeline and user functions.
+All functions used are throwing logs on [cloudwatch](https://us-east-1.console.aws.amazon.com/cloudwatch/home). The functions that the project is using are AWS Lambdas, codepipeline and user functions. Also the change of System manager parameters are logged in each specific parameter in their history secction as the next image(Each parameter has their own history section):
+![](../img/AC/SSM_history_parameters.png)
 
 #### 5. AC-6(10) Prohibit Non-privileged Users from Executing Privileged Functions
 #### 5.1 Description
@@ -133,10 +138,45 @@ c.        For publicly accessible systems:
 2.        Displays references, if any, to monitoring, recording, or auditing that are consistent with privacy accommodations for such systems that generally prohibit those activities; and
 3.        Includes a description of the authorized uses of the system.
 #### 2 Implementation
-The display of system use notifications are managed by MetTel and the laptops that they provide to their systems. We don't have direct connexions to machines by SSH or any remote access to servers in this infrastructure.
+The display of system use notifications are managed by MetTel and the laptops that they provide to access their systems. We don't have direct connexions to machines by SSH or any remote access to servers on this infrastructure.
 
 # AC-12 Session Termination
 #### 1 Description
 Automatically terminate a user session after [(1) 30 minutes of inactivity (2) the following timeframes, regardless of user activity: a. Thirty (30) days for systems at AAL1 b. Twelve (12) hours for systems at AAL2 and AAL3]. Note: AAL2 and AAL3 require Two Factor Authentication].
 #### 2 Implementation
 To enforce a session termination MetTel implemented Okta users central system conected to their VPN and plataformed laptops. MetTel has the control of the session termination with the two factor aunthentication implemented with Okta.
+
+# AC-17 Remote Access
+#### 1 Description
+Automatically terminate a user session after [(1) 30 minutes of inactivity (2) the following timeframes, regardless of user activity: a. Thirty (30) days for systems at AAL1 b. Twelve (12) hours for systems at AAL2 and AAL3]. Note: AAL2 and AAL3 require Two Factor Authentication].
+#### 2 Implementation
+To enforce a session termination MetTel implemented Okta users central system conected to their VPN and plataformed laptops. MetTel has the control of the session termination with the two factor aunthentication implemented with Okta. In the other hand, AWS contected to Okta has 24h token sessions but operators must access AWS accounts from the plataformed laptops.
+
+# AC-17(1) Remote Access | Monitoring and Control
+#### 1 Description
+Employ automated mechanisms to monitor and control remote access methods.
+#### 2 Implementation
+
+# AC-17(2) Remote Access | Protection of Confidentiality and Integrity Using Encryption
+#### 1 Description
+Implement cryptographic mechanisms to protect the confidentiality and integrity of remote access sessions.
+#### 2 Implementation
+
+# AC-17(3) Remote Access | Managed Access Control Points
+#### 1 Description
+Route remote accesses through authorized and managed network access control points.
+#### 2 Implementation
+
+# AC-17(4) Remote Access | Privileged Commands and Access
+#### 1 Description
+(a) Authorize the execution of privileged commands and access to security-relevant information via remote access only in a format that provides assessable evidence and for the following needs: [S/SO or contractor recommended and GSA CISO and AO approved special cases for remote administration and maintenance tasks]; and
+(b) Document the rationale for remote access in the security plan for the system.
+#### 2 Implementation
+
+
+# AC-20(1) Use of External Systems | Limits on Authorized Use
+#### 1 Description
+Permit authorized individuals to use an external system to access the system or to process, store, or transmit organization-controlled information only after:
+(a)        Verification of the implementation of controls on the external system as specified in the organization’s security and privacy policies and security and privacy plans; or
+(b)        Retention of approved system connection or processing agreements with the organizational entity hosting the external system.
+#### 2 Implementation
