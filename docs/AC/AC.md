@@ -93,7 +93,9 @@ Only contractors recomended by MetTel and GSA are explicitly authorized access t
 #### 3.1 Description
 Require that users of system accounts (or roles) with access to [all security functions (examples of security functions include but are not limited to: establishing system accounts, configuring access authorizations (i.e., permissions, privileges), setting events to be audited, and setting intrusion detection parameters, system programming, system and security administration, other privileged functions)] use non-privileged accounts or roles, when accessing nonsecurity functions.
 #### 3.2 Implementation
-This is manually configured with specific groups on IAM Indentity center with no privileged credentials, these groups are asociated to users(from Okta), these are not allowed to execute or see privileged resources/functions.
+All the users with access to privilged accounts has adn msut have access to non-privileged accounts. These are the groups that are assigned from Okta:
+- OKTA-IPA-FED-INT-NON-PRIVILEGED
+- OKTA-IPA-FED-EXT-NON-PRIVILEGED
 
 #### 4. AC-6(5) Least Privilege | Privileged Accounts
 #### 4.1 Description
@@ -156,16 +158,22 @@ To enforce a session termination MetTel implemented Okta users central system co
 #### 1 Description
 Employ automated mechanisms to monitor and control remote access methods.
 #### 2 Implementation
+Remote acceses are monitored by AWS cloud and Okta software. 
+- [User recent activity Okta](https://help.okta.com/en-us/Content/Topics/Security/recent-signin-activity.htm)
+- [User IAM indentity center](https://docs.aws.amazon.com/singlesignon/latest/userguide/security-logging-and-monitoring.html)
+- [EKS auding](https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html)
 
 # AC-17(2) Remote Access | Protection of Confidentiality and Integrity Using Encryption
 #### 1 Description
 Implement cryptographic mechanisms to protect the confidentiality and integrity of remote access sessions.
 #### 2 Implementation
+All the remote connexions are encrypted by the VPN access from MetTel and HTTPS connexions. EKS cluster is using cerificates and encrypted conexions when an operator access to it.
 
 # AC-17(3) Remote Access | Managed Access Control Points
 #### 1 Description
 Route remote accesses through authorized and managed network access control points.
 #### 2 Implementation
+All remote accesses will be route from the MetTel network being accesible from a [AWS direct connect](https://aws.amazon.com/directconnect/) setup. These connexions are connect to MetTel systems but this project does not have direct connection to internet or the oposite. 
 
 # AC-17(4) Remote Access | Privileged Commands and Access
 #### 1 Description
@@ -180,3 +188,4 @@ Permit authorized individuals to use an external system to access the system or 
 (a)        Verification of the implementation of controls on the external system as specified in the organization’s security and privacy policies and security and privacy plans; or
 (b)        Retention of approved system connection or processing agreements with the organizational entity hosting the external system.
 #### 2 Implementation
+The External system to access the systems or processes are cover with the laptops that MetTel provides to the authorized contractors. Individual users are verified by MetTel and the Okta software.
