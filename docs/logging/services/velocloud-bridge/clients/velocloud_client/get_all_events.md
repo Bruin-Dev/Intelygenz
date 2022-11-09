@@ -1,11 +1,11 @@
 ## Get all events
 
-* If there's no client authenticated against the VeloCloud host:
+* If there's no cookie for the VeloCloud host:
     ```python
-    logger.error(f"Cannot find a client to connect to {host}")
+    logger.error(f"Cannot find a cookie for {host}")
     ```
 
-    [_start_relogin_job](_start_relogin_job.md)
+    [_login](_login.md)
 
     END
 

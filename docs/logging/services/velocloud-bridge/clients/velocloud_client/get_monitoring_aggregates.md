@@ -1,14 +1,14 @@
 ## Get monitoring aggregates
 
 ```python
-logger.info(f"Getting monitoring aggregates for host {client['host']}")
+logger.info(f"Getting monitoring aggregates for host {host}")
 ```
 
 Call VeloCloud API endpoint `POST /monitoring/getAggregates`.
 
 * If the status of the HTTP response is `200`:
     ```python
-    logger.info(f"Got HTTP 200 from POST /monitoring/getAggregates for host {client['host']}")
+    logger.info(f"Got HTTP 200 from POST /monitoring/getAggregates for host {host}")
     ```
 
     [_json_return](_json_return.md)

@@ -28,7 +28,7 @@ Call VeloCloud API endpoint `POST /network/getNetworkEnterprises` with the set o
 
 * If the status of the HTTP response is any other:
 
-    [__schedule_relogin_job_if_needed](__schedule_relogin_job_if_needed.md)
+    [__login_if_needed](__login_if_needed.md)
 
     ```python
     logger.info(

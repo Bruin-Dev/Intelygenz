@@ -3,10 +3,10 @@
 * If the response has errors:
     * If the response indicates that the authentication token expired:
         ```python
-        logger.info(f"Response returned: {response}. Attempting to relogin")
+        logger.info(f"Response returned: {response}. Logging in...")
         ```
 
-        [_start_relogin_job](_start_relogin_job.md)
+        [_login](_login.md)
 
     * Otherwise:
       ```python

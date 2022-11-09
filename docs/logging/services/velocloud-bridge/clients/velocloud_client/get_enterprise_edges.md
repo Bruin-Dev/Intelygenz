@@ -1,11 +1,11 @@
 ## Get enterprise edges
 
-* If there's no client authenticated against the VeloCloud host:
+* If there's no cookie for the VeloCloud host:
     ```python
-    logger.error(f"Cannot find a client to connect to {velocloud_host}")
+    logger.error(f"Cannot find a cookie for {host}")
     ```
 
-    [_start_relogin_job](_start_relogin_job.md)
+    [_login](_login.md)
 
     [__log_result](__log_result.md)
 
@@ -32,7 +32,7 @@ Call VeloCloud API endpoint `POST /enterprise/getEnterpriseEdges` with the set o
 
     END
 
-[__schedule_relogin_job_if_needed](__schedule_relogin_job_if_needed.md)
+[__login_if_needed](__login_if_needed.md)
 
 ```python
 logger.info(
