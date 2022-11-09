@@ -14,7 +14,7 @@ log.info(
     [get_tickets_basic_info](get_tickets_basic_info.md)
 
 * for ticket in tickets
-    details = [get_ticket_details](get_tickets_details.md)
+    details = [get_ticket_details](get_ticket_details.md)
     * if details["status"] is not 200
         ```python
         log.error(f"Error while retrieving details from ticket {ticket_id}")

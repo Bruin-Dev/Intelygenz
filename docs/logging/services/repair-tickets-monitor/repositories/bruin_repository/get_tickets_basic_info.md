@@ -3,9 +3,7 @@
 * try
   * try
     ```python
-    log.info(
-                    f"Getting all tickets with any status of {ticket_statuses},with keyword arguments {kwargs}"
-                )
+    log.info(f"Getting all tickets with any status of {ticket_statuses},with keyword arguments {kwargs}")
     ```
     response = event_bus.request
 
