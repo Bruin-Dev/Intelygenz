@@ -70,6 +70,7 @@
           5. [Service Now Bridge](logging/events/16-servicenow-bridge.md)
           6. [Dri Bridge](logging/events/17-dri-bridge.md)
           7. [DiGi Bridge](logging/events/18-digi-bridge.md)
+          8. [Hawkeye Bridge](logging/events/25-hawkeye-bridge.md)
        4. Use cases with bridge capabilities
           1. [Customer Cache](logging/events/23-customer-cache.md)
           2. [Hawkeye Customer Cache](logging/events/24-hawkeye-customer-cache.md)
