@@ -55,6 +55,10 @@ class HawkeyeRepository:
             params["offset"] = offset
             response = await fn(params)
             if response["status"] not in range(200, 300):
+                logger.warning(
+                    f"Call to {fn.__name__} failed. Checking if max retries threshold has been "
+                    "reached"
+                )
                 if retries < self._config.HAWKEYE_CONFIG["retries"]:
                     retries += 1
                     continue
@@ -72,4 +76,5 @@ class HawkeyeRepository:
             else:
                 offset += params["limit"]
 
+        logger.info(f"Finished fetching all pages for {fn.__name__}.")
         return result

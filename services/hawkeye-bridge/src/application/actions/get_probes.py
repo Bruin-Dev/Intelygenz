@@ -17,6 +17,7 @@ class GetProbes:
         body = payload.get("body")
 
         if body is None:
+            logger.error(f"Cannot get probes using {json.dumps(payload)}. JSON malformed")
             probes_response["status"] = 400
             probes_response["body"] = 'Must include "body" in request'
             await msg.respond(data=json.dumps(probes_response).encode())
@@ -27,7 +28,7 @@ class GetProbes:
         if "status" in body:
             filters["status"] = body["status"]
 
-        logger.info(f"Collecting all probes ...")
+        logger.info(f"Collecting all probes with filters: {json.dumps(filters)}...")
 
         filtered_probes = await self._hawkeye_repository.get_probes(filters)
 
