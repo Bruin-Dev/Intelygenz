@@ -3,7 +3,7 @@
 </div>
 
 1. CONCEPTS
-	1. [Monorepo](pipeline/BASIC_CI_CONFIGURATION.md)send
+	1. [Monorepo](pipeline/BASIC_CI_CONFIGURATION.md)
 	2. [Semantic Release](pipeline/BASIC_CI_CONFIGURATION.md)
 	3. [Infrastructure as code](pipeline/BASIC_CI_CONFIGURATION.md)
 	4. [Datalake](pipeline/BASIC_CI_CONFIGURATION.md)
@@ -62,6 +62,7 @@
            12. [Last Contact Report](logging/events/20-last-contact-report.md)
            13. [Lumin Billing Report](logging/events/21-lumin-billing-report.md)
            14. [DiGi Reboot Report](logging/events/22-digi-reboot-report.md)
+           15. [Task Dispatcher](logging/events/26-task-dispatcher.md)
        3. Bridges
           1. [Bruin Bridge](logging/events/11-bruin-bridge.md)
           2. [VeloCloud Bridge](logging/events/12-velocloud-bridge.md)
