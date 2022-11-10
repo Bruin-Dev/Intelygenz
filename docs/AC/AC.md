@@ -180,7 +180,10 @@ All remote accesses will be route from the MetTel network being accesible from a
 (a) Authorize the execution of privileged commands and access to security-relevant information via remote access only in a format that provides assessable evidence and for the following needs: [S/SO or contractor recommended and GSA CISO and AO approved special cases for remote administration and maintenance tasks]; and
 (b) Document the rationale for remote access in the security plan for the system.
 #### 2 Implementation
+There are two principal posible remote accesses to execute commands are AWS Cli and EKS Kubernetes access. The Authorization on AWS cli is related to Okta and AWS groups, the groups OKTA-IPA-FED-INT-PRIVILEGED and OKTA-IPA-FED-EXT-PRIVILEGED have Administration roles on the CLI and the groups OKTA-IPA-FED-INT-NON-PRIVILEGED and OKTA-IPA-FED-EXT-NON-PRIVILEGED have not administration roles. To access EKS the roles needs to have https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html
 
+#### 3 LINKS
+- [AWS CLI SSO Profile](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html#sso-using-profile)
 
 # AC-20(1) Use of External Systems | Limits on Authorized Use
 #### 1 Description
