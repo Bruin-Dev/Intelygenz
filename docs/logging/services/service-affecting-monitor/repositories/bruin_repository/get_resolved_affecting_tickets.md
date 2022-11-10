@@ -1,3 +1,3 @@
-## Get resolved affecting tickets
+## Get resolved Service Affecting tickets
 
-* Launch [Get affecting tickets](get_affecting_tickets.md)
+Call [get_affecting_tickets](get_affecting_tickets.md) get all Service Affecting tickets whose status is "Resolved"

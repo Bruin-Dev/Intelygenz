@@ -1,3 +1,3 @@
-## Get open affecting tickets
+## Get open Service Affecting tickets
 
-* Launch [Get affecting tickets](get_affecting_tickets.md)
+Call [get_affecting_tickets](get_affecting_tickets.md) to get all Service Affecting tickets whose status is any of "New", "InProgress" or "Draft" 

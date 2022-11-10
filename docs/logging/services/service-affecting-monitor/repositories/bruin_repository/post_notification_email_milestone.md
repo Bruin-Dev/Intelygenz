@@ -1,36 +1,40 @@
-## Post notification email milestone Documentation
+## Send e-mail milestone notification via Bruin
 
+```python
+logger.info(
+    f"Sending email for ticket id {ticket_id}, "
+    f"service_number {service_number} "
+    f"and notification type {notification_type}..."
+)
 ```
-self._logger.info(
-                f"Sending email for ticket id {ticket_id}, "
-                f"service_number {service_number} "
-                f"and notification type {notification_type}..."
-            )
-```
 
-* if `Exception`
+* If there's an error while asking for the data to the `bruin-bridge`:
+  ```python
+  err_msg = (
+      f"An error occurred when sending email for ticket id {ticket_id}, "
+      f"service_number {service_number} "
+      f"and notification type {notification_type}...-> {e}"
+  ) 
+  [...]
+  logger.error(err_msg)
   ```
-  self._logger.error(
-                f"An error occurred when sending email for ticket id {ticket_id}, "
-                f"service_number {service_number} "
-                f"and notification type {notification_type}...-> {e}"
-            )
-  ```
+  END
 
-* if response_status in range(200, 300)
+* If response status for send e-mail milestone notification is not ok:
+  ```python
+  err_msg = (
+      f"Error while sending email for ticket {ticket_id}, "
+      f"service_number {service_number} and notification type {notification_type} in "
+      f"{self._config.CURRENT_ENVIRONMENT.upper()} environment: "
+      f"Error {response_status} - {response_body}"
+  )
+  [...]
+  logger.error(err_msg)
   ```
-  self._logger.info(
-                    f"Email sent for ticket {ticket_id}, service number {service_number} "
-                    f"and notification type {notification_type}!"
-                )
-  ```
-
-* else
-  ```
-  self._logger.error(
-                    f"Error while sending email for ticket {ticket_id}, "
-                    f"service_number {service_number} and notification type {notification_type} in "
-                    f"{self._config.CURRENT_ENVIRONMENT.upper()} environment: "
-                    f"Error {response_status} - {response_body}"
-                )
+* Otherwise:
+  ```python
+  logger.info(
+      f"Email sent for ticket {ticket_id}, service number {service_number} "
+      f"and notification type {notification_type}!"
+  )
   ```

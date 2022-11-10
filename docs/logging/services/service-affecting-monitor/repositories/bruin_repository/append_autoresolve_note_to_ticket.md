@@ -1,3 +1,3 @@
-## Append autoresolve note to ticket Documentation
+## Append Auto-Resolve note to ticket
 
-* Launch [append_note_to_ticket](append_note_to_ticket.md)
+Call [append_note_to_ticket](append_note_to_ticket.md) using an Auto-Resolve note

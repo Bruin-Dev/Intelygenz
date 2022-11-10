@@ -55,7 +55,7 @@
            5. [TNBA Monitor](logging/events/5-TNBA-monitor.md)
            6. [Ticket severity](logging/events/6-ticket-severity.md)
            7. [Ticket creation outcomes](logging/events/7-ticket-creation-outcome.md)
-           8. [Service affecting](logging/events/8-service-affecting.md)
+           8. [Service Affecting Monitor](logging/events/8-service-affecting-monitor.md)
            9. [InterMapper Outage Monitoring](logging/events/9-intermapper-monitor.md)
            10. [Hawkeye Outage Monitoring](logging/events/10-hawkeye-outage-monitor.md)
            11. [Gateway Monitoring](logging/events/15-gateway-monitor.md)

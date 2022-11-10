@@ -1,3 +1,3 @@
-## Get affecting tickets
+## Get Service Affecting tickets
 
-* Launch [Get tickets](get_tickets.md)
+Call [get_tickets](get_tickets.md) to get all tickets whose ticket topic is "VAS" 

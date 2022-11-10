@@ -1,3 +1,3 @@
-## Get cache for affecting Documentation
+## Get customer cache for Service Affecting monitoring
 
-1. Launch [get_cache](get_cache.md)
+Call [get_cache](get_cache.md) using the list of VCOs under monitoring

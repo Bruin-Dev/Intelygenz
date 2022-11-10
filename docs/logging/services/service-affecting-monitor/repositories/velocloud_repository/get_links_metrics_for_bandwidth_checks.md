@@ -1,3 +1,3 @@
-## Get links metrics for bandwidth checks Documentation
+## Get links metrics for Bandwidth Over-Utilization checks
 
-1. Launch [get_all_links_metrics](get_all_links_metrics.md)
+Call [get_all_links_metrics](get_all_links_metrics.md) using the time interval specified for Bandwidth Over-Utilization checks.
