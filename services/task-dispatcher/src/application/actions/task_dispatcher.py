@@ -87,6 +87,7 @@ class TaskDispatcher:
     async def _publish_result(self, task: dict, result: str):
         topic = f"task_dispatcher.{task['data']['service']}.{task['type'].value}.{result}"
         await self._nats_client.publish(topic, to_json_bytes(task["data"]))
+        logger.info(f"Published result for task {topic} on NATS!")
 
     async def _forward_ticket(
         self, target_queue: str, ticket_id: int, detail_id: int = None, serial_number: str = None, **_kwargs
