@@ -63,6 +63,7 @@
            13. [Lumin Billing Report](logging/events/21-lumin-billing-report.md)
            14. [DiGi Reboot Report](logging/events/22-digi-reboot-report.md)
            15. [Task Dispatcher](logging/events/26-task-dispatcher.md)
+           16. [Fraud Monitor](logging/events/27-fraud-monitor.md)
        3. Bridges
           1. [Bruin Bridge](logging/events/11-bruin-bridge.md)
           2. [VeloCloud Bridge](logging/events/12-velocloud-bridge.md)
