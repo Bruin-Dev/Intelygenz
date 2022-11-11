@@ -68,7 +68,7 @@ class BandwidthReports:
         links_metrics = links_metrics_response["body"]
 
         if links_metrics_response["status"] not in range(200, 300):
-            logger.info("[bandwidth-reports] Error getting links metrics. Process cannot keep going.")
+            logger.error("[bandwidth-reports] Error getting links metrics. Process cannot keep going.")
             return
 
         serial_numbers = await self.get_serials_by_client_id(clients, customer_cache)
@@ -123,6 +123,7 @@ class BandwidthReports:
     async def _generate_bandwidth_report_for_client(
         self, client_id, client_name, serial_numbers, links_metrics, customer_cache, interval_for_metrics
     ):
+        logger.info(f"[bandwidth-reports] Generating report for client {client_id}...")
 
         tickets = await self._bruin_repository.get_affecting_ticket_for_report(
             client_id, interval_for_metrics["start"], interval_for_metrics["end"]
@@ -144,7 +145,10 @@ class BandwidthReports:
                 links_metrics, grouped_ticket_details
             )
             report_items.sort(key=lambda item: (item["serial_number"], item["interface"]))
+
+            logger.info(f"Got {len(report_items)} rows for the report for client {client_id}")
         else:
+            logger.warning(f"Couldn't generate any rows for the report for client {client_id}")
             report_items = []
 
         if self._config.CURRENT_ENVIRONMENT != "production":
@@ -154,6 +158,7 @@ class BandwidthReports:
             )
             return
 
+        logger.info(f"Sending report of {len(report_items)} rows to client {client_id} sent via email...")
         await self._email_repository.send_email(
             email_object=self._template_repository.compose_bandwidth_report_email(
                 client_id=client_id,

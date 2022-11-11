@@ -232,6 +232,10 @@ class VelocloudRepository:
                 enterprise_events = enterprise_events_response["body"]
 
                 if enterprise_events_response["status"] not in range(200, 300):
+                    logger.error(
+                        f"Error while getting enterprise events for host {host} and enterprise {enterprise_id}: "
+                        f"{enterprise_events_response}"
+                    )
                     continue
 
                 for event in enterprise_events:

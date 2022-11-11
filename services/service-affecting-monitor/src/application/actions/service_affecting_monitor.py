@@ -77,11 +77,15 @@ class ServiceAffectingMonitor:
 
         customer_cache_response = await self._customer_cache_repository.get_cache_for_affecting_monitoring()
         if customer_cache_response["status"] not in range(200, 300) or customer_cache_response["status"] == 202:
+            logger.error(
+                f"Error while getting VeloCloud's customer cache: {customer_cache_response}. "
+                f"Skipping Service Affecting monitoring process..."
+            )
             return
 
         self._customer_cache: list = customer_cache_response["body"]
         if not self._customer_cache:
-            logger.info("Got an empty customer cache. Process cannot keep going.")
+            logger.warning("Got an empty customer cache. Skipping Service Affecting monitoring process...")
             return
 
         self._default_contact_info_by_client_id = self._get_default_contact_info_by_client_id()
@@ -237,7 +241,7 @@ class ServiceAffectingMonitor:
             serial_number = elem["edge_status"]["edgeSerialNumber"]
             cached_edge = cached_edges_by_serial.get(serial_number)
             if not cached_edge:
-                logger.info(f"No cached info was found for edge {serial_number}. Skipping...")
+                logger.warning(f"No cached info was found for edge {serial_number}. Skipping...")
                 continue
 
             client_id = cached_edge["bruin_client_info"]["client_id"]
@@ -245,8 +249,10 @@ class ServiceAffectingMonitor:
 
             default_contacts = self._default_contact_info_by_client_id.get(client_id)
             if self._should_use_default_contact_info(client_id, cached_edge):
+                logger.info(f"Using default contact info for edge {serial_number} and client {client_id}")
                 contacts = default_contacts
             else:
+                logger.info(f"Using site-specific contact info for edge {serial_number} and client {client_id}")
                 contacts = self._bruin_repository.get_contact_info_for_site(site_details) or default_contacts
 
             result.append(
@@ -266,7 +272,7 @@ class ServiceAffectingMonitor:
         links_metrics: list = links_metrics_response["body"]
 
         if not links_metrics:
-            logger.info("List of links metrics arrived empty while running auto-resolve process. Skipping...")
+            logger.warning("List of links metrics arrived empty while running auto-resolve process. Skipping...")
             return
 
         events = await self._velocloud_repository.get_events_by_serial_and_interface(self._customer_cache)
@@ -298,7 +304,7 @@ class ServiceAffectingMonitor:
                 check_bandwidth_troubles=check_bandwidth_troubles,
             )
             if not all_metrics_within_thresholds:
-                logger.info(
+                logger.warning(
                     f"At least one metric of edge {serial_number} is not within the threshold. Skipping autoresolve..."
                 )
                 return
@@ -308,11 +314,15 @@ class ServiceAffectingMonitor:
             )
             affecting_ticket_response_status = affecting_ticket_response["status"]
             if affecting_ticket_response_status not in range(200, 300):
+                logger.error(
+                    f"Error while getting open Service Affecting tickets for edge {serial_number}: "
+                    f"{affecting_ticket_response}. Skipping autoresolve..."
+                )
                 return
 
             affecting_tickets: list = affecting_ticket_response["body"]
             if not affecting_tickets:
-                logger.info(
+                logger.warning(
                     f"No affecting ticket found for edge with serial number {serial_number}. Skipping autoresolve..."
                 )
                 return
@@ -322,7 +332,7 @@ class ServiceAffectingMonitor:
                 affecting_ticket_creation_date = affecting_ticket["createDate"]
 
                 if not self._ticket_repository.was_ticket_created_by_automation_engine(affecting_ticket):
-                    logger.info(
+                    logger.warning(
                         f"Ticket {affecting_ticket_id} was not created by Automation Engine. Skipping autoresolve..."
                     )
                     continue
@@ -331,6 +341,10 @@ class ServiceAffectingMonitor:
                 ticket_details_response_body = ticket_details_response["body"]
                 ticket_details_response_status = ticket_details_response["status"]
                 if ticket_details_response_status not in range(200, 300):
+                    logger.error(
+                        f"Error while getting details of ticket {affecting_ticket_id}: "
+                        f"{ticket_details_response}. Skipping autoresolve..."
+                    )
                     continue
 
                 details_from_ticket = ticket_details_response_body["ticketDetails"]
@@ -371,7 +385,7 @@ class ServiceAffectingMonitor:
                     )
                 else:
                     if not last_trouble_was_detected_recently:
-                        logger.info(
+                        logger.warning(
                             f"Edge with serial number {serial_number} has been under an affecting trouble for a long "
                             f"time, so the detail of ticket {affecting_ticket_id} related to it will not be "
                             f"autoresolved. Skipping autoresolve..."
@@ -379,14 +393,14 @@ class ServiceAffectingMonitor:
                         continue
 
                     if self._ticket_repository.is_autoresolve_threshold_maxed_out(relevant_notes):
-                        logger.info(
+                        logger.warning(
                             f"Limit to autoresolve detail of ticket {affecting_ticket_id} related to serial "
                             f"{serial_number} has been maxed out already. Skipping autoresolve..."
                         )
                         continue
 
                 if self._ticket_repository.is_task_resolved(detail_for_ticket_resolution):
-                    logger.info(
+                    logger.warning(
                         f"Detail of ticket {affecting_ticket_id} related to serial {serial_number} is already "
                         "resolved. Skipping autoresolve..."
                     )
@@ -408,6 +422,10 @@ class ServiceAffectingMonitor:
                     affecting_ticket_id, ticket_detail_id
                 )
                 if resolve_ticket_response["status"] not in range(200, 300):
+                    logger.error(
+                        f"Error while resolving ticket task of ticket {affecting_ticket_id} for edge {serial_number}: "
+                        f"{resolve_ticket_response}. Skipping autoresolve..."
+                    )
                     continue
 
                 self._metrics_repository.increment_tasks_autoresolved(
@@ -462,7 +480,7 @@ class ServiceAffectingMonitor:
         links_metrics: list = links_metrics_response["body"]
 
         if not links_metrics:
-            logger.info("List of links arrived empty while checking latency issues. Skipping...")
+            logger.warning("List of links arrived empty while checking latency issues. Skipping...")
             return
 
         links_metrics = self._structure_links_metrics(links_metrics)
@@ -494,7 +512,7 @@ class ServiceAffectingMonitor:
         links_metrics: list = links_metrics_response["body"]
 
         if not links_metrics:
-            logger.info("List of links arrived empty while checking packet loss issues. Skipping...")
+            logger.warning("List of links arrived empty while checking packet loss issues. Skipping...")
             return
 
         links_metrics = self._structure_links_metrics(links_metrics)
@@ -528,7 +546,7 @@ class ServiceAffectingMonitor:
         links_metrics: list = links_metrics_response["body"]
 
         if not links_metrics:
-            logger.info("List of links arrived empty while checking jitter issues. Skipping...")
+            logger.warning("List of links arrived empty while checking jitter issues. Skipping...")
             return
 
         links_metrics = self._structure_links_metrics(links_metrics)
@@ -560,7 +578,7 @@ class ServiceAffectingMonitor:
         links_metrics: list = links_metrics_response["body"]
 
         if not links_metrics:
-            logger.info("List of links arrived empty while checking bandwidth issues. Skipping...")
+            logger.warning("List of links arrived empty while checking bandwidth issues. Skipping...")
             return
 
         links_metrics = self._structure_links_metrics(links_metrics)
@@ -579,6 +597,7 @@ class ServiceAffectingMonitor:
             client_id = cached_info["bruin_client_info"]["client_id"]
             check_bandwidth_troubles = client_id in self._config.MONITOR_CONFIG["customers_with_bandwidth_enabled"]
             if not check_bandwidth_troubles:
+                logger.warning(f"Bandwidth checks are not enabled for client {client_id}. Skipping...")
                 continue
 
             tx_bandwidth = metrics["bpsOfBestPathTx"]
@@ -619,7 +638,7 @@ class ServiceAffectingMonitor:
         links_metrics: list = links_metrics_response["body"]
 
         if not links_metrics:
-            logger.info("List of links arrived empty while checking bouncing issues. Skipping...")
+            logger.warning("List of links arrived empty while checking bouncing issues. Skipping...")
             return
 
         events = await self._velocloud_repository.get_events_by_serial_and_interface(self._customer_cache)
@@ -638,7 +657,7 @@ class ServiceAffectingMonitor:
             serial_number = cached_info["serial_number"]
 
             if not events:
-                logger.info(
+                logger.warning(
                     f"No events were found for {link_status['interface']} from {serial_number} "
                     f"while looking for bouncing troubles"
                 )
@@ -691,6 +710,10 @@ class ServiceAffectingMonitor:
             client_id, service_number=serial_number
         )
         if open_affecting_tickets_response["status"] not in range(200, 300):
+            logger.error(
+                f"Error while getting open Service Affecting tickets for edge {serial_number}: "
+                f"{open_affecting_tickets_response}. Skipping processing Service Affecting trouble..."
+            )
             return
 
         # Get oldest open ticket related to Service Affecting Monitor (i.e. trouble must be latency, packet loss, jitter
@@ -729,6 +752,10 @@ class ServiceAffectingMonitor:
                 client_id, service_number=serial_number
             )
             if resolved_affecting_tickets_response["status"] not in range(200, 300):
+                logger.error(
+                    f"Error while getting resolved Service Affecting tickets for edge {serial_number}: "
+                    f"{resolved_affecting_tickets_response}. Skipping processing Service Affecting trouble..."
+                )
                 return
 
             resolved_affecting_tickets = resolved_affecting_tickets_response["body"]
@@ -769,6 +796,10 @@ class ServiceAffectingMonitor:
             ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
 
             if ticket_details_response["status"] not in range(200, 300):
+                logger.error(
+                    f"Error while getting details of ticket {ticket_id}: {ticket_details_response}. "
+                    f"The oldest Service Affecting ticket cannot be determined."
+                )
                 return
 
             ticket_notes = ticket_details_response["body"]["ticketNotes"]
@@ -781,6 +812,10 @@ class ServiceAffectingMonitor:
             ]
 
             if not self._ticket_repository.is_ticket_used_for_reoccurring_affecting_troubles(relevant_notes):
+                logger.info(
+                    f"Ticket {ticket_id} linked to edge {serial_number} is not being actively used to report "
+                    f"Service Affecting troubles"
+                )
                 continue
 
             ticket_tasks = ticket_details_response["body"]["ticketDetails"]
@@ -835,6 +870,10 @@ class ServiceAffectingMonitor:
             service_numbers=[serial_number],
         )
         if append_note_response["status"] not in range(200, 300):
+            logger.error(
+                f"Error while appending latest trouble for edge {serial_number} as a note to ticket {ticket_id}: "
+                f"{append_note_response}"
+            )
             return
 
         logger.info(
@@ -875,6 +914,10 @@ class ServiceAffectingMonitor:
 
         unresolve_task_response = await self._bruin_repository.open_ticket(ticket_id, task_id)
         if unresolve_task_response["status"] not in range(200, 300):
+            logger.error(
+                f"Error while unresolving Service Affecting ticket task for edge {serial_number}: "
+                f"{unresolve_task_response}"
+            )
             return
 
         logger.info(
@@ -955,6 +998,10 @@ class ServiceAffectingMonitor:
             client_id, serial_number, contact_info
         )
         if create_affecting_ticket_response["status"] not in range(200, 300):
+            logger.error(
+                f"Error while creating Service Affecting ticket for edge {serial_number}: "
+                f"{create_affecting_ticket_response}. Skipping ticket creation..."
+            )
             return
 
         ticket_id = create_affecting_ticket_response["body"]["ticketIds"][0]
@@ -1050,16 +1097,21 @@ class ServiceAffectingMonitor:
         )
 
     async def _attempt_forward_to_asr(self, link_data: dict, trouble: AffectingTroubles, ticket_id: Optional[int]):
+        serial_number = link_data["cached_info"]["serial_number"]
+        interface = link_data["link_status"]["interface"]
+
         if not ticket_id:
+            logger.warning(
+                f"No ticket could be created, re-opened or updated for edge {serial_number} and link {interface}. "
+                f"Skipping forward to ASR..."
+            )
             return
 
-        serial_number = link_data["cached_info"]["serial_number"]
         logger.info(
             f"Attempting to forward task of ticket {ticket_id} related to serial {serial_number} to ASR Investigate..."
         )
 
         target_queue = ForwardQueues.ASR.value
-        interface = link_data["link_status"]["interface"]
         links_configuration = link_data["cached_info"]["links_configuration"]
         client_name = link_data["cached_info"]["bruin_client_info"]["client_name"]
         link_label = link_data["link_status"]["displayName"]
@@ -1074,7 +1126,7 @@ class ServiceAffectingMonitor:
 
         if link_interface_type != "WIRED":
             forward_time = 0
-            logger.info(
+            logger.warning(
                 f"Link {interface} is of type {link_interface_type} and not WIRED. Attempting to forward to HNOC..."
             )
             self._schedule_forward_to_hnoc_queue(forward_time, ticket_id, serial_number, link_data, trouble)
@@ -1086,7 +1138,7 @@ class ServiceAffectingMonitor:
         )
 
         if not self._should_forward_to_asr(link_data):
-            logger.info(
+            logger.warning(
                 f"No links with whitelisted labels were found for serial {serial_number}. "
                 f"Related detail of ticket {ticket_id} will not be forwarded to {target_queue}."
             )
@@ -1096,6 +1148,9 @@ class ServiceAffectingMonitor:
         ticket_details_response_body = ticket_details_response["body"]
         ticket_details_response_status = ticket_details_response["status"]
         if ticket_details_response_status not in range(200, 300):
+            logger.error(
+                f"Error while getting details of ticket {ticket_id}: {ticket_details_response}. Skipping autoresolve..."
+            )
             return
 
         details_from_ticket = ticket_details_response_body["ticketDetails"]
@@ -1120,8 +1175,8 @@ class ServiceAffectingMonitor:
         )
 
         if other_troubles_in_ticket:
-            logger.info(
-                f"Other service affecting troubles were found in ticket id {ticket_id}. Skipping forwardto asr..."
+            logger.warning(
+                f"Other service affecting troubles were found in ticket id {ticket_id}. Skipping forward to ASR..."
             )
             return
 
@@ -1131,7 +1186,7 @@ class ServiceAffectingMonitor:
         )
 
         if task_result_note is not None:
-            logger.info(
+            logger.warning(
                 f"Detail related to serial {serial_number} of ticket {ticket_id} has already been forwarded to "
                 f'"{task_result}"'
             )

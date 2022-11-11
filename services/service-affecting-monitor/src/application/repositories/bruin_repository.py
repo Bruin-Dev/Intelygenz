@@ -594,7 +594,7 @@ class BruinRepository:
                 raise Exception(f"Error: Retry after few seconds all tickets. Status: {response_all_tickets['status']}")
 
             if response_all_tickets["status"] not in range(200, 300):
-                logger.error(f"Error: an error occurred retrieving affecting tickets")
+                logger.error(f"Error: an error occurred retrieving affecting tickets: {response_all_tickets}")
                 return None
             return response_all_tickets
 
@@ -624,6 +624,7 @@ class BruinRepository:
             )
 
             if not response:
+                logger.error("An error occurred while fetching Service Affecting tickets for reports")
                 return None
 
             logger.info(f"Getting ticket details for {len(response['body'])} tickets")
@@ -645,12 +646,10 @@ class BruinRepository:
     def group_ticket_details_by_serial(self, tickets):
         all_serials = defaultdict(list)
 
-        logger.info(f"[bruin_repository] processing {len(tickets)}")
-
         for detail_object in tickets:
-            logger.info(f"[bruin_repository] ticket_id: {detail_object['ticket_id']}")
             serial = detail_object["ticket_detail"]["detailValue"].upper()
             all_serials[serial].append(detail_object)
+
         return all_serials
 
     @staticmethod

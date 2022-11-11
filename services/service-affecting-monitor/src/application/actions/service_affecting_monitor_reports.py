@@ -40,10 +40,12 @@ class ServiceAffectingMonitorReports:
         self._scheduler.add_job(self.monitor_reports, cron, id=f"_monitor_reports", replace_existing=True)
 
     async def monitor_reports(self):
-        monitor_report_init_time = datetime.utcnow()
-        start_date_process = self.get_rounded_date(datetime.utcnow())
         host = self._config.VELOCLOUD_HOST
         configuration = self._config.MONITOR_REPORT_CONFIG["recipients_by_host_and_client_id"][host]
+        clients_id = list(configuration.keys())
+
+        logger.info(f"Starting Reoccurring Trouble Reports job for host {host} and clients {clients_id}")
+
         customer_cache_response = await self._customer_cache_repository.get_cache(
             velo_filter=self._config.MONITOR_CONFIG["velo_filter"]
         )
@@ -52,8 +54,10 @@ class ServiceAffectingMonitorReports:
             logger.error("[service-affecting-monitor-reports] Got an empty customer cache. Process cannot keep going.")
             return
 
-        clients_id = configuration.keys()
         cached_names_by_serial = self.get_serial_and_name_for_cached_edges_with_client_id(customer_cache, clients_id)
+
+        monitor_report_init_time = datetime.utcnow()
+        start_date_process = self.get_rounded_date(datetime.utcnow())
 
         trailing_interval = self.get_trailing_interval_for_date(start_date_process)
         start_date_str = self.get_format_to_string_date(trailing_interval["start"])
@@ -62,17 +66,21 @@ class ServiceAffectingMonitorReports:
         affecting_tickets_per_client = {}
 
         for client_id in clients_id:
+            logger.info(f"Getting Service Affecting ticket for client {client_id}...")
             tickets = await self._bruin_repository.get_affecting_ticket_for_report(
                 client_id, start_date_str, end_date_str
             )
             if not tickets:
                 tickets = {}
-                err_msg = (
-                    f"[service-affecting-monitor-reports] Reports could not be generated for client: {client_id}. "
-                    f"No tickets were found."
+                msg = (
+                    f"No Service Affecting tickets were found for client {client_id}. A report claiming "
+                    f"that no data matching the criteria was found will be delivered soon."
                 )
-                logger.error(err_msg)
-                await self._notifications_repository.send_slack_message(err_msg)
+                logger.warning(msg)
+                await self._notifications_repository.send_slack_message(msg)
+            else:
+                logger.info(f"Got Service Affecting ticket for client {client_id}!")
+
             affecting_tickets_per_client[client_id] = tickets
 
         await self._service_affecting_monitor_report(
@@ -101,17 +109,37 @@ class ServiceAffectingMonitorReports:
         for client_id, affecting_tickets in affecting_tickets_per_client.items():
             await asyncio.sleep(0)
 
+            logger.info(f"Processing {len(affecting_tickets)} tickets for client {client_id}...")
+
+            logger.info(f"Getting ticket tasks from {len(affecting_tickets)} tickets for client {client_id}...")
             ticket_details_by_serial = self.get_ticket_details_for_serial_and_trouble(
                 active_reports, affecting_tickets, cached_names_by_serial, client_id
+            )
+            logger.info(f"Got ticket tasks for client {client_id}")
+
+            logger.info(
+                f"Mapping interfaces to counters with the number of tickets where a trouble has been reported for "
+                f"client {client_id}..."
             )
             report_list = self._bruin_repository.prepare_items_for_monitor_report(
                 ticket_details_by_serial, cached_names_by_serial
             )
+            logger.info(
+                f"Mapped interfaces to counters. Got {len(report_list)} rows for the report for client {client_id}."
+            )
 
+            logger.info(
+                f"Filtering out rows with interfaces whose troubles haven't been reported to at least {threshold} "
+                f"different tickets for client {client_id}..."
+            )
             final_report_list = self._bruin_repository.filter_trouble_reports(
                 active_reports=active_reports, report_list=report_list, threshold=threshold
             )
             final_report_list.sort(key=lambda item: item["serial_number"])
+            logger.info(
+                f"Rows with interfaces whose troubles haven't been reported to at least {threshold} different tickets "
+                f"were filtered out. Got {len(final_report_list)} rows for the report for client {client_id}."
+            )
 
             if self._config.CURRENT_ENVIRONMENT != "production":
                 logger.info(
@@ -127,14 +155,13 @@ class ServiceAffectingMonitorReports:
                 trailing_interval=trailing_interval,
             )
 
+            logger.info(f"Sending report of {len(final_report_list)} rows to client {client_id} via email...")
             await self._email_repository.send_email(email_object=email)
-
             logger.info(f"Report for client {client_id} sent via email")
 
     def get_ticket_details_for_serial_and_trouble(
         self, active_reports, affecting_tickets, cached_names_by_serial, client_id
     ):
-        logger.info(f"[service-affecting-monitor-reports] Starting all report for client {client_id}")
         ticket_details = self._bruin_repository.transform_tickets_into_ticket_details(affecting_tickets)
         filtered_ticket_details = self._bruin_repository.filter_ticket_details_by_serials(
             ticket_details, cached_names_by_serial
