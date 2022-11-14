@@ -1,7 +1,11 @@
-## Get network enterprises for triage
-* For host in triage host:
-  * [get_network_enterprises](get_network_enterprises.md)
-  * If get network enterprises status is not ok:
-    ```
-    self._logger.error(f"Could not retrieve network enterprises for triage using host {host}")
-    ```
+## Get network enterprises for Triage
+
+* For each VCO under monitoring:
+
+    [get_network_enterprises](get_network_enterprises.md)
+
+    * If response status for get network enterprises is not ok:
+      ```python
+      logger.error(f"Error while retrieving network enterprises for VeloCloud host {host}: {response}")
+      ```
+      _Continue with next VCO_

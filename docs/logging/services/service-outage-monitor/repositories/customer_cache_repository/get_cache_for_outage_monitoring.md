@@ -1,3 +1,3 @@
-## get cache for outage Documentation
+## Get customer cache for Service Outage monitoring
 
-1. Launch [get_cache](get_cache.md)
+Call [get_cache](get_cache.md) using the list of VCOs under monitoring to get edges contacted in the last 7 days

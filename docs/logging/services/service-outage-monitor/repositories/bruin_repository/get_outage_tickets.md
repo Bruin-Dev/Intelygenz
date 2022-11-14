@@ -1,2 +1,3 @@
-## Get outage tickets
-*[get_ticket](get_ticket.md)
+## Get Service Outage tickets
+
+Call [get_tickets](get_tickets.md) to get all tickets whose ticket topic is "VOO" 

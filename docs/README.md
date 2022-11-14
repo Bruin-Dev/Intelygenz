@@ -48,7 +48,7 @@
        1. Communication between services
           1. [Messages Bus](logging/events/0-messages-bus.md)
        2. Use Cases
-           1. [Service outage](logging/events/1-service-outage.md)
+           1. [Service Outage Monitor](logging/events/1-service-outage-monitor.md)
            2. [BYOB IPA Queue](logging/events/2-BYOB-IPA-queue.md)
            3. [HNOC forwarding](logging/events/3-HNOC-forwarding.md)
            4. [SA forwarding to ASR](logging/events/4-SA-forward-to-ASR.md)

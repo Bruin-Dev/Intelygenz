@@ -1,21 +1,30 @@
-# Change severity
+## Change severity of ticket
 
-```
-self._logger.info(f"Changing severity level of ticket {ticket_id} to {severity_level}...")
+```python
+logger.info(f"Changing severity level of ticket {ticket_id} to {severity_level}...")
 ```
 
-* If Exception:
+* If there's an error while asking for the data to the `bruin-bridge`:
+  ```python
+  err_msg = (
+      f"An error occurred when changing the severity level of ticket {ticket_id} to {severity_level} -> {e}"
+  )
+  [...]
+  logger.error(err_msg)
   ```
-  self._logger.error(f"An error occurred when changing the severity level of ticket {ticket_id} to 
-  {severity_level} -> {e}")
+  END
+
+* If response status for change ticket severity is ok:
+  ```python
+  logger.info(f"Severity level of ticket {ticket_id} successfully changed to {severity_level}!")
   ```
-* If status is 200:
-  ```
-  self._logger.info(f"Severity level of ticket {ticket_id} successfully changed to {severity_level}!")
-  ```
-* Else:
-  ```
-  self._logger.error(f"Error while changing severity of ticket {ticket_id} to {severity_level} in "
-                     f"{self._config.CURRENT_ENVIRONMENT.upper()} environment: "
-                     f"Error {response_status} - {response_body}")
+* Otherwise:
+  ```python
+  err_msg = (
+      f"Error while changing severity of ticket {ticket_id} to {severity_level} in "
+      f"{self._config.CURRENT_ENVIRONMENT.upper()} environment: "
+      f"Error {response_status} - {response_body}"
+  )
+  [...]
+  logger.error(err_msg)
   ```

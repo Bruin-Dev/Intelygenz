@@ -1,2 +1,3 @@
-## Send reminder email milestone notification
-* [post_notification_email_milestone](post_notification_email_milestone.md)
+## Send reminder e-mail milestone notification via Bruin
+
+Call [post_notification_email_milestone](post_notification_email_milestone.md) using the notification type "TicketBYOBOutageRepairReminder-E-Mail"

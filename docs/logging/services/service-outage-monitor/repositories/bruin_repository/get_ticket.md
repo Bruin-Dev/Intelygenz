@@ -1,18 +1,28 @@
-## Get ticket
+## Get overview for a specific ticket
+
+```python
+logger.info(f"Getting info of ticket {ticket_id}...")
 ```
-self._logger.info(f'Getting all tickets with parameters of {request["body"]} from Bruin...')
-```
-* If Exception:
+
+* If there's an error while asking for the data to the `bruin-bridge`:
+  ```python
+  err_msg = f"An error occurred when requesting info of ticket {ticket_id} -> {e}"
+  [...]
+  logger.error(err_msg)
   ```
-  self._logger.error(f'An error occurred when requesting tickets from Bruin API with parameters of {request["body"]} -> {e}')
+  END
+
+* If response status for get overview of ticket is ok:
+  ```python
+  logger.info(f"Got info of ticket {ticket_id} from Bruin!")
   ```
-* If status ok:
-  ```
-  self._logger.info(f'Got all tickets with parameters of {request["body"]} from Bruin!')
-  ```
-* Else:
-  ```
-  self._logger.error(f'Error while retrieving tickets with parameters of {request["body"]} in '
-                     f"{self._config.CURRENT_ENVIRONMENT.upper()} environment: "
-                     f"Error {response_status} - {response_body}")
+* Otherwise:
+  ```python
+  err_msg = (
+      f"Error while retrieving info of ticket {ticket_id} in "
+      f"{self._config.CURRENT_ENVIRONMENT.upper()} environment: "
+      f"Error {response_status} - {response_body}"
+  )
+  [...]
+  logger.error(err_msg)
   ```

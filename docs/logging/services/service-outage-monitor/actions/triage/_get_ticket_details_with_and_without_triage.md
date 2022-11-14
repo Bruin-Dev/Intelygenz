@@ -1,28 +1,39 @@
-## Get ticket details with and without triage
-* For ticket in tickets:
-  ```
-  self._logger.info(f"Checking details of ticket_id: {ticket_id}")
-  ```
-  * For detail in ticket details:
+## Get sets of ticket tasks with and without a Triage note
+
+```python
+logger.info(f"Generating sets of ticket tasks with and without Triage notes based on {len(tickets)} tickets...")
+```
+
+* For each ticket:
+    ```python
+    logger.info(f"Checking {len(ticket_details)} tasks from ticket {ticket_id}...")
     ```
-    self._logger.info(
-                    f"Checking for triage notes in ticket_id: {ticket_id} "
-                    f"relating to serial number: {serial_number}"
-                )
+
+    * For each task in ticket:
+        ```python
+        logger.info(f"Looking for Triage notes in ticket {ticket_id} for edge {serial_number}...")
+        ```
+
+        * If there are no Triage notes for the task:
+          ```python
+          logger.info(f"No Triage notes found in ticket {ticket_id} for edge {serial_number}")
+          ```
+        * Otherwise:
+          ```python
+          logger.info(f"Triage notes found in ticket {ticket_id} for edge {serial_number}")
+          ```
+
+        ```python
+        logger.info(f"Finished looking for Triage notes in ticket {ticket_id} for edge {serial_number}")
+        ```
+
+    ```python
+    logger.info(f"Finished checking {len(ticket_details)} tasks from ticket {ticket_id}")
     ```
-    * If notes related to serial:
-      ```
-      self._logger.info(
-                        f"No triage notes found in ticket_id: {ticket_id} "
-                        f"for serial number {serial_number}. "
-                        f"Adding to ticket_details_without_triage list..."
-                    )
-      ```
-    * Else:
-      ```
-      sself._logger.info(
-                        f"Triage note found in ticket_id: {ticket_id} "
-                        f"for serial number {serial_number}. "
-                        f"Adding to ticket_details_with_triage list..."
-                    )
-      ```
+
+```python
+logger.info(
+    f"Generated {len(ticket_details_with_triage)} tasks with Triage notes and "
+    f"{len(ticket_details_without_triage)} tasks without Triage notes"
+)
+```

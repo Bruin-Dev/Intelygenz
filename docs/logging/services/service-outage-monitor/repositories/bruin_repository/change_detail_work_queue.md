@@ -1,19 +1,31 @@
-## Change detail work queue
+## Change work queue for ticket task
+
+```python
+logger.info(
+    f"Changing task result for ticket {ticket_id} and detail id {detail_id} for device "
+    f"{serial_number} to {task_result}..."
+)
 ```
-self._logger.info(f"Changing task result for ticket {ticket_id} and detail id {detail_id} for device 
-{serial_number} to {task_result}...")
-```
-* If Exception:
+
+* If there's an error while posting the data to the `bruin-bridge`:
+  ```python
+  err_msg = f"An error occurred when changing task result for ticket {ticket_id} and serial {serial_number}"
+  [...]
+  logger.error(err_msg)
   ```
-  self._logger.error(f"An error occurred when changing task result for ticket {ticket_id} and serial{serial_number}")
+  END
+
+* If response status for change work queue for ticket task is ok:
+  ```python
+  logger.info(f"Ticket {ticket_id} and serial {serial_number} task result changed to  {task_result}")
   ```
-* If status ok:
-  ```
-  self._logger.info(f"Ticket {ticket_id} and serial {serial_number} task result changed to  {task_result}")
-  ```
-* Else:
-  ```
-  self._logger.info(f"Error while changing task result for ticket {ticket_id} and serial {serial_number} in "
-                    f"{self._config.CURRENT_ENVIRONMENT.upper()} environment: "
-                    f"Error {response_status} - {response_body}")
+* Otherwise:
+  ```python
+  err_msg = (
+      f"Error while changing task result for ticket {ticket_id} and serial {serial_number} in "
+      f"{self._config.CURRENT_ENVIRONMENT.upper()} environment: "
+      f"Error {response_status} - {response_body}"
+  )
+  [...]
+  logger.error(err_msg)
   ```

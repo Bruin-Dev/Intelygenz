@@ -1,33 +1,35 @@
-## get cache Documentation
+## Get VeloCloud's customer cache
 
-1. If velo_filter
-
-   ```
-   self._logger.info(f"Getting customer cache for Velocloud host(s) {', '.join(velo_filter.keys())}...")
-   ```
-2. Else:
-
-   ```
-   self._logger.info(f"Getting customer cache for all Velocloud hosts...")
-   ```
-3. If `Exception`:
-
-   ```
-   self._logger.error(f"An error occurred when requesting customer cache -> {e}")
-   ```
-
-* If response status == 202:
+* If there's a list of specific VCOs to get a cache for:
+  ```python
+  logger.info(f"Getting customer cache for Velocloud host(s) {', '.join(velo_filter.keys())}...")
   ```
-  self._logger.error(response_body)
+* Otherwise:
+  ```python
+  logger.info(f"Getting customer cache for all Velocloud hosts...")
   ```
-* Else:
-  * If velo_filter:
 
-    ```
-    self._logger.info(f"Got customer cache for Velocloud host(s) {', '.join(velo_filter.keys())}!")
-    ```
-  * Else
+* If there's an error while asking for the data to the `customer-cache` service:
+  ```python
+  err_msg = f"An error occurred when requesting customer cache -> {e}" 
+  [...]
+  logger.error(err_msg)
+  ```
+  END
 
-    ```
-    self._logger.info(f"Got customer cache for all Velocloud hosts!")
-    ```
+* If response status for get VeloCloud's customer cache is not ok, or the cache is still building:
+  ```python
+  err_msg = response_body
+  [...]
+  logger.error(err_msg)
+  ```
+  END
+* Otherwise:
+    * If there's a list of specific VCOs to get a cache for:
+      ```python
+      logger.info(f"Got customer cache for Velocloud host(s) {', '.join(velo_filter.keys())}!")
+      ```
+    * Otherwise:
+      ```python
+      logger.info(f"Got customer cache for all Velocloud hosts!")
+      ```
