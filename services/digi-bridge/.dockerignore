@@ -1,0 +1,7 @@
+.dockerignore
+.hadolint.yaml
+ansible/
+Dockerfile
+package.json
+packer.pkr.hcl
+README.md
