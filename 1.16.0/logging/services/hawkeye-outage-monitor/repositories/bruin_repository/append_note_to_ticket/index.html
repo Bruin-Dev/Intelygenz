@@ -793,20 +793,47 @@
 
 <h2 id="append-note-to-ticket">Append note to ticket</h2>
 <ul>
-<li>If service number:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(f&#39;Appending note for service number(s) {&quot;, &quot;.join(service_numbers)} in ticket {ticket_id}...&#39;)
+<li>If the note is meant to be appended to tasks linked to particular service numbers:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="sa">f</span><span class="s1">&#39;Appending note for service number(s) </span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">service_numbers</span><span class="p">)</span><span class="si">}</span><span class="s1"> in ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s1">...&#39;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span>
 </code></pre></div></li>
-<li>Else:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(f&quot;Appending note for all service number(s) in ticket {ticket_id}...&quot;)
-</code></pre></div></li>
-<li>If Exception:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.error(f&quot;An error occurred when appending a ticket note to ticket {ticket_id}. &quot;
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>                   f&quot;Ticket note: {note}. Error: {e}&quot;)
-</code></pre></div></li>
-<li>If status not ok:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.error(f&quot;Error while appending note to ticket {ticket_id} in &quot;
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>                   f&quot;{self._config.CURRENT_ENVIRONMENT.upper()} environment. Note was {note}. Error: &quot;
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>                   f&quot;Error {response_status} - {response_body}&quot;)
+<li>
+<p>Otherwise:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Appending note for all service number(s) in ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+</code></pre></div></p>
+</li>
+<li>
+<p>If there's an error while asking for the data to the <code>bruin-bridge</code>:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">err_msg</span> <span class="o">=</span> <span class="p">(</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="sa">f</span><span class="s2">&quot;An error occurred when appending a ticket note to ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">. &quot;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="sa">f</span><span class="s2">&quot;Ticket note: </span><span class="si">{</span><span class="n">note</span><span class="si">}</span><span class="s2">. Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">)</span> 
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">[</span><span class="o">...</span><span class="p">]</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+</code></pre></div>
+  END</p>
+</li>
+<li>
+<p>If response status for append note to ticket is not ok:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">err_msg</span> <span class="o">=</span> <span class="p">(</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="sa">f</span><span class="s2">&quot;Error while appending note to ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">: Error: &quot;</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="sa">f</span><span class="s2">&quot;Error </span><span class="si">{</span><span class="n">response_status</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">response_body</span><span class="si">}</span><span class="s2">&quot;</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">)</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="p">[</span><span class="o">...</span><span class="p">]</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+</code></pre></div>
+  END</p>
+</li>
+<li>
+<p>If the note was successfully appended to tasks linked to particular service numbers:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="sa">f</span><span class="s1">&#39;Note for service number(s) </span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">service_numbers</span><span class="p">)</span><span class="si">}</span><span class="s1"> appended to ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s1">!&#39;</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="p">)</span>
+</code></pre></div></p>
+</li>
+<li>Otherwise:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Note for all service number(s) appended to ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
 </code></pre></div></li>
 </ul>
 

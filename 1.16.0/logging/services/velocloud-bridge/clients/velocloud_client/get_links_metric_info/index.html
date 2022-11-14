@@ -794,10 +794,10 @@
 <h2 id="get-links-metric-info">Get links metric info</h2>
 <ul>
 <li>
-<p>If there's no client authenticated against the VeloCloud host:
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot find a client to connect to </span><span class="si">{</span><span class="n">velocloud_host</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<p>If there's no cookie for the VeloCloud host:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot find a cookie for </span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div></p>
-<p><a href="../_start_relogin_job/">_start_relogin_job</a></p>
+<p><a href="../_login/">_login</a></p>
 <p><a href="../__log_result/">__log_result</a></p>
 <p>END</p>
 </li>
@@ -817,7 +817,7 @@
 <p>END</p>
 </li>
 </ul>
-<p><a href="../__schedule_relogin_job_if_needed/">__schedule_relogin_job_if_needed</a></p>
+<p><a href="../__login_if_needed/">__login_if_needed</a></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="sa">f</span><span class="s2">&quot;Got HTTP </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status</span><span class="si">}</span><span class="s2"> from Velocloud after claiming links metric info for host </span><span class="si">{</span><span class="n">velocloud_host</span><span class="si">}</span><span class="s2"> and &quot;</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="sa">f</span><span class="s2">&quot;interval </span><span class="si">{</span><span class="n">interval</span><span class="si">}</span><span class="s2">&quot;</span>
