@@ -795,11 +795,11 @@
 <p><em>Message arrives at subject</em></p>
 <ul>
 <li>If message body has <code>ticket_id</code> and <code>detail_id</code>:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Updating the ticket status for ticket id: </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> to RESOLVED&quot;</span><span class="p">)</span>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Updating the ticket status for ticket id: </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> to RESOLVED&quot;</span><span class="p">)</span>
 </code></pre></div>
   <a href="../../repositories/bruin_repository/resolve_ticket/">resolve_ticket</a></li>
 <li>Else
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot resolve a ticket using </span><span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span><span class="si">}</span><span class="s2">. JSON malformed&quot;</span><span class="p">)</span>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot resolve a ticket using </span><span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span><span class="si">}</span><span class="s2">. JSON malformed&quot;</span><span class="p">)</span>
 </code></pre></div>
   END</li>
 </ul>

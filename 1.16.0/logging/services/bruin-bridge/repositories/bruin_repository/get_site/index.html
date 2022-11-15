@@ -796,7 +796,7 @@
 <ul>
 <li>
 <p>If response is not ok:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="sa">f</span><span class="s2">&quot;Got response with status </span><span class="si">{</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> while getting site information for params </span><span class="si">{</span><span class="n">params</span><span class="si">}</span><span class="s2">.&quot;</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span>
 </code></pre></div>
@@ -805,7 +805,7 @@
 <li>
 <p>If site information is missing in response:
   <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;No site information was found for site </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;site_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> and client </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;client_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 </code></pre></div>
   END </p>
 </li>
