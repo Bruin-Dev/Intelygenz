@@ -38,7 +38,7 @@ docker repository <https://gitlab.intelygenz.com/mettel/docker_images/-/tree/mas
 Please check `pre-commit-config.yaml` for more info about it.
 - Another option (after adding the project poetry env as interpreter in pycharm) would be running `poetry run black .` and `poetry run isort .` on the root folder, the config options will be taken automatically from `pyproject.toml`. For adding this as autosave option please refer to https://black.readthedocs.io/en/stable/integrations/editors.html
 - When updating a git branch please use rebase instead of merge.
-
+- If you update the project documentation please run `poetry run mkdocs serve -f mkdocs.yml` and check everything it displayed as expected, no broken links.
 ### Tools
 
 - k9s <https://k9scli.io/>
