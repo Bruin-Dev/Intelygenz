@@ -52,8 +52,8 @@ class APIServer:
                     jsonify(
                         {
                             "error": "Request must have start_date and end_date as query params"
-                                     "start date and end date are integers representing milliseconds from epoch"
-                                     "in UTC"
+                            "start date and end date are integers representing milliseconds from epoch"
+                            "in UTC"
                         }
                     ),
                     HTTPStatus.BAD_REQUEST,

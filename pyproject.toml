@@ -30,7 +30,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.black]
 target-version = ["py310"]
 line-length = 120
-exclude = ".venv|environment_files_generator.py|lib"
+exclude = ".venv|environment_files_generator.py|lib|databases"
 
 [tool.isort]
 py_version=310
