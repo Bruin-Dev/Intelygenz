@@ -1,10 +1,9 @@
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-from nats.aio.msg import Msg
-
 from application.actions.get_tickets import GetTicket
 from application.repositories.utils_repository import to_json_bytes
+from nats.aio.msg import Msg
 
 
 class TestGetTicket:

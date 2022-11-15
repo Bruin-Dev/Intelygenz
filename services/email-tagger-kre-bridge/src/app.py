@@ -4,6 +4,12 @@ import sys
 from dataclasses import asdict
 
 import redis
+from application.actions.get_prediction import GetPrediction
+from application.actions.save_metrics import SaveMetrics
+from application.clients.email_tagger_client import EmailTaggerClient
+from application.models import subscriptions
+from application.repositories.email_tagger_repository import EmailTaggerRepository
+from config import config
 from framework.http.server import Config as HealthConfig
 from framework.http.server import Server as HealthServer
 from framework.logging.formatters import Papertrail as PapertrailFormatter
@@ -16,13 +22,6 @@ from framework.nats.models import *
 from framework.nats.models import Connection
 from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
 from prometheus_client import start_http_server
-
-from application.actions.get_prediction import GetPrediction
-from application.actions.save_metrics import SaveMetrics
-from application.clients.email_tagger_client import EmailTaggerClient
-from application.models import subscriptions
-from application.repositories.email_tagger_repository import EmailTaggerRepository
-from config import config
 
 base_handler = StdoutHandler()
 base_handler.setFormatter(StandardFormatter(environment_name=config.ENVIRONMENT_NAME))

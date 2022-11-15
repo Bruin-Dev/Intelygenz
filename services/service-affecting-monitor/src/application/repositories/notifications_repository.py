@@ -1,9 +1,8 @@
 import json
 from typing import Any
 
-from shortuuid import uuid
-
 from application import AffectingTroubles
+from shortuuid import uuid
 
 
 def to_json_bytes(message: dict[str, Any]):

@@ -3,15 +3,14 @@ from datetime import datetime
 from unittest.mock import Mock
 
 import pytest
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from shortuuid import uuid
-
 from application.actions.alert import Alert
 from application.repositories.email_repository import EmailRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.template_management import TemplateRenderer
 from application.repositories.velocloud_repository import VelocloudRepository
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import testconfig
+from shortuuid import uuid
 
 # Scopes
 # - function

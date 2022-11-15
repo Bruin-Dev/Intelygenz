@@ -1,7 +1,6 @@
 from collections import defaultdict
 
 import pytest
-
 from application.actions.bandwidth_reports import BandwidthReports
 from application.actions.service_affecting_monitor_reports import ServiceAffectingMonitorReports
 from config import testconfig

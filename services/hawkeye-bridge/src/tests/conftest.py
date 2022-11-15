@@ -1,7 +1,6 @@
 from unittest.mock import Mock
 
 import pytest
-
 from application.actions.get_probes import GetProbes
 from application.actions.get_test_results import GetTestResults
 from application.clients.hawkeye_client import HawkeyeClient

@@ -10,13 +10,6 @@ from ipaddress import ip_address
 from time import perf_counter
 from typing import List, Optional, Pattern
 
-from apscheduler.jobstores.base import ConflictingIdError
-from apscheduler.util import undefined
-from dateutil.parser import parse
-from framework.storage.task_dispatcher_client import TaskTypes
-from pytz import timezone, utc
-from shortuuid import uuid
-
 from application import (
     DIGI_NOTE_REGEX,
     LINK_INFO_REGEX,
@@ -27,6 +20,12 @@ from application import (
     ForwardQueues,
     Outages,
 )
+from apscheduler.jobstores.base import ConflictingIdError
+from apscheduler.util import undefined
+from dateutil.parser import parse
+from framework.storage.task_dispatcher_client import TaskTypes
+from pytz import timezone, utc
+from shortuuid import uuid
 
 logger = logging.getLogger(__name__)
 

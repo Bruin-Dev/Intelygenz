@@ -1,10 +1,9 @@
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-from nats.aio.msg import Msg
-
 from application.actions.save_closed_ticket_feedback import SaveClosedTicketFeedback
 from application.repositories.utils_repository import to_json_bytes
+from nats.aio.msg import Msg
 
 
 class TestSaveClosedTicketFeedback:

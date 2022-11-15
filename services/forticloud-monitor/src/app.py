@@ -5,19 +5,18 @@ from asyncio import AbstractEventLoop
 from dataclasses import dataclass
 from typing import Optional
 
-from bruin_client import BruinClient
-from forticloud_client.client import ForticloudClient
-from framework.http.server import Config as HealthConfig
-from framework.nats.client import Client as FrameworkClient
-from framework.nats.temp_payload_storage import RedisLegacy as TempPayloadStorage
-from redis.client import Redis
-
 from application.actions import CheckDevice
 from application.clients import NatsClient
 from application.consumers import ApConsumer, SwitchConsumer
 from application.repositories import BruinRepository, ForticloudRepository
+from bruin_client import BruinClient
 from config.config import Config
+from forticloud_client.client import ForticloudClient
+from framework.http.server import Config as HealthConfig
+from framework.nats.client import Client as FrameworkClient
+from framework.nats.temp_payload_storage import RedisLegacy as TempPayloadStorage
 from health_server import HealthServer
+from redis.client import Redis
 
 log = logging.getLogger()
 log.setLevel(logging.DEBUG)

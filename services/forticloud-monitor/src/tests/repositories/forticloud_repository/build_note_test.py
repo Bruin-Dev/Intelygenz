@@ -2,7 +2,6 @@ import os
 from unittest.mock import Mock, patch
 
 import pytest
-
 from application.models.device import Device, DeviceStatus
 from application.repositories import REOPEN_HEADER, TRIAGE_HEADER, build_note
 

@@ -1,11 +1,11 @@
 import logging
+from dataclasses import dataclass
 
 from application.data.bruin.ticket_basic import Response, TicketBasic
 from application.data.bruin.ticket_details import TicketDetails
 from application.handler import WillExecute, WillReturnJSON
 from application.scenario import Scenario
 from application.servers.grpc.rta.rta import RtaService
-from dataclasses import dataclass
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 

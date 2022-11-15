@@ -1,10 +1,10 @@
 import logging
+from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import List, Set
 
 from application.domain.asset import AssetId
 from application.rpc import Rpc, RpcError, RpcFailedError, RpcRequest
-from dataclasses import dataclass, field
 from pydantic import BaseModel, Field
 
 log = logging.getLogger(__name__)

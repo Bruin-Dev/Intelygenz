@@ -2,10 +2,9 @@ import asyncio
 import logging
 from datetime import datetime, timedelta
 
+from application import AffectingTroubles
 from apscheduler.triggers.cron import CronTrigger
 from pytz import timezone
-
-from application import AffectingTroubles
 
 logger = logging.getLogger(__name__)
 

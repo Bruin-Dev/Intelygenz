@@ -1,9 +1,8 @@
 from dataclasses import dataclass
 
+from application.repositories.utils import to_json_bytes
 from framework.nats.client import Client
 from shortuuid import uuid
-
-from application.repositories.utils import to_json_bytes
 
 
 @dataclass

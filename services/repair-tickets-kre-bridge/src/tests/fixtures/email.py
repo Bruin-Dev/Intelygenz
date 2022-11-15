@@ -2,7 +2,6 @@ from datetime import datetime
 from typing import List
 
 import pytest
-
 from tests.fixtures._helpers import bruinize_date
 
 

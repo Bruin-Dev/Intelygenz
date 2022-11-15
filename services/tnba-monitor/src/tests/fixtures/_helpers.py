@@ -5,7 +5,6 @@ from typing import Any, List
 from unittest.mock import AsyncMock, Mock
 
 from pytz import timezone
-
 from tests.fixtures._constants import BRUIN_API_TIMEZONE, VELOCLOUD_API_TIMEZONE
 
 

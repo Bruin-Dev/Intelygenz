@@ -4,6 +4,13 @@ import sys
 from dataclasses import asdict
 
 import redis
+from application.actions.get_dri_parameters import GetDRIParameters
+from application.clients.dri_client import DRIClient
+from application.models import subscriptions
+from application.repositories.dri_repository import DRIRepository
+from application.repositories.endpoints_usage_repository import EndpointsUsageRepository
+from application.repositories.storage_repository import StorageRepository
+from config import config
 from framework.http.server import Config as QuartConfig
 from framework.http.server import Server as QuartServer
 from framework.logging.formatters import Papertrail as PapertrailFormatter
@@ -15,14 +22,6 @@ from framework.nats.exceptions import NatsException
 from framework.nats.models import Connection
 from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
 from prometheus_client import start_http_server
-
-from application.actions.get_dri_parameters import GetDRIParameters
-from application.clients.dri_client import DRIClient
-from application.models import subscriptions
-from application.repositories.dri_repository import DRIRepository
-from application.repositories.endpoints_usage_repository import EndpointsUsageRepository
-from application.repositories.storage_repository import StorageRepository
-from config import config
 
 base_handler = StdoutHandler()
 base_handler.setFormatter(StandardFormatter(environment_name=config.ENVIRONMENT_NAME))

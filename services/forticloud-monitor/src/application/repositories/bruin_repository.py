@@ -2,9 +2,6 @@ import logging
 from dataclasses import dataclass, field
 from http import HTTPStatus
 
-from bruin_client import BruinClient, BruinRequest
-from pydantic import ValidationError
-
 from application.models.device import DeviceId
 from application.models.note import Note
 from application.models.ticket import CreatedTicket, TicketStatus
@@ -14,6 +11,8 @@ from application.repositories.bruin_repository_models.post_repair_ticket import 
 )
 from application.repositories.bruin_repository_models.post_ticket_note import PostTicketNoteBody
 from application.repositories.errors import UnexpectedResponseError, UnexpectedStatusError
+from bruin_client import BruinClient, BruinRequest
+from pydantic import ValidationError
 
 log = logging.getLogger(__name__)
 

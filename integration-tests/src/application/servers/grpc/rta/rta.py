@@ -1,4 +1,5 @@
 import logging
+from dataclasses import dataclass
 
 from application.data.rta import (
     prediction_response,
@@ -14,7 +15,6 @@ from application.servers.grpc.rta.rta_pb2_grpc import (
     EntrypointStub,
     add_EntrypointServicer_to_server,
 )
-from dataclasses import dataclass
 from grpc import aio
 
 log = logging.getLogger(__name__)

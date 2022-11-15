@@ -1,7 +1,7 @@
 import logging
+from dataclasses import dataclass
 from typing import Optional, Type
 
-from dataclasses import dataclass
 from framework.storage import RedisStorage
 
 log = logging.getLogger(__name__)

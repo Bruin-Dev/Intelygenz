@@ -1,12 +1,11 @@
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from shortuuid import uuid
-
 from application.repositories import bruin_repository as bruin_repository_module
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.utils import to_json_bytes
 from config import testconfig
+from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(bruin_repository_module, "uuid", return_value=uuid_)

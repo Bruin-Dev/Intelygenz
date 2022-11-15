@@ -1,11 +1,10 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
+from application.models.device import DeviceId
 from bruin_client import BruinRequest
 from pydantic import Field, root_validator
 from pydantic.main import BaseModel
-
-from application.models.device import DeviceId
 
 
 @dataclass

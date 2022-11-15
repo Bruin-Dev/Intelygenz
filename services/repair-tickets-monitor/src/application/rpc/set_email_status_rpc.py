@@ -1,8 +1,8 @@
 import logging
+from dataclasses import dataclass, field
 
 from application.domain.email import EmailStatus
 from application.rpc import Rpc, RpcRequest
-from dataclasses import dataclass, field
 from pydantic import BaseModel
 
 log = logging.getLogger(__name__)

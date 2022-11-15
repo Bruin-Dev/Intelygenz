@@ -5,11 +5,10 @@ from typing import Any
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from nats.aio.msg import Msg
-from shortuuid import uuid
-
 from application.repositories import velocloud_repository as velocloud_repository_module
 from config import testconfig
+from nats.aio.msg import Msg
+from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(velocloud_repository_module, "uuid", return_value=uuid_)

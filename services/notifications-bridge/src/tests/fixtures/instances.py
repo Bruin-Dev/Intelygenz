@@ -2,7 +2,6 @@ from unittest.mock import Mock
 
 import aiohttp
 import pytest
-
 from application.actions.send_to_slack import SendToSlack
 from application.clients.slack_client import SlackClient
 from application.repositories.slack_repository import SlackRepository

@@ -1,7 +1,6 @@
 from unittest.mock import Mock
 
 import pytest
-
 from tests.fixtures._constants import CURRENT_DATETIME
 
 

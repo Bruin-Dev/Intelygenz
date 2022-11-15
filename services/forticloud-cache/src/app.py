@@ -3,7 +3,15 @@ import sys
 from dataclasses import asdict
 
 import redis
+from application.actions.refresh_cache import RefreshCache
+from application.clients.bruin_client import BruinClient
+from application.clients.forticloud_client import ForticloudClient
+from application.repositories.bruin_repository import BruinRepository
+from application.repositories.cache_repository import CacheRepository
+from application.repositories.forticloud_repository import ForticloudRepository
+from application.repositories.redis_repository import RedisRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from config import config
 from forticloud_client.client import ForticloudClient as ForticloudClientLibrary
 from framework.http.server import Config as QuartConfig
 from framework.http.server import Server as QuartServer
@@ -16,15 +24,6 @@ from framework.nats.exceptions import NatsException
 from framework.nats.models import *
 from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
 from prometheus_client import start_http_server
-
-from application.actions.refresh_cache import RefreshCache
-from application.clients.bruin_client import BruinClient
-from application.clients.forticloud_client import ForticloudClient
-from application.repositories.bruin_repository import BruinRepository
-from application.repositories.cache_repository import CacheRepository
-from application.repositories.forticloud_repository import ForticloudRepository
-from application.repositories.redis_repository import RedisRepository
-from config import config
 
 base_handler = StdoutHandler()
 base_handler.setFormatter(StandardFormatter(environment_name=config.ENVIRONMENT_NAME))

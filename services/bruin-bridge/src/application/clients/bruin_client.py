@@ -6,7 +6,6 @@ from typing import Dict
 
 import aiohttp
 import humps
-
 from application.clients.bruin_session import BruinGetRequest, BruinResponse, BruinSession
 
 logger = logging.getLogger(__name__)

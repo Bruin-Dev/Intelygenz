@@ -2,10 +2,9 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from aiohttp import ClientSession
-from pytest import raises
-
 from application.clients.dri_client import DRIClient
 from config import testconfig as config
+from pytest import raises
 
 
 class TestDRIClient:

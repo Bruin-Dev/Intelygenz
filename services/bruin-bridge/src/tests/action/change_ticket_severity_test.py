@@ -1,10 +1,9 @@
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-from nats.aio.msg import Msg
-
 from application.actions.change_ticket_severity import ChangeTicketSeverity
 from application.repositories.utils_repository import to_json_bytes
+from nats.aio.msg import Msg
 
 
 class TestChangeTicketSeverity:

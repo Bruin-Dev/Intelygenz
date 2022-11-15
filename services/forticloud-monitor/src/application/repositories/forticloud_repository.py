@@ -5,10 +5,6 @@ from datetime import datetime
 from http import HTTPStatus
 from typing import Any, Dict
 
-from forticloud_client.client import ForticloudClient
-from pydantic import ValidationError
-from tenacity import AsyncRetrying, retry_if_exception_type, stop_after_attempt, wait_chain, wait_random
-
 from application.models.device import Device, DeviceId, DeviceStatus, DeviceType
 from application.repositories import UnexpectedResponseError, UnexpectedStatusError
 from application.repositories.errors import UnknownStatusError
@@ -17,6 +13,9 @@ from application.repositories.forticloud_repository_models.get_device import (
     ForticloudResponse,
     SwitchResponseBody,
 )
+from forticloud_client.client import ForticloudClient
+from pydantic import ValidationError
+from tenacity import AsyncRetrying, retry_if_exception_type, stop_after_attempt, wait_chain, wait_random
 
 log = logging.getLogger(__name__)
 

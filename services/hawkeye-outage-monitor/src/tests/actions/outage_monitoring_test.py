@@ -3,15 +3,14 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
+from application.actions import outage_monitoring as outage_monitoring_module
+from application.actions.outage_monitoring import OutageMonitor
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
+from config import testconfig
 from dateutil.parser import parse
 from pytz import timezone, utc
 from shortuuid import uuid
-
-from application.actions import outage_monitoring as outage_monitoring_module
-from application.actions.outage_monitoring import OutageMonitor
-from config import testconfig
 
 uuid_ = uuid()
 uuid_mock = patch.object(outage_monitoring_module, "uuid", return_value=uuid_)

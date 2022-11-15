@@ -3,15 +3,14 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
+from application import ForwardQueues
+from application.actions import intermapper_monitoring as intermapper_monitor_module
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
+from config import testconfig
 from dateutil.parser import parse
 from framework.storage.task_dispatcher_client import TaskTypes
 from pytz import utc
-
-from application import ForwardQueues
-from application.actions import intermapper_monitoring as intermapper_monitor_module
-from config import testconfig
 from tests.fixtures._constants import CURRENT_DATETIME
 
 config_mock = patch.object(testconfig, "CURRENT_ENVIRONMENT", "production")

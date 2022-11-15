@@ -1,10 +1,6 @@
 from unittest.mock import Mock
 
 import pytest
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from framework.nats.client import Client as NatsClient
-from framework.storage.task_dispatcher_client import TaskDispatcherClient
-
 from application.actions.outage_monitoring import OutageMonitor
 from application.actions.triage import Triage
 from application.repositories.bruin_repository import BruinRepository
@@ -17,7 +13,10 @@ from application.repositories.outage_repository import OutageRepository
 from application.repositories.triage_repository import TriageRepository
 from application.repositories.utils_repository import UtilsRepository
 from application.repositories.velocloud_repository import VelocloudRepository
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import testconfig as config
+from framework.nats.client import Client as NatsClient
+from framework.storage.task_dispatcher_client import TaskDispatcherClient
 from tests.fixtures._helpers import wrap_all_methods
 
 

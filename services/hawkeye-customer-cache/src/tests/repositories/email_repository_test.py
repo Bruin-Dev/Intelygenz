@@ -1,11 +1,10 @@
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from shortuuid import uuid
-
 from application.repositories import email_repository as email_repository_module
 from application.repositories.email_repository import EmailRepository
 from application.repositories.utils_repository import to_json_bytes
+from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(email_repository_module, "uuid", return_value=uuid_)

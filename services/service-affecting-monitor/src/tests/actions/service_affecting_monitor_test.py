@@ -5,15 +5,14 @@ from typing import Any
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from apscheduler.util import undefined
-from framework.storage.task_dispatcher_client import TaskTypes
-from nats.aio.msg import Msg
-from shortuuid import uuid
-
 from application import REMINDER_NOTE_REGEX, AffectingTroubles, ForwardQueues
 from application.actions import service_affecting_monitor as service_affecting_monitor_module
 from application.repositories import utils_repository as utils_repository_module
+from apscheduler.util import undefined
 from config import testconfig
+from framework.storage.task_dispatcher_client import TaskTypes
+from nats.aio.msg import Msg
+from shortuuid import uuid
 from tests.fixtures._constants import CURRENT_DATETIME
 
 uuid_ = uuid()

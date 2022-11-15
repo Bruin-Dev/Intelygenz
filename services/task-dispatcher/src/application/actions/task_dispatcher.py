@@ -1,11 +1,10 @@
 import logging
 from datetime import datetime
 
+from application.repositories.utils_repository import to_json_bytes
 from apscheduler.jobstores.base import ConflictingIdError
 from framework.storage.task_dispatcher_client import TaskTypes
 from pytz import timezone
-
-from application.repositories.utils_repository import to_json_bytes
 
 logger = logging.getLogger(__name__)
 

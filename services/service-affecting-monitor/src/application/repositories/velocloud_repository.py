@@ -4,11 +4,10 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Any
 
-from pytz import utc
-from shortuuid import uuid
-
 from application import AffectingTroubles
 from application.repositories import nats_error_response
+from pytz import utc
+from shortuuid import uuid
 
 logger = logging.getLogger(__name__)
 

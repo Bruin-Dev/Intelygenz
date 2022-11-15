@@ -1,12 +1,11 @@
 import logging
 from dataclasses import dataclass
 
+from application.actions.check_device import CheckDevice
+from application.models.device import DeviceId, DeviceType
 from framework.nats.models import Subscription
 from nats.aio.msg import Msg
 from pydantic import BaseModel
-
-from application.actions.check_device import CheckDevice
-from application.models.device import DeviceId, DeviceType
 
 from .consumer_settings import ConsumerSettings
 

@@ -3,7 +3,6 @@ from unittest.mock import AsyncMock, patch
 
 import aiohttp
 import pytest
-
 from application.clients.slack_client import SlackResponse
 from config import testconfig as config
 

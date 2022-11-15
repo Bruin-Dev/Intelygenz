@@ -2,14 +2,13 @@ import logging
 from collections import defaultdict
 from datetime import date, datetime, time, timedelta
 
+from application.clients.email_client import EmailClient
+from application.repositories.lumin_repository import LuminBillingRepository, LuminBillingTypes
+from application.repositories.template_renderer import TemplateRenderer
 from apscheduler.events import EVENT_JOB_ERROR, JobExecutionEvent
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.util import undefined
 from pytz import timezone
-
-from application.clients.email_client import EmailClient
-from application.repositories.lumin_repository import LuminBillingRepository, LuminBillingTypes
-from application.repositories.template_renderer import TemplateRenderer
 
 logger = logging.getLogger(__name__)
 

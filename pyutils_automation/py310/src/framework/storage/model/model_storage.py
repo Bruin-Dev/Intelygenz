@@ -2,9 +2,8 @@ import logging
 from dataclasses import dataclass
 from typing import Optional, TypeVar
 
-from pydantic import BaseModel, ValidationError
-
 from framework.storage import RedisStorage
+from pydantic import BaseModel, ValidationError
 
 M = TypeVar("M", bound=BaseModel)
 

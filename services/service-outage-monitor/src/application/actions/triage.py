@@ -4,12 +4,11 @@ import time
 from datetime import datetime, timedelta
 from typing import Set
 
+from application import TRIAGE_NOTE_REGEX
 from apscheduler.util import undefined
 from dateutil.parser import parse
 from pytz import timezone, utc
 from tenacity import retry, stop_after_delay, wait_exponential
-
-from application import TRIAGE_NOTE_REGEX
 
 logger = logging.getLogger(__name__)
 

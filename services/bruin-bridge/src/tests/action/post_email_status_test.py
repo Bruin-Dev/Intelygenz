@@ -3,13 +3,12 @@ from typing import Any, Callable, Dict
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-from nats.aio.msg import Msg
-
 from application.actions.post_email_status import BRUIN_PATH, PostBody, PostEmailStatus
 from application.clients.bruin_client import BruinClient
 from application.clients.bruin_session import BruinPostRequest, BruinResponse, BruinSession
 from application.repositories.utils_repository import to_json_bytes
 from application.services.sentence_formatter import SentenceFormatter
+from nats.aio.msg import Msg
 
 
 @pytest.mark.asyncio

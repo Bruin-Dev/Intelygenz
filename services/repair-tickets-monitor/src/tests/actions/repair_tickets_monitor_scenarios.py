@@ -1,3 +1,4 @@
+from dataclasses import dataclass, field
 from typing import Any, Dict, List
 
 from application.domain.asset import Topic
@@ -5,7 +6,6 @@ from application.domain.repair_email_output import RepairEmailOutput, TicketOutp
 from application.domain.ticket import Category, Ticket, TicketStatus
 from application.rpc import RpcError
 from application.rpc.upsert_outage_ticket_rpc import UpsertedStatus, UpsertedTicket
-from dataclasses import dataclass, field
 
 
 @dataclass

@@ -2,14 +2,13 @@ from datetime import datetime
 from unittest.mock import Mock, patch
 
 import pytest
-from apscheduler.jobstores.base import ConflictingIdError
-from apscheduler.util import undefined
-from shortuuid import uuid
-
 from application.actions import fraud_monitoring as fraud_monitor_module
 from application.actions.fraud_monitoring import EMAIL_REGEXES
 from application.repositories import bruin_repository as bruin_repository_module
+from apscheduler.jobstores.base import ConflictingIdError
+from apscheduler.util import undefined
 from config import testconfig
+from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(bruin_repository_module, "uuid", return_value=uuid_)

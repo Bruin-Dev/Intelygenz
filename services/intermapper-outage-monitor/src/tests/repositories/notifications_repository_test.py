@@ -1,12 +1,11 @@
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from nats.aio.msg import Msg
-from shortuuid import uuid
-
 from application.repositories import notifications_repository as notifications_repository_module
 from application.repositories.utils_repository import to_json_bytes
 from config import testconfig
+from nats.aio.msg import Msg
+from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(notifications_repository_module, "uuid", return_value=uuid_)

@@ -3,14 +3,13 @@ from typing import Generator
 from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
-from apscheduler.util import undefined
-from dateutil.parser import parse
-from shortuuid import uuid
-
 from application import Outages
 from application.actions import triage as triage_module
 from application.actions.triage import Triage
+from apscheduler.util import undefined
 from config import testconfig
+from dateutil.parser import parse
+from shortuuid import uuid
 
 
 class TestTriage:

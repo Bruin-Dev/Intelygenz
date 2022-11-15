@@ -1,9 +1,8 @@
 from unittest.mock import Mock
 
 import pytest
-from shortuuid import uuid
-
 from application.repositories.utils_repository import UtilsRepository
+from shortuuid import uuid
 
 # Scopes
 # - function

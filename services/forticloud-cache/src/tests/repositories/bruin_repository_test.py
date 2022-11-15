@@ -1,7 +1,6 @@
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-
 from application.repositories.bruin_repository import BruinRepository
 
 LIST_OF_DEVICES = [{"serial_number": "serial_number_test"}]

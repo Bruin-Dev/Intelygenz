@@ -5,13 +5,6 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Callable, Dict, List, Optional
 
-from apscheduler.jobstores.base import ConflictingIdError
-from apscheduler.util import undefined
-from dateutil.parser import parse
-from framework.storage.task_dispatcher_client import TaskTypes
-from pytz import timezone, utc
-from pyzipcode import ZipCodeDatabase
-
 from application import (
     AUTORESOLVE_REGEX,
     CONDITION_REGEX,
@@ -22,6 +15,12 @@ from application import (
     ZIP_CODE_REGEX,
     ForwardQueues,
 )
+from apscheduler.jobstores.base import ConflictingIdError
+from apscheduler.util import undefined
+from dateutil.parser import parse
+from framework.storage.task_dispatcher_client import TaskTypes
+from pytz import timezone, utc
+from pyzipcode import ZipCodeDatabase
 
 logger = logging.getLogger(__name__)
 

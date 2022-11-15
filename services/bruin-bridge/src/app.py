@@ -4,18 +4,6 @@ import sys
 from dataclasses import asdict
 
 import redis
-from framework.http.server import Config as HealthConfig
-from framework.http.server import Server as HealthServer
-from framework.logging.formatters import Papertrail as PapertrailFormatter
-from framework.logging.formatters import Standard as StandardFormatter
-from framework.logging.handlers import Papertrail as PapertrailHandler
-from framework.logging.handlers import Stdout as StdoutHandler
-from framework.nats.client import Client
-from framework.nats.exceptions import NatsException
-from framework.nats.models import *
-from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
-from prometheus_client import start_http_server
-
 from application.actions.change_detail_work_queue import ChangeDetailWorkQueue
 from application.actions.change_ticket_severity import ChangeTicketSeverity
 from application.actions.get_asset_topics import GetAssetTopics
@@ -52,6 +40,17 @@ from application.repositories.bruin_repository import BruinRepository
 from application.repositories.endpoints_usage_repository import EndpointsUsageRepository
 from application.services.sentence_formatter import SentenceFormatter
 from config import config
+from framework.http.server import Config as HealthConfig
+from framework.http.server import Server as HealthServer
+from framework.logging.formatters import Papertrail as PapertrailFormatter
+from framework.logging.formatters import Standard as StandardFormatter
+from framework.logging.handlers import Papertrail as PapertrailHandler
+from framework.logging.handlers import Stdout as StdoutHandler
+from framework.nats.client import Client
+from framework.nats.exceptions import NatsException
+from framework.nats.models import *
+from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
+from prometheus_client import start_http_server
 
 # Standard output logging
 base_handler = StdoutHandler()

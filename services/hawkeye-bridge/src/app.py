@@ -3,6 +3,12 @@ import sys
 from dataclasses import asdict
 
 import redis
+from application.actions.get_probes import GetProbes
+from application.actions.get_test_results import GetTestResults
+from application.clients.hawkeye_client import HawkeyeClient
+from application.models import subscriptions
+from application.repositories.hawkeye_repository import HawkeyeRepository
+from config import config
 from framework.http.server import Config as HealthConfig
 from framework.http.server import Server as HealthServer
 from framework.logging.formatters import Papertrail as PapertrailFormatter
@@ -14,13 +20,6 @@ from framework.nats.exceptions import NatsException
 from framework.nats.models import *
 from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
 from prometheus_client import start_http_server
-
-from application.actions.get_probes import GetProbes
-from application.actions.get_test_results import GetTestResults
-from application.clients.hawkeye_client import HawkeyeClient
-from application.models import subscriptions
-from application.repositories.hawkeye_repository import HawkeyeRepository
-from config import config
 
 # Standard output logging
 base_handler = StdoutHandler()

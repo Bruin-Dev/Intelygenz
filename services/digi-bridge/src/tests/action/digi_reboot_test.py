@@ -4,9 +4,8 @@ from unittest.mock import AsyncMock, Mock
 
 import humps
 import pytest
-from nats.aio.msg import Msg
-
 from application.actions.digi_reboot import DiGiReboot
+from nats.aio.msg import Msg
 
 
 class TestDiGiReboot:

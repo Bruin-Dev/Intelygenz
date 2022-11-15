@@ -2,7 +2,13 @@ import asyncio
 import logging
 from dataclasses import asdict
 
+from application.actions.alert import Alert
+from application.repositories.email_repository import EmailRepository
+from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.template_management import TemplateRenderer
+from application.repositories.velocloud_repository import VelocloudRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from config import config
 from framework.http.server import Config as HealthConfig
 from framework.http.server import Server as HealthServer
 from framework.logging.formatters import Papertrail as PapertrailFormatter
@@ -14,13 +20,6 @@ from framework.nats.models import Connection
 from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
 from prometheus_client import start_http_server
 from redis.client import Redis
-
-from application.actions.alert import Alert
-from application.repositories.email_repository import EmailRepository
-from application.repositories.notifications_repository import NotificationsRepository
-from application.repositories.template_management import TemplateRenderer
-from application.repositories.velocloud_repository import VelocloudRepository
-from config import config
 
 # Standard output logging
 base_handler = StdoutHandler()

@@ -2,7 +2,6 @@ from datetime import datetime
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-
 from application.actions.get_customers import GetCustomers
 from application.actions.refresh_cache import RefreshCache
 from application.repositories.bruin_repository import BruinRepository

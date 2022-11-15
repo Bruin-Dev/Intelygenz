@@ -2,13 +2,12 @@ from datetime import datetime
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from apscheduler.jobstores.base import ConflictingIdError
-from apscheduler.util import undefined
-from shortuuid import uuid
-
 from application.actions import tnba_feedback_action as tnba_feedback_action_module
 from application.actions.tnba_feedback_action import TNBAFeedback
+from apscheduler.jobstores.base import ConflictingIdError
+from apscheduler.util import undefined
 from config import testconfig
+from shortuuid import uuid
 
 
 class TestTNBAMonitor:

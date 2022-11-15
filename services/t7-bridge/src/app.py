@@ -4,6 +4,13 @@ import sys
 from dataclasses import asdict
 
 import redis
+from application.actions.get_prediction import GetPrediction
+from application.actions.post_automation_metrics import PostAutomationMetrics
+from application.actions.post_live_automation_metrics import PostLiveAutomationMetrics
+from application.clients.t7_kre_client import T7KREClient
+from application.models import subscriptions
+from application.repositories.t7_kre_repository import T7KRERepository
+from config import config
 from framework.http.server import Config as HealthConfig
 from framework.http.server import Server as HealthServer
 from framework.logging.formatters import Papertrail as PapertrailFormatter
@@ -15,14 +22,6 @@ from framework.nats.exceptions import NatsException
 from framework.nats.models import *
 from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
 from prometheus_client import start_http_server
-
-from application.actions.get_prediction import GetPrediction
-from application.actions.post_automation_metrics import PostAutomationMetrics
-from application.actions.post_live_automation_metrics import PostLiveAutomationMetrics
-from application.clients.t7_kre_client import T7KREClient
-from application.models import subscriptions
-from application.repositories.t7_kre_repository import T7KRERepository
-from config import config
 
 base_handler = StdoutHandler()
 base_handler.setFormatter(StandardFormatter(environment_name=config.ENVIRONMENT_NAME))

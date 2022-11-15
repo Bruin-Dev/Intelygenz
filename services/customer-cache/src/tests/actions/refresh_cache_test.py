@@ -2,15 +2,14 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from apscheduler.jobstores.base import ConflictingIdError
-from apscheduler.util import undefined
-from shortuuid import uuid
-from tenacity import retry, stop_after_attempt
-
 from application.actions import refresh_cache as refresh_cache_module
 from application.actions.refresh_cache import RefreshCache
 from application.repositories import EdgeIdentifier
+from apscheduler.jobstores.base import ConflictingIdError
+from apscheduler.util import undefined
 from config import testconfig
+from shortuuid import uuid
+from tenacity import retry, stop_after_attempt
 
 uuid_ = uuid()
 uuid_mock = patch.object(refresh_cache_module, "uuid", return_value=uuid_)

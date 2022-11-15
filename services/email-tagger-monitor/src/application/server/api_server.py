@@ -11,17 +11,16 @@ from http import HTTPStatus
 from typing import Any, List
 
 import jsonschema
+from application.repositories.new_emails_repository import NewEmailsRepository
+from application.repositories.new_tickets_repository import NewTicketsRepository
+from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.utils_repository import UtilsRepository
 from hypercorn.asyncio import serve
 from hypercorn.config import Config as HyperCornConfig
 from jsonschema import validate
 from quart import jsonify, request
 from quart_openapi import Pint
 from swagger_ui import quart_api_doc
-
-from application.repositories.new_emails_repository import NewEmailsRepository
-from application.repositories.new_tickets_repository import NewTicketsRepository
-from application.repositories.notifications_repository import NotificationsRepository
-from application.repositories.utils_repository import UtilsRepository
 
 MEGABYTE: int = 1024 * 1024
 MAX_CONTENT_LENGTH = 4 * MEGABYTE  # 4mb

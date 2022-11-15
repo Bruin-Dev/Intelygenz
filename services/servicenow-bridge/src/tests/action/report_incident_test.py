@@ -2,7 +2,6 @@ import json
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-
 from application.actions.report_incident import ReportIncident
 
 

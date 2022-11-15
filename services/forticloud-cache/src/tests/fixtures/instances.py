@@ -2,9 +2,6 @@ from copy import deepcopy
 from unittest.mock import Mock
 
 import pytest
-from forticloud_client.client import ForticloudClient as ForticloudClientLibrary
-from tenacity import stop_after_attempt
-
 from application.actions.refresh_cache import RefreshCache
 from application.clients.bruin_client import BruinClient
 from application.clients.forticloud_client import DEFAULT_RETRY_CONFIG, ForticloudClient
@@ -13,6 +10,8 @@ from application.repositories.cache_repository import CacheRepository
 from application.repositories.forticloud_repository import ForticloudRepository
 from application.repositories.redis_repository import RedisRepository
 from config import testconfig
+from forticloud_client.client import ForticloudClient as ForticloudClientLibrary
+from tenacity import stop_after_attempt
 
 
 @pytest.fixture(scope="function")

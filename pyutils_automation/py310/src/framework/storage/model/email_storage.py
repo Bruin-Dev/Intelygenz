@@ -1,7 +1,7 @@
+from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Optional, Type
 
-from dataclasses import dataclass
 from framework.storage.model.model_storage import ModelStorage
 from pydantic import BaseModel, Field
 

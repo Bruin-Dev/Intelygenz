@@ -2,11 +2,10 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from apscheduler.util import undefined
-from shortuuid import uuid
-
 from application.actions import alert as alert_module
+from apscheduler.util import undefined
 from config import testconfig
+from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(alert_module, "uuid", return_value=uuid_)

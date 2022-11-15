@@ -1,16 +1,15 @@
 import asyncio
 import logging
 
+from application.actions.get_link_metrics import GetLinkMetrics
+from application.clients.mongo_client import MyMongoClient
+from application.server.api_server import APIServer
+from config import config
 from framework.logging.formatters import Papertrail as PapertrailFormatter
 from framework.logging.formatters import Standard as StandardFormatter
 from framework.logging.handlers import Papertrail as PapertrailHandler
 from framework.logging.handlers import Stdout as StdoutHandler
 from prometheus_client import start_http_server
-
-from application.actions.get_link_metrics import GetLinkMetrics
-from application.clients.mongo_client import MyMongoClient
-from application.server.api_server import APIServer
-from config import config
 
 # Standard output logging
 base_handler = StdoutHandler()

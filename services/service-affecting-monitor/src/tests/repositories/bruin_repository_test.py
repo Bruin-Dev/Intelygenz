@@ -4,13 +4,12 @@ from typing import Any
 from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
-from nats.aio.msg import Msg
-from shortuuid import uuid
-
 from application.repositories import bruin_repository as bruin_repository_module
 from application.repositories import nats_error_response
 from application.repositories import notifications_repository as notifications_repository_module
 from config import testconfig
+from nats.aio.msg import Msg
+from shortuuid import uuid
 from tests.fixtures._constants import CURRENT_DATETIME
 
 uuid_ = uuid()

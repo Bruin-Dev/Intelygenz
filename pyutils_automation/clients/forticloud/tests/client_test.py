@@ -4,7 +4,6 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import aiohttp
 import pytest
-
 from forticloud_client.exceptions.login_error import LoginError
 
 

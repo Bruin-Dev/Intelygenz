@@ -1,7 +1,6 @@
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-
 from application.repositories.servicenow_repository import ServiceNowRepository
 
 

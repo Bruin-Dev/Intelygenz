@@ -3,6 +3,11 @@ import sys
 from dataclasses import asdict
 
 import redis
+from application.actions.send_to_slack import SendToSlack
+from application.clients.slack_client import SlackClient
+from application.models import subscriptions
+from application.repositories.slack_repository import SlackRepository
+from config import config
 from framework.http.server import Config as QuartConfig
 from framework.http.server import Server as QuartServer
 from framework.logging.formatters import Papertrail as PapertrailFormatter
@@ -13,12 +18,6 @@ from framework.nats.client import Client
 from framework.nats.exceptions import NatsException
 from framework.nats.models import *
 from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
-
-from application.actions.send_to_slack import SendToSlack
-from application.clients.slack_client import SlackClient
-from application.models import subscriptions
-from application.repositories.slack_repository import SlackRepository
-from config import config
 
 base_handler = StdoutHandler()
 base_handler.setFormatter(StandardFormatter(environment_name=config.ENVIRONMENT_NAME))

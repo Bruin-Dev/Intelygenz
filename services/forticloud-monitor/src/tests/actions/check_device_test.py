@@ -1,7 +1,6 @@
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-
 from application.actions.check_device import CheckDevice
 from application.models.device import Device
 from application.models.note import Note

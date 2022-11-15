@@ -2,9 +2,8 @@ import json
 import logging
 from typing import Any
 
-from shortuuid import uuid
-
 from application import nats_error_response
+from shortuuid import uuid
 
 logger = logging.getLogger(__name__)
 

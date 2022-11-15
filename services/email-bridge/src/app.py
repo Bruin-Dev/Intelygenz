@@ -3,6 +3,15 @@ import sys
 from dataclasses import asdict
 
 import redis
+from application.actions.get_emails import GetEmails
+from application.actions.mark_email_as_read import MarkEmailAsRead
+from application.actions.send_to_email import SendToEmail
+from application.clients.email_client import EmailClient
+from application.clients.email_reader_client import EmailReaderClient
+from application.models import subscriptions
+from application.repositories.email_reader_repository import EmailReaderRepository
+from application.repositories.email_repository import EmailRepository
+from config import config
 from framework.http.server import Config as QuartConfig
 from framework.http.server import Server as QuartServer
 from framework.logging.formatters import Papertrail as PapertrailFormatter
@@ -13,16 +22,6 @@ from framework.nats.client import Client
 from framework.nats.exceptions import NatsException
 from framework.nats.models import *
 from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
-
-from application.actions.get_emails import GetEmails
-from application.actions.mark_email_as_read import MarkEmailAsRead
-from application.actions.send_to_email import SendToEmail
-from application.clients.email_client import EmailClient
-from application.clients.email_reader_client import EmailReaderClient
-from application.models import subscriptions
-from application.repositories.email_reader_repository import EmailReaderRepository
-from application.repositories.email_repository import EmailRepository
-from config import config
 
 base_handler = StdoutHandler()
 base_handler.setFormatter(StandardFormatter(environment_name=config.ENVIRONMENT_NAME))

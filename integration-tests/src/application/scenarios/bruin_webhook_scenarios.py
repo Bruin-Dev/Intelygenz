@@ -1,4 +1,5 @@
 import logging
+from dataclasses import dataclass
 
 from application.clients import bruin
 from application.data.bruin import Document, Email, Inventory, TicketModel
@@ -14,7 +15,6 @@ from application.servers.grpc.email_tagger import email_tagger
 from application.servers.grpc.email_tagger.email_tagger import EmailTaggerService
 from application.servers.grpc.rta import rta
 from application.servers.grpc.rta.rta import RtaService
-from dataclasses import dataclass
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 

@@ -4,7 +4,6 @@ import io
 from datetime import date, timedelta
 
 import pytest
-
 from application.repositories.template_renderer import TemplateRenderer
 from config.testconfig import BILLING_REPORT_CONFIG
 

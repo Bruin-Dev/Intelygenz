@@ -2,11 +2,10 @@ from datetime import datetime, timedelta
 from unittest.mock import Mock
 
 import pytest
-from nats.aio.msg import Msg
-
 from application.actions.get_customers import GetCustomers
 from application.repositories.utils_repository import to_json_bytes
 from config import testconfig
+from nats.aio.msg import Msg
 
 
 class TestGetCustomers:

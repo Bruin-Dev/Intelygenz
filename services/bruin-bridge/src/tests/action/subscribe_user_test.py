@@ -3,12 +3,11 @@ from typing import Any, Callable, Dict
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-from nats.aio.msg import Msg
-
 from application.actions.subscribe_user import BRUIN_PATH, PostBody, PostBodyUser, SubscribeUser
 from application.clients.bruin_client import BruinClient
 from application.clients.bruin_session import BruinPostRequest, BruinResponse, BruinSession
 from application.repositories.utils_repository import to_json_bytes
+from nats.aio.msg import Msg
 
 
 class TestSubscribeUser:

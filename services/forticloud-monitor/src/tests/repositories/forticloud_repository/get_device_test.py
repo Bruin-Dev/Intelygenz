@@ -2,10 +2,6 @@ from copy import deepcopy
 from unittest.mock import ANY, AsyncMock, Mock
 
 import pytest
-from forticloud_client.client import ForticloudClient
-from tenacity import stop_after_attempt
-from tenacity.stop import stop_base
-
 from application.models.device import Device, DeviceStatus, DeviceType
 from application.repositories import (
     DEFAULT_RETRY_CONFIG,
@@ -14,6 +10,9 @@ from application.repositories import (
     UnexpectedStatusError,
     UnknownStatusError,
 )
+from forticloud_client.client import ForticloudClient
+from tenacity import stop_after_attempt
+from tenacity.stop import stop_base
 
 
 async def a_forticloud_repository_is_built_with_a_default_ap_retry_config_test():

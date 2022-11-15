@@ -3,12 +3,11 @@ from typing import Any, Callable
 from unittest.mock import Mock, create_autospec
 
 import pytest
-from framework.nats.client import Client
-from nats.aio.msg import Msg
-
 from application.repositories.storage_repository import StorageRepository
 from application.server.api_server import APIServer
 from config import testconfig as config
+from framework.nats.client import Client
+from nats.aio.msg import Msg
 
 # Scopes
 # - function

@@ -3,14 +3,13 @@ from unittest import mock
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from apscheduler.events import EVENT_JOB_ERROR, JobExecutionEvent
-from apscheduler.util import undefined
-from pytz import timezone
-
 from application.actions import billing_report as alert_module
 from application.actions.billing_report import BillingReport
 from application.repositories.template_renderer import TemplateRenderer
+from apscheduler.events import EVENT_JOB_ERROR, JobExecutionEvent
+from apscheduler.util import undefined
 from config.testconfig import BILLING_REPORT_CONFIG
+from pytz import timezone
 
 
 @pytest.fixture

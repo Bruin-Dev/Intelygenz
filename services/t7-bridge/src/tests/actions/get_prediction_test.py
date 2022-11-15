@@ -2,10 +2,9 @@ from unittest import mock
 from unittest.mock import Mock
 
 import pytest
-from nats.aio.msg import Msg
-
 from application.actions.get_prediction import GetPrediction
 from application.repositories.utils_repository import to_json_bytes
+from nats.aio.msg import Msg
 
 
 class TestGetPrediction:

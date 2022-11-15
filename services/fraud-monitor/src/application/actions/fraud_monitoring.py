@@ -4,12 +4,11 @@ import time
 from datetime import datetime
 from typing import List, Optional
 
+from application import ForwardQueues
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from dateutil.parser import parse
 from pytz import timezone
-
-from application import ForwardQueues
 
 logger = logging.getLogger(__name__)
 

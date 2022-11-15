@@ -4,7 +4,19 @@ import sys
 from dataclasses import asdict
 
 import redis
+from application.actions.tnba_monitor import TNBAMonitor
+from application.repositories.bruin_repository import BruinRepository
+from application.repositories.customer_cache_repository import CustomerCacheRepository
+from application.repositories.metrics_repository import MetricsRepository
+from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.prediction_repository import PredictionRepository
+from application.repositories.t7_repository import T7Repository
+from application.repositories.ticket_repository import TicketRepository
+from application.repositories.trouble_repository import TroubleRepository
+from application.repositories.utils_repository import UtilsRepository
+from application.repositories.velocloud_repository import VelocloudRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from config import config
 from framework.http.server import Config as HealthConfig
 from framework.http.server import Server as HealthServer
 from framework.logging.formatters import Papertrail as PapertrailFormatter
@@ -18,19 +30,6 @@ from framework.nats.models import Connection
 from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
 from prometheus_client import start_http_server
 from pytz import timezone
-
-from application.actions.tnba_monitor import TNBAMonitor
-from application.repositories.bruin_repository import BruinRepository
-from application.repositories.customer_cache_repository import CustomerCacheRepository
-from application.repositories.metrics_repository import MetricsRepository
-from application.repositories.notifications_repository import NotificationsRepository
-from application.repositories.prediction_repository import PredictionRepository
-from application.repositories.t7_repository import T7Repository
-from application.repositories.ticket_repository import TicketRepository
-from application.repositories.trouble_repository import TroubleRepository
-from application.repositories.utils_repository import UtilsRepository
-from application.repositories.velocloud_repository import VelocloudRepository
-from config import config
 
 base_handler = StdoutHandler()
 base_handler.setFormatter(StandardFormatter(environment_name=config.ENVIRONMENT_NAME))

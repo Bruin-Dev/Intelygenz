@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from dataclasses import dataclass, field
 from typing import Any, Awaitable, Callable, Optional
 
 from application.data.bruin import Document, Inventory
@@ -9,7 +10,6 @@ from application.data.bruin.ticket_details import TicketDetails, TicketNote
 from application.data.servicenow.incident_response import IncidentResponse
 from application.handler import Handler, WillReturnJSON, WillReturnNothing
 from application.route import Route, Routes
-from dataclasses import dataclass, field
 from starlette.requests import Request
 from starlette.responses import Response
 

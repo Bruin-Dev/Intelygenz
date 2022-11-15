@@ -5,12 +5,11 @@ from typing import Any
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from nats.aio.msg import Msg
-from shortuuid import uuid
-
 from application import Troubles
 from application.repositories import servicenow_repository as servicenow_repository_module
 from config import testconfig
+from nats.aio.msg import Msg
+from shortuuid import uuid
 from tests.fixtures._constants import CURRENT_DATETIME
 
 uuid_ = uuid()

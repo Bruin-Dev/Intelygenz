@@ -3,12 +3,11 @@ from unittest.mock import Mock, call, patch
 
 import grpc
 import pytest
-from google.protobuf.json_format import Parse
-
 from application.clients.generated_grpc import public_input_pb2 as pb2
 from application.clients.generated_grpc import public_input_pb2_grpc as pb2_grpc
 from application.clients.t7_kre_client import T7KREClient
 from config import testconfig
+from google.protobuf.json_format import Parse
 
 
 class TestT7KREClient:

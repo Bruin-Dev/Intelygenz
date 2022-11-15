@@ -4,11 +4,10 @@ from typing import Any
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from shortuuid import uuid
-
 from application.repositories import email_repository as email_repository_module
 from application.repositories.email_repository import EmailRepository
 from config import testconfig
+from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(email_repository_module, "uuid", return_value=uuid_)

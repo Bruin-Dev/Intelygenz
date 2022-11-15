@@ -1,7 +1,6 @@
 from typing import Any, Dict
 
 import pytest
-
 from tests.fixtures.email import *
 from tests.fixtures.rta import *
 

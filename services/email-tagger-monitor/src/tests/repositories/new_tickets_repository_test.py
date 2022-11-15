@@ -1,7 +1,6 @@
 from unittest.mock import Mock
 
 import pytest
-
 from application.repositories.new_tickets_repository import NewTicketsRepository
 from config import testconfig
 

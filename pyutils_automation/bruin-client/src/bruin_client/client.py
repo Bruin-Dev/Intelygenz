@@ -3,9 +3,8 @@ from dataclasses import dataclass, field
 from http import HTTPStatus
 
 from aiohttp import ClientSession
-from pydantic.main import BaseModel
-
 from bruin_client.models import BruinCredentials, BruinRequest, BruinResponse, BruinToken, RefreshTokenError
+from pydantic.main import BaseModel
 
 log = logging.getLogger(__name__)
 TOKEN_METHOD = "POST"

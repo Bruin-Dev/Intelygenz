@@ -2,7 +2,17 @@ import asyncio
 import logging
 from dataclasses import asdict
 
+from application.actions.handle_ticket_forward import HandleTicketForward
+from application.actions.intermapper_monitoring import InterMapperMonitor
+from application.models import subscriptions
+from application.repositories.bruin_repository import BruinRepository
+from application.repositories.dri_repository import DRIRepository
+from application.repositories.email_repository import EmailRepository
+from application.repositories.metrics_repository import MetricsRepository
+from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.utils_repository import UtilsRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from config import config
 from framework.http.server import Config as HealthConfig
 from framework.http.server import Server as HealthServer
 from framework.logging.formatters import Papertrail as PapertrailFormatter
@@ -15,17 +25,6 @@ from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
 from framework.storage.task_dispatcher_client import TaskDispatcherClient, TaskTypes
 from prometheus_client import start_http_server
 from redis.client import Redis
-
-from application.actions.handle_ticket_forward import HandleTicketForward
-from application.actions.intermapper_monitoring import InterMapperMonitor
-from application.models import subscriptions
-from application.repositories.bruin_repository import BruinRepository
-from application.repositories.dri_repository import DRIRepository
-from application.repositories.email_repository import EmailRepository
-from application.repositories.metrics_repository import MetricsRepository
-from application.repositories.notifications_repository import NotificationsRepository
-from application.repositories.utils_repository import UtilsRepository
-from config import config
 
 # Standard output logging
 base_handler = StdoutHandler()

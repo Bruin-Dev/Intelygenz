@@ -3,11 +3,10 @@ import time
 from datetime import datetime
 from typing import List
 
+from application import Troubles
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from pytz import timezone
-
-from application import Troubles
 
 logger = logging.getLogger(__name__)
 

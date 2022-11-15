@@ -1,7 +1,6 @@
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-
 from application.clients.servicenow_client import ServiceNowClient
 from config import testconfig as config
 

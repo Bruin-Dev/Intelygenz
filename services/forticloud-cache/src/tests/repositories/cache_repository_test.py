@@ -1,7 +1,6 @@
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-
 from application.repositories.cache_repository import CacheRepository
 from config import testconfig
 

@@ -3,10 +3,9 @@ from dataclasses import dataclass, field
 from http import HTTPStatus
 from typing import Any, Dict
 
+from application.repositories.errors import UnexpectedStatusError
 from forticloud_client.client import ForticloudClient
 from tenacity import AsyncRetrying, retry_if_exception_type, stop_after_attempt, wait_chain, wait_random
-
-from application.repositories.errors import UnexpectedStatusError
 
 logger = logging.getLogger(__name__)
 

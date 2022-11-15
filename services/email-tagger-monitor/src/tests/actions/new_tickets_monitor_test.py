@@ -3,11 +3,10 @@ from datetime import datetime
 from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
-from shortuuid import uuid
-
 from application.actions import new_tickets_monitor as new_tickets_monitor_module
 from application.actions.new_tickets_monitor import NewTicketsMonitor
 from config import testconfig
+from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(new_tickets_monitor_module, "uuid", return_value=uuid_)

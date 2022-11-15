@@ -4,12 +4,11 @@ from typing import Any
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from nats.aio.msg import Msg
-from shortuuid import uuid
-
 from application import nats_error_response
 from application.repositories import customer_cache_repository as customer_cache_repository_module
 from application.repositories.customer_cache_repository import CustomerCacheRepository
+from nats.aio.msg import Msg
+from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(customer_cache_repository_module, "uuid", return_value=uuid_)

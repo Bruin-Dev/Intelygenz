@@ -1,5 +1,4 @@
 import pytest
-
 from application.repositories.prediction_repository import PredictionRepository
 
 

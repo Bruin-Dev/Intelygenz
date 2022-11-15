@@ -2,7 +2,11 @@ import asyncio
 import logging
 from dataclasses import asdict
 
+from application.actions.forticloud_poller import ForticloudPoller
+from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.redis_repository import RedisRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from config import config
 from framework.http.server import Config as HealthConfig
 from framework.http.server import Server as HealthServer
 from framework.logging.formatters import Papertrail as PapertrailFormatter
@@ -13,11 +17,6 @@ from framework.nats.client import Client as NatsClient
 from framework.nats.models import Connection
 from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
 from redis.client import Redis
-
-from application.actions.forticloud_poller import ForticloudPoller
-from application.repositories.notifications_repository import NotificationsRepository
-from application.repositories.redis_repository import RedisRepository
-from config import config
 
 # Standard output logging
 base_handler = StdoutHandler()

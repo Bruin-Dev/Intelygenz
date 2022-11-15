@@ -4,9 +4,8 @@ from typing import Any
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-from nats.aio.msg import Msg
-
 from application.clients.bruin_client import BruinClient
+from nats.aio.msg import Msg
 
 EXAMPLE_SERIAL_NUMBER = "sn_test_1"
 CLIENT_ID = 1

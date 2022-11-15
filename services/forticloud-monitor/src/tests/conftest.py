@@ -1,5 +1,4 @@
 import pytest
-
 from application.models.device import Device, DeviceId, DeviceStatus, DeviceType
 from application.models.note import Note
 from application.models.ticket import CreatedTicket, TicketStatus

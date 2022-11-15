@@ -3,14 +3,13 @@ from typing import List
 from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
+from application.actions import new_emails_monitor as new_emails_monitor_module
+from application.actions.new_emails_monitor import NewEmailsMonitor
+from config import testconfig
 from framework.storage.model import Email, EmailTag
 from framework.testing import given
 from pydantic import Field
 from shortuuid import uuid
-
-from application.actions import new_emails_monitor as new_emails_monitor_module
-from application.actions.new_emails_monitor import NewEmailsMonitor
-from config import testconfig
 
 uuid_ = uuid()
 uuid_mock = patch.object(new_emails_monitor_module, "uuid", return_value=uuid_)

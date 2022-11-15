@@ -1,9 +1,6 @@
 from unittest.mock import AsyncMock, Mock, create_autospec
 
 import pytest
-from framework.nats.client import Client as NatsClient
-from framework.storage.model import RepairParentEmailStorage
-
 from application.actions.new_closed_tickets_feedback import NewClosedTicketsFeedback
 from application.actions.new_created_tickets_feedback import NewCreatedTicketsFeedback
 from application.actions.repair_tickets_monitor import RepairTicketsMonitor
@@ -15,6 +12,8 @@ from application.repositories.notifications_repository import NotificationsRepos
 from application.repositories.repair_ticket_kre_repository import RepairTicketKreRepository
 from application.repositories.storage_repository import StorageRepository
 from config import testconfig as config
+from framework.nats.client import Client as NatsClient
+from framework.storage.model import RepairParentEmailStorage
 from tests.fixtures._helpers import wrap_all_methods
 
 

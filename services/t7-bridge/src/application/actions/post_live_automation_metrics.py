@@ -1,9 +1,8 @@
 import json
 import logging
 
-from nats.aio.msg import Msg
-
 from application.repositories.utils_repository import to_json_bytes
+from nats.aio.msg import Msg
 
 logger = logging.getLogger(__name__)
 missing = object()

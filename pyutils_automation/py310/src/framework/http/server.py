@@ -1,8 +1,8 @@
 import logging
+from dataclasses import dataclass
 from http import HTTPStatus
 from typing import Union
 
-from dataclasses import dataclass
 from hypercorn.asyncio import serve
 from hypercorn.config import Config as HyperCornConfig
 from quart import Quart, jsonify

@@ -3,21 +3,6 @@ import logging
 import sys
 from dataclasses import asdict
 
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from framework.http.server import Config as HealthConfig
-from framework.http.server import Server as HealthServer
-from framework.logging.formatters import Papertrail as PapertrailFormatter
-from framework.logging.formatters import Standard as StandardFormatter
-from framework.logging.handlers import Papertrail as PapertrailHandler
-from framework.logging.handlers import Stdout as StdoutHandler
-from framework.nats.client import Client
-from framework.nats.exceptions import NatsException
-from framework.nats.models import Connection
-from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
-from framework.storage.task_dispatcher_client import TaskDispatcherClient
-from prometheus_client import start_http_server
-from redis.client import Redis
-
 from application.actions.handle_ticket_forward import HandleTicketForward
 from application.actions.outage_monitoring import OutageMonitor
 from application.actions.triage import Triage
@@ -33,7 +18,21 @@ from application.repositories.outage_repository import OutageRepository
 from application.repositories.triage_repository import TriageRepository
 from application.repositories.utils_repository import UtilsRepository
 from application.repositories.velocloud_repository import VelocloudRepository
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import config
+from framework.http.server import Config as HealthConfig
+from framework.http.server import Server as HealthServer
+from framework.logging.formatters import Papertrail as PapertrailFormatter
+from framework.logging.formatters import Standard as StandardFormatter
+from framework.logging.handlers import Papertrail as PapertrailHandler
+from framework.logging.handlers import Stdout as StdoutHandler
+from framework.nats.client import Client
+from framework.nats.exceptions import NatsException
+from framework.nats.models import Connection
+from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
+from framework.storage.task_dispatcher_client import TaskDispatcherClient
+from prometheus_client import start_http_server
+from redis.client import Redis
 
 # Standard output logging
 base_handler = StdoutHandler()

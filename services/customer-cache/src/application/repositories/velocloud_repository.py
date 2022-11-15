@@ -2,10 +2,9 @@ import json
 import logging
 import time
 
-from shortuuid import uuid
-
 from application.repositories import nats_error_response
 from application.repositories.utils_repository import to_json_bytes
+from shortuuid import uuid
 
 logger = logging.getLogger(__name__)
 

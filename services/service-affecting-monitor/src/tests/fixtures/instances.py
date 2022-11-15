@@ -1,8 +1,6 @@
 from unittest.mock import Mock
 
 import pytest
-from framework.nats.client import Client
-
 from application.actions.service_affecting_monitor import ServiceAffectingMonitor
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.customer_cache_repository import CustomerCacheRepository
@@ -14,6 +12,7 @@ from application.repositories.trouble_repository import TroubleRepository
 from application.repositories.utils_repository import UtilsRepository
 from application.repositories.velocloud_repository import VelocloudRepository
 from config import testconfig as config
+from framework.nats.client import Client
 from tests.fixtures._helpers import wrap_all_methods
 
 

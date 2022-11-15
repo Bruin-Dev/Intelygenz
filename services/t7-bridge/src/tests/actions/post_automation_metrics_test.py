@@ -1,10 +1,9 @@
 from unittest.mock import Mock
 
 import pytest
-from nats.aio.msg import Msg
-
 from application.actions.post_automation_metrics import PostAutomationMetrics
 from application.repositories.utils_repository import to_json_bytes
+from nats.aio.msg import Msg
 
 
 class TestPostAutomationMetrics:

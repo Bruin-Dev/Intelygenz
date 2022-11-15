@@ -2,7 +2,6 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-
 from application.repositories.lumin_repository import LuminBillingRepository, LuminBillingTypes
 
 

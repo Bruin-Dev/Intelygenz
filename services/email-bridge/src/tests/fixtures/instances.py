@@ -1,5 +1,4 @@
 import pytest
-
 from application.actions.get_emails import GetEmails
 from application.actions.mark_email_as_read import MarkEmailAsRead
 from application.actions.send_to_email import SendToEmail

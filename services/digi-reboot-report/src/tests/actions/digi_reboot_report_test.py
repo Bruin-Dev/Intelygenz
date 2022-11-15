@@ -2,10 +2,9 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
-from apscheduler.util import undefined
-
 from application.actions import digi_reboot_report as digi_reboot_report_module
 from application.actions.digi_reboot_report import DiGiRebootReport
+from apscheduler.util import undefined
 from config import testconfig
 
 

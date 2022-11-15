@@ -1,7 +1,6 @@
 import base64
 
 import pandas as pd
-
 from application.repositories.template_management import TemplateRenderer
 from config import testconfig
 from config import testconfig as config

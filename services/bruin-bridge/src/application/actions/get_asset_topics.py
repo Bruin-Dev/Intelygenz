@@ -2,10 +2,9 @@ import json
 import logging
 from http import HTTPStatus
 
-from nats.aio.msg import Msg
-
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.utils_repository import to_json_bytes
+from nats.aio.msg import Msg
 
 NO_BODY_MSG = 'Must include {.."body":{"client_id", "service_number"}, ..} in request'
 MISSING_PARAMS_MSG = "You must include 'client_id' and 'service_number' in the 'body' field of the response request"

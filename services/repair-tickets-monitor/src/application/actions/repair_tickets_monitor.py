@@ -8,12 +8,6 @@ from datetime import datetime
 from typing import Any, DefaultDict, Dict, List, Set, Tuple
 
 import html2text
-from apscheduler.jobstores.base import ConflictingIdError
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.util import undefined
-from framework.nats.client import Client as NatsClient
-from pytz import timezone
-
 from application import resources
 from application.domain.asset import Asset, AssetId, Assets
 from application.domain.email import Email, EmailStatus
@@ -35,6 +29,11 @@ from application.rpc.send_email_reply_rpc import SendEmailReplyRpc
 from application.rpc.set_email_status_rpc import SetEmailStatusRpc
 from application.rpc.subscribe_user_rpc import SubscribeUserRpc
 from application.rpc.upsert_outage_ticket_rpc import UpsertedStatus, UpsertedTicket, UpsertOutageTicketRpc
+from apscheduler.jobstores.base import ConflictingIdError
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.util import undefined
+from framework.nats.client import Client as NatsClient
+from pytz import timezone
 
 log = logging.getLogger(__name__)
 

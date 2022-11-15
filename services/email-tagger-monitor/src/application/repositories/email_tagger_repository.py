@@ -3,13 +3,12 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-from framework.nats.client import Client
-from shortuuid import uuid
-from tenacity import retry, stop_after_delay, wait_exponential
-
 from application.repositories import nats_error_response
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.utils import to_json_bytes
+from framework.nats.client import Client
+from shortuuid import uuid
+from tenacity import retry, stop_after_delay, wait_exponential
 
 log = logging.getLogger(__name__)
 

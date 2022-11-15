@@ -4,7 +4,14 @@ import sys
 from dataclasses import asdict
 
 import redis
+from application.actions.monitoring import Monitor as GatewayMonitor
+from application.repositories.metrics_repository import MetricsRepository
+from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.servicenow_repository import ServiceNowRepository
+from application.repositories.utils_repository import UtilsRepository
+from application.repositories.velocloud_repository import VelocloudRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from config import config
 from framework.http.server import Config as QuartConfig
 from framework.http.server import Server as QuartServer
 from framework.logging.formatters import Papertrail as PapertrailFormatter
@@ -16,14 +23,6 @@ from framework.nats.exceptions import NatsException
 from framework.nats.models import Connection
 from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
 from prometheus_client import start_http_server
-
-from application.actions.monitoring import Monitor as GatewayMonitor
-from application.repositories.metrics_repository import MetricsRepository
-from application.repositories.notifications_repository import NotificationsRepository
-from application.repositories.servicenow_repository import ServiceNowRepository
-from application.repositories.utils_repository import UtilsRepository
-from application.repositories.velocloud_repository import VelocloudRepository
-from config import config
 
 base_handler = StdoutHandler()
 base_handler.setFormatter(StandardFormatter(environment_name=config.ENVIRONMENT_NAME))

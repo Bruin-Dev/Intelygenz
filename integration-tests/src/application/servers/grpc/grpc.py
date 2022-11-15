@@ -1,8 +1,8 @@
 import logging
+from dataclasses import dataclass, field
 from typing import Any, Optional
 
 import grpc
-from dataclasses import dataclass, field
 from google.protobuf.descriptor import FileDescriptor
 
 log = logging.getLogger(__name__)

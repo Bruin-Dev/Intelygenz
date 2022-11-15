@@ -6,7 +6,6 @@ from unittest.mock import Mock
 
 import pytest
 from aiohttp import ClientResponse
-
 from bruin_client import BruinClient, BruinCredentials, BruinRequest, BruinResponse, BruinToken, RefreshTokenError
 
 

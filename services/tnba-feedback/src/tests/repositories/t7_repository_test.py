@@ -1,14 +1,13 @@
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from nats.aio.msg import Msg
-from shortuuid import uuid
-
 from application.repositories import nats_error_response
 from application.repositories import t7_repository as t7_repository_module
 from application.repositories.t7_repository import T7Repository
 from application.repositories.utils_repository import to_json_bytes
 from config import testconfig
+from nats.aio.msg import Msg
+from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(t7_repository_module, "uuid", return_value=uuid_)

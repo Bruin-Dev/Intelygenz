@@ -2,11 +2,10 @@ from unittest import mock
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-from framework.nats.models import Subscription
-from nats.aio.msg import Msg
-
 from application.consumers import ConsumerSettings, SwitchConsumer
 from application.models.device import DeviceId, DeviceType
+from framework.nats.models import Subscription
+from nats.aio.msg import Msg
 
 any_serialized_message = b'{"serial_number":1,"network_id":1,"client_id":1}'
 

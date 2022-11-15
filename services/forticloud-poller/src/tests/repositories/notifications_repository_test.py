@@ -3,9 +3,8 @@ from typing import Any
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from shortuuid import uuid
-
 from application.repositories import notifications_repository as notifications_repository_module
+from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(notifications_repository_module, "uuid", return_value=uuid_)

@@ -3,7 +3,15 @@ import logging
 import sys
 from dataclasses import asdict
 
+from application.actions.fraud_monitoring import FraudMonitor
+from application.repositories.bruin_repository import BruinRepository
+from application.repositories.email_repository import EmailRepository
+from application.repositories.metrics_repository import MetricsRepository
+from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.ticket_repository import TicketRepository
+from application.repositories.utils_repository import UtilsRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from config import config
 from framework.http.server import Config as HealthConfig
 from framework.http.server import Server as HealthServer
 from framework.logging.formatters import Papertrail as PapertrailFormatter
@@ -16,15 +24,6 @@ from framework.nats.models import Connection
 from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
 from prometheus_client import start_http_server
 from redis.client import Redis
-
-from application.actions.fraud_monitoring import FraudMonitor
-from application.repositories.bruin_repository import BruinRepository
-from application.repositories.email_repository import EmailRepository
-from application.repositories.metrics_repository import MetricsRepository
-from application.repositories.notifications_repository import NotificationsRepository
-from application.repositories.ticket_repository import TicketRepository
-from application.repositories.utils_repository import UtilsRepository
-from config import config
 
 # Standard output logging
 base_handler = StdoutHandler()

@@ -3,9 +3,8 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
-from shortuuid import uuid
-
 from application.repositories import email_repository as email_repository_module
+from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(email_repository_module, "uuid", return_value=uuid_)

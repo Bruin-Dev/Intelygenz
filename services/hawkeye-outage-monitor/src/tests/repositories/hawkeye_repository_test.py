@@ -3,13 +3,12 @@ from typing import Any
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from nats.aio.msg import Msg
-from shortuuid import uuid
-
 from application import nats_error_response
 from application.repositories import hawkeye_repository as hawkeye_repository_module
 from application.repositories.hawkeye_repository import HawkeyeRepository
 from config import testconfig
+from nats.aio.msg import Msg
+from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(hawkeye_repository_module, "uuid", return_value=uuid_)

@@ -1,11 +1,10 @@
 from unittest.mock import patch
 
 import pytest
-from shortuuid import uuid
-
 from application.repositories import notifications_repository as notifications_repository_module
 from application.repositories.utils_repository import to_json_bytes
 from config import testconfig
+from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(notifications_repository_module, "uuid", return_value=uuid_)

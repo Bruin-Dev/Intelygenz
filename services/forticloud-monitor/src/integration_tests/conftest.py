@@ -5,14 +5,13 @@ from pathlib import Path
 from typing import Dict, List
 
 import pytest
+from app import Application, start
+from config.config import Config
 from hypercorn import Config as HypercornConfig
 from hypercorn.asyncio import serve
 from nats.aio.client import Client
 from quart import Quart, request
 from redis.client import Redis
-
-from app import Application, start
-from config.config import Config
 
 #
 # Application setup

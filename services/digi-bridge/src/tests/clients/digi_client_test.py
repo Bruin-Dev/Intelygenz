@@ -4,10 +4,9 @@ from unittest.mock import AsyncMock, Mock, patch
 import humps
 import pytest
 from aiohttp import ClientSession
-from pytest import raises
-
 from application.clients.digi_client import DiGiClient
 from config import testconfig
+from pytest import raises
 
 
 @pytest.fixture(scope="function")

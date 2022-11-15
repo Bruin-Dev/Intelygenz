@@ -1,7 +1,6 @@
 from asyncio import Task
-from typing import Any, Dict
-
 from dataclasses import dataclass
+from typing import Any, Dict
 
 LOGGING_CONTEXT_ATTR = "logging_context"
 

@@ -4,10 +4,9 @@ import os
 from datetime import datetime
 from typing import Any, List
 
+from application import Troubles
 from pytz import timezone
 from shortuuid import uuid
-
-from application import Troubles
 
 logger = logging.getLogger(__name__)
 

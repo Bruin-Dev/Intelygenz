@@ -7,13 +7,12 @@ from collections import defaultdict
 from datetime import datetime
 from typing import Any
 
+from application import AffectingTroubles, ForwardQueues
+from application.repositories import nats_error_response
 from dateutil.parser import parse
 from pytz import timezone
 from shortuuid import uuid
 from tenacity import retry, stop_after_attempt, wait_fixed
-
-from application import AffectingTroubles, ForwardQueues
-from application.repositories import nats_error_response
 
 INTERFACE_NOTE_REGEX = re.compile(r"Interface: (?P<interface_name>[a-zA-Z0-9]+)")
 logger = logging.getLogger(__name__)

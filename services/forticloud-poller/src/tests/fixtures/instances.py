@@ -1,7 +1,6 @@
 from unittest.mock import Mock
 
 import pytest
-
 from application.actions.forticloud_poller import ForticloudPoller
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.redis_repository import RedisRepository

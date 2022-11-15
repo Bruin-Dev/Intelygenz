@@ -2,10 +2,9 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from shortuuid import uuid
-
 from application.actions import bandwidth_reports as bandwidth_reports_module
 from config import testconfig
+from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(bandwidth_reports_module, "uuid", return_value=uuid_)

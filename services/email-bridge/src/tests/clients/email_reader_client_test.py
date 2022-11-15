@@ -2,7 +2,6 @@ import imaplib
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-
 from application.clients import email_reader_client as email_reader_client_module
 from config import testconfig as config
 

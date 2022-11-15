@@ -7,13 +7,12 @@ from copy import deepcopy
 from datetime import datetime
 from typing import List, NoReturn
 
+from application.repositories import EdgeIdentifier
 from apscheduler.jobstores.base import ConflictingIdError
 from pytz import timezone
 from pyzipcode import ZipCodeDatabase
 from shortuuid import uuid
 from tenacity import retry, stop_after_delay, wait_exponential, wait_random
-
-from application.repositories import EdgeIdentifier
 
 logger = logging.getLogger(__name__)
 

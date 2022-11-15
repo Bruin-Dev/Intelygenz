@@ -5,7 +5,6 @@ from http import HTTPStatus
 from typing import Any
 
 import aiohttp
-
 from forticloud_client.assemblers.device_status_response_assembler import device_status_response_assembler
 from forticloud_client.exceptions.login_error import LoginError
 

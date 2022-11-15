@@ -4,10 +4,9 @@ from typing import Any
 from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
+from application.actions import forticloud_poller as forticloud_poller_module
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
-
-from application.actions import forticloud_poller as forticloud_poller_module
 
 
 def to_json_bytes(message: dict[str, Any]):

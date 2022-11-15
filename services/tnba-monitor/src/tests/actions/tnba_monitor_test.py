@@ -2,13 +2,12 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
-from apscheduler.util import undefined
-from dateutil.parser import parse
-from pytz import utc
-
 from application.actions import tnba_monitor as tnba_monitor_module
 from application.actions.tnba_monitor import TNBAMonitor
+from apscheduler.util import undefined
 from config import testconfig
+from dateutil.parser import parse
+from pytz import utc
 
 
 class TestTNBAMonitor:

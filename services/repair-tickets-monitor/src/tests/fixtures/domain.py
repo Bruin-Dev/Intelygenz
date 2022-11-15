@@ -2,10 +2,9 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Callable, List
 
-from pytest import fixture
-
 from application.domain.asset import AssetId
 from application.domain.email import Email, EmailTag
+from pytest import fixture
 
 
 @fixture(scope="function")

@@ -2,13 +2,12 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from nats.aio.msg import Msg
-from shortuuid import uuid
-
 from application import nats_error_response
 from application.repositories import hawkeye_repository as hawkeye_repository_module
 from application.repositories.utils_repository import to_json_bytes
 from config import testconfig
+from nats.aio.msg import Msg
+from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(hawkeye_repository_module, "uuid", return_value=uuid_)

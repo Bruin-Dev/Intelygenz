@@ -1,10 +1,10 @@
 import logging
+from dataclasses import dataclass
 
 from application.data.velocloud.network_gateway import NetworkGateway
 from application.handler import WillReturnJSON
 from application.scenario import Scenario
 from application.scenarios import timeout
-from dataclasses import dataclass
 
 log = logging.getLogger(__name__)
 

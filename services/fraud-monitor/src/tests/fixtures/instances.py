@@ -1,9 +1,6 @@
 from unittest.mock import Mock
 
 import pytest
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from framework.nats.client import Client as NatsClient
-
 from application.actions.fraud_monitoring import FraudMonitor
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.email_repository import EmailRepository
@@ -11,7 +8,9 @@ from application.repositories.metrics_repository import MetricsRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.ticket_repository import TicketRepository
 from application.repositories.utils_repository import UtilsRepository
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import testconfig
+from framework.nats.client import Client as NatsClient
 from tests.fixtures._helpers import wrap_all_methods
 
 

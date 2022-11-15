@@ -3,7 +3,6 @@ from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
 from aiohttp import ClientConnectionError
-
 from application.clients.hawkeye_client import HawkeyeClient
 from config import testconfig as config
 

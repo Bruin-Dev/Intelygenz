@@ -1,7 +1,6 @@
 from unittest.mock import Mock
 
 import pytest
-
 from application.repositories.new_emails_repository import NewEmailsRepository
 from config import testconfig
 

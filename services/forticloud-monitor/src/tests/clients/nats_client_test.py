@@ -1,10 +1,9 @@
 from unittest.mock import AsyncMock, Mock
 
 import pytest
+from application.clients import NatsClient, NatsConsumer, NatsSettings
 from framework.nats.client import Client as FrameworkClient
 from framework.nats.models import Subscription
-
-from application.clients import NatsClient, NatsConsumer, NatsSettings
 
 
 async def consumers_are_properly_subscribed_test(any_nats_client, any_subscription, any_consumer):

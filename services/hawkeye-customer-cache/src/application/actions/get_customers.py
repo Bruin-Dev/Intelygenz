@@ -1,11 +1,10 @@
 import json
 import logging
 
+from application.repositories.utils_repository import to_json_bytes
 from dateutil.parser import parse
 from nats.aio.msg import Msg
 from pytz import utc
-
-from application.repositories.utils_repository import to_json_bytes
 
 logger = logging.getLogger(__name__)
 

@@ -5,11 +5,10 @@ from unittest.mock import AsyncMock, Mock, call, patch
 import humps
 import pytest
 from aiohttp import ClientConnectionError, ClientSession
-from pytest import raises
-
 from application.clients.bruin_client import BruinClient
 from application.clients.bruin_session import BruinGetRequest, BruinResponse, BruinSession
 from config import testconfig as config
+from pytest import raises
 
 
 class TestBruinClient:

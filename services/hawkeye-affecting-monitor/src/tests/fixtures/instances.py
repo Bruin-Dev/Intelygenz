@@ -1,16 +1,15 @@
 from unittest.mock import Mock
 
 import pytest
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from framework.nats.client import Client as NatsClient
-
 from application.actions.affecting_monitoring import AffectingMonitor
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.customer_cache_repository import CustomerCacheRepository
 from application.repositories.hawkeye_repository import HawkeyeRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.utils_repository import UtilsRepository
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import testconfig as config
+from framework.nats.client import Client as NatsClient
 from tests.fixtures._helpers import wrap_all_methods
 
 

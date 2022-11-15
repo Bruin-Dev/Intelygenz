@@ -2,10 +2,9 @@ from http import HTTPStatus
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-from bruin_client import BruinClient, BruinRequest, BruinResponse
-
 from application.models.note import Note
 from application.repositories import BruinRepository, UnexpectedStatusError
+from bruin_client import BruinClient, BruinRequest, BruinResponse
 
 
 async def ticket_notes_are_properly_posted_test(any_bruin_repository, any_response):

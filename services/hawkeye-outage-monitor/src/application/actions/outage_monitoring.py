@@ -7,12 +7,11 @@ import time
 from datetime import datetime, timedelta
 from typing import Any, Callable, List, Optional
 
+from application import Outages
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from dateutil.parser import parse
 from pytz import timezone, utc
-
-from application import Outages
 
 TRIAGE_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nTriage \(Ixia\)")
 REOPEN_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nRe-opening")

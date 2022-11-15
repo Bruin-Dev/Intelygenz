@@ -2,7 +2,6 @@ from http import HTTPStatus
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-
 from forticloud_client.client import ForticloudClient
 
 

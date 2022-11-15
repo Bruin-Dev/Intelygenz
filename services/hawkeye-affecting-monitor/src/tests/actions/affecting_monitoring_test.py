@@ -2,15 +2,14 @@ from datetime import datetime
 from unittest.mock import Mock, call, patch
 
 import pytest
+from application.actions import affecting_monitoring as affecting_monitoring_module
+from application.actions.affecting_monitoring import AffectingMonitor
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
+from config import testconfig
 from dateutil.parser import parse
 from pytz import utc
 from shortuuid import uuid
-
-from application.actions import affecting_monitoring as affecting_monitoring_module
-from application.actions.affecting_monitoring import AffectingMonitor
-from config import testconfig
 
 uuid_ = uuid()
 uuid_mock = patch.object(affecting_monitoring_module, "uuid", return_value=uuid_)

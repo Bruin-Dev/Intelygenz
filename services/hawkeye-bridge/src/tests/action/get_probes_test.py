@@ -3,9 +3,8 @@ from typing import Any
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-from nats.aio.msg import Msg
-
 from application.actions.get_probes import GetProbes
+from nats.aio.msg import Msg
 
 
 def to_json_bytes(message: dict[str, Any]):

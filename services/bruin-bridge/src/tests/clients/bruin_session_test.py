@@ -7,9 +7,6 @@ import aiohttp
 import pytest as pytest
 from aiohttp import ClientSession
 from aiohttp.client_reqrep import ClientResponse
-from pydantic import Field
-from pytest import fixture, mark
-
 from application.clients.bruin_session import (
     COMMON_HEADERS,
     BruinGetRequest,
@@ -18,6 +15,8 @@ from application.clients.bruin_session import (
     BruinResponse,
     BruinSession,
 )
+from pydantic import Field
+from pytest import fixture, mark
 
 
 class TestBruinSession:

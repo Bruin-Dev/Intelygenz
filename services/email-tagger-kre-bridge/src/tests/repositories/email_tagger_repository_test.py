@@ -1,7 +1,6 @@
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-
 from application.repositories.email_tagger_repository import EmailTaggerRepository
 
 

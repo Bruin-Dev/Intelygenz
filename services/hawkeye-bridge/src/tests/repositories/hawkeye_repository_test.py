@@ -1,7 +1,6 @@
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-
 from application.repositories.hawkeye_repository import HawkeyeRepository
 from config import testconfig as config
 

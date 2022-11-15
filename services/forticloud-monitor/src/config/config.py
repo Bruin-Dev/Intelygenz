@@ -1,14 +1,13 @@
 from typing import Optional
 
+from application.clients import NatsSettings
+from application.consumers import ConsumerSettings
 from bruin_client import BruinCredentials
 from framework.logging.formatters import Papertrail as PapertrailFormatter
 from framework.logging.formatters import Standard as StandardFormatter
 from framework.logging.handlers import Papertrail as PapertrailHandler
 from framework.logging.handlers import Stdout as StdoutHandler
 from pydantic import BaseSettings, Field
-
-from application.clients import NatsSettings
-from application.consumers import ConsumerSettings
 
 
 class Config(BaseSettings):

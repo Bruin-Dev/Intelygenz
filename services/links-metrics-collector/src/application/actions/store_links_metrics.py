@@ -4,11 +4,10 @@ import logging
 from asyncio import BoundedSemaphore
 from datetime import datetime, timedelta
 
+from application.repositories.utils_repository import to_json_bytes
 from apscheduler.jobstores.base import ConflictingIdError
 from pytz import timezone
 from shortuuid import uuid
-
-from application.repositories.utils_repository import to_json_bytes
 
 logger = logging.getLogger(__name__)
 

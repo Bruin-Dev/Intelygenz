@@ -4,7 +4,13 @@ import sys
 from dataclasses import asdict
 
 import redis
+from application.actions.digi_reboot_report import DiGiRebootReport
+from application.repositories.bruin_repository import BruinRepository
+from application.repositories.digi_repository import DiGiRepository
+from application.repositories.email_repository import EmailRepository
+from application.repositories.notifications_repository import NotificationsRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from config import config
 from framework.http.server import Config as QuartConfig
 from framework.http.server import Server as QuartServer
 from framework.logging.formatters import Papertrail as PapertrailFormatter
@@ -16,13 +22,6 @@ from framework.nats.exceptions import NatsException
 from framework.nats.models import Connection
 from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
 from prometheus_client import start_http_server
-
-from application.actions.digi_reboot_report import DiGiRebootReport
-from application.repositories.bruin_repository import BruinRepository
-from application.repositories.digi_repository import DiGiRepository
-from application.repositories.email_repository import EmailRepository
-from application.repositories.notifications_repository import NotificationsRepository
-from config import config
 
 base_handler = StdoutHandler()
 base_handler.setFormatter(StandardFormatter(environment_name=config.ENVIRONMENT_NAME))

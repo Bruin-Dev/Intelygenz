@@ -3,11 +3,10 @@ from datetime import datetime
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from pytz import timezone
-
 from application.repositories import digi_repository as digi_repository_module
 from application.repositories.digi_repository import DiGiRepository
 from config import testconfig as config
+from pytz import timezone
 
 
 class TestDiGiRepository:

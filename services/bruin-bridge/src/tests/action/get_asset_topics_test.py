@@ -1,11 +1,10 @@
 from unittest.mock import ANY, AsyncMock, Mock
 
 import pytest
-from nats.aio.msg import Msg
-
 from application.actions.get_asset_topics import *
 from application.clients.bruin_session import BruinResponse
 from application.repositories.utils_repository import to_json_bytes
+from nats.aio.msg import Msg
 
 
 class TestGetAssetTopics:

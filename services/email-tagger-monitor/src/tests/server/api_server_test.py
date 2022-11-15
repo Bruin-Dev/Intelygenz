@@ -3,15 +3,14 @@ import hmac
 from http import HTTPStatus
 from unittest.mock import AsyncMock, Mock, patch
 
-import pytest
-from hypercorn.config import Config as HyperCornConfig
-from quart import Quart
-
 import application
 import application.server.api_server as api_server_module
+import pytest
 from application.repositories.utils_repository import UtilsRepository
 from application.server.api_server import APIServer
 from config import testconfig
+from hypercorn.config import Config as HyperCornConfig
+from quart import Quart
 
 
 class TestApiServer:

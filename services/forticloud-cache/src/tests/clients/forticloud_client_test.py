@@ -1,9 +1,8 @@
 from unittest.mock import AsyncMock
 
 import pytest
-from tenacity import stop_after_attempt
-
 from application.repositories.errors import UnexpectedStatusError
+from tenacity import stop_after_attempt
 
 correct_response = {
     "status": 200,

@@ -3,13 +3,12 @@ from http import HTTPStatus
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from apscheduler.jobstores.base import ConflictingIdError
-from apscheduler.util import undefined
-from shortuuid import uuid
-
 from application import Troubles
 from application.actions import monitoring as monitoring_module
+from apscheduler.jobstores.base import ConflictingIdError
+from apscheduler.util import undefined
 from config import testconfig
+from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(monitoring_module, "uuid", return_value=uuid_)

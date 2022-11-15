@@ -2,11 +2,10 @@ from http import HTTPStatus
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-from bruin_client import BruinClient, BruinRequest, BruinResponse
-from pydantic import ValidationError
-
 from application.models.ticket import CreatedTicket, TicketStatus
 from application.repositories import BruinRepository, UnexpectedResponseError, UnexpectedStatusError
+from bruin_client import BruinClient, BruinRequest, BruinResponse
+from pydantic import ValidationError
 
 
 async def repair_tickets_are_properly_posted_test(any_bruin_repository, any_response, any_device_id):

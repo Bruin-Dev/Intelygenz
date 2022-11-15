@@ -2,11 +2,10 @@ import json
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-from nats.aio.msg import Msg
-from shortuuid import uuid
-
 from application.actions.get_dri_parameters import GetDRIParameters
 from application.repositories.utils_repository import to_json_bytes
+from nats.aio.msg import Msg
+from shortuuid import uuid
 
 _uuid = uuid()
 

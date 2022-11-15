@@ -1,7 +1,7 @@
+from dataclasses import dataclass
 from typing import Optional, Type
 from unittest.mock import ANY, Mock
 
-from dataclasses import dataclass
 from framework.storage.redis_storage import RedisStorage
 from framework.testing import case, given
 from pydantic import BaseModel

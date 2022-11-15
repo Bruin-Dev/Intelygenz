@@ -1,9 +1,8 @@
 from dataclasses import dataclass
 
+from config import config
 from framework.nats.models import Subscription
 from framework.storage.task_dispatcher_client import TaskTypes
-
-from config import config
 
 
 @dataclass(kw_only=True)

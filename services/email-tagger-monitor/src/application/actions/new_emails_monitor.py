@@ -5,17 +5,16 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
-from apscheduler.jobstores.base import ConflictingIdError
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.util import undefined
-from framework.nats.client import Client
-from pytz import timezone
-
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.email_tagger_repository import EmailTaggerRepository
 from application.repositories.new_emails_repository import NewEmailsRepository
 from application.repositories.predicted_tags_repository import PredictedTagsRepository
+from apscheduler.jobstores.base import ConflictingIdError
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.util import undefined
+from framework.nats.client import Client
 from framework.storage.model import RepairParentEmailStorage
+from pytz import timezone
 
 log = logging.getLogger(__name__)
 

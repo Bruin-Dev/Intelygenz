@@ -1,4 +1,5 @@
 import logging
+from dataclasses import dataclass
 
 from application.data.email_tagger import prediction_response, save_metrics_response
 from application.scenario import get_current_scenario
@@ -9,7 +10,6 @@ from application.servers.grpc.email_tagger.email_tagger_pb2_grpc import (
     add_EntrypointServicer_to_server,
 )
 from application.servers.grpc.grpc import GrpcServer, GrpcService
-from dataclasses import dataclass
 from grpc import aio
 
 log = logging.getLogger(__name__)

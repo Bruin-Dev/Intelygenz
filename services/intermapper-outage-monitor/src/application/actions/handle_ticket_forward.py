@@ -1,9 +1,8 @@
 import json
 import logging
 
-from nats.aio.msg import Msg
-
 from application import ForwardQueues
+from nats.aio.msg import Msg
 
 logger = logging.getLogger(__name__)
 

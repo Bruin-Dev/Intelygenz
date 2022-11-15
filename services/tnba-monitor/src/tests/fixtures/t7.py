@@ -1,7 +1,6 @@
 from typing import List
 
 import pytest
-
 from tests.fixtures import _constants as constants
 
 

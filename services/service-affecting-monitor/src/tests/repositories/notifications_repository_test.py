@@ -3,11 +3,10 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
-from shortuuid import uuid
-
 from application import AffectingTroubles
 from application.repositories import notifications_repository as notifications_repository_module
 from config import testconfig
+from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(notifications_repository_module, "uuid", return_value=uuid_)

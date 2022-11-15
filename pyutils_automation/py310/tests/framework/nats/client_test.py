@@ -1,7 +1,7 @@
 import asyncio
+from dataclasses import asdict
 from unittest.mock import AsyncMock, Mock, patch
 
-from dataclasses import asdict
 from framework.nats.client import Client
 from framework.nats.client import Client_ as RealClient
 from framework.nats.exceptions import BadSubjectError, NatsConnectionError, ResponseTimeoutError

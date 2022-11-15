@@ -3,6 +3,11 @@ import logging
 import sys
 from dataclasses import asdict
 
+from application.actions.models import subscriptions
+from application.actions.report_incident import ReportIncident
+from application.clients.servicenow_client import ServiceNowClient
+from application.repositories.servicenow_repository import ServiceNowRepository
+from config import config
 from framework.http.server import Config as HealthConfig
 from framework.http.server import Server as HealthServer
 from framework.logging.formatters import Papertrail as PapertrailFormatter
@@ -15,12 +20,6 @@ from framework.nats.models import Connection
 from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
 from prometheus_client import start_http_server
 from redis import Redis
-
-from application.actions.models import subscriptions
-from application.actions.report_incident import ReportIncident
-from application.clients.servicenow_client import ServiceNowClient
-from application.repositories.servicenow_repository import ServiceNowRepository
-from config import config
 
 log = logging.getLogger("application")
 log.setLevel(logging.DEBUG)

@@ -3,13 +3,12 @@ import logging
 from dataclasses import dataclass
 from http import HTTPStatus
 
-from nats.aio.msg import Msg
-from pydantic import BaseModel, Field, ValidationError
-
 from application.clients.bruin_client import BruinClient
 from application.clients.bruin_session import BruinPostBody, BruinPostRequest
 from application.repositories.utils_repository import to_json_bytes
 from application.services.sentence_formatter import SentenceFormatter
+from nats.aio.msg import Msg
+from pydantic import BaseModel, Field, ValidationError
 
 logger = logging.getLogger(__name__)
 

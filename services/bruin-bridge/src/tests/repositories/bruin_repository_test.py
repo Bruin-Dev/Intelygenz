@@ -1,7 +1,6 @@
 from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
-
 from application.repositories import bruin_repository as bruin_repository_module
 from application.repositories.bruin_repository import BruinRepository
 from config import testconfig as config

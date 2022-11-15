@@ -3,10 +3,9 @@ from datetime import timezone as tz
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from shortuuid import uuid
-
 from application.actions import service_affecting_monitor_reports as service_affecting_monitor_module
 from config import testconfig
+from shortuuid import uuid
 
 uuid_ = uuid()
 uuid_mock = patch.object(service_affecting_monitor_module, "uuid", return_value=uuid_)

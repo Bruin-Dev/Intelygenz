@@ -2,11 +2,10 @@ import json
 import logging
 
 import grpc
-from google.protobuf.json_format import MessageToDict, Parse
-from grpc import aio as grpc_aio
-
 from application.clients.generated_grpc import public_input_pb2 as pb2
 from application.clients.generated_grpc import public_input_pb2_grpc as pb2_grpc
+from google.protobuf.json_format import MessageToDict, Parse
+from grpc import aio as grpc_aio
 
 logger = logging.getLogger(__name__)
 

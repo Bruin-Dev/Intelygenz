@@ -1,9 +1,6 @@
 from unittest.mock import Mock
 
 import pytest
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from framework.nats.client import Client as NatsClient
-
 from application.actions.tnba_monitor import TNBAMonitor
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.customer_cache_repository import CustomerCacheRepository
@@ -14,7 +11,9 @@ from application.repositories.ticket_repository import TicketRepository
 from application.repositories.trouble_repository import TroubleRepository
 from application.repositories.utils_repository import UtilsRepository
 from application.repositories.velocloud_repository import VelocloudRepository
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import testconfig as config
+from framework.nats.client import Client as NatsClient
 from tests.fixtures._helpers import wrap_all_methods
 
 

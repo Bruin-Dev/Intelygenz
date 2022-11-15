@@ -4,13 +4,12 @@ import time
 from datetime import datetime, timedelta
 from typing import List, Optional
 
+from application import AFFECTING_NOTE_REGEX, LINK_INFO_REGEX, REMINDER_NOTE_REGEX, AffectingTroubles, ForwardQueues
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from dateutil.parser import parse
 from framework.storage.task_dispatcher_client import TaskTypes
 from pytz import timezone
-
-from application import AFFECTING_NOTE_REGEX, LINK_INFO_REGEX, REMINDER_NOTE_REGEX, AffectingTroubles, ForwardQueues
 
 logger = logging.getLogger(__name__)
 

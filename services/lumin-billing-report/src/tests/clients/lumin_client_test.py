@@ -2,7 +2,6 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 from aioresponses import aioresponses
-
 from application.clients.lumin_client import LuminBillingClient, LuminClientError
 from config.testconfig import LUMIN_CONFIG as testconfig
 

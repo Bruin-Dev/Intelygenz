@@ -1,17 +1,16 @@
 from unittest.mock import Mock
 
 import pytest
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from framework.nats.client import Client as NatsClient
-from framework.storage.task_dispatcher_client import TaskDispatcherClient
-
 from application.actions.intermapper_monitoring import InterMapperMonitor
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.dri_repository import DRIRepository
 from application.repositories.email_repository import EmailRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.utils_repository import UtilsRepository
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import testconfig as config
+from framework.nats.client import Client as NatsClient
+from framework.storage.task_dispatcher_client import TaskDispatcherClient
 from tests.fixtures._helpers import wrap_all_methods
 
 

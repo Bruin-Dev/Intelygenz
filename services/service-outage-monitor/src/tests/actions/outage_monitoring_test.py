@@ -3,16 +3,15 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
+from application import REMINDER_NOTE_REGEX, REOPEN_NOTE_REGEX, ForwardQueues, Outages
+from application.actions import outage_monitoring as outage_monitoring_module
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
+from config import testconfig
 from dateutil.parser import parse
 from framework.storage.task_dispatcher_client import TaskTypes
 from pytz import utc
 from shortuuid import uuid
-
-from application import REMINDER_NOTE_REGEX, REOPEN_NOTE_REGEX, ForwardQueues, Outages
-from application.actions import outage_monitoring as outage_monitoring_module
-from config import testconfig
 from tests.fixtures._constants import CURRENT_DATETIME
 
 uuid_ = uuid()

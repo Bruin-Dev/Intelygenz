@@ -2,7 +2,6 @@ from datetime import datetime
 from unittest.mock import Mock, patch
 
 import pytest
-
 from bruin_client import BruinCredentials, BruinToken
 
 

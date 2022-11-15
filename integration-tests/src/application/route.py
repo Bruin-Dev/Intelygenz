@@ -1,9 +1,9 @@
 import logging
+from dataclasses import dataclass
 from typing import Any, Awaitable, Callable, Dict, Optional
 
 from application.conditions import path_was_reached, wait_for_path
 from application.handler import Handler, WillExecute, WillReturn, WillReturnNothing
-from dataclasses import dataclass
 from starlette.responses import JSONResponse
 from starlette.routing import Match
 from starlette.routing import Route as Matcher

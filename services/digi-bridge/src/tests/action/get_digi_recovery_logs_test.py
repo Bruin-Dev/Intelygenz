@@ -3,9 +3,8 @@ from unittest.mock import AsyncMock, Mock
 
 import humps
 import pytest
-from nats.aio.msg import Msg
-
 from application.actions.get_digi_recovery_logs import DiGiRecoveryLogs
+from nats.aio.msg import Msg
 
 
 class TestDiGiRecoveryLogs:

@@ -3,13 +3,12 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 from aioresponses import aioresponses
-from pytz import timezone
-
 from application.actions.billing_report import BillingReport
 from application.clients.lumin_client import LuminBillingClient
 from application.repositories.lumin_repository import LuminBillingRepository
 from application.repositories.template_renderer import TemplateRenderer
 from config import testconfig
+from pytz import timezone
 
 
 @pytest.fixture
