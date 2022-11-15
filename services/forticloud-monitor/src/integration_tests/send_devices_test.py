@@ -5,7 +5,7 @@ import pytest
 async def new_ap_ticket_test(nats_client, config, bruin_server, bruin_login, forticloud_server, forticloud_login):
     # given
     payload = b'{"serial_number":1,"network_id":2,"client_id":3}'
-    # a succesful login
+    # a successful login
     await bruin_login()
     await forticloud_login()
     # an offline AP
@@ -41,7 +41,7 @@ async def reopen_switch_ticket_test(
 ):
     # given
     payload = b'{"serial_number":1,"network_id":2,"client_id":3}'
-    # a succesful login
+    # a successful login
     await bruin_login()
     await forticloud_login()
     # an offline switch

@@ -4,7 +4,7 @@
 
 The messages bus is the central piece of communication between the services living in the Automation system.
 
-Services can talk to each other by publishing messages to subjects. When a service has interest on a particular
+Services can talk to each other by publishing messages to subject. When a service has interest on a particular
 subject, any messages published to that subject will be consumed by it.
 
 The bus provides two communication models for these services:
@@ -58,7 +58,7 @@ storing them to a temporary storage so consumers can restore the original messag
 * [request](../services/pyutils_automation/py310/src/framework/nats/client/request.md)
 
 ### Python 3.6 utils
-#### Connect to messages bus
+#### Connect to message bus
 * [connect](../services/pyutils_automation/py36/igz/packages/eventbus/eventbus/connect.md)
 
 #### Subscribe to subject

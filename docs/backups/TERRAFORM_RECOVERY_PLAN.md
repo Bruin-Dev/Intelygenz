@@ -4,15 +4,15 @@
 
 ## Description
 The project at this moment is deployed in AWS infrastructure with all [FEDRAMP](https://www.fedramp.gov/)
-requirements meet. To acompish this requirements the SSH keys generated to access the EKS cluster need a backup plan and a recovery plan.
+requirements meet. To accomplish these requirements the SSH keys generated to access the EKS cluster need a backup plan and a recovery plan.
 
 ![](../diagrams/workflows/backups/stages.drawio.svg)
 
-The project generates the next TF state files and it's executed in order:
+The project generates the next TF state files, and it's executed in order:
 - Global: Infrastructure that is global in AWS
 - Primary(regional): Infrastructure that is in the primary region.
-- secundary(regional): Infrastructure that is in the secundary region.
-- terciary(regional): Infrastructure that is in the terciary region.
+- secondary(regional): Infrastructure that is in the secondary region.
+- tertiary(regional): Infrastructure that is in the tertiary region.
 - Unions: Create links between regions of systems that must be connected(Like backups and replication)
 
 ![](../diagrams/workflows/backups/terraform.drawio.svg)

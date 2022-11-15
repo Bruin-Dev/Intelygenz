@@ -23,7 +23,7 @@ It's important to emphasize in the architecture of the system the use of [NATS](
 
 - NATS is used in the microservices system as a communication center for all of them.
 
-> NATS it's used in cluster mode to safistify more work to be done by it due to the high number of events in the system to be processed
+> NATS it's used in cluster mode to satisfy more work to be done by it due to the high number of events in the system to be processed
 
 #### Microservices communications
 

@@ -8,11 +8,11 @@ Naming conventions must follow the [Prometheus Best Practices for naming and uni
 
 ## List of metrics ##
 
-| Metric | Description |
-| ------ | ----------- |
-| [tasks_created](./tasks_created.md) | Task Creations |
-| [tasks_reopened](./tasks_reopened.md) | Task Re-Opens |
-| [tasks_forwarded](./tasks_forwarded.md) | Task Forwards |
-| [tasks_autoresolved](./tasks_autoresolved.md) | Task Auto-Resolves |
-| [velocloud_fetcher_to_kafka_messages_attempts](./velocloud_fetcher_to_kafka_messages_attempts.md) | VeloCloud fetcher attempts to kafka |
-| [velocloud_fetcher_to_kafka_messages_status](./velocloud_fetcher_to_kafka_messages_status.md) | VeloCloud fetcher errors when pushing to kafka |
+| Metric                                                                                            | Description                                    |
+|---------------------------------------------------------------------------------------------------|------------------------------------------------|
+| [tasks_created](./tasks_created.md)                                                               | Task Creations                                 |
+| [tasks_reopened](./tasks_reopened.md)                                                             | Task Re-Opens                                  |
+| [tasks_forwarded](./tasks_forwarded.md)                                                           | Task Forwards                                  |
+| [tasks_autoresolved](./tasks_autoresolved.md)                                                     | Task Auto-Resolves                             |
+| [velocloud_fetcher_to_kafka_messages_attempts](./velocloud_fetcher_to_kafka_messages_attempts.md) | VeloCloud fetcher attempts to kafka            |
+| [velocloud_fetcher_to_kafka_messages_status](./velocloud_fetcher_to_kafka_messages_status.md)     | VeloCloud fetcher errors when pushing to kafka |

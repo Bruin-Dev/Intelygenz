@@ -37,14 +37,14 @@
                         <div data-drawio-colors="color: rgb(0, 0, 0); " style="box-sizing: border-box; font-size: 0px; text-align: center;">
                             <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
                                 <font color="#000000">
-                                    Secundary: us-west-1
+                                    Secondary: us-west-1
                                 </font>
                             </div>
                         </div>
                     </div>
                 </foreignObject>
                 <text x="220" y="19" fill="rgb(0, 0, 0)" font-family="Helvetica" font-size="12px" text-anchor="middle">
-                    Secundary: us-west-1
+                    Secondary: us-west-1
                 </text>
             </switch>
         </g>

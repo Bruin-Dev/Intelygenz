@@ -17,11 +17,11 @@ OKTA and AWS SSO, because of that, groups and users are going to be synced if so
 - Configure IdP with Okta, [this is the guide](https://docs.aws.amazon.com/singlesignon/latest/userguide/okta-idp.html).
 - Create the following groups:
   - OKTA-IPA-FED-INT-PRIVILEGED: Internal users Federated privileged group on the federal account. Administration accounts.
-  - OKTA-IPA-FED-INT-NON-PRIVILEGED: Internal users Federated non privileged group on the federal account.
+  - OKTA-IPA-FED-INT-NON-PRIVILEGED: Internal users Federated non-privileged group on the federal account.
   - OKTA-IPA-COM-INT-PRIVILEGED: Internal users Commercial privileged group on the commercial account. Administration accounts.
   - OKTA-IPA-COM-INT-NON-PRIVILEGED: Internal users Federated privileged group on the commercial account. Administration accounts.
   - OKTA-IPA-FED-EXT-PRIVILEGED: External users Federated privileged group on the federal account. Administration accounts.
-  - OKTA-IPA-FED-EXT-NON-PRIVILEGED: External users Federated non privileged group on the federal account.
+  - OKTA-IPA-FED-EXT-NON-PRIVILEGED: External users Federated non-privileged group on the federal account.
   - OKTA-IPA-COM-EXT-PRIVILEGED: External users Commercial privileged group on the commercial account. Administration accounts.
   - OKTA-IPA-COM-EXT-NON-PRIVILEGED: External users Federated privileged group on the commercial account. Administration accounts.
 - Associate permissions to groups. [Guide](https://docs.aws.amazon.com/singlesignon/latest/userguide/iam-auth-access-overview.html)

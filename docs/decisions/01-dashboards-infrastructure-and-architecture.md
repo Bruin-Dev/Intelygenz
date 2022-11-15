@@ -18,8 +18,8 @@ Miro diagram of affected systems: https://miro.com/app/board/uXjVO6bg-zY=/
 
 **Justification:** 
 
-- Current dashboarding solution has several different interfaces, this is confusing for all kind of users.
-- Current stability of dashboarding is dependent in the stability of our K8s deployments, losing all visibility if anything goes wrong on K8s.
+- Current dashboard solution has several interfaces, this is confusing for all kind of users.
+- Current stability of dashboard is dependent in the stability of our K8s deployments, losing all visibility if anything goes wrong on K8s.
 - License limitations on InfluxDB OSS1 could become a problem.
 
 **Consequences:**

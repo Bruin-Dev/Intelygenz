@@ -17,10 +17,10 @@ The groups must have the next values:
 * Description: API Data highway access group.
 
 ## Create Application server
-1. To create an application destined for the API, we are gonna need to go to "Applications/Applications" and click on create
+1. To create an application destined for the API, we are going to need to go to "Applications/Applications" and click on create
 app integration
 ![](../img/manual_configurations/okta_jwt/add_api_application.png)
-2. A new form will show and we need to fill it with the next information:
+2. A new form will show, and we need to fill it with the next information:
    1. App integration name: IGZ-DATA-HIGHWAY-API
    2. Grant type: Select "Authorization Code" and "Resource Owner Password"
    3. Controlled access: Select "Limit access to selected groups"

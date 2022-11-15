@@ -55,7 +55,7 @@ services:
       VELOCLOUD_CREDENTIALS: integration-tests:8004+username+password
 
   # Disabled services with no integration tests yet
-  # Integration tests whould be run with all the services enabled (and did in the past).
+  # Integration tests would be run with all the services enabled (and did in the past).
   # Some recent change has made the existing tests to fail and to diagnose what is exactly the problem is too complex.
   base-microservice:
     entrypoint: ["echo", "Service is disabled"]

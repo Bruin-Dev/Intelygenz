@@ -1783,7 +1783,7 @@
           "noteId": &lt;id&gt;,
           "fileName": &lt;file name&gt;,
           "filePath": &lt;file path&gt;,
-          "fileExtension": &lt;file extention&gt;,
+          "fileExtension": &lt;file extension&gt;,
           "fileSize": &lt;file size&gt;,
           "createdAt": &lt;created date&gt;,
           "createdBy": &lt;creator&gt;
@@ -1856,7 +1856,7 @@
           "noteId": &lt;id&gt;,
           "fileName": &lt;file name&gt;,
           "filePath": &lt;file path&gt;,
-          "fileExtension": &lt;file extention&gt;,
+          "fileExtension": &lt;file extension&gt;,
           "fileSize": &lt;file size&gt;,
           "createdAt": &lt;created date&gt;,
           "createdBy": &lt;creator&gt;

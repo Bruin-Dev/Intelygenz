@@ -18,7 +18,7 @@ _Try converting message body.client_id into an int_
 
 _Getting `service_number` from message body_
 
-* If message body doesnt have a value for `service_number`:
+* If message body does not have a value for `service_number`:
   ```python
   logger.error(f"body.service_number can't be empty")
   ```

@@ -66,7 +66,7 @@ class RedisStorage(Generic[T], ABC):
         Stores a record.
         :param id: a record ID
         :param data: the record data
-        :param ttl_seconds: record time to live in secods
+        :param ttl_seconds: record time to live in seconds
         :return: True if the record was successfully stored, False otherwise
         """
         log.debug(f"set(id={id}, data={data}, ttl_seconds={ttl_seconds})")

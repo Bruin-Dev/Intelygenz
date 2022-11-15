@@ -4,17 +4,17 @@
 - [UNZIP tool](https://speedysense.com/zip-and-unzip-command-in-ubuntu-terminal/)
 ## Description
 The project at this moment is deployed in AWS infrastructure with all [FEDRAMP](https://www.fedramp.gov/)
-requirements meet. To acompish this requirements the ECR repository must have a backup plan in case of losing the containers.
+requirements meet. To accomplish these requirements the ECR repository must have a backup plan in case of losing the containers.
 
 ![](../diagrams/workflows/backups/ecr.drawio.svg)
 
 ## Backup Plan
-When the pipeline runs, the projects copy the docker containers from the comercial environment with the keys to validate that the images are delived 
-by the intelygenz team. The Pipeline will push the containers to the 3 regions(Primary, Secundary and Terciary) and create a ZIP file with the next
+When the pipeline runs, the projects copy the docker containers from the commercial environment with the keys to validate that the images are delivered 
+by the Intelygenz team. The Pipeline will push the containers to the 3 regions(Primary, Secondary and Tertiary) and create a ZIP file with the next
 format <service_name>/<date>-<service_version>-<global_version>.tar. The s3 bucket name that contains the containers is "fedramp-ecr-backups"
 
 ## Recovery Plan
-Before start, you must be loged on the AWS docker login.
+Before start, you must be logged on the AWS docker login.
 
 To recovery a ECR container in case is lost/deleted follow the next steps:
 - Identify the Activated region and go to s3 and find "fedramp-ecr-backups" bucket.

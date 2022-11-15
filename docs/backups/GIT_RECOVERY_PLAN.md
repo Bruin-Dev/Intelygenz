@@ -4,7 +4,7 @@
 - [UNZIP tool](https://speedysense.com/zip-and-unzip-command-in-ubuntu-terminal/)
 ## Description
 The project at this moment is deployed in AWS infrastructure with all [FEDRAMP](https://www.fedramp.gov/)
-requirements meet. To acompish this requirements the GIT repository must have a backup in case of losing the code in the repositories.
+requirements meet. To accomplish these requirements the GIT repository must have a backup in case of losing the code in the repositories.
 
 ![](../diagrams/workflows/backups/git.drawio.svg)
 
@@ -24,7 +24,7 @@ To recovery a git repository in case is lost/deleted follow the next steps:
     - git add .
     - git commit -m "Backup recovery"
     - git push -f origin main
-- if the repository does not exists:
+- if the repository does not exist:
     - create a repository using the AWS UI called "automation-fedramp".
     - unzip <version>-<date>.zip -d <version>-<date>
     - mv <GIT_REPOSITORY>/.git <version>-<date> 

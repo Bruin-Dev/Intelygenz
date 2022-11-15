@@ -9,7 +9,7 @@
 
 # 2. Rules
 * This is the Main source of truth.
-* Docs must be in the docs folder.
+* Docs must be in the docs' folder.
 * Always make atomic commits.
 * All the documentation must be reviewed and approved.
 * Before start the code of a new metric, document it, and work on it only after approved by another team member.

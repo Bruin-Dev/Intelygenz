@@ -103,7 +103,7 @@
       </bpmn:conditionalEventDefinition>
     </bpmn:intermediateCatchEvent>
     <bpmn:sequenceFlow id="Flow_1an1vx4" name="VCO 4" sourceRef="Gateway_1rvpcen" targetRef="Event_0km69pl" />
-    <bpmn:sequenceFlow id="Flow_166xq1t" name="Link name doesn&#39;t inclued BYOB or is an IPA address." sourceRef="Gateway_0ly7icf" targetRef="Event_0km69pl" />
+    <bpmn:sequenceFlow id="Flow_166xq1t" name="Link name doesn&#39;t include BYOB or is an IPA address." sourceRef="Gateway_0ly7icf" targetRef="Event_0km69pl" />
     <bpmn:task id="Activity_057gs1z" name="Auto-resolve task.">
       <bpmn:incoming>Flow_02sp3xh</bpmn:incoming>
       <bpmn:outgoing>Flow_153sp3x</bpmn:outgoing>

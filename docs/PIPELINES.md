@@ -8,8 +8,8 @@ In this project is implemented Software delivery with total automation, thus avo
 
 Human error can and does occur when carrying out these boring and repetitive tasks manually and ultimately does affect the ability to meet deliverables.
 
-All of the automation is made with Gitlab CI technology, taking advantage of all the tools that Gitlab has.
-We separate the automatation in two parts, [continuous integration](#continuous-integration-ci) and [continuous delivery](#continuous-delivery-cd), that are explained in the next sections.
+All the automation is made with Gitlab CI technology, taking advantage of all the tools that Gitlab has.
+We separate the automation in two parts, [continuous integration](#continuous-integration-ci) and [continuous delivery](#continuous-delivery-cd), that are explained in the next sections.
 
 To improve the speed and optimization of the pipelines, **only the jobs and stages will be executed on those modules that change in each commit**.
 
@@ -98,7 +98,7 @@ In this stage is also checked whether there are enough free resources in ECS to 
 In this stage will be the following jobs:
 * `deploy-basic-infra-kre-dev` for ephemeral environments and `deploy-basic-infra-kre-production` for the production environment, **these are executed optionally manually**.
 
-  This job is responsible of checking and creation, if necessary, of the EKS cluster used by KRE in each environment and all the necessary resources related (RBAC configuration, helm charts needed for the KRE runtimes, etc)
+  This job is responsible for checking and creation, if necessary, of the EKS cluster used by KRE in each environment and all the necessary resources related (RBAC configuration, helm charts needed for the KRE runtimes, etc)
 
   The process followed in this job is as follows:
 
@@ -143,7 +143,7 @@ In this stage will be the following jobs:
         
         2. **cert-mananger**, using the helm chart from [jetstack repository](https://charts.jetstack.io).
 
-            This component automate the management lifecycle of all required certificates used by the KRE component in each environment.
+            This component automates the management lifecycle of all required certificates used by the KRE component in each environment.
 
         3. **nginx ingress controller**, using the helm chart from [ingress-nginx repository](https://kubernetes.github.io/ingress-nginx).
 

@@ -15,7 +15,7 @@ To init the project and be able to start using these CI/CD tool we need to follo
 - In terraform we use a feature called `workspace` as a representation of the `environment`.
 - The actual environments are: `pro` and `mirror`, but could be more in the future.
 - Any change must be applied manually in all regions and pushed to the repository by the authorized operator.
-- The definition of this resources are located in a separated repository of Automation Engine one.
+- The definition of these resources are located in a separated repository of Automation Engine one.
 - A manual git repository was already created that contain the terraform definition of the CI/CD tool in the master branch.
 - This manual repository has subsequently created a job in the pipelines (automated) that performs backups together with the rest of the infrastructure.
 
@@ -31,7 +31,7 @@ To init the project and be able to start using these CI/CD tool we need to follo
   ```
   cd fedramp-pipelines/
   ```
-- Initializate terraformn:
+- Initialize terraformn:
   ```
   terraform init
   ```
@@ -39,7 +39,7 @@ To init the project and be able to start using these CI/CD tool we need to follo
   ```
   terraform workspace select <environemt>
   ```
-- Verify changes and apply (if theres a problem in the plan step, just fix an try again):
+- Verify changes and apply (if there's a problem in the plan step, just fix and try again):
   ```
   terraform plan
   terraform apply
@@ -52,7 +52,7 @@ To init the project and be able to start using these CI/CD tool we need to follo
   ```
 
 ## Application results
-Afther terraform apply of all environments, the pipelines will be configured in each separated region and will be prepared to manage
+After terraform apply of all environments, the pipelines will be configured in each separated region and will be prepared to manage
 Automation Engine application life cycle.
 This terraform project will create the follow resources in each environment:
 
