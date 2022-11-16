@@ -663,21 +663,37 @@ class BruinRepository:
 
         if self._config.CURRENT_ENVIRONMENT == "production":
             if len(ticket_note) < 1500:
+                logger.info(
+                    f"Note for ticket {ticket_id} and edge {service_number} is {len(ticket_note)} characters large. "
+                    f"There's no need to split it."
+                )
 
                 append_note_response = await self.append_note_to_ticket(
                     ticket_id, ticket_note, service_numbers=[service_number]
                 )
 
                 if append_note_response["status"] == 503:
+                    logger.error(
+                        f"Request to append Triage note to ticket {ticket_id} for edge {service_number} timed out"
+                    )
                     return 503
 
                 if append_note_response["status"] not in range(200, 300):
+                    logger.error(
+                        f"Error while appending Triage note to ticket {ticket_id} for edge {service_number}: "
+                        f"{append_note_response}"
+                    )
                     return None
             else:
+                total_notes = math.ceil(len(ticket_note) / 1000)
+                logger.warning(
+                    f"Note for ticket {ticket_id} and edge {service_number} is {len(ticket_note)} characters large. "
+                    f"Splitting it to {total_notes} notes..."
+                )
+
                 lines = ticket_note.split("\n")
                 accumulator = ""
                 counter = 1
-                total_notes = math.ceil(len(ticket_note) / 1000)
 
                 for line in lines:
                     accumulator = accumulator + line + "\n"
@@ -686,16 +702,35 @@ class BruinRepository:
 
                         note_page = f"Triage note: {counter}/{total_notes}"
                         accumulator = accumulator + note_page
+
+                        logger.info(
+                            f"Appending Triage note ({counter}/{total_notes}) to ticket {ticket_id} for "
+                            f"edge {service_number}..."
+                        )
                         append_note_response = await self.append_note_to_ticket(
                             ticket_id, accumulator, service_numbers=[service_number]
                         )
                         if append_note_response["status"] == 503:
+                            logger.error(
+                                f"Request to append Triage note ({counter}/{total_notes}) to ticket {ticket_id} "
+                                f"for edge {service_number} timed out"
+                            )
                             return 503
 
                         if append_note_response["status"] not in range(200, 300):
+                            logger.error(
+                                f"Error while appending Triage note ({counter}/{total_notes}) to ticket {ticket_id} "
+                                f"for edge {service_number}: {append_note_response}"
+                            )
                             return None
+
+                        logger.info(
+                            f"Triage note ({counter}/{total_notes}) appended to ticket {ticket_id} for edge "
+                            f"{service_number}!"
+                        )
+
                         counter = counter + 1
-                        accumulator = "#*MetTel's IPA*#\n" "Triage (VeloCloud)\n"
+                        accumulator = "#*MetTel's IPA*#\nTriage (VeloCloud)\n"
             return 200
         else:
             triage_message = (

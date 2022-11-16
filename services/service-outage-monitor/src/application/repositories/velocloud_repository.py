@@ -167,7 +167,7 @@ class VelocloudRepository:
         for host in self._config.TRIAGE_CONFIG["velo_hosts"]:
             response = await self.get_links_with_edge_info(velocloud_host=host)
             if response["status"] not in range(200, 300):
-                logger.info(f"Error: could not retrieve edges links by host: {host}")
+                logger.error(f"Error while retrieving links with edge info for VeloCloud host {host}: {response}")
                 continue
             all_edges += response["body"]
         links_grouped_by_edge = self.group_links_by_edge(all_edges)
@@ -179,7 +179,7 @@ class VelocloudRepository:
         for host in self._config.TRIAGE_CONFIG["velo_hosts"]:
             response = await self.get_network_enterprises(velocloud_host=host)
             if response["status"] not in range(200, 300):
-                logger.error(f"Could not retrieve network enterprises for triage using host {host}")
+                logger.error(f"Error while retrieving network enterprises for VeloCloud host {host}: {response}")
                 continue
 
             edges += response["body"]
@@ -208,14 +208,14 @@ class VelocloudRepository:
             serial_number = link["edgeSerialNumber"]
 
             if edge_state is None:
-                logger.info(
+                logger.warning(
                     f"Edge in host {velocloud_host} and enterprise {enterprise_name} (ID: {enterprise_id}) "
                     f"has an invalid state. Skipping..."
                 )
                 continue
 
             if edge_state == "NEVER_ACTIVATED":
-                logger.info(
+                logger.warning(
                     f"Edge {edge_name} in host {velocloud_host} and enterprise {enterprise_name} (ID: {enterprise_id}) "
                     f"has never been activated. Skipping..."
                 )

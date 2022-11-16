@@ -8664,7 +8664,7 @@ class TestServiceOutageMonitor:
             ticket_id, cached_edge, edge_status, outage_type, is_reopen_note=True
         )
         outage_monitor._notifications_repository.send_slack_message.assert_called_once_with(
-            f"Detail {detail_2_id} of outage ticket {ticket_id} reopened: https://app.bruin.com/t/{ticket_id}"
+            f"Task for edge {serial_number_1} of ticket {ticket_id} reopened: https://app.bruin.com/t/{ticket_id}"
         )
 
     def is_detail_resolved_test(self, outage_monitor):
@@ -10573,7 +10573,7 @@ class TestServiceOutageMonitor:
         }
         change_detail_work_queue_response = {"body": "Success", "status": 200}
         slack_message = (
-            f"Detail of ticket {ticket_id} related to serial {edge_serial} was successfully forwarded "
+            f"Task of ticket {ticket_id} related to serial {edge_serial} was successfully forwarded "
             f"to ASR Investigate queue!"
         )
         outage_monitor._outage_repository.is_faulty_edge = Mock(return_value=False)

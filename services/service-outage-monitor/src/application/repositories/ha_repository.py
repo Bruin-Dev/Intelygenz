@@ -48,6 +48,7 @@ class HaRepository:
 
             ha_state = edge_ha_info["haState"]
             if self.is_raw_ha_state_under_monitoring(ha_state):
+                logger.info(f"HA partner for {serial_number} is in state {ha_state}. Mapping HA info to edge...")
                 result.append(
                     {
                         **edge_with_links,
@@ -56,7 +57,7 @@ class HaRepository:
                     }
                 )
             else:
-                logger.info(
+                logger.warning(
                     f"HA partner for {serial_number} is in state {ha_state}, so HA will be considered as disabled for "
                     "this edge"
                 )

@@ -24,12 +24,15 @@ class DiGiRepository:
         }
 
         try:
-            logger.info(f"Rebooting DiGi link of ticket {ticket_id} from Bruin...")
+            logger.info(f"Rebooting DiGi link from edge {serial_number} (ticket {ticket_id})...")
             response = await self._nats_client.request("digi.reboot", to_json_bytes(request), timeout=150)
             response = json.loads(response.data)
-            logger.info(f"Got details of ticket {ticket_id} from Bruin!")
+            logger.info(f"DiGi link from {serial_number} (ticket {ticket_id}) rebooted!")
         except Exception as e:
-            err_msg = f"An error occurred when attempting a DiGi reboot for ticket {ticket_id} -> {e}"
+            err_msg = (
+                f"An error occurred when attempting a DiGi reboot for link from edge {serial_number} "
+                f"(ticket {ticket_id}) -> {e}"
+            )
             response = nats_error_response
         else:
             response_body = response["body"]
