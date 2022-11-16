@@ -1,0 +1,25 @@
+.packer_eks_build_image: &packer_eks_build_image
+  stage: packer
+  image:
+    name: hashicorp/packer:latest
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  before_script:
+    - source ci-utils/environments/environment_assign.sh
+  script:
+    - cd ci-utils/ansible-packer
+    - packer build packer.pkr.hcl
+
+.packer_app_build_image: &packer_app_build_image
+  stage: packer
+  image:
+    name: hashicorp/packer:latest
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  before_script:
+    - source ci-utils/environments/environment_assign.sh
+  script:
+    - cd ci-utils/ansible-packer
+    - packer build packer.pkr.hcl

@@ -1,0 +1,7 @@
+
+packer-reloader:
+  extends: .packer_eks_build_image 
+  variables:
+    ECR_REPOSITORY_NAME: reloader
+    PACKER_DIR_MODULE: "infra-as-code/containers/reloader"
+    ECR_REPOSITORY_TAG: "0.0.103"
