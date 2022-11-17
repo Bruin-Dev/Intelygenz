@@ -159,12 +159,10 @@ build {
 
   provisioner "file" {
     destination = "/app/"
-    source      = "${var.PACKER_DIR_MODULE}"
-  }
-
-  provisioner "file" {
-    destination = "/app/"
-    source      = "./"
+    sources      = [
+      "${var.PACKER_DIR_MODULE}",
+      "./"
+    ]
   }
 
   provisioner "shell" {
