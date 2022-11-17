@@ -68,6 +68,7 @@ include:
   - local: 'gitlab-ci/**/*.yml'
   # Gitlab-CI jobs
   - local: 'infra-as-code/**/.gitlab-ci.yml'
+  - local: 'infra-as-code/containers/**/.gitlab-ci.yml'
   - local: 'services/**/.gitlab-ci.yml'
   - local: 'helm/.gitlab-ci.yml'
   - local: 'docs/.gitlab-ci.yml'

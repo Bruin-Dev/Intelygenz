@@ -1,6 +1,7 @@
 
 packer-reloader:
-  extends: .packer_eks_build_image 
+  extends: .packer_eks_build_image
+  stage: packerf
   variables:
     ECR_REPOSITORY_NAME: reloader
     PACKER_DIR_MODULE: "infra-as-code/containers/reloader"
