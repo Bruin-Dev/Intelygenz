@@ -162,6 +162,11 @@ build {
     source      = "${var.PACKER_DIR_MODULE}"
   }
 
+  provisioner "file" {
+    destination = "/app/"
+    source      = "./"
+  }
+
   provisioner "shell" {
     environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
     inline = [
