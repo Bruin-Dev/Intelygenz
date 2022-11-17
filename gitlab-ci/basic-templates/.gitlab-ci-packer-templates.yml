@@ -1,5 +1,5 @@
 .packer_eks_build_image: &packer_eks_build_image
-  stage: packer
+  stage: k8s_packer
   image:
     name: hashicorp/packer:latest
     entrypoint:
