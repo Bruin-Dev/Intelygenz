@@ -174,7 +174,7 @@ build {
   }
 
   provisioner "shell" {
-    environmednt_vars = ["DEBIAN_FRONTEND=noninteractive"]
+    environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
     inline = [
       "echo '** Rebooting VM so the patched kernel aws-fips runs **'",
       "sudo reboot",
