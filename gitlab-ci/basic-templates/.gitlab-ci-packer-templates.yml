@@ -8,7 +8,7 @@
   before_script:
     - source ci-utils/environments/environment_assign.sh
   script:
-    - cd ci-utils/ansible-packer
+    - cd ci-utils/packer
     - packer build packer.pkr.hcl
 
 .packer_app_build_image: &packer_app_build_image
@@ -21,5 +21,5 @@
   before_script:
     - source ci-utils/environments/environment_assign.sh
   script:
-    - cd ci-utils/ansible-packer
+    - cd ci-utils/packer
     - packer build packer.pkr.hcl
