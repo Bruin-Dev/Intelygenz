@@ -97,6 +97,11 @@ variable "ECR_REPOSITORY_TAG" {
   default = env("ECR_REPOSITORY_TAG")
 }
 
+variable "PACKER_DIR_MODULE" {
+  type    = string
+  default = env("PACKER_DIR_MODULE")
+}
+
 data "amazon-ami" "fedramp" {
   filters = {
     name                = "${var.source_ami_filter_name}"
@@ -169,7 +174,7 @@ build {
   }
 
   provisioner "shell" {
-    environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
+    environmednt_vars = ["DEBIAN_FRONTEND=noninteractive"]
     inline = [
       "echo '** Rebooting VM so the patched kernel aws-fips runs **'",
       "sudo reboot",
