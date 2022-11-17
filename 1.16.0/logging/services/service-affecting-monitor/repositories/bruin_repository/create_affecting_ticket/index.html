@@ -61,7 +61,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#create-affecting-ticket-documentation" class="md-skip">
+        <a href="#create-service-affecting-ticket" class="md-skip">
           Skip to content
         </a>
       
@@ -769,8 +769,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#create-affecting-ticket-documentation" class="md-nav__link">
-    Create Affecting ticket Documentation
+  <a href="#create-service-affecting-ticket" class="md-nav__link">
+    Create Service Affecting ticket
   </a>
   
 </li>
@@ -791,33 +791,36 @@
 
   <h1>Create affecting ticket</h1>
 
-<h2 id="create-affecting-ticket-documentation">Create Affecting ticket Documentation</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                f&quot;Creating affecting ticket for serial {service_number} belonging to client {client_id}...&quot;
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>            )
+<h2 id="create-service-affecting-ticket">Create Service Affecting ticket</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating affecting ticket for serial </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2"> belonging to client </span><span class="si">{</span><span class="n">client_id</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
 </code></pre></div>
 <ul>
 <li>
-<p>if <code>Exception</code>
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.error(
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>              f&quot;An error occurred while creating affecting ticket for client id {client_id} and serial &quot;
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>              f&quot;{service_number} -&gt; {e}&quot;
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>          )
-</code></pre></div></p>
+<p>If there's an error while asking for the data to the <code>bruin-bridge</code>:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">err_msg</span> <span class="o">=</span> <span class="p">(</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="sa">f</span><span class="s2">&quot;An error occurred while creating affecting ticket for client id </span><span class="si">{</span><span class="n">client_id</span><span class="si">}</span><span class="s2"> and serial &quot;</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="p">)</span> 
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="p">[</span><span class="o">...</span><span class="p">]</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+</code></pre></div>
+  END</p>
 </li>
 <li>
-<p>if response_status in range(200, 300)
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>                  f&quot;Affecting ticket for client {client_id} and serial {service_number} created successfully!&quot;
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>              )
+<p>If response status for create Service Affecting ticket is not ok:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">err_msg</span> <span class="o">=</span> <span class="p">(</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="sa">f</span><span class="s2">&quot;Error while opening affecting ticket for client </span><span class="si">{</span><span class="n">client_id</span><span class="si">}</span><span class="s2"> and serial </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2"> in &quot;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">ENVIRONMENT_NAME</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> environment: &quot;</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="sa">f</span><span class="s2">&quot;Error </span><span class="si">{</span><span class="n">response_status</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">response_body</span><span class="si">}</span><span class="s2">&quot;</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">)</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="p">[</span><span class="o">...</span><span class="p">]</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
 </code></pre></div></p>
 </li>
-<li>else
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.error(
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>                  f&quot;Error while opening affecting ticket for client {client_id} and serial {service_number} in &quot;
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>                  f&quot;{self._config.ENVIRONMENT_NAME.upper()} environment: &quot;
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>                  f&quot;Error {response_status} - {response_body}&quot;
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>              )
+<li>Otherwise:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="sa">f</span><span class="s2">&quot;Affecting ticket for client </span><span class="si">{</span><span class="n">client_id</span><span class="si">}</span><span class="s2"> and serial </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2"> created successfully!&quot;</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="p">)</span>
 </code></pre></div></li>
 </ul>
 

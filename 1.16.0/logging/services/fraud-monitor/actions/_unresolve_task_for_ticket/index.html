@@ -792,25 +792,29 @@
   <h1> unresolve task for ticket</h1>
 
 <h2 id="unresolve-task-for-ticket">Unresolve task for ticket</h2>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(f&quot;Unresolving task related to {service_number} of Fraud ticket {ticket_id}...&quot;)
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unresolving task related to </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2"> of Fraud ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
 </code></pre></div>
 * If environment not PRODUCTION:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>              f&quot;Task related to {service_number} of Fraud ticket {ticket_id} will not be unresolved &quot;
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>              f&quot;since the current environment is not production&quot;
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>          )
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="sa">f</span><span class="s2">&quot;Task related to </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2"> of Fraud ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> will not be unresolved &quot;</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="sa">f</span><span class="s2">&quot;since the current environment is not production&quot;</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="p">)</span>
 </code></pre></div>
 * <a href="../../repositories/bruin_repository/open_ticket/">open_ticket</a>
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.warning(f&quot;Bad status calling to open ticket with ticket id: {ticket_id}. &quot;
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>                               f&quot;Unresolve task for ticket return FALSE&quot;)
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="sa">f</span><span class="s2">&quot;Bad status calling to open ticket with ticket id: </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">. &quot;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="sa">f</span><span class="s2">&quot;Unresolve task for ticket return FALSE&quot;</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.info(f&quot;Task related to {service_number} of Fraud ticket {ticket_id} was successfully unresolved!&quot;)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Task related to </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2"> of Fraud ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> was successfully unresolved!&quot;</span><span class="p">)</span>
 </code></pre></div>
 * <a href="../../repositories/bruin_repository/append_note_to_ticket/">append_note_to_ticket</a>
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.warning(f&quot;Bad status calling to append note to ticket id: {ticket_id} and service number:&quot;
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>                               f&quot;{service_number}. Unresolve task for ticket return FALSE&quot;)
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="sa">f</span><span class="s2">&quot;Bad status calling to append note to ticket id: </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> and service number:&quot;</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2">. Unresolve task for ticket return FALSE&quot;</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>self._logger.info(f&quot;Fraud note was successfully appended to ticket {ticket_id}!&quot;)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fraud note was successfully appended to ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
 </code></pre></div></p>
 
               

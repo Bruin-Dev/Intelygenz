@@ -792,25 +792,27 @@
   <h1> append note to ticket</h1>
 
 <h2 id="append-note-to-ticket">Append note to ticket</h2>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(f&quot;Appending Fraud note to ticket {ticket_id}&quot;)
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Appending Fraud note to ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
 * If note existe:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>              f&quot;No Fraud trouble note will be appended to ticket {ticket_id}. &quot;
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>              f&quot;A note for this email was already appended to the ticket after the latest re-open or ticket creation.&quot;
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>          )
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="sa">f</span><span class="s2">&quot;No Fraud trouble note will be appended to ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">. &quot;</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="sa">f</span><span class="s2">&quot;A note for this email was already appended to the ticket after the latest re-open or ticket creation.&quot;</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="p">)</span>
 </code></pre></div>
 * If not PRODUCTION:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>              f&quot;No Fraud note will be appended to ticket {ticket_id} since the current environment is not production&quot;
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>          )
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="sa">f</span><span class="s2">&quot;No Fraud note will be appended to ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> since the current environment is not production&quot;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="p">)</span>
 </code></pre></div>
 * <a href="../../repositories/bruin_repository/append_note_to_ticket/">append_note_to_ticket</a>
 * If status is not Ok:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.warning(f&quot;Bad status calling to append note to ticket id: {ticket_id}. &quot;
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>                               f&quot;Skipping append note ...&quot;)
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="sa">f</span><span class="s2">&quot;Bad status calling to append note to ticket id: </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">. &quot;</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="sa">f</span><span class="s2">&quot;Skipping append note ...&quot;</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.info(f&quot;Fraud note was successfully appended to ticket {ticket_id}!&quot;)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fraud note was successfully appended to ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
 </code></pre></div></p>
 
               

@@ -792,28 +792,32 @@
   <h1> create fraud ticket</h1>
 
 <h2 id="create-fraud-ticket">Create fraud ticket</h2>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(f&quot;Creating Fraud ticket for client {client_id} and service number {service_number}&quot;)
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating Fraud ticket for client </span><span class="si">{</span><span class="n">client_id</span><span class="si">}</span><span class="s2"> and service number </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
 * If not contacts:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.warning(f&quot;Not found contacts to create the fraud ticket&quot;)
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not found contacts to create the fraud ticket&quot;</span><span class="p">)</span>
 </code></pre></div>
 * If environment is not PRODUCTION:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(f&quot;No Fraud ticket will be created since the current environment is not production&quot;)
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No Fraud ticket will be created since the current environment is not production&quot;</span><span class="p">)</span>
 </code></pre></div>
 * <a href="../../repositories/bruin_repository/create_fraud_ticket/">create_fraud_ticket</a>
 * If status is not Ok:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.warning(f&quot;Bad status calling to create fraud ticket with client id: {client_id} and&quot;
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>                               f&quot;service number: {service_number}. Create fraud ticket return FALSE ...&quot;)
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="sa">f</span><span class="s2">&quot;Bad status calling to create fraud ticket with client id: </span><span class="si">{</span><span class="n">client_id</span><span class="si">}</span><span class="s2"> and&quot;</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="sa">f</span><span class="s2">&quot;service number: </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2">. Create fraud ticket return FALSE ...&quot;</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.info(f&quot;Fraud ticket was successfully created! Ticket ID is {ticket_id}&quot;)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fraud ticket was successfully created! Ticket ID is </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
 * <a href="../../repositories/bruin_repository/append_note_to_ticket/">append_note_to_ticket</a>
 * If status is not Ok:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>self._logger.warning(f&quot;Bad status calling to append note to ticket id: {ticket_id} and service number:&quot;
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>                               f&quot;{service_number}. Create fraud ticket return FALSE ...&quot;)
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="sa">f</span><span class="s2">&quot;Bad status calling to append note to ticket id: </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> and service number:&quot;</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2">. Create fraud ticket return FALSE ...&quot;</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>self._logger.info(f&quot;Fraud note was successfully appended to ticket {ticket_id}!&quot;)
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>self._logger.info(f&quot;Forwarding ticket {ticket_id} to HNOC&quot;)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fraud note was successfully appended to ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Forwarding ticket </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> to HNOC&quot;</span><span class="p">)</span>
 </code></pre></div>
 * <a href="../../repositories/bruin_repository/change_detail_work_queue_to_hnoc/">change_detail_work_queue_to_hnoc</a></p>
 

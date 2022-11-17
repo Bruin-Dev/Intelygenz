@@ -795,42 +795,44 @@
 <ul>
 <li><a href="../../repositories/bruin_repository/get_client_info_by_did/">get_client_info_by_did</a></li>
 <li>If status not Ok:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.warning(f&quot;Failed to get client info by DID {did}, using default client info&quot;)
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to get client info by DID </span><span class="si">{</span><span class="n">did</span><span class="si">}</span><span class="s2">, using default client info&quot;</span><span class="p">)</span>
 </code></pre></div></li>
 <li><a href="../../repositories/bruin_repository/get_open_fraud_tickets/">get_open_fraud_tickets</a>
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.warning(f&quot;fBad status calling to get open fraud tickets for client id: {client_id} and &quot;
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>                               f&quot;service number: {service_number}. Process fraud FALSE ...&quot;)
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fBad status calling to get open fraud tickets for client id: </span><span class="si">{</span><span class="n">client_id</span><span class="si">}</span><span class="s2"> and &quot;</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>                               <span class="sa">f</span><span class="s2">&quot;service number: </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2">. Process fraud FALSE ...&quot;</span><span class="p">)</span>
 </code></pre></div></li>
 <li><a href="../_get_oldest_fraud_ticket/">_get_oldest_fraud_ticket</a> </li>
 <li>If open fraud ticket:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(f&quot;An open Fraud ticket was found for {service_number}. Ticket ID: {ticket_id}&quot;)
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;An open Fraud ticket was found for </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2">. Ticket ID: </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div></li>
 <li>If is a task resolved:
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.info(
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>                f&quot;Fraud ticket with ID {ticket_id} is open, but the task related to {service_number} is resolved. &quot;
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>                f&quot;Therefore, the ticket will be considered as Resolved.&quot;
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>            )
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="sa">f</span><span class="s2">&quot;Fraud ticket with ID </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2"> is open, but the task related to </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2"> is resolved. &quot;</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="sa">f</span><span class="s2">&quot;Therefore, the ticket will be considered as Resolved.&quot;</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">)</span>
 </code></pre></div></li>
 <li>Else:<ul>
 <li><a href="../_append_note_to_ticket/">_append_note_to_ticket</a></li>
 </ul>
 </li>
 <li>Else:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.info(f&quot;No open Fraud ticket was found for {service_number}&quot;) 
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No open Fraud ticket was found for </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> 
 </code></pre></div></li>
 <li><a href="../../repositories/bruin_repository/get_resolved_fraud_tickets/">get_resolved_fraud_tickets</a></li>
 <li>If status is not Ok:
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>self._logger.warning(f&quot;bad status calling to get resolved fraud tickets for client id: {client_id} &quot;
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>                                 f&quot;and service number: {service_number}. Skipping process fraud ...&quot;)
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="sa">f</span><span class="s2">&quot;bad status calling to get resolved fraud tickets for client id: </span><span class="si">{</span><span class="n">client_id</span><span class="si">}</span><span class="s2"> &quot;</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="sa">f</span><span class="s2">&quot;and service number: </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2">. Skipping process fraud ...&quot;</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="p">)</span>
 </code></pre></div><ul>
 <li><a href="../_get_oldest_fraud_ticket/">_get_oldest_fraud_ticket</a></li>
 </ul>
 </li>
 <li>If resolved fraud ticket:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>self._logger.info(f&quot;A resolved Fraud ticket was found for {service_number}. Ticket ID: {ticket_id}&quot;)
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;A resolved Fraud ticket was found for </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2">. Ticket ID: </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div></li>
 <li><a href="../_unresolve_task_for_ticket/">_unresolve_task_for_ticket</a>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>self._logger.info(f&quot;No open or resolved Fraud ticket was found for {service_number}&quot;)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No open or resolved Fraud ticket was found for </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div></li>
 <li><a href="../_create_fraud_ticket/">_create_fraud_ticket</a></li>
 </ul>

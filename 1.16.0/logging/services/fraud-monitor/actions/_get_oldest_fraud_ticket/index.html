@@ -796,8 +796,10 @@
 <li>For ticket in tickets:</li>
 <li><a href="../../repositories/bruin_repository/get_ticket_details/">get_ticket_details</a></li>
 <li>If status is not Ok:
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.warning(f&quot;Bad status calling to get ticket details for ticket id: {ticket_id}.&quot;
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                                 f&quot;Skipping get oldest fraud ticket ...&quot;)
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="sa">f</span><span class="s2">&quot;Bad status calling to get ticket details for ticket id: </span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s2">.&quot;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="sa">f</span><span class="s2">&quot;Skipping get oldest fraud ticket ...&quot;</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">)</span>
 </code></pre></div></li>
 </ul>
 

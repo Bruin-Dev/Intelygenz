@@ -792,14 +792,14 @@
   <h1>Start fraud monitoring</h1>
 
 <h2 id="start-fraud-monitoring">Start fraud monitoring</h2>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(&quot;Scheduling Fraud Monitor job...&quot;)
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Scheduling Fraud Monitor job...&quot;</span><span class="p">)</span>
 </code></pre></div>
 * If exec on start:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(&quot;Fraud Monitor job is going to be executed immediately&quot;)
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Fraud Monitor job is going to be executed immediately&quot;</span><span class="p">)</span>
 </code></pre></div>
 * <a href="../_fraud_monitoring_process/">_fraud_monitoring_process</a>
 * If ConflictingIdError:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(f&quot;Skipping start of Fraud Monitoring job. Reason: {conflict}&quot;)
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Skipping start of Fraud Monitoring job. Reason: </span><span class="si">{</span><span class="n">conflict</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div></p>
 
               

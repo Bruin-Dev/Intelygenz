@@ -61,7 +61,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#get-cache-documentation" class="md-skip">
+        <a href="#get-veloclouds-customer-cache" class="md-skip">
           Skip to content
         </a>
       
@@ -769,8 +769,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#get-cache-documentation" class="md-nav__link">
-    Get cache Documentation
+  <a href="#get-veloclouds-customer-cache" class="md-nav__link">
+    Get VeloCloud's customer cache
   </a>
   
 </li>
@@ -791,32 +791,29 @@
 
   <h1>Get cache</h1>
 
-<h2 id="get-cache-documentation">Get cache Documentation</h2>
-<ol>
-<li>If velo_filter</li>
-</ol>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(f&quot;Getting customer cache for Velocloud host(s) {&#39;, &#39;.join(velo_filter.keys())}...&quot;)
-</code></pre></div>
-2. Else:</p>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(f&quot;Getting customer cache for all Velocloud hosts...&quot;)
-</code></pre></div>
-3. If <code>Exception</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.error(f&quot;An error occurred when requesting customer cache -&gt; {e}&quot;)
+<h2 id="get-veloclouds-customer-cache">Get VeloCloud's customer cache</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Getting customer cache for Velocloud host(s) </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">velo_filter</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
 </code></pre></div>
 <ul>
-<li>If response status == 202:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.error(response_body)
-</code></pre></div></li>
-<li>Else:</li>
 <li>
-<p>If velo_filter:</p>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.info(f&quot;Got customer cache for Velocloud host(s) {&#39;, &#39;.join(velo_filter.keys())}!&quot;)
+<p>If there's an error while asking for the data to the <code>customer-cache</code> service:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;An error occurred when requesting customer cache -&gt; </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span> 
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="p">[</span><span class="o">...</span><span class="p">]</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
 </code></pre></div>
-  * Else</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>self._logger.info(f&quot;Got customer cache for all Velocloud hosts!&quot;)
+  END</p>
+</li>
+<li>
+<p>If response status for get VeloCloud's customer cache is not ok, or the cache is still building:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">err_msg</span> <span class="o">=</span> <span class="n">response_body</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="p">[</span><span class="o">...</span><span class="p">]</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
 </code></pre></div>
+  END</p>
 </li>
 </ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Got customer cache for Velocloud host(s) </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">velo_filter</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
+</code></pre></div>
 
               
             </article>

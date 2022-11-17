@@ -792,39 +792,39 @@
   <h1> fraud monitoring process</h1>
 
 <h2 id="fraud-monitoring-process">Fraud monitoring process</h2>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(f&#39;Processing all unread email from {self._config.FRAUD_CONFIG[&quot;inbox_email&quot;]}&#39;)
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>logger.info(f&#39;Processing all unread email from {self._config.FRAUD_CONFIG[&quot;inbox_email&quot;]}&#39;)
 </code></pre></div>
 * <a href="../../repositories/notifications_repository/get_unread_emails/">get_unread_emails</a>
 * If status is no Ok:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.warning(f&quot;Bad status calling to get unread emails. Skipping fraud monitor process&quot;)
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad status calling to get unread emails. Skipping fraud monitor process&quot;</span><span class="p">)</span>
 </code></pre></div>
 * for email in emails:
   * If message is none or uid -1:
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.error(f&quot;Invalid message: {email}&quot;)
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid message: </span><span class="si">{</span><span class="n">email</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
   * If not email regex:
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.info(f&quot;Email with msg_uid {msg_uid} is not a fraud warning. Skipping...&quot;)
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Email with msg_uid </span><span class="si">{</span><span class="n">msg_uid</span><span class="si">}</span><span class="s2"> is not a fraud warning. Skipping...&quot;</span><span class="p">)</span>
 </code></pre></div>
   * If not found body:
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>self._logger.error(f&quot;Email with msg_uid {msg_uid} has an unexpected body&quot;)
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Email with msg_uid </span><span class="si">{</span><span class="n">msg_uid</span><span class="si">}</span><span class="s2"> has an unexpected body&quot;</span><span class="p">)</span>
 </code></pre></div>
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>self._logger.info(f&quot;Processing email with msg_uid {msg_uid}&quot;)
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing email with msg_uid </span><span class="si">{</span><span class="n">msg_uid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
   * <a href="../_process_fraud/">_process_fraud</a>
   * If processed and PRODUCTION:
     * If mark email as read status is Ok:
-      <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>self._logger.error(f&quot;Could not mark email with msg_uid {msg_uid} as read&quot;)
+      <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not mark email with msg_uid </span><span class="si">{</span><span class="n">msg_uid</span><span class="si">}</span><span class="s2"> as read&quot;</span><span class="p">)</span>
 </code></pre></div>
   * If processed:
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>self._logger.info(f&quot;Processed email with msg_uid {msg_uid}&quot;)
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processed email with msg_uid </span><span class="si">{</span><span class="n">msg_uid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
   * Else:
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>self._logger.info(f&quot;Failed to process email with msg_uid {msg_uid}&quot;)
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to process email with msg_uid </span><span class="si">{</span><span class="n">msg_uid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>self._logger.info(
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>            f&#39;Finished processing all unread email from {self._config.FRAUD_CONFIG[&quot;inbox_email&quot;]}. &#39;
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>            f&quot;Elapsed time: {round((stop - start) / 60, 2)} minutes&quot;
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>        )
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>    <span class="sa">f</span><span class="s1">&#39;Finished processing all unread email from </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">FRAUD_CONFIG</span><span class="p">[</span><span class="s2">&quot;inbox_email&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">. &#39;</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>    <span class="sa">f</span><span class="s2">&quot;Elapsed time: </span><span class="si">{</span><span class="nb">round</span><span class="p">((</span><span class="n">stop</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">/</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2"> minutes&quot;</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="p">)</span>
 </code></pre></div></p>
 
               

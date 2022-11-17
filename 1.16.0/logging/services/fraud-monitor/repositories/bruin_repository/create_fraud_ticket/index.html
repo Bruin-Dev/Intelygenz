@@ -792,21 +792,25 @@
   <h1>Create fraud ticket</h1>
 
 <h2 id="create-fraud-ticket">Create fraud ticket</h2>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                f&quot;Creating fraud ticket for service number {service_number} that belongs to client {client_id}...&quot;
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>            )
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="sa">f</span><span class="s2">&quot;Creating fraud ticket for service number </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2"> that belongs to client </span><span class="si">{</span><span class="n">client_id</span><span class="si">}</span><span class="s2">...&quot;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span>
 </code></pre></div>
 * If Exception:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>f&quot;An error occurred when creating fraud ticket for service number {service_number} &quot;
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>              f&quot;that belongs to client {client_id} -&gt; {e}&quot;
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="sa">f</span><span class="s2">&quot;An error occurred when creating fraud ticket for service number </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2"> &quot;</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="sa">f</span><span class="s2">&quot;that belongs to client </span><span class="si">{</span><span class="n">client_id</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="p">)</span>
 </code></pre></div>
 * If status ok:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>self._logger.info(f&quot;Fraud ticket for service number {service_number} that belongs to client {client_id} created!&quot;)
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fraud ticket for service number </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2"> that belongs to client </span><span class="si">{</span><span class="n">client_id</span><span class="si">}</span><span class="s2"> created!&quot;</span><span class="p">)</span>
 </code></pre></div>
 * Else:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>self._logger.error(f&quot;Error while creating fraud ticket for service number {service_number} that belongs to client &quot;
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>                  f&quot;{client_id} in {self._config.ENVIRONMENT_NAME.upper()} environment: &quot;
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>                  f&quot;Error {response_status} - {response_body}&quot;)
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="sa">f</span><span class="s2">&quot;Error while creating fraud ticket for service number </span><span class="si">{</span><span class="n">service_number</span><span class="si">}</span><span class="s2"> that belongs to client &quot;</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">client_id</span><span class="si">}</span><span class="s2"> in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">ENVIRONMENT_NAME</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> environment: &quot;</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="sa">f</span><span class="s2">&quot;Error </span><span class="si">{</span><span class="n">response_status</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">response_body</span><span class="si">}</span><span class="s2">&quot;</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="p">)</span>
 </code></pre></div></p>
 
               

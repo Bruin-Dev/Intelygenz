@@ -61,7 +61,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#get-events-by-serial-and-interface-documentation" class="md-skip">
+        <a href="#get-velocloud-events-for-edge-and-group-them-by-interfaces-links" class="md-skip">
           Skip to content
         </a>
       
@@ -769,8 +769,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#get-events-by-serial-and-interface-documentation" class="md-nav__link">
-    Get events by serial and interface Documentation
+  <a href="#get-velocloud-events-for-edge-and-group-them-by-interfaces-links" class="md-nav__link">
+    Get VeloCloud events for edge and group them by interfaces (links)
   </a>
   
 </li>
@@ -791,31 +791,40 @@
 
   <h1>Get events by serial and interface</h1>
 
-<h2 id="get-events-by-serial-and-interface-documentation">Get events by serial and interface Documentation</h2>
+<h2 id="get-velocloud-events-for-edge-and-group-them-by-interfaces-links">Get VeloCloud events for edge and group them by interfaces (links)</h2>
+<p><a href="../_structure_edges_by_host_and_enterprise/">_structure_edges_by_host_and_enterprise</a></p>
+<ul>
+<li>For each VeloCloud host (VCO):<ul>
+<li>
+<p>For each enterprise in the VCO:</p>
+<p><a href="../get_enterprise_events/">get_enterprise_events</a></p>
 <ul>
 <li>
-<p>for host in edges_by_host_and_enterprise</p>
+<p>If response status for get enterprise events is not ok:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="sa">f</span><span class="s2">&quot;Error while getting enterprise events for host </span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s2"> and enterprise </span><span class="si">{</span><span class="n">enterprise_id</span><span class="si">}</span><span class="s2">: &quot;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">enterprise_events_response</span><span class="si">}</span><span class="s2">&quot;</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">)</span>
+</code></pre></div>
+  <em>Continue with next enterprise</em></p>
 </li>
 <li>
-<p>for enterprise_id in edges_by_enterprise</p>
+<p>For each event found for the enterprise:</p>
 <ul>
-<li><a href="../get_enterprise_events/">Get enterprise events</a></li>
-<li>
-<p>for event in enterprise_events</p>
-</li>
-<li>
-<p>if not matching_edge
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>self._logger.info(
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                  f&#39;No edge in the customer cache had edge name {event[&quot;edgeName&quot;]}. Skipping...&#39;
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>                 )
-</code></pre></div></p>
+<li>If there's no edge in the cache of customers whose name matches the one included in the event:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;No edge in the customer cache had edge name </span><span class="si">{</span><span class="n">event</span><span class="p">[</span><span class="s2">&quot;edgeName&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">. Skipping...&#39;</span><span class="p">)</span>
+</code></pre></div>
+  <em>Continue with next event</em></li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="sa">f</span><span class="s1">&#39;Event with edge name </span><span class="si">{</span><span class="n">event</span><span class="p">[</span><span class="s2">&quot;edgeName&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1"> matches edge from customer cache with&#39;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="sa">f</span><span class="s2">&quot;serial number </span><span class="si">{</span><span class="n">serial</span><span class="si">}</span><span class="s2">&quot;</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">)</span>
+</code></pre></div>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>self._logger.info(
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>                    f&#39;Event with edge name {event[&quot;edgeName&quot;]} matches edge from customer cache with&#39;
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>                    f&quot;serial number {serial}&quot;
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>                )
-</code></pre></div>
+</li>
+</ul>
 </li>
 </ul>
 
