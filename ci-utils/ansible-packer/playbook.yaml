@@ -17,6 +17,7 @@
   connection: local
   gather_facts: false
   become: true
+  debugger: on_failed
   vars:
     ecr_repository_name: "{{ ecr_repository_name }}"
     ecr_repository_uri: "{{ ecr_repository_uri }}"
