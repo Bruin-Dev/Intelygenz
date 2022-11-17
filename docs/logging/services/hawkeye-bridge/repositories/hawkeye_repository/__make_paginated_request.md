@@ -9,10 +9,7 @@ logger.info(f"Fetching all pages using {fn.__name__}...")
     * Make a call for the current page to Hawkeye API through the HawkeyeClient
     * If response status is not ok:
       ```python
-      logger.warning(
-          f"Call to {fn.__name__} failed. Checking if max retries threshold has been "
-          "reached"
-      )
+      logger.warning(f"Call to {fn.__name__} failed. Checking if max retries threshold has been reached")
       ```
 
         * If the max attempts threshold has been reached:
