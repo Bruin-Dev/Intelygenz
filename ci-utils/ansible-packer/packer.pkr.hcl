@@ -87,9 +87,9 @@ variable "ECR_REPOSITORY_NAME" {
   default = env("ECR_REPOSITORY_NAME")
 }
 
-variable "ECR_REPOSITORY_URI" {
+variable "ECR_REPOSITORY_URL" {
   type    = string
-  default = env("ECR_REPOSITORY_URI")
+  default = env("ECR_REPOSITORY_URL")
 }
 
 variable "ECR_REPOSITORY_TAG" {
