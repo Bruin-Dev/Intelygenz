@@ -246,11 +246,11 @@ build {
       "--extra-vars", "ecr_repository_name=${var.ECR_REPOSITORY_NAME}",
       "--extra-vars", "ecr_repository_tag=${var.ECR_REPOSITORY_TAG}",
     ]
-    command = "ANSIBLE_ROLES_PATH=/app/ansible-packer/roles ansible-playbook"
-    galaxy_collections_path = "/app/ansible-packer/ansible_collections"
+    command = "ANSIBLE_ROLES_PATH=/app/ansible/roles ansible-playbook"
+    galaxy_collections_path = "/app/ansible/ansible_collections"
     galaxy_command = "ansible-galaxy"
-    galaxy_file = "./ansible-packer/ansible_galaxy/requirements.yaml"
-    role_paths = ["./ansible-packer/roles"]
-    playbook_file = "./ansible-packer/playbook.yaml"
+    galaxy_file = "./ansible/ansible_galaxy/requirements.yaml"
+    role_paths = ["./ansible/roles"]
+    playbook_file = "./ansible/playbook.yaml"
   }
 }
