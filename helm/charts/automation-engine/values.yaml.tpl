@@ -1227,10 +1227,10 @@ service-outage-monitor-triage:
   resources:
     limits:
       cpu: 300m
-      memory: 384Mi
+      memory: 500Mi
     requests:
       cpu: 150m
-      memory: 192Mi
+      memory: 300Mi
 
 
 # -- servicenow-bridge subchart specific configuration
