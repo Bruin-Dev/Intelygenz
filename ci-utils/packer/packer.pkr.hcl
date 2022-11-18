@@ -247,7 +247,7 @@ build {
       "curl -s 'https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip' -o 'awscliv2.zip'",
       "unzip -qq awscliv2.zip",
       "sudo ./aws/install",
-      "export AWS_ACCESS_KEY_ID=${var.AWS_ACCESS_KEY_ID}"
+      "export AWS_ACCESS_KEY_ID=${var.AWS_ACCESS_KEY_ID}",
       "export AWS_SECRET_ACCESS_KEY=${var.AWS_SECRET_ACCESS_KEY}"
     ]
     inline_shebang = "/bin/bash -xe"
