@@ -102,6 +102,16 @@ variable "PACKER_DIR_MODULE" {
   default = env("PACKER_DIR_MODULE")
 }
 
+variable "AWS_ACCESS_KEY_ID" {
+  type    = string
+  default = env("AWS_ACCESS_KEY_ID")
+}
+
+variable "AWS_SECRET_ACCESS_KEY" {
+  type    = string
+  default = env("AWS_SECRET_ACCESS_KEY")
+}
+
 data "amazon-ami" "fedramp" {
   filters = {
     name                = "${var.source_ami_filter_name}"
