@@ -179,6 +179,7 @@ build {
     environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
     inline = [
       "echo '** Enable Ubuntu Pro services **'",
+      "sudo killall apt-get",
       "sudo apt-get update && sudo apt-get upgrade -yq",
       "echo '** Enabling UA services already enabled will cause the pipeline to fail **'",
       "sudo pro enable cc-eal cis fips --assume-yes",
