@@ -31,6 +31,8 @@
     - name: Build image 
       community.docker.docker_image:
         build:
+          args:
+             CONTAINER_VERSION: "{{ ecr_repository_tag }}"
           path: /app
         name: "{{ ecr_repository_image }}"
         tag: "{{ ecr_repository_tag }}"
