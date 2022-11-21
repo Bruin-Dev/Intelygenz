@@ -44,33 +44,55 @@
 		1. [Revoke Session token](manual_configurations/OKTA_CONFIGURATIONS.md#revoke-permissions)
 	3. [AWS SSO Okta JWT token](manual_configurations/OKTA_JWT.md)
 9. AUDIT EVENTS
-    1. Automation
-       1. Communication between services
-          1. [Messages Bus](logging/events/messages-bus.md)
-       2. Use Cases
-           1. [Service Outage Monitor](logging/events/service-outage-monitor.md)
-           5. [TNBA Monitor](logging/events/tnba-monitor.md)
-           8. [Service Affecting Monitor](logging/events/service-affecting-monitor.md)
-           9. [InterMapper Outage Monitor](logging/events/intermapper-outage-monitor.md)
-           10. [Hawkeye Outage Monitor](logging/events/hawkeye-outage-monitor.md)
-           11. [Gateway Monitor](logging/events/gateway-monitor.md)
-           12. [Last Contact Report](logging/events/last-contact-report.md)
-           13. [Lumin Billing Report](logging/events/lumin-billing-report.md)
-           14. [DiGi Reboot Report](logging/events/digi-reboot-report.md)
-           15. [Task Dispatcher](logging/events/task-dispatcher.md)
-           16. [Fraud Monitor](logging/events/fraud-monitor.md)
-       3. Bridges
-          1. [Bruin Bridge](logging/events/bruin-bridge.md)
-          2. [VeloCloud Bridge](logging/events/velocloud-bridge.md)
-          3. [Notifications Bridge](logging/events/notifications-bridge.md)
-          4. [Email Bridge](logging/events/email-bridge.md)
-          5. [Service Now Bridge](logging/events/servicenow-bridge.md)
-          6. [Dri Bridge](logging/events/dri-bridge.md)
-          7. [DiGi Bridge](logging/events/digi-bridge.md)
-          8. [Hawkeye Bridge](logging/events/hawkeye-bridge.md)
-       4. Use cases with bridge capabilities
-          1. [Customer Cache](logging/events/customer-cache.md)
-          2. [Hawkeye Customer Cache](logging/events/hawkeye-customer-cache.md)
-    2. Infrastructure
-        1. [Lambda Parameter-Replicator](lambda/PARAMETER_REPLICATOR.md)
+     1. Automation
+          * Bridges
+             * [Bruin Bridge](logging/events/bruin-bridge.md)
+             * [DiGi Bridge](logging/events/digi-bridge.md)
+             * [DRI (Data Remote) Bridge](logging/events/dri-bridge.md)
+             * [Email Bridge](logging/events/email-bridge.md)
+             * [Hawkeye / Ixia Bridge](logging/events/hawkeye-bridge.md)
+             * [Notifications Bridge](logging/events/notifications-bridge.md)
+             * [ServiceNow Bridge](logging/events/servicenow-bridge.md)
+             * [VeloCloud Bridge](logging/events/velocloud-bridge.md)
+
+          * Communication between services
+             * [Messages Bus](logging/events/messages-bus.md)
+
+          * Use cases
+              * DiGi
+                  * [Reboot Report](logging/events/digi-reboot-report.md)
+
+              * Fraud
+                  * [Alerts Monitor](logging/events/fraud-monitor.md)
+
+              * Hawkeye / Ixia
+                  * [Outage Monitor](logging/events/hawkeye-outage-monitor.md)
+
+              * InterMapper
+                  * [Outage Monitor](logging/events/intermapper-outage-monitor.md)
+
+              * LuminAI
+                  * [Billing Report](logging/events/lumin-billing-report.md)
+
+              * Tasks scheduling
+                  * [Task Dispatcher](logging/events/task-dispatcher.md)
+
+              * VeloCloud
+                  * Reporting
+                      * [Last Contact Report](logging/events/last-contact-report.md)
+                  * SD-WAN Monitoring
+                      * [Affecting Monitor](logging/events/service-affecting-monitor.md)
+                      * [Gateway Monitor](logging/events/gateway-monitor.md)
+                      * [Outage Monitor](logging/events/service-outage-monitor.md)
+                      * [TNBA Monitor](logging/events/tnba-monitor.md)
+
+          * Use cases with bridge capabilities
+             * VeloCloud
+                 * [Customer Cache](logging/events/customer-cache.md)
+
+             * Hawkeye / Ixia
+                 * [Customer Cache](logging/events/hawkeye-customer-cache.md)
+
+     2. Infrastructure
+         * [Lambda Parameter-Replicator](lambda/PARAMETER_REPLICATOR.md)
 
