@@ -2,7 +2,7 @@
 FROM ubuntu:18.04
 
 ARG NON_ROOT_USER=nroot
-
+ARG RELOADER_VERSION=0.0.103
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -40,4 +40,26 @@ USER ${NON_ROOT_USER}
 # Set workdir to user home
 WORKDIR /home/${NON_ROOT_USER}
 
+# INSTALL RELOADER
+RUN git clone --depth 1 --branch ${RELOADER_VERSION} https://github.com/stakater/Reloader.git
 
+RUN cp Reloader/main.go .
+RUN cp Reloader/go.mod .
+RUN cp Reloader/go.sum . 
+RUN cp -R Reloader/internal ./internal
+RUN cp -R Reloader/pkg ./pkg
+
+RUN go mod download
+RUN rm -rf Reloader
+
+RUN CGO_ENABLED=0 \
+    GOOS=${TARGETOS} \
+    GOARCH=${TARGETARCH} \
+    GOPROXY=${GOPROXY} \
+    GOPRIVATE=${GOPRIVATE} \
+    GO111MODULE=on \
+    go build -mod=mod -a -o manager main.go
+
+EXPOSE 9090
+
+ENTRYPOINT ["/home/nroot/manager"]
