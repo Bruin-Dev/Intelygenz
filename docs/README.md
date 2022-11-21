@@ -49,12 +49,7 @@
           1. [Messages Bus](logging/events/0-messages-bus.md)
        2. Use Cases
            1. [Service Outage Monitor](logging/events/1-service-outage-monitor.md)
-           2. [BYOB IPA Queue](logging/events/2-BYOB-IPA-queue.md)
-           3. [HNOC forwarding](logging/events/3-HNOC-forwarding.md)
-           4. [SA forwarding to ASR](logging/events/4-SA-forward-to-ASR.md)
            5. [TNBA Monitor](logging/events/5-TNBA-monitor.md)
-           6. [Ticket severity](logging/events/6-ticket-severity.md)
-           7. [Ticket creation outcomes](logging/events/7-ticket-creation-outcome.md)
            8. [Service Affecting Monitor](logging/events/8-service-affecting-monitor.md)
            9. [InterMapper Outage Monitoring](logging/events/9-intermapper-monitor.md)
            10. [Hawkeye Outage Monitoring](logging/events/10-hawkeye-outage-monitor.md)
