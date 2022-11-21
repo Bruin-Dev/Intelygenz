@@ -3,8 +3,8 @@ stages:
   - unit_test
   - sonar
   - parameters
-  - k8s_packer
   - basic_infra
+  - k8s_packer
   - basic_infra_kre
   - deploy_kre_runtimes
   - release
