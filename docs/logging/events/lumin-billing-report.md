@@ -7,7 +7,7 @@ gather all the billable events registered during the past month in the LuminAI s
 via e-mail.
 
 ## Process Workflows
-![[](../../images/21-lumin-billing-report.png)](../../images/21-lumin-billing-report.png)
+![[](../../images/lumin-billing-report.png)](../../images/lumin-billing-report.png)
 
 ## List of Decisions made by the Lumin Billing Report service
 _This service does not make any business decision_

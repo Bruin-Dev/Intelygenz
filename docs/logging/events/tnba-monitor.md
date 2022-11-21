@@ -2,7 +2,7 @@
 
 ## Process Workflows
 
-![](../../images/5-TNBA-monitor.png)
+![](../../images/tnba-monitor.png)
 
 ## List of Decisions made by the TNBA Monitor
 
@@ -22,7 +22,7 @@
 
 #### Start of TNBA Monitor
 #### Event description
-* [Start TNBA automated process](../services/TNBA-monitor/actions/start_tnba_automated_process.md)
+* [Start TNBA automated process](../services/tnba-monitor/actions/start_tnba_automated_process.md)
 
 
 

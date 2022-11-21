@@ -10,7 +10,7 @@ The Hawkeye Customer Cache service has two responsibilities:
 * Serve the cache built from execution of the previously mentioned job to other services in the system.
 
 ## Process Workflows
-![[](../../images/24-hawkeye-customer-cache.png)](../../images/24-hawkeye-customer-cache.png)
+![[](../../images/hawkeye-customer-cache.png)](../../images/hawkeye-customer-cache.png)
 
 ## List of Decisions made by the Hawkeye Customer Cache service
 ### Bridge-like capabilities

@@ -6,7 +6,7 @@ DRI Bridge is used to make calls to the DRI API. The main call includes [get_dri
 three different endpoint calls to the DRI API.
 
 ## Process Workflows
-![[](../../images/17-dri-bridge.png)](../../images/17-dri-bridge.png)
+![[](../../images/dri-bridge.png)](../../images/dri-bridge.png)
 
 ## List of Decisions made by the DRI Bridge
 ### Subject: dri.parameters.request

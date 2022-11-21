@@ -10,7 +10,7 @@ The `task-dispatcher` service is in charge of getting due tasks and executing th
 
 
 ## Process Workflows
-![[](../../images/26-task-dispatcher.png)](../../images/26-task-dispatcher.png)
+![[](../../images/task-dispatcher.png)](../../images/task-dispatcher.png)
 
 ## List of Decisions made by the Task Dispatcher Report service
 _This service does not make any business decision_

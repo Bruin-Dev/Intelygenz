@@ -7,7 +7,7 @@ gather the edges across all VCOs, and send via e-mail a summary of the edges tha
 where they belong more than 30 days ago.
 
 ## Process Workflows
-![[](../../images/20-last-contact-report.png)](../../images/20-last-contact-report.png)
+![[](../../images/last-contact-report.png)](../../images/last-contact-report.png)
 
 ## List of Decisions made by the Last Contact Report service
 ### Overall workflow

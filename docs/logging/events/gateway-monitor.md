@@ -5,7 +5,7 @@
 The mission of this service is to analyze VeloCloud gateways' statuses and metrics, and report issues to ServiceNow (if any).
 
 ## Process Workflows
-![[](../../images/15-gateway-monitor.png)](../../images/15-gateway-monitor.png)
+![[](../../images/gateway-monitor.png)](../../images/gateway-monitor.png)
 
 ## List of Decisions made by the Gateway Monitor
 ### Process Gateway workflow

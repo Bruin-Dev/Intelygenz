@@ -14,7 +14,7 @@ be enriched with information from the DRI system.
 Whatever the outcome of the analysis is, the event is finally marked as processed.
 
 ## Process Workflows
-![[](../../images/9-intermapper-monitor.png)](../../images/9-intermapper-monitor.png)
+![[](../../images/intermapper-outage-monitor.png)](../../images/intermapper-outage-monitor.png)
 
 ## List of Decisions made by the Intermapper Monitor
 ### Process E-mail Batch workflow

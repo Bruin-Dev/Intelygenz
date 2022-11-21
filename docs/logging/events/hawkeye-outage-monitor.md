@@ -6,7 +6,7 @@ sure to create or re-open Service Outage tickets if these devices stay offline f
 auto-resolving any open tickets if the device comes back online.
 
 ## Process Workflows
-![[](../../images/10-hawkeye-outage-monitor.png)](../../images/10-hawkeye-outage-monitor.png)
+![[](../../images/hawkeye-outage-monitor.png)](../../images/hawkeye-outage-monitor.png)
 
 ## List of Decisions made by the Hawkeye Outage Monitor service
 ### Overall workflow
