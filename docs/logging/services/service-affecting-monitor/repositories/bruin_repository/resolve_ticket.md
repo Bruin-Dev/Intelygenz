@@ -1,4 +1,4 @@
-## Resolve ticket task for Ixia device
+## Resolve ticket task for VeloCloud edge
 
 ```python
 logger.info(f"Resolving detail {detail_id} of ticket {ticket_id}...")

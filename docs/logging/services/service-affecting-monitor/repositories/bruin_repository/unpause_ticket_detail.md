@@ -1,4 +1,4 @@
-## Unpause ticket task for Ixia device
+## Unpause ticket task for VeloCloud edge
 
 ```python
 logger.info(f"Unpausing detail of ticket {ticket_id} related to serial number {service_number}...")
