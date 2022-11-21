@@ -180,6 +180,7 @@ build {
     inline = [
       "echo '** Enable Ubuntu Pro services **'",
       "sudo killall apt-get",
+      "ls -al /app",
       "sudo apt-get update && sudo apt-get upgrade -yq",
       "echo '** Enabling UA services already enabled will cause the pipeline to fail **'",
       "sudo pro enable cc-eal cis fips --assume-yes",
