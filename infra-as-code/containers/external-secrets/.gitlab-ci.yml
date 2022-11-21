@@ -5,7 +5,7 @@ packer-external-secrets:
   variables:
     ECR_REPOSITORY_NAME: external-secrets
     PACKER_DIR_MODULE: "../../infra-as-code/containers/external-secrets/"
-    ECR_REPOSITORY_TAG: "0.0.103"
+    ECR_REPOSITORY_TAG: "v0.4.4"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: never

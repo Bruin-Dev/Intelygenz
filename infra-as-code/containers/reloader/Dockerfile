@@ -2,7 +2,7 @@
 FROM ubuntu:18.04
 
 ARG NON_ROOT_USER=nroot
-ARG RELOADER_VERSION=0.0.103
+ARG CONTAINER_VERSION
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -41,7 +41,7 @@ USER ${NON_ROOT_USER}
 WORKDIR /home/${NON_ROOT_USER}
 
 # INSTALL RELOADER
-RUN git clone --depth 1 --branch ${RELOADER_VERSION} https://github.com/stakater/Reloader.git
+RUN git clone --depth 1 --branch ${CONTAINER_VERSION} https://github.com/stakater/Reloader.git
 
 RUN cp Reloader/main.go .
 RUN cp Reloader/go.mod .
