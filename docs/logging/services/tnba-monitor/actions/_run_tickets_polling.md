@@ -15,7 +15,7 @@ self._logger.info("Starting TNBA process...")
 ```
 self._logger.info("Keeping serials that exist in both the customer cache and the set of edges statuses...")
 ```
-* [get_links_metrics_for_autoresolve](get_links_metrics_for_autoresolve.md)
+* [get_links_metrics_for_autoresolve](../repositories/velocloud_repository/get_links_metrics_for_autoresolve.md)
 * If not link metrics:
   ```
   self._logger.info("List of links metrics arrived empty. Skipping...")

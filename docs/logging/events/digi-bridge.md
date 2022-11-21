@@ -23,7 +23,7 @@ The DiGi bridge is mainly used to call the DiGi API to reboot DiGi devices.
 ## Event Descriptions
 ### Authentication management
 #### Schedule DiGi Login job
-* [login_job](../services/digi-bridge/repositories/login_job.md)
+* [login_job](../services/digi-bridge/repositories/digi_repository/login_job.md)
 
 ### Bridge capabilities
 #### Subject: digi.reboot
