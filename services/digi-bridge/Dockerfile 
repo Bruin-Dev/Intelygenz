@@ -41,7 +41,7 @@ RUN wget -q https://install.python-poetry.org -O poetry-install.py && \
 RUN apt-get install --reinstall --yes --quiet ./packages/*.deb && \
     apt-get clean && \
     apt-get autoremove && \
-    rm -rf /var/lib/apt/lists/* /tmp/* ~/* %&& \
+    rm -rf /var/lib/apt/lists/* /tmp/* ~/* && \
     rm -rf ./packages
 
 # Create a non-root user
