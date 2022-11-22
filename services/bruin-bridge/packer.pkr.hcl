@@ -157,6 +157,11 @@ build {
     source      = "./"
   }
 
+    provisioner "file" {
+    destination = "/app/pyutils_automation/"
+    source      = "../../pyutils_automation"
+  }
+
   provisioner "shell" {
     environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
     inline = [

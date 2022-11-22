@@ -58,7 +58,7 @@ WORKDIR /home/${NON_ROOT_USER}
 # Copy utils and install with Poetry
 COPY --chown=${NON_ROOT_USER}:0 pyutils_automation/py310 /pyutils_automation/py310
 WORKDIR /pyutils_automation/py310
-RUN install --only main
+RUN poetry install --only main
 
 COPY --chown=${NON_ROOT_USER}:0 services/bruin-bridge/ /service/app
 WORKDIR /service/app
