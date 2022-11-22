@@ -1,3 +1,9 @@
+---
+hide:
+  - navigation
+  - toc
+---
+
 # Notifications Bridge Event Logging
 
 # Description

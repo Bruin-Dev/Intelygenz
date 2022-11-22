@@ -1,3 +1,9 @@
+---
+hide:
+  - navigation
+  - toc
+---
+
 # Repair tickets monitor
 
 ## Process Workflows

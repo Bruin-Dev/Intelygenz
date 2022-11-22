@@ -2,33 +2,61 @@
 <img src="http://photos.prnewswire.com/prnfull/20141022/153661LOGO?p=publish"  width="300" height="120">
 </div>
 
-# PIPELINES RULES
-## Add new section
-To add new section of jobs in the pipeline, we must include the section adding an included in the general .gitlab-ci.yml:
+# Setting up pipelines
+
+## Adding new jobs
+
+To add new jobs, we must include them using the `include` directive in the project's root `.gitlab-ci.yml`:
+
 ```yaml
 include:
   - local: microservices/.gitlab-ci.yml
 ```
-Could be possible that an included .gitlab-ci.yml of another section include more sub-sections(Example microservices):
+
+Also, `.gitlab-ci.yml` files can reference `.gitlab-ci.yml` files that exist in a directory that has its own `.gitlab-ci.yml`.
+
+For example, this one references a configuration exclusive to a particular service within the `microservices` folder, for whom
+we included its own `.gitlab-ci.yml` in the previous snippet:
 ```yaml
 include:
   - local: microservices/fetchers/velocloud/.gitlab-ci.yml
 ```
-We should follow this organization technique to isolate code to their respective area and avoid big files with
-spaghetti code.
 
-## Add new template
-To add a new template we should take a look in the folder structure:
-```yaml
-# templates (folder where project templating is going to be saved)
-  ## gitlab (section of the templating)
+By following this approach we are able to isolate code to the appropriate place, and ultimately avoid huge files with
+spaghetti code, which are harder to maintain.
+
+## Adding new templates
+
+Before adding a new template that other `.gitlab-ci.yml` files can inherit definitions from, we need to take a look at
+the folder structure:
+
 ```
-Inside gitlab folder we should create template YAML files that fits with a section, for example, for microservices
-we created a microservice-ci.yml to store the templates of that section. Same in infrastructure. Also, we should include 
-new templates in the index.yml in templates/index.yml
+templates    -> folder holding every single template in the project
+  |- gitlab  -> folder holding GitLab templates
+```
+
+To add a new template, we must add `yml` files to the `gitlab` folder, and make sure their name makes clear which kind
+of templates we are going to find there.
+
+For example, if we need a place to store templates for microservices, we should create a `microservice-ci.yml` file.
+Same applies for infrastructure: we would need file named `infrastructure-ci.yml`.
 ```yaml
 include:
   # CI templates
   - local: templates/gitlab/microservice-ci.yml
   - local: templates/gitlab/infrastructure-ci.yml
+```
+
+To ease referencing any kind of template, we should have a central `index.yml` file where all templates are included.
+The folder structure would then look like this:
+```
+/templates
+   |- /gitlab
+   |- index.yml
+```
+
+`index.yml` contents should look like this:
+```yaml
+include:
+  - local: 'gitlab/**/*.yml'
 ```

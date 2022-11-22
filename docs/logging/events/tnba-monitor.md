@@ -1,3 +1,9 @@
+---
+hide:
+  - navigation
+  - toc
+---
+
  **1. <G** ent Logging
 
 ## Process Workflows

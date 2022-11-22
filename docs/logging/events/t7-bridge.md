@@ -1,3 +1,9 @@
+---
+hide:
+  - navigation
+  - toc
+---
+
 # DRI Bridge Event Logging
 
 # Description

@@ -1,3 +1,9 @@
+---
+hide:
+  - navigation
+  - toc
+---
+
 # VeloCloud Bridge Event Logging
 
 # Description

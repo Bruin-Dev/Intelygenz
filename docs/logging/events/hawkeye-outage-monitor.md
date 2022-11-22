@@ -1,3 +1,9 @@
+---
+hide:
+  - navigation
+  - toc
+---
+
 # Hawkeye Outage Monitor Event Logging
 
 # Description

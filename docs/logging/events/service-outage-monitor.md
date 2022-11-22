@@ -1,3 +1,9 @@
+---
+hide:
+  - navigation
+  - toc
+---
+
 # Service Outage Monitor Event Logging
 
 # Description

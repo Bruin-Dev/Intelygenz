@@ -5,7 +5,9 @@ theme:
   icon:
     repo: fontawesome/brands/github
   features:
-    - navigation.tabs
+    - header.autohide
+    - toc.follow
+    - toc.integrate
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -17,34 +19,100 @@ markdown_extensions:
   - pymdownx.tasklist:
       custom_checkbox: true
 nav:
-  - Home: "README.md"
-  - Topics: 
-    - Concepts: "CONCEPTS.md"
-    - Pipelines:
-      - Basic configurations: "pipeline/BASIC_CI_CONFIGURATION.md"
-      - Pipeline rules: "pipeline/PIPELINE_RULES.md"
-    - Documentation:
-      - Organization: "DOCUMENTATION.md"
-      - MetTel decisions: "decisions/README.md"
-      - Metrics definitions: "metrics-definitions/README.md"
-    - Development rules: "README.md"
-    - Work in a local env:
-      - Launch docker compose: "kafka/LAUNCH_DOCKER_COMPOSE.md"
-    - Datalake: "snowflake/README.md"
-    - Manual procedures:
-      - Emergency recovery plan: "manual_procedures/EMERGENCY_PLAN.md"
-      - Vendor access to the API: "manual_procedures/API_VENDOR_ACCESS.md"
-      - Switch Automation Engine region: "manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION.md"
-    - Backups Recovery plans:
-      - ECR backup recovery: "backups/ECR_RECOVERY_PLAN.md"
-      - EKS SSH recovery: "backups/EKS_SSH_RECOVERY_PLAN.md"
-      - GIT recovery: "backups/GIT_RECOVERY_PLAN.md"
-      - Prometheus recovery: "backups/PROMETHEUS_RECOVERY_PLAN.md"
-      - Terraform recovery: "backups/TERRAFORM_RECOVERY_PLAN.md"
-    - Manual configurations:
-      - Init Automation Engine project: "manual_configurations/INIT_AUTOMATION_PROJECT.md"
-      - AWS SSO Okta configurations: "manual_configurations/OKTA_CONFIGURATIONS.md"
-      - AWS SSO Okta JWT token: "manual_configurations/OKTA_JWT.md"
+  - Concepts:
+      - Monorepo: "MONOREPO.md"
+
+  - CI/CD Pipelines:
+      - Pre-requisites:       "pipeline/BASIC_CI_CONFIGURATION.md"
+      - Setting up pipelines: "pipeline/PIPELINE_RULES.md"
+
+  - Documentation:
+      - About this documentation:                  "DOCUMENTATION.md"
+      - Architecture Decision Records (ADRs):      "decisions/README.md"
+      - Business:
+          - Metrics Definitions:                   "metrics-definitions/README.md"
+          - System Configuration:                  "parameters/parameters.md"
+          - Workflows:
+              - Communication between services:    "logging/events/messages-bus.md"
+              - Bridges:
+                  - Bruin:                         "logging/events/bruin-bridge.md"
+                  - DiGi:                          "logging/events/digi-bridge.md"
+                  - DRI (Data Remote Portal):      "logging/events/dri-bridge.md"
+                  - E-mail Services:               "logging/events/email-bridge.md"
+                  - Hawkeye / Ixia:                "logging/events/hawkeye-bridge.md"
+                  - Notification Services:         "logging/events/notifications-bridge.md"
+                  - ServiceNow:                    "logging/events/servicenow-bridge.md"
+                  - VeloCloud:                     "logging/events/velocloud-bridge.md"
+              - Use cases:
+                  - Caching Services:
+                      - Hawkeye / Ixia:            "logging/events/hawkeye-customer-cache.md"
+                      - VeloCloud:                 "logging/events/customer-cache.md"
+                  - DiGi:
+                      - Reporting:
+                          - Reboot Report:         "logging/events/digi-reboot-report.md"
+                  - Fraud:
+                      - Monitoring:
+                          - Fraud Alerts:          "logging/events/fraud-monitor.md"
+                  - Hawkeye / Ixia:
+                      - Monitoring:
+                          - Service Outage:        "logging/events/hawkeye-outage-monitor.md"
+                  - InterMapper:
+                      - Monitoring:
+                          - Service Outage:        "logging/events/intermapper-outage-monitor.md"
+                  - LuminAI:
+                      - Reporting:
+                          - Billing Report:        "logging/events/lumin-billing-report.md"
+                  - Tasks scheduling:              "logging/events/task-dispatcher.md"
+                  - VeloCloud:
+                      - Reporting:
+                          - Last Contact Report:   "logging/events/last-contact-report.md"
+                      - Monitoring:
+                          - SD-WAN:
+                              - Service Affecting: "logging/events/service-affecting-monitor.md"
+                              - Service Outage:    "logging/events/service-outage-monitor.md"
+                          - Gateways:              "logging/events/gateway-monitor.md"
+
+  - Working in local environments:
+      - Automation:
+          - Metrics:
+              - Creating new metrics:  "CREATE_NEW_METRIC.md"
+          - Business Services:
+              - Creating new services: "CREATE_NEW_MICROSERVICE.md"
+      - Data Lake:
+          - Running in docker-compose: "kafka/LAUNCH_DOCKER_COMPOSE.md"
+
+  - System Overview:
+      - Automation Engine:
+          - Architecture & Infrastructure: "SYSTEM_OVERVIEW.md"
+          - Infrastructure as Code:        "INFRASTRUCTURE_AS_CODE.md"
+          - Logging & Monitoring:          "LOGGING_AND_MONITORING.md"
+          - Pipelines:                     "PIPELINES.md"
+      - Data Lake:
+          - Snowflake:                     "snowflake/README.md"
+
+  - Manual Procedures:
+      - Emergency Recovery Plan:                   "manual_procedures/EMERGENCY_PLAN.md"
+      - Grant vendors access to the Data Lake API: "manual_procedures/API_VENDOR_ACCESS.md"
+      - Switch Automation Engine's region:         "manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION.md"
+
+  - Backups Recovery Plans:
+      - AWS:
+          - ECR:                    "backups/ECR_RECOVERY_PLAN.md"
+          - EKS SSH:                "backups/EKS_SSH_RECOVERY_PLAN.md"
+      - Infrastructure:
+          - Terraform:              "backups/TERRAFORM_RECOVERY_PLAN.md"
+      - Metrics:
+          - Prometheus:             "backups/PROMETHEUS_RECOVERY_PLAN.md"
+      - Source Code:
+          - GIT repository:         "backups/GIT_RECOVERY_PLAN.md"
+      - System Configuration:
+          - Parameters Replication: "lambda/PARAMETER_REPLICATOR.md"
+
+  - Manual Configurations:
+      - Initialize Automation Engine project:   "manual_configurations/INIT_AUTOMATION_PROJECT.md"
+      - AWS SSO - OKTA:
+          - Configurations:                     "manual_configurations/OKTA_CONFIGURATIONS.md"
+          - JWT token:                          "manual_configurations/OKTA_JWT.md"
 extra:
   version:
     provider: mike

@@ -1,3 +1,9 @@
+---
+hide:
+  - navigation
+  - toc
+---
+
 # Task Dispatcher Event Logging
 
 # Description

@@ -1,3 +1,9 @@
+---
+hide:
+  - navigation
+  - toc
+---
+
 # DiGi Reboot Report Event Logging
 
 # Description

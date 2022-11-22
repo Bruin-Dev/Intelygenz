@@ -2,29 +2,45 @@
 <img src="http://photos.prnewswire.com/prnfull/20141022/153661LOGO?p=publish"  width="300" height="120">
 </div>
 
-# 1. CI/CD PROJECT CONFIGURATION FROM 0
-To release this project an make it work we need to configure next stuff:
-- semantic release
-- AIVEN
-- AWS
+# Setting up the CI/CD from scratch
+To release this project and make it work, we first need to set up the following items:
 
-# 1.1 Semantic Release
-Semantic release is depending of a base image in this repository to be faster on this project CI/CD. The only two configurations
-we need to make it work here is:
-- Have prepared the base image repository and point to that image in the .gitlab-ci.yml(variable SEMANTIC_RELEASE_IMAGE)
-- Get an access token on the project (Settings/Access tokens) and get all permissions to interacts with the API. Create a variable called GITLAB_TOKEN and put the token you crete there.
+- [Semantic Release](#semantic-release)
+- [AWS](#aws)
+- [AIVEN](#aiven)
+- [Snowflake](#snowflake)
 
-# 1.2 AIVEN
+## Semantic Release
+Semantic release depends on a base image stored on the GitLab repository that makes pipelines able to finish in a reasonable amount
+of time.
+
+The only two configurations we need to make it work are:
+
+- Make sure that the base image repository is ready to be used, and point to that image in the project's root `.gitlab-ci.yml`
+  through the variable `SEMANTIC_RELEASE_IMAGE`.
+
+- Get an access token on the project (`Settings > Access tokens`), and get all permissions required to interact with the API.
+
+    After getting the access token, make sure to create a variable called `GITLAB_TOKEN` and set its value with it.
+
+## AWS
+It's recommended to create an account for Terraform and a group of permissions with admin access. It's also necessary to create
+an AWS S3 bucket that the user can access to.
+
+To connect to AWS from some steps of the CI/CD, we need to add the following variables to `Settings > CI/CD`:
+
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+
+> Make sure NOT to add these configurations to the project's root `.gitlab-ci.yml` to avoid potential security risks.
+
+These two variables are mandatory for the CI/CD to be able to connect to the AWS S3 bucket, as we store Terraform's `tfstate` files to
+_remember_ the state of our infrastructure deployments.
+
+## AIVEN
+
 _TODO_
 
-# 1.3 AWS
-It's recommended to create an account for terraform and a group of permissions with admin access, also it's necessary to create
-an S3 bucket that the user can access to. To accomplish aws connection in some steps of the CI/CD we need to add next 
-variables (on the settings section, not in the YAML) in the CI:
-- AWS_ACCESS_KEY_ID
-- AWS_SECRET_ACCESS_KEY
+## Snowflake
 
-It's necessary to connect to the S3 from amazon, where we store the tfstate files to maintain the state of 
-our infrastructure deployments.
-
-# 1.4 Snowflake
+_TODO_

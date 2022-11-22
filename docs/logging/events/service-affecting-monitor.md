@@ -1,3 +1,9 @@
+---
+hide:
+  - navigation
+  - toc
+---
+
 # Service Affecting Monitor Event Logging
 
 # Description

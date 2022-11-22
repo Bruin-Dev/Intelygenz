@@ -1,3 +1,9 @@
+---
+hide:
+  - navigation
+  - toc
+---
+
 # Service Now Bridge Event Logging
 
 # Description

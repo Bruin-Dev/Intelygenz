@@ -1,3 +1,9 @@
+---
+hide:
+  - navigation
+  - toc
+---
+
 # Bruin Bridge Event Logging
 
 # Description

@@ -1,3 +1,9 @@
+---
+hide:
+  - navigation
+  - toc
+---
+
 # Hawkeye Customer Cache Event Logging
 
 # Description

@@ -1,3 +1,9 @@
+---
+hide:
+  - navigation
+  - toc
+---
+
 # Fraud Monitor Event Logging
 
 # Description
