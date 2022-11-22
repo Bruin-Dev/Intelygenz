@@ -14,13 +14,17 @@ WORKDIR /tmp
 # Copy and install FIPS compliant cryptography packages
 COPY ubuntu18-fips/packages packages/
 
+# Install golang
 RUN apt-get update -y -q && apt-get upgrade -y -q
 RUN DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y -q curl build-essential ca-certificates git
+RUN curl -s https://storage.googleapis.com/golang/go1.18.2.linux-amd64.tar.gz| tar -v -C /usr/local -xz
+ENV PATH $PATH:/usr/local/go/bin
 
 # Install FIPS compliant cryptography packages and clean
 # hadolint ignore=DL3015 We want to install any extra FIPS packages
 # hadolint ignore=DL3008 We won't pin versions of FIPS packages
-RUN apt-get install --reinstall --yes --quiet ./packages/*.deb && \
+RUN apt-get --yes install libseccomp-dev && \
+    apt-get install --reinstall --yes --quiet ./packages/*.deb && \
     apt-get clean && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists/* /tmp/* ~/* %&& \
@@ -38,12 +42,8 @@ USER ${NON_ROOT_USER}
 WORKDIR /home/${NON_ROOT_USER}
 
 # INSTALL RELOADER
-RUN wget -nc -P /tmp/bitnami/pkg/cache/ https://downloads.bitnami.com/files/stacksmith/external-dns-0.12.1-0-linux-amd64-debian-11.tar.gz && \
-    echo "7033df14ab250855c75eb2835caff6e408265ec4c8ea86f33bfcfea284168c1e  /tmp/bitnami/pkg/cache/external-dns-0.12.1-0-linux-amd64-debian-11.tar.gz" | sha256sum -c - && \
-    tar -zxf /tmp/bitnami/pkg/cache/external-dns-0.12.1-0-linux-amd64-debian-11.tar.gz -P --transform 's|^[^/]*/files|/home/nroot/external-dns|' --wildcards '*/files' && \
-    rm -rf /tmp/bitnami/pkg/cache/external-dns-0.12.1-0-linux-amd64-debian-11.tar.gz
-RUN chmod g+rwX /home/nroot/external-dns
+RUN go get github.com/tools/godep
 
-EXPOSE 7979
+RUN godep version
 
-ENTRYPOINT ["/home/nroot/external-dns"]
+CMD ["/bin/bash"]

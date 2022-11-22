@@ -48,6 +48,7 @@ RUN cp external-secrets/go.mod .
 RUN cp external-secrets/go.sum . 
 RUN cp -R external-secrets/apis . 
 RUN cp -R external-secrets/pkg . 
+RUN cp -R external-secrets/e2e . 
 
 RUN go mod download
 RUN rm -rf external-secrets

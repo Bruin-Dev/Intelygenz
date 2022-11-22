@@ -1,7 +1,7 @@
 #NOTE: This dockerfile is made to be run with context in the root of the monorepo
 FROM ubuntu:18.04
 
-ARG NON_ROOT_USER=www-data
+ARG NON_ROOT_USER=nroot
 ARG CONTAINER_VERSION
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -30,7 +30,8 @@ RUN apt-get install --reinstall --yes --quiet ./packages/*.deb && \
     rm -rf ./packages
 
 # Create a non-root user
-RUN useradd ${NON_ROOT_USER} --system --create-home --uid 1001 --gid 1001 && \
+RUN groupadd ${NON_ROOT_USER} --gid 1001 && \
+    useradd ${NON_ROOT_USER} --system --create-home --uid 1001 --gid 1001 && \
     chown ${NON_ROOT_USER}:${NON_ROOT_USER} /home/${NON_ROOT_USER}
 
 # Set workdir to user home
