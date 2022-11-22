@@ -63,7 +63,7 @@ WORKDIR /home/${NON_ROOT_USER}
 #WORKDIR /service/app
 #RUN poetry install --only main
 
-COPY --chwon=nroot:0 pyutils_automation/py310 /pyutils_automation/py310
+COPY --chown=nroot:0 pyutils_automation/py310 /pyutils_automation/py310
 WORKDIR /pyutils_automation/py310
 RUN poetry install --no-dev
 

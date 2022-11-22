@@ -61,7 +61,7 @@ WORKDIR /home/${NON_ROOT_USER}
 #WORKDIR /pyutils_automation/py310
 #RUN poetry install --only main
 
-#COPY services/service-outage-monitor/ /service/app
+#COPY services/repair-tickets-monitor/ /service/app
 #WORKDIR /service/app
 #RUN poetry install --only main
 
