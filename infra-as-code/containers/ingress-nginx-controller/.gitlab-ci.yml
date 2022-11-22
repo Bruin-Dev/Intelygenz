@@ -5,7 +5,7 @@ packer-ingress-nginx-controller:
   variables:
     ECR_REPOSITORY_NAME: ingress-nginx-controller
     PACKER_DIR_MODULE: "../../infra-as-code/containers/ingress-nginx-controller/"
-    ECR_REPOSITORY_TAG: "v0.4.4"
+    ECR_REPOSITORY_TAG: "controller-v1.1.0"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: never

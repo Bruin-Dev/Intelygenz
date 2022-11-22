@@ -1,7 +1,7 @@
 #NOTE: This dockerfile is made to be run with context in the root of the monorepo
 FROM ubuntu:18.04
 
-ARG NON_ROOT_USER=nroot
+ARG NON_ROOT_USER=www-data
 ARG CONTAINER_VERSION
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -34,23 +34,48 @@ RUN groupadd ${NON_ROOT_USER} --gid 1001 && \
     useradd ${NON_ROOT_USER} --system --create-home --uid 1001 --gid 1001 && \
     chown ${NON_ROOT_USER}:${NON_ROOT_USER} /home/${NON_ROOT_USER}
 
-# Use non-root user
-USER ${NON_ROOT_USER}
-
 # Set workdir to user home
 WORKDIR /home/${NON_ROOT_USER}
 
 # INSTALL RELOADER
-RUN git clone --depth 1 --branch ${CONTAINER_VERSION} https://github.com/external-secrets/external-secrets.git
+RUN git clone --depth 1 --branch ${CONTAINER_VERSION} https://github.com/kubernetes/ingress-nginx.git
 
-RUN cp external-secrets/main.go .
-RUN cp external-secrets/go.mod .
-RUN cp external-secrets/go.sum . 
+RUN cp -R ingress-nginx/rootfs/etc /etc
+RUN cp -R ingress-nginx/rootfs/bin/${TARGETARCH}/dbg /
+RUN cp -R ingress-nginx/rootfs/bin/${TARGETARCH}/nginx-ingress-controller /
+RUN cp -R ingress-nginx/rootfs/bin/${TARGETARCH}/wait-shutdown /
 
-RUN go mod download
-RUN rm -rf external-secrets
+RUN bash -xeu -c ' \
+  writeDirs=( \
+    /etc/ingress-controller \
+    /etc/ingress-controller/ssl \
+    /etc/ingress-controller/auth \
+    /var/log \
+    /var/log/nginx \
+  ); \
+  for dir in "${writeDirs[@]}"; do \
+    mkdir -p ${dir}; \
+    chown -R www-data.www-data ${dir}; \
+  done'
 
-RUN RUN go build -o external-secrets main.go
-RUN chmod g+rwX /home/nroot/external-secrets
+RUN apk add --no-cache libcap \
+  && setcap    cap_net_bind_service=+ep /nginx-ingress-controller \
+  && setcap -v cap_net_bind_service=+ep /nginx-ingress-controller \
+  && setcap    cap_net_bind_service=+ep /usr/local/nginx/sbin/nginx \
+  && setcap -v cap_net_bind_service=+ep /usr/local/nginx/sbin/nginx \
+  && setcap    cap_net_bind_service=+ep /usr/bin/dumb-init \
+  && setcap -v cap_net_bind_service=+ep /usr/bin/dumb-init \
+  && apk del libcap
 
-ENTRYPOINT ["/home/nroot/external-secrets"]
+RUN rm -rf ingress-nginx
+
+# Use non-root user
+USER ${NON_ROOT_USER}
+
+# Create symlinks to redirect nginx logs to stdout and stderr docker log collector
+RUN  ln -sf /dev/stdout /var/log/nginx/access.log \
+  && ln -sf /dev/stderr /var/log/nginx/error.log
+
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+
+CMD ["/nginx-ingress-controller"]

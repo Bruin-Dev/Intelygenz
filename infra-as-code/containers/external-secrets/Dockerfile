@@ -50,7 +50,7 @@ RUN cp external-secrets/go.sum .
 RUN go mod download
 RUN rm -rf external-secrets
 
-RUN RUN go build -o external-secrets main.go
+RUN go build -o external-secrets main.go
 RUN chmod g+rwX /home/nroot/external-secrets
 
 ENTRYPOINT ["/home/nroot/external-secrets"]
