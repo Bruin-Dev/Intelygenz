@@ -14,11 +14,8 @@ WORKDIR /tmp
 # Copy and install FIPS compliant cryptography packages
 COPY ubuntu18-fips/packages packages/
 
-# Install golang
 RUN apt-get update -y -q && apt-get upgrade -y -q
 RUN DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y -q curl build-essential ca-certificates git
-RUN curl -s https://storage.googleapis.com/golang/go1.18.2.linux-amd64.tar.gz| tar -v -C /usr/local -xz
-ENV PATH $PATH:/usr/local/go/bin
 
 # Install FIPS compliant cryptography packages and clean
 # hadolint ignore=DL3015 We want to install any extra FIPS packages
@@ -41,18 +38,12 @@ USER ${NON_ROOT_USER}
 WORKDIR /home/${NON_ROOT_USER}
 
 # INSTALL RELOADER
-RUN git clone --depth 1 --branch ${CONTAINER_VERSION} https://github.com/external-secrets/external-secrets.git
+RUN wget -nc -P /tmp/bitnami/pkg/cache/ https://downloads.bitnami.com/files/stacksmith/external-dns-0.12.1-0-linux-amd64-debian-11.tar.gz && \
+    echo "7033df14ab250855c75eb2835caff6e408265ec4c8ea86f33bfcfea284168c1e  /tmp/bitnami/pkg/cache/external-dns-0.12.1-0-linux-amd64-debian-11.tar.gz" | sha256sum -c - && \
+    tar -zxf /tmp/bitnami/pkg/cache/external-dns-0.12.1-0-linux-amd64-debian-11.tar.gz -P --transform 's|^[^/]*/files|/home/nroot/external-dns|' --wildcards '*/files' && \
+    rm -rf /tmp/bitnami/pkg/cache/external-dns-0.12.1-0-linux-amd64-debian-11.tar.gz
+RUN chmod g+rwX /home/nroot/external-dns
 
-RUN cp external-secrets/main.go .
-RUN cp external-secrets/go.mod .
-RUN cp external-secrets/go.sum . 
-RUN cp -R external-secrets/apis . 
-RUN cp -R external-secrets/pkg . 
+EXPOSE 7979
 
-RUN go mod download
-RUN rm -rf external-secrets
-
-RUN go build -o external-secrets main.go
-RUN chmod g+rwX /home/nroot/external-secrets
-
-ENTRYPOINT ["/home/nroot/external-secrets"]
+ENTRYPOINT ["/home/nroot/external-dns"]

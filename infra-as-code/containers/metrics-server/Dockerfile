@@ -43,7 +43,6 @@ WORKDIR /home/${NON_ROOT_USER}
 # INSTALL RELOADER
 RUN git clone --depth 1 --branch ${CONTAINER_VERSION} https://github.com/kubernetes-sigs/metrics-server.git
 
-RUN cp metrics-server/main.go .
 RUN cp metrics-server/go.mod .
 RUN cp metrics-server/go.sum . 
 RUN cp -R metrics-server/pkg ./pkg 

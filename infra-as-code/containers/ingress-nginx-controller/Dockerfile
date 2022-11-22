@@ -30,8 +30,7 @@ RUN apt-get install --reinstall --yes --quiet ./packages/*.deb && \
     rm -rf ./packages
 
 # Create a non-root user
-RUN groupadd ${NON_ROOT_USER} --gid 1001 && \
-    useradd ${NON_ROOT_USER} --system --create-home --uid 1001 --gid 1001 && \
+RUN useradd ${NON_ROOT_USER} --system --create-home --uid 1001 --gid 1001 && \
     chown ${NON_ROOT_USER}:${NON_ROOT_USER} /home/${NON_ROOT_USER}
 
 # Set workdir to user home
