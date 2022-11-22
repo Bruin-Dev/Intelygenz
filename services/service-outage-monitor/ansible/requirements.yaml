@@ -1,0 +1,9 @@
+---
+collections:
+  - name: community.docker
+    source: https://galaxy.ansible.com
+roles:
+  - name: geerlingguy.pip
+    source: https://galaxy.ansible.com
+  - name: geerlingguy.docker
+    source: https://galaxy.ansible.com
