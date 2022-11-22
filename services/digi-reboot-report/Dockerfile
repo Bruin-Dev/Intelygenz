@@ -55,7 +55,7 @@ USER ${NON_ROOT_USER}
 # Set workdir to user home
 WORKDIR /home/${NON_ROOT_USER}
 
-#COPY --chwon=nroot:0 pyutils_automation/py310 /pyutils_automation/py310
+#COPY --chown=nroot:0 pyutils_automation/py310 /pyutils_automation/py310
 #WORKDIR /pyutils_automation/py310
 #RUN poetry install --only main
 
@@ -84,7 +84,7 @@ CMD ["python3", "-u", "src/app.py"]
 # ENV PATH="/root/.local/bin:$PATH"
 # ENV POETRY_VIRTUALENVS_CREATE=false
 
-# COPY --chwon=nroot:0 pyutils_automation/py310 /pyutils_automation/py310
+# COPY --chown=nroot:0 pyutils_automation/py310 /pyutils_automation/py310
 # WORKDIR /pyutils_automation/py310
 # RUN poetry install --no-dev
 

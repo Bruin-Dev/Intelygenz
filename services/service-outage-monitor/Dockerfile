@@ -55,14 +55,17 @@ USER ${NON_ROOT_USER}
 # Set workdir to user home
 WORKDIR /home/${NON_ROOT_USER}
 
-#COPY --chwon=nroot:0 pyutils_automation/py310 /pyutils_automation/py310
-#WORKDIR /pyutils_automation/py310
-#RUN poetry install --only main
+# Copy utils and install with Poetry
+COPY --chown=${NON_ROOT_USER}:0 pyutils_automation/py310 /pyutils_automation/py310
+WORKDIR /pyutils_automation/py310
+RUN poetry install --only main
 
-#COPY services/service-outage-monitor/ /service/app
-#WORKDIR /service/app
-#RUN poetry install --only main
+COPY --chown=${NON_ROOT_USER}:0 services/service-outage-monitor/ /service/app
+WORKDIR /service/app
+RUN poetry install --only main
 
+# # Expose ports for the service 
 EXPOSE 5000 9090
 
+# ExposeRun the service
 CMD ["python3", "-u", "src/app.py"]

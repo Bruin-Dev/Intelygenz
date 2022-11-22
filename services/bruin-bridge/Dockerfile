@@ -55,44 +55,17 @@ USER ${NON_ROOT_USER}
 # Set workdir to user home
 WORKDIR /home/${NON_ROOT_USER}
 
-#COPY --chwon=nroot:0 pyutils_automation/py310 /pyutils_automation/py310
-#WORKDIR /pyutils_automation/py310
-#RUN poetry install --only main
-
-#COPY services/service-outage-monitor/ /service/app
-#WORKDIR /service/app
-#RUN poetry install --only main
-COPY pyutils_automation/py310 /pyutils_automation/py310
+# Copy utils and install with Poetry
+COPY --chown=${NON_ROOT_USER}:0 pyutils_automation/py310 /pyutils_automation/py310
 WORKDIR /pyutils_automation/py310
-RUN poetry install --only main
+RUN install --only main
 
-COPY services/bruin-bridge/ /service/app
+COPY --chown=${NON_ROOT_USER}:0 services/bruin-bridge/ /service/app
 WORKDIR /service/app
 RUN poetry install --only main
 
+# Expose ports for the service
 EXPOSE 5000 9090
 
+# Run the service
 CMD ["python3", "-u", "src/app.py"]
-
-#OLD Dockerfile
-#NOTE: This dockerfile is made to be run with context in the root of the monorepo
-# ARG REPOSITORY_URL
-# ARG DOCKER_BASE_IMAGE_VERSION
-# FROM registry.gitlab.intelygenz.com/mettel/dockers/images/python3.10-base:1.0.0
-
-# ENV PYTHONUNBUFFERED 1
-# ENV PATH="/root/.local/bin:$PATH"
-# ENV POETRY_VIRTUALENVS_CREATE=false
-
-# RUN wget https://install.python-poetry.org -O poetry-install.py
-# RUN python poetry-install.py
-
-# COPY pyutils_automation/py310 /pyutils_automation/py310
-# WORKDIR /pyutils_automation/py310
-# RUN poetry install --only main
-
-# COPY services/bruin-bridge/ /service/app
-# WORKDIR /service/app
-# RUN poetry install --only main
-
-# CMD ["python3", "-u", "src/app.py"]
