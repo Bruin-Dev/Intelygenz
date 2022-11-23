@@ -53,7 +53,6 @@ RUN go mod download
 RUN rm -rf metrics-server
 RUN make metrics-server
 
-RUN go build -o metrics-server main.go
 RUN chmod g+rwX /home/nroot/metrics-server
 
 ENTRYPOINT ["/home/nroot/metrics-server"]
