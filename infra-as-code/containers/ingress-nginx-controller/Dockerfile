@@ -23,7 +23,8 @@ ENV PATH $PATH:/usr/local/go/bin
 # Install FIPS compliant cryptography packages and clean
 # hadolint ignore=DL3015 We want to install any extra FIPS packages
 # hadolint ignore=DL3008 We won't pin versions of FIPS packages
-RUN apt-get install --reinstall --yes --quiet ./packages/*.deb && \
+RUN apt-get install --yes diffutils && \ 
+    apt-get install --reinstall --yes --quiet ./packages/*.deb && \
     apt-get clean && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists/* /tmp/* ~/* %&& \

@@ -1,11 +1,20 @@
 
 packer-ingress-nginx-controller:
-  extends: .packer_eks_build_image
   stage: k8s_packer
+  image:
+    name: hashicorp/packer:latest
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   variables:
     ECR_REPOSITORY_NAME: ingress-nginx-controller
-    PACKER_DIR_MODULE: "../../infra-as-code/containers/ingress-nginx-controller/"
+    PACKER_DIR_MODULE: "../../../infra-as-code/containers/ingress-nginx-controller/"
     ECR_REPOSITORY_TAG: "controller-v1.1.0"
+  before_script:
+    - source ci-utils/environments/environment_assign.sh
+  script:
+    - cd infra-as-code/containers/ingress-nginx-controller
+    - packer build packer.pkr.hcl
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: never
