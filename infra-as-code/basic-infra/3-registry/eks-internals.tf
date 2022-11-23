@@ -69,3 +69,21 @@ resource "aws_ecr_repository" "eks_cluster_autoscaler_aws" {
     Module        = "cluster-autoscaler-aws"
   }
 }
+
+resource "aws_ecr_repository" "eks_nats" {
+  name = "nats"
+  tags = {
+    Project       = var.common_info.project
+    Provisioning  = var.common_info.provisioning
+    Module        = "nats"
+  }
+}
+
+resource "aws_ecr_repository" "eks_prometheus-nats-exporter" {
+  name = "prometheus-nats-exporter"
+  tags = {
+    Project       = var.common_info.project
+    Provisioning  = var.common_info.provisioning
+    Module        = "prometheus-nats-exporter"
+  }
+}
