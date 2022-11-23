@@ -55,33 +55,14 @@ USER ${NON_ROOT_USER}
 # Set workdir to user home
 WORKDIR /home/${NON_ROOT_USER}
 
-#COPY --chown=nroot:0 pyutils_automation/py310 /pyutils_automation/py310
-#WORKDIR /pyutils_automation/py310
-#RUN poetry install --only main
+COPY --chown=${NON_ROOT_USER}:0 pyutils_automation/py310 /pyutils_automation/py310
+WORKDIR /pyutils_automation/py310
+RUN poetry install --only main
 
-#COPY services/service-outage-monitor/ /service/app
-#WORKDIR /service/app
-#RUN poetry install --only main
+COPY --chown=${NON_ROOT_USER}:0 services/service-outage-monitor/ /service/app
+WORKDIR /service/app
+RUN poetry install --only main
 
 EXPOSE 5000 9090
 
 CMD ["python3", "-u", "src/app.py"]
-
-
-
-
-
-#RUN wget https://install.python-poetry.org -O poetry-install.py
-#RUN python poetry-install.py
-#ENV PATH="/root/.local/bin:$PATH"
-#ENV POETRY_VIRTUALENVS_CREATE=false
-
-#COPY pyutils_automation/py310 /pyutils_automation/py310
-#WORKDIR /pyutils_automation/py310
-#RUN poetry install --only main
-
-#COPY services/service-affecting-monitor/ /service/app
-#WORKDIR /service/app
-#RUN poetry install --only main
-
-#CMD ["python3", "-u", "src/app.py"]

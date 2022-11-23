@@ -55,41 +55,14 @@ USER ${NON_ROOT_USER}
 # Set workdir to user home
 WORKDIR /home/${NON_ROOT_USER}
 
-#COPY --chown=nroot:0 pyutils_automation/py310 /pyutils_automation/py310
-#WORKDIR /pyutils_automation/py310
-#RUN poetry install --only main
-
-#COPY services/service-outage-monitor/ /service/app
-#WORKDIR /service/app
-#RUN poetry install --only main
-
-COPY --chown=nroot:0 pyutils_automation/py310 /pyutils_automation/py310
+COPY --chown=${NON_ROOT_USER}:0 pyutils_automation/py310 /pyutils_automation/py310
 WORKDIR /pyutils_automation/py310
 RUN poetry install --no-dev
 
-COPY services/digi-reboot-report/ /service/app
+COPY --chown=${NON_ROOT_USER}:0 services/digi-reboot-report/ /service/app
 WORKDIR /service/app
 RUN poetry install --no-dev
 
 EXPOSE 5000 9090
 
 CMD ["python3", "-u", "src/app.py"]
-
-#Old Dockerfile
-#NOTE: This dockerfile is made to be run with context in the root of the monorepo
-# FROM registry.gitlab.intelygenz.com/mettel/dockers/images/python3.10-base:1.0.0
-
-# RUN wget https://install.python-poetry.org -O poetry-install.py
-# RUN python poetry-install.py
-# ENV PATH="/root/.local/bin:$PATH"
-# ENV POETRY_VIRTUALENVS_CREATE=false
-
-# COPY --chown=nroot:0 pyutils_automation/py310 /pyutils_automation/py310
-# WORKDIR /pyutils_automation/py310
-# RUN poetry install --no-dev
-
-# COPY services/digi-reboot-report/ /service/app
-# WORKDIR /service/app
-# RUN poetry install --no-dev
-
-# CMD ["python3", "-u", "src/app.py"]
