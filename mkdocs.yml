@@ -8,6 +8,8 @@ theme:
     - header.autohide
     - toc.follow
     - toc.integrate
+plugins:
+  - glightbox
 
 markdown_extensions:
   - pymdownx.highlight:
