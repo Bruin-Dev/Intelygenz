@@ -4,7 +4,7 @@ hide:
   - toc
 ---
 
-# Service Now Bridge Event Logging
+# ServiceNow Bridge Event Logging
 
 # Description
 

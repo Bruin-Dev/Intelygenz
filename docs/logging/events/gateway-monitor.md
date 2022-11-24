@@ -4,7 +4,7 @@ hide:
   - toc
 ---
 
-# Intermapper Event Logging
+# Gateway Monitor Event Logging
 
 # Description
 

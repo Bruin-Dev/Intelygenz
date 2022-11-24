@@ -9,6 +9,7 @@ hide:
 # Description
 
 The Customer Cache service has two responsibilities:
+
 * Run a periodic job that retrieves non-volatile data from VeloCloud and Bruin for all edges across VCOs, and then cross the
   data from both systems and store the resulting cache to a Redis instance. The cache will remain valid until the next successful
   execution of the job.

@@ -4,7 +4,7 @@ hide:
   - toc
 ---
 
-# Last Contact Report Event Logging
+# Lumin Billing Report Event Logging
 
 # Description
 

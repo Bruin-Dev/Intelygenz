@@ -4,7 +4,7 @@ hide:
   - toc
 ---
 
-# DRI Bridge Event Logging
+# T7 Bridge Event Logging
 
 # Description
 

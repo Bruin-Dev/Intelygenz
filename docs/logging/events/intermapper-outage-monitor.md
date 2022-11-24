@@ -4,12 +4,13 @@ hide:
   - toc
 ---
 
-# Intermapper Event Logging
+# InterMapper Outage Monitor Event Logging
 
 # Description
 
 The mission of this service is to analyze InterMapper events sent by one or more InterMapper instances via e-mail, where each
 event refers to a device. The outcome of the analysis will determine whether:
+
 * A new Bruin ticket is created, if the device is down.
 * An existing Bruin ticket is re-opened, if the device is down and the ticket is resolved.
 * An existing Bruin ticket is auto-resolved, if the device is up and the ticket is open.
