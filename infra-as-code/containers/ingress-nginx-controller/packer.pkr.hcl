@@ -249,7 +249,7 @@ build {
       "sudo ./aws/install",
       "export AWS_ACCESS_KEY_ID=${var.AWS_ACCESS_KEY_ID}",
       "export AWS_SECRET_ACCESS_KEY=${var.AWS_SECRET_ACCESS_KEY}",
-      "git clone --depth 1 --branch ${ECR_REPOSITORY_TAG} https://github.com/kubernetes/ingress-nginx.git",
+      "git clone --depth 1 --branch ${var.ECR_REPOSITORY_TAG} https://github.com/kubernetes/ingress-nginx.git",
       "cd ingress-nginx",
       "make build",
       "cd ..",

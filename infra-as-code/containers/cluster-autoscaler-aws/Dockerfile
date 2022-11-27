@@ -44,6 +44,4 @@ WORKDIR /home/${NON_ROOT_USER}
 # INSTALL RELOADER
 RUN go get github.com/tools/godep
 
-RUN godep version
-
 CMD ["/bin/bash"]
