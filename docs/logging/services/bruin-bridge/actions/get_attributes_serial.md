@@ -25,7 +25,7 @@ logger.info(f"'Getting attribute's serial number with filters: {json.dumps(filte
 
 ```python
 logger.info(
-            f"'Attribute's serial number published in event bus for request {json.dumps(msg)}. '"
-            f"Message published was {response}"
-        )
+    f"'Attribute's serial number published in event bus for request {json.dumps(msg)}. '"
+    f"Message published was {response}"
+)
 ```

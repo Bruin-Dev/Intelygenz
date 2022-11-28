@@ -4,14 +4,14 @@
 logger.info(f"Getting ticket task history for ticket: {filters}")
 ```
 
-Call Bruin API endpoint `GET /api/Ticket/AITicketData?ticketId={filters["ticket_id"]}` with the desired payload.
+Call Bruin API endpoint `GET /api/Ticket/AITicketData?ticketId={ticketId}` with the desired payload.
 
 * If there's an error while connecting to Bruin API:
   ```python
   logger.error(f"A connection error happened while trying to connect to Bruin API -> {e}")
   ```
   END
-* 
+
 * If the status of the HTTP response is in range `200 - 300`:
   ```python
   logger.info(f"Got ticket task history for : {filters}")
@@ -25,12 +25,12 @@ Call Bruin API endpoint `GET /api/Ticket/AITicketData?ticketId={filters["ticket_
   END
 
 * If the status of the HTTP response is `401`:
-  ```python
-  logger.error(f"Got 401 from Bruin. Re-logging in...")
-  ```
-  [login](../../clients/bruin_client/login.md)
+    ```python
+    logger.error(f"Got 401 from Bruin. Re-logging in...")
+    ```
+    [login](../../clients/bruin_client/login.md)
 
-  END
+    END
 
 * If the status of the HTTP response is in range `500 - 513`:
   ```python

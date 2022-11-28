@@ -94,5 +94,7 @@ logger.info(
       END
 
 * If device should be forwarded to the `IPA Investigate` work queue:
-  * [_schedule_forward_to_queue](_schedule_forward_to_queue.md) (`IPA Investigate` queue)
-  * [_schedule_forward_to_queue](_schedule_forward_to_queue.md) (`HNOC Investigate` queue)
+
+    [_schedule_forward_to_queue](_schedule_forward_to_queue.md) (`IPA Investigate` queue)
+
+    [_schedule_forward_to_queue](_schedule_forward_to_queue.md) (`HNOC Investigate` queue)

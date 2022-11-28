@@ -9,8 +9,8 @@ _Message arrives at subject_
   [mark_email_as_done](../repositories/bruin_repository/mark_email_as_done.md)
 
 * else
-  ```python
-  logger.error(f"Cannot mark emails as done using {json.dumps(msg)}. JSON malformed")
-  ```
+    ```python
+    logger.error(f"Cannot mark emails as done using {json.dumps(msg)}. JSON malformed")
+    ```
 
-  END
+    END

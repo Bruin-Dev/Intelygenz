@@ -7,7 +7,8 @@ logger.info("Scheduling InterMapper Monitor job...")
   ```python
   logger.info("InterMapper Monitor job is going to be executed immediately")
   ```
-  [_intermapper_monitoring_process](_intermapper_monitoring_process.md)
+
+[_intermapper_monitoring_process](_intermapper_monitoring_process.md)
 
 * If there's a running job to monitor InterMapper events already:
   ```python

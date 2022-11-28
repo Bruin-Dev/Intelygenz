@@ -29,6 +29,6 @@ Call Hawkeye API endpoint `GET /probes` with the set of desired query parameters
 
 * If the status of the HTTP response is between `500` and `513` (both inclusive):
 
-  [__log_result](__log_result.md)
+    [__log_result](__log_result.md)
   
-  END
+    END

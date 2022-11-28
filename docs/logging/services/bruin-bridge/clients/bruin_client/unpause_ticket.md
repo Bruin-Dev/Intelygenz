@@ -25,12 +25,12 @@ Call Bruin API endpoint `POST /api/Ticket/{ticket_id}/detail/unpause` with the d
   END
 
 * If the status of the HTTP response is `401`:
-  ```python
-  logger.error(f"Got 401 from Bruin. Re-logging in...")
-  ```
-  [login](../../clients/bruin_client/login.md)
+    ```python
+    logger.error(f"Got 401 from Bruin. Re-logging in...")
+    ```
+    [login](../../clients/bruin_client/login.md)
 
-  END
+    END
 
 * If the status of the HTTP response is `403`:
   ```python

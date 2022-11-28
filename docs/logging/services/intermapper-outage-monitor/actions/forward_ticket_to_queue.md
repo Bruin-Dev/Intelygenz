@@ -8,12 +8,13 @@ logger.info(
 ```
 
 * While there are retries left to try to forward to the work queue:
-  * [change_detail_work_queue](change_detail_work_queue.md)
 
-* If the maximum number of retries was exceeded:
-  ```python
-  logger.error(
-      f"An error occurred while trying to forward ticket_id {ticket_id} for serial {serial_number} to"
-      f" {target_queue} queue -> {e}"
-  )
-  ```
+    [change_detail_work_queue](change_detail_work_queue.md)
+
+    * If the maximum number of retries was exceeded:
+      ```python
+      logger.error(
+          f"An error occurred while trying to forward ticket_id {ticket_id} for serial {serial_number} to"
+          f" {target_queue} queue -> {e}"
+      )
+      ```

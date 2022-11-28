@@ -21,8 +21,8 @@ logger.info(f"Getting ticket task history with filters: {json.dumps(filters)}")
 [get_ticket_task_history](../repositories/bruin_repository/get_ticket_task_history.md)
 
 ```python
-\logger.info(
-            f"get ticket task history published in event bus for request {json.dumps(msg)}. "
-            f"Message published was {response}"
-        )
+logger.info(
+    f"get ticket task history published in event bus for request {json.dumps(msg)}. "
+    f"Message published was {response}"
+)
 ```

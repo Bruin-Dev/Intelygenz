@@ -50,5 +50,5 @@ The Hawkeye Customer Cache service has two responsibilities:
 #### Schedule Hawkeye Customer Cache Refresh job
 * [schedule_cache_refresh](../services/hawkeye-customer-cache/actions/refresh_cache/schedule_cache_refresh.md)
 
-### Run Hawkeye Customer Cache Refresh job
+#### Run Hawkeye Customer Cache Refresh job
 * [_refresh_cache](../services/hawkeye-customer-cache/actions/refresh_cache/_refresh_cache.md)

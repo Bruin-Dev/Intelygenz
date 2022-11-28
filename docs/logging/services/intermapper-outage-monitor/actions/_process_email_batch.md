@@ -6,7 +6,8 @@ logger.info(f"Processing {len(emails)} email(s) with circuit ID {circuit_id}..."
 
 * If Circuit ID is undefined or Circuit ID is `SD-WAN`:
     * For each email in batch:
-        * [mark email as read](../repositories/email_repository/mark_email_as_read.md)
+
+        [mark_email_as_read](../repositories/email_repository/mark_email_as_read.md)
   
     ```python
     logger.info(f"Invalid circuit_id. Skipping emails with circuit_id {circuit_id}...")
@@ -32,8 +33,10 @@ logger.info(f"Processing {len(emails)} email(s) with circuit ID {circuit_id}..."
     ```
     * For each email in batch:
         * If environment is `PRODUCTION`:
-            * [mark email as read](../repositories/email_repository/mark_email_as_read.md)
-        * END
+
+            [mark email as read](../repositories/email_repository/mark_email_as_read.md)
+        
+          END
 
 * For email in batch:
     * [_process_email](_process_email.md)

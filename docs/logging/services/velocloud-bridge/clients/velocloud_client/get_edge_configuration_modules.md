@@ -12,7 +12,7 @@
     END
 
 ```python
-logger.info(f'Trying to get edge links series for payload {payload} from Velocloud host "{velocloud_host}"...')
+logger.info(f"Getting edge configuration modules for edge {edge}...")
 ```
   
 Call VeloCloud API endpoint `POST /edge/getEdgeConfigurationModules` with the set of desired parameters.
@@ -33,8 +33,7 @@ Call VeloCloud API endpoint `POST /edge/getEdgeConfigurationModules` with the se
 
 ```python
 logger.info(
-    f"Got HTTP {response.status} from Velocloud after fetching edge link series for {payload}"
-    f"and host {velocloud_host}"
+    f"Got HTTP {response.status} from Velocloud after claiming edge configuration modules for edge {edge}"
 )
 ```
 

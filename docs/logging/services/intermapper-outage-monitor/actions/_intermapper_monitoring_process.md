@@ -12,7 +12,7 @@ logger.info(f'Processing all unread email from {self._config.INTERMAPPER_CONFIG[
   ```
   END
 
-* Group e-mails by Circuit ID in batches.
+Group e-mails by Circuit ID in batches.
 
 * For every batch of e-mails:
     * [_process_email_batch](_process_email_batch.md)

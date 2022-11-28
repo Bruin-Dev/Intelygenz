@@ -8,9 +8,12 @@ logger.info("Starting the autoresolve process")
 
 * If response status for get tickets basic info is not ok:
   ```python
-  logger.warning(f"Bad status calling to get ticket basic info for client id:  {client_id}."
-                       f"Skipping autoresolve ticket ...")
+  logger.warning(
+      f"Bad status calling to get ticket basic info for client id:  {client_id}."
+      f"Skipping autoresolve ticket ..."
+  )
   ```
+  END
 
 ```python
 logger.info(
@@ -20,35 +23,41 @@ logger.info(
 
 * For ticket in tickets:
     * If current condition has already been reported on the ticket:
-    ```python
-    logger.info(
-        f"Current condition has already been reported on ticket id {ticket_id}. "
-        f"Skipping append note to ticket..."
-    )
-    ```
+      ```python
+      logger.info(
+          f"Current condition has already been reported on ticket id {ticket_id}. "
+          f"Skipping append note to ticket..."
+      )
+      ```
     * Else:
-    ```python
-    logger.info(
-        f"Posting InterMapper UP note to task of ticket id {ticket_id} "
-        f"related to service number {service_number}..."
-    )
-    ```
-    [_append_intermapper_up_note](../repositories/bruin_repository/append_intermapper_up_note.md)
-    * If response status for append InterMapper UP note is not ok:
         ```python
-        logger.warning(f"Bad status calling to append intermapper note to ticket id: {ticket_id}."
-                             f"Skipping autoresolve ticket ....")
+        logger.info(
+            f"Posting InterMapper UP note to task of ticket id {ticket_id} "
+            f"related to service number {service_number}..."
+        )
         ```
-      END
+        
+        [_append_intermapper_up_note](../repositories/bruin_repository/append_intermapper_up_note.md)
+        
+        * If response status for append InterMapper UP note is not ok:
+          ```python
+          logger.warning(
+              f"Bad status calling to append intermapper note to ticket id: {ticket_id}."
+              f"Skipping autoresolve ticket ...."
+          )
+          ```
+          END
 
     [get_tickets](../repositories/bruin_repository/get_tickets.md)
 
     * If response status for get tickets is not ok:
-          ```python
-          logger.warning(f"Bad status calling to get ticket for client id: {client_id} and "
-                               f"ticket id: {ticket_id}. Skipping autoresolve ticket ...")
-          ```
-          END
+      ```python
+      logger.warning(
+          f"Bad status calling to get ticket for client id: {client_id} and "
+          f"ticket id: {ticket_id}. Skipping autoresolve ticket ..."
+      )
+      ```
+      END
 
     * If there's no ticket data:
           ```python
@@ -146,5 +155,6 @@ logger.info(
     )
     ```
 
-[_remove_job_for_autoresolved_task](_remove_job_for_autoresolved_task.md) (`HNOC Investigate` queue)
-[_remove_job_for_autoresolved_task](_remove_job_for_autoresolved_task.md) (`IPA Investigate` queue)
+    [_remove_job_for_autoresolved_task](_remove_job_for_autoresolved_task.md) (`HNOC Investigate` queue)
+
+    [_remove_job_for_autoresolved_task](_remove_job_for_autoresolved_task.md) (`IPA Investigate` queue)

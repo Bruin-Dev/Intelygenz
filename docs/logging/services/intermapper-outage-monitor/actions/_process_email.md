@@ -47,7 +47,8 @@ logger.info(f"Processing email with msg_uid: {msg_uid} and subject: {subject}")
   ```
 
 * If e-mail was processed successfully and environment is `PRODUCTION`:
-    * [_mark_email_as_read](_mark_email_as_read.md)
+
+    [_mark_email_as_read](_mark_email_as_read.md)
 
 * If event was processed successfully:
   ```python

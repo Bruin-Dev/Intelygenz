@@ -4,7 +4,21 @@
 logger.info(f"Rebooting DiGi device with params {request_filters}")
 ```
 
-[check_if_token_is_created_and_valid](check_if_token_is_created_and_valid.md)
+* If the auth token has not been created yet:
+  ```python
+  error_token_msg = f"The token is not created yet"
+  bad_token_msg = f"{error_token_msg}. Please try in a few seconds"
+  logger.error(bad_token_msg)
+  ```
+  END
+
+* If the existing auth token has expired:
+  ```python
+  error_token_msg = f"The token is not valid because it is expired"
+  bad_token_msg = f"{error_token_msg}. Please try in a few seconds"
+  logger.error(bad_token_msg)
+  ```
+  END
 
 Make a call to `POST /DeviceManagement_API/rest/Recovery/RecoverDevice` with the specified query parameters.
 

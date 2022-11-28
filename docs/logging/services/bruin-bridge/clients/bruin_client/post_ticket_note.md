@@ -15,12 +15,12 @@ Call Bruin API endpoint `POST /api/Ticket/{ticket_id}/notes` with the desired pa
   END
 
 * If the status of the HTTP response is `401`:
-  ```python
-  logger.error(f"Got 401 from Bruin. Re-logging in...")
-  ```
-  [login](../../clients/bruin_client/login.md)
-
-  END
+    ```python
+    logger.error(f"Got 401 from Bruin. Re-logging in...")
+    ```
+    [login](../../clients/bruin_client/login.md)
+    
+    END
 
 * If the status of the HTTP response is `403`:
   ```python
@@ -31,8 +31,8 @@ Call Bruin API endpoint `POST /api/Ticket/{ticket_id}/notes` with the desired pa
 * If the status of the HTTP response is `404`:
   ```python
   logger.error(
-                    f"Got 404 from Bruin, resource not posted for ticket_id {ticket_id} with payload {payload}"
-                )
+      f"Got 404 from Bruin, resource not posted for ticket_id {ticket_id} with payload {payload}"
+  )
   ```
   END
 

@@ -15,12 +15,12 @@ Call Bruin API endpoint `PUT /api/Ticket/{ticket_id}/details/{detail_id}/status`
   END
 
 * If the status of the HTTP response is `401`:
-  ```python
-  logger.error(f"Got 401 from Bruin. Re-logging in...")
-  ```
-  [login](../../clients/bruin_client/login.md)
-
-  END
+    ```python
+    logger.error(f"Got 401 from Bruin. Re-logging in...")
+    ```
+    [login](../../clients/bruin_client/login.md)
+    
+    END
 
 * If the status of the HTTP response is `403`:
   ```python

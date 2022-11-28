@@ -22,7 +22,7 @@ logger.info(f"Getting Bruin client ID with filters: {json.dumps(filters)}")
 
 ```python
 logger.info(
-            f"Bruin client_info published in event bus for request {json.dumps(msg)}. "
-            f"Message published was {response}"
-        )
+    f"Bruin client_info published in event bus for request {json.dumps(msg)}. "
+    f"Message published was {response}"
+)
 ```

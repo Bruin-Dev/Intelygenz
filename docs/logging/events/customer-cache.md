@@ -64,5 +64,5 @@ The Customer Cache service has two responsibilities:
 #### Schedule Customer Cache Refresh job
 * [schedule_cache_refresh](../services/customer-cache/actions/refresh_cache/schedule_cache_refresh.md)
 
-### Run Customer Cache Refresh job
+#### Run Customer Cache Refresh job
 * [_refresh_cache](../services/customer-cache/actions/refresh_cache/_refresh_cache.md)

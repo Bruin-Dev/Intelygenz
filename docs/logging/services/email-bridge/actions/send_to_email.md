@@ -9,9 +9,9 @@ _Message arrives at subject_
   END
 
 * If message body does not contain `email_data`:
-
   ```python
   logger.error(f'Cannot send to email with {json.dumps(payload)}. JSON malformed"')
-  END
   ```
+  END
+
 [send_to_email](../repositories/email_repository/send_to_email.md)

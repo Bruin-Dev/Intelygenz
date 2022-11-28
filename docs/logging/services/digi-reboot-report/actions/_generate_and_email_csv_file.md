@@ -6,7 +6,7 @@ logger.info("Generating a csv file from the ticket map of ticket IDs to ticket t
 
 * Once the file is generated we proceed to send it
 
-```
+```python
 logger.info("Sending csv file through email")
 ```
 

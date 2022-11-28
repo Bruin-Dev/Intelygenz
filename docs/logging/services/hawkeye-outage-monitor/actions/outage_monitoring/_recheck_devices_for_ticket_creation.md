@@ -96,12 +96,12 @@ _The list of devices is split to two different data sets: devices in outage stat
   ```
   
 * If there are devices online:
-  ```python
-  logger.info(f"{len(healthy_devices)} devices were detected in healthy state after re-check.")
-  ```
-  * For each online device:
+    ```python
+    logger.info(f"{len(healthy_devices)} devices were detected in healthy state after re-check.")
+    ```
+    * For each online device:
   
-    [_run_ticket_autoresolve](_run_ticket_autoresolve.md)
+        [_run_ticket_autoresolve](_run_ticket_autoresolve.md)
 
 * Otherwise:
   ```python

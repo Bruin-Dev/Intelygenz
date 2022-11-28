@@ -22,7 +22,7 @@ logger.info(f"Getting Bruin circuit ID with filters: {json.dumps(params)}")
 
 ```python
 logger.info(
-            f"Bruin circuit ID published in event bus for request {json.dumps(msg)}. "
-            f"Message published was {response}"
-        )
+    f"Bruin circuit ID published in event bus for request {json.dumps(msg)}. "
+    f"Message published was {response}"
+)
 ```

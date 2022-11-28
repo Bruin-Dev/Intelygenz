@@ -10,16 +10,16 @@ _Message arrives at subject_
 
 ```python
 logger.info(
-            f"Unpause the ticket for ticket id: {ticket_id}, "
-            f"serial number: {serial_number} and detail id: {detail_id}"
-        )
+    f"Unpause the ticket for ticket id: {ticket_id}, "
+    f"serial number: {serial_number} and detail id: {detail_id}"
+)
 ```
 
 [unpause_ticket](../repositories/bruin_repository/unpause_ticket.md)
 
 ```python
 logger.info(
-            f"Response from unpause: {response} to the ticket with ticket id: {ticket_id}, "
-            f"serial number: {serial_number} and detail id {detail_id}"
-        )
+    f"Response from unpause: {response} to the ticket with ticket id: {ticket_id}, "
+    f"serial number: {serial_number} and detail id {detail_id}"
+)
 ```

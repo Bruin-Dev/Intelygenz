@@ -25,7 +25,7 @@ logger.info(f"Getting management status with filters: {json.dumps(filters)}")
 
 ```python
 logger.info(
-            f"Management status published in event bus for request {json.dumps(msg)}. "
-            f"Message published was {response}"
-        )
+    f"Management status published in event bus for request {json.dumps(msg)}. "
+    f"Message published was {response}"
+)
 ```

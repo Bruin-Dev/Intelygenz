@@ -32,3 +32,12 @@ logger.info(f"Fetching all pages using {fn.__name__}...")
       logger.info(f"Finished fetching all pages for {fn.__name__}.")
       ```
       END
+
+    * If there are more pages to fetch but the last page has no records:
+      ```python
+      logger.warning(
+          f"There are still {remaining_items} remaining items, but the last page returned 0 items."
+          f"There may be a mismatch, stopping paginated request for {fn.__name__}..."
+      )
+      ```
+      END
