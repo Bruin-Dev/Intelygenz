@@ -1,929 +1,1037 @@
 
-<!doctype html>
-<html lang="en" class="no-js">
-  <head>
-    
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width,initial-scale=1">
-      
-      
-      
-        <link rel="canonical" href="https://docs.mettel-automation.net/1.16.0/PIPELINES/">
-      
-      <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.11">
-    
-    
-      
-        <title>PIPELINES - Automation Engine Documentation</title>
-      
-    
-    
-      <link rel="stylesheet" href="../assets/stylesheets/main.8c5ef100.min.css">
-      
-        
-        <link rel="stylesheet" href="../assets/stylesheets/palette.9647289d.min.css">
-        
-      
-    
-    
-    
-      
-        
-        
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
-        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
-      
-    
-    
-    <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
-    
-      
+<!DOCTYPE html>
 
-    
-    
-  </head>
-  
-  
-    
-    
-    
-    
-    
-    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
-  
-    
-    
-    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
-    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
-    <label class="md-overlay" for="__drawer"></label>
-    <div data-md-component="skip">
-      
-        
-        <a href="#pipelines" class="md-skip">
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<link href="https://docs.mettel-automation.net/1.16.0/PIPELINES/" rel="canonical"/>
+<link href="../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.3.1, mkdocs-material-8.2.11" name="generator"/>
+<title>Pipelines - Automation Engine Documentation</title>
+<link href="../assets/stylesheets/main.8c5ef100.min.css" rel="stylesheet"/>
+<link href="../assets/stylesheets/palette.9647289d.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+<link href="../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
+            html.glightbox-open { overflow: initial; height: 100%; }
+            .gslide-title { margin-top: 0px; user-select: text; }
+            .gslide-desc { color: #666; user-select: text; }
+            .gslide-image img { background: white; }
+            
+                .gscrollbar-fixer { padding-right: 15px; }
+                .gdesc-inner { font-size: 0.75rem; }
+                body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
+                body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
+                body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}
+                </style><script src="../assets/javascripts/glightbox.min.js"></script></head>
+<body data-md-color-accent="none" data-md-color-primary="none" data-md-color-scheme="" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#pipelines">
           Skip to content
         </a>
-      
-    </div>
-    <div data-md-component="announce">
-      
-    </div>
-    
-      <div data-md-component="outdated" hidden>
-        <aside class="md-banner md-banner--warning">
-          
-        </aside>
-      </div>
-    
-    
-      
-
+</div>
+<div data-md-component="announce">
+</div>
+<div data-md-component="outdated" hidden="">
+<aside class="md-banner md-banner--warning">
+</aside>
+</div>
 <header class="md-header" data-md-component="header">
-  <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="Automation Engine Documentation" class="md-header__button md-logo" aria-label="Automation Engine Documentation" data-md-component="logo">
-      
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
-
-    </a>
-    <label class="md-header__button md-icon" for="__drawer">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
-    </label>
-    <div class="md-header__title" data-md-component="header-title">
-      <div class="md-header__ellipsis">
-        <div class="md-header__topic">
-          <span class="md-ellipsis">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="Automation Engine Documentation" class="md-header__button md-logo" data-md-component="logo" href=".." title="Automation Engine Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
             Automation Engine Documentation
           </span>
-        </div>
-        <div class="md-header__topic" data-md-component="header-topic">
-          <span class="md-ellipsis">
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
             
-              PIPELINES
+              Pipelines
             
           </span>
-        </div>
-      </div>
-    </div>
-    
-    
-    
-      <label class="md-header__button md-icon" for="__search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
-      </label>
-      <div class="md-search" data-md-component="search" role="dialog">
-  <label class="md-search__overlay" for="__search"></label>
-  <div class="md-search__inner" role="search">
-    <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
-      <label class="md-search__icon md-icon" for="__search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
-      </label>
-      <nav class="md-search__options" aria-label="Search">
-        
-        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
-        </button>
-      </nav>
-      
-    </form>
-    <div class="md-search__output">
-      <div class="md-search__scrollwrap" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="search-result">
-          <div class="md-search-result__meta">
-            Initializing search
-          </div>
-          <ol class="md-search-result__list"></ol>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
-    
-    
-  </nav>
-  
-</header>
-    
-    <div class="md-container" data-md-component="container">
-      
-      
-        
-          
-            
-<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
-  <div class="md-tabs__inner md-grid">
-    <ul class="md-tabs__list">
-      
-        
-  
-  
-
-
-  <li class="md-tabs__item">
-    <a href=".." class="md-tabs__link">
-      Home
-    </a>
-  </li>
-
-      
-        
-  
-  
-
-
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../CONCEPTS/" class="md-tabs__link">
-        Topics
-      </a>
-    </li>
-  
-
-      
-    </ul>
-  </div>
+</div>
+</div>
 </nav>
-          
-        
-      
-      <main class="md-main" data-md-component="main">
-        <div class="md-main__inner md-grid">
-          
-            
-              
-              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-  
-
-
-<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
-  <label class="md-nav__title" for="__drawer">
-    <a href=".." title="Automation Engine Documentation" class="md-nav__button md-logo" aria-label="Automation Engine Documentation" data-md-component="logo">
-      
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
-
-    </a>
+</header>
+<div class="md-container" data-md-component="container">
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--integrated" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="Automation Engine Documentation" class="md-nav__button md-logo" data-md-component="logo" href=".." title="Automation Engine Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"></path></svg>
+</a>
     Automation Engine Documentation
   </label>
-  
-  <ul class="md-nav__list" data-md-scrollfix>
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
-        Home
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_2">
-          Topics
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" id="__nav_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_1">
+          Concepts
           <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Concepts" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_1">
+<span class="md-nav__icon md-icon"></span>
+          Concepts
         </label>
-      
-      <nav class="md-nav" aria-label="Topics" data-md-level="1">
-        <label class="md-nav__title" for="__nav_2">
-          <span class="md-nav__icon md-icon"></span>
-          Topics
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../CONCEPTS/" class="md-nav__link">
-        Concepts
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../MONOREPO/">
+        Monorepo
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_2" type="checkbox" id="__nav_2_2" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_2_2">
-          Pipelines
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Pipelines" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_2">
-          <span class="md-nav__icon md-icon"></span>
-          Pipelines
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../pipeline/BASIC_CI_CONFIGURATION/" class="md-nav__link">
-        Basic configurations
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../pipeline/PIPELINE_RULES/" class="md-nav__link">
-        Pipeline rules
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_3" type="checkbox" id="__nav_2_3" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_2_3">
-          Documentation
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Documentation" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_3">
-          <span class="md-nav__icon md-icon"></span>
-          Documentation
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../DOCUMENTATION/" class="md-nav__link">
-        Organization
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../decisions/" class="md-nav__link">
-        MetTel decisions
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../metrics-definitions/" class="md-nav__link">
-        Metrics definitions
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
-        Development rules
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_5" type="checkbox" id="__nav_2_5" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_2_5">
-          Work in a local env
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Work in a local env" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_5">
-          <span class="md-nav__icon md-icon"></span>
-          Work in a local env
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../kafka/LAUNCH_DOCKER_COMPOSE/" class="md-nav__link">
-        Launch docker compose
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../snowflake/" class="md-nav__link">
-        Datalake
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_2_7">
-          Manual procedures
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Manual procedures" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_7">
-          <span class="md-nav__icon md-icon"></span>
-          Manual procedures
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../manual_procedures/EMERGENCY_PLAN/" class="md-nav__link">
-        Emergency recovery plan
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../manual_procedures/API_VENDOR_ACCESS/" class="md-nav__link">
-        Vendor access to the API
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION/" class="md-nav__link">
-        Switch Automation Engine region
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_2_8">
-          Backups Recovery plans
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Backups Recovery plans" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_8">
-          <span class="md-nav__icon md-icon"></span>
-          Backups Recovery plans
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../backups/ECR_RECOVERY_PLAN/" class="md-nav__link">
-        ECR backup recovery
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../backups/EKS_SSH_RECOVERY_PLAN/" class="md-nav__link">
-        EKS SSH recovery
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../backups/GIT_RECOVERY_PLAN/" class="md-nav__link">
-        GIT recovery
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../backups/PROMETHEUS_RECOVERY_PLAN/" class="md-nav__link">
-        Prometheus recovery
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../backups/TERRAFORM_RECOVERY_PLAN/" class="md-nav__link">
-        Terraform recovery
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_9" type="checkbox" id="__nav_2_9" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_2_9">
-          Manual configurations
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Manual configurations" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_9">
-          <span class="md-nav__icon md-icon"></span>
-          Manual configurations
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../manual_configurations/INIT_AUTOMATION_PROJECT/" class="md-nav__link">
-        Init Automation Engine project
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../manual_configurations/OKTA_CONFIGURATIONS/" class="md-nav__link">
-        AWS SSO Okta configurations
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../manual_configurations/OKTA_JWT/" class="md-nav__link">
-        AWS SSO Okta JWT token
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-    
-  </ul>
+</li>
+</ul>
 </nav>
-                  </div>
-                </div>
-              </div>
-            
-            
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" id="__nav_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_2">
+          CI/CD Pipelines
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="CI/CD Pipelines" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_2">
+<span class="md-nav__icon md-icon"></span>
+          CI/CD Pipelines
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../pipeline/BASIC_CI_CONFIGURATION/">
+        Pre-requisites
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../pipeline/PIPELINE_RULES/">
+        Setting up pipelines
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3">
+          Documentation
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Documentation" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+          Documentation
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../DOCUMENTATION/">
+        About this documentation
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../decisions/">
+        Architecture Decision Records (ADRs)
+      </a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3" id="__nav_3_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3">
+          Business
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Business" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_3_3">
+<span class="md-nav__icon md-icon"></span>
+          Business
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../metrics-definitions/">
+        Metrics Definitions
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../parameters/parameters/">
+        System Configuration
+      </a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3" id="__nav_3_3_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3">
+          Workflows
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Workflows" class="md-nav" data-md-level="3">
+<label class="md-nav__title" for="__nav_3_3_3">
+<span class="md-nav__icon md-icon"></span>
+          Workflows
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/messages-bus/">
+        Communication between services
+      </a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_2" id="__nav_3_3_3_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_2">
+          Bridges
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Bridges" class="md-nav" data-md-level="4">
+<label class="md-nav__title" for="__nav_3_3_3_2">
+<span class="md-nav__icon md-icon"></span>
+          Bridges
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/bruin-bridge/">
+        Bruin
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/digi-bridge/">
+        DiGi
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/dri-bridge/">
+        DRI (Data Remote Portal)
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/email-bridge/">
+        E-mail Services
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/hawkeye-bridge/">
+        Hawkeye / Ixia
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/notifications-bridge/">
+        Notification Services
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/servicenow-bridge/">
+        ServiceNow
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/velocloud-bridge/">
+        VeloCloud
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3" id="__nav_3_3_3_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3">
+          Use cases
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Use cases" class="md-nav" data-md-level="4">
+<label class="md-nav__title" for="__nav_3_3_3_3">
+<span class="md-nav__icon md-icon"></span>
+          Use cases
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_1" id="__nav_3_3_3_3_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_1">
+          Caching Services
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Caching Services" class="md-nav" data-md-level="5">
+<label class="md-nav__title" for="__nav_3_3_3_3_1">
+<span class="md-nav__icon md-icon"></span>
+          Caching Services
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/hawkeye-customer-cache/">
+        Hawkeye / Ixia
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/customer-cache/">
+        VeloCloud
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_2" id="__nav_3_3_3_3_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_2">
+          DiGi
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="DiGi" class="md-nav" data-md-level="5">
+<label class="md-nav__title" for="__nav_3_3_3_3_2">
+<span class="md-nav__icon md-icon"></span>
+          DiGi
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_2_1" id="__nav_3_3_3_3_2_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_2_1">
+          Reporting
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Reporting" class="md-nav" data-md-level="6">
+<label class="md-nav__title" for="__nav_3_3_3_3_2_1">
+<span class="md-nav__icon md-icon"></span>
+          Reporting
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/digi-reboot-report/">
+        Reboot Report
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_3" id="__nav_3_3_3_3_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_3">
+          Fraud
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Fraud" class="md-nav" data-md-level="5">
+<label class="md-nav__title" for="__nav_3_3_3_3_3">
+<span class="md-nav__icon md-icon"></span>
+          Fraud
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_3_1" id="__nav_3_3_3_3_3_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_3_1">
+          Monitoring
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Monitoring" class="md-nav" data-md-level="6">
+<label class="md-nav__title" for="__nav_3_3_3_3_3_1">
+<span class="md-nav__icon md-icon"></span>
+          Monitoring
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/fraud-monitor/">
+        Fraud Alerts
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_4" id="__nav_3_3_3_3_4" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_4">
+          Hawkeye / Ixia
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Hawkeye / Ixia" class="md-nav" data-md-level="5">
+<label class="md-nav__title" for="__nav_3_3_3_3_4">
+<span class="md-nav__icon md-icon"></span>
+          Hawkeye / Ixia
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_4_1" id="__nav_3_3_3_3_4_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_4_1">
+          Monitoring
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Monitoring" class="md-nav" data-md-level="6">
+<label class="md-nav__title" for="__nav_3_3_3_3_4_1">
+<span class="md-nav__icon md-icon"></span>
+          Monitoring
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/hawkeye-outage-monitor/">
+        Service Outage
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_5" id="__nav_3_3_3_3_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_5">
+          InterMapper
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="InterMapper" class="md-nav" data-md-level="5">
+<label class="md-nav__title" for="__nav_3_3_3_3_5">
+<span class="md-nav__icon md-icon"></span>
+          InterMapper
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_5_1" id="__nav_3_3_3_3_5_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_5_1">
+          Monitoring
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Monitoring" class="md-nav" data-md-level="6">
+<label class="md-nav__title" for="__nav_3_3_3_3_5_1">
+<span class="md-nav__icon md-icon"></span>
+          Monitoring
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/intermapper-outage-monitor/">
+        Service Outage
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_6" id="__nav_3_3_3_3_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_6">
+          LuminAI
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="LuminAI" class="md-nav" data-md-level="5">
+<label class="md-nav__title" for="__nav_3_3_3_3_6">
+<span class="md-nav__icon md-icon"></span>
+          LuminAI
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_6_1" id="__nav_3_3_3_3_6_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_6_1">
+          Reporting
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Reporting" class="md-nav" data-md-level="6">
+<label class="md-nav__title" for="__nav_3_3_3_3_6_1">
+<span class="md-nav__icon md-icon"></span>
+          Reporting
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/lumin-billing-report/">
+        Billing Report
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/task-dispatcher/">
+        Tasks scheduling
+      </a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_8" id="__nav_3_3_3_3_8" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_8">
+          VeloCloud
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="VeloCloud" class="md-nav" data-md-level="5">
+<label class="md-nav__title" for="__nav_3_3_3_3_8">
+<span class="md-nav__icon md-icon"></span>
+          VeloCloud
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_8_1" id="__nav_3_3_3_3_8_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_8_1">
+          Reporting
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Reporting" class="md-nav" data-md-level="6">
+<label class="md-nav__title" for="__nav_3_3_3_3_8_1">
+<span class="md-nav__icon md-icon"></span>
+          Reporting
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/last-contact-report/">
+        Last Contact Report
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_8_2" id="__nav_3_3_3_3_8_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_8_2">
+          Monitoring
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Monitoring" class="md-nav" data-md-level="6">
+<label class="md-nav__title" for="__nav_3_3_3_3_8_2">
+<span class="md-nav__icon md-icon"></span>
+          Monitoring
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_8_2_1" id="__nav_3_3_3_3_8_2_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_8_2_1">
+          SD-WAN
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="SD-WAN" class="md-nav" data-md-level="7">
+<label class="md-nav__title" for="__nav_3_3_3_3_8_2_1">
+<span class="md-nav__icon md-icon"></span>
+          SD-WAN
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/service-affecting-monitor/">
+        Service Affecting
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/service-outage-monitor/">
+        Service Outage
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/gateway-monitor/">
+        Gateways
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" id="__nav_4" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4">
+          Working in local environments
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Working in local environments" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_4">
+<span class="md-nav__icon md-icon"></span>
+          Working in local environments
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_1" id="__nav_4_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4_1">
+          Automation
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Automation" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_4_1">
+<span class="md-nav__icon md-icon"></span>
+          Automation
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_1_1" id="__nav_4_1_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4_1_1">
+          Metrics
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Metrics" class="md-nav" data-md-level="3">
+<label class="md-nav__title" for="__nav_4_1_1">
+<span class="md-nav__icon md-icon"></span>
+          Metrics
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../CREATE_NEW_METRIC/">
+        Creating new metrics
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_1_2" id="__nav_4_1_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4_1_2">
+          Business Services
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Business Services" class="md-nav" data-md-level="3">
+<label class="md-nav__title" for="__nav_4_1_2">
+<span class="md-nav__icon md-icon"></span>
+          Business Services
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../CREATE_NEW_MICROSERVICE/">
+        Creating new services
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_2" id="__nav_4_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4_2">
+          Data Lake
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Data Lake" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_4_2">
+<span class="md-nav__icon md-icon"></span>
+          Data Lake
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../kafka/LAUNCH_DOCKER_COMPOSE/">
+        Running in docker-compose
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5">
+          System Overview
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="System Overview" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+          System Overview
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_1" id="__nav_5_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5_1">
+          Automation Engine
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Automation Engine" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_5_1">
+<span class="md-nav__icon md-icon"></span>
+          Automation Engine
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../SYSTEM_OVERVIEW/">
+        Architecture &amp; Infrastructure
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../INFRASTRUCTURE_AS_CODE/">
+        Infrastructure as Code
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../LOGGING_AND_MONITORING/">
+        Logging &amp; Monitoring
+      </a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" data-md-toggle="toc" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+          Pipelines
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+        Pipelines
+      </a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#launch-all-jobs-in-a-pipeline" class="md-nav__link">
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#launch-all-jobs-in-a-pipeline">
     Launch all jobs in a pipeline
   </a>
-  
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#environments" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#environments">
     Environments
   </a>
-  
-    <nav class="md-nav" aria-label="Environments">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#microservices-environments" class="md-nav__link">
+<nav aria-label="Environments" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#microservices-environments">
     Microservices Environments
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#kre-environments" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#kre-environments">
     KRE Environments
   </a>
-  
 </li>
-        
-      </ul>
-    </nav>
-  
+</ul>
+</nav>
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#continuous-integration-ci" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#continuous-integration-ci">
     Continuous integration (CI)
   </a>
-  
-    <nav class="md-nav" aria-label="Continuous integration (CI)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#validation-steps" class="md-nav__link">
+<nav aria-label="Continuous integration (CI)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#validation-steps">
     Validation steps
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#unit-tests-steps" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#unit-tests-steps">
     Unit tests steps
   </a>
-  
 </li>
-        
-      </ul>
-    </nav>
-  
+</ul>
+</nav>
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#continuous-delivery-cd" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#continuous-delivery-cd">
     Continuous delivery (CD)
   </a>
-  
-    <nav class="md-nav" aria-label="Continuous delivery (CD)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#basic_infra-steps" class="md-nav__link">
+<nav aria-label="Continuous delivery (CD)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#basic_infra-steps">
     Basic_infra steps
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#basic_infra_kre-steps" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#basic_infra_kre-steps">
     Basic_infra_kre steps
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#deploy_kre_runtimes-steps" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#deploy_kre_runtimes-steps">
     Deploy_kre_runtimes steps
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#build-steps" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#build-steps">
     Build steps
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#deploy-steps" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#deploy-steps">
     Deploy steps
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#destroy-steps" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#destroy-steps">
     Destroy steps
   </a>
-  
 </li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
+</ul>
 </nav>
-                  </div>
-                </div>
-              </div>
-            
-          
-          <div class="md-content" data-md-component="content">
-            <article class="md-content__inner md-typeset">
-              
-                
-
-
-<div align="center">
-<img src="https://media.licdn.com/dms/image/C4E0BAQHrME9aCW6ulg/company-logo_200_200/0?e=2159024400&v=beta&t=6xMNS1zK1F8asBlM16EzbJ4Im7SlQ8L7a7sgcaNzZQE"  width="200" height="200">
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2" id="__nav_5_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5_2">
+          Data Lake
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Data Lake" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_5_2">
+<span class="md-nav__icon md-icon"></span>
+          Data Lake
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../snowflake/">
+        Snowflake
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" id="__nav_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6">
+          Manual Procedures
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Manual Procedures" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_6">
+<span class="md-nav__icon md-icon"></span>
+          Manual Procedures
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../manual_procedures/EMERGENCY_PLAN/">
+        Emergency Recovery Plan
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../manual_procedures/API_VENDOR_ACCESS/">
+        Grant vendors access to the Data Lake API
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION/">
+        Switch Automation Engine's region
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" id="__nav_7" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7">
+          Backups Recovery Plans
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Backups Recovery Plans" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_7">
+<span class="md-nav__icon md-icon"></span>
+          Backups Recovery Plans
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7_1" id="__nav_7_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7_1">
+          AWS
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="AWS" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_7_1">
+<span class="md-nav__icon md-icon"></span>
+          AWS
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../backups/ECR_RECOVERY_PLAN/">
+        ECR
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../backups/EKS_SSH_RECOVERY_PLAN/">
+        EKS SSH
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7_2" id="__nav_7_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7_2">
+          Infrastructure
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Infrastructure" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_7_2">
+<span class="md-nav__icon md-icon"></span>
+          Infrastructure
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../backups/TERRAFORM_RECOVERY_PLAN/">
+        Terraform
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7_3" id="__nav_7_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7_3">
+          Metrics
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Metrics" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_7_3">
+<span class="md-nav__icon md-icon"></span>
+          Metrics
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../backups/PROMETHEUS_RECOVERY_PLAN/">
+        Prometheus
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7_4" id="__nav_7_4" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7_4">
+          Source Code
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Source Code" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_7_4">
+<span class="md-nav__icon md-icon"></span>
+          Source Code
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../backups/GIT_RECOVERY_PLAN/">
+        GIT repository
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7_5" id="__nav_7_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7_5">
+          System Configuration
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="System Configuration" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_7_5">
+<span class="md-nav__icon md-icon"></span>
+          System Configuration
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../lambda/PARAMETER_REPLICATOR/">
+        Parameters Replication
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" id="__nav_8" type="checkbox"/>
+<label class="md-nav__link" for="__nav_8">
+          Manual Configurations
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Manual Configurations" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_8">
+<span class="md-nav__icon md-icon"></span>
+          Manual Configurations
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../manual_configurations/INIT_AUTOMATION_PROJECT/">
+        Initialize Automation Engine project
+      </a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8_2" id="__nav_8_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_8_2">
+          AWS SSO - OKTA
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="AWS SSO - OKTA" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_8_2">
+<span class="md-nav__icon md-icon"></span>
+          AWS SSO - OKTA
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../manual_configurations/OKTA_CONFIGURATIONS/">
+        Configurations
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../manual_configurations/OKTA_JWT/">
+        JWT token
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
 </div>
-
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<div align="center">
+<a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="https://media.licdn.com/dms/image/C4E0BAQHrME9aCW6ulg/company-logo_200_200/0?e=2159024400&amp;v=beta&amp;t=6xMNS1zK1F8asBlM16EzbJ4Im7SlQ8L7a7sgcaNzZQE"><img height="200" src="https://media.licdn.com/dms/image/C4E0BAQHrME9aCW6ulg/company-logo_200_200/0?e=2159024400&amp;v=beta&amp;t=6xMNS1zK1F8asBlM16EzbJ4Im7SlQ8L7a7sgcaNzZQE" width="200"/></a>
+</div>
 <h1 id="pipelines">Pipelines</h1>
 <p>In this project is implemented Software delivery with total automation, thus avoiding manual intervention and therefore human errors in our product.</p>
 <p>Human error can and does occur when carrying out these boring and repetitive tasks manually and ultimately does affect the ability to meet deliverables.</p>
-<p>All of the automation is made with Gitlab CI technology, taking advantage of all the tools that Gitlab has.
-We separate the automatation in two parts, <a href="#continuous-integration-ci">continuous integration</a> and <a href="#continuous-delivery-cd">continuous delivery</a>, that are explained in the next sections.</p>
+<p>All the automation is made with Gitlab CI technology, taking advantage of all the tools that Gitlab has.
+We separate the automation in two parts, <a href="#continuous-integration-ci">continuous integration</a> and <a href="#continuous-delivery-cd">continuous delivery</a>, that are explained in the next sections.</p>
 <p>To improve the speed and optimization of the pipelines, <strong>only the jobs and stages will be executed on those modules that change in each commit</strong>.</p>
 <h2 id="launch-all-jobs-in-a-pipeline">Launch all jobs in a pipeline</h2>
 <p><strong>Exceptionally, it is possible to launch a pipeline with all the jobs and stages on a branch using the web interface, as shown in the following image</strong>. To do so, the following steps must be followed:</p>
 <ol>
 <li>
 <p>From the project repository select the <code>CI/CD</code> option in the left sidebar and this <code>Pipelines</code>, as shown in the following image where these options are marked in red.
-   <img alt="IMAGE: Select_CI_option" src="../img/pipelines/Select_CI_option.png" /></p>
+   <a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/pipelines/Select_CI_option.png"><img alt="IMAGE: Select_CI_option" src="../img/pipelines/Select_CI_option.png"/></a></p>
 </li>
 <li>
 <p>Choose the <code>Run Pipeline</code> option, as shown in the image below in red.
-   <img alt="IMAGE: select_run_pipeline" src="../img/pipelines/select_run_pipeline.png" /></p>
+   <a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/pipelines/select_run_pipeline.png"><img alt="IMAGE: select_run_pipeline" src="../img/pipelines/select_run_pipeline.png"/></a></p>
 </li>
 <li>
 <p>Indicate the branch where you want to run the pipeline in the <code>Run for</code> box and then click on <code>Run pipeline</code>. It's possible see an example in the following image, where the box <code>Run for</code> is shown in green and <code>Run pipeline</code> is shown in red.
-   <img alt="IMAGE: select_run_pipeline_branch" src="../img/pipelines/select_run_pipeline_branch.png" /></p>
+   <a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/pipelines/select_run_pipeline_branch.png"><img alt="IMAGE: select_run_pipeline_branch" src="../img/pipelines/select_run_pipeline_branch.png"/></a></p>
 </li>
 </ol>
 <blockquote>
@@ -958,7 +1066,7 @@ We separate the automatation in two parts, <a href="#continuous-integration-ci">
 <p>Continuous Integration (CI) is a development practice where developers integrate code into a shared repository frequently, preferably several times a day. Each integration can then be verified by an automated build and automated tests. While automated testing is not strictly part of CI it is typically implied.
 <a href="https://codeship.com/continuous-integration-essentials">Codeship</a></p>
 </blockquote>
-<p><img alt="IMAGE: CI_MetTel_Automation.png" src="../img/pipelines/CI_MetTel_Automation.png" /></p>
+<p><a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/pipelines/CI_MetTel_Automation.png"><img alt="IMAGE: CI_MetTel_Automation.png" src="../img/pipelines/CI_MetTel_Automation.png"/></a></p>
 <h3 id="validation-steps">Validation steps</h3>
 <p>This stage checks the following:</p>
 <ul>
@@ -976,13 +1084,13 @@ We separate the automatation in two parts, <a href="#continuous-integration-ci">
 <p>All the available unit tests for each service should be run in this stage of the CI process.</p>
 <p>If the coverage obtained from these tests for a service is not greater than or equal to 80%, it will cause this phase to fail, this will mean that the steps of the next stage will not be executed and the process will fail.</p>
 <p>In cases in which a module does not reach the minimum coverage mentioned above, a message like the following will be seen in the step executed for that module.</p>
-<p><img alt="IMAGE: unit_test_coverage_not_reach_minimum.png" src="../img/pipelines/unit_test_coverage_not_reach_minimum.png" /></p>
+<p><a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/pipelines/unit_test_coverage_not_reach_minimum.png"><img alt="IMAGE: unit_test_coverage_not_reach_minimum.png" src="../img/pipelines/unit_test_coverage_not_reach_minimum.png"/></a></p>
 <h2 id="continuous-delivery-cd">Continuous delivery (CD)</h2>
 <blockquote>
 <p>Continuous deployment is the next step of continuous delivery: Every change that passes the automated tests is deployed to production automatically. Continuous deployment should be the goal of most companies that are not constrained by regulatory or other requirements.
 <a href="https://puppet.com/blog/continuous-delivery-vs-continuous-deployment-what-s-diff">Puppet.com</a></p>
 </blockquote>
-<p><img alt="IMAGE: CD_MetTel_Automation.png" src="../img/pipelines/CD_MetTel_Automation.png" /></p>
+<p><a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/pipelines/CD_MetTel_Automation.png"><img alt="IMAGE: CD_MetTel_Automation.png" src="../img/pipelines/CD_MetTel_Automation.png"/></a></p>
 <h3 id="basic_infra-steps">Basic_infra steps</h3>
 <p>This area covers the checking and creation, if necessary, of all the basic resources for the subsequent deployment, these being the specific image repositories in <a href="https://aws.amazon.com/ecr">ECR Docker Container Registry</a>, as well as the roles necessary in AWS to be able to display these images in <a href="https://aws.amazon.com/ecs/">ECS Container Orchestrator</a>.</p>
 <p>In this stage there is also a job that must be executed manually if necessary, this is responsible for checking and creating if necessary network resources for the production environment or ephemeral environments.</p>
@@ -994,7 +1102,7 @@ We separate the automatation in two parts, <a href="#continuous-integration-ci">
 <h3 id="basic_infra_kre-steps">Basic_infra_kre steps</h3>
 <p>In this stage will be the following jobs:
 * <code>deploy-basic-infra-kre-dev</code> for ephemeral environments and <code>deploy-basic-infra-kre-production</code> for the production environment, <strong>these are executed optionally manually</strong>.</p>
-<p>This job is responsible of checking and creation, if necessary, of the EKS cluster used by KRE in each environment and all the necessary resources related (RBAC configuration, helm charts needed for the KRE runtimes, etc)</p>
+<p>This job is responsible for checking and creation, if necessary, of the EKS cluster used by KRE in each environment and all the necessary resources related (RBAC configuration, helm charts needed for the KRE runtimes, etc)</p>
 <p>The process followed in this job is as follows:</p>
 <ol>
 <li>
@@ -1017,22 +1125,22 @@ We separate the automatation in two parts, <a href="#continuous-integration-ci">
 </li>
 </ul>
 <p>Below is an example of a pipeline execution where it's possible see the IAM roles of users generated for each role in the project:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Outputs:
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a> <span class="nv">eks_developer_ops_privileged_roles</span> <span class="o">=</span> <span class="o">[</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>   <span class="s2">&quot;arn:aws:iam::374050862540:role/eks-developer-ops-mettel-automation-kre-xisco.capllonch&quot;</span>,
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>   <span class="s2">&quot;arn:aws:iam::374050862540:role/eks-developer-ops-mettel-automation-kre-xoan.mallon.developer&quot;</span>,
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a> <span class="o">]</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a> <span class="nv">eks_developer_roles</span> <span class="o">=</span> <span class="o">[</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>   <span class="s2">&quot;arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-brandon.samudio&quot;</span>,
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>   <span class="s2">&quot;arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-daniel.fernandez&quot;</span>,
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>   <span class="s2">&quot;arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-joseluis.vega&quot;</span>,
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>   <span class="s2">&quot;arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-marc.vivancos&quot;</span>,
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a> <span class="o">]</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a> <span class="nv">eks_devops_roles</span> <span class="o">=</span> <span class="o">[</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>   <span class="s2">&quot;arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-alberto.iglesias&quot;</span>,
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>   <span class="s2">&quot;arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-angel.costales&quot;</span>,
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>   <span class="s2">&quot;arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-angel.luis.piquero&quot;</span>,
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a> <span class="o">]</span>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-0-1" id="__codelineno-0-1" name="__codelineno-0-1"></a>Outputs:
+<a href="#__codelineno-0-2" id="__codelineno-0-2" name="__codelineno-0-2"></a> <span class="nv">eks_developer_ops_privileged_roles</span> <span class="o">=</span> <span class="o">[</span>
+<a href="#__codelineno-0-3" id="__codelineno-0-3" name="__codelineno-0-3"></a>   <span class="s2">"arn:aws:iam::374050862540:role/eks-developer-ops-mettel-automation-kre-xisco.capllonch"</span>,
+<a href="#__codelineno-0-4" id="__codelineno-0-4" name="__codelineno-0-4"></a>   <span class="s2">"arn:aws:iam::374050862540:role/eks-developer-ops-mettel-automation-kre-xoan.mallon.developer"</span>,
+<a href="#__codelineno-0-5" id="__codelineno-0-5" name="__codelineno-0-5"></a> <span class="o">]</span>
+<a href="#__codelineno-0-6" id="__codelineno-0-6" name="__codelineno-0-6"></a> <span class="nv">eks_developer_roles</span> <span class="o">=</span> <span class="o">[</span>
+<a href="#__codelineno-0-7" id="__codelineno-0-7" name="__codelineno-0-7"></a>   <span class="s2">"arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-brandon.samudio"</span>,
+<a href="#__codelineno-0-8" id="__codelineno-0-8" name="__codelineno-0-8"></a>   <span class="s2">"arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-daniel.fernandez"</span>,
+<a href="#__codelineno-0-9" id="__codelineno-0-9" name="__codelineno-0-9"></a>   <span class="s2">"arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-joseluis.vega"</span>,
+<a href="#__codelineno-0-10" id="__codelineno-0-10" name="__codelineno-0-10"></a>   <span class="s2">"arn:aws:iam::374050862540:role/eks-developer-mettel-automation-kre-marc.vivancos"</span>,
+<a href="#__codelineno-0-11" id="__codelineno-0-11" name="__codelineno-0-11"></a> <span class="o">]</span>
+<a href="#__codelineno-0-12" id="__codelineno-0-12" name="__codelineno-0-12"></a> <span class="nv">eks_devops_roles</span> <span class="o">=</span> <span class="o">[</span>
+<a href="#__codelineno-0-13" id="__codelineno-0-13" name="__codelineno-0-13"></a>   <span class="s2">"arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-alberto.iglesias"</span>,
+<a href="#__codelineno-0-14" id="__codelineno-0-14" name="__codelineno-0-14"></a>   <span class="s2">"arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-angel.costales"</span>,
+<a href="#__codelineno-0-15" id="__codelineno-0-15" name="__codelineno-0-15"></a>   <span class="s2">"arn:aws:iam::374050862540:role/eks-devops-mettel-automation-kre-angel.luis.piquero"</span>,
+<a href="#__codelineno-0-16" id="__codelineno-0-16" name="__codelineno-0-16"></a> <span class="o">]</span>
 </code></pre></div>
 <ul>
 <li>
@@ -1044,7 +1152,7 @@ We separate the automatation in two parts, <a href="#continuous-integration-ci">
 </li>
 <li>
 <p><strong>cert-mananger</strong>, using the helm chart from <a href="https://charts.jetstack.io">jetstack repository</a>.</p>
-<p>This component automate the management lifecycle of all required certificates used by the KRE component in each environment.</p>
+<p>This component automates the management lifecycle of all required certificates used by the KRE component in each environment.</p>
 </li>
 <li>
 <p><strong>nginx ingress controller</strong>, using the helm chart from <a href="https://kubernetes.github.io/ingress-nginx">ingress-nginx repository</a>.</p>
@@ -1241,21 +1349,21 @@ We separate the automatation in two parts, <a href="#continuous-integration-ci">
 </ul>
 <p>This is achieved by defining explicit dependencies between the ECS services for the capabilities microservices and the set of null resources that perform the healthcheck of the capabilities microservices.​</p>
 <p>The following is an example of a definition for the use-case microservice <code>service-affecting-monitor</code> using <a href="https://www.terraform.io/"><em>Terraform</em></a>. Here, the dependency between the corresponding <code>null_resource</code> type resources in charge of performing the health check of the different capabilities microservices in Terraform code for this microservice is established.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;aws_ecs_service&quot;</span><span class="w"> </span><span class="nv">&quot;automation-service-affecting-monitor&quot;</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">   </span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="w"></span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">     </span><span class="na">depends_on</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="nv">null_resource.bruin-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">                    </span><span class="nv">null_resource.cts-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">                    </span><span class="nv">null_resource.lit-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">                    </span><span class="nv">null_resource.velocloud-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">                    </span><span class="nv">null_resource.hawkeye-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">                    </span><span class="nv">null_resource.t7-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">                    </span><span class="nv">null_resource.email-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">                    </span><span class="nv">null_resource.notifications-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">                    </span><span class="nv">null_resource.metrics-prometheus-healthcheck</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">   </span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="w"></span>
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-1-1" id="__codelineno-1-1" name="__codelineno-1-1"></a><span class="kr">resource</span><span class="w"> </span><span class="nc">"aws_ecs_service"</span><span class="w"> </span><span class="nv">"automation-service-affecting-monitor"</span><span class="w"> </span><span class="p">{</span>
+<a href="#__codelineno-1-2" id="__codelineno-1-2" name="__codelineno-1-2"></a>
+<a href="#__codelineno-1-3" id="__codelineno-1-3" name="__codelineno-1-3"></a><span class="w">   </span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="w"></span>
+<a href="#__codelineno-1-4" id="__codelineno-1-4" name="__codelineno-1-4"></a>
+<a href="#__codelineno-1-5" id="__codelineno-1-5" name="__codelineno-1-5"></a><span class="w">     </span><span class="na">depends_on</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="nv">null_resource.bruin-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a href="#__codelineno-1-6" id="__codelineno-1-6" name="__codelineno-1-6"></a><span class="w">                    </span><span class="nv">null_resource.cts-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a href="#__codelineno-1-7" id="__codelineno-1-7" name="__codelineno-1-7"></a><span class="w">                    </span><span class="nv">null_resource.lit-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a href="#__codelineno-1-8" id="__codelineno-1-8" name="__codelineno-1-8"></a><span class="w">                    </span><span class="nv">null_resource.velocloud-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a href="#__codelineno-1-9" id="__codelineno-1-9" name="__codelineno-1-9"></a><span class="w">                    </span><span class="nv">null_resource.hawkeye-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a href="#__codelineno-1-10" id="__codelineno-1-10" name="__codelineno-1-10"></a><span class="w">                    </span><span class="nv">null_resource.t7-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a href="#__codelineno-1-11" id="__codelineno-1-11" name="__codelineno-1-11"></a><span class="w">                    </span><span class="nv">null_resource.email-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a href="#__codelineno-1-12" id="__codelineno-1-12" name="__codelineno-1-12"></a><span class="w">                    </span><span class="nv">null_resource.notifications-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a href="#__codelineno-1-13" id="__codelineno-1-13" name="__codelineno-1-13"></a><span class="w">                    </span><span class="nv">null_resource.metrics-prometheus-healthcheck</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
+<a href="#__codelineno-1-14" id="__codelineno-1-14" name="__codelineno-1-14"></a><span class="w">   </span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="w"></span>
+<a href="#__codelineno-1-15" id="__codelineno-1-15" name="__codelineno-1-15"></a><span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <blockquote>
 <p>This procedure has been done to ensure that use case microservices are not created in ECS until new versions of the capability-type microservices are properly deployed, as use case microservices need to use capability-type microservices.</p>
@@ -1265,22 +1373,22 @@ We separate the automatation in two parts, <a href="#continuous-integration-ci">
 <p>Following the same procedure as in the previous step, a dependency is established between the microservice <code>dispatch-portal-frontend</code> and <code>dispatch-portal-backend</code>. </p>
 <p>The reason for this is that the <code>dispatch-portal-frontend</code> microservice needs to know the corresponding IP with the DNS entry in Route53 for the <code>dispatch-portal-backend</code> microservice, since if the previous deployment is saved, the new IP corresponding to the DNS entry is not updated.</p>
 <p>The following is the configuration in the terraform code of the service in ECS for the <code>dispatch-portal-frontend</code> microservice, where the necessary configuration to comply with this restriction can be seen.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;aws_ecs_service&quot;</span><span class="w"> </span><span class="nv">&quot;automation-dispatch-portal-frontend&quot;</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">   </span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="w"></span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">     </span><span class="na">depends_on</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="nv">null_resource.bruin-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">                    </span><span class="nv">null_resource.cts-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">                    </span><span class="nv">null_resource.lit-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">                    </span><span class="nv">null_resource.velocloud-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">                    </span><span class="nv">null_resource.hawkeye-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">                    </span><span class="nv">null_resource.t7-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">                    </span><span class="nv">null_resource.email-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">                    </span><span class="nv">null_resource.notifications-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
-<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">                    </span><span class="nv">null_resource.metrics-prometheus-healthcheck</span><span class="p">,</span><span class="w"></span>
-<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">                    </span><span class="nv">null_resource.dispatch-portal-backend-healthcheck</span><span class="p">,</span><span class="w"></span>
-<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">                    </span><span class="nv">aws_lb.automation-alb</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
-<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-2-1" id="__codelineno-2-1" name="__codelineno-2-1"></a><span class="kr">resource</span><span class="w"> </span><span class="nc">"aws_ecs_service"</span><span class="w"> </span><span class="nv">"automation-dispatch-portal-frontend"</span><span class="w"> </span><span class="p">{</span>
+<a href="#__codelineno-2-2" id="__codelineno-2-2" name="__codelineno-2-2"></a>
+<a href="#__codelineno-2-3" id="__codelineno-2-3" name="__codelineno-2-3"></a><span class="w">   </span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="w"></span>
+<a href="#__codelineno-2-4" id="__codelineno-2-4" name="__codelineno-2-4"></a>
+<a href="#__codelineno-2-5" id="__codelineno-2-5" name="__codelineno-2-5"></a><span class="w">     </span><span class="na">depends_on</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="nv">null_resource.bruin-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a href="#__codelineno-2-6" id="__codelineno-2-6" name="__codelineno-2-6"></a><span class="w">                    </span><span class="nv">null_resource.cts-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a href="#__codelineno-2-7" id="__codelineno-2-7" name="__codelineno-2-7"></a><span class="w">                    </span><span class="nv">null_resource.lit-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a href="#__codelineno-2-8" id="__codelineno-2-8" name="__codelineno-2-8"></a><span class="w">                    </span><span class="nv">null_resource.velocloud-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a href="#__codelineno-2-9" id="__codelineno-2-9" name="__codelineno-2-9"></a><span class="w">                    </span><span class="nv">null_resource.hawkeye-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a href="#__codelineno-2-10" id="__codelineno-2-10" name="__codelineno-2-10"></a><span class="w">                    </span><span class="nv">null_resource.t7-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a href="#__codelineno-2-11" id="__codelineno-2-11" name="__codelineno-2-11"></a><span class="w">                    </span><span class="nv">null_resource.email-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a href="#__codelineno-2-12" id="__codelineno-2-12" name="__codelineno-2-12"></a><span class="w">                    </span><span class="nv">null_resource.notifications-bridge-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a href="#__codelineno-2-13" id="__codelineno-2-13" name="__codelineno-2-13"></a><span class="w">                    </span><span class="nv">null_resource.metrics-prometheus-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a href="#__codelineno-2-14" id="__codelineno-2-14" name="__codelineno-2-14"></a><span class="w">                    </span><span class="nv">null_resource.dispatch-portal-backend-healthcheck</span><span class="p">,</span><span class="w"></span>
+<a href="#__codelineno-2-15" id="__codelineno-2-15" name="__codelineno-2-15"></a><span class="w">                    </span><span class="nv">aws_lb.automation-alb</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
+<a href="#__codelineno-2-16" id="__codelineno-2-16" name="__codelineno-2-16"></a><span class="p">}</span><span class="w"></span>
 </code></pre></div>
 </li>
 <li>
@@ -1300,41 +1408,57 @@ We separate the automatation in two parts, <a href="#continuous-integration-ci">
 <p><code>destroy-basic-infra-kre-dev</code> for ephemeral environments or <code>destroy-basic-infra-kre-production</code> for the production environment: This job will destroy everything created by Terraform in the previous stage by the job <code>deploy-kre-dev</code> or <code>deploy-kre-production</code> depending on the environment.</p>
 </li>
 </ul>
-
-              
-            </article>
-          </div>
-        </div>
-        
-      </main>
-      
-        <footer class="md-footer">
-  
-  <div class="md-footer-meta md-typeset">
-    <div class="md-footer-meta__inner md-grid">
-      <div class="md-copyright">
+</article>
+</div>
+</div>
+</main>
+<footer class="md-footer">
+<nav aria-label="Footer" class="md-footer__inner md-grid">
+<a aria-label="Previous: Logging &amp; Monitoring" class="md-footer__link md-footer__link--prev" href="../LOGGING_AND_MONITORING/" rel="prev">
+<div class="md-footer__button md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"></path></svg>
+</div>
+<div class="md-footer__title">
+<div class="md-ellipsis">
+<span class="md-footer__direction">
+                Previous
+              </span>
+              Logging &amp; Monitoring
+            </div>
+</div>
+</a>
+<a aria-label="Next: Snowflake" class="md-footer__link md-footer__link--next" href="../snowflake/" rel="next">
+<div class="md-footer__title">
+<div class="md-ellipsis">
+<span class="md-footer__direction">
+                Next
+              </span>
+              Snowflake
+            </div>
+</div>
+<div class="md-footer__button md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"></path></svg>
+</div>
+</a>
+</nav>
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
   
   
     Made with
-    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
       Material for MkDocs
     </a>
-  
 </div>
-      
-    </div>
-  </div>
+</div>
+</div>
 </footer>
-      
-    </div>
-    <div class="md-dialog" data-md-component="dialog">
-      <div class="md-dialog__inner md-typeset"></div>
-    </div>
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs"], "search": "../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"provider": "mike"}}</script>
-    
-    
-      <script src="../assets/javascripts/bundle.748e2769.min.js"></script>
-      
-    
-  </body>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"base": "..", "features": ["header.autohide", "toc.follow", "toc.integrate"], "search": "../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"provider": "mike"}}</script>
+<script src="../assets/javascripts/bundle.748e2769.min.js"></script>
+<script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
 </html>
