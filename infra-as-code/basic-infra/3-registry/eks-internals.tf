@@ -79,7 +79,7 @@ resource "aws_ecr_repository" "eks_nats" {
   }
 }
 
-resource "aws_ecr_repository" "eks_prometheus-nats-exporter" {
+resource "aws_ecr_repository" "eks_prometheus_nats_exporter" {
   name = "prometheus-nats-exporter"
   tags = {
     Project       = var.common_info.project
