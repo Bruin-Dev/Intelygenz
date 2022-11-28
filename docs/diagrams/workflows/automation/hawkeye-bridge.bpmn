@@ -27,7 +27,7 @@
       <bpmn:outgoing>Flow_1erl5mc</bpmn:outgoing>
     </bpmn:task>
     <bpmn:sequenceFlow id="Flow_1skdmmh" name="HTTP response has status 200" sourceRef="Gateway_0exbxli" targetRef="Activity_1lbhobn" />
-    <bpmn:task id="Activity_1xyohug" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_1xyohug" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_1erl5mc</bpmn:incoming>
       <bpmn:incoming>Flow_0iq2m2x</bpmn:incoming>
       <bpmn:outgoing>Flow_00yavg5</bpmn:outgoing>
@@ -67,7 +67,7 @@
       <bpmn:incoming>Flow_03tqefs</bpmn:incoming>
       <bpmn:outgoing>Flow_0jl2yp2</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_1p06cn4" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_1p06cn4" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_0jl2yp2</bpmn:incoming>
       <bpmn:incoming>Flow_1m8epyi</bpmn:incoming>
       <bpmn:outgoing>Flow_0oozon5</bpmn:outgoing>

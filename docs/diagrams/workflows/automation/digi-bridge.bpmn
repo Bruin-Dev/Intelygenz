@@ -23,7 +23,7 @@
       <bpmn:incoming>Flow_0c19q8v</bpmn:incoming>
       <bpmn:outgoing>Flow_1x2kp3d</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_1pvfc87" name="Send response to the requestor via message bus">
+    <bpmn:task id="Activity_1pvfc87" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_1x2kp3d</bpmn:incoming>
       <bpmn:incoming>Flow_0623h8s</bpmn:incoming>
       <bpmn:outgoing>Flow_0qisa23</bpmn:outgoing>
@@ -67,7 +67,7 @@
       <bpmn:incoming>Flow_1af0h68</bpmn:incoming>
       <bpmn:outgoing>Flow_06rgyk6</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_1b51l02" name="Send response to the requestor via message bus">
+    <bpmn:task id="Activity_1b51l02" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_06rgyk6</bpmn:incoming>
       <bpmn:incoming>Flow_1a9hxbi</bpmn:incoming>
       <bpmn:outgoing>Flow_0moecy1</bpmn:outgoing>

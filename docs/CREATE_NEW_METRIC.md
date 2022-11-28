@@ -4,7 +4,7 @@
 
 # CREATE NEW METRIC
 
-This process describes step by step how to create a new metric, how to test it locally and how to verify that it's
+This process describes step by step how to create a new metric, how to test it locally and how to verify that it is
 working in production.
 Feel free to skip step 1 if the metrics repository already exists in the service you want to add the new metric for.
 

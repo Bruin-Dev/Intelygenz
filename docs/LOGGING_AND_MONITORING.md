@@ -50,12 +50,12 @@ This tool is available for Linux, MacOS and Windows, it is possible to download 
 
 - **Linux**:
 
-    - It's possible download and install as a `deb` package
+    - It is possible download and install as a `deb` package
         ```sh
         curl -o log-stream-filter.deb -L $(curl -s https://api.github.com/repos/xoanmm/log-stream-filter/releases/latest | jq -r '.assets[] | select(.name | contains("linux_amd64.deb")) | .browser_download_url')
         sudo dpkg -i log-stream-filter.deb
         ```
-    - It's also possible download and install as a simple binary
+    - It is also possible download and install as a simple binary
         ```sh
         curl -o log-stream-filter.tgz -L $(curl -s https://api.github.com/repos/xoanmm/log-stream-filter/releases/latest | jq -r '.assets[] | select(.name | contains("linux_64-bit.tar.gz")) | .browser_download_url')
         tar -zxvf log-stream-filter.tgz
@@ -132,7 +132,7 @@ Below is a screenshot of the main screen of the system.
 
 ![IMAGE: papertrail_dashboards_overview](./img/papertrail/papertrail_dashboards_overview.png){loading=lazy}
 
-In this system it's possible see three useful dashboards:
+In this system it is possible see three useful dashboards:
 
 - **[production] - master alarms**: alarms are defined on different modules with notifications sent to slack through the mettel-alarms-papertrail-production channel, for example when the number of error messages in a module exceeds 100 times in an hour. Below is a screenshot where these alarms have been marked in a red rectangle.
 

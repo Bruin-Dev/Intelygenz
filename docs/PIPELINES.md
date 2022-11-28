@@ -23,7 +23,7 @@ To improve the speed and optimization of the pipelines, **only the jobs and stag
    2. Choose the `Run Pipeline` option, as shown in the image below in red.
    ![IMAGE: select_run_pipeline](./img/pipelines/select_run_pipeline.png){loading=lazy}
    
-   3. Indicate the branch where you want to run the pipeline in the `Run for` box and then click on `Run pipeline`. It's possible see an example in the following image, where the box `Run for` is shown in green and `Run pipeline` is shown in red.
+   3. Indicate the branch where you want to run the pipeline in the `Run for` box and then click on `Run pipeline`. It is possible see an example in the following image, where the box `Run for` is shown in green and `Run pipeline` is shown in red.
    ![IMAGE: select_run_pipeline_branch](./img/pipelines/select_run_pipeline_branch.png){loading=lazy}
 
    > It is important to note that due to the extra time added by the tests of the `dispacth-portal-frontend` microservice, the tests of this one will only be executed when any of the files within it change or a pipeline with the Gitlab variable `TEST_DISPATCH_PORTAL_FRONTEND` with value `true` is executed.
@@ -90,7 +90,7 @@ In this stage there is also a job that must be executed manually if necessary, t
 
 In this stage is also checked whether there are enough free resources in ECS to carry out the deployment with success or not.
 
-**It's necessary run the `basic-infra` job the first time a new microservice is created in the project**
+**It is necessary run the `basic-infra` job the first time a new microservice is created in the project**
 > This has been done because ECR repositories are global resources and are stored in the same `tfstate` file, thus avoiding that when a microservice that creates a repository is created, it is not deleted by other branches that do not have it added.
 
 ### Basic_infra_kre steps
@@ -114,7 +114,7 @@ In this stage will be the following jobs:
 
      - A set of IAM roles, one for each user with access to the project. These will be used to assign subsequent permissions in the Kubernetes cluster according to the role they belong to. These are stored as terraform [output values](https://www.terraform.io/docs/configuration/outputs.html), saving the list of user roles belonging to each role in their corresponding variable.
      
-       Below is an example of a pipeline execution where it's possible see the IAM roles of users generated for each role in the project:
+       Below is an example of a pipeline execution where it is possible see the IAM roles of users generated for each role in the project:
 
        ```sh
        Outputs:
@@ -167,7 +167,7 @@ In this stage the KRE runtimes will be deployed in the corresponding environment
 
 ### Build steps
 
-This area will cover all build steps of all necessary modules to deploy the app to the selected environment. It's typical to build the docker images and push to the repository in this step.
+This area will cover all build steps of all necessary modules to deploy the app to the selected environment. It is typical to build the docker images and push to the repository in this step.
 
 ### Deploy steps
 

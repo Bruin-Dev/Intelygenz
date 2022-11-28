@@ -15,8 +15,8 @@
 Infrastructure as Code enables DevOps to test the deployment of environments before use it in production. IaC can deliver 
 stable environments rapidly and at scale. Avoiding manual configuration of environments and enforce consistency by representing
  the desired state of their environments via code. This technique improves the automatic deployments in automation-engine, each time 
- the pipelines launch the [Continuous delivery](./PIPELINES.md##continuous-delivery-cd) will create, update or destroy 
- the infrastructure if it's necessary. 
+ the pipelines launch the [Continuous delivery](./PIPELINES.md#continuous-delivery-cd) will create, update or destroy 
+ the infrastructure if it is necessary. 
 
 ## IaC in MetTel Automation
 

@@ -11,7 +11,7 @@ requirements meet. To accomplish these requirements the SSH keys generated to ac
 ## Backup Plan
 Each region generate the SSH keys credentials for their specific region, when passive is activated will have different SSH keys to avoid the reuse of these keys.
 The backup is executed at the moment the terraform runs in the pipeline in a normal execution to deploy the infrastructure and software for the FEDRAMP environment.
-**The Tertiary region only contains backups of the secondary region.** Also, it's important to notice that the ssh keys only get generated in case of the activation of a region
+**The Tertiary region only contains backups of the secondary region.** Also, it is important to notice that the ssh keys only get generated in case of the activation of a region
 
 ## Recovery Plan
 To recovery a SSH key in case is lost/deleted follow the next steps:

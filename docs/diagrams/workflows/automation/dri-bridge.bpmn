@@ -23,7 +23,7 @@
         <bpmn:targetRef>DataStoreReference_1g8zolv</bpmn:targetRef>
       </bpmn:dataOutputAssociation>
     </bpmn:task>
-    <bpmn:task id="Activity_1xyohug" name="Send response to the requestor via message bus">
+    <bpmn:task id="Activity_1xyohug" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_0iq2m2x</bpmn:incoming>
       <bpmn:incoming>Flow_0bs7ah8</bpmn:incoming>
       <bpmn:incoming>Flow_1d40800</bpmn:incoming>

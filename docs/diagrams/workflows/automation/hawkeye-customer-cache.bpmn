@@ -23,7 +23,7 @@
       <bpmn:incoming>Flow_1hx9tdy</bpmn:incoming>
       <bpmn:outgoing>Flow_00fj7ow</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_1pvfc87" name="Send response to the requestor via message bus">
+    <bpmn:task id="Activity_1pvfc87" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_0623h8s</bpmn:incoming>
       <bpmn:incoming>Flow_0ygs05m</bpmn:incoming>
       <bpmn:outgoing>Flow_0qisa23</bpmn:outgoing>

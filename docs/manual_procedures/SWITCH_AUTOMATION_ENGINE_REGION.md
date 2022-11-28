@@ -17,7 +17,7 @@ this is the goal of this procedure.
 - Ensure that your AWS credentials have Codecommit permission to interact with Automation Engine repository in all available regions.
 - We have configured a git mirroring from `pro` to `mirror` environment, by that way we always have updated the repo in the mirror region.
 - The actual environments are: `pro` and `mirror`, but could be more in the future.
-- Master branch is protected, you can't commit directly to it, you must create a new branch and do a pull request.
+- Master branch is protected, you cannot commit directly to it, you must create a new branch and do a pull request.
 - An authorized team member must accept your PR once the changes was verified.
 - Once the pipeline run, if we check logs, we can verify that is possible that terraform failed the execution of `union` resources(AWS resources
 that create links between regions), this is originated by AWS unavailability in one region. This behavior is expected since we assume
@@ -26,7 +26,7 @@ that an AWS Region is not working properly; this job is allowed to fail for this
 ## Possible situation
 We have all active infrastructure and application in `pro` (`us-east-1`), then AWS suffers a disaster in Nort Virginia region(`us-east-1`) and
 we lost the activity and responses from AWS resources; we must assume that all resources are unavailable.
-It's time to star using the resources in the mirror region(`us-west-1`) by following the next steps:
+It is time to star using the resources in the mirror region(`us-west-1`) by following the next steps:
 
 ## Steps
 - Verify AWS Health Dashboards to confirm AWS services availability per region. Confirm that our services in the main region(`us-east-1`) are unavailable.

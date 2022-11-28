@@ -4,10 +4,10 @@
 
 # Snowflake
 
-## Create a private key for a user/service
+## Create a private key for a user or service
 To create a new user follow the [link](https://docs.snowflake.com/en/user-guide/key-pair-auth.html#configuring-key-pair-authentication) from snowflake about key creation
 
-It's only allowed to create users with keys to automate connection between services. If we need a key for testing purposes
+It is only allowed to create users with keys to automate connection between services. If we need a key for testing purposes
 should be a temporary user or in a development infrastructure. Important to know that only a SECURITYADMIN user can modify users
 to have a key pair access.
 

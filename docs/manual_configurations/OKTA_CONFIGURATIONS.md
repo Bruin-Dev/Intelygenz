@@ -8,7 +8,7 @@ related to MetTel projects that are made by Intelygenz. For automatic synchroniz
 OKTA and AWS SSO, because of that, groups and users are going to be synced if someone deletes/create a group/user in Okta.
 
 ## Considerations
-- Remove a user/group don't revoke the session tokens in AWS, the minimum duration of these tokens are of 1h. [Info here](https://docs.aws.amazon.com/singlesignon/latest/userguide/authconcept.html#sessionsconcept)
+- Remove a user/group do not revoke the session tokens in AWS, the minimum duration of these tokens are of 1h. [Info here](https://docs.aws.amazon.com/singlesignon/latest/userguide/authconcept.html#sessionsconcept)
 - Using the same Okta group for both assignments and group push is not currently supported. To maintain consistent group memberships between Okta and AWS SSO, you need to create a separate group and configure it to push groups to AWS SSO. [Info here](https://docs.aws.amazon.com/singlesignon/latest/userguide/okta-idp.html)
 - If you update a user’s address you must have streetAddress, city, state, zipCode and the countryCode value specified. If any of these values are not specified for the Okta user at the time of synchronization, the user or changes to the user will not be provisioned. [Info here](https://docs.aws.amazon.com/singlesignon/latest/userguide/okta-idp.html)
 - Entitlements and role attributes are not supported and cannot be synced to AWS SSO. [Info here](https://docs.aws.amazon.com/singlesignon/latest/userguide/okta-idp.html)

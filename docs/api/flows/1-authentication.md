@@ -1,6 +1,6 @@
 
 ## Flow Diagram
-![](../../diagrams/workflows/data_highway/api/flow-authorization.svg)
+![](../../diagrams/workflows/data_highway/api/flow-authorization.drawio.svg)
 
 Requisites
 ----------

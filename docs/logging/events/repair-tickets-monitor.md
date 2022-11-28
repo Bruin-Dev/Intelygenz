@@ -7,7 +7,7 @@ hide:
 # Repair tickets monitor
 
 ## Process Workflows
-![](../../images/20-repair-tickets-monitor.jpg){loading=lazy}
+![](../../images/repair-tickets-monitor.png)(../../images/repair-tickets-monitor.png){loading=lazy}
 
 ## List of Decisions made by the Repair tickets monitor
 ### new_closed_tickets_feedback

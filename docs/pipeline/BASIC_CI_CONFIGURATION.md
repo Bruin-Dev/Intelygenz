@@ -24,7 +24,7 @@ The only two configurations we need to make it work are:
     After getting the access token, make sure to create a variable called `GITLAB_TOKEN` and set its value with it.
 
 ## AWS
-It's recommended to create an account for Terraform and a group of permissions with admin access. It's also necessary to create
+It is recommended to create an account for Terraform and a group of permissions with admin access. It is also necessary to create
 an AWS S3 bucket that the user can access to.
 
 To connect to AWS from some steps of the CI/CD, we need to add the following variables to `Settings > CI/CD`:

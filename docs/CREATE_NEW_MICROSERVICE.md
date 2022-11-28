@@ -15,7 +15,7 @@ first so that we can then start developing and testing our new microservice in e
 
 ## 1. Create ECR repository
 
-We can't create the ECR repository in the branch where we are developing because the creation or update of the ECR repositories 
+We cannot create the ECR repository in the branch where we are developing because the creation or update of the ECR repositories 
 is only in the Master branch. This means that the first thing that we need to do is make a little merge to master to create our 
 new microservice repo, by that way we can deploy our microservice later in dev branches.
 
@@ -58,7 +58,7 @@ new-bridge
 
 ## 3. Update CI-CD gitlab files with the proper values
 
-It's important to have the .gitlab-ci.yaml files correctly defined to enable pipelines:
+It is important to have the .gitlab-ci.yaml files correctly defined to enable pipelines:
   * `new-bridge/.gitlab-ci.yml`
   Change any reference of the template microservice to the new one: example find and replace "bruin-bridge" for "new-bridge"
   * `.gitlab-ci.yml` (the file in the root of the repository)
@@ -211,7 +211,7 @@ Perfect, now let's copy and paste another chart to use as template, if we will d
           {{- end }}                                                                                                                                            _│
   ...
   ````
-  Note that we have a `if` condition. You will see this in some check, we use this because if we deploy only some microservices, we must contemplate this. If the notifications-bridge does not exist, the check will not be created. Nats and Redis are always required, that's wy don't have the conditional.
+  Note that we have a `if` condition. You will see this in some check, we use this because if we deploy only some microservices, we must contemplate this. If the notifications-bridge does not exist, the check will not be created. Nats and Redis are always required, that is why they do not have the conditional.
   * VARIABLES: time to update the variables that will use our microservice, this involves various files:
 
     * `helm/charts/automation-engine/charts/new-bridge/templates/configmap.yaml` this file always will be part of the deployment, it contains the variables base and the variables with no sensitive information. let's add a new variable NEW_VAR:
@@ -228,7 +228,7 @@ Perfect, now let's copy and paste another chart to use as template, if we will d
       PAPERTRAIL_PREFIX: "{{ .Values.config.papertrail_prefix }}"
     ...
     ````
-    You can see here two important things, 1. there are variables with quotes and without quotes: this depends on your needs, if you don't put quotes, YAML will interpret the best case for you.. example, if you put a number like 5 as a value, YAML will interpret this as an integer, but careful, this could be a danger if your application expects a string variable; if this is the case, use quotes to define your var. 2. Additionally, we have variables of two types: "global" and "config". The global ones are common for all microservices, and the "config" is specific for this microservice. All the additional variables that we add will be of the type "config"
+    You can see here two important things, 1. there are variables with quotes and without quotes: this depends on your needs, if you do not put quotes, YAML will interpret the best case for you.. example, if you put a number like 5 as a value, YAML will interpret this as an integer, but careful, this could be a danger if your application expects a string variable; if this is the case, use quotes to define your var. 2. Additionally, we have variables of two types: "global" and "config". The global ones are common for all microservices, and the "config" is specific for this microservice. All the additional variables that we add will be of the type "config"
 
     * `helm/charts/automation-engine/charts/new-bridge/templates/secret.yaml` this file may or may not exist in the chart and contains variables that have sensitive information. This info will be encoded with base64 to no show in clear text. let's add a new variable NEW_SENSITIVE_VAR:
     ````
@@ -257,7 +257,7 @@ Perfect, now let's copy and paste another chart to use as template, if we will d
     ````
     Check that we only define the variable but no put any value, although we can also set a default value if we want.
 
-    * `helm/charts/automation-engine/values.yaml` This is the values template off the entire automation-engine application. This only have the structure of the values and no contain any real value. For this part we will copy the content of the values file that we just created and paste in the place that correspond (respecting the alphabetical order). It's important to note that we are pasting the values inside another Yaml, so we must adapt the indentation for the destiny file:
+    * `helm/charts/automation-engine/values.yaml` This is the values template off the entire automation-engine application. This only have the structure of the values and no contain any real value. For this part we will copy the content of the values file that we just created and paste in the place that correspond (respecting the alphabetical order). It is important to note that we are pasting the values inside another Yaml, so we must adapt the indentation for the destiny file:
     ````
     ...
     # -- lumin-billing-report subchart specific configuration
@@ -322,7 +322,7 @@ Perfect, now let's copy and paste another chart to use as template, if we will d
     ````
     Things to check: first the indentation!!.. second, the "global" config is not set here; it is defined at the beginning of the values file and is common for all microservices. and finally, we remove blank and default configurations to get a shorter file (things removed: autoscaling, the default is false, so we can omit it. nodeSelector. tolerations and affinity). PD: You can keep autoscaling if you will enable it.
 
-    * `helm/charts/automation-engine/values.yaml.tpl` This is the most important file, it contains the values that will be parsed and used to deploy the Automation-Engine application. Basically it's the same file of values.yaml, but with the variables that will be replaced in the pipeline to deploy a production or develop environment. Let's add our new micro with the variables:
+    * `helm/charts/automation-engine/values.yaml.tpl` This is the most important file, it contains the values that will be parsed and used to deploy the Automation-Engine application. Basically it is the same file of values.yaml, but with the variables that will be replaced in the pipeline to deploy a production or develop environment. Let's add our new micro with the variables:
     ````
     ...
     # -- lumin-billing-report subchart specific configuration
@@ -386,7 +386,7 @@ Perfect, now let's copy and paste another chart to use as template, if we will d
     ````
     With this, we have the entire template of our new microservice. Now we need to set in the pipeline the variables that we just created.
 
-    * `ci-utils/environments/deploy_environment_vars.sh` In this file, we define the variables that will be used in the values file. Most of the cases are variables that we create in GitLab with the value of dev and production environments. This file is a bash script that has multiple functions to define the variables, each function is for the microservice that requires those variables. If we are adding a new micro that requires variables, we need to define the function and in the bottom of the file execute that function. PD: no all microservices needs specific variables, so in some cases, we wouldn't need to touch this file or even create a secret.yaml. Rebember to respect the alphabetical order:
+    * `ci-utils/environments/deploy_environment_vars.sh` In this file, we define the variables that will be used in the values file. Most of the cases are variables that we create in GitLab with the value of dev and production environments. This file is a bash script that has multiple functions to define the variables, each function is for the microservice that requires those variables. If we are adding a new micro that requires variables, we need to define the function and in the bottom of the file execute that function. PD: no all microservices needs specific variables, so in some cases, we would not need to touch this file or even create a secret.yaml. Rebember to respect the alphabetical order:
     ````
     ...
     function lumin_billing_report_variables() {

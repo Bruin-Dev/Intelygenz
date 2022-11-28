@@ -4,7 +4,7 @@
 
 ### Basic concepts
 
-It's a project based on microservices, in which two types are distinguished:
+It is a project based on microservices, in which two types are distinguished:
 
 - **Capabilities**: They are in charge of carrying out certain common actions for the business logic. I.e.: Collect information from SD-WAN routers
   
@@ -17,13 +17,13 @@ It's a project based on microservices, in which two types are distinguished:
 It is important to emphasize on the architecture of the system the use of [NATS](https://github.com/nats-io/nats-server) in it.
 
 ### Messaging system
-It's important to emphasize in the architecture of the system the use of [NATS](https://nats.io/) in it.
+It is important to emphasize in the architecture of the system the use of [NATS](https://nats.io/) in it.
 
 - NATS is a simple, secure and performant communications system for digital system, services and devices
 
 - NATS is used in the microservices system as a communication center for all of them.
 
-> NATS it's used in cluster mode to satisfy more work to be done by it due to the high number of events in the system to be processed
+> NATS it is used in cluster mode to satisfy more work to be done by it due to the high number of events in the system to be processed
 
 #### Microservices communications
 
@@ -59,9 +59,9 @@ There are two types of microservices depending on the connection between them an
         - `customer-cache`
         - `hawkeye-customer-cache`
     
-    > It's important take into account that all microservices that communicate with NATS can also communicate with the Redis Cluster. This is needed to bypass the limit size that NATS enforces for all messages it receives (1MB).
+    > It is important take into account that all microservices that communicate with NATS can also communicate with the Redis Cluster. This is needed to bypass the limit size that NATS enforces for all messages it receives (1MB).
 
-- **Microservices that doesn't communicate with NATS**:
+- **Microservices that does not communicate with NATS**:
     - `dispatch-portal-frontend`
     - `lumin-billing-report`
     - `prometheus` and `thanos` components, from `metrics-prometheus` microservice
@@ -69,13 +69,13 @@ There are two types of microservices depending on the connection between them an
 
 NATS is used in the microservice system as a communication center for all of them. It is used in cluster mode to satisfy more work to be done by it.
 
-In the following [diagram](https://www.draw.io/#G1zd4zHYf7B0iTxBUmXxq9qK-Tap4zH5vh) it's possible see a graph with the relationships between the microservices explained previously in this section
+In the following diagram is possible see a graph with the relationships between the microservices explained previously in this section
 
 ![IMAGE: microservices_general_architecture](./img/system_overview/mettel_microservices_general_architecture.png){loading=lazy}
 
 #### Relationships between microservices
 
-The services that are part of the previously explained architecture are related to each other, in the following [diagram](https://www.draw.io/#G1npbFKJq-cODHY5WddFt4aB-d3y9bv_lW) it's possible see the relationships between them.
+The services that are part of the previously explained architecture are related to each other, in the following diagram is possible see the relationships between them.
 
 ![IMAGE: microservices_general_relationship](./img/system_overview/microservices_general_relationship.png){loading=lazy}
 
@@ -89,7 +89,7 @@ When another microservice requests bruin data, it will be in charge of making re
 
 > Bruin is a third-party system that allows creating and managing support tickets to deal with issues that appear in network devices, among other types of devices.
 
-The following [diagram](https://app.diagrams.net/#G1g8vBpgNG_UFBwsUnNi5_z5nN5aoXhf6a) shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
+The following diagram shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
 
 ![IMAGE: bruin-bridge_microservice_relationships](img/system_overview/capabilities/bruin-bridge_microservice_relationships.png){loading=lazy}
 
@@ -99,7 +99,7 @@ This microservice is in charge of making requests to the CTS API, taking the rol
 
 When another microservice requests CTS data, it will be in charge of making response messages to the same and never of request, that is to say, it will always be a producer within a NATS topic and never a consumer.
 
-The following [diagram](https://app.diagrams.net/#G1UrbamtWY7hB7Xy9p0gnRgah9eWvoEYKK) shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
+The following diagram shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
 
 ![IMAGE: cts-bridge_microservice_relationships](img/system_overview/capabilities/cts-bridge_microservice_relationships.png){loading=lazy}
 
@@ -109,7 +109,7 @@ This microservice is in charge of making requests to the Digi Reboot API, taking
 
 When another microservice asks to reboot a SD-WAN device, it will be in charge of making response messages to the same and never of request, that is to say, it will always be a producer within a NATS topic and never a consumer.
 
-The following [diagram](https://app.diagrams.net/#G184B7YUYaKKWe5MsRKKY1rVVVQd_a1CbJ) shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
+The following diagram shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
 
 ![IMAGE: digi-bridge_microservice_relationships](img/system_overview/capabilities/digi-bridge_microservice_relationships.png){loading=lazy}
 
@@ -120,7 +120,7 @@ This microservice is in charge of making requests to the Hawkeye API, taking the
 
 When another microservice requests Hawkeye data, it will be in charge of making response messages to the same and never of request, that is to say, it will always be a producer within a NATS topic and never a consumer.
 
-The following [diagram](https://app.diagrams.net/#G1ki13-NoKadfUai12FWQCFebwkNGoKGFo) shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
+The following diagram shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
 
 ![IMAGE: hawkeye-bridge_microservice_relationships](img/system_overview/capabilities/hawkeye-bridge_microservice_relationships.png){loading=lazy}
 
@@ -130,7 +130,7 @@ This microservice is in charge of making requests to the LIT API, taking the rol
 
 When another microservice requests LIT data, it will be in charge of making response messages to the same and never of request, that is to say, it will always be a producer within a NATS topic and never a consumer.
 
-The following [diagram](https://app.diagrams.net/#G1UztleVULGVS86wYXTEh7efsb2zdBWNJy) shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
+The following diagram shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
 
 ![IMAGE: lit-bridge_microservice_relationships](img/system_overview/capabilities/lit-bridge_microservice_relationships.png){loading=lazy}
 
@@ -140,9 +140,9 @@ This microservice is in charge of sending emails.
 
 It is important to point out that it is not in charge of the composition of the messages to be sent, that is to say, of their content, but only of sending them.
 
-The following [diagram](https://app.diagrams.net/#G19IZI0cCp1odvYIwgMGlrGiQfKYZbedx2) shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
+The following diagram shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
 
-![IMAGE: email_bridge_microservice_relationships](img/system_overview/capabilities/email_bridge_microservice_relationships.png){loading=lazy}
+![IMAGE: email_bridge_microservice_relationships](img/system_overview/capabilities/email-bridge_microservice_relationships.png){loading=lazy}
 
 #### Notifications bridge microservice
 
@@ -150,15 +150,15 @@ This microservice is in charge of sending notifications to third-party systems.
 
 It is important to point out that it is not in charge of the composition of the messages to be sent, that is to say, of their content, but only of sending them.
 
-The following [diagram](https://app.diagrams.net/#G19IZI0cCp1odvYIwgMGlrGiQfKYZbedx2) shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
+The following diagram shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
 
-![IMAGE: notifications_bridge_microservice_relationships](img/system_overview/capabilities/notifications_bridge_microservice_relationships.png){loading=lazy}
+![IMAGE: notifications_bridge_microservice_relationships](img/system_overview/capabilities/notifications-bridge_microservice_relationships.png){loading=lazy}
 
 #### T7-bridge microservice
 
 The function of this microservice is to embed in the notes of a ticket the prediction calculated by T7, this prediction will store information on the recommendations actions for the ticket.
 
-In order to carry out the mentioned actions, it communicates with the API of T7 to obtain the information about the prediction, as it can be seen in the following [diagram](https://app.diagrams.net/#G18eBQnyAJwUxAAME2gKjxb9NCVbeCVzWt).
+In order to carry out the mentioned actions, it communicates with the API of T7 to obtain the information about the prediction, as it can be seen in the following diagram.
 
 ![IMAGE: t7-bridge_microservice_relationships](img/system_overview/capabilities/t7-bridge_microservice_relationships.png){loading=lazy}
 
@@ -168,7 +168,7 @@ This microservice is in charge of making requests to the velocloud API, taking t
 
 When another microservice requests velocloud data, it will be in charge of making response messages to the same and never of request, that is to say, it will always be a producer within a NATS topic and never a consumer.
 
-The following [diagram](https://app.diagrams.net/#G1bn-S0EvBXgnLW22Zwvdx4MJVx0hauXdQ) shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
+The following diagram shows the dependencies or interactions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
 
 ![IMAGE: velocloud-bridge_microservice_relationships](img/system_overview/capabilities/velocloud-bridge_microservice_relationships.png){loading=lazy}
 
@@ -185,7 +185,7 @@ It acts as an intermediary between `dispatch-portal-frontend` and CTS & LIT APIs
 that, once they receive a payload from the frontend side, it modifies its fields with the help of some mappers to match the formats expected
 by CTS and LIT and then forward those customized payloads to their APIs. 
 
-The following [diagram](https://app.diagrams.net/#G16slq1OcvjBmFVygq6jhC9DlpAMvcZS2W) shows the dependencies or interactions of this microservice with the others.
+The following diagram shows the dependencies or interactions of this microservice with the others.
 
 ![IMAGE: grafana_microservice_relationships](img/system_overview/use_cases/grafana_microservice_relationships.png){loading=lazy}
 
@@ -194,7 +194,7 @@ The following [diagram](https://app.diagrams.net/#G16slq1OcvjBmFVygq6jhC9DlpAMvc
 Although Grafana is a visualization tool for metrics, it needs to fetch some data from VeloCloud API to build dashboards for customer
 Titan America.
 
-The following [diagram](https://app.diagrams.net/#G1Q4GtTXtbDXUyJibl4bXF8ZKAaQMQlVrf) shows the dependencies or interactions of this microservice with the others.
+The following diagram shows the dependencies or interactions of this microservice with the others.
 
 ![IMAGE: dispatch-portal-backend_microservice_relationships](img/system_overview/use_cases/dispatch-portal-backend_microservice_relationships.png){loading=lazy}
 
@@ -208,7 +208,7 @@ will be taken.
 
 In case the device was detected to be healthy, the system looks for an open outage ticket for this device and resolves it in case it exists.
 
-In the following [diagram](https://app.diagrams.net/#G1ZAQSFthTrg4w2RGuzINR03LNlT54aOpZ) it's possible see the relationship of this microservice with the others.
+In the following diagram is possible see the relationship of this microservice with the others.
 ![IMAGE: hawkeye-outage-monitor_microservice_relationships](img/system_overview/use_cases/hawkeye-outage-monitor_microservice_relationships.png){loading=lazy}
 
 #### Last-contact-report microservice
@@ -221,7 +221,7 @@ The following flow is used to make this report:
 
 2. Once the events are obtained from an edge, it communicates with the *email-bridge* microservice to send an email with this information.
 
-It is possible to see the relations between the mentioned services for the flow in the following [diagram](https://app.diagrams.net/#G13QWoYPfjPgxZ0Mp1Nl7SDZVonzUj2tIS).
+It is possible to see the relations between the mentioned services for the flow in the following diagram.
 ![IMAGE: last-contact-report_microservice_relationships](img/system_overview/use_cases/last-contact-report_microservice_relationships.png){loading=lazy}
 
 #### Service-affecting-monitor microservice
@@ -232,7 +232,7 @@ In case the thresholds are exceeded, it will communicate with the email-bridge s
 
 This microservice also communicates with the bruin-bridge microservice to create tickets or add notes to an existing one, including in this information about the routers for which a problem is detected.
 
-In the following [diagram](https://app.diagrams.net/#G1iwUTk1QGrLi2OKuKHpIB6K0KJ1s2W87e) it's possible see the relationships between this microservice and the others.
+In the following diagram is possible see the relationships between this microservice and the others.
 
 ![IMAGE: service-affecting-monitor_microservice_relationships](img/system_overview/use_cases/service-affecting-monitor_microservice_relationships.png){loading=lazy}
 
@@ -271,9 +271,9 @@ The basic algorithm behaves like this:
     * Canceled dispatch:
         - Append note to bruin when a dispatch is canceled
 
-Each vendor has it's own details like how to retrieve some fields or how we identify the tickets with the dispatches, all explained in the `service-dispatch-monitor`.
+Each vendor has its own details like how to retrieve some fields or how we identify the tickets with the dispatches, all explained in the `service-dispatch-monitor`.
 
-In the following [diagram](https://app.diagrams.net/#G1cy-zEqGpzKDxFTlCYuVNrrq8VqcVO7l0) it's possible see the relationships between this microservice and the others.
+In the following diagram is possible see the relationships between this microservice and the others.
 
 ![IMAGE: service-dispatch-monitor_microservice_relationships](img/system_overview/use_cases/service-dispatch-monitor_microservice_relationships.png){loading=lazy}
 
@@ -302,7 +302,7 @@ will be taken.
     between the creation date of the last triage note and the current moment are claimed to Velocloud and then they are included in the triage notes, which are finally appended to the ticket. Note that due to Bruin limitations it is not feasible to have a triage note with 1500 characters or more;
     that is the reason why several triage notes are appended to the ticket (instead of just appending one).
 
-In the following [diagram](https://app.diagrams.net/#G1-ESnlWgdP7-SbwhP3NAuRWv6ZMuSOUu0) it's possible see the relationship of this microservice with the others.
+In the following diagram is possible see the relationship of this microservice with the others.
 ![IMAGE: service-outage-monitor_microservice_relationships](img/system_overview/use_cases/service-outage-monitor_microservice_relationships.png){loading=lazy}
 
 #### TNBA-feedback microservice
@@ -310,7 +310,7 @@ In the following [diagram](https://app.diagrams.net/#G1-ESnlWgdP7-SbwhP3NAuRWv6Z
 This microservice is in charge of collecting closed tickets that had a TNBA note appended by `tnba-monitor` at some point. After collecting them, they are sent to `t7-bridge` to retrain predictive models and hence improve
 the accuracy of predictions claimed by `tnba-monitor`.
 
-The following [diagram](https://www.draw.io/#G1Gwr3JseMInuIsKIB1CQOU9TEABipepfq) shows the relationship between this microservice and the others.
+The following diagram shows the relationship between this microservice and the others.
 
 ![IMAGE: tnba-feedback_microservice_relationships](img/system_overview/use_cases/tnba-feedback_microservice_relationships.png){loading=lazy}
 
@@ -319,9 +319,9 @@ The following [diagram](https://www.draw.io/#G1Gwr3JseMInuIsKIB1CQOU9TEABipepfq)
 This microservice is in charge of appending notes to Bruin tickets indicating what is *T*he *N*ext *B*est *A*ction a member of the support team of
 Bruin can take to move forward on the resolution of the ticket.
 
-It mostly communicates with `bruin-bridge` and `t7-bridge` to embed predictions into tickets, but it also communicates with other capabilities as shown in the following [diagram](https://www.draw.io/#G1uD7Otczhg_kZrgtBztJ5GvLkud0uaTNv).
+It mostly communicates with `bruin-bridge` and `t7-bridge` to embed predictions into tickets, but it also communicates with other capabilities as shown in the following diagram.
 
-The following [diagram](https://app.diagrams.net/#G1Gwr3JseMInuIsKIB1CQOU9TEABipepfq) shows the relationship between this microservice and the others.
+The following diagram shows the relationship between this microservice and the others.
 
 ![IMAGE: tnba-monitor_microservice_relationships](img/system_overview/use_cases/tnba-monitor_microservice_relationships.png){loading=lazy}
 
@@ -334,7 +334,7 @@ On the other hand, it also serves this information to the rest of services.
 
 This service is a special one, since it acts as a requester (to build and store caches) but also as a replier (to serve caches to services requesting them).
 
-The following [diagram](https://www.draw.io/#G1y-I8UCvNxvZo538T9BEY0mfteGi52Pzk) shows the dependencies or interactions of this microservice with the rest.
+The following diagram shows the dependencies or interactions of this microservice with the rest.
 
 ![IMAGE: customer-cache_microservice_relationships](img/system_overview/mixed_services/customer-cache_microservice_relationships.png){loading=lazy}
 
@@ -349,7 +349,7 @@ On the other hand, it also serves this information to the rest of services.
 
 This service is a special one, since it acts as a requester (to build and store caches) but also as a replier (to serve caches to services requesting them).
 
-The following [diagram](https://www.draw.io/#G1QLpox45cZE4PV3dxlZsnK5Gv1N6hQNvM) shows the dependencies or interactions of this microservice with the rest.
+The following diagram shows the dependencies or interactions of this microservice with the rest.
 
 ![IMAGE: hawkeye-customer-cache_microservice_relationships](img/system_overview/mixed_services/hawkeye-customer-cache_microservice_relationships.png){loading=lazy}
 
@@ -357,7 +357,7 @@ From the point of view of services to the left of `hawkeye-customer-cache`, it p
 
 From the point of view of services to the right of `hawkeye-customer-cache`, it plays the role of a requester as it asks for data to Hawkeye and Bruin to cross it.
 
-### Microservices that don't communicate with NATS
+### Microservices that do not communicate with NATS
 
 #### dispatch-portal-frontend
 
@@ -367,7 +367,7 @@ as well as create and update them, so their technicians can assist customers whe
 It exposes a UI that communicates directly with a REST API in `dispatch-portal-backend` to handle the visualization, creation and
 update of dispatch requests.
 
-The following [diagram](https://app.diagrams.net/#G15bx0C_yx4lsMM9h9a16Ew4YmHu62U5uD) shows the relationship between this microservice and `dispatch-portal-backend`.
+The following diagram shows the relationship between this microservice and `dispatch-portal-backend`.
 
 ![IMAGE: dispatch-portal-frontend_microservice_relationships](img/system_overview/isolated_services/dispatch-portal-frontend_microservice_relationships.png){loading=lazy}
 
@@ -377,7 +377,7 @@ This service automates requesting billing information for a given customer from 
 
 This service is self-contained, i.e., it does not require access to NATS or Redis, or any other microservice within the Automation Engine.
 
-The following [diagram](https://app.diagrams.net/#G1kdUzFnFiu_u1c5SltBs6MSeXr2nqQgFw) shows the relationship between this service and the third-party services it uses.
+The following diagram shows the relationship between this service and the third-party services it uses.
 
 ![IMAGE: lumin-billing-report_microservice_relationships](img/system_overview/isolated_services/lumin-billing-report_microservice_relationships.png){loading=lazy}
 
@@ -390,7 +390,7 @@ can be restored after the deployment completes.
 
 Metrics are usually displayed in a Grafana instance with a few custom dashboards.
 
-The following [diagram](https://app.diagrams.net/#G15dB_8RisA3p0HWtdsFr-5--iUAj1_Y34) shows the relationship between Prometheus, the metrics servers it scrapes metrics, and Grafana.
+The following diagram shows the relationship between Prometheus, the metrics servers it scrapes metrics, and Grafana.
 
 ![IMAGE: prometheus_microservice_relationships](img/system_overview/isolated_services/prometheus_microservice_relationships.png){loading=lazy}
 
@@ -432,7 +432,7 @@ The following containerization tools are used:
 
 For the microservices ECS is used to deploy a container for each microservice for all [environments](PIPELINES.md#microservices-environments) deployed, as each one has its own repository in the ECR registry used in the project.
 
-In the following [diagram](https://www.draw.io/#G1eET1FDYMJ7bf2xpZVXfEaEnz1DA-V6M2) it's possible see how the microservices of the project are deployed, using the different images available in the registry created for the project in ECR.
+In the following diagram is possible see how the microservices of the project are deployed, using the different images available in the registry created for the project in ECR.
 
 ![IMAGE: ecs_infrastructure](./img/system_overview/infrastructure/ECS_infrastructure.png){loading=lazy}
 
@@ -440,7 +440,7 @@ In the following [diagram](https://www.draw.io/#G1eET1FDYMJ7bf2xpZVXfEaEnz1DA-V6
 
 In this project [KRE](https://konstellation-io.github.io/website/) is used, it has been deployed in an [Kubernetes](https://kubernetes.io/docs/home/) cluster using [EKS](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html) for each of the necessary [environments](PIPELINES.md#KRE-Environments), as well as all the parts needed for this in AWS.
 
-In the following [diagram](https://app.diagrams.net/#G1Mcg9-Z0AOkA_R8juMD6UuQQGIJX57b2f) it's possible see how is configured the KRE infrastructure in the project.
+In the following diagram is possible see how is configured the KRE infrastructure in the project.
 
 ![IMAGE: kre_infrastructure](./img/system_overview/infrastructure/kre_infrastructure.png){loading=lazy}
 
@@ -448,7 +448,7 @@ In the following [diagram](https://app.diagrams.net/#G1Mcg9-Z0AOkA_R8juMD6UuQQGI
 
 For the infrastructure of the network resources there is a distinction according to the [microservice environments](PIPELINES.md#microservices-environments) and also the [kre-environmetns](PIPELINES.md#kre-environments) to deploy belongs to `dev` or `production`.
 
-In the following [diagram](https://www.draw.io/#G1s8eD7_XNplcVC6b-Aqtjd1p_Vf2quPnn) it's possible see the infrastructure relative to the existing network resources in AWS created for the two type of environments.
+In the following diagram is possible see the infrastructure relative to the existing network resources in AWS created for the two type of environments.
 
 ![IMAGE: network_infrastructure](./img/system_overview/infrastructure/network_infrastructure.png){loading=lazy}
 

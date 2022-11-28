@@ -62,7 +62,7 @@ _No relevant business decisions are made in this workflow_
 |-----|------------------------------------------------------------|----------------------------------------------------------|--------------------------------------------------------------|
 | 1   | Check if Circuit Instability metrics are within thresholds | Link's metrics are within Circuit Instability thresholds | Link's metrics are NOT within Circuit Instability thresholds |
 
-##### Workflow - Filter out links whose edges shouldn't be monitored
+##### Workflow - Filter out links whose edges should not be monitored
 |     | Condition                                 | Decision                       | Decision                             |
 |-----|-------------------------------------------|--------------------------------|--------------------------------------|
 | 1   | Check for validity of link's edge state   | Link's edge state is invalid   | Link's edge state is valid           |

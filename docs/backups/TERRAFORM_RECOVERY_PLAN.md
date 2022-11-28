@@ -8,7 +8,7 @@ requirements meet. To accomplish these requirements the SSH keys generated to ac
 
 ![](../diagrams/workflows/backups/stages.drawio.svg)
 
-The project generates the next TF state files, and it's executed in order:
+The project generates the next TF state files, and it is executed in order:
 - Global: Infrastructure that is global in AWS
 - Primary(regional): Infrastructure that is in the primary region.
 - secondary(regional): Infrastructure that is in the secondary region.
@@ -29,4 +29,4 @@ The recovery plan is:
 - Upload the files to the S3 Bucket.
 
 ## Test the backup plan
-Follow the steps to recovery the backed files and run a deployment pipeline in the active region. If the pipeline works perfectly it's a signal that the files are working properly.
+Follow the steps to recovery the backed files and run a deployment pipeline in the active region. If the pipeline works perfectly it is a signal that the files are working properly.

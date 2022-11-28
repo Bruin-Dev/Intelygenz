@@ -11,7 +11,7 @@ hide:
 Repair tickets kre bridge is used to make calls to Konstellation. It gets email inference, save closed and created ticket feedback, and it saves outputs
 
 ## Process Workflows
-![](../../images/19-repair-tickets-kre-bridge.jpg){loading=lazy}
+![](../../images/repair-tickets-kre-bridge.png)(../../images/repair-tickets-kre-bridge.png){loading=lazy}
 
 ## List of Decisions made by the Repair tickets kre bridge
 ### Subject: rta.save_outputs.request

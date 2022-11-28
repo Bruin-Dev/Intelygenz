@@ -11,7 +11,7 @@ hide:
 T7 Bridge is used to make calls to Konstellation. It gets predictions and post live and non-live metrics.
 
 ## Process Workflows
-![](../../images/t7-bridge.jpg){loading=lazy}
+![](../../images/t7-bridge.png){loading=lazy}
 
 ## List of Decisions made by the T7 Bridge
 ### Subject: t7.prediction.request
