@@ -12,7 +12,7 @@ The mission of this service is to act as a proxy to the email server. It accepts
 the requested data back to those services, so they can make the appropriate business decision.
 
 ## Process Workflows
-![[](../../images/email-bridge.png)](../../images/email-bridge.png)
+![](../../images/email-bridge.png){loading=lazy}
 
 ## List of Decisions made by the Email Bridge
 ### Subject: get.email.request (aims at the email server smtp.gmail.com:587)

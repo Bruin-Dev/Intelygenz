@@ -434,6 +434,6 @@ Perfect, now let's copy and paste another chart to use as template, if we will d
     ````
 
     * `add the variables in gitlab-ci` finally, we have all the path until the real value in Gitlab. Let's go to the repository [settings/ci-cd](https://gitlab.intelygenz.com/mettel/automation-engine/-/settings/ci_cd) section and create the new variables:
-    ![IMAGE: gitlab_add_new_var](./img/system_overview/gitlab_add_new_var.png)
+    ![IMAGE: gitlab_add_new_var](./img/system_overview/gitlab_add_new_var.png){loading=lazy}
 
 That's all, with this and the proper [commit message](README.md#commit) the pipeline will run and deploy an ephemeral environment.

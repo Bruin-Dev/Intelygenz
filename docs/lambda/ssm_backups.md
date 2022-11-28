@@ -21,4 +21,4 @@ some_parameter_name:12
 Then we need to store that file in an aws s3 bucket using the boto3 function `upload_file`
 # 2. Diagram
 
-![](../images/ssm_backups.jpg)
+![](../images/ssm_backups.jpg){loading=lazy}

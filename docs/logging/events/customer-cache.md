@@ -16,7 +16,7 @@ The Customer Cache service has two responsibilities:
 * Serve the cache built from execution of the previously mentioned job to other services in the system.
 
 ## Process Workflows
-![[](../../images/customer-cache.png)](../../images/customer-cache.png)
+![](../../images/customer-cache.png){loading=lazy}
 
 ## List of Decisions made by the Customer Cache service
 ### Bridge-like capabilities

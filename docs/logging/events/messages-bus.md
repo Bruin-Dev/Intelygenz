@@ -28,7 +28,7 @@ Since the messages bus won't allow publishing messages larger than 1MB+, and if 
 storing them to a temporary storage so consumers can restore the original message on their end.
 
 ## Process Workflows
-![[](../../images/messages-bus.png)](../../images/messages-bus.png)
+![](../../images/messages-bus.png){loading=lazy}
 
 ## List of Decisions made by the Messages Bus
 ### PUB-SUB workflow

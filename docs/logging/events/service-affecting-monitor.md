@@ -28,7 +28,7 @@ The Service Affecting Monitor service has three responsibilities:
   troubles, and the tickets where those troubles were documented.
 
 ## Process Workflows
-![[](../../images/service-affecting-monitor.png)](../../images/service-affecting-monitor.png)
+![](../../images/service-affecting-monitor.png){loading=lazy}
 
 ## List of Decisions made by the Service Affecting Monitor
 ### Bridge-like capabilities

@@ -12,7 +12,7 @@ Parameter-replicator is a python lambda that replicate parameters from one regio
 
 ## Replication process
 
-![](../images/ssm_backups.jpg)
+![](../images/ssm_backups.jpg){loading=lazy}
 
 We utilize the boto3 library to get the data from the parameter store. We utilize the `describe_parameters` function
 to get all the data from the Parameter store. Since the max size of the response is 50 items we need to loop a couple

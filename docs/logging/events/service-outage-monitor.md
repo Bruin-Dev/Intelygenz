@@ -29,7 +29,7 @@ The Service Outage Monitor service has two responsibilities:
     of the latest events found in VeloCloud for a particular edge. These are known as Events notes.
 
 ## Process Workflows
-![[](../../images/service-outage-monitor.png)](../../images/service-outage-monitor.png)
+![](../../images/service-outage-monitor.png){loading=lazy}
 
 ## List of Decisions made by the Service Outage Monitor
 ### Bridge-like capabilities

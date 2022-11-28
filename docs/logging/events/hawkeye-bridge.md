@@ -11,7 +11,7 @@ hide:
 Hawkeye Bridge is used to make calls to the Hawkeye API.
 
 ## Process Workflows
-![[](../../images/hawkeye-bridge.png)](../../images/hawkeye-bridge.png)
+![](../../images/hawkeye-bridge.png){loading=lazy}
 
 ## List of Decisions made by the Hawkeye Bridge
 ### Subject: hawkeye.probe.request (aims at endpoint [GET /probes])

@@ -130,21 +130,21 @@ The system logs of the production environment are stored in papertrail, the acco
 
 Below is a screenshot of the main screen of the system.
 
-![IMAGE: papertrail_dashboards_overview](./img/papertrail/papertrail_dashboards_overview.png)
+![IMAGE: papertrail_dashboards_overview](./img/papertrail/papertrail_dashboards_overview.png){loading=lazy}
 
 In this system it's possible see three useful dashboards:
 
 - **[production] - master alarms**: alarms are defined on different modules with notifications sent to slack through the mettel-alarms-papertrail-production channel, for example when the number of error messages in a module exceeds 100 times in an hour. Below is a screenshot where these alarms have been marked in a red rectangle.
 
-    ![IMAGE: papertrail_dashboard-master_alarms](./img/papertrail/papertrail_dashboard-master_alarms.png)
+    ![IMAGE: papertrail_dashboard-master_alarms](./img/papertrail/papertrail_dashboard-master_alarms.png){loading=lazy}
 
 - **[production] - master logs**: searches are defined to gather the logs of the replicas of each deployed microservice. Below is a screenshot where these searches have been marked in a red rectangle.
 
-    ![IMAGE: papertrail_dashboard-master_logs](./img/papertrail/papertrail_dashboard-master_logs.png)
+    ![IMAGE: papertrail_dashboard-master_logs](./img/papertrail/papertrail_dashboard-master_logs.png){loading=lazy}
 
 - **[production] - master notifications**: Searches on different modules are defined with their notification to slack through the mettel-notifications-papertrail-production channel. Below is a screenshot where these searches have been marked in a red rectangle.
 
-    ![IMAGE: papertrail_dashboard-master_notifications](./img/papertrail/papertrail_dashboard-master_notifications.png)
+    ![IMAGE: papertrail_dashboard-master_notifications](./img/papertrail/papertrail_dashboard-master_notifications.png){loading=lazy}
 
 ### Papertrail logging configuration
 

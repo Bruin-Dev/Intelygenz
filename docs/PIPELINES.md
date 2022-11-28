@@ -18,13 +18,13 @@ To improve the speed and optimization of the pipelines, **only the jobs and stag
 **Exceptionally, it is possible to launch a pipeline with all the jobs and stages on a branch using the web interface, as shown in the following image**. To do so, the following steps must be followed:
 
    1. From the project repository select the `CI/CD` option in the left sidebar and this `Pipelines`, as shown in the following image where these options are marked in red.
-   ![IMAGE: Select_CI_option](./img/pipelines/Select_CI_option.png)
+   ![IMAGE: Select_CI_option](./img/pipelines/Select_CI_option.png){loading=lazy}
    
    2. Choose the `Run Pipeline` option, as shown in the image below in red.
-   ![IMAGE: select_run_pipeline](./img/pipelines/select_run_pipeline.png)
+   ![IMAGE: select_run_pipeline](./img/pipelines/select_run_pipeline.png){loading=lazy}
    
    3. Indicate the branch where you want to run the pipeline in the `Run for` box and then click on `Run pipeline`. It's possible see an example in the following image, where the box `Run for` is shown in green and `Run pipeline` is shown in red.
-   ![IMAGE: select_run_pipeline_branch](./img/pipelines/select_run_pipeline_branch.png)
+   ![IMAGE: select_run_pipeline_branch](./img/pipelines/select_run_pipeline_branch.png){loading=lazy}
 
    > It is important to note that due to the extra time added by the tests of the `dispacth-portal-frontend` microservice, the tests of this one will only be executed when any of the files within it change or a pipeline with the Gitlab variable `TEST_DISPATCH_PORTAL_FRONTEND` with value `true` is executed.
 
@@ -53,7 +53,7 @@ For [KRE](https://konstellation-io.github.io/website/) component there are the f
 > Continuous Integration (CI) is a development practice where developers integrate code into a shared repository frequently, preferably several times a day. Each integration can then be verified by an automated build and automated tests. While automated testing is not strictly part of CI it is typically implied.
 > [Codeship](https://codeship.com/continuous-integration-essentials)
 
-![IMAGE: CI_MetTel_Automation.png](./img/pipelines/CI_MetTel_Automation.png)
+![IMAGE: CI_MetTel_Automation.png](./img/pipelines/CI_MetTel_Automation.png){loading=lazy}
 
 ### Validation steps
 
@@ -73,14 +73,14 @@ If the coverage obtained from these tests for a service is not greater than or e
 
 In cases in which a module does not reach the minimum coverage mentioned above, a message like the following will be seen in the step executed for that module.
 
-![IMAGE: unit_test_coverage_not_reach_minimum.png](./img/pipelines/unit_test_coverage_not_reach_minimum.png)
+![IMAGE: unit_test_coverage_not_reach_minimum.png](./img/pipelines/unit_test_coverage_not_reach_minimum.png){loading=lazy}
 
 ## Continuous delivery (CD)
 
 > Continuous deployment is the next step of continuous delivery: Every change that passes the automated tests is deployed to production automatically. Continuous deployment should be the goal of most companies that are not constrained by regulatory or other requirements.
 > [Puppet.com](https://puppet.com/blog/continuous-delivery-vs-continuous-deployment-what-s-diff)
 
-![IMAGE: CD_MetTel_Automation.png](./img/pipelines/CD_MetTel_Automation.png)
+![IMAGE: CD_MetTel_Automation.png](./img/pipelines/CD_MetTel_Automation.png){loading=lazy}
 
 ### Basic_infra steps
 

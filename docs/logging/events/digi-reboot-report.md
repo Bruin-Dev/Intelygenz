@@ -12,7 +12,7 @@ The `digi-reboot-report` service creates a daily report based on the DiGi recove
 and then emails it out.
 
 ## Process Workflows
-![[](../../images/digi-reboot-report.png)](../../images/digi-reboot-report.png)
+![](../../images/digi-reboot-report.png){loading=lazy}
 
 ## List of Decisions made by the Digi Reboot Report service
 _This service does not make any business decision_

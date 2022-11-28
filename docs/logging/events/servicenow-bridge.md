@@ -11,7 +11,7 @@ hide:
 The `servicenow-bridge` is used to call to the ServiceNow API.
 
 ## Process Workflows
-![[](../../images/servicenow-bridge.png)](../../images/servicenow-bridge.png)
+![](../../images/servicenow-bridge.png){loading=lazy}
 
 ## List of Decisions made by the Service Now Bridge
 ### Subject: servicenow.incident.report.request

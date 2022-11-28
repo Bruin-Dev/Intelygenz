@@ -8,7 +8,7 @@ hide:
 
 ## Process Workflows
 
-![](../../images/tnba-monitor.png)
+![](../../images/tnba-monitor.png){loading=lazy}
 
 ## List of Decisions made by the TNBA Monitor
 

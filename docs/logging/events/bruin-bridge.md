@@ -12,7 +12,7 @@ The mission of this service is to act as a proxy to the Bruin API. It accepts re
 the requested data back to those services so they can make the appropriate business decision.
 
 ## Process Workflows
-![[](../../images/bruin-bridge.png)](../../images/bruin-bridge.png)
+![](../../images/bruin-bridge.png){loading=lazy}
 
 ## List of Decisions made by the Bruin Bridge
 ### Subject: bruin.ticket.request (aims at endpoint [GET /api/Ticket](https://api.bruin.com/index.html#/Ticket/get_api_Ticket))

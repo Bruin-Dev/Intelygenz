@@ -11,7 +11,7 @@ hide:
 The goal of the `fraud-monitor` service is to get unread fraud warning emails and create fraud tickets for them.
 
 ## Process Workflows
-![[](../../images/fraud-monitor.png)](../../images/fraud-monitor.png)
+![](../../images/fraud-monitor.png){loading=lazy}
 
 ## List of Decisions made by the Fraud Monitor service
 _This service does not make any business decision_

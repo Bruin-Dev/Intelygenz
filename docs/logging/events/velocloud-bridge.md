@@ -12,7 +12,7 @@ The mission of this service is to act as a proxy to the VeloCloud API. It accept
 the requested data back to those services, so they can make the appropriate business decision.
 
 ## Process Workflows
-![[](../../images/velocloud-bridge.png)](../../images/velocloud-bridge.png)
+![](../../images/velocloud-bridge.png){loading=lazy}
 
 ## List of Decisions made by the VeloCloud Bridge
 ### Subject: alert.request.event.edge (aims at endpoint [POST /event/getEnterpriseEvents](https://vdc-download.vmware.com/vmwb-repository/dcr-public/5b27c4a1-c44d-4806-b2d8-f03ab51f3109/c8bb0795-f567-4781-9176-a442c64a2f74/index-4.4.0-dist.html#/event/event_get_enterprise_events))

@@ -31,7 +31,7 @@ microservice within the Automation Engine.
     Main report building logic, triggered on first day of month as APScheduler asyncio cron.
 
 ## Examples
-![example](readme-resources/examples/lumin-example.png)
+![example](readme-resources/examples/lumin-example.png){loading=lazy}
 And a sample csv [attachment](readme-resources/examples/lumin-example.csv)
 
 

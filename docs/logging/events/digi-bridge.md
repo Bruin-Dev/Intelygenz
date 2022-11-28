@@ -11,7 +11,7 @@ hide:
 The DiGi bridge is mainly used to call the DiGi API to reboot DiGi devices.
 
 ## Process Workflows
-![[](../../images/digi-bridge.png)](../../images/digi-bridge.png)
+![](../../images/digi-bridge.png){loading=lazy}
 
 ## List of Decisions made by the Digi Bridge
 ### Subject: digi.reboot (aims at endpoint GET /DeviceManagement_API/rest/Recovery/RecoverDevice)
