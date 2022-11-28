@@ -9,7 +9,9 @@ theme:
     - toc.follow
     - toc.integrate
 plugins:
-  - glightbox
+  - glightbox:
+      zoomable: false
+      draggable: false
 
 markdown_extensions:
   - attr_list
