@@ -1023,15 +1023,15 @@ We separate the automation in two parts, <a href="#continuous-integration-ci">co
 <ol>
 <li>
 <p>From the project repository select the <code>CI/CD</code> option in the left sidebar and this <code>Pipelines</code>, as shown in the following image where these options are marked in red.
-   <a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/pipelines/Select_CI_option.png"><img alt="IMAGE: Select_CI_option" src="../img/pipelines/Select_CI_option.png"/></a></p>
+   <a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/pipelines/Select_CI_option.png"><img alt="IMAGE: Select_CI_option" loading="lazy" src="../img/pipelines/Select_CI_option.png"/></a></p>
 </li>
 <li>
 <p>Choose the <code>Run Pipeline</code> option, as shown in the image below in red.
-   <a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/pipelines/select_run_pipeline.png"><img alt="IMAGE: select_run_pipeline" src="../img/pipelines/select_run_pipeline.png"/></a></p>
+   <a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/pipelines/select_run_pipeline.png"><img alt="IMAGE: select_run_pipeline" loading="lazy" src="../img/pipelines/select_run_pipeline.png"/></a></p>
 </li>
 <li>
 <p>Indicate the branch where you want to run the pipeline in the <code>Run for</code> box and then click on <code>Run pipeline</code>. It's possible see an example in the following image, where the box <code>Run for</code> is shown in green and <code>Run pipeline</code> is shown in red.
-   <a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/pipelines/select_run_pipeline_branch.png"><img alt="IMAGE: select_run_pipeline_branch" src="../img/pipelines/select_run_pipeline_branch.png"/></a></p>
+   <a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/pipelines/select_run_pipeline_branch.png"><img alt="IMAGE: select_run_pipeline_branch" loading="lazy" src="../img/pipelines/select_run_pipeline_branch.png"/></a></p>
 </li>
 </ol>
 <blockquote>
@@ -1066,7 +1066,7 @@ We separate the automation in two parts, <a href="#continuous-integration-ci">co
 <p>Continuous Integration (CI) is a development practice where developers integrate code into a shared repository frequently, preferably several times a day. Each integration can then be verified by an automated build and automated tests. While automated testing is not strictly part of CI it is typically implied.
 <a href="https://codeship.com/continuous-integration-essentials">Codeship</a></p>
 </blockquote>
-<p><a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/pipelines/CI_MetTel_Automation.png"><img alt="IMAGE: CI_MetTel_Automation.png" src="../img/pipelines/CI_MetTel_Automation.png"/></a></p>
+<p><a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/pipelines/CI_MetTel_Automation.png"><img alt="IMAGE: CI_MetTel_Automation.png" loading="lazy" src="../img/pipelines/CI_MetTel_Automation.png"/></a></p>
 <h3 id="validation-steps">Validation steps</h3>
 <p>This stage checks the following:</p>
 <ul>
@@ -1084,13 +1084,13 @@ We separate the automation in two parts, <a href="#continuous-integration-ci">co
 <p>All the available unit tests for each service should be run in this stage of the CI process.</p>
 <p>If the coverage obtained from these tests for a service is not greater than or equal to 80%, it will cause this phase to fail, this will mean that the steps of the next stage will not be executed and the process will fail.</p>
 <p>In cases in which a module does not reach the minimum coverage mentioned above, a message like the following will be seen in the step executed for that module.</p>
-<p><a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/pipelines/unit_test_coverage_not_reach_minimum.png"><img alt="IMAGE: unit_test_coverage_not_reach_minimum.png" src="../img/pipelines/unit_test_coverage_not_reach_minimum.png"/></a></p>
+<p><a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/pipelines/unit_test_coverage_not_reach_minimum.png"><img alt="IMAGE: unit_test_coverage_not_reach_minimum.png" loading="lazy" src="../img/pipelines/unit_test_coverage_not_reach_minimum.png"/></a></p>
 <h2 id="continuous-delivery-cd">Continuous delivery (CD)</h2>
 <blockquote>
 <p>Continuous deployment is the next step of continuous delivery: Every change that passes the automated tests is deployed to production automatically. Continuous deployment should be the goal of most companies that are not constrained by regulatory or other requirements.
 <a href="https://puppet.com/blog/continuous-delivery-vs-continuous-deployment-what-s-diff">Puppet.com</a></p>
 </blockquote>
-<p><a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/pipelines/CD_MetTel_Automation.png"><img alt="IMAGE: CD_MetTel_Automation.png" src="../img/pipelines/CD_MetTel_Automation.png"/></a></p>
+<p><a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/pipelines/CD_MetTel_Automation.png"><img alt="IMAGE: CD_MetTel_Automation.png" loading="lazy" src="../img/pipelines/CD_MetTel_Automation.png"/></a></p>
 <h3 id="basic_infra-steps">Basic_infra steps</h3>
 <p>This area covers the checking and creation, if necessary, of all the basic resources for the subsequent deployment, these being the specific image repositories in <a href="https://aws.amazon.com/ecr">ECR Docker Container Registry</a>, as well as the roles necessary in AWS to be able to display these images in <a href="https://aws.amazon.com/ecs/">ECS Container Orchestrator</a>.</p>
 <p>In this stage there is also a job that must be executed manually if necessary, this is responsible for checking and creating if necessary network resources for the production environment or ephemeral environments.</p>
@@ -1460,5 +1460,5 @@ We separate the automation in two parts, <a href="#continuous-integration-ci">co
 </div>
 <script id="__config" type="application/json">{"base": "..", "features": ["header.autohide", "toc.follow", "toc.integrate"], "search": "../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"provider": "mike"}}</script>
 <script src="../assets/javascripts/bundle.748e2769.min.js"></script>
-<script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
+<script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": false, "draggable": false, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
 </html>

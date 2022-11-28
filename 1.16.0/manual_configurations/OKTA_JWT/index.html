@@ -979,7 +979,7 @@ The groups must have the next values:
 <ol>
 <li>To create an application destined for the API, we are going to need to go to "Applications/Applications" and click on create
 app integration
-<a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../../img/manual_configurations/okta_jwt/add_api_application.png"><img alt="" src="../../img/manual_configurations/okta_jwt/add_api_application.png"/></a></li>
+<a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../../img/manual_configurations/okta_jwt/add_api_application.png"><img alt="" loading="lazy" src="../../img/manual_configurations/okta_jwt/add_api_application.png"/></a></li>
 <li>A new form will show, and we need to fill it with the next information:</li>
 <li>App integration name: IGZ-DATA-HIGHWAY-API</li>
 <li>Grant type: Select "Authorization Code" and "Resource Owner Password"</li>
@@ -990,7 +990,7 @@ app integration
 <h2 id="create-authorization-server">Create Authorization server</h2>
 <ol>
 <li>In the Admin Dashboard, go to security/API and click on add authorization server.
-   <a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../../img/manual_configurations/okta_jwt/add-authorization-server.png"><img alt="" src="../../img/manual_configurations/okta_jwt/add-authorization-server.png"/></a></li>
+   <a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../../img/manual_configurations/okta_jwt/add-authorization-server.png"><img alt="" loading="lazy" src="../../img/manual_configurations/okta_jwt/add-authorization-server.png"/></a></li>
 <li>We will need to fill the name, audience, and description. the next values are the selected ones:</li>
 <li>Name: API-DATA-HIGHWAY</li>
 <li>Audience: API-DATA-HIGHWAY</li>
@@ -998,7 +998,7 @@ app integration
 </ol>
 <p>After filling this form, click on the save button.
 3. With the Authorization server created, we need to add some extra configurations. Go to the Claims menu following the next image
-<a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../../img/manual_configurations/okta_jwt/authorization_server_claims_menu.png"><img alt="" src="../../img/manual_configurations/okta_jwt/authorization_server_claims_menu.png"/></a>
+   <a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../../img/manual_configurations/okta_jwt/authorization_server_claims_menu.png"><img alt="" loading="lazy" src="../../img/manual_configurations/okta_jwt/authorization_server_claims_menu.png"/></a>
    1. Click on "Add claim"
    2. Fill the new claim with the next information:
       1. Name: organization
@@ -1007,13 +1007,13 @@ app integration
       4. Value: user.organization
       5. Include in: "Any scope"
 4. Go to access policies menu following the next image:
-<a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../../img/manual_configurations/okta_jwt/authorization_server_access_policies_menu.png"><img alt="" src="../../img/manual_configurations/okta_jwt/authorization_server_access_policies_menu.png"/></a>
+   <a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../../img/manual_configurations/okta_jwt/authorization_server_access_policies_menu.png"><img alt="" loading="lazy" src="../../img/manual_configurations/okta_jwt/authorization_server_access_policies_menu.png"/></a>
    1. in this menu click in the button "Add new access policy"
    2. it will appear a new form, fill it with the next values and click on create policy:
       1. Name: IGZ-DATA-HIGHWAY-API-JWT-ACCESS-POLICY
       2. Description: Api JWT access policy.
       3. Assign to: IGZ-INT-DATA-HIGHWAY-API, IGZ-EXT-DATA-HIGHWAY-API</p>
-<p><a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../../img/manual_configurations/okta_jwt/authorization_server_add_new_rule_on_policy.png"><img alt="" src="../../img/manual_configurations/okta_jwt/authorization_server_add_new_rule_on_policy.png"/></a>
+<p><a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../../img/manual_configurations/okta_jwt/authorization_server_add_new_rule_on_policy.png"><img alt="" loading="lazy" src="../../img/manual_configurations/okta_jwt/authorization_server_add_new_rule_on_policy.png"/></a>
    3. After closing the form, select the policy created and click on the "Add rule" button. And fill the form with the next information:
       1. Rule Name: IGZ-DATA-HIGHWAY-API-ACCESS-RULE
       2. Grant type is: Select "Client credentials" and "Resource Owner Password"
@@ -1064,5 +1064,5 @@ app integration
 </div>
 <script id="__config" type="application/json">{"base": "../..", "features": ["header.autohide", "toc.follow", "toc.integrate"], "search": "../../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"provider": "mike"}}</script>
 <script src="../../assets/javascripts/bundle.748e2769.min.js"></script>
-<script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
+<script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": false, "draggable": false, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
 </html>

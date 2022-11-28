@@ -1120,20 +1120,20 @@
 <h3 id="papertrail-dashboards">Papertrail dashboards</h3>
 <p>The system logs of the production environment are stored in papertrail, the account credentials are in the project's onepassword vault to which all people in the project have access.</p>
 <p>Below is a screenshot of the main screen of the system.</p>
-<p><a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/papertrail/papertrail_dashboards_overview.png"><img alt="IMAGE: papertrail_dashboards_overview" src="../img/papertrail/papertrail_dashboards_overview.png"/></a></p>
+<p><a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/papertrail/papertrail_dashboards_overview.png"><img alt="IMAGE: papertrail_dashboards_overview" loading="lazy" src="../img/papertrail/papertrail_dashboards_overview.png"/></a></p>
 <p>In this system it's possible see three useful dashboards:</p>
 <ul>
 <li>
 <p><strong>[production] - master alarms</strong>: alarms are defined on different modules with notifications sent to slack through the mettel-alarms-papertrail-production channel, for example when the number of error messages in a module exceeds 100 times in an hour. Below is a screenshot where these alarms have been marked in a red rectangle.</p>
-<p><a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/papertrail/papertrail_dashboard-master_alarms.png"><img alt="IMAGE: papertrail_dashboard-master_alarms" src="../img/papertrail/papertrail_dashboard-master_alarms.png"/></a></p>
+<p><a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/papertrail/papertrail_dashboard-master_alarms.png"><img alt="IMAGE: papertrail_dashboard-master_alarms" loading="lazy" src="../img/papertrail/papertrail_dashboard-master_alarms.png"/></a></p>
 </li>
 <li>
 <p><strong>[production] - master logs</strong>: searches are defined to gather the logs of the replicas of each deployed microservice. Below is a screenshot where these searches have been marked in a red rectangle.</p>
-<p><a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/papertrail/papertrail_dashboard-master_logs.png"><img alt="IMAGE: papertrail_dashboard-master_logs" src="../img/papertrail/papertrail_dashboard-master_logs.png"/></a></p>
+<p><a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/papertrail/papertrail_dashboard-master_logs.png"><img alt="IMAGE: papertrail_dashboard-master_logs" loading="lazy" src="../img/papertrail/papertrail_dashboard-master_logs.png"/></a></p>
 </li>
 <li>
 <p><strong>[production] - master notifications</strong>: Searches on different modules are defined with their notification to slack through the mettel-notifications-papertrail-production channel. Below is a screenshot where these searches have been marked in a red rectangle.</p>
-<p><a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/papertrail/papertrail_dashboard-master_notifications.png"><img alt="IMAGE: papertrail_dashboard-master_notifications" src="../img/papertrail/papertrail_dashboard-master_notifications.png"/></a></p>
+<p><a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/papertrail/papertrail_dashboard-master_notifications.png"><img alt="IMAGE: papertrail_dashboard-master_notifications" loading="lazy" src="../img/papertrail/papertrail_dashboard-master_notifications.png"/></a></p>
 </li>
 </ul>
 <h3 id="papertrail-logging-configuration">Papertrail logging configuration</h3>
@@ -1211,5 +1211,5 @@
 </div>
 <script id="__config" type="application/json">{"base": "..", "features": ["header.autohide", "toc.follow", "toc.integrate"], "search": "../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"provider": "mike"}}</script>
 <script src="../assets/javascripts/bundle.748e2769.min.js"></script>
-<script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
+<script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": false, "draggable": false, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
 </html>
