@@ -2,7 +2,7 @@
 
 ```python
 logger.info(
-    "Changing task result of serial {service_number} in ticket {ticket_id} " f"to {task_result}..."
+    "Changing task result of serial {service_number} in ticket {ticket_id} to {task_result}..."
 )
 ```
 * If Exception:

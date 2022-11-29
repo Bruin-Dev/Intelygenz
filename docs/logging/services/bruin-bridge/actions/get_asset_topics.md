@@ -4,7 +4,7 @@ _Message arrives at subject_
 
 * If message body doesn't have `client_id` or `service_number`:
   ```python
-  logger.error(f"Cannot get asset topics using {json.dumps(msg)}. " f"JSON malformed")
+  logger.error(f"Cannot get asset topics using {json.dumps(msg)}. JSON malformed")
   ```
   END
 

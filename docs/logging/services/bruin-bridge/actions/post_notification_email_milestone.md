@@ -4,7 +4,7 @@ _Message arrives at subject_
 
 * If message body doesn't have `ticket_id`, `notification_type`, or `service_number` :
   ```python
-  logger.error(f"Cannot send milestone email using {json.dumps(msg)}. " f"JSON malformed")
+  logger.error(f"Cannot send milestone email using {json.dumps(msg)}. JSON malformed")
   ```
   END
 

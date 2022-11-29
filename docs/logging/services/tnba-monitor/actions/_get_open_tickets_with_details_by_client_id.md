@@ -20,7 +20,7 @@ self._logger.info(f"Getting all opened tickets for Bruin customer {client_id}...
   * If not ticket details:
     ```
     self._logger.info(
-                            f"Ticket {ticket_id} doesn't have any detail under ticketDetails key. " f"Skipping..."
+                            f"Ticket {ticket_id} doesn't have any detail under ticketDetails key. Skipping..."
                         )
     ```
   ```

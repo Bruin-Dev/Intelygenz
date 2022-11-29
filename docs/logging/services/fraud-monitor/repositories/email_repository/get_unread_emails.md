@@ -2,7 +2,7 @@
 
 ```python
 logger.info(
-    f"Getting the unread emails from the inbox of {email_account} sent from the users: " f"{email_filter}"
+    f"Getting the unread emails from the inbox of {email_account} sent from the users: {email_filter}"
 )
 ```
 
