@@ -31,7 +31,7 @@ class GetAssetTopics:
             return
 
         if not all(key in payload.keys() for key in ("client_id", "service_number")):
-            logger.error(f"Cannot get asset topics using {json.dumps(payload)}. " f"JSON malformed")
+            logger.error(f"Cannot get asset topics using {json.dumps(payload)}. JSON malformed")
 
             response["body"] = MISSING_PARAMS_MSG
             response["status"] = HTTPStatus.BAD_REQUEST

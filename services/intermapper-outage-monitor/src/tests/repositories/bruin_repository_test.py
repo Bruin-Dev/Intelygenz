@@ -1021,7 +1021,7 @@ class TestBruinRepository:
                 f"IM Map Name: 	       {parsed_email_dict['document']}",
                 f"Probe Type:          {parsed_email_dict['probe_type']}\n",
                 f"{sim_note}",
-                f"WAN Mac Address:     " f"{dri_body_add}\n",
+                f"WAN Mac Address:     {dri_body_add}\n",
                 f"SIM ICC ID:          {dri_body['InternetGatewayDevice.DeviceInfo.X_8C192D_lte_info.SimIccid']}",
                 f"Subscriber Number:   {sub_number}\n",
                 f"Time since last reported down: {parsed_email_dict['last_reported_down']}",

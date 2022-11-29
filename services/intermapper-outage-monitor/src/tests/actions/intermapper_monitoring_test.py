@@ -2054,7 +2054,7 @@ class TestInterMapperMonitor:
         serial_number_2 = "VC7654321"
         serial_number_3 = "123"
 
-        text_identifier = "#*MetTel's IPA*#\n" f"Auto-resolving task"
+        text_identifier = "#*MetTel's IPA*#\nAuto-resolving task"
 
         note_value1 = f"{text_identifier} for {serial_number_1}\nTimeStamp: 2021-01-02 10:18:16-05:00"
         note_value2 = f"{text_identifier} for {serial_number_2}\nTimeStamp: 2020-01-02 10:18:16-05:00"

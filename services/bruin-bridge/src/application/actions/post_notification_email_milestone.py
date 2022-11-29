@@ -24,7 +24,7 @@ class PostNotificationEmailMilestone:
             return
 
         if not all(key in payload.keys() for key in ("ticket_id", "notification_type", "service_number")):
-            logger.error(f"Cannot send milestone email using {json.dumps(payload)}. " f"JSON malformed")
+            logger.error(f"Cannot send milestone email using {json.dumps(payload)}. JSON malformed")
 
             response["body"] = (
                 'You must include "ticket_id", "notification_type" and "service_number"'
