@@ -671,7 +671,7 @@
         <bpmn:outgoing>Flow_0mhdtzo</bpmn:outgoing>
       </bpmn:subProcess>
       <bpmn:textAnnotation id="TextAnnotation_1p4bxdg">
-        <bpmn:text>Although it's stylized as a Re-Open note, its contents are exactly the same ones found in regular Triage notes</bpmn:text>
+        <bpmn:text>Although it is stylized as a Re-Open note, its contents are exactly the same ones found in regular Triage notes</bpmn:text>
       </bpmn:textAnnotation>
       <bpmn:association id="Association_0nk1p7y" sourceRef="Activity_0fn7ig2" targetRef="TextAnnotation_1p4bxdg" />
     </bpmn:subProcess>

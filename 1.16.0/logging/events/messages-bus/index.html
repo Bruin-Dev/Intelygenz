@@ -933,7 +933,7 @@ subject, any messages published to that subject will be consumed by it.</p>
 requestor takes care of consuming that response message once it gets it.</p>
 </li>
 </ul>
-<p>Since the messages bus won't allow publishing messages larger than 1MB+, and if necessary, all services take care of
+<p>Since the messages bus will not allow publishing messages larger than 1MB+, and if necessary, all services take care of
 storing them to a temporary storage so consumers can restore the original message on their end.</p>
 <h2 id="process-workflows">Process Workflows</h2>
 <p><a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../../../images/messages-bus.png"><img alt="" loading="lazy" src="../../../images/messages-bus.png"/></a></p>
@@ -979,7 +979,7 @@ storing them to a temporary storage so consumers can restore the original messag
 <td>2</td>
 <td>Check for response message size before consuming it</td>
 <td>Message has a token representing a large message (1MB+)</td>
-<td>Message doesn't have a token representing a large message (1MB+)</td>
+<td>Message does not have a token representing a large message (1MB+)</td>
 </tr>
 </tbody>
 </table>
@@ -998,7 +998,7 @@ storing them to a temporary storage so consumers can restore the original messag
 <td>1</td>
 <td>Check for request message size before consuming it</td>
 <td>Message has a token representing a large message (1MB+)</td>
-<td>Message doesn't have a token representing a large message (1MB+)</td>
+<td>Message does not have a token representing a large message (1MB+)</td>
 </tr>
 <tr>
 <td>2</td>
@@ -1010,7 +1010,7 @@ storing them to a temporary storage so consumers can restore the original messag
 </table>
 <h2 id="event-descriptions">Event Descriptions</h2>
 <h3 id="python-310-utils">Python 3.10 utils</h3>
-<h4 id="connect-to-messages-bus">Connect to messages bus</h4>
+<h4 id="connect-to-the-message-bus">Connect to the message bus</h4>
 <ul>
 <li><a href="../../services/pyutils_automation/py310/src/framework/nats/client/connect/">connect</a></li>
 </ul>
@@ -1027,7 +1027,7 @@ storing them to a temporary storage so consumers can restore the original messag
 <li><a href="../../services/pyutils_automation/py310/src/framework/nats/client/request/">request</a></li>
 </ul>
 <h3 id="python-36-utils">Python 3.6 utils</h3>
-<h4 id="connect-to-message-bus">Connect to message bus</h4>
+<h4 id="connect-to-the-message-bus_1">Connect to the message bus</h4>
 <ul>
 <li><a href="../../services/pyutils_automation/py36/igz/packages/eventbus/eventbus/connect/">connect</a></li>
 </ul>

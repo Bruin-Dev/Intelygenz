@@ -26,7 +26,7 @@
       <bpmn:outgoing>Flow_1erl5mc</bpmn:outgoing>
     </bpmn:task>
     <bpmn:sequenceFlow id="Flow_1skdmmh" name="HTTP response has status 200" sourceRef="Gateway_0exbxli" targetRef="Activity_1lbhobn" />
-    <bpmn:task id="Activity_1xyohug" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_1xyohug" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_1erl5mc</bpmn:incoming>
       <bpmn:incoming>Flow_0iq2m2x</bpmn:incoming>
       <bpmn:outgoing>Flow_00yavg5</bpmn:outgoing>
@@ -66,7 +66,7 @@
       <bpmn:incoming>Flow_1jj24pc</bpmn:incoming>
       <bpmn:outgoing>Flow_0jwf49g</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_13vo0ub" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_13vo0ub" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_0jwf49g</bpmn:incoming>
       <bpmn:incoming>Flow_1lmrpvt</bpmn:incoming>
       <bpmn:incoming>Flow_0rjtmdx</bpmn:incoming>
@@ -123,7 +123,7 @@
       <bpmn:incoming>Flow_03tqefs</bpmn:incoming>
       <bpmn:outgoing>Flow_0jl2yp2</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_1p06cn4" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_1p06cn4" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_0jl2yp2</bpmn:incoming>
       <bpmn:incoming>Flow_1m8epyi</bpmn:incoming>
       <bpmn:outgoing>Flow_0oozon5</bpmn:outgoing>
@@ -168,7 +168,7 @@
       <bpmn:incoming>Flow_02rhfb0</bpmn:incoming>
       <bpmn:outgoing>Flow_0gz0aea</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_1vo5z03" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_1vo5z03" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_0gz0aea</bpmn:incoming>
       <bpmn:incoming>Flow_0wx9a77</bpmn:incoming>
       <bpmn:outgoing>Flow_1i22sss</bpmn:outgoing>
@@ -212,7 +212,7 @@
       <bpmn:incoming>Flow_0y0984w</bpmn:incoming>
       <bpmn:outgoing>Flow_1nabm44</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_15z9e7j" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_15z9e7j" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_1nabm44</bpmn:incoming>
       <bpmn:incoming>Flow_0reozic</bpmn:incoming>
       <bpmn:outgoing>Flow_1ptl0t9</bpmn:outgoing>
@@ -256,7 +256,7 @@
       <bpmn:incoming>Flow_16kywyr</bpmn:incoming>
       <bpmn:outgoing>Flow_0n8re0x</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_1x8na29" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_1x8na29" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_0n8re0x</bpmn:incoming>
       <bpmn:incoming>Flow_0a9effr</bpmn:incoming>
       <bpmn:outgoing>Flow_1hpkxv8</bpmn:outgoing>
@@ -300,7 +300,7 @@
       <bpmn:incoming>Flow_1gscy7x</bpmn:incoming>
       <bpmn:outgoing>Flow_0p8ac32</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_0k0h6il" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_0k0h6il" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_0p8ac32</bpmn:incoming>
       <bpmn:incoming>Flow_0yexoo7</bpmn:incoming>
       <bpmn:outgoing>Flow_1j6kv8u</bpmn:outgoing>
@@ -344,7 +344,7 @@
       <bpmn:incoming>Flow_1voxw2c</bpmn:incoming>
       <bpmn:outgoing>Flow_083vwj0</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_0cia745" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_0cia745" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_083vwj0</bpmn:incoming>
       <bpmn:incoming>Flow_09iu29r</bpmn:incoming>
       <bpmn:outgoing>Flow_05a00on</bpmn:outgoing>
@@ -388,7 +388,7 @@
       <bpmn:incoming>Flow_0ewyoot</bpmn:incoming>
       <bpmn:outgoing>Flow_0ygdtao</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_1ctbhrk" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_1ctbhrk" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_0ygdtao</bpmn:incoming>
       <bpmn:incoming>Flow_1yelp7e</bpmn:incoming>
       <bpmn:outgoing>Flow_1mgctub</bpmn:outgoing>
@@ -432,7 +432,7 @@
       <bpmn:incoming>Flow_1lje4sv</bpmn:incoming>
       <bpmn:outgoing>Flow_0i4ucdf</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_1wyaxkj" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_1wyaxkj" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_0i4ucdf</bpmn:incoming>
       <bpmn:incoming>Flow_1oz978o</bpmn:incoming>
       <bpmn:outgoing>Flow_071ph1o</bpmn:outgoing>
@@ -476,7 +476,7 @@
       <bpmn:incoming>Flow_0k9qb64</bpmn:incoming>
       <bpmn:outgoing>Flow_0w9yyhy</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_0bsr7hx" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_0bsr7hx" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_0w9yyhy</bpmn:incoming>
       <bpmn:incoming>Flow_1pcmc1r</bpmn:incoming>
       <bpmn:outgoing>Flow_14z1tpn</bpmn:outgoing>
@@ -520,7 +520,7 @@
       <bpmn:incoming>Flow_0wb1bi6</bpmn:incoming>
       <bpmn:outgoing>Flow_0u0uaxb</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_15l6oam" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_15l6oam" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_0u0uaxb</bpmn:incoming>
       <bpmn:incoming>Flow_02kilu1</bpmn:incoming>
       <bpmn:outgoing>Flow_1juaalm</bpmn:outgoing>
@@ -564,7 +564,7 @@
       <bpmn:incoming>Flow_0sk092k</bpmn:incoming>
       <bpmn:outgoing>Flow_1d4ipbx</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_0z5ul9p" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_0z5ul9p" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_1d4ipbx</bpmn:incoming>
       <bpmn:incoming>Flow_09jfptc</bpmn:incoming>
       <bpmn:incoming>Flow_0lway9l</bpmn:incoming>
@@ -621,7 +621,7 @@
       <bpmn:incoming>Flow_07qa14h</bpmn:incoming>
       <bpmn:outgoing>Flow_11nchk8</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_1dfnnay" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_1dfnnay" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_11nchk8</bpmn:incoming>
       <bpmn:incoming>Flow_1bjjire</bpmn:incoming>
       <bpmn:incoming>Flow_1q9m2ro</bpmn:incoming>
@@ -678,7 +678,7 @@
       <bpmn:incoming>Flow_03snfrb</bpmn:incoming>
       <bpmn:outgoing>Flow_0t2ub65</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_16lvgxm" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_16lvgxm" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_14idfr4</bpmn:incoming>
       <bpmn:incoming>Flow_0jupk7j</bpmn:incoming>
       <bpmn:outgoing>Flow_0gwn3m3</bpmn:outgoing>
@@ -764,7 +764,7 @@
       <bpmn:incoming>Flow_1ejnglp</bpmn:incoming>
       <bpmn:outgoing>Flow_1wu6osv</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_06k03jt" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_06k03jt" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_1wu6osv</bpmn:incoming>
       <bpmn:incoming>Flow_1wgv177</bpmn:incoming>
       <bpmn:outgoing>Flow_0aclzdb</bpmn:outgoing>
@@ -808,7 +808,7 @@
       <bpmn:incoming>Flow_1e3p30m</bpmn:incoming>
       <bpmn:outgoing>Flow_0hbb4gu</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_1jcossk" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_1jcossk" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_0hbb4gu</bpmn:incoming>
       <bpmn:incoming>Flow_0btcbfi</bpmn:incoming>
       <bpmn:outgoing>Flow_1qcim30</bpmn:outgoing>
@@ -855,7 +855,7 @@
       <bpmn:incoming>Flow_0coh8qw</bpmn:incoming>
       <bpmn:outgoing>Flow_1v4bmm7</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_10mrhwt" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_10mrhwt" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_189wmyg</bpmn:incoming>
       <bpmn:incoming>Flow_1brmy8b</bpmn:incoming>
       <bpmn:incoming>Flow_161tf8l</bpmn:incoming>
@@ -926,7 +926,7 @@
       <bpmn:incoming>Flow_179kbck</bpmn:incoming>
       <bpmn:outgoing>Flow_0q2l95r</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_0cgi8c9" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_0cgi8c9" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_0q2l95r</bpmn:incoming>
       <bpmn:incoming>Flow_00mppzo</bpmn:incoming>
       <bpmn:outgoing>Flow_017s6ow</bpmn:outgoing>
@@ -970,7 +970,7 @@
       <bpmn:incoming>Flow_1w286hb</bpmn:incoming>
       <bpmn:outgoing>Flow_0griotp</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_1urymfn" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_1urymfn" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_0griotp</bpmn:incoming>
       <bpmn:incoming>Flow_0crnyqf</bpmn:incoming>
       <bpmn:outgoing>Flow_027vtxk</bpmn:outgoing>
@@ -1014,7 +1014,7 @@
       <bpmn:incoming>Flow_0uhorfq</bpmn:incoming>
       <bpmn:outgoing>Flow_0spm2vn</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_0b6o0aw" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_0b6o0aw" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_0spm2vn</bpmn:incoming>
       <bpmn:incoming>Flow_0kveqt5</bpmn:incoming>
       <bpmn:outgoing>Flow_0ehljf9</bpmn:outgoing>
@@ -1058,7 +1058,7 @@
       <bpmn:incoming>Flow_1ggjc1e</bpmn:incoming>
       <bpmn:outgoing>Flow_187m718</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_0qzuqhz" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_0qzuqhz" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_187m718</bpmn:incoming>
       <bpmn:incoming>Flow_1q1l6lr</bpmn:incoming>
       <bpmn:outgoing>Flow_107po9c</bpmn:outgoing>
@@ -1102,7 +1102,7 @@
       <bpmn:incoming>Flow_1s841ad</bpmn:incoming>
       <bpmn:outgoing>Flow_16sks95</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_0cmjlst" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_0cmjlst" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_16sks95</bpmn:incoming>
       <bpmn:incoming>Flow_18h1ujr</bpmn:incoming>
       <bpmn:outgoing>Flow_02zwbsa</bpmn:outgoing>
@@ -1146,7 +1146,7 @@
       <bpmn:incoming>Flow_0vxq2b2</bpmn:incoming>
       <bpmn:outgoing>Flow_08zisl1</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_0qaso2u" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_0qaso2u" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_08zisl1</bpmn:incoming>
       <bpmn:incoming>Flow_1tk52qj</bpmn:incoming>
       <bpmn:outgoing>Flow_0gnpuxk</bpmn:outgoing>
@@ -1198,7 +1198,7 @@
       <bpmn:incoming>Flow_1c8xx5b</bpmn:incoming>
       <bpmn:outgoing>Flow_0epb01l</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_1v6xoqe" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_1v6xoqe" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_0epb01l</bpmn:incoming>
       <bpmn:incoming>Flow_0t6ewij</bpmn:incoming>
       <bpmn:outgoing>Flow_0tss8gn</bpmn:outgoing>
@@ -1250,7 +1250,7 @@
       <bpmn:incoming>Flow_14ghmab</bpmn:incoming>
       <bpmn:outgoing>Flow_176xw6u</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_1pxxzq7" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_1pxxzq7" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_176xw6u</bpmn:incoming>
       <bpmn:incoming>Flow_1d3roq5</bpmn:incoming>
       <bpmn:outgoing>Flow_13w6y30</bpmn:outgoing>
@@ -1294,7 +1294,7 @@
       <bpmn:incoming>Flow_0h2v4mc</bpmn:incoming>
       <bpmn:outgoing>Flow_1312psj</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_1acbqdz" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_1acbqdz" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_1312psj</bpmn:incoming>
       <bpmn:incoming>Flow_1slcbaz</bpmn:incoming>
       <bpmn:outgoing>Flow_0j73422</bpmn:outgoing>
@@ -1338,7 +1338,7 @@
       <bpmn:incoming>Flow_003t7rf</bpmn:incoming>
       <bpmn:outgoing>Flow_0vz5z85</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_10gtevc" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_10gtevc" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_0vz5z85</bpmn:incoming>
       <bpmn:incoming>Flow_1xa1mar</bpmn:incoming>
       <bpmn:outgoing>Flow_0rdzyf5</bpmn:outgoing>
@@ -1382,7 +1382,7 @@
       <bpmn:incoming>Flow_0wtgc2n</bpmn:incoming>
       <bpmn:outgoing>Flow_0k9x4ia</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_1k6skht" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_1k6skht" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_0k9x4ia</bpmn:incoming>
       <bpmn:incoming>Flow_0awu1kk</bpmn:incoming>
       <bpmn:outgoing>Flow_1u39t9l</bpmn:outgoing>
@@ -1426,7 +1426,7 @@
       <bpmn:incoming>Flow_0jf850m</bpmn:incoming>
       <bpmn:outgoing>Flow_12enw33</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Activity_18cq3ig" name="Send response to the requestor via messages bus">
+    <bpmn:task id="Activity_18cq3ig" name="Send response to the requestor via the message bus">
       <bpmn:incoming>Flow_12enw33</bpmn:incoming>
       <bpmn:incoming>Flow_1e5pznp</bpmn:incoming>
       <bpmn:outgoing>Flow_08aftmp</bpmn:outgoing>

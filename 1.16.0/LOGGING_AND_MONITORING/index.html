@@ -1048,11 +1048,11 @@
 <li>
 <p><strong>Linux</strong>:</p>
 <ul>
-<li>It's possible download and install as a <code>deb</code> package
+<li>It is possible download and install as a <code>deb</code> package
     <div class="highlight"><pre><span></span><code><a href="#__codelineno-1-1" id="__codelineno-1-1" name="__codelineno-1-1"></a>curl -o log-stream-filter.deb -L <span class="k">$(</span>curl -s https://api.github.com/repos/xoanmm/log-stream-filter/releases/latest <span class="p">|</span> jq -r <span class="s1">'.assets[] | select(.name | contains("linux_amd64.deb")) | .browser_download_url'</span><span class="k">)</span>
 <a href="#__codelineno-1-2" id="__codelineno-1-2" name="__codelineno-1-2"></a>sudo dpkg -i log-stream-filter.deb
 </code></pre></div></li>
-<li>It's also possible download and install as a simple binary
+<li>It is also possible download and install as a simple binary
     <div class="highlight"><pre><span></span><code><a href="#__codelineno-2-1" id="__codelineno-2-1" name="__codelineno-2-1"></a>curl -o log-stream-filter.tgz -L <span class="k">$(</span>curl -s https://api.github.com/repos/xoanmm/log-stream-filter/releases/latest <span class="p">|</span> jq -r <span class="s1">'.assets[] | select(.name | contains("linux_64-bit.tar.gz")) | .browser_download_url'</span><span class="k">)</span>
 <a href="#__codelineno-2-2" id="__codelineno-2-2" name="__codelineno-2-2"></a>tar -zxvf log-stream-filter.tgz
 <a href="#__codelineno-2-3" id="__codelineno-2-3" name="__codelineno-2-3"></a>chmod +x ./log-stream-filter <span class="o">&amp;&amp;</span> sudo mv ./log-stream-filter /usr/local/bin
@@ -1121,7 +1121,7 @@
 <p>The system logs of the production environment are stored in papertrail, the account credentials are in the project's onepassword vault to which all people in the project have access.</p>
 <p>Below is a screenshot of the main screen of the system.</p>
 <p><a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/papertrail/papertrail_dashboards_overview.png"><img alt="IMAGE: papertrail_dashboards_overview" loading="lazy" src="../img/papertrail/papertrail_dashboards_overview.png"/></a></p>
-<p>In this system it's possible see three useful dashboards:</p>
+<p>In this system it is possible see three useful dashboards:</p>
 <ul>
 <li>
 <p><strong>[production] - master alarms</strong>: alarms are defined on different modules with notifications sent to slack through the mettel-alarms-papertrail-production channel, for example when the number of error messages in a module exceeds 100 times in an hour. Below is a screenshot where these alarms have been marked in a red rectangle.</p>

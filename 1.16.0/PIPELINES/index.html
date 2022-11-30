@@ -1030,7 +1030,7 @@ We separate the automation in two parts, <a href="#continuous-integration-ci">co
    <a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/pipelines/select_run_pipeline.png"><img alt="IMAGE: select_run_pipeline" loading="lazy" src="../img/pipelines/select_run_pipeline.png"/></a></p>
 </li>
 <li>
-<p>Indicate the branch where you want to run the pipeline in the <code>Run for</code> box and then click on <code>Run pipeline</code>. It's possible see an example in the following image, where the box <code>Run for</code> is shown in green and <code>Run pipeline</code> is shown in red.
+<p>Indicate the branch where you want to run the pipeline in the <code>Run for</code> box and then click on <code>Run pipeline</code>. It is possible see an example in the following image, where the box <code>Run for</code> is shown in green and <code>Run pipeline</code> is shown in red.
    <a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../img/pipelines/select_run_pipeline_branch.png"><img alt="IMAGE: select_run_pipeline_branch" loading="lazy" src="../img/pipelines/select_run_pipeline_branch.png"/></a></p>
 </li>
 </ol>
@@ -1095,7 +1095,7 @@ We separate the automation in two parts, <a href="#continuous-integration-ci">co
 <p>This area covers the checking and creation, if necessary, of all the basic resources for the subsequent deployment, these being the specific image repositories in <a href="https://aws.amazon.com/ecr">ECR Docker Container Registry</a>, as well as the roles necessary in AWS to be able to display these images in <a href="https://aws.amazon.com/ecs/">ECS Container Orchestrator</a>.</p>
 <p>In this stage there is also a job that must be executed manually if necessary, this is responsible for checking and creating if necessary network resources for the production environment or ephemeral environments.</p>
 <p>In this stage is also checked whether there are enough free resources in ECS to carry out the deployment with success or not.</p>
-<p><strong>It's necessary run the <code>basic-infra</code> job the first time a new microservice is created in the project</strong></p>
+<p><strong>It is necessary run the <code>basic-infra</code> job the first time a new microservice is created in the project</strong></p>
 <blockquote>
 <p>This has been done because ECR repositories are global resources and are stored in the same <code>tfstate</code> file, thus avoiding that when a microservice that creates a repository is created, it is not deleted by other branches that do not have it added.</p>
 </blockquote>
@@ -1124,7 +1124,7 @@ We separate the automation in two parts, <a href="#continuous-integration-ci">co
 <p>A set of IAM roles, one for each user with access to the project. These will be used to assign subsequent permissions in the Kubernetes cluster according to the role they belong to. These are stored as terraform <a href="https://www.terraform.io/docs/configuration/outputs.html">output values</a>, saving the list of user roles belonging to each role in their corresponding variable.</p>
 </li>
 </ul>
-<p>Below is an example of a pipeline execution where it's possible see the IAM roles of users generated for each role in the project:</p>
+<p>Below is an example of a pipeline execution where it is possible see the IAM roles of users generated for each role in the project:</p>
 <div class="highlight"><pre><span></span><code><a href="#__codelineno-0-1" id="__codelineno-0-1" name="__codelineno-0-1"></a>Outputs:
 <a href="#__codelineno-0-2" id="__codelineno-0-2" name="__codelineno-0-2"></a> <span class="nv">eks_developer_ops_privileged_roles</span> <span class="o">=</span> <span class="o">[</span>
 <a href="#__codelineno-0-3" id="__codelineno-0-3" name="__codelineno-0-3"></a>   <span class="s2">"arn:aws:iam::374050862540:role/eks-developer-ops-mettel-automation-kre-xisco.capllonch"</span>,
@@ -1182,7 +1182,7 @@ We separate the automation in two parts, <a href="#continuous-integration-ci">co
 </li>
 </ul>
 <h3 id="build-steps">Build steps</h3>
-<p>This area will cover all build steps of all necessary modules to deploy the app to the selected environment. It's typical to build the docker images and push to the repository in this step.</p>
+<p>This area will cover all build steps of all necessary modules to deploy the app to the selected environment. It is typical to build the docker images and push to the repository in this step.</p>
 <h3 id="deploy-steps">Deploy steps</h3>
 <p>In this stage there are one job:</p>
 <ul>

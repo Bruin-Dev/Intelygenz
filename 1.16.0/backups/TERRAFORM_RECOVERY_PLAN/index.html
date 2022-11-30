@@ -962,7 +962,7 @@
 <p>The project at this moment is deployed in AWS infrastructure with all <a href="https://www.fedramp.gov/">FEDRAMP</a>
 requirements meet. To accomplish these requirements the SSH keys generated to access the EKS cluster need a backup plan and a recovery plan.</p>
 <p><a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../../diagrams/workflows/backups/stages.drawio.svg"><img alt="" src="../../diagrams/workflows/backups/stages.drawio.svg"/></a></p>
-<p>The project generates the next TF state files, and it's executed in order:
+<p>The project generates the next TF state files, and it is executed in order:
 - Global: Infrastructure that is global in AWS
 - Primary(regional): Infrastructure that is in the primary region.
 - secondary(regional): Infrastructure that is in the secondary region.
@@ -979,7 +979,7 @@ requirements meet. To accomplish these requirements the SSH keys generated to ac
 - Find the bucket called <strong>fedramp-automation-infrastructure</strong> in the activated
 - Upload the files to the S3 Bucket.</p>
 <h2 id="test-the-backup-plan">Test the backup plan</h2>
-<p>Follow the steps to recovery the backed files and run a deployment pipeline in the active region. If the pipeline works perfectly it's a signal that the files are working properly.</p>
+<p>Follow the steps to recovery the backed files and run a deployment pipeline in the active region. If the pipeline works perfectly it is a signal that the files are working properly.</p>
 </article>
 </div>
 </div>
