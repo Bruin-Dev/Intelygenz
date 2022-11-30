@@ -1123,7 +1123,7 @@ class ServiceAffectingMonitor:
             if interface in link_configuration["interfaces"]:
                 link_interface_type = link_configuration["type"]
 
-        if link_interface_type != "WIRED":
+        if link_interface_type != "WIRED" and self._should_forward_to_hnoc(link_label):
             forward_time = 0
             logger.warning(
                 f"Link {interface} is of type {link_interface_type} and not WIRED. Attempting to forward to HNOC..."
