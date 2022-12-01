@@ -50,6 +50,13 @@ To init the project and be able to start using these CI/CD tool we need to follo
   git commit
   git push
   ```
+- Push terraform base image in case does not exists on:
+  ```
+  cd infrastructure
+  docker build -t images/terraform-1.x -f Dockerfile.terraform .
+  docker tag images/terraform-1.x:latest 663771866250.dkr.ecr.us-east-1.amazonaws.com/images/terraform-1.x:latest
+  docker push 663771866250.dkr.ecr.us-east-1.amazonaws.com/images/terraform-1.x:latest
+  ```
 
 ## Application results
 After terraform apply of all environments, the pipelines will be configured in each separated region and will be prepared to manage
