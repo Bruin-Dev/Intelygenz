@@ -244,7 +244,7 @@
             <bpmn:outgoing>Flow_0bwzoft</bpmn:outgoing>
           </bpmn:task>
           <bpmn:sequenceFlow id="Flow_0baumj2" name="Ticket is not resolved" sourceRef="Gateway_1o9hgn6" targetRef="Activity_0yqpu4w" />
-          <bpmn:task id="Activity_1a71fmt" name="Resolve task for ivnentory">
+          <bpmn:task id="Activity_1a71fmt" name="Resolve task for inventory">
             <bpmn:incoming>Flow_0bwzoft</bpmn:incoming>
             <bpmn:outgoing>Flow_1xoaw9g</bpmn:outgoing>
           </bpmn:task>
