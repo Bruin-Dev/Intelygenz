@@ -276,3 +276,83 @@ resource "aws_ssm_parameter" "parameter-intermapper-outage-monitor-monitor-piab-
     note = "can be updated from the parameter store dashboard"
   })
 }
+
+resource "aws_ssm_parameter" "parameter-intermapper-outage-monitor-battery-alert-probe-conditions" {
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  name        = "/automation-engine/common/intermapper-outage-monitor/battery-alert-probe-conditions"
+  description = "Probe conditions for which the IPA system should send battery alerts via Bruin emails"
+  type        = "SecureString"
+  value       = "-"  # to edit go to parameter store dashboard.
+  key_id      =  aws_kms_alias.kms_key.name
+
+  lifecycle {
+    ignore_changes = [
+      value,
+    ]
+  }
+
+  tags = merge(var.common_info, {
+    Name = "BATTERY_ALERT_PROBE_CONDITIONS"
+    note = "can be updated from the parameter store dashboard"
+  })
+}
+
+resource "aws_ssm_parameter" "parameter-intermapper-outage-monitor-battery-alert-probe-types" {
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  name        = "/automation-engine/common/intermapper-outage-monitor/battery-alert-probe-types"
+  description = "Battery alert probe types"
+  type        = "SecureString"
+  value       = "-"  # to edit go to parameter store dashboard.
+  key_id      =  aws_kms_alias.kms_key.name
+
+  lifecycle {
+    ignore_changes = [
+      value,
+    ]
+  }
+
+  tags = merge(var.common_info, {
+    Name = "BATTERY_ALERT_PROBE_TYPES"
+    note = "can be updated from the parameter store dashboard"
+  })
+}
+
+resource "aws_ssm_parameter" "parameter-intermapper-outage-monitor-forward-to-hnoc-job-interval" {
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  name        = "/automation-engine/common/intermapper-outage-monitor/forward-to-hnoc-job-interval"
+  description = "Forward to hnoc job interval"
+  type        = "SecureString"
+  value       = "-"  # to edit go to parameter store dashboard.
+  key_id      =  aws_kms_alias.kms_key.name
+
+  lifecycle {
+    ignore_changes = [
+      value,
+    ]
+  }
+
+  tags = merge(var.common_info, {
+    Name = "FORWARD_TO_HNOC_JOB_INTERVAL"
+    note = "can be updated from the parameter store dashboard"
+  })
+}
+
+resource "aws_ssm_parameter" "parameter-intermapper-outage-monitor-forward-to-ipa-job-interval" {
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  name        = "/automation-engine/common/intermapper-outage-monitor/forward-to-ipa-job-interval"
+  description = "Forward to ipa job interval"
+  type        = "SecureString"
+  value       = "-"  # to edit go to parameter store dashboard.
+  key_id      =  aws_kms_alias.kms_key.name
+
+  lifecycle {
+    ignore_changes = [
+      value,
+    ]
+  }
+
+  tags = merge(var.common_info, {
+    Name = "FORWARD_TO_IPA_JOB_INTERVAL"
+    note = "can be updated from the parameter store dashboard"
+  })
+}
