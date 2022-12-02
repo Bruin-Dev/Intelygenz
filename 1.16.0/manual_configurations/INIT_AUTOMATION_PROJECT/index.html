@@ -999,6 +999,12 @@ To init the project and be able to start using these CI/CD tool we need to follo
   <div class="highlight"><pre><span></span><code><a href="#__codelineno-5-1" id="__codelineno-5-1" name="__codelineno-5-1"></a>git commit
 <a href="#__codelineno-5-2" id="__codelineno-5-2" name="__codelineno-5-2"></a>git push
 </code></pre></div></li>
+<li>Push terraform base image in case does not exists on:
+  <div class="highlight"><pre><span></span><code><a href="#__codelineno-6-1" id="__codelineno-6-1" name="__codelineno-6-1"></a>cd infrastructure
+<a href="#__codelineno-6-2" id="__codelineno-6-2" name="__codelineno-6-2"></a>docker build -t images/terraform-1.x -f Dockerfile.terraform .
+<a href="#__codelineno-6-3" id="__codelineno-6-3" name="__codelineno-6-3"></a>docker tag images/terraform-1.x:latest 663771866250.dkr.ecr.us-east-1.amazonaws.com/images/terraform-1.x:latest
+<a href="#__codelineno-6-4" id="__codelineno-6-4" name="__codelineno-6-4"></a>docker push 663771866250.dkr.ecr.us-east-1.amazonaws.com/images/terraform-1.x:latest
+</code></pre></div></li>
 </ul>
 <h2 id="application-results">Application results</h2>
 <p>After terraform apply of all environments, the pipelines will be configured in each separated region and will be prepared to manage

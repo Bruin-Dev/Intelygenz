@@ -917,11 +917,131 @@
 <article class="md-content__inner md-typeset">
 <h1 id="fraud-monitor-event-logging">Fraud Monitor Event Logging</h1>
 <h1 id="description">Description</h1>
-<p>The goal of the <code>fraud-monitor</code> service is to get unread fraud warning emails and create fraud tickets for them.</p>
+<p>The goal of the <code>fraud-monitor</code> service is to process unread Fraud e-mails and create / re-open Fraud tickets for them.</p>
 <h2 id="process-workflows">Process Workflows</h2>
 <p><a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../../../images/fraud-monitor.png"><img alt="" loading="lazy" src="../../../images/fraud-monitor.png"/></a></p>
 <h2 id="list-of-decisions-made-by-the-fraud-monitor-service">List of Decisions made by the Fraud Monitor service</h2>
-<p><em>This service does not make any business decision</em></p>
+<h3 id="workflow-process-e-mail">Workflow - Process e-mail</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for the e-mail subject to see if it is related to a Fraud alert</td>
+<td>E-mail subject contains "Possible Fraud" or "Request Rate Monitor Violation (High)"</td>
+<td>E-mail subject does NOT contain "Possible Fraud" or "Request Rate Monitor Violation (High)"</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for the shape of the e-mail body</td>
+<td>Format of the e-mail body is correct</td>
+<td>E-mail body is malformed</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Check if the e-mail was processed</td>
+<td>E-mail couldn't be processed</td>
+<td>E-mail could be processed normally</td>
+</tr>
+</tbody>
+</table>
+<h3 id="workflow-process-fraud-alert">Workflow - Process Fraud Alert</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check if client info could be found in Bruin for the service number</td>
+<td>No client info was found</td>
+<td>Client info was found</td>
+</tr>
+</tbody>
+</table>
+<h3 id="workflow-report-fraud-to-bruin">Workflow - Report Fraud to Bruin</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check if open Service Affecting tickets were found for the service number</td>
+<td>Open tickets were found</td>
+<td>No open tickets were found</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check if resolved Service Affecting tickets were found for the service number</td>
+<td>Resolved tickets were found</td>
+<td>No resolved tickets were found</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Check if the ticket task related to the service number is already resolved</td>
+<td>Ticket task is NOT resolved</td>
+<td>Ticket task is resolved already</td>
+</tr>
+</tbody>
+</table>
+<h3 id="workflow-append-fraud-note-to-open-ticket">Workflow - Append Fraud note to open ticket</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check if there's a Fraud note for the same Fraud appended to the ticket in the current documentation cycle</td>
+<td>No note for the same Fraud has been appended in the ongoing cycle</td>
+<td>A note for the same Fraud has been previously appended in the ongoing cycle</td>
+</tr>
+</tbody>
+</table>
+<h3 id="workflow-re-open-ticket-task">Workflow - Re-open ticket task</h3>
+<p><em>No relevant business decisions are made in this workflow</em></p>
+<h3 id="workflow-create-new-service-affecting-ticket">Workflow - Create new Service Affecting ticket</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check if there is Site and Ticket contacts to use on ticket creation for the client ID and service number</td>
+<td>Site and Ticket contacts could be determined for the client ID and service number</td>
+<td>Site and Ticket contacts could NOT be determined for the client ID and service number</td>
+</tr>
+</tbody>
+</table>
 <h2 id="event-descriptions">Event Descriptions</h2>
 <h3 id="schedule-fraud-monitoring-job">Schedule Fraud Monitoring job</h3>
 <ul>
