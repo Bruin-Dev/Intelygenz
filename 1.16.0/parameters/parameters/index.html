@@ -966,7 +966,7 @@
 <td>Defines the hour at which the day ends and the night starts for dynamic auto-resolution times</td>
 <td>int</td>
 <td>hour</td>
-<td>0-24</td>
+<td>0-23</td>
 <td>0</td>
 </tr>
 <tr>
@@ -974,7 +974,7 @@
 <td>Defines the hour at which the night ends and the day starts for dynamic auto-resolution times</td>
 <td>int</td>
 <td>hour</td>
-<td>0-24</td>
+<td>0-23</td>
 <td>8</td>
 </tr>
 <tr>
@@ -983,7 +983,7 @@
 <td>string</td>
 <td></td>
 <td></td>
-<td></td>
+<td>Intelygenz Ai</td>
 </tr>
 <tr>
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/customer-cache/refresh-check-interval/description?region=us-east-1&amp;tab=Table">/automation-engine/common/customer-cache/refresh-check-interval</a></td>
@@ -1005,7 +1005,7 @@
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/customer-cache/whitelisted-management-statuses/description?region=us-east-1&amp;tab=Table">/automation-engine/common/customer-cache/whitelisted-management-statuses</a></td>
 <td>Management statuses that should be considered in the caching process</td>
 <td>list</td>
-<td>management statues</td>
+<td>management statuses</td>
 <td>[management status,...]</td>
 <td>["Pending", "Active – Gold Monitoring", "Active – Platinum Monitoring"]</td>
 </tr>
@@ -1109,7 +1109,7 @@
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/email-tagger-monitor/new-emails-job-interval/description?region=us-east-1&amp;tab=Table">/automation-engine/common/email-tagger-monitor/new-emails-job-interval</a></td>
 <td>Defines how often new emails received from Bruin are processed</td>
 <td>int</td>
-<td>emails</td>
+<td>seconds</td>
 <td>0-inf</td>
 <td>10</td>
 </tr>
@@ -1117,7 +1117,7 @@
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/email-tagger-monitor/new-tickets-job-interval/description?region=us-east-1&amp;tab=Table">/automation-engine/common/email-tagger-monitor/new-tickets-job-interval</a></td>
 <td>Defines how often new tickets received from Bruin are sent to the KRE(konstellation) to train the AI model</td>
 <td>int</td>
-<td>tickets</td>
+<td>seconds</td>
 <td>0-inf</td>
 <td>10</td>
 </tr>
@@ -1133,7 +1133,7 @@
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/forticloud-cache/monitorable-management-statuses/description?region=us-east-1&amp;tab=Table#list_parameter_filters=Name:Contains:%2Fautomation-engine%2Fcommon%2F">/automation-engine/common/forticloud-cache/monitorable-management-statuses</a></td>
 <td>Managements statuses to store devices in cache</td>
 <td>list</td>
-<td>management statues</td>
+<td>management statuses</td>
 <td>[management status,...]</td>
 <td></td>
 </tr>
@@ -1253,8 +1253,8 @@
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/gateway-monitor/tunnel-count-threshold/description?region=us-east-1&amp;tab=Table">/automation-engine/common/gateway-monitor/tunnel-count-threshold</a></td>
 <td>Threshold for tunnel count incidents</td>
 <td>int</td>
-<td>tunnels</td>
-<td>0-inf</td>
+<td>percentage (tunnels)</td>
+<td>0-100</td>
 <td>20</td>
 </tr>
 <tr>
@@ -1325,7 +1325,7 @@
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/hawkeye-customer-cache/whitelisted-management-statuses/description?region=us-east-1&amp;tab=Table">/automation-engine/common/hawkeye-customer-cache/whitelisted-management-statuses</a></td>
 <td>Management statuses that should be considered in the caching process</td>
 <td>list</td>
-<td>management statues</td>
+<td>management statuses</td>
 <td>[management status,...]</td>
 <td>["Pending", "Active – Gold Monitoring", "Active – Platinum Monitoring"]</td>
 </tr>
@@ -1429,7 +1429,7 @@
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/intermapper-outage-monitor/max-autoresolves-per-ticket/description?region=us-east-1&amp;tab=Table">/automation-engine/common/intermapper-outage-monitor/max-autoresolves-per-ticket</a></td>
 <td>Defines how many times a ticket can be auto-resolved</td>
 <td>int</td>
-<td></td>
+<td>auto-resolve occurrences</td>
 <td>0-inf</td>
 <td>3</td>
 </tr>
@@ -1437,7 +1437,7 @@
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/intermapper-outage-monitor/max-concurrent-email-batches/description?region=us-east-1&amp;tab=Table">/automation-engine/common/intermapper-outage-monitor/max-concurrent-email-batches</a></td>
 <td>Defines how many simultaneous email batches related to the same InterMapper asset are processed</td>
 <td>int</td>
-<td>email</td>
+<td>email batches</td>
 <td>0-inf</td>
 <td>10</td>
 </tr>
@@ -1461,16 +1461,16 @@
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/intermapper-outage-monitor/monitored-down-events/description?region=us-east-1&amp;tab=Table">/automation-engine/common/intermapper-outage-monitor/monitored-down-events</a></td>
 <td>InterMapper events considered as DOWN</td>
 <td>list</td>
-<td>events</td>
-<td>[edge event,...]</td>
+<td>event types</td>
+<td>[event type,...]</td>
 <td>["Down", "Critical", "Alarm", "Warning", "Link Warning"]</td>
 </tr>
 <tr>
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/intermapper-outage-monitor/monitored-up-events/description?region=us-east-1&amp;tab=Table">/automation-engine/common/intermapper-outage-monitor/monitored-up-events</a></td>
 <td>InterMapper events considered as UP</td>
 <td>list</td>
-<td>events</td>
-<td>[edge event,...]</td>
+<td>event types</td>
+<td>[event type,...]</td>
 <td>["Up", "OK"]</td>
 </tr>
 <tr>
@@ -1485,7 +1485,7 @@
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/intermapper-outage-monitor/observed-inbox-senders/description?region=us-east-1&amp;tab=Table">/automation-engine/common/intermapper-outage-monitor/observed-inbox-senders</a></td>
 <td>Senders addresses whose e-mail messages represent InterMapper events</td>
 <td>list</td>
-<td>email address</td>
+<td>email addresses</td>
 <td>[email address,...]</td>
 <td>["noreply@mettel.net"]</td>
 </tr>
@@ -1709,8 +1709,8 @@
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/bandwidth-over-utilization-monitoring-threshold/description?region=us-east-1&amp;tab=Table">/automation-engine/common/service-affecting/monitor/bandwidth-over-utilization-monitoring-threshold</a></td>
 <td>Threshold for Bandwidth Over Utilization troubles</td>
 <td>int</td>
-<td></td>
-<td>0-inf</td>
+<td>percentage (bandwidth used)</td>
+<td>0-100</td>
 <td>80</td>
 </tr>
 <tr>
@@ -1733,7 +1733,7 @@
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/circuit-instability-monitoring-threshold/description?region=us-east-1&amp;tab=Table">/automation-engine/common/service-affecting/monitor/circuit-instability-monitoring-threshold</a></td>
 <td>Threshold for Circuit Instability troubles</td>
 <td>int</td>
-<td></td>
+<td>events</td>
 <td>0-inf</td>
 <td>10</td>
 </tr>
@@ -1789,7 +1789,7 @@
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/jitter-monitoring-threshold/description?region=us-east-1&amp;tab=Table">/automation-engine/common/service-affecting/monitor/jitter-monitoring-threshold</a></td>
 <td>Threshold for Jitter troubles</td>
 <td>int</td>
-<td></td>
+<td>milliseconds</td>
 <td>0-inf</td>
 <td>50</td>
 </tr>
@@ -1805,7 +1805,7 @@
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/latency-monitoring-threshold/description?region=us-east-1&amp;tab=Table">/automation-engine/common/service-affecting/monitor/latency-monitoring-threshold</a></td>
 <td>Threshold for Latency troubles</td>
 <td>int</td>
-<td></td>
+<td>milliseconds</td>
 <td>0-inf</td>
 <td>140</td>
 </tr>
@@ -1813,7 +1813,7 @@
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/max-autoresolves-per-ticket/description?region=us-east-1&amp;tab=Table">/automation-engine/common/service-affecting/monitor/max-autoresolves-per-ticket</a></td>
 <td>Defines how many times a ticket can be auto-resolved</td>
 <td>int</td>
-<td></td>
+<td>auto-resolve occurrences</td>
 <td>0-inf</td>
 <td>3</td>
 </tr>
@@ -1837,7 +1837,7 @@
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-affecting/monitor/packet-loss-monitoring-threshold/description?region=us-east-1&amp;tab=Table">/automation-engine/common/service-affecting/monitor/packet-loss-monitoring-threshold</a></td>
 <td>Threshold for Packet Loss troubles</td>
 <td>int</td>
-<td></td>
+<td>packets lost</td>
 <td>0-inf</td>
 <td>8</td>
 </tr>
@@ -1941,7 +1941,7 @@
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/service-outage/monitor/max-autoresolves-per-ticket/description?region=us-east-1&amp;tab=Table">/automation-engine/common/service-outage/monitor/max-autoresolves-per-ticket</a></td>
 <td>Defines how many times a ticket can be auto-resolved</td>
 <td>int</td>
-<td></td>
+<td>auto-resolve occurrences</td>
 <td>0-inf</td>
 <td>3</td>
 </tr>
@@ -2006,7 +2006,7 @@
 <td>Severity level for Edge Down outages</td>
 <td>int</td>
 <td></td>
-<td>[1 High, 2 MediumHigh , 3 MediumLow , 4Low]</td>
+<td>[1 High, 2 MediumHigh, 3 MediumLow, 4 Low]</td>
 <td>2</td>
 </tr>
 <tr>
@@ -2014,7 +2014,7 @@
 <td>Severity level for Link Down outages</td>
 <td>int</td>
 <td></td>
-<td>[1 High, 2 MediumHigh , 3 MediumLow , 4Low]</td>
+<td>[1 High, 2 MediumHigh, 3 MediumLow, 4 Low]</td>
 <td>3</td>
 </tr>
 <tr>
@@ -2056,14 +2056,6 @@
 <td>seconds</td>
 <td>0-inf</td>
 <td>600</td>
-</tr>
-<tr>
-<td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/sites-monitor/monitoring-job-interval/description?region=us-east-1&amp;tab=Table">/automation-engine/common/sites-monitor/monitoring-job-interval</a></td>
-<td>Defines how often to look for links and edges, and write their data to the metrics server</td>
-<td>int</td>
-<td>seconds</td>
-<td>0-inf</td>
-<td>1200</td>
 </tr>
 <tr>
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/servicenow-bridge/client-id/description?region=us-east-1&amp;tab=Table#list_parameter_filters=Name:Contains:%2Fautomation-engine%2Fcommon%2F">/automation-engine/common/servicenow-bridge/client-id</a></td>
@@ -2165,8 +2157,8 @@
 <td><a href="https://us-east-1.console.aws.amazon.com/systems-manager/parameters/automation-engine/common/tnba-monitor/min-required-confidence-for-request-and-repair-completed-predictions/description?region=us-east-1&amp;tab=Table">/automation-engine/common/tnba-monitor/min-required-confidence-for-request-and-repair-completed-predictions</a></td>
 <td>Defines the minimum confidence level required to consider a Request Completed / Repair Completed prediction accurate in TNBA auto-resolves</td>
 <td>int</td>
-<td></td>
-<td>0-inf</td>
+<td>percentage (confidence)</td>
+<td>0-100</td>
 <td>75</td>
 </tr>
 <tr>
