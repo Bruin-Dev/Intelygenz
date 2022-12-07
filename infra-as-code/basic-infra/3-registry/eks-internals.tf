@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "eks_reloader" {
-  name = "reloader"
+  name = "eks_reloader"
   tags = {
     Project       = var.common_info.project
     Provisioning  = var.common_info.provisioning
@@ -8,7 +8,7 @@ resource "aws_ecr_repository" "eks_reloader" {
 }
 
 resource "aws_ecr_repository" "eks_external_dns" {
-  name = "external-dns"
+  name = "eks_external-dns"
   tags = {
     Project       = var.common_info.project
     Provisioning  = var.common_info.provisioning
@@ -17,7 +17,7 @@ resource "aws_ecr_repository" "eks_external_dns" {
 }
 
 resource "aws_ecr_repository" "eks_external_secrets" {
-  name = "external-secrets"
+  name = "eks_external-secrets"
   tags = {
     Project       = var.common_info.project
     Provisioning  = var.common_info.provisioning
@@ -26,7 +26,7 @@ resource "aws_ecr_repository" "eks_external_secrets" {
 }
 
 resource "aws_ecr_repository" "eks_fluent_bit" {
-  name = "fluent-bit"
+  name = "eks_fluent-bit"
   tags = {
     Project       = var.common_info.project
     Provisioning  = var.common_info.provisioning
@@ -35,7 +35,7 @@ resource "aws_ecr_repository" "eks_fluent_bit" {
 }
 
 resource "aws_ecr_repository" "eks_kyverno" {
-  name = "kyverno"
+  name = "eks_kyverno"
   tags = {
     Project       = var.common_info.project
     Provisioning  = var.common_info.provisioning
@@ -44,7 +44,7 @@ resource "aws_ecr_repository" "eks_kyverno" {
 }
 
 resource "aws_ecr_repository" "eks_metrics_server" {
-  name = "metrics-server"
+  name = "eks_metrics-server"
   tags = {
     Project       = var.common_info.project
     Provisioning  = var.common_info.provisioning
@@ -53,7 +53,7 @@ resource "aws_ecr_repository" "eks_metrics_server" {
 }
 
 resource "aws_ecr_repository" "eks_ingress_nginx_controller" {
-  name = "ingress-nginx-controller"
+  name = "eks_ingress-nginx-controller"
   tags = {
     Project       = var.common_info.project
     Provisioning  = var.common_info.provisioning
@@ -62,7 +62,7 @@ resource "aws_ecr_repository" "eks_ingress_nginx_controller" {
 }
 
 resource "aws_ecr_repository" "eks_cluster_autoscaler_aws" {
-  name = "cluster-autoscaler-aws"
+  name = "eks_cluster-autoscaler-aws"
   tags = {
     Project       = var.common_info.project
     Provisioning  = var.common_info.provisioning

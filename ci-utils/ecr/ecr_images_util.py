@@ -84,10 +84,11 @@ class EcrUtil:
         repositories = self._client.describe_repositories()
         logging.info(f"Obtaining all ECR repositories to filter by project {self._project_name}")
         for repository in repositories["repositories"]:
-            repository_arn = repository.get("repositoryArn")
-            repository_name = repository.get("repositoryName")
-            if self._check_is_project_repository(repository_name, repository_arn):
-                repositories_in_ecr.append(repository_name)
+            if not str(repository.get("repositoryName")).startswith("eks_"):
+                repository_arn = repository.get("repositoryArn")
+                repository_name = repository.get("repositoryName")
+                if self._check_is_project_repository(repository_name, repository_arn):
+                    repositories_in_ecr.append(repository_name)
         if len(repositories_in_ecr) > 0:
             repositories_in_ecr.sort()
             repositories_to_avoid = self._repositories_to_avoid
