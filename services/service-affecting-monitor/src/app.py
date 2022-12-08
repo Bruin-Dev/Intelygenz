@@ -149,6 +149,7 @@ class Container:
             email_repository=self._email_repository,
             utils_repository=self._utils_repository,
             template_repository=self._template_repository,
+            metrics_repository=self._metrics_repository
         )
         self._server = QuartServer(QuartConfig(port=config.QUART_CONFIG["port"]))
 

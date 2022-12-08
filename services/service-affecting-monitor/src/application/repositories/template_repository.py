@@ -130,8 +130,8 @@ class TemplateRepository:
             recipients = recipients + recipients_by_client[client_id]
         return recipients
 
-    def compose_bandwidth_report_email(self, client_id, client_name, report_items, interval_for_metrics):
-        now = datetime.strptime(interval_for_metrics["end"], "%Y-%m-%dT00:00:00Z")
+    def compose_bandwidth_report_email(self, client_id, client_name, report_items):
+        now = datetime.now(timezone(self._config.TIMEZONE))
         date = now.strftime(DATE_FORMAT)
 
         recipients = self._config.BANDWIDTH_REPORT_CONFIG["recipients"]
@@ -147,9 +147,19 @@ class TemplateRepository:
             "Serial Number",
             "Edge Name",
             "Interface",
-            "Average Bandwidth",
-            "Bandwidth Trouble Threshold Exceeded",
-            "Bandwidth Trouble Tickets",
+            "Available Bandwidth Down",
+            "Peak Utilization Down",
+            "Peak Utilization Time Down",
+            "Peak Utilization % Down",
+            "Total Number: Bandwidth Threshold Exceeded Down",
+            "Bandwidth Trouble Tickets Down",
+            "                      ",
+            "Available Bandwidth Up",
+            "Peak Utilization Up",
+            "Peak Utilization Time Up",
+            "Peak Utilization % Up",
+            "Total Number: Bandwidth Threshold Exceeded Up",
+            "Bandwidth Trouble Tickets Up"
         ]
         centered_headers = [3, 4, 5]
 
@@ -159,9 +169,19 @@ class TemplateRepository:
                     item["serial_number"],
                     item["edge_name"],
                     item["interface"],
-                    item["bandwidth"],
-                    item["threshold_exceeded"],
-                    ",<br>".join([str(_id) for _id in item["ticket_ids"]]),
+                    item["down_bytes_total"],
+                    item["peak_bytes_down"],
+                    item["peak_time_down"],
+                    item["peak_percent_down"],
+                    item["threshold_exceeded_down"],
+                    ", ".join([str(_id) for _id in item["ticket_ids_down"]]),
+                    " ",
+                    item["up_bytes_total"],
+                    item["peak_bytes_up"],
+                    item["peak_time_up"],
+                    item["peak_percent_up"],
+                    item["threshold_exceeded_up"],
+                    ", ".join([str(_id) for _id in item["ticket_ids_up"]]),
                 ]
             )
 

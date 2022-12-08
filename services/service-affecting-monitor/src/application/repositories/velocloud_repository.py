@@ -154,14 +154,74 @@ class VelocloudRepository:
         }
         return await self.get_all_links_metrics(interval=interval_for_metrics)
 
-    def get_interval_for_bandwidth_reports(self, rounded_now) -> dict:
-        return {
-            "start": (
-                rounded_now - timedelta(hours=self._config.BANDWIDTH_REPORT_CONFIG["lookup_interval_hours"])
-            ).isoformat()
-            + "Z",
-            "end": rounded_now.isoformat() + "Z",
+    async def get_edge_link_series_for_bandwidth_reports(self, interval, enterprise_id_edge_id_relation) -> dict:
+        edge_link_series = []
+        for edge_info in enterprise_id_edge_id_relation:
+            response = await self.get_edge_link_series(
+                host=edge_info['host'],
+                edge_id=edge_info['edge_id'],
+                enterprise_id=edge_info['enterprise_id'],
+                interval=interval
+            )
+
+            if response["status"] not in range(200, 300):
+                logger.info(f"Error: could not retrieve links metrics from {edge_info}")
+                continue
+            for body in response['body']:
+                body['serial_number'] = edge_info['serial_number']
+                body['edge_name'] = edge_info['edge_name']
+            edge_link_series += response["body"]
+
+        response = {
+            "request_id": uuid(),
+            "body": edge_link_series,
+            "status": 200,
         }
+        return response
+
+    async def get_edge_link_series(self, host, edge_id, enterprise_id, interval):
+        err_msg = None
+
+        request = {
+            "request_id": uuid(),
+            "body": {
+                "host": host,
+                "payload": {
+                    "enterpriseId": enterprise_id,
+                    "edgeId": edge_id,
+                    "interval": interval,
+                    "metrics": ["bytesTx", "bytesRx", "bpsOfBestPathRx", "bpsOfBestPathTx"],
+                }
+            }
+        }
+
+        try:
+            logger.info(
+                f"Getting edge links series between {interval['start']} and {interval['end']} "
+                f"from Velocloud host {host}..."
+            )
+            response = get_data_from_response_message(
+                await self._nats_client.request("request.edge.links.series", to_json_bytes(request), timeout=90)
+            )
+            logger.info(f"Got edge links series from Velocloud host {host}!")
+        except Exception as e:
+            err_msg = f"An error occurred when requesting edge link series from Velocloud -> {e}"
+            response = nats_error_response
+        else:
+            response_body = response["body"]
+            response_status = response["status"]
+
+            if response_status not in range(200, 300):
+                err_msg = (
+                    f"Error while retrieving edge link series in {self._config.ENVIRONMENT_NAME.upper()} "
+                    f"environment: Error {response_status} - {response_body}"
+                )
+
+        if err_msg:
+            logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
 
     async def get_enterprise_events(self, host, enterprise_id):
         err_msg = None

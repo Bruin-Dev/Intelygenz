@@ -15,6 +15,8 @@ class MetricsRepository:
     _tasks_reopened = Counter("tasks_reopened", "Tasks reopened", COMMON_LABELS + REOPEN_LABELS)
     _tasks_forwarded = Counter("tasks_forwarded", "Tasks forwarded", COMMON_LABELS + FORWARD_LABELS)
     _tasks_autoresolved = Counter("tasks_autoresolved", "Tasks autoresolved", COMMON_LABELS + AUTORESOLVE_LABELS)
+    _reports_signet_execution_OK = Counter("reports_signet_execution_OK", "Successfully sent bandwidth reports")
+    _reports_signet_execution_KO = Counter("reports_signet_execution_KO", "Failed to send bandwidth reports")
 
     def __init__(self, config):
         self._config = config
@@ -80,3 +82,9 @@ class MetricsRepository:
         trouble = self._get_trouble_label(troubles)
         labels = {"client": client, "link_types": link_type, "trouble": trouble, **labels, **self._STATIC_LABELS}
         self._tasks_autoresolved.labels(**labels).inc()
+
+    def increment_reports_signet_execution_OK(self):
+        self._reports_signet_execution_OK.inc()
+
+    def increment_reports_signet_execution_KO(self):
+        self._reports_signet_execution_KO.inc()

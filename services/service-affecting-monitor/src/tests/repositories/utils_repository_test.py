@@ -108,6 +108,23 @@ class TestUtilsRepository:
         expected = "1000000.0 Gbps"
         assert result == expected
 
+    def convert_bytes_to_bps_test(self):
+        time = 86400
+        byte = 0
+        result = UtilsRepository.convert_bytes_to_bps(byte, time)
+        expected = 0
+        assert result == expected
+
+        byte = 10800
+        result = UtilsRepository.convert_bytes_to_bps(byte, time)
+        expected = 1
+        assert result == expected
+
+        byte = 86400
+        result = UtilsRepository.convert_bytes_to_bps(byte, time)
+        expected = 8
+        assert result == expected
+
     def get_interface_from_event_test(self):
         event = {"message": "Link GE1 is now DEAD"}
         result = UtilsRepository.get_interface_from_event(event)

@@ -30,6 +30,14 @@ class UtilsRepository:
         return f"{round(bps, 3)} bps"
 
     @staticmethod
+    def humanize_bps_for_bandwidth_report(bps: int) -> str:
+        return f"{round((bps / 1000000), 3):.3f} Mbps"
+
+    @staticmethod
+    def convert_bytes_to_bps(byte, time):
+        return (byte * 8) / time
+
+    @staticmethod
     def get_interface_from_event(event):
         match = EVENT_INTERFACE_REGEX.match(event["message"])
         return match.group("interface") or match.group("link_interface")

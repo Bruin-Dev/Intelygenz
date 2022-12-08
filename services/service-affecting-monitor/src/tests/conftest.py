@@ -48,6 +48,7 @@ def bandwidth_reports(
     email_repository,
     utils_repository,
     template_repository,
+    metrics_repository
 ):
     return BandwidthReports(
         scheduler,
@@ -59,6 +60,7 @@ def bandwidth_reports(
         email_repository,
         utils_repository,
         template_repository,
+        metrics_repository,
     )
 
 
