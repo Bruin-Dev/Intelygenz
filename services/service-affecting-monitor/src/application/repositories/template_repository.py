@@ -159,7 +159,7 @@ class TemplateRepository:
             "Peak Utilization Time Up",
             "Peak Utilization % Up",
             "Total Number: Bandwidth Threshold Exceeded Up",
-            "Bandwidth Trouble Tickets Up"
+            "Bandwidth Trouble Tickets Up",
         ]
         centered_headers = [3, 4, 5]
 

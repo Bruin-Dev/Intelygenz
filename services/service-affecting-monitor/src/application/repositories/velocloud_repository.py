@@ -158,18 +158,18 @@ class VelocloudRepository:
         edge_link_series = []
         for edge_info in enterprise_id_edge_id_relation:
             response = await self.get_edge_link_series(
-                host=edge_info['host'],
-                edge_id=edge_info['edge_id'],
-                enterprise_id=edge_info['enterprise_id'],
-                interval=interval
+                host=edge_info["host"],
+                edge_id=edge_info["edge_id"],
+                enterprise_id=edge_info["enterprise_id"],
+                interval=interval,
             )
 
             if response["status"] not in range(200, 300):
                 logger.info(f"Error: could not retrieve links metrics from {edge_info}")
                 continue
-            for body in response['body']:
-                body['serial_number'] = edge_info['serial_number']
-                body['edge_name'] = edge_info['edge_name']
+            for body in response["body"]:
+                body["serial_number"] = edge_info["serial_number"]
+                body["edge_name"] = edge_info["edge_name"]
             edge_link_series += response["body"]
 
         response = {
@@ -191,8 +191,8 @@ class VelocloudRepository:
                     "edgeId": edge_id,
                     "interval": interval,
                     "metrics": ["bytesTx", "bytesRx", "bpsOfBestPathRx", "bpsOfBestPathTx"],
-                }
-            }
+                },
+            },
         }
 
         try:

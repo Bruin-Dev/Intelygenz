@@ -67,7 +67,8 @@ MONITOR_CONFIG = {
         AffectingTroubles.JITTER: int(os.environ["MONITORING__JITTER_MONITORING_LOOKUP_INTERVAL"]) // 60,
         AffectingTroubles.BANDWIDTH_OVER_UTILIZATION: int(
             os.environ["MONITORING__BANDWIDTH_OVER_UTILIZATION_MONITORING_LOOKUP_INTERVAL"]
-        ) // 60,
+        )
+        // 60,
         AffectingTroubles.BOUNCING: int(os.environ["MONITORING__CIRCUIT_INSTABILITY_MONITORING_LOOKUP_INTERVAL"]) // 60,
     },
     "blacklisted_link_labels_for_asr_forwards": json.loads(os.environ["LINK_LABELS_BLACKLISTED_FROM_ASR_FORWARDS"]),

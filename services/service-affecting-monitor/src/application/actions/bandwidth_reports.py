@@ -1,27 +1,27 @@
 import asyncio
-from datetime import datetime, timedelta
 import logging
-
+from datetime import datetime, timedelta
 
 from application import AffectingTroubles
 from apscheduler.triggers.cron import CronTrigger
 from pytz import timezone, utc
+
 logger = logging.getLogger(__name__)
 
 
 class BandwidthReports:
     def __init__(
-            self,
-            scheduler,
-            config,
-            velocloud_repository,
-            bruin_repository,
-            trouble_repository,
-            customer_cache_repository,
-            email_repository,
-            utils_repository,
-            template_repository,
-            metrics_repository
+        self,
+        scheduler,
+        config,
+        velocloud_repository,
+        bruin_repository,
+        trouble_repository,
+        customer_cache_repository,
+        email_repository,
+        utils_repository,
+        template_repository,
+        metrics_repository,
     ):
         self._scheduler = scheduler
         self._config = config
@@ -40,8 +40,9 @@ class BandwidthReports:
         if exec_on_start:
             await self._bandwidth_reports_job()
 
-        cron = CronTrigger.from_crontab(self._config.BANDWIDTH_REPORT_CONFIG["crontab"],
-                                        timezone=timezone(self._config.TIMEZONE))
+        cron = CronTrigger.from_crontab(
+            self._config.BANDWIDTH_REPORT_CONFIG["crontab"], timezone=timezone(self._config.TIMEZONE)
+        )
         self._scheduler.add_job(self._bandwidth_reports_job, cron, id="_bandwidth_reports", replace_existing=True)
 
     async def _bandwidth_reports_job(self):
@@ -59,7 +60,8 @@ class BandwidthReports:
             return
 
         enterprise_id_edge_id_relation = self.get_enterprise_id_and_edge_id_relation_from_customer_cache_response(
-            customer_cache_body, clients, velocloud_host)
+            customer_cache_body, clients, velocloud_host
+        )
 
         now = datetime.now(utc)
         interval_for_metrics = {
@@ -68,8 +70,8 @@ class BandwidthReports:
         }
 
         edge_links_metrics_response = await self._velocloud_repository.get_edge_link_series_for_bandwidth_reports(
-            interval_for_metrics,
-            enterprise_id_edge_id_relation)
+            interval_for_metrics, enterprise_id_edge_id_relation
+        )
         edge_links_metrics_response_body = edge_links_metrics_response["body"]
 
         if edge_links_metrics_response["status"] not in range(200, 300):
@@ -97,29 +99,29 @@ class BandwidthReports:
             f"Took {round((end - start).total_seconds() / 60, 2)} minutes."
         )
 
-    def get_enterprise_id_and_edge_id_relation_from_customer_cache_response(self,
-                                                                            customer_cache_response_body,
-                                                                            clients_id,
-                                                                            velocloud_host):
+    def get_enterprise_id_and_edge_id_relation_from_customer_cache_response(
+        self, customer_cache_response_body, clients_id, velocloud_host
+    ):
         enterprise_id_edge_id_relation = []
         for edge_info in customer_cache_response_body:
 
-            if edge_info['edge']['host'] == velocloud_host and \
-                    edge_info['bruin_client_info']['client_id'] in clients_id:
+            if (
+                edge_info["edge"]["host"] == velocloud_host
+                and edge_info["bruin_client_info"]["client_id"] in clients_id
+            ):
                 enterprise_id_edge_id_relation.append(
-                    {'enterprise_id': edge_info['edge']['enterprise_id'],
-                     'host': edge_info['edge']['host'],
-                     'edge_id': edge_info['edge']['edge_id'],
-                     'serial_number': edge_info['serial_number'],
-                     'edge_name': edge_info['edge_name']
-                     }
+                    {
+                        "enterprise_id": edge_info["edge"]["enterprise_id"],
+                        "host": edge_info["edge"]["host"],
+                        "edge_id": edge_info["edge"]["edge_id"],
+                        "serial_number": edge_info["serial_number"],
+                        "edge_name": edge_info["edge_name"],
+                    }
                 )
 
         return enterprise_id_edge_id_relation
 
-    async def _generate_bandwidth_report_for_client(
-            self, client_id, client_name, serial_numbers, links_metrics
-    ):
+    async def _generate_bandwidth_report_for_client(self, client_id, client_name, serial_numbers, links_metrics):
         start_date = self._get_start_date()
         end_date = self._get_end_date()
 
@@ -172,9 +174,9 @@ class BandwidthReports:
     def _add_bandwidth_to_links_metrics(self, links_metrics):
         reported_metrics = []
         for link_metric in links_metrics:
-            down_bytes_metrics = self.find_metric_by_field_value('bytesRx', link_metric['series'])
-            up_bytes_metrics = self.find_metric_by_field_value('bytesTx', link_metric['series'])
-            down_bytes_total = down_bytes_metrics['total']
+            down_bytes_metrics = self.find_metric_by_field_value("bytesRx", link_metric["series"])
+            up_bytes_metrics = self.find_metric_by_field_value("bytesTx", link_metric["series"])
+            down_bytes_total = down_bytes_metrics["total"]
             up_bytes_total = up_bytes_metrics["total"]
 
             peak_bytes_down = down_bytes_metrics["max"]
@@ -184,8 +186,8 @@ class BandwidthReports:
             timezone_config = timezone(self._config.TIMEZONE)
 
             start_time = timezone_default.localize(
-                datetime.utcfromtimestamp(down_bytes_metrics["startTime"] / 1e3)).astimezone(
-                timezone_config)
+                datetime.utcfromtimestamp(down_bytes_metrics["startTime"] / 1e3)
+            ).astimezone(timezone_config)
             bandwidth_down_data_list = down_bytes_metrics["data"]
             bandwidth_up_data_list = up_bytes_metrics["data"]
 
@@ -210,11 +212,11 @@ class BandwidthReports:
                     "peak_bytes_up": self._utils_repository.humanize_bps_for_bandwidth_report(peak_bytes_up),
                     "peak_percent_down": peak_percent_down,
                     "peak_percent_up": peak_percent_up,
-                    "peak_time_down": peak_time_down.strftime('%I:%M %p EST'),
-                    "peak_time_up": peak_time_up.strftime('%I:%M %p EST'),
-                    "serial_number": link_metric['serial_number'],
-                    "edge_name": link_metric['edge_name'],
-                    "interface": link_metric['link']['interface']
+                    "peak_time_down": peak_time_down.strftime("%I:%M %p EST"),
+                    "peak_time_up": peak_time_up.strftime("%I:%M %p EST"),
+                    "serial_number": link_metric["serial_number"],
+                    "edge_name": link_metric["edge_name"],
+                    "interface": link_metric["link"]["interface"],
                 }
             )
 

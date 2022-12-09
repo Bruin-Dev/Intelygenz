@@ -1,4 +1,5 @@
 import asyncio
+import itertools
 import json
 import logging
 import os
@@ -13,7 +14,7 @@ from dateutil.parser import parse
 from pytz import timezone
 from shortuuid import uuid
 from tenacity import retry, stop_after_attempt, wait_fixed
-import itertools
+
 INTERFACE_NOTE_REGEX = re.compile(r"Interface: (?P<interface_name>[a-zA-Z0-9]+)")
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,7 @@ class BruinRepository:
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_REPORT_CONFIG["semaphore"])
 
     async def get_tickets(
-            self, client_id: int, ticket_topic: str, ticket_statuses: list, *, service_number: str = None
+        self, client_id: int, ticket_topic: str, ticket_statuses: list, *, service_number: str = None
     ):
         err_msg = None
 
@@ -314,7 +315,7 @@ class BruinRepository:
         return response
 
     async def change_detail_work_queue(
-            self, ticket_id: int, task_result: str, *, service_number: str = None, detail_id: int = None
+        self, ticket_id: int, task_result: str, *, service_number: str = None, detail_id: int = None
     ):
         err_msg = None
 
@@ -558,7 +559,7 @@ class BruinRepository:
             return None
 
     async def get_all_affecting_tickets(
-            self, client_id=None, serial=None, start_date=None, end_date=None, ticket_statuses=None
+        self, client_id=None, serial=None, start_date=None, end_date=None, ticket_statuses=None
     ):
         @retry(
             wait=wait_fixed(self._config.MONITOR_REPORT_CONFIG["wait_fixed"]),
@@ -756,14 +757,14 @@ class BruinRepository:
                 interface=interface,
                 ticket_details_up=grouped_ticket_details[serial_number][interface]["bandwidth_up_exceeded"],
                 ticket_details_down=grouped_ticket_details[serial_number][interface]["bandwidth_down_exceeded"],
-                down_bytes_total=link_metrics['down_bytes_total'],
-                up_bytes_total=link_metrics['up_bytes_total'],
-                peak_bytes_down=link_metrics['peak_bytes_down'],
-                peak_bytes_up=link_metrics['peak_bytes_up'],
-                peak_percent_down=link_metrics['peak_percent_down'],
-                peak_percent_up=link_metrics['peak_percent_up'],
-                peak_time_down=link_metrics['peak_time_down'],
-                peak_time_up=link_metrics['peak_time_up']
+                down_bytes_total=link_metrics["down_bytes_total"],
+                up_bytes_total=link_metrics["up_bytes_total"],
+                peak_bytes_down=link_metrics["peak_bytes_down"],
+                peak_bytes_up=link_metrics["peak_bytes_up"],
+                peak_percent_down=link_metrics["peak_percent_down"],
+                peak_percent_up=link_metrics["peak_percent_up"],
+                peak_time_down=link_metrics["peak_time_down"],
+                peak_time_up=link_metrics["peak_time_up"],
             )
             report_items.append(report_item)
 
@@ -771,19 +772,19 @@ class BruinRepository:
 
     @staticmethod
     def build_bandwidth_report_item(
-            serial_number,
-            edge_name,
-            interface,
-            ticket_details_up,
-            ticket_details_down,
-            down_bytes_total,
-            up_bytes_total,
-            peak_bytes_down,
-            peak_bytes_up,
-            peak_percent_down,
-            peak_percent_up,
-            peak_time_down,
-            peak_time_up
+        serial_number,
+        edge_name,
+        interface,
+        ticket_details_up,
+        ticket_details_down,
+        down_bytes_total,
+        up_bytes_total,
+        peak_bytes_down,
+        peak_bytes_up,
+        peak_percent_down,
+        peak_percent_up,
+        peak_time_down,
+        peak_time_up,
     ):
         return {
             "serial_number": serial_number,
@@ -820,8 +821,10 @@ class BruinRepository:
                     ticket_note
                     for ticket_note in detail_object["ticket_notes"]
                     if ticket_note["noteValue"]
-                    if ("#*Automation Engine*#" in ticket_note["noteValue"] or "#*MetTel's IPA*#" in ticket_note[
-                        "noteValue"])
+                    if (
+                        "#*Automation Engine*#" in ticket_note["noteValue"]
+                        or "#*MetTel's IPA*#" in ticket_note["noteValue"]
+                    )
                     if f"Trouble: {trouble}" in ticket_note["noteValue"]
                 ]
 

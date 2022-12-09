@@ -16,17 +16,17 @@ datetime_mock.utcnow = Mock(return_value=frozen_datetime)
 
 class TestBandwidthReports:
     def instance_test(
-            self,
-            bandwidth_reports,
-            scheduler,
-            velocloud_repository,
-            bruin_repository,
-            trouble_repository,
-            customer_cache_repository,
-            email_repository,
-            utils_repository,
-            template_repository,
-            metrics_repository
+        self,
+        bandwidth_reports,
+        scheduler,
+        velocloud_repository,
+        bruin_repository,
+        trouble_repository,
+        customer_cache_repository,
+        email_repository,
+        utils_repository,
+        template_repository,
+        metrics_repository,
     ):
         assert bandwidth_reports._scheduler is scheduler
         assert bandwidth_reports._config is testconfig
@@ -55,18 +55,18 @@ class TestBandwidthReports:
 
     @pytest.mark.asyncio
     async def bandwidth_reports_job_test(
-            self,
-            bandwidth_reports,
-            make_bruin_client_info,
-            make_cached_edge,
-            make_customer_cache,
-            make_metrics_for_link,
-            make_rpc_response,
+        self,
+        bandwidth_reports,
+        make_bruin_client_info,
+        make_cached_edge,
+        make_customer_cache,
+        make_metrics_for_link,
+        make_rpc_response,
     ):
         client_id = 9994
         client_name = "MetTel"
         serial_number = "VC1234567"
-        edge = {'host': 'test', 'edge_id': 1, 'enterprise_id': 2}
+        edge = {"host": "test", "edge_id": 1, "enterprise_id": 2}
 
         bruin_client_info = make_bruin_client_info(client_id=client_id, client_name=client_name)
         cached_edge = make_cached_edge(full_id=edge, serial_number=serial_number, bruin_client_info=bruin_client_info)
@@ -91,20 +91,20 @@ class TestBandwidthReports:
 
     @pytest.mark.asyncio
     async def generate_bandwidth_report_for_client_test(
-            self,
-            bandwidth_reports,
-            make_edge_full_id,
-            make_bruin_client_info,
-            make_cached_edge,
-            make_customer_cache,
-            make_link,
-            make_edge,
-            make_link_with_edge_info,
-            make_metrics_for_link,
-            make_ticket,
-            make_detail_item,
-            make_ticket_note,
-            make_ticket_details,
+        self,
+        bandwidth_reports,
+        make_edge_full_id,
+        make_bruin_client_info,
+        make_cached_edge,
+        make_customer_cache,
+        make_link,
+        make_edge,
+        make_link_with_edge_info,
+        make_metrics_for_link,
+        make_ticket,
+        make_detail_item,
+        make_ticket_note,
+        make_ticket_details,
     ):
         host = "mettel.velocloud.net"
         enterprise_id = 1
@@ -137,46 +137,38 @@ class TestBandwidthReports:
                         "metric": "bytesRx",
                         "startTime": 1659636000000,
                         "tickInterval": 300000,
-                        "data": [
-                            0.0
-                        ],
+                        "data": [0.0],
                         "total": 0.0,
                         "min": 0.0,
-                        "max": 0.0
+                        "max": 0.0,
                     },
                     {
                         "metric": "bytesTx",
                         "startTime": 1659636000000,
                         "tickInterval": 300000,
-                        "data": [
-                            0.0
-                        ],
+                        "data": [0.0],
                         "total": 0.0,
                         "min": 0.0,
-                        "max": 0.0
+                        "max": 0.0,
                     },
                     {
                         "metric": "bpsOfBestPathRx",
                         "startTime": 1659636000000,
                         "tickInterval": 300000,
-                        "data": [
-                            0.0
-                        ],
+                        "data": [0.0],
                         "total": 0.0,
                         "min": 0.0,
-                        "max": 0.0
+                        "max": 0.0,
                     },
                     {
                         "metric": "bpsOfBestPathTx",
                         "startTime": 1659636000000,
                         "tickInterval": 300000,
-                        "data": [
-                            0.0
-                        ],
+                        "data": [0.0],
                         "total": 0.0,
                         "min": 0.0,
-                        "max": 0.0
-                    }
+                        "max": 0.0,
+                    },
                 ],
                 "linkId": 9388,
                 "edgeId": 2800,
@@ -212,8 +204,8 @@ class TestBandwidthReports:
                     "alertsEnabled": 1,
                     "operatorAlertsEnabled": 1,
                     "serviceState": "IN_SERVICE",
-                    "modified": "2022-08-30T12:04:42.000Z"
-                }
+                    "modified": "2022-08-30T12:04:42.000Z",
+                },
             }
         ]
 
@@ -221,7 +213,7 @@ class TestBandwidthReports:
         detail_item = make_detail_item(value=serial_number)
         note = make_ticket_note(
             text="#*MetTel's IPA*#\nTrouble: Bandwidth Over Utilization\nInterface: GE1\n "
-                 "Throughput (Receive): 3.022 Mbps",
+            "Throughput (Receive): 3.022 Mbps",
             service_numbers=[serial_number],
         )
         ticket_details = make_ticket_details(detail_items=[detail_item], notes=[note])
@@ -250,8 +242,8 @@ class TestBandwidthReports:
                 "peak_bytes_up": "0.000 Mbps",
                 "peak_percent_down": 0.0,
                 "peak_percent_up": 0.0,
-                'peak_time_down': '02:00 PM EST',
-                'peak_time_up': '02:00 PM EST',
+                "peak_time_down": "02:00 PM EST",
+                "peak_time_up": "02:00 PM EST",
                 "threshold_exceeded_up": 0,
                 "threshold_exceeded_down": 1,
                 "ticket_ids_up": set(),
@@ -275,46 +267,38 @@ class TestBandwidthReports:
                         "metric": "bytesRx",
                         "startTime": 1659636000000,
                         "tickInterval": 300000,
-                        "data": [
-                            0.0
-                        ],
+                        "data": [0.0],
                         "total": 0.0,
                         "min": 0.0,
-                        "max": 0.0
+                        "max": 0.0,
                     },
                     {
                         "metric": "bytesTx",
                         "startTime": 1659636000000,
                         "tickInterval": 300000,
-                        "data": [
-                            0.0
-                        ],
+                        "data": [0.0],
                         "total": 0.0,
                         "min": 0.0,
-                        "max": 0.0
+                        "max": 0.0,
                     },
                     {
                         "metric": "bpsOfBestPathRx",
                         "startTime": 1659636000000,
                         "tickInterval": 300000,
-                        "data": [
-                            0.0
-                        ],
+                        "data": [0.0],
                         "total": 0.0,
                         "min": 0.0,
-                        "max": 0.0
+                        "max": 0.0,
                     },
                     {
                         "metric": "bpsOfBestPathTx",
                         "startTime": 1659636000000,
                         "tickInterval": 300000,
-                        "data": [
-                            0.0
-                        ],
+                        "data": [0.0],
                         "total": 0.0,
                         "min": 0.0,
-                        "max": 0.0
-                    }
+                        "max": 0.0,
+                    },
                 ],
                 "linkId": 9388,
                 "edgeId": 2800,
@@ -350,8 +334,8 @@ class TestBandwidthReports:
                     "alertsEnabled": 1,
                     "operatorAlertsEnabled": 1,
                     "serviceState": "IN_SERVICE",
-                    "modified": "2022-08-30T12:04:42.000Z"
-                }
+                    "modified": "2022-08-30T12:04:42.000Z",
+                },
             }
         ]
 
@@ -363,8 +347,8 @@ class TestBandwidthReports:
                 "peak_bytes_up": "0.000 Mbps",
                 "peak_percent_down": 0.0,
                 "peak_percent_up": 0.0,
-                'peak_time_down': '02:00 PM EST',
-                'peak_time_up': '02:00 PM EST',
+                "peak_time_down": "02:00 PM EST",
+                "peak_time_up": "02:00 PM EST",
                 "serial_number": serial_number,
                 "edge_name": edge_name,
                 "interface": interface,
@@ -395,46 +379,38 @@ class TestBandwidthReports:
                         "metric": "bytesRx",
                         "startTime": 1659636000000,
                         "tickInterval": 300000,
-                        "data": [
-                            0.0
-                        ],
+                        "data": [0.0],
                         "total": 0.0,
                         "min": 0.0,
-                        "max": 0.0
+                        "max": 0.0,
                     },
                     {
                         "metric": "bytesTx",
                         "startTime": 1659636000000,
                         "tickInterval": 300000,
-                        "data": [
-                            0.0
-                        ],
+                        "data": [0.0],
                         "total": 0.0,
                         "min": 0.0,
-                        "max": 0.0
+                        "max": 0.0,
                     },
                     {
                         "metric": "bpsOfBestPathRx",
                         "startTime": 1659636000000,
                         "tickInterval": 300000,
-                        "data": [
-                            0.0
-                        ],
+                        "data": [0.0],
                         "total": 0.0,
                         "min": 0.0,
-                        "max": 0.0
+                        "max": 0.0,
                     },
                     {
                         "metric": "bpsOfBestPathTx",
                         "startTime": 1659636000000,
                         "tickInterval": 300000,
-                        "data": [
-                            0.0
-                        ],
+                        "data": [0.0],
                         "total": 0.0,
                         "min": 0.0,
-                        "max": 0.0
-                    }
+                        "max": 0.0,
+                    },
                 ],
                 "linkId": 9388,
                 "edgeId": 2800,
@@ -470,13 +446,12 @@ class TestBandwidthReports:
                     "alertsEnabled": 1,
                     "operatorAlertsEnabled": 1,
                     "serviceState": "IN_SERVICE",
-                    "modified": "2022-08-30T12:04:42.000Z"
-                }
+                    "modified": "2022-08-30T12:04:42.000Z",
+                },
             }
         ]
         bandwidth_reports._utils_repository.humanize_bps.side_effect = lambda bps: bps
-        result = bandwidth_reports._add_bandwidth_to_links_metrics(
-            link_series)
+        result = bandwidth_reports._add_bandwidth_to_links_metrics(link_series)
         assert result is not None
 
     def add_bandwidth_to_links_metrics_is_dict_test(self, bandwidth_reports, make_metrics):
@@ -490,46 +465,38 @@ class TestBandwidthReports:
                         "metric": "bytesRx",
                         "startTime": 1659636000000,
                         "tickInterval": 300000,
-                        "data": [
-                            0.0
-                        ],
+                        "data": [0.0],
                         "total": 0.0,
                         "min": 0.0,
-                        "max": 0.0
+                        "max": 0.0,
                     },
                     {
                         "metric": "bytesTx",
                         "startTime": 1659636000000,
                         "tickInterval": 300000,
-                        "data": [
-                            0.0
-                        ],
+                        "data": [0.0],
                         "total": 0.0,
                         "min": 0.0,
-                        "max": 0.0
+                        "max": 0.0,
                     },
                     {
                         "metric": "bpsOfBestPathRx",
                         "startTime": 1659636000000,
                         "tickInterval": 300000,
-                        "data": [
-                            0.0
-                        ],
+                        "data": [0.0],
                         "total": 0.0,
                         "min": 0.0,
-                        "max": 0.0
+                        "max": 0.0,
                     },
                     {
                         "metric": "bpsOfBestPathTx",
                         "startTime": 1659636000000,
                         "tickInterval": 300000,
-                        "data": [
-                            0.0
-                        ],
+                        "data": [0.0],
                         "total": 0.0,
                         "min": 0.0,
-                        "max": 0.0
-                    }
+                        "max": 0.0,
+                    },
                 ],
                 "linkId": 9388,
                 "edgeId": 2800,
@@ -565,11 +532,10 @@ class TestBandwidthReports:
                     "alertsEnabled": 1,
                     "operatorAlertsEnabled": 1,
                     "serviceState": "IN_SERVICE",
-                    "modified": "2022-08-30T12:04:42.000Z"
-                }
+                    "modified": "2022-08-30T12:04:42.000Z",
+                },
             }
         ]
         bandwidth_reports._utils_repository.humanize_bps.side_effect = lambda bps: bps
-        result = bandwidth_reports._add_bandwidth_to_links_metrics(
-            link_series)
+        result = bandwidth_reports._add_bandwidth_to_links_metrics(link_series)
         assert isinstance(result, list)
