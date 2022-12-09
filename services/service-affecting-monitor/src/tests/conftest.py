@@ -1301,7 +1301,7 @@ def customer_cache():
             "bruin_client_info": {"client_id": 9994, "client_name": "Benchmark Senior Living - Network"},
         },
         {
-            "edge": {"host": "mettel.velocloud.net", "enterprise_id": 100, "edge_id": 1561},
+            "edge": {"host": "test-host", "enterprise_id": 100, "edge_id": 1561},
             "last_contact": "2020-10-15T21:06:31.000Z",
             "logical_ids": [
                 {"interface_name": "GE1", "logical_id": "6a:ee:96:dc:43:10:0000"},
