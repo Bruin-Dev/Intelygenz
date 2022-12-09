@@ -50,7 +50,11 @@ class ServiceAffectingMonitorReports:
             logger.error("[service-affecting-monitor-reports] Got an empty customer cache. Process cannot keep going.")
             return
 
-        clients_id = set(edge["bruin_client_info"]["client_id"] for edge in customer_cache if edge['edge']['host'] == self._config.VELOCLOUD_HOST)
+        clients_id = set(
+            edge["bruin_client_info"]["client_id"]
+            for edge in customer_cache
+            if edge["edge"]["host"] == self._config.VELOCLOUD_HOST
+        )
         cached_names_by_serial = self.get_serial_and_name_for_cached_edges_with_client_id(customer_cache, clients_id)
 
         monitor_report_init_time = datetime.utcnow()
