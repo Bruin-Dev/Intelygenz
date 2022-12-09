@@ -73,7 +73,7 @@
         </bpmn:endEvent>
         <bpmn:sequenceFlow id="Flow_14ros16" sourceRef="Activity_1co3pqc" targetRef="Event_1ahg2xf" />
       </bpmn:subProcess>
-      <bpmn:sequenceFlow id="Flow_0aerxsm" sourceRef="Gateway_131f7m4" targetRef="Activity_1rlm55p" />
+      <bpmn:sequenceFlow id="Flow_0aerxsm" name="Format of the e-mail body is correct" sourceRef="Gateway_131f7m4" targetRef="Activity_1rlm55p" />
       <bpmn:sequenceFlow id="Flow_18a9bye" name="E-mail body is malformed" sourceRef="Gateway_131f7m4" targetRef="Event_1idj5pt" />
       <bpmn:exclusiveGateway id="Gateway_0wvco0u">
         <bpmn:incoming>Flow_0g244ok</bpmn:incoming>
@@ -86,7 +86,7 @@
         <bpmn:incoming>Flow_1ep74vt</bpmn:incoming>
         <bpmn:outgoing>Flow_0t65d77</bpmn:outgoing>
       </bpmn:task>
-      <bpmn:sequenceFlow id="Flow_1ep74vt" name="E-mail was processed" sourceRef="Gateway_0wvco0u" targetRef="Activity_1icx74h" />
+      <bpmn:sequenceFlow id="Flow_1ep74vt" name="E-mail could be processed normally" sourceRef="Gateway_0wvco0u" targetRef="Activity_1icx74h" />
       <bpmn:endEvent id="Event_1mpwwkr">
         <bpmn:incoming>Flow_0t65d77</bpmn:incoming>
       </bpmn:endEvent>
@@ -307,7 +307,7 @@ If the ticket task is currently in progress, then there's an ongoing documentati
         <di:waypoint x="1225" y="510" />
         <di:waypoint x="1470" y="510" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1321" y="476" width="54" height="27" />
+          <dc:Bounds x="1310" y="466" width="76" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0aqfhpf_di" bpmnElement="Flow_0aqfhpf">
@@ -331,6 +331,9 @@ If the ticket task is currently in progress, then there's an ongoing documentati
       <bpmndi:BPMNEdge id="Flow_0aerxsm_di" bpmnElement="Flow_0aerxsm">
         <di:waypoint x="905" y="230" />
         <di:waypoint x="1040" y="230" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="933" y="180" width="79" height="40" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1ufupqz_di" bpmnElement="Flow_1ufupqz">
         <di:waypoint x="695" y="230" />
