@@ -86,7 +86,7 @@
         <bpmn:incoming>Flow_1ep74vt</bpmn:incoming>
         <bpmn:outgoing>Flow_0t65d77</bpmn:outgoing>
       </bpmn:task>
-      <bpmn:sequenceFlow id="Flow_1ep74vt" sourceRef="Gateway_0wvco0u" targetRef="Activity_1icx74h" />
+      <bpmn:sequenceFlow id="Flow_1ep74vt" name="E-mail was processed" sourceRef="Gateway_0wvco0u" targetRef="Activity_1icx74h" />
       <bpmn:endEvent id="Event_1mpwwkr">
         <bpmn:incoming>Flow_0t65d77</bpmn:incoming>
       </bpmn:endEvent>
@@ -299,9 +299,45 @@ If the ticket task is currently in progress, then there's an ongoing documentati
         <dc:Bounds x="510" y="85" width="1400" height="545" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_0d741zm_di" bpmnElement="Flow_0d741zm">
-        <di:waypoint x="586" y="230" />
-        <di:waypoint x="645" y="230" />
+      <bpmndi:BPMNEdge id="Flow_0t65d77_di" bpmnElement="Flow_0t65d77">
+        <di:waypoint x="1570" y="510" />
+        <di:waypoint x="1824" y="510" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ep74vt_di" bpmnElement="Flow_1ep74vt">
+        <di:waypoint x="1225" y="510" />
+        <di:waypoint x="1470" y="510" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1321" y="476" width="54" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0aqfhpf_di" bpmnElement="Flow_0aqfhpf">
+        <di:waypoint x="1175" y="510" />
+        <di:waypoint x="898" y="510" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1001" y="476" width="72" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0g244ok_di" bpmnElement="Flow_0g244ok">
+        <di:waypoint x="1200" y="400" />
+        <di:waypoint x="1200" y="485" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_18a9bye_di" bpmnElement="Flow_18a9bye">
+        <di:waypoint x="880" y="255" />
+        <di:waypoint x="880" y="492" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="885" y="319" width="70" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0aerxsm_di" bpmnElement="Flow_0aerxsm">
+        <di:waypoint x="905" y="230" />
+        <di:waypoint x="1040" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ufupqz_di" bpmnElement="Flow_1ufupqz">
+        <di:waypoint x="695" y="230" />
+        <di:waypoint x="855" y="230" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="733" y="140" width="85" height="80" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1awsz5e_di" bpmnElement="Flow_1awsz5e">
         <di:waypoint x="670" y="255" />
@@ -311,42 +347,9 @@ If the ticket task is currently in progress, then there's an ongoing documentati
           <dc:Bounds x="685" y="300" width="89" height="80" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1ufupqz_di" bpmnElement="Flow_1ufupqz">
-        <di:waypoint x="695" y="230" />
-        <di:waypoint x="855" y="230" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="733" y="140" width="85" height="80" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0aerxsm_di" bpmnElement="Flow_0aerxsm">
-        <di:waypoint x="905" y="230" />
-        <di:waypoint x="1040" y="230" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_18a9bye_di" bpmnElement="Flow_18a9bye">
-        <di:waypoint x="880" y="255" />
-        <di:waypoint x="880" y="492" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="885" y="319" width="70" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0g244ok_di" bpmnElement="Flow_0g244ok">
-        <di:waypoint x="1200" y="400" />
-        <di:waypoint x="1200" y="485" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0aqfhpf_di" bpmnElement="Flow_0aqfhpf">
-        <di:waypoint x="1175" y="510" />
-        <di:waypoint x="898" y="510" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1001" y="476" width="72" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1ep74vt_di" bpmnElement="Flow_1ep74vt">
-        <di:waypoint x="1225" y="510" />
-        <di:waypoint x="1470" y="510" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0t65d77_di" bpmnElement="Flow_0t65d77">
-        <di:waypoint x="1570" y="510" />
-        <di:waypoint x="1824" y="510" />
+      <bpmndi:BPMNEdge id="Flow_0d741zm_di" bpmnElement="Flow_0d741zm">
+        <di:waypoint x="586" y="230" />
+        <di:waypoint x="645" y="230" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Event_0g0c9fm_di" bpmnElement="Event_0g0c9fm">
         <dc:Bounds x="550" y="212" width="36" height="36" />
@@ -363,34 +366,25 @@ If the ticket task is currently in progress, then there's an ongoing documentati
           <dc:Bounds x="841" y="535" width="78" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_0wvco0u_di" bpmnElement="Gateway_0wvco0u" isMarkerVisible="true">
-        <dc:Bounds x="1175" y="485" width="50" height="50" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1mpwwkr_di" bpmnElement="Event_1mpwwkr">
-        <dc:Bounds x="1824" y="492" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1icx74h_di" bpmnElement="Activity_1icx74h">
-        <dc:Bounds x="1470" y="470" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1rlm55p_di" bpmnElement="Activity_1rlm55p" isExpanded="true">
         <dc:Bounds x="1040" y="130" width="850" height="270" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_09xsqc3_di" bpmnElement="Flow_09xsqc3">
-        <di:waypoint x="1116" y="230" />
-        <di:waypoint x="1170" y="230" />
+      <bpmndi:BPMNEdge id="Flow_14ros16_di" bpmnElement="Flow_14ros16">
+        <di:waypoint x="1750" y="280" />
+        <di:waypoint x="1822" y="280" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_000aq9j_di" bpmnElement="Flow_000aq9j">
-        <di:waypoint x="1270" y="230" />
-        <di:waypoint x="1325" y="230" />
+      <bpmndi:BPMNEdge id="Flow_016nzka_di" bpmnElement="Flow_016nzka">
+        <di:waypoint x="1570" y="340" />
+        <di:waypoint x="1605" y="340" />
+        <di:waypoint x="1605" y="280" />
+        <di:waypoint x="1650" y="280" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0m9banm_di" bpmnElement="Flow_0m9banm">
-        <di:waypoint x="1375" y="230" />
-        <di:waypoint x="1470" y="230" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1391" y="196" width="64" height="27" />
-        </bpmndi:BPMNLabel>
+      <bpmndi:BPMNEdge id="Flow_11ql236_di" bpmnElement="Flow_11ql236">
+        <di:waypoint x="1570" y="230" />
+        <di:waypoint x="1605" y="230" />
+        <di:waypoint x="1605" y="280" />
+        <di:waypoint x="1650" y="280" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0geskqm_di" bpmnElement="Flow_0geskqm">
         <di:waypoint x="1350" y="255" />
@@ -400,21 +394,20 @@ If the ticket task is currently in progress, then there's an ongoing documentati
           <dc:Bounds x="1395" y="306" width="51" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_11ql236_di" bpmnElement="Flow_11ql236">
-        <di:waypoint x="1570" y="230" />
-        <di:waypoint x="1605" y="230" />
-        <di:waypoint x="1605" y="280" />
-        <di:waypoint x="1650" y="280" />
+      <bpmndi:BPMNEdge id="Flow_0m9banm_di" bpmnElement="Flow_0m9banm">
+        <di:waypoint x="1375" y="230" />
+        <di:waypoint x="1470" y="230" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1391" y="196" width="64" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_016nzka_di" bpmnElement="Flow_016nzka">
-        <di:waypoint x="1570" y="340" />
-        <di:waypoint x="1605" y="340" />
-        <di:waypoint x="1605" y="280" />
-        <di:waypoint x="1650" y="280" />
+      <bpmndi:BPMNEdge id="Flow_000aq9j_di" bpmnElement="Flow_000aq9j">
+        <di:waypoint x="1270" y="230" />
+        <di:waypoint x="1325" y="230" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_14ros16_di" bpmnElement="Flow_14ros16">
-        <di:waypoint x="1750" y="280" />
-        <di:waypoint x="1822" y="280" />
+      <bpmndi:BPMNEdge id="Flow_09xsqc3_di" bpmnElement="Flow_09xsqc3">
+        <di:waypoint x="1116" y="230" />
+        <di:waypoint x="1170" y="230" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Event_1w186hs_di" bpmnElement="Event_1w186hs">
         <dc:Bounds x="1080" y="212" width="36" height="36" />
@@ -434,88 +427,49 @@ If the ticket task is currently in progress, then there's an ongoing documentati
         <dc:Bounds x="1470" y="300" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1ahg2xf_di" bpmnElement="Event_1ahg2xf">
-        <dc:Bounds x="1822" y="262" width="36" height="36" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1lwaqdv" bpmnElement="Activity_1co3pqc">
         <dc:Bounds x="1650" y="240" width="100" height="80" />
         <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1ahg2xf_di" bpmnElement="Event_1ahg2xf">
+        <dc:Bounds x="1822" y="262" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0wvco0u_di" bpmnElement="Gateway_0wvco0u" isMarkerVisible="true">
+        <dc:Bounds x="1175" y="485" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1icx74h_di" bpmnElement="Activity_1icx74h">
+        <dc:Bounds x="1470" y="470" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1mpwwkr_di" bpmnElement="Event_1mpwwkr">
+        <dc:Bounds x="1824" y="492" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_020u0tm" bpmnElement="Activity_0txtg1s" isExpanded="true">
         <dc:Bounds x="510" y="680" width="1400" height="710" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_0gbyrsc_di" bpmnElement="TextAnnotation_0gbyrsc">
-        <dc:Bounds x="582" y="780" width="219" height="40" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_1iupv4l_di" bpmnElement="TextAnnotation_1iupv4l">
-        <dc:Bounds x="892" y="772" width="260" height="55" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_1wvsh3l_di" bpmnElement="TextAnnotation_1wvsh3l">
-        <dc:Bounds x="1292" y="765" width="260" height="70" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_1f515ns" bpmnElement="TextAnnotation_0dmupg1">
-        <dc:Bounds x="1092" y="1050" width="260" height="70" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_1ikv9km_di" bpmnElement="Flow_1ikv9km">
-        <di:waypoint x="1602" y="930" />
-        <di:waypoint x="1850" y="930" />
-        <di:waypoint x="1850" y="1032" />
+      <bpmndi:BPMNEdge id="BPMNEdge_11hmk5z" bpmnElement="Flow_137p7og">
+        <di:waypoint x="581" y="930" />
+        <di:waypoint x="673" y="930" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0qstsec_di" bpmnElement="Flow_0qstsec">
-        <di:waypoint x="1552" y="1150" />
-        <di:waypoint x="1552" y="1090" />
+      <bpmndi:BPMNEdge id="Flow_1fgayco_di" bpmnElement="Flow_1fgayco">
+        <di:waypoint x="773" y="930" />
+        <di:waypoint x="837" y="930" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0ql7aus_di" bpmnElement="Flow_0ql7aus">
-        <di:waypoint x="1432" y="1190" />
-        <di:waypoint x="1502" y="1190" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_11wh05i_di" bpmnElement="Flow_11wh05i">
-        <di:waypoint x="1602" y="1300" />
-        <di:waypoint x="1850" y="1300" />
-        <di:waypoint x="1850" y="1068" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1vn0o27_di" bpmnElement="Flow_1vn0o27">
-        <di:waypoint x="1192" y="1215" />
-        <di:waypoint x="1192" y="1300" />
-        <di:waypoint x="1502" y="1300" />
+      <bpmndi:BPMNEdge id="Flow_14ogomd_di" bpmnElement="Flow_14ogomd">
+        <di:waypoint x="887" y="930" />
+        <di:waypoint x="992" y="930" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1227" y="1306" width="89" height="27" />
+          <dc:Bounds x="909" y="901" width="62" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_08s09i8_di" bpmnElement="Flow_08s09i8">
-        <di:waypoint x="1217" y="1190" />
-        <di:waypoint x="1332" y="1190" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1231" y="1156" width="81" height="27" />
-        </bpmndi:BPMNLabel>
+      <bpmndi:BPMNEdge id="Flow_1b9qrfi_di" bpmnElement="Flow_1b9qrfi">
+        <di:waypoint x="1092" y="930" />
+        <di:waypoint x="1172" y="930" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_030b6as_di" bpmnElement="Flow_030b6as">
-        <di:waypoint x="1602" y="1050" />
-        <di:waypoint x="1832" y="1050" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_144l0s0_di" bpmnElement="Flow_144l0s0">
-        <di:waypoint x="1092" y="1190" />
-        <di:waypoint x="1167" y="1190" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0o3lg1i_di" bpmnElement="Flow_0o3lg1i">
-        <di:waypoint x="862" y="955" />
-        <di:waypoint x="862" y="1190" />
-        <di:waypoint x="992" y="1190" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="868" y="1055" width="76" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_00lw8nd_di" bpmnElement="Flow_00lw8nd">
-        <di:waypoint x="1407" y="930" />
-        <di:waypoint x="1502" y="930" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1403" y="896" width="90" height="27" />
-        </bpmndi:BPMNLabel>
+      <bpmndi:BPMNEdge id="Flow_06llj6r_di" bpmnElement="Flow_06llj6r">
+        <di:waypoint x="1272" y="930" />
+        <di:waypoint x="1357" y="930" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1orl2z3_di" bpmnElement="Flow_1orl2z3">
         <di:waypoint x="1382" y="955" />
@@ -525,28 +479,61 @@ If the ticket task is currently in progress, then there's an ongoing documentati
           <dc:Bounds x="1398" y="1021" width="81" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_06llj6r_di" bpmnElement="Flow_06llj6r">
-        <di:waypoint x="1272" y="930" />
-        <di:waypoint x="1357" y="930" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1b9qrfi_di" bpmnElement="Flow_1b9qrfi">
-        <di:waypoint x="1092" y="930" />
-        <di:waypoint x="1172" y="930" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_14ogomd_di" bpmnElement="Flow_14ogomd">
-        <di:waypoint x="887" y="930" />
-        <di:waypoint x="992" y="930" />
+      <bpmndi:BPMNEdge id="Flow_00lw8nd_di" bpmnElement="Flow_00lw8nd">
+        <di:waypoint x="1407" y="930" />
+        <di:waypoint x="1502" y="930" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="909" y="901" width="62" height="27" />
+          <dc:Bounds x="1403" y="896" width="90" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1fgayco_di" bpmnElement="Flow_1fgayco">
-        <di:waypoint x="773" y="930" />
-        <di:waypoint x="837" y="930" />
+      <bpmndi:BPMNEdge id="Flow_0o3lg1i_di" bpmnElement="Flow_0o3lg1i">
+        <di:waypoint x="862" y="955" />
+        <di:waypoint x="862" y="1190" />
+        <di:waypoint x="992" y="1190" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="868" y="1055" width="76" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="BPMNEdge_11hmk5z" bpmnElement="Flow_137p7og">
-        <di:waypoint x="581" y="930" />
-        <di:waypoint x="673" y="930" />
+      <bpmndi:BPMNEdge id="Flow_144l0s0_di" bpmnElement="Flow_144l0s0">
+        <di:waypoint x="1092" y="1190" />
+        <di:waypoint x="1167" y="1190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_030b6as_di" bpmnElement="Flow_030b6as">
+        <di:waypoint x="1602" y="1050" />
+        <di:waypoint x="1832" y="1050" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_08s09i8_di" bpmnElement="Flow_08s09i8">
+        <di:waypoint x="1217" y="1190" />
+        <di:waypoint x="1332" y="1190" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1231" y="1156" width="81" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1vn0o27_di" bpmnElement="Flow_1vn0o27">
+        <di:waypoint x="1192" y="1215" />
+        <di:waypoint x="1192" y="1300" />
+        <di:waypoint x="1502" y="1300" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1227" y="1306" width="89" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11wh05i_di" bpmnElement="Flow_11wh05i">
+        <di:waypoint x="1602" y="1300" />
+        <di:waypoint x="1850" y="1300" />
+        <di:waypoint x="1850" y="1068" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ql7aus_di" bpmnElement="Flow_0ql7aus">
+        <di:waypoint x="1432" y="1190" />
+        <di:waypoint x="1502" y="1190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0qstsec_di" bpmnElement="Flow_0qstsec">
+        <di:waypoint x="1552" y="1150" />
+        <di:waypoint x="1552" y="1090" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ikv9km_di" bpmnElement="Flow_1ikv9km">
+        <di:waypoint x="1602" y="930" />
+        <di:waypoint x="1850" y="930" />
+        <di:waypoint x="1850" y="1032" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="BPMNShape_0zeqv0r" bpmnElement="Event_0fp2sca">
         <dc:Bounds x="545" y="912" width="36" height="36" />
@@ -569,24 +556,6 @@ If the ticket task is currently in progress, then there's an ongoing documentati
       <bpmndi:BPMNShape id="Gateway_1w2wd7o_di" bpmnElement="Gateway_1w2wd7o" isMarkerVisible="true">
         <dc:Bounds x="1357" y="905" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1yf8k8w_di" bpmnElement="Activity_1yf8k8w">
-        <dc:Bounds x="992" y="1150" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_078bnsw" bpmnElement="Gateway_1m6nv63" isMarkerVisible="true">
-        <dc:Bounds x="1167" y="1165" width="50" height="50" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_0h9u3hw" bpmnElement="Activity_0y8zzji">
-        <dc:Bounds x="1332" y="1150" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_0xzaf3n" bpmnElement="Activity_1mckq38">
-        <dc:Bounds x="1502" y="1150" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_13iakaf_di" bpmnElement="Event_13iakaf">
-        <dc:Bounds x="1832" y="1032" width="36" height="36" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1jaezyd_di" bpmnElement="Activity_02z2fj8">
         <dc:Bounds x="1502" y="1010" width="100" height="80" />
         <bpmndi:BPMNLabel />
@@ -595,8 +564,42 @@ If the ticket task is currently in progress, then there's an ongoing documentati
         <dc:Bounds x="1502" y="890" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1yf8k8w_di" bpmnElement="Activity_1yf8k8w">
+        <dc:Bounds x="992" y="1150" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_078bnsw" bpmnElement="Gateway_1m6nv63" isMarkerVisible="true">
+        <dc:Bounds x="1167" y="1165" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_13iakaf_di" bpmnElement="Event_13iakaf">
+        <dc:Bounds x="1832" y="1032" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0h9u3hw" bpmnElement="Activity_0y8zzji">
+        <dc:Bounds x="1332" y="1150" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0dvm2vo" bpmnElement="Activity_0cgt7fg">
         <dc:Bounds x="1502" y="1260" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0xzaf3n" bpmnElement="Activity_1mckq38">
+        <dc:Bounds x="1502" y="1150" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0gbyrsc_di" bpmnElement="TextAnnotation_0gbyrsc">
+        <dc:Bounds x="582" y="780" width="219" height="40" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_1iupv4l_di" bpmnElement="TextAnnotation_1iupv4l">
+        <dc:Bounds x="892" y="772" width="260" height="55" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_1wvsh3l_di" bpmnElement="TextAnnotation_1wvsh3l">
+        <dc:Bounds x="1292" y="765" width="260" height="70" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1f515ns" bpmnElement="TextAnnotation_0dmupg1">
+        <dc:Bounds x="1092" y="1050" width="260" height="70" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Association_0pjguca_di" bpmnElement="Association_0pjguca">
@@ -619,17 +622,17 @@ If the ticket task is currently in progress, then there's an ongoing documentati
         <dc:Bounds x="510" y="1430" width="1400" height="460" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_0nv5azr_di" bpmnElement="TextAnnotation_0nv5azr">
-        <dc:Bounds x="591" y="1490" width="302" height="113" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_0vlurnv_di" bpmnElement="Flow_0vlurnv">
-        <di:waypoint x="923" y="1705" />
-        <di:waypoint x="923" y="1800" />
-        <di:waypoint x="1832" y="1800" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1310" y="1812" width="80" height="66" />
-        </bpmndi:BPMNLabel>
+      <bpmndi:BPMNEdge id="Flow_0dn6mlc_di" bpmnElement="Flow_0dn6mlc">
+        <di:waypoint x="1390" y="1680" />
+        <di:waypoint x="1832" y="1680" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0q4jl4f_di" bpmnElement="Flow_0q4jl4f">
+        <di:waypoint x="586" y="1680" />
+        <di:waypoint x="673" y="1680" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1mpjodv_di" bpmnElement="Flow_1mpjodv">
+        <di:waypoint x="773" y="1680" />
+        <di:waypoint x="898" y="1680" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_00hk0b2_di" bpmnElement="Flow_00hk0b2">
         <di:waypoint x="948" y="1680" />
@@ -638,17 +641,13 @@ If the ticket task is currently in progress, then there's an ongoing documentati
           <dc:Bounds x="1077" y="1623" width="89" height="53" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1mpjodv_di" bpmnElement="Flow_1mpjodv">
-        <di:waypoint x="773" y="1680" />
-        <di:waypoint x="898" y="1680" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0q4jl4f_di" bpmnElement="Flow_0q4jl4f">
-        <di:waypoint x="586" y="1680" />
-        <di:waypoint x="673" y="1680" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0dn6mlc_di" bpmnElement="Flow_0dn6mlc">
-        <di:waypoint x="1390" y="1680" />
-        <di:waypoint x="1832" y="1680" />
+      <bpmndi:BPMNEdge id="Flow_0vlurnv_di" bpmnElement="Flow_0vlurnv">
+        <di:waypoint x="923" y="1705" />
+        <di:waypoint x="923" y="1800" />
+        <di:waypoint x="1832" y="1800" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1310" y="1812" width="80" height="66" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Event_0dkhn4p_di" bpmnElement="Event_0dkhn4p">
         <dc:Bounds x="550" y="1662" width="36" height="36" />
@@ -664,14 +663,18 @@ If the ticket task is currently in progress, then there's an ongoing documentati
         <dc:Bounds x="1290" y="1640" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0mw4510_di" bpmnElement="Event_0mw4510">
-        <dc:Bounds x="1832" y="1662" width="36" height="36" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0fy14ky_di" bpmnElement="Event_0g6js62">
         <dc:Bounds x="1832" y="1782" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="1814" y="1825" width="72" height="40" />
         </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0mw4510_di" bpmnElement="Event_0mw4510">
+        <dc:Bounds x="1832" y="1662" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0nv5azr_di" bpmnElement="TextAnnotation_0nv5azr">
+        <dc:Bounds x="591" y="1490" width="302" height="113" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Association_0jlth7a_di" bpmnElement="Association_0jlth7a">
         <di:waypoint x="704" y="1640" />
@@ -681,6 +684,10 @@ If the ticket task is currently in progress, then there's an ongoing documentati
         <dc:Bounds x="510" y="1940" width="1400" height="190" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_01rv8pu_di" bpmnElement="Flow_01rv8pu">
+        <di:waypoint x="1360" y="2050" />
+        <di:waypoint x="1459" y="2050" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_050q8ff_di" bpmnElement="Flow_050q8ff">
         <di:waypoint x="983" y="2050" />
         <di:waypoint x="1070" y="2050" />
@@ -688,10 +695,6 @@ If the ticket task is currently in progress, then there's an ongoing documentati
       <bpmndi:BPMNEdge id="Flow_1s8g2v6_di" bpmnElement="Flow_1s8g2v6">
         <di:waypoint x="1170" y="2050" />
         <di:waypoint x="1260" y="2050" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_01rv8pu_di" bpmnElement="Flow_01rv8pu">
-        <di:waypoint x="1360" y="2050" />
-        <di:waypoint x="1459" y="2050" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Event_0t0hddq_di" bpmnElement="Event_0t0hddq">
         <dc:Bounds x="947" y="2032" width="36" height="36" />
@@ -711,10 +714,6 @@ If the ticket task is currently in progress, then there's an ongoing documentati
         <dc:Bounds x="510" y="2180" width="1400" height="380" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_1eq8a8y_di" bpmnElement="Flow_1eq8a8y">
-        <di:waypoint x="743" y="2390" />
-        <di:waypoint x="802" y="2390" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1t2faf1_di" bpmnElement="Flow_1t2faf1">
         <di:waypoint x="827" y="2365" />
         <di:waypoint x="827" y="2320" />
@@ -723,18 +722,6 @@ If the ticket task is currently in progress, then there's an ongoing documentati
           <dc:Bounds x="922" y="2247" width="90" height="66" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0syu870_di" bpmnElement="Flow_0syu870">
-        <di:waypoint x="1210" y="2320" />
-        <di:waypoint x="1280" y="2320" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_11ix0da_di" bpmnElement="Flow_11ix0da">
-        <di:waypoint x="1380" y="2320" />
-        <di:waypoint x="1457" y="2320" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0yfpjuj_di" bpmnElement="Flow_0yfpjuj">
-        <di:waypoint x="1557" y="2320" />
-        <di:waypoint x="1639" y="2320" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1gx4346_di" bpmnElement="Flow_1gx4346">
         <di:waypoint x="827" y="2415" />
         <di:waypoint x="827" y="2450" />
@@ -742,6 +729,22 @@ If the ticket task is currently in progress, then there's an ongoing documentati
         <bpmndi:BPMNLabel>
           <dc:Bounds x="1149" y="2456" width="90" height="80" />
         </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1eq8a8y_di" bpmnElement="Flow_1eq8a8y">
+        <di:waypoint x="743" y="2390" />
+        <di:waypoint x="802" y="2390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0yfpjuj_di" bpmnElement="Flow_0yfpjuj">
+        <di:waypoint x="1557" y="2320" />
+        <di:waypoint x="1639" y="2320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11ix0da_di" bpmnElement="Flow_11ix0da">
+        <di:waypoint x="1380" y="2320" />
+        <di:waypoint x="1457" y="2320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0syu870_di" bpmnElement="Flow_0syu870">
+        <di:waypoint x="1210" y="2320" />
+        <di:waypoint x="1280" y="2320" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Event_0hh58ot_di" bpmnElement="Event_0hh58ot">
         <dc:Bounds x="707" y="2372" width="36" height="36" />
