@@ -58,7 +58,7 @@ packer-bruin-bridge:
         - services/bruin-bridge/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
+  # extends: .build_app_image
   needs:
     - job: bruin-bridge-test
     - job: semantic-release
