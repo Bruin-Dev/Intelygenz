@@ -6,7 +6,13 @@ eks_developer_users = [
     "javier.aguilera",
     "gabriel.palacios",
     "david.fuentes",
-    "jesus.alonso"
+    "jesus.alonso",
+    "anath@mettel.net",
+    "xwan@mettel.net",
+    "orahman@mettel.net",
+    "Swang@mettel.net",
+    "srajvanshi@mettel.net",
+    "hli@mettel.net"
 ]
 
 eks_devops_users = [
@@ -14,7 +20,8 @@ eks_devops_users = [
     "angel.luis.piquero",
     "alejandro.aceituna",
     "daniel.fernandez",
-    "sergio.delpuerto"
+    "sergio.delpuerto",
+    "asumarokoff@mettel.net"
 ]
 
 eks_ops_users = [
