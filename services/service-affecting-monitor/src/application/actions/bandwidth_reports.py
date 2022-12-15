@@ -35,7 +35,7 @@ class BandwidthReports:
         self._metrics_repository = metrics_repository
 
     async def start_bandwidth_reports_job(self, exec_on_start=False):
-        logger.info(f"Scheduled task: bandwidth reports")
+        logger.info(f"[bandwidth-reports] Scheduled task: bandwidth reports")
 
         if exec_on_start:
             await self._bandwidth_reports_job()
@@ -48,7 +48,7 @@ class BandwidthReports:
     async def _bandwidth_reports_job(self):
         velocloud_host = self._config.VELOCLOUD_HOST
         clients = self._config.BANDWIDTH_REPORT_CONFIG["client_ids_by_host"][velocloud_host]
-        logger.info(f"Running bandwidth reports process for {len(clients)} client(s)")
+        logger.info(f"[bandwidth-reports] Running bandwidth reports process for {len(clients)} client(s)")
         start = datetime.now()
 
         customer_cache_response = await self._customer_cache_repository.get_cache_for_affecting_monitoring()
@@ -102,6 +102,7 @@ class BandwidthReports:
     def get_enterprise_id_and_edge_id_relation_from_customer_cache_response(
         self, customer_cache_response_body, clients_id, velocloud_host
     ):
+        logger.info(f"[bandwidth-reports] Creating enterprise id edge id_relation list")
         enterprise_id_edge_id_relation = []
         for edge_info in customer_cache_response_body:
 
@@ -122,6 +123,8 @@ class BandwidthReports:
         return enterprise_id_edge_id_relation
 
     async def _generate_bandwidth_report_for_client(self, client_id, client_name, serial_numbers, links_metrics):
+        logger.info(f"[bandwidth-reports] Generating bandwidth report for client id {client_id} and \
+                      client name {client_name}")
         start_date = self._get_start_date()
         end_date = self._get_end_date()
 
@@ -164,6 +167,8 @@ class BandwidthReports:
             await self._email_repository.send_email(email_object=email)
             self._metrics_repository.increment_reports_signet_execution_OK()
             logger.info(f"[bandwidth-reports] Report for client {client_id} sent via email")
+        else:
+            logger.error(f"[bandwidth-reports] No report for client {client_id} was sent via email")
 
     @staticmethod
     def find_metric_by_field_value(value, metrics):
@@ -172,8 +177,11 @@ class BandwidthReports:
                 return metric
 
     def _add_bandwidth_to_links_metrics(self, links_metrics):
+        logger.info(f"[bandwidth-reports] Adding bandwidth data to link metrics")
         reported_metrics = []
         for link_metric in links_metrics:
+            logger.info(f"[bandwidth-report] Adding bandwidth data for edge {link_metric['serial_number']} and \
+                         interface {link_metric['link']['interface']}")
             down_bytes_metrics = self.find_metric_by_field_value("bytesRx", link_metric["series"])
             up_bytes_metrics = self.find_metric_by_field_value("bytesTx", link_metric["series"])
             down_bytes_total = down_bytes_metrics["total"]
@@ -225,7 +233,7 @@ class BandwidthReports:
     def _get_start_date(self):
         now = datetime.utcnow()
         start_date = now - timedelta(hours=self._config.BANDWIDTH_REPORT_CONFIG["lookup_interval_hours"])
-        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        start_date = start_date.replace(microsecond=0)
         return start_date.isoformat() + "Z"
 
     def _get_end_date(self):

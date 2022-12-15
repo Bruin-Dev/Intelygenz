@@ -746,8 +746,8 @@ class BruinRepository:
         }
 
     def prepare_items_for_bandwidth_report(self, links_metrics, grouped_ticket_details):
+        logger.info(f"[bandwidth-reports] Preparing items for bandwidth report")
         report_items = []
-
         for link_metrics in links_metrics:
             serial_number = link_metrics["serial_number"]
             interface = link_metrics["interface"]
@@ -786,6 +786,8 @@ class BruinRepository:
         peak_time_down,
         peak_time_up,
     ):
+        logger.info(f"[bandwidth-reports] Building bandwidth report item for edge {serial_number} and \
+                      interface {interface}")
         return {
             "serial_number": serial_number,
             "edge_name": edge_name,
