@@ -12,7 +12,8 @@ eks_developer_users = [
     "orahman@mettel.net",
     "Swang@mettel.net",
     "srajvanshi@mettel.net",
-    "hli@mettel.net"
+    "hli@mettel.net",
+    "yornstein@mettel.net"
 ]
 
 eks_devops_users = [
