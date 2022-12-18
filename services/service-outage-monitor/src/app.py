@@ -206,6 +206,7 @@ class Container:
 
 
 if __name__ == "__main__":
+    # the program starts here
     container = Container()
 
     loop = asyncio.new_event_loop()
