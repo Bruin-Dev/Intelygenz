@@ -1155,7 +1155,7 @@ service-affecting-monitor:
   resources:
     limits:
       cpu: 300m
-      memory: 384Mi
+      memory: 500Mi
     requests:
       cpu: 150m
       memory: 192Mi
