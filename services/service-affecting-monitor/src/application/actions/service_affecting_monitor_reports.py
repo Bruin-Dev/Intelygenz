@@ -40,7 +40,11 @@ class ServiceAffectingMonitorReports:
         self._scheduler.add_job(self.monitor_reports, cron, id=f"_monitor_reports", replace_existing=True)
 
     async def monitor_reports(self):
-        logger.info(f"Starting Reoccurring Trouble Reports job for host {self._config.VELOCLOUD_HOST}")
+        host = self._config.VELOCLOUD_HOST
+        configuration = self._config.MONITOR_REPORT_CONFIG["recipients_by_host_and_client_id"][host]
+        clients_id = list(configuration.keys())
+
+        logger.info(f"Starting Reoccurring Trouble Reports job for host {host} and clients {clients_id}")
 
         customer_cache_response = await self._customer_cache_repository.get_cache(
             velo_filter=self._config.MONITOR_CONFIG["velo_filter"]
@@ -50,11 +54,6 @@ class ServiceAffectingMonitorReports:
             logger.error("[service-affecting-monitor-reports] Got an empty customer cache. Process cannot keep going.")
             return
 
-        clients_id = set(
-            edge["bruin_client_info"]["client_id"]
-            for edge in customer_cache
-            if edge["edge"]["host"] == self._config.VELOCLOUD_HOST
-        )
         cached_names_by_serial = self.get_serial_and_name_for_cached_edges_with_client_id(customer_cache, clients_id)
 
         monitor_report_init_time = datetime.utcnow()
