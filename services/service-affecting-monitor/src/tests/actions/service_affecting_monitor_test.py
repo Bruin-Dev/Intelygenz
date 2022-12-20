@@ -2571,17 +2571,6 @@ class TestServiceAffectingMonitor:
         result = service_affecting_monitor._should_forward_to_hnoc(link_label)
         assert result is False
 
-    def should_forward_to_hnoc_byob_link_display_name_host_metvco4_return_true_test(
-        self, service_affecting_monitor, make_link, make_structured_metrics_object
-    ):
-        link_data = make_link(display_name="BYOB Test")
-        link_metric_object = make_structured_metrics_object(link_info=link_data)
-        link_label = link_metric_object["link_status"]["displayName"]
-
-        with patch.object(service_affecting_monitor._config, "VELOCLOUD_HOST", "metvco04.mettel.net"):
-            result = service_affecting_monitor._should_forward_to_hnoc(link_label)
-        assert result is True
-
     def schedule_forward_to_hnoc_queue_test(
         self, service_affecting_monitor, frozen_datetime, make_structured_metrics_object_with_cache_and_contact_info
     ):

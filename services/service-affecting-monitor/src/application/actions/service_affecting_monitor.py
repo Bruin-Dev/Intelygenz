@@ -1054,8 +1054,6 @@ class ServiceAffectingMonitor:
         return ticket_id
 
     def _should_forward_to_hnoc(self, link_label: str) -> bool:
-        if self._config.VELOCLOUD_HOST == "metvco04.mettel.net":
-            return True
         return not self._is_link_label_blacklisted_from_hnoc(link_label)
 
     def _schedule_forward_to_hnoc_queue(self, forward_time, ticket_id, serial_number, link_data, trouble):
