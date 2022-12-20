@@ -8084,22 +8084,6 @@ class TestServiceOutageMonitor:
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
-    def should_forward_to_hnoc_metvco4_host_byob_link_display_test(self, outage_monitor):
-        link_data = [
-            {
-                # Some fields omitted for simplicity
-                "displayName": "BYOB Jeff",
-                "interface": "REX",
-                "linkState": "DISCONNECTED",
-                "linkId": 5293,
-            }
-        ]
-        is_edge_down = False
-
-        with patch.object(outage_monitor._config, "VELOCLOUD_HOST", "metvco04.mettel.net"):
-            result = outage_monitor._should_forward_to_hnoc(link_data, is_edge_down)
-        assert result is True
-
     def should_forward_to_hnoc_non_byob_and_not_faulty_display_name_test(self, outage_monitor):
         link_data = [
             {

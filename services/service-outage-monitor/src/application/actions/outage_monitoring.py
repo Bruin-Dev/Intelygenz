@@ -595,8 +595,6 @@ class OutageMonitor:
             return self._config.MONITOR_CONFIG["jobs_intervals"]["forward_to_hnoc_edge_down"]
 
     def _should_forward_to_hnoc(self, link_data: list, is_edge_down: bool) -> bool:
-        if self._config.VELOCLOUD_HOST == "metvco04.mettel.net":
-            return True
         if is_edge_down:
             return True
         return self._has_faulty_non_blacklisted_link(link_data)
