@@ -1,0 +1,1422 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<link href="https://docs.mettel-automation.net/1.205.1/logging/events/service-outage-monitor/" rel="canonical"/>
+<link href="../../../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.3.1, mkdocs-material-8.2.11" name="generator"/>
+<title>Service Outage - Automation Engine Documentation</title>
+<link href="../../../assets/stylesheets/main.8c5ef100.min.css" rel="stylesheet"/>
+<link href="../../../assets/stylesheets/palette.9647289d.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("../../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+<link href="../../../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
+            html.glightbox-open { overflow: initial; height: 100%; }
+            .gslide-title { margin-top: 0px; user-select: text; }
+            .gslide-desc { color: #666; user-select: text; }
+            .gslide-image img { background: white; }
+            
+                .gscrollbar-fixer { padding-right: 15px; }
+                .gdesc-inner { font-size: 0.75rem; }
+                body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
+                body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
+                body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}
+                </style><script src="../../../assets/javascripts/glightbox.min.js"></script></head>
+<body data-md-color-accent="none" data-md-color-primary="none" data-md-color-scheme="" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#service-outage-monitor-event-logging">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<div data-md-component="outdated" hidden="">
+<aside class="md-banner md-banner--warning">
+</aside>
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="Automation Engine Documentation" class="md-header__button md-logo" data-md-component="logo" href="../../.." title="Automation Engine Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            Automation Engine Documentation
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Service Outage
+            
+          </span>
+</div>
+</div>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" hidden="">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--integrated" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="Automation Engine Documentation" class="md-nav__button md-logo" data-md-component="logo" href="../../.." title="Automation Engine Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"></path></svg>
+</a>
+    Automation Engine Documentation
+  </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" id="__nav_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_1">
+          Concepts
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Concepts" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_1">
+<span class="md-nav__icon md-icon"></span>
+          Concepts
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../MONOREPO/">
+        Monorepo
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" id="__nav_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_2">
+          CI/CD Pipelines
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="CI/CD Pipelines" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_2">
+<span class="md-nav__icon md-icon"></span>
+          CI/CD Pipelines
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../pipeline/BASIC_CI_CONFIGURATION/">
+        Pre-requisites
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../pipeline/PIPELINE_RULES/">
+        Setting up pipelines
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3">
+          Documentation
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Documentation" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+          Documentation
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../DOCUMENTATION/">
+        About this documentation
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../decisions/">
+        Architecture Decision Records (ADRs)
+      </a>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3" id="__nav_3_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3">
+          Business
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Business" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_3_3">
+<span class="md-nav__icon md-icon"></span>
+          Business
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../metrics-definitions/">
+        Metrics Definitions
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../parameters/parameters/">
+        System Configuration
+      </a>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3" id="__nav_3_3_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3">
+          Workflows
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Workflows" class="md-nav" data-md-level="3">
+<label class="md-nav__title" for="__nav_3_3_3">
+<span class="md-nav__icon md-icon"></span>
+          Workflows
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../messages-bus/">
+        Communication between services
+      </a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_2" id="__nav_3_3_3_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_2">
+          Bridges
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Bridges" class="md-nav" data-md-level="4">
+<label class="md-nav__title" for="__nav_3_3_3_2">
+<span class="md-nav__icon md-icon"></span>
+          Bridges
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../bruin-bridge/">
+        Bruin
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../digi-bridge/">
+        DiGi
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../dri-bridge/">
+        DRI (Data Remote Portal)
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../email-bridge/">
+        E-mail Services
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../hawkeye-bridge/">
+        Hawkeye / Ixia
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../notifications-bridge/">
+        Notification Services
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../servicenow-bridge/">
+        ServiceNow
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../velocloud-bridge/">
+        VeloCloud
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3" id="__nav_3_3_3_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3">
+          Use cases
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Use cases" class="md-nav" data-md-level="4">
+<label class="md-nav__title" for="__nav_3_3_3_3">
+<span class="md-nav__icon md-icon"></span>
+          Use cases
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_1" id="__nav_3_3_3_3_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_1">
+          Caching Services
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Caching Services" class="md-nav" data-md-level="5">
+<label class="md-nav__title" for="__nav_3_3_3_3_1">
+<span class="md-nav__icon md-icon"></span>
+          Caching Services
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../hawkeye-customer-cache/">
+        Hawkeye / Ixia
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../customer-cache/">
+        VeloCloud
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_2" id="__nav_3_3_3_3_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_2">
+          DiGi
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="DiGi" class="md-nav" data-md-level="5">
+<label class="md-nav__title" for="__nav_3_3_3_3_2">
+<span class="md-nav__icon md-icon"></span>
+          DiGi
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_2_1" id="__nav_3_3_3_3_2_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_2_1">
+          Reporting
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Reporting" class="md-nav" data-md-level="6">
+<label class="md-nav__title" for="__nav_3_3_3_3_2_1">
+<span class="md-nav__icon md-icon"></span>
+          Reporting
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../digi-reboot-report/">
+        Reboot Report
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_3" id="__nav_3_3_3_3_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_3">
+          Fraud
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Fraud" class="md-nav" data-md-level="5">
+<label class="md-nav__title" for="__nav_3_3_3_3_3">
+<span class="md-nav__icon md-icon"></span>
+          Fraud
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_3_1" id="__nav_3_3_3_3_3_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_3_1">
+          Monitoring
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Monitoring" class="md-nav" data-md-level="6">
+<label class="md-nav__title" for="__nav_3_3_3_3_3_1">
+<span class="md-nav__icon md-icon"></span>
+          Monitoring
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../fraud-monitor/">
+        Fraud Alerts
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_4" id="__nav_3_3_3_3_4" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_4">
+          Hawkeye / Ixia
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Hawkeye / Ixia" class="md-nav" data-md-level="5">
+<label class="md-nav__title" for="__nav_3_3_3_3_4">
+<span class="md-nav__icon md-icon"></span>
+          Hawkeye / Ixia
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_4_1" id="__nav_3_3_3_3_4_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_4_1">
+          Monitoring
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Monitoring" class="md-nav" data-md-level="6">
+<label class="md-nav__title" for="__nav_3_3_3_3_4_1">
+<span class="md-nav__icon md-icon"></span>
+          Monitoring
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../hawkeye-outage-monitor/">
+        Service Outage
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_5" id="__nav_3_3_3_3_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_5">
+          InterMapper
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="InterMapper" class="md-nav" data-md-level="5">
+<label class="md-nav__title" for="__nav_3_3_3_3_5">
+<span class="md-nav__icon md-icon"></span>
+          InterMapper
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_5_1" id="__nav_3_3_3_3_5_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_5_1">
+          Monitoring
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Monitoring" class="md-nav" data-md-level="6">
+<label class="md-nav__title" for="__nav_3_3_3_3_5_1">
+<span class="md-nav__icon md-icon"></span>
+          Monitoring
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../intermapper-outage-monitor/">
+        Service Outage
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_6" id="__nav_3_3_3_3_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_6">
+          LuminAI
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="LuminAI" class="md-nav" data-md-level="5">
+<label class="md-nav__title" for="__nav_3_3_3_3_6">
+<span class="md-nav__icon md-icon"></span>
+          LuminAI
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_6_1" id="__nav_3_3_3_3_6_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_6_1">
+          Reporting
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Reporting" class="md-nav" data-md-level="6">
+<label class="md-nav__title" for="__nav_3_3_3_3_6_1">
+<span class="md-nav__icon md-icon"></span>
+          Reporting
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../lumin-billing-report/">
+        Billing Report
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../task-dispatcher/">
+        Tasks scheduling
+      </a>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_8" id="__nav_3_3_3_3_8" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_8">
+          VeloCloud
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="VeloCloud" class="md-nav" data-md-level="5">
+<label class="md-nav__title" for="__nav_3_3_3_3_8">
+<span class="md-nav__icon md-icon"></span>
+          VeloCloud
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_8_1" id="__nav_3_3_3_3_8_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_8_1">
+          Reporting
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Reporting" class="md-nav" data-md-level="6">
+<label class="md-nav__title" for="__nav_3_3_3_3_8_1">
+<span class="md-nav__icon md-icon"></span>
+          Reporting
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../last-contact-report/">
+        Last Contact Report
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_8_2" id="__nav_3_3_3_3_8_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_8_2">
+          Monitoring
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Monitoring" class="md-nav" data-md-level="6">
+<label class="md-nav__title" for="__nav_3_3_3_3_8_2">
+<span class="md-nav__icon md-icon"></span>
+          Monitoring
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_8_2_1" id="__nav_3_3_3_3_8_2_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_8_2_1">
+          SD-WAN
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="SD-WAN" class="md-nav" data-md-level="7">
+<label class="md-nav__title" for="__nav_3_3_3_3_8_2_1">
+<span class="md-nav__icon md-icon"></span>
+          SD-WAN
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../service-affecting-monitor/">
+        Service Affecting
+      </a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" data-md-toggle="toc" id="__toc" type="checkbox"/>
+<a class="md-nav__link md-nav__link--active" href="./">
+        Service Outage
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../gateway-monitor/">
+        Gateways
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" id="__nav_4" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4">
+          Working in local environments
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Working in local environments" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_4">
+<span class="md-nav__icon md-icon"></span>
+          Working in local environments
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_1" id="__nav_4_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4_1">
+          Automation
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Automation" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_4_1">
+<span class="md-nav__icon md-icon"></span>
+          Automation
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_1_1" id="__nav_4_1_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4_1_1">
+          Metrics
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Metrics" class="md-nav" data-md-level="3">
+<label class="md-nav__title" for="__nav_4_1_1">
+<span class="md-nav__icon md-icon"></span>
+          Metrics
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../CREATE_NEW_METRIC/">
+        Creating new metrics
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_1_2" id="__nav_4_1_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4_1_2">
+          Business Services
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Business Services" class="md-nav" data-md-level="3">
+<label class="md-nav__title" for="__nav_4_1_2">
+<span class="md-nav__icon md-icon"></span>
+          Business Services
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../CREATE_NEW_MICROSERVICE/">
+        Creating new services
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_2" id="__nav_4_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4_2">
+          Data Lake
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Data Lake" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_4_2">
+<span class="md-nav__icon md-icon"></span>
+          Data Lake
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../kafka/LAUNCH_DOCKER_COMPOSE/">
+        Running in docker-compose
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5">
+          System Overview
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="System Overview" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+          System Overview
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_1" id="__nav_5_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5_1">
+          Automation Engine
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Automation Engine" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_5_1">
+<span class="md-nav__icon md-icon"></span>
+          Automation Engine
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../SYSTEM_OVERVIEW/">
+        Architecture &amp; Infrastructure
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../INFRASTRUCTURE_AS_CODE/">
+        Infrastructure as Code
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../LOGGING_AND_MONITORING/">
+        Logging &amp; Monitoring
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../PIPELINES/">
+        Pipelines
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2" id="__nav_5_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5_2">
+          Data Lake
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Data Lake" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_5_2">
+<span class="md-nav__icon md-icon"></span>
+          Data Lake
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../snowflake/">
+        Snowflake
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" id="__nav_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6">
+          Manual Procedures
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Manual Procedures" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_6">
+<span class="md-nav__icon md-icon"></span>
+          Manual Procedures
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../manual_procedures/EMERGENCY_PLAN/">
+        Emergency Recovery Plan
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../manual_procedures/API_VENDOR_ACCESS/">
+        Grant vendors access to the Data Lake API
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION/">
+        Switch Automation Engine's region
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" id="__nav_7" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7">
+          Backups Recovery Plans
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Backups Recovery Plans" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_7">
+<span class="md-nav__icon md-icon"></span>
+          Backups Recovery Plans
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7_1" id="__nav_7_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7_1">
+          AWS
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="AWS" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_7_1">
+<span class="md-nav__icon md-icon"></span>
+          AWS
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../backups/ECR_RECOVERY_PLAN/">
+        ECR
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../backups/EKS_SSH_RECOVERY_PLAN/">
+        EKS SSH
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7_2" id="__nav_7_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7_2">
+          Infrastructure
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Infrastructure" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_7_2">
+<span class="md-nav__icon md-icon"></span>
+          Infrastructure
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../backups/TERRAFORM_RECOVERY_PLAN/">
+        Terraform
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7_3" id="__nav_7_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7_3">
+          Metrics
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Metrics" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_7_3">
+<span class="md-nav__icon md-icon"></span>
+          Metrics
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../backups/PROMETHEUS_RECOVERY_PLAN/">
+        Prometheus
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7_4" id="__nav_7_4" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7_4">
+          Source Code
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Source Code" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_7_4">
+<span class="md-nav__icon md-icon"></span>
+          Source Code
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../backups/GIT_RECOVERY_PLAN/">
+        GIT repository
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7_5" id="__nav_7_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7_5">
+          System Configuration
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="System Configuration" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_7_5">
+<span class="md-nav__icon md-icon"></span>
+          System Configuration
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../lambda/PARAMETER_REPLICATOR/">
+        Parameters Replication
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" id="__nav_8" type="checkbox"/>
+<label class="md-nav__link" for="__nav_8">
+          Manual Configurations
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Manual Configurations" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_8">
+<span class="md-nav__icon md-icon"></span>
+          Manual Configurations
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../manual_configurations/INIT_AUTOMATION_PROJECT/">
+        Initialize Automation Engine project
+      </a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8_2" id="__nav_8_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_8_2">
+          AWS SSO - OKTA
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="AWS SSO - OKTA" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_8_2">
+<span class="md-nav__icon md-icon"></span>
+          AWS SSO - OKTA
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../manual_configurations/OKTA_CONFIGURATIONS/">
+        Configurations
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../manual_configurations/OKTA_JWT/">
+        JWT token
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="service-outage-monitor-event-logging">Service Outage Monitor Event Logging</h1>
+<h1 id="description">Description</h1>
+<p>The Service Outage Monitor service has two responsibilities:</p>
+<ul>
+<li>
+<p>Monitor VeloCloud edges periodically. The monitoring process makes sure to create tickets or re-open Service Outage tasks
+  if these edges or any of their links are down, and it also takes care of auto-resolving any open ticket tasks if the edge comes
+  back online.</p>
+<p>Monitored outages are:</p>
+<ul>
+<li>Link Down - HA disabled</li>
+<li>Hard Down - HA disabled</li>
+<li>Link Down - HA enabled</li>
+<li>Soft Down - HA enabled</li>
+<li>Hard Down - HA enabled</li>
+</ul>
+</li>
+<li>
+<p>Append Triage and Events notes to tickets. Under certain conditions, the IPA system fails to append Triage notes right after
+  creating a ticket or re-opening an existing task. This last resort mechanism ensures that those tickets get a Triage note
+  appended at some point.</p>
+<p>At the same time, this process makes sure to update tickets already having Triage notes with notes gathering the details
+of the latest events found in VeloCloud for a particular edge. These are known as Events notes.</p>
+</li>
+</ul>
+<h2 id="process-workflows">Process Workflows</h2>
+<p><a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="../../../images/service-outage-monitor.png"><img alt="" loading="lazy" src="../../../images/service-outage-monitor.png"/></a></p>
+<h2 id="list-of-decisions-made-by-the-service-outage-monitor">List of Decisions made by the Service Outage Monitor</h2>
+<h3 id="bridge-like-capabilities">Bridge-like capabilities</h3>
+<h4 id="subject-task_dispatcherservice-outage-monitorticket_forwardssuccess">Subject: task_dispatcher.service-outage-monitor.ticket_forwards.success</h4>
+<p><em>No relevant business decisions are made in this workflow</em></p>
+<h3 id="use-cases">Use cases</h3>
+<h4 id="monitoring">Monitoring</h4>
+<h5 id="overall-workflow">Overall workflow</h5>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for the status of VeloCloud edges</td>
+<td>Edge state is ONLINE, and all its links are STABLE</td>
+<td>Edge state is OFFLINE, or any of its links is DISCONNECTED</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check if the outage detected for an edge should be documented to a ticket attending to its HA condition (primary or standby) and the type of outage</td>
+<td>Detected outage should be documented in a ticket</td>
+<td>Detected outage should NOT be documented in a ticket</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Check for the grade of VeloCloud edges' links (Business vs. Commercial)</td>
+<td>Any of the edge's links is DISCONNECTED plus that link is a Business Grade link</td>
+<td>Edge is OFFLINE, or any of its links is DISCONNECTED plus that link is a Commercial Grade link</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Check for the status of VeloCloud edges after sitting in the quarantine for some time</td>
+<td>Edge state is ONLINE, and all its links are STABLE</td>
+<td>Edge is still OFFLINE, or any of its links is still DISCONNECTED</td>
+</tr>
+</tbody>
+</table>
+<h5 id="workflow-ticket-creation-task-re-open">Workflow - Ticket Creation / Task Re-Open</h5>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+<th>Decision</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check the status returned by Bruin after trying to create a ticket for the VeloCloud edge</td>
+<td>Ticket was created (Bruin status 200)</td>
+<td>Ticket with open task already exists for the edge (Bruin status 409)</td>
+<td>Ticket with Resolved task exists for the edge, but Bruin could not re-open it automatically (Bruin status 471)</td>
+<td>Ticket with Resolved task exists for the edge, and was automatically re-opened by Bruin (Bruin status 472)</td>
+<td>Resolved ticket exists for the edge and site (physical location) - a new task was automatically added by Bruin (Bruin status 473)</td>
+</tr>
+</tbody>
+</table>
+<h5 id="workflow-filter-out-edges-that-should-not-be-monitored">Workflow - Filter out edges that should not be monitored</h5>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for validity of edge state</td>
+<td>Edge state is invalid</td>
+<td>Edge state is valid</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for activation state of edge</td>
+<td>Edge has been activated</td>
+<td>Edge has never been activated</td>
+</tr>
+</tbody>
+</table>
+<h5 id="workflow-append-triage-note-to-ticket-task-for-edge">Workflow - Append Triage note to ticket task for edge</h5>
+<p><em>No relevant business decisions are made in this workflow</em></p>
+<h5 id="workflow-change-ticket-severity">Workflow - Change ticket severity</h5>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check type of outage for edge</td>
+<td>Edge is OFFLINE</td>
+<td>Edge is ONLINE, and any of its links is DISCONNECTED</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check current ticket severity for Edge Down outages</td>
+<td>Ticket severity is NOT set to 2 (Medium/High) already</td>
+<td>Ticket severity is already set to 2 (Medium/High)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Check status returned by Bruin on ticket creation</td>
+<td>Bruin returned a 409, 471, or 472 status while trying to create the ticket</td>
+<td>Bruin returned a 200 or 473 status while trying to create the ticket</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Check for ticket having multiple open tasks</td>
+<td>Ticket has multiple open tasks</td>
+<td>Only the ticket task for the edge is open</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Check current ticket severity for Link Down outages</td>
+<td>Ticket severity is NOT set to 3 (Low/Medium) already</td>
+<td>Ticket severity is already set to 3 (Low/Medium)</td>
+</tr>
+</tbody>
+</table>
+<h5 id="workflow-forward-ticket-task-to-hnoc">Workflow - Forward ticket task to HNOC</h5>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check type of outage for edge, and BYOB condition of links for Link Down outages</td>
+<td>Edge is OFFLINE</td>
+<td>Edge is ONLINE, and any of its links is DISCONNECTED plus that link is NOT a BYOB or Customer Provided link</td>
+<td>Edge is ONLINE, and any of its links is DISCONNECTED plus that link is a BYOB or Customer Provided link</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check for time at impacted site</td>
+<td>Time at impacted site is between 12 am and 8 am (NIGHT)</td>
+<td>Time at impacted site is between 8am and 12am. (DAY)</td>
+<td></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Check status returned by Bruin on ticket creation</td>
+<td>Bruin returned a 409 status while trying to create the ticket</td>
+<td>Bruin returned a 200, 471, 472, or 473 status while trying to create the ticket</td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Check the last time an e-mail reminder was sent via Bruin for a Link Down outage in BYOB link</td>
+<td>Last reminder e-mail was sent to the customer less than 24h ago</td>
+<td>Last reminder e-mail was sent to the customer more than 24h ago</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h5 id="workflow-forward-ticket-task-to-asr">Workflow - Forward ticket task to ASR</h5>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check type of outage for edge</td>
+<td>Edge is OFFLINE</td>
+<td>Edge is ONLINE, and any of its links is DISCONNECTED</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check type of disconnected link(s)</td>
+<td>Any of the DISCONNECTED links is Wired</td>
+<td>None of the DISCONNECTED links is Wired</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Check if any of the disconnected wired links is BYOB or PIAB</td>
+<td>None of the DISCONNECTED Wired links are BYOB, Customer Provided, or a PIAB</td>
+<td>All the DISCONNECTED Wired links are BYOB, Customer Provided, or a PIAB</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Check if ticket task has been forwarded to ASR before</td>
+<td>Ticket task has NOT been forwarded to ASR before</td>
+<td>Ticket task has been forwarded to ASR before</td>
+</tr>
+</tbody>
+</table>
+<h5 id="workflow-start-reboot-for-digi-links">Workflow - Start reboot for DiGi links</h5>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check DiGi condition for edge's links</td>
+<td>Edge has no DiGi links</td>
+<td>Edge has DiGi links</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check status of DiGi links</td>
+<td>None of the DiGi links are DISCONNECTED</td>
+<td>At least one DiGi link is DISCONNECTED</td>
+</tr>
+</tbody>
+</table>
+<h5 id="workflow-check-for-failed-reboot-for-digi-links">Workflow - Check for failed reboot for DiGi links</h5>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check DiGi condition for edge's links</td>
+<td>Edge has no DiGi links</td>
+<td>Edge has DiGi links</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check status of DiGi links</td>
+<td>None of the DiGi links are DISCONNECTED</td>
+<td>At least one DiGi link is DISCONNECTED</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Check for existence of DiGi Reboot related notes in ticket</td>
+<td>No DiGi Reboot notes were found (i.e. no reboots were attempted before)</td>
+<td>DiGi Reboot note was found (i.e. a reboot was attempted before)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Check for the moment the DiGi link was last rebooted</td>
+<td>DiGi link was rebooted recently</td>
+<td>DiGi link was rebooted long time ago</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Check if the DiGi Reboot note found is related to the DiGi link</td>
+<td>DiGi Reboot note found is NOT related to the link</td>
+<td>DiGi Reboot note found is related to the link</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Check if the ticket task related to the DiGi link's edge has already been forwarded to the Wireless team before</td>
+<td>Ticket task has been forwarded to the Wireless Repair Intervention Needed team before</td>
+<td>Ticket task has never been forwarded to the Wireless Repair Intervention Needed team before</td>
+</tr>
+</tbody>
+</table>
+<h5 id="workflow-re-open-ticket-task-for-edge">Workflow - Re-open ticket task for edge</h5>
+<p><em>No relevant business decisions are made in this workflow</em></p>
+<h5 id="workflow-auto-resolution">Workflow - Auto-Resolution</h5>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check if edge is in the auto-resolution blacklist</td>
+<td>Edge is blacklisted from auto-resolves</td>
+<td>Edge is NOT blacklisted from auto-resolves</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Check if an open Service Outage ticket was found for the edge</td>
+<td>No open ticket was found</td>
+<td>Open ticket was found</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Check for creator of the open ticket</td>
+<td>Ticket was created by the IPA system</td>
+<td>Ticket was NOT created by the IPA system</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Check if the outage documented in the ticket is a Link Down, if the link that was down is BYOB, and also if the ticket task related to the edge is currently sitting in the IPA queue</td>
+<td>Edge has BYOB links, and ticket task is currently sitting in the IPA queue</td>
+<td>Edge does NOT have BYOB links, and ticket task is NOT sitting in the IPA queue</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Check for time at impacted site</td>
+<td>Time at impacted site is between 12 am and 8 am (NIGHT)</td>
+<td>Time at impacted site is between 8am and 12am. (DAY)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Check if time elapsed since last outage was documented is more or less than 3 hrs (NIGHT)</td>
+<td>Last outage was documented less than 3h ago</td>
+<td>Last outage was documented more than 3h ago</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Check if time elapsed since last outage was documented is more or less than 90 min (DAY)</td>
+<td>Last outage was documented less than 90 min ago</td>
+<td>Last outage was documented more than 90 min ago</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Check if max auto-resolves threshold has been exceeded for the ticket task</td>
+<td>Ticket task has been auto-resolved less than 3 times</td>
+<td>Ticket task has been auto-resolved 3 times or more</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Check if ticket task is resolved already</td>
+<td>Ticket task is resolved already</td>
+<td>Ticket task is NOT resolved</td>
+</tr>
+</tbody>
+</table>
+<h4 id="triage">Triage</h4>
+<h5 id="workflow-append-triage-or-events-note-to-ticket-task-without-triage-note">Workflow - Append Triage or Events note to ticket task without Triage note</h5>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check current state of the edge for which the Service Outage ticket was created / the ticket task was re-opened earlier</td>
+<td>Edge is no longer in outage state</td>
+<td>Edge is still in outage state</td>
+</tr>
+</tbody>
+</table>
+<h5 id="workflow-append-events-note-to-ticket-task-with-triage-note">Workflow - Append Events note to ticket task with Triage note</h5>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Condition</th>
+<th>Decision</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Check for the moment the last Events note was appended to the ticket task related to the edge</td>
+<td>Last Events note was appended to ticket task very recently</td>
+<td>Last Events note was appended to ticket task long time ago</td>
+</tr>
+</tbody>
+</table>
+<h2 id="event-descriptions">Event Descriptions</h2>
+<h3 id="bridge-like-capabilities_1">Bridge-like capabilities</h3>
+<h4 id="subject-task_dispatcherservice-outage-monitorticket_forwardssuccess_1">Subject: task_dispatcher.service-outage-monitor.ticket_forwards.success</h4>
+<ul>
+<li><a href="../../services/service-outage-monitor/actions/handle_ticket_forward/success/">handle_ticket_forward</a></li>
+</ul>
+<h3 id="use-cases_1">Use cases</h3>
+<h4 id="monitoring_1">Monitoring</h4>
+<h5 id="schedule-service-outage-monitoring-job">Schedule Service Outage Monitoring job</h5>
+<ul>
+<li><a href="../../services/service-outage-monitor/actions/service_outage_monitor/start_service_outage_monitoring/">start_service_outage_monitoring</a></li>
+</ul>
+<h5 id="run-service-outage-monitoring-job">Run Service Outage Monitoring job</h5>
+<ul>
+<li><a href="../../services/service-outage-monitor/actions/service_outage_monitor/_outage_monitoring_process/">_outage_monitoring_process</a></li>
+</ul>
+<h4 id="triage_1">Triage</h4>
+<h5 id="schedule-triage-job">Schedule Triage job</h5>
+<ul>
+<li><a href="../../services/service-outage-monitor/actions/triage/start_triage_job/">start_triage_job</a></li>
+</ul>
+<h5 id="run-triage-job">Run Triage job</h5>
+<ul>
+<li><a href="../../services/service-outage-monitor/actions/triage/_run_tickets_polling/">_run_tickets_polling</a></li>
+</ul>
+</article>
+</div>
+</div>
+</main>
+<footer class="md-footer">
+<nav aria-label="Footer" class="md-footer__inner md-grid">
+<a aria-label="Previous: Service Affecting" class="md-footer__link md-footer__link--prev" href="../service-affecting-monitor/" rel="prev">
+<div class="md-footer__button md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"></path></svg>
+</div>
+<div class="md-footer__title">
+<div class="md-ellipsis">
+<span class="md-footer__direction">
+                Previous
+              </span>
+              Service Affecting
+            </div>
+</div>
+</a>
+<a aria-label="Next: Gateways" class="md-footer__link md-footer__link--next" href="../gateway-monitor/" rel="next">
+<div class="md-footer__title">
+<div class="md-ellipsis">
+<span class="md-footer__direction">
+                Next
+              </span>
+              Gateways
+            </div>
+</div>
+<div class="md-footer__button md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"></path></svg>
+</div>
+</a>
+</nav>
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"base": "../../..", "features": ["header.autohide", "toc.follow", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"provider": "mike"}}</script>
+<script src="../../../assets/javascripts/bundle.748e2769.min.js"></script>
+<script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": false, "draggable": false, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
+</html>

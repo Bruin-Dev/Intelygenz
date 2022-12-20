@@ -1,0 +1,1178 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<link href="https://docs.mettel-automation.net/1.205.1/CREATE_NEW_METRIC/" rel="canonical"/>
+<link href="../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.3.1, mkdocs-material-8.2.11" name="generator"/>
+<title>Creating new metrics - Automation Engine Documentation</title>
+<link href="../assets/stylesheets/main.8c5ef100.min.css" rel="stylesheet"/>
+<link href="../assets/stylesheets/palette.9647289d.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+<link href="../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
+            html.glightbox-open { overflow: initial; height: 100%; }
+            .gslide-title { margin-top: 0px; user-select: text; }
+            .gslide-desc { color: #666; user-select: text; }
+            .gslide-image img { background: white; }
+            
+                .gscrollbar-fixer { padding-right: 15px; }
+                .gdesc-inner { font-size: 0.75rem; }
+                body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
+                body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
+                body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}
+                </style><script src="../assets/javascripts/glightbox.min.js"></script></head>
+<body data-md-color-accent="none" data-md-color-primary="none" data-md-color-scheme="" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#create-new-metric">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<div data-md-component="outdated" hidden="">
+<aside class="md-banner md-banner--warning">
+</aside>
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="Automation Engine Documentation" class="md-header__button md-logo" data-md-component="logo" href=".." title="Automation Engine Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            Automation Engine Documentation
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Creating new metrics
+            
+          </span>
+</div>
+</div>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--integrated" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="Automation Engine Documentation" class="md-nav__button md-logo" data-md-component="logo" href=".." title="Automation Engine Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"></path></svg>
+</a>
+    Automation Engine Documentation
+  </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" id="__nav_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_1">
+          Concepts
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Concepts" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_1">
+<span class="md-nav__icon md-icon"></span>
+          Concepts
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../MONOREPO/">
+        Monorepo
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" id="__nav_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_2">
+          CI/CD Pipelines
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="CI/CD Pipelines" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_2">
+<span class="md-nav__icon md-icon"></span>
+          CI/CD Pipelines
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../pipeline/BASIC_CI_CONFIGURATION/">
+        Pre-requisites
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../pipeline/PIPELINE_RULES/">
+        Setting up pipelines
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3">
+          Documentation
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Documentation" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+          Documentation
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../DOCUMENTATION/">
+        About this documentation
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../decisions/">
+        Architecture Decision Records (ADRs)
+      </a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3" id="__nav_3_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3">
+          Business
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Business" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_3_3">
+<span class="md-nav__icon md-icon"></span>
+          Business
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../metrics-definitions/">
+        Metrics Definitions
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../parameters/parameters/">
+        System Configuration
+      </a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3" id="__nav_3_3_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3">
+          Workflows
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Workflows" class="md-nav" data-md-level="3">
+<label class="md-nav__title" for="__nav_3_3_3">
+<span class="md-nav__icon md-icon"></span>
+          Workflows
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/messages-bus/">
+        Communication between services
+      </a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_2" id="__nav_3_3_3_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_2">
+          Bridges
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Bridges" class="md-nav" data-md-level="4">
+<label class="md-nav__title" for="__nav_3_3_3_2">
+<span class="md-nav__icon md-icon"></span>
+          Bridges
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/bruin-bridge/">
+        Bruin
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/digi-bridge/">
+        DiGi
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/dri-bridge/">
+        DRI (Data Remote Portal)
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/email-bridge/">
+        E-mail Services
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/hawkeye-bridge/">
+        Hawkeye / Ixia
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/notifications-bridge/">
+        Notification Services
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/servicenow-bridge/">
+        ServiceNow
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/velocloud-bridge/">
+        VeloCloud
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3" id="__nav_3_3_3_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3">
+          Use cases
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Use cases" class="md-nav" data-md-level="4">
+<label class="md-nav__title" for="__nav_3_3_3_3">
+<span class="md-nav__icon md-icon"></span>
+          Use cases
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_1" id="__nav_3_3_3_3_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_1">
+          Caching Services
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Caching Services" class="md-nav" data-md-level="5">
+<label class="md-nav__title" for="__nav_3_3_3_3_1">
+<span class="md-nav__icon md-icon"></span>
+          Caching Services
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/hawkeye-customer-cache/">
+        Hawkeye / Ixia
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/customer-cache/">
+        VeloCloud
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_2" id="__nav_3_3_3_3_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_2">
+          DiGi
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="DiGi" class="md-nav" data-md-level="5">
+<label class="md-nav__title" for="__nav_3_3_3_3_2">
+<span class="md-nav__icon md-icon"></span>
+          DiGi
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_2_1" id="__nav_3_3_3_3_2_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_2_1">
+          Reporting
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Reporting" class="md-nav" data-md-level="6">
+<label class="md-nav__title" for="__nav_3_3_3_3_2_1">
+<span class="md-nav__icon md-icon"></span>
+          Reporting
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/digi-reboot-report/">
+        Reboot Report
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_3" id="__nav_3_3_3_3_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_3">
+          Fraud
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Fraud" class="md-nav" data-md-level="5">
+<label class="md-nav__title" for="__nav_3_3_3_3_3">
+<span class="md-nav__icon md-icon"></span>
+          Fraud
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_3_1" id="__nav_3_3_3_3_3_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_3_1">
+          Monitoring
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Monitoring" class="md-nav" data-md-level="6">
+<label class="md-nav__title" for="__nav_3_3_3_3_3_1">
+<span class="md-nav__icon md-icon"></span>
+          Monitoring
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/fraud-monitor/">
+        Fraud Alerts
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_4" id="__nav_3_3_3_3_4" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_4">
+          Hawkeye / Ixia
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Hawkeye / Ixia" class="md-nav" data-md-level="5">
+<label class="md-nav__title" for="__nav_3_3_3_3_4">
+<span class="md-nav__icon md-icon"></span>
+          Hawkeye / Ixia
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_4_1" id="__nav_3_3_3_3_4_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_4_1">
+          Monitoring
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Monitoring" class="md-nav" data-md-level="6">
+<label class="md-nav__title" for="__nav_3_3_3_3_4_1">
+<span class="md-nav__icon md-icon"></span>
+          Monitoring
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/hawkeye-outage-monitor/">
+        Service Outage
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_5" id="__nav_3_3_3_3_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_5">
+          InterMapper
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="InterMapper" class="md-nav" data-md-level="5">
+<label class="md-nav__title" for="__nav_3_3_3_3_5">
+<span class="md-nav__icon md-icon"></span>
+          InterMapper
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_5_1" id="__nav_3_3_3_3_5_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_5_1">
+          Monitoring
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Monitoring" class="md-nav" data-md-level="6">
+<label class="md-nav__title" for="__nav_3_3_3_3_5_1">
+<span class="md-nav__icon md-icon"></span>
+          Monitoring
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/intermapper-outage-monitor/">
+        Service Outage
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_6" id="__nav_3_3_3_3_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_6">
+          LuminAI
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="LuminAI" class="md-nav" data-md-level="5">
+<label class="md-nav__title" for="__nav_3_3_3_3_6">
+<span class="md-nav__icon md-icon"></span>
+          LuminAI
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_6_1" id="__nav_3_3_3_3_6_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_6_1">
+          Reporting
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Reporting" class="md-nav" data-md-level="6">
+<label class="md-nav__title" for="__nav_3_3_3_3_6_1">
+<span class="md-nav__icon md-icon"></span>
+          Reporting
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/lumin-billing-report/">
+        Billing Report
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/task-dispatcher/">
+        Tasks scheduling
+      </a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_8" id="__nav_3_3_3_3_8" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_8">
+          VeloCloud
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="VeloCloud" class="md-nav" data-md-level="5">
+<label class="md-nav__title" for="__nav_3_3_3_3_8">
+<span class="md-nav__icon md-icon"></span>
+          VeloCloud
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_8_1" id="__nav_3_3_3_3_8_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_8_1">
+          Reporting
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Reporting" class="md-nav" data-md-level="6">
+<label class="md-nav__title" for="__nav_3_3_3_3_8_1">
+<span class="md-nav__icon md-icon"></span>
+          Reporting
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/last-contact-report/">
+        Last Contact Report
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_8_2" id="__nav_3_3_3_3_8_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_8_2">
+          Monitoring
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Monitoring" class="md-nav" data-md-level="6">
+<label class="md-nav__title" for="__nav_3_3_3_3_8_2">
+<span class="md-nav__icon md-icon"></span>
+          Monitoring
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_3_3_8_2_1" id="__nav_3_3_3_3_8_2_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_3_3_3_8_2_1">
+          SD-WAN
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="SD-WAN" class="md-nav" data-md-level="7">
+<label class="md-nav__title" for="__nav_3_3_3_3_8_2_1">
+<span class="md-nav__icon md-icon"></span>
+          SD-WAN
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/service-affecting-monitor/">
+        Service Affecting
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/service-outage-monitor/">
+        Service Outage
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../logging/events/gateway-monitor/">
+        Gateways
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" id="__nav_4" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4">
+          Working in local environments
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Working in local environments" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_4">
+<span class="md-nav__icon md-icon"></span>
+          Working in local environments
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_1" id="__nav_4_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4_1">
+          Automation
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Automation" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_4_1">
+<span class="md-nav__icon md-icon"></span>
+          Automation
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_1_1" id="__nav_4_1_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4_1_1">
+          Metrics
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Metrics" class="md-nav" data-md-level="3">
+<label class="md-nav__title" for="__nav_4_1_1">
+<span class="md-nav__icon md-icon"></span>
+          Metrics
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" data-md-toggle="toc" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+          Creating new metrics
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+        Creating new metrics
+      </a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-adding-metrics-repository-to-the-service">
+    1. Adding metrics repository to the service
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-adding-a-new-metric">
+    2. Adding a new metric
+  </a>
+<nav aria-label="2. Adding a new metric" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#counter">
+    Counter
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#gauge">
+    Gauge
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#histogram">
+    Histogram
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#summary">
+    Summary
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-testing-the-new-metric">
+    3. Testing the new metric
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#4-verifying-in-production">
+    4. Verifying in production
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5-querying-your-metric">
+    5. Querying your metric
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_1_2" id="__nav_4_1_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4_1_2">
+          Business Services
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Business Services" class="md-nav" data-md-level="3">
+<label class="md-nav__title" for="__nav_4_1_2">
+<span class="md-nav__icon md-icon"></span>
+          Business Services
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../CREATE_NEW_MICROSERVICE/">
+        Creating new services
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_2" id="__nav_4_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4_2">
+          Data Lake
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Data Lake" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_4_2">
+<span class="md-nav__icon md-icon"></span>
+          Data Lake
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../kafka/LAUNCH_DOCKER_COMPOSE/">
+        Running in docker-compose
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5">
+          System Overview
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="System Overview" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+          System Overview
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_1" id="__nav_5_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5_1">
+          Automation Engine
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Automation Engine" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_5_1">
+<span class="md-nav__icon md-icon"></span>
+          Automation Engine
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../SYSTEM_OVERVIEW/">
+        Architecture &amp; Infrastructure
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../INFRASTRUCTURE_AS_CODE/">
+        Infrastructure as Code
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../LOGGING_AND_MONITORING/">
+        Logging &amp; Monitoring
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../PIPELINES/">
+        Pipelines
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2" id="__nav_5_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5_2">
+          Data Lake
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Data Lake" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_5_2">
+<span class="md-nav__icon md-icon"></span>
+          Data Lake
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../snowflake/">
+        Snowflake
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" id="__nav_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6">
+          Manual Procedures
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Manual Procedures" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_6">
+<span class="md-nav__icon md-icon"></span>
+          Manual Procedures
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../manual_procedures/EMERGENCY_PLAN/">
+        Emergency Recovery Plan
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../manual_procedures/API_VENDOR_ACCESS/">
+        Grant vendors access to the Data Lake API
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../manual_procedures/SWITCH_AUTOMATION_ENGINE_REGION/">
+        Switch Automation Engine's region
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" id="__nav_7" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7">
+          Backups Recovery Plans
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Backups Recovery Plans" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_7">
+<span class="md-nav__icon md-icon"></span>
+          Backups Recovery Plans
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7_1" id="__nav_7_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7_1">
+          AWS
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="AWS" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_7_1">
+<span class="md-nav__icon md-icon"></span>
+          AWS
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../backups/ECR_RECOVERY_PLAN/">
+        ECR
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../backups/EKS_SSH_RECOVERY_PLAN/">
+        EKS SSH
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7_2" id="__nav_7_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7_2">
+          Infrastructure
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Infrastructure" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_7_2">
+<span class="md-nav__icon md-icon"></span>
+          Infrastructure
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../backups/TERRAFORM_RECOVERY_PLAN/">
+        Terraform
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7_3" id="__nav_7_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7_3">
+          Metrics
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Metrics" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_7_3">
+<span class="md-nav__icon md-icon"></span>
+          Metrics
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../backups/PROMETHEUS_RECOVERY_PLAN/">
+        Prometheus
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7_4" id="__nav_7_4" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7_4">
+          Source Code
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Source Code" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_7_4">
+<span class="md-nav__icon md-icon"></span>
+          Source Code
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../backups/GIT_RECOVERY_PLAN/">
+        GIT repository
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7_5" id="__nav_7_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7_5">
+          System Configuration
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="System Configuration" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_7_5">
+<span class="md-nav__icon md-icon"></span>
+          System Configuration
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../lambda/PARAMETER_REPLICATOR/">
+        Parameters Replication
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" id="__nav_8" type="checkbox"/>
+<label class="md-nav__link" for="__nav_8">
+          Manual Configurations
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Manual Configurations" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_8">
+<span class="md-nav__icon md-icon"></span>
+          Manual Configurations
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../manual_configurations/INIT_AUTOMATION_PROJECT/">
+        Initialize Automation Engine project
+      </a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8_2" id="__nav_8_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_8_2">
+          AWS SSO - OKTA
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="AWS SSO - OKTA" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_8_2">
+<span class="md-nav__icon md-icon"></span>
+          AWS SSO - OKTA
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../manual_configurations/OKTA_CONFIGURATIONS/">
+        Configurations
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../manual_configurations/OKTA_JWT/">
+        JWT token
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<div align="center">
+<a class="glightbox" data-desc-position="bottom" data-height="auto" data-width="100%" href="https://media.licdn.com/dms/image/C4E0BAQHrME9aCW6ulg/company-logo_200_200/0?e=2159024400&amp;v=beta&amp;t=6xMNS1zK1F8asBlM16EzbJ4Im7SlQ8L7a7sgcaNzZQE"><img height="200" src="https://media.licdn.com/dms/image/C4E0BAQHrME9aCW6ulg/company-logo_200_200/0?e=2159024400&amp;v=beta&amp;t=6xMNS1zK1F8asBlM16EzbJ4Im7SlQ8L7a7sgcaNzZQE" width="200"/></a>
+</div>
+<h1 id="create-new-metric">CREATE NEW METRIC</h1>
+<p>This process describes step by step how to create a new metric, how to test it locally and how to verify that it is
+working in production.
+Feel free to skip step 1 if the metrics repository already exists in the service you want to add the new metric for.</p>
+<h2 id="1-adding-metrics-repository-to-the-service">1. Adding metrics repository to the service</h2>
+<p>First thing you need to do is adding the metric repository to your service if it is not already there, 
+for doing that you will need to follow the steps below:</p>
+<ul>
+<li>Add the repository in the <code>app.py</code> file
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-0-1" id="__codelineno-0-1" name="__codelineno-0-1"></a>from application.repositories.metrics_repository import MetricsRepository
+<a href="#__codelineno-0-2" id="__codelineno-0-2" name="__codelineno-0-2"></a>
+<a href="#__codelineno-0-3" id="__codelineno-0-3" name="__codelineno-0-3"></a>
+<a href="#__codelineno-0-4" id="__codelineno-0-4" name="__codelineno-0-4"></a>class Container:
+<a href="#__codelineno-0-5" id="__codelineno-0-5" name="__codelineno-0-5"></a>    def __init__(self):
+<a href="#__codelineno-0-6" id="__codelineno-0-6" name="__codelineno-0-6"></a>        [...]
+<a href="#__codelineno-0-7" id="__codelineno-0-7" name="__codelineno-0-7"></a>        # METRICS
+<a href="#__codelineno-0-8" id="__codelineno-0-8" name="__codelineno-0-8"></a>        self._metrics_repository = MetricsRepository()
+<a href="#__codelineno-0-9" id="__codelineno-0-9" name="__codelineno-0-9"></a>
+<a href="#__codelineno-0-10" id="__codelineno-0-10" name="__codelineno-0-10"></a>        # ACTIONS
+<a href="#__codelineno-0-11" id="__codelineno-0-11" name="__codelineno-0-11"></a>        self._my_service = MyService(
+<a href="#__codelineno-0-12" id="__codelineno-0-12" name="__codelineno-0-12"></a>            self._event_bus,
+<a href="#__codelineno-0-13" id="__codelineno-0-13" name="__codelineno-0-13"></a>            self._logger,
+<a href="#__codelineno-0-14" id="__codelineno-0-14" name="__codelineno-0-14"></a>            self._scheduler,
+<a href="#__codelineno-0-15" id="__codelineno-0-15" name="__codelineno-0-15"></a>            config,
+<a href="#__codelineno-0-16" id="__codelineno-0-16" name="__codelineno-0-16"></a>            self._utils_repository,
+<a href="#__codelineno-0-17" id="__codelineno-0-17" name="__codelineno-0-17"></a>            self._metrics_repository
+<a href="#__codelineno-0-18" id="__codelineno-0-18" name="__codelineno-0-18"></a>        )
+</code></pre></div></li>
+</ul>
+<p>For more info please refer to <code>CREATE_NEW_MICROSERVICE.md</code></p>
+<p>Once you have the metric repository in the service just create a new python file called <code>metrics_repository.py</code></p>
+<h2 id="2-adding-a-new-metric">2. Adding a new metric</h2>
+<p>Existing metrics repositories can be used as references for each metric type use case. Prometheus offers a great
+variety of metric types we can add to the project:</p>
+<h3 id="counter">Counter</h3>
+<p>The counter metric type is used for any value that increases, such as a request count or error count.
+Importantly, a counter should never be used for a value that can decrease (for that see Gauges, below).</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-1-1" id="__codelineno-1-1" name="__codelineno-1-1"></a><span class="kn">from</span> <span class="nn">prometheus_client</span> <span class="kn">import</span> <span class="n">Counter</span>
+<a href="#__codelineno-1-2" id="__codelineno-1-2" name="__codelineno-1-2"></a><span class="n">COMMON_LABELS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"feature"</span><span class="p">,</span> <span class="s2">"system"</span><span class="p">,</span> <span class="s2">"topic"</span><span class="p">,</span> <span class="s2">"severity"</span><span class="p">,</span> <span class="s2">"event"</span><span class="p">]</span>
+<a href="#__codelineno-1-3" id="__codelineno-1-3" name="__codelineno-1-3"></a><span class="n">CREATE_LABELS</span> <span class="o">=</span> <span class="p">[]</span>
+<a href="#__codelineno-1-4" id="__codelineno-1-4" name="__codelineno-1-4"></a>
+<a href="#__codelineno-1-5" id="__codelineno-1-5" name="__codelineno-1-5"></a>
+<a href="#__codelineno-1-6" id="__codelineno-1-6" name="__codelineno-1-6"></a><span class="k">class</span> <span class="nc">MetricsRepository</span><span class="p">:</span>
+<a href="#__codelineno-1-7" id="__codelineno-1-7" name="__codelineno-1-7"></a>    <span class="n">_tasks_created</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="s2">"tasks_created"</span><span class="p">,</span> <span class="s2">"Tasks created"</span><span class="p">,</span> <span class="n">COMMON_LABELS</span> <span class="o">+</span> <span class="n">CREATE_LABELS</span><span class="p">)</span>
+<a href="#__codelineno-1-8" id="__codelineno-1-8" name="__codelineno-1-8"></a>
+<a href="#__codelineno-1-9" id="__codelineno-1-9" name="__codelineno-1-9"></a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a href="#__codelineno-1-10" id="__codelineno-1-10" name="__codelineno-1-10"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_STATIC_LABELS</span> <span class="o">=</span> <span class="p">{</span>
+<a href="#__codelineno-1-11" id="__codelineno-1-11" name="__codelineno-1-11"></a>            <span class="s2">"feature"</span><span class="p">:</span> <span class="s2">"Service name"</span><span class="p">,</span>
+<a href="#__codelineno-1-12" id="__codelineno-1-12" name="__codelineno-1-12"></a>            <span class="s2">"system"</span><span class="p">:</span> <span class="s2">"System name"</span><span class="p">,</span>
+<a href="#__codelineno-1-13" id="__codelineno-1-13" name="__codelineno-1-13"></a>            <span class="s2">"topic"</span><span class="p">:</span> <span class="s2">"Topic name"</span><span class="p">,</span>
+<a href="#__codelineno-1-14" id="__codelineno-1-14" name="__codelineno-1-14"></a>            <span class="s2">"severity"</span><span class="p">:</span> <span class="s2">"&lt;Integer&gt;"</span><span class="p">,</span>
+<a href="#__codelineno-1-15" id="__codelineno-1-15" name="__codelineno-1-15"></a>        <span class="p">}</span>
+<a href="#__codelineno-1-16" id="__codelineno-1-16" name="__codelineno-1-16"></a>
+<a href="#__codelineno-1-17" id="__codelineno-1-17" name="__codelineno-1-17"></a>    <span class="k">def</span> <span class="nf">increment_tasks_created</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">labels</span><span class="p">):</span>
+<a href="#__codelineno-1-18" id="__codelineno-1-18" name="__codelineno-1-18"></a>        <span class="n">labels</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">labels</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_STATIC_LABELS</span><span class="p">}</span>
+<a href="#__codelineno-1-19" id="__codelineno-1-19" name="__codelineno-1-19"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_tasks_created</span><span class="o">.</span><span class="n">labels</span><span class="p">(</span><span class="o">**</span><span class="n">labels</span><span class="p">)</span><span class="o">.</span><span class="n">inc</span><span class="p">()</span>
+</code></pre></div>
+<p>CREATE_LABELS list can be used to expand the metric labels you are going to use. Remember adding any no static label
+when calling the <code>increment_tasks_created_method</code>.</p>
+<p>The counter property <code>tasks_created</code> should create 1 new counter: tasks_created_total. By default, it is set to 0.</p>
+<p>We can use <code>rate(task_created[5m])</code> to calculate the per second rate of creations averaged over the last 5 minutes.</p>
+<h3 id="gauge">Gauge</h3>
+<p>The gauge metric type can be used for values that go down as well as up, such as current memory usage or
+the number of items in a queue.</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-2-1" id="__codelineno-2-1" name="__codelineno-2-1"></a><span class="kn">from</span> <span class="nn">prometheus_client</span> <span class="kn">import</span> <span class="n">Gauge</span>
+<a href="#__codelineno-2-2" id="__codelineno-2-2" name="__codelineno-2-2"></a><span class="n">COMMON_LABELS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"feature"</span><span class="p">,</span> <span class="s2">"system"</span><span class="p">,</span> <span class="s2">"topic"</span><span class="p">]</span>
+<a href="#__codelineno-2-3" id="__codelineno-2-3" name="__codelineno-2-3"></a><span class="n">MEMORY_USAGE_LABELS</span> <span class="o">=</span> <span class="p">[]</span>
+<a href="#__codelineno-2-4" id="__codelineno-2-4" name="__codelineno-2-4"></a>
+<a href="#__codelineno-2-5" id="__codelineno-2-5" name="__codelineno-2-5"></a>
+<a href="#__codelineno-2-6" id="__codelineno-2-6" name="__codelineno-2-6"></a><span class="k">class</span> <span class="nc">MetricsRepository</span><span class="p">:</span>
+<a href="#__codelineno-2-7" id="__codelineno-2-7" name="__codelineno-2-7"></a>    <span class="n">_memory_usage</span> <span class="o">=</span> <span class="n">Gauge</span><span class="p">(</span><span class="s2">"memory_usage"</span><span class="p">,</span> <span class="s2">"Memory Usage"</span><span class="p">,</span> <span class="n">COMMON_LABELS</span> <span class="o">+</span> <span class="n">MEMORY_USAGE_LABELS</span><span class="p">)</span>
+<a href="#__codelineno-2-8" id="__codelineno-2-8" name="__codelineno-2-8"></a>
+<a href="#__codelineno-2-9" id="__codelineno-2-9" name="__codelineno-2-9"></a>    <span class="p">[</span><span class="o">...</span><span class="p">]</span>
+<a href="#__codelineno-2-10" id="__codelineno-2-10" name="__codelineno-2-10"></a>
+<a href="#__codelineno-2-11" id="__codelineno-2-11" name="__codelineno-2-11"></a>    <span class="k">def</span> <span class="nf">increment_memory_usage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">labels</span><span class="p">):</span>
+<a href="#__codelineno-2-12" id="__codelineno-2-12" name="__codelineno-2-12"></a>        <span class="n">labels</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">labels</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_STATIC_LABELS</span><span class="p">}</span>
+<a href="#__codelineno-2-13" id="__codelineno-2-13" name="__codelineno-2-13"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_memory_usage</span><span class="o">.</span><span class="n">labels</span><span class="p">(</span><span class="o">**</span><span class="n">labels</span><span class="p">)</span><span class="o">.</span><span class="n">inc</span><span class="p">()</span>
+<a href="#__codelineno-2-14" id="__codelineno-2-14" name="__codelineno-2-14"></a>
+<a href="#__codelineno-2-15" id="__codelineno-2-15" name="__codelineno-2-15"></a>    <span class="k">def</span> <span class="nf">decrement_memory_usage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">labels</span><span class="p">):</span>
+<a href="#__codelineno-2-16" id="__codelineno-2-16" name="__codelineno-2-16"></a>        <span class="n">labels</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">labels</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_STATIC_LABELS</span><span class="p">}</span>
+<a href="#__codelineno-2-17" id="__codelineno-2-17" name="__codelineno-2-17"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_memory_usage</span><span class="o">.</span><span class="n">labels</span><span class="p">(</span><span class="o">**</span><span class="n">labels</span><span class="p">)</span><span class="o">.</span><span class="n">dec</span><span class="p">()</span>
+<a href="#__codelineno-2-18" id="__codelineno-2-18" name="__codelineno-2-18"></a>
+<a href="#__codelineno-2-19" id="__codelineno-2-19" name="__codelineno-2-19"></a>    <span class="k">def</span> <span class="nf">reset_memory_usage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">labels</span><span class="p">):</span>
+<a href="#__codelineno-2-20" id="__codelineno-2-20" name="__codelineno-2-20"></a>        <span class="n">labels</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">labels</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_STATIC_LABELS</span><span class="p">}</span>
+<a href="#__codelineno-2-21" id="__codelineno-2-21" name="__codelineno-2-21"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_memory_usage</span><span class="o">.</span><span class="n">labels</span><span class="p">(</span><span class="o">**</span><span class="n">labels</span><span class="p">)</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</code></pre></div>
+<p>The gauge property <code>memory_usage</code> should create 1 new counter: memory_usage_inprogress.</p>
+<p>We can use the query <code>avg_over_time(memory_usage[5m])</code> to calculate the average memory usage over the last 5 minutes.</p>
+<h3 id="histogram">Histogram</h3>
+<p>The histogram metric type measures the frequency of value observations that fall into specific predefined buckets.</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-3-1" id="__codelineno-3-1" name="__codelineno-3-1"></a><span class="kn">from</span> <span class="nn">prometheus_client</span> <span class="kn">import</span> <span class="n">Histogram</span>
+<a href="#__codelineno-3-2" id="__codelineno-3-2" name="__codelineno-3-2"></a>
+<a href="#__codelineno-3-3" id="__codelineno-3-3" name="__codelineno-3-3"></a><span class="k">class</span> <span class="nc">MetricsRepository</span><span class="p">:</span>
+<a href="#__codelineno-3-4" id="__codelineno-3-4" name="__codelineno-3-4"></a>    <span class="n">_response_latency</span> <span class="o">=</span> <span class="n">Histogram</span><span class="p">(</span>
+<a href="#__codelineno-3-5" id="__codelineno-3-5" name="__codelineno-3-5"></a>        <span class="s2">"response_latency"</span><span class="p">,</span>
+<a href="#__codelineno-3-6" id="__codelineno-3-6" name="__codelineno-3-6"></a>        <span class="s2">"Response latency"</span><span class="p">,</span>
+<a href="#__codelineno-3-7" id="__codelineno-3-7" name="__codelineno-3-7"></a>        <span class="n">buckets</span><span class="o">=</span><span class="p">[</span><span class="mf">0.11</span><span class="p">,</span> <span class="mf">0.12</span><span class="p">,</span> <span class="mf">0.13</span><span class="p">,</span> <span class="mf">0.14</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.16</span><span class="p">,</span> <span class="mf">0.17</span><span class="p">,</span> <span class="mf">0.18</span><span class="p">,</span> <span class="mf">0.19</span><span class="p">,</span> <span class="mf">0.20</span><span class="p">]</span>
+<a href="#__codelineno-3-8" id="__codelineno-3-8" name="__codelineno-3-8"></a>    <span class="p">)</span>
+<a href="#__codelineno-3-9" id="__codelineno-3-9" name="__codelineno-3-9"></a>
+<a href="#__codelineno-3-10" id="__codelineno-3-10" name="__codelineno-3-10"></a>    <span class="k">def</span> <span class="nf">response_latency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a href="#__codelineno-3-11" id="__codelineno-3-11" name="__codelineno-3-11"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_response_latency</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<a href="#__codelineno-3-12" id="__codelineno-3-12" name="__codelineno-3-12"></a>        <span class="c1"># action()</span>
+<a href="#__codelineno-3-13" id="__codelineno-3-13" name="__codelineno-3-13"></a>
+<a href="#__codelineno-3-14" id="__codelineno-3-14" name="__codelineno-3-14"></a>    <span class="k">def</span> <span class="nf">observe_latency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_amount</span><span class="p">):</span>
+<a href="#__codelineno-3-15" id="__codelineno-3-15" name="__codelineno-3-15"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_response_latency</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="n">time_amount</span><span class="p">)</span>
+</code></pre></div>
+<p>The histogram property <code>response_latency</code> should create 3 new counters:
+response_latency_count, response_latency_sum, and response_latency_bucket.</p>
+<p>Time method times a block of code or function, and observe the duration in seconds. Can be used as a function decorator
+or context manager.</p>
+<p>We can use the following query to calculate the average response latency duration within the last 5 minutes:
+<code>rate(response_latency_sum[5m]) / rate(response_latency_count[5m])</code></p>
+<h3 id="summary">Summary</h3>
+<p>Summaries and histograms share a lot of similarities. So, simply a Histogram is a Summary with quantiles and
+percentiles calculation feature added. Summaries preceded histograms, and the recommendation is 
+very much to use histograms where possible.</p>
+<h2 id="3-testing-the-new-metric">3. Testing the new metric</h2>
+<p>Add your service to the file <code>metrics-dashboard/prometheus/config/prometheus-local.yml</code> in order for Prometheus
+to start scraping metrics from it.</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-4-1" id="__codelineno-4-1" name="__codelineno-4-1"></a>-  job_name: 'my-service'
+<a href="#__codelineno-4-2" id="__codelineno-4-2" name="__codelineno-4-2"></a>
+<a href="#__codelineno-4-3" id="__codelineno-4-3" name="__codelineno-4-3"></a>   scrape_interval: 5s
+<a href="#__codelineno-4-4" id="__codelineno-4-4" name="__codelineno-4-4"></a>   static_configs:
+<a href="#__codelineno-4-5" id="__codelineno-4-5" name="__codelineno-4-5"></a>     - targets: ['my-service:9090']
+</code></pre></div>
+<p>After that you are ready to go, just run your service and prometheus with <code>docker-compose up my-service prometheus</code>.</p>
+<p>If you go to <a href="http://localhost:9090/targets">localhost:9090/targets</a> you should be able to see all the services,
+and the status of yours should be <code>UP</code>.</p>
+<p>You can then go to <a href="http://localhost:9090/graph">localhost:9090/graph</a> in order to monitor the metric you added and
+verify that it works as expected.</p>
+<h2 id="4-verifying-in-production">4. Verifying in production</h2>
+<p>Once you release your MR with the new metric you can start monitoring it in production. Depending on how often the
+action we're measuring with the metric you added happens, it might take a while before it shows up.</p>
+<p>You can monitor through the Prometheus interface at <a href="https://prometheus.mettel-automation.net">prometheus.mettel-automation.net</a>,
+or directly on Grafana through the explorer interface at <a href="http://grafana.mettel-automation.net/explore">grafana.mettel-automation.net/explore</a>
+for a better UX. You'll need to be connected to the VPN in order to access either.</p>
+<h2 id="5-querying-your-metric">5. Querying your metric</h2>
+<p>In order to query your metric you'll need to use PromQL. For each metric we add, Prometheus creates 2 under the hood:
+one for the date it was created and one for the actual value of the metric. They have the suffixes <code>_created</code> and <code>_total</code>.</p>
+<p>The most basic way to monitor your metric would be to query for <code>my_metric_total</code>, which will show the current value of that metric.</p>
+<p>Since most of the metrics we have are used across many services, you may want to filter yours with labels.
+For instance, <code>my_metric_total{feature="My Service"}</code> would filter the results to just those collected by your service.</p>
+<p>For more information about PromQL please refer to <a href="https://prometheus.io/docs/prometheus/latest/querying/basics">prometheus.io/docs/prometheus/latest/querying/basics</a></p>
+</article>
+</div>
+</div>
+</main>
+<footer class="md-footer">
+<nav aria-label="Footer" class="md-footer__inner md-grid">
+<a aria-label="Previous: Gateways" class="md-footer__link md-footer__link--prev" href="../logging/events/gateway-monitor/" rel="prev">
+<div class="md-footer__button md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"></path></svg>
+</div>
+<div class="md-footer__title">
+<div class="md-ellipsis">
+<span class="md-footer__direction">
+                Previous
+              </span>
+              Gateways
+            </div>
+</div>
+</a>
+<a aria-label="Next: Creating new services" class="md-footer__link md-footer__link--next" href="../CREATE_NEW_MICROSERVICE/" rel="next">
+<div class="md-footer__title">
+<div class="md-ellipsis">
+<span class="md-footer__direction">
+                Next
+              </span>
+              Creating new services
+            </div>
+</div>
+<div class="md-footer__button md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"></path></svg>
+</div>
+</a>
+</nav>
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"base": "..", "features": ["header.autohide", "toc.follow", "toc.integrate"], "search": "../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"provider": "mike"}}</script>
+<script src="../assets/javascripts/bundle.748e2769.min.js"></script>
+<script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": false, "draggable": false, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
+</html>
