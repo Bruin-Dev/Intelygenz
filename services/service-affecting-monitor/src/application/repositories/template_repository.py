@@ -163,7 +163,9 @@ class TemplateRepository:
         ]
         centered_headers = [3, 4, 5]
 
+        serial_number_set = set()
         for index, item in enumerate(report_items):
+            serial_number_set.add(item["serial_number"])
             rows.append(
                 [
                     item["serial_number"],
@@ -188,9 +190,7 @@ class TemplateRepository:
         if rows:
             csv_report = {"name": f"daily-bandwidth-report_{date}.csv", "data": self._generate_csv(headers, rows)}
 
-            template_vars["__ROWS__"] = rows
-            template_vars["__HEADERS__"] = headers
-            template_vars["__CENTERED_HEADERS__"] = centered_headers
+            template_vars["__EDGE_COUNT__"] = len(serial_number_set)
         else:
             template_vars["__EMPTY_CSV__"] = True
             csv_report = None
