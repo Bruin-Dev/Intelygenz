@@ -170,9 +170,9 @@ class BruinRepository:
         payload = {"Status": "O"}
         return await self._bruin_client.update_ticket_status(ticket_id, detail_id, payload)
 
-    async def resolve_ticket(self, ticket_id, detail_id):
+    async def resolve_ticket(self, ticket_id, detail_id, interfaces):
         payload = {"Status": "R"}
-        return await self._bruin_client.update_ticket_status(ticket_id, detail_id, payload)
+        return await self._bruin_client.update_ticket_status(ticket_id, detail_id, payload, interfaces)
 
     async def unpause_ticket(self, ticket_id, serial_number, detail_id):
         filters = {}
@@ -207,8 +207,8 @@ class BruinRepository:
     async def get_management_status(self, filters):
         return await self._get_attribute_from_inventory(filters, attr_key="Management Status")
 
-    async def post_outage_ticket(self, client_id, service_number, ticket_contact):
-        response = await self._bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
+    async def post_outage_ticket(self, client_id, service_number, ticket_contact, interfaces):
+        response = await self._bruin_client.post_outage_ticket(client_id, service_number, ticket_contact, interfaces)
 
         status_code = response["status"]
         is_bruin_custom_status = status_code in (409, 471, 472, 473)

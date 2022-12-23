@@ -386,12 +386,15 @@ class BruinClient:
         except Exception as e:
             return {"body": e.args[0], "status": 500}
 
-    async def update_ticket_status(self, ticket_id, detail_id, payload):
+    async def update_ticket_status(self, ticket_id, detail_id, payload, interfaces):
         try:
             logger.info(f"Updating ticket status for ticket id: {ticket_id}")
 
             logger.info(f"Payload that will be applied (parsed to PascalCase): {json.dumps(payload)}")
 
+            if interfaces:
+                payload["WtnInterfaces"] = {detail_id: interfaces}
+                
             response = await self._session.put(
                 f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/details/{detail_id}/status',
                 json=payload,
@@ -491,7 +494,7 @@ class BruinClient:
         except Exception as e:
             return {"body": e.args[0], "status": 500}
 
-    async def post_outage_ticket(self, client_id, service_number, ticket_contact):
+    async def post_outage_ticket(self, client_id, service_number, ticket_contact, interfaces):
         try:
             logger.info(f"Posting outage ticket for client with ID {client_id} and for service number {service_number}")
 
@@ -505,6 +508,9 @@ class BruinClient:
             }
             if ticket_contact:
                 payload["ticketContact"] = ticket_contact
+            
+            if interfaces:
+                payload["WtnInterfaces"] = {service_number: interfaces}
 
             logger.info(f"Posting payload {json.dumps(payload)} to create new outage ticket...")
 
