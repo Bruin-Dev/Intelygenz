@@ -26,6 +26,6 @@ eks_devops_users = [
 ]
 
 eks_ops_users = [
-    "julia.hossu"
+    "alberto.iglesias"
 ]
 

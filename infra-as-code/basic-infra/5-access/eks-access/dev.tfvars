@@ -1,5 +1,5 @@
 eks_developer_users = [
-    "julia.hossu"
+    "alberto.iglesias"
 ]
 
 eks_devops_users = [
