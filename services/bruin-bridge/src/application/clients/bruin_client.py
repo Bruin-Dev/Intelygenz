@@ -390,11 +390,11 @@ class BruinClient:
         try:
             logger.info(f"Updating ticket status for ticket id: {ticket_id}")
 
+            if interfaces:
+                payload["Interfaces"] = interfaces
+
             logger.info(f"Payload that will be applied (parsed to PascalCase): {json.dumps(payload)}")
 
-            if interfaces:
-                payload["WtnInterfaces"] = {detail_id: interfaces}
-                
             response = await self._session.put(
                 f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/details/{detail_id}/status',
                 json=payload,
@@ -508,9 +508,9 @@ class BruinClient:
             }
             if ticket_contact:
                 payload["ticketContact"] = ticket_contact
-            
+
             if interfaces:
-                payload["WtnInterfaces"] = {service_number: interfaces}
+                payload["WtnInterfaces"] = {service_number[0]: interfaces}
 
             logger.info(f"Posting payload {json.dumps(payload)} to create new outage ticket...")
 

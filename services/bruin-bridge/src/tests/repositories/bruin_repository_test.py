@@ -684,13 +684,14 @@ class TestBruinRepository:
         detail_id = 321
         payload = dict(Status="R")
         successful_status_change = "Success"
+        interfaces = ["GE1", "GE2"]
 
         bruin_client = Mock()
         bruin_client.update_ticket_status = AsyncMock(return_value=successful_status_change)
 
         bruin_repository = BruinRepository(config, bruin_client)
-        change_status = await bruin_repository.resolve_ticket(ticket_id, detail_id)
-        bruin_client.update_ticket_status.assert_awaited_once_with(ticket_id, detail_id, payload)
+        change_status = await bruin_repository.resolve_ticket(ticket_id, detail_id, interfaces)
+        bruin_client.update_ticket_status.assert_awaited_once_with(ticket_id, detail_id, payload, interfaces)
         assert change_status == successful_status_change
 
     @pytest.mark.asyncio
@@ -871,6 +872,7 @@ class TestBruinRepository:
         client_id = 9994
         ticket_contact = None
         service_number = "VC05400002265"
+        interfaces = ["GE1", "GE2"]
 
         ticket_id = 4503440
         response_status = 200
@@ -892,9 +894,9 @@ class TestBruinRepository:
 
         bruin_repository = BruinRepository(config, bruin_client)
 
-        result = await bruin_repository.post_outage_ticket(client_id, service_number, ticket_contact)
+        result = await bruin_repository.post_outage_ticket(client_id, service_number, ticket_contact, interfaces)
 
-        bruin_client.post_outage_ticket.assert_awaited_once_with(client_id, service_number, ticket_contact)
+        bruin_client.post_outage_ticket.assert_awaited_once_with(client_id, service_number, ticket_contact, interfaces)
         assert result == {"body": ticket_id, "status": response_status}
 
     @pytest.mark.asyncio
@@ -902,6 +904,7 @@ class TestBruinRepository:
         client_id = 9994
         ticket_contact = None
         service_number = "VC05400002265"
+        interfaces = ["GE1", "GE2"]
         ticket_id = 0
         response_status = 200
         error_msg = "An error occurred while executing the command definition. See the inner exception for details."
@@ -928,9 +931,9 @@ class TestBruinRepository:
 
         bruin_repository = BruinRepository(config, bruin_client)
 
-        result = await bruin_repository.post_outage_ticket(client_id, service_number, ticket_contact)
+        result = await bruin_repository.post_outage_ticket(client_id, service_number, ticket_contact, interfaces)
 
-        bruin_client.post_outage_ticket.assert_awaited_once_with(client_id, service_number, ticket_contact)
+        bruin_client.post_outage_ticket.assert_awaited_once_with(client_id, service_number, ticket_contact, interfaces)
         assert result == {"body": error_msg, "status": error_response_status}
 
     @pytest.mark.asyncio
@@ -938,6 +941,7 @@ class TestBruinRepository:
         client_id = 9994
         ticket_contact = None
         service_number = "VC05400002265"
+        interfaces = ["GE1", "GE2"]
 
         ticket_id = 4503440
         response_status = 409
@@ -959,9 +963,9 @@ class TestBruinRepository:
 
         bruin_repository = BruinRepository(config, bruin_client)
 
-        result = await bruin_repository.post_outage_ticket(client_id, service_number, ticket_contact)
+        result = await bruin_repository.post_outage_ticket(client_id, service_number, ticket_contact, interfaces)
 
-        bruin_client.post_outage_ticket.assert_awaited_once_with(client_id, service_number, ticket_contact)
+        bruin_client.post_outage_ticket.assert_awaited_once_with(client_id, service_number, ticket_contact, interfaces)
         assert result == {"body": ticket_id, "status": response_status}
 
     @pytest.mark.asyncio
@@ -969,6 +973,7 @@ class TestBruinRepository:
         client_id = 9994
         ticket_contact = None
         service_number = "VC05400002265"
+        interfaces = ["GE1", "GE2"]
 
         ticket_id = 4503440
         response_status = 471
@@ -990,9 +995,9 @@ class TestBruinRepository:
 
         bruin_repository = BruinRepository(config, bruin_client)
 
-        result = await bruin_repository.post_outage_ticket(client_id, service_number, ticket_contact)
+        result = await bruin_repository.post_outage_ticket(client_id, service_number, ticket_contact, interfaces)
 
-        bruin_client.post_outage_ticket.assert_awaited_once_with(client_id, service_number, ticket_contact)
+        bruin_client.post_outage_ticket.assert_awaited_once_with(client_id, service_number, ticket_contact, interfaces)
         assert result == {"body": ticket_id, "status": response_status}
 
     @pytest.mark.asyncio
@@ -1000,6 +1005,7 @@ class TestBruinRepository:
         client_id = 9994
         ticket_contact = None
         service_number = "VC05400002265"
+        interfaces = ["GE1", "GE2"]
 
         ticket_id = 4503440
         response_status = 472
@@ -1021,9 +1027,9 @@ class TestBruinRepository:
 
         bruin_repository = BruinRepository(config, bruin_client)
 
-        result = await bruin_repository.post_outage_ticket(client_id, service_number, ticket_contact)
+        result = await bruin_repository.post_outage_ticket(client_id, service_number, ticket_contact, interfaces)
 
-        bruin_client.post_outage_ticket.assert_awaited_once_with(client_id, service_number, ticket_contact)
+        bruin_client.post_outage_ticket.assert_awaited_once_with(client_id, service_number, ticket_contact, interfaces)
         assert result == {"body": ticket_id, "status": response_status}
 
     @pytest.mark.asyncio
@@ -1031,6 +1037,7 @@ class TestBruinRepository:
         client_id = 9994
         ticket_contact = None
         service_number = "VC05400002265"
+        interfaces = ["GE1", "GE2"]
 
         ticket_id = 4503440
         response_status = 473
@@ -1052,9 +1059,9 @@ class TestBruinRepository:
 
         bruin_repository = BruinRepository(config, bruin_client)
 
-        result = await bruin_repository.post_outage_ticket(client_id, service_number, ticket_contact)
+        result = await bruin_repository.post_outage_ticket(client_id, service_number, ticket_contact, interfaces)
 
-        bruin_client.post_outage_ticket.assert_awaited_once_with(client_id, service_number, ticket_contact)
+        bruin_client.post_outage_ticket.assert_awaited_once_with(client_id, service_number, ticket_contact, interfaces)
         assert result == {"body": ticket_id, "status": response_status}
 
     @pytest.mark.asyncio
@@ -1062,6 +1069,7 @@ class TestBruinRepository:
         client_id = 9994
         ticket_contact = None
         service_number = "VC05400002265"
+        interfaces = ["GE1", "GE2"]
 
         response_status = 500
         client_response = {
@@ -1076,9 +1084,9 @@ class TestBruinRepository:
 
         bruin_repository = BruinRepository(config, bruin_client)
 
-        result = await bruin_repository.post_outage_ticket(client_id, service_number, ticket_contact)
+        result = await bruin_repository.post_outage_ticket(client_id, service_number, ticket_contact, interfaces)
 
-        bruin_client.post_outage_ticket.assert_awaited_once_with(client_id, service_number, ticket_contact)
+        bruin_client.post_outage_ticket.assert_awaited_once_with(client_id, service_number, ticket_contact, interfaces)
         assert result == client_response
 
     @pytest.mark.asyncio

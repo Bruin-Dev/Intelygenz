@@ -54,8 +54,9 @@ class TestResolveTicket:
     async def resolve_ticket_200_test(self):
         ticket_id = 123
         detail_id = 432
+        interfaces = ["GE1", "GE2"]
         msg = {
-            "body": {"ticket_id": ticket_id, "detail_id": detail_id},
+            "body": {"ticket_id": ticket_id, "detail_id": detail_id, "interfaces": interfaces},
         }
 
         request_msg = Mock(spec_set=Msg)
@@ -67,5 +68,5 @@ class TestResolveTicket:
         resolve_ticket = ResolveTicket(bruin_repo)
         await resolve_ticket(request_msg)
 
-        bruin_repo.resolve_ticket.assert_awaited_once_with(ticket_id, detail_id)
+        bruin_repo.resolve_ticket.assert_awaited_once_with(ticket_id, detail_id, interfaces)
         request_msg.respond.assert_awaited_once_with(to_json_bytes({"body": "Success", "status": 200}))

@@ -166,7 +166,8 @@ class TestPostOutageTicket:
 
         await post_outage_ticket(request_msg)
 
-        bruin_repository.post_outage_ticket.assert_awaited_once_with(client_id, service_number, ticket_contact=None)
+        bruin_repository.post_outage_ticket.assert_awaited_once_with(
+            client_id, service_number, ticket_contact=None, interfaces=None)
         request_msg.respond.assert_awaited_once_with(
             to_json_bytes(
                 {
@@ -180,6 +181,7 @@ class TestPostOutageTicket:
         client_id = 9994
         ticket_contact = {"email": "test@test.com"}
         service_number = "VC05400002265"
+        interfaces = ["GE1", "GE2"]
 
         outage_ticket_id = 123456
         response_status_code = 200
@@ -192,7 +194,8 @@ class TestPostOutageTicket:
         bruin_repository = Mock()
         bruin_repository.post_outage_ticket = AsyncMock(return_value=repository_response)
 
-        parameters = {"client_id": client_id, "service_number": service_number, "ticket_contact": ticket_contact}
+        parameters = {"client_id": client_id, "service_number": service_number,
+                      "ticket_contact": ticket_contact, "interfaces": interfaces}
         event_bus_request = {"body": parameters}
 
         request_msg = Mock(spec_set=Msg)
@@ -203,7 +206,7 @@ class TestPostOutageTicket:
         await post_outage_ticket(request_msg)
 
         bruin_repository.post_outage_ticket.assert_awaited_once_with(
-            client_id, service_number, ticket_contact=ticket_contact
+            client_id, service_number, ticket_contact=ticket_contact, interfaces=interfaces
         )
         request_msg.respond.assert_awaited_once_with(
             to_json_bytes(
