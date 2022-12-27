@@ -619,7 +619,8 @@ class TestUpdateTicketStatus:
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)) as mock_put:
-            update_ticket_status = await bruin_client.update_ticket_status(ticket_id, detail_id, ticket_status, interfaces)
+            update_ticket_status = await bruin_client.update_ticket_status(
+                ticket_id, detail_id, ticket_status, interfaces)
             mock_put.assert_called_once()
             assert update_ticket_status["body"] == successful_status_change
             assert update_ticket_status["status"] == 200
@@ -643,7 +644,8 @@ class TestUpdateTicketStatus:
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)):
-            update_ticket_status = await bruin_client.update_ticket_status(ticket_id, detail_id, ticket_status, interfaces)
+            update_ticket_status = await bruin_client.update_ticket_status(
+                ticket_id, detail_id, ticket_status, interfaces)
 
             assert update_ticket_status["body"] == failure_status_change
             assert update_ticket_status["status"] == 400
@@ -667,7 +669,8 @@ class TestUpdateTicketStatus:
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)):
-            update_ticket_status = await bruin_client.update_ticket_status(ticket_id, detail_id, ticket_status, interfaces)
+            update_ticket_status = await bruin_client.update_ticket_status(
+                ticket_id, detail_id, ticket_status, interfaces)
 
             bruin_client.login.assert_awaited()
 
@@ -693,7 +696,8 @@ class TestUpdateTicketStatus:
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)):
-            update_ticket_status = await bruin_client.update_ticket_status(ticket_id, detail_id, ticket_status, interfaces)
+            update_ticket_status = await bruin_client.update_ticket_status(
+                ticket_id, detail_id, ticket_status, interfaces)
 
             assert update_ticket_status["body"] == failure_status_change
             assert update_ticket_status["status"] == 403
@@ -717,7 +721,8 @@ class TestUpdateTicketStatus:
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)):
-            update_ticket_status = await bruin_client.update_ticket_status(ticket_id, detail_id, ticket_status, interfaces)
+            update_ticket_status = await bruin_client.update_ticket_status(
+                ticket_id, detail_id, ticket_status, interfaces)
 
             assert update_ticket_status["body"] == "Resource not found"
             assert update_ticket_status["status"] == 404
@@ -741,7 +746,8 @@ class TestUpdateTicketStatus:
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)):
-            update_ticket_status = await bruin_client.update_ticket_status(ticket_id, detail_id, ticket_status, interfaces)
+            update_ticket_status = await bruin_client.update_ticket_status(
+                ticket_id, detail_id, ticket_status, interfaces)
 
             assert update_ticket_status["body"] == "Got internal error from Bruin"
             assert update_ticket_status["status"] == 500
