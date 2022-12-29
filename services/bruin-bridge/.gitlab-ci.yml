@@ -11,8 +11,10 @@ bruin-bridge-linter:
         - services/bruin-bridge/src/config/**/*
         - services/bruin-bridge/src/app.py
         - services/bruin-bridge/Dockerfile
+        - services/bruin-bridge/Dockerfile.packer
         - services/bruin-bridge/pyproject.toml
         - services/bruin-bridge/poetry.lock
+        - services/bruin-bridge/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
@@ -30,8 +32,10 @@ bruin-bridge-test:
         - services/bruin-bridge/src/config/**/*
         - services/bruin-bridge/src/app.py
         - services/bruin-bridge/Dockerfile
+        - services/bruin-bridge/Dockerfile.packer
         - services/bruin-bridge/pyproject.toml
         - services/bruin-bridge/poetry.lock
+        - services/bruin-bridge/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .unittest_module_python_310
