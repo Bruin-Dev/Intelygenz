@@ -25,5 +25,3 @@
   script:
     - cd ci-utils/packer
     - packer build packer.pkr.hcl
-  when: manual
-  allow_failure: false

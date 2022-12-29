@@ -24,3 +24,8 @@ else
   export GRAFANA_INGRESS_HOSTNAME="grafana.mettel-automation.net"
   export GRAFANA_INGRESS_ROOT_URL="https://${GRAFANA_INGRESS_HOSTNAME}"
 fi
+
+if [ -z "$ECR_REPOSITORY_TAG" ]
+then
+  export ECR_REPOSITORY_TAG="${TAG}"
+fi
