@@ -61,7 +61,7 @@ bruin-bridge-build:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   needs:
     - job: bruin-bridge-test
-    - job: sonar
+    - job: sonar-analysis
     - job: semantic-release
       optional: true
 
