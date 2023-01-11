@@ -64,3 +64,4 @@ bruin-bridge-build:
     - job: sonar-analysis
     - job: semantic-release
       optional: true
+
