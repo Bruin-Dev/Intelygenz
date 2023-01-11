@@ -24,4 +24,4 @@
     - source ci-utils/environments/environment_assign.sh
   script:
     - cd ci-utils/packer
-    - packer build packer.pkr.services.hcl
+    - packer build packer.pkr.hcl

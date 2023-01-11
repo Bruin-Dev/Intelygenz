@@ -1,5 +1,5 @@
 #NOTE: This dockerfile is made to be run with context in the root of the monorepo
-FROM ubuntu:18.04
+FROM ubuntu:18.04 AS FEDRAMP
 
 ARG NON_ROOT_USER=nroot
 ARG CONTAINER_VERSION

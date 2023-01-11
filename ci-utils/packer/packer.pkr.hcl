@@ -97,11 +97,6 @@ variable "ECR_REPOSITORY_TAG" {
   default = env("ECR_REPOSITORY_TAG")
 }
 
-variable "DOCKERFILE_NAME" {
-  type    = string
-  default = env("DOCKERFILE_NAME")
-}
-
 variable "PACKER_DIR_MODULE" {
   type    = string
   default = env("PACKER_DIR_MODULE")
@@ -264,7 +259,6 @@ build {
       "--extra-vars", "ecr_repository_uri=${var.ECR_REPOSITORY_URL}",
       "--extra-vars", "ecr_repository_name=${var.ECR_REPOSITORY_NAME}",
       "--extra-vars", "ecr_repository_tag=${var.ECR_REPOSITORY_TAG}",
-      "--extra-vars", "dockerfile_name=${var.DOCKERFILE_NAME}",
     ]
     command = "ANSIBLE_ROLES_PATH=/app/ansible/roles ansible-playbook"
     galaxy_collections_path = "/app/ansible/ansible_collections"
