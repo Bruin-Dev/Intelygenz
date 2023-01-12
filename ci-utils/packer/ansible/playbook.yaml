@@ -31,12 +31,11 @@
     - name: Build an image with BuildKit and push it to a private repo
       vars:
         image: "{{ ecr_repository_image }}"
-        tag: "{{ ecr_repository_tag }}"
       ansible.builtin.shell:
         cmd: |-
           export DOCKER_BUILDKIT=1
-          docker build -t {{ image }}:{{ tag }} --target FEDRAMP .
-          docker push {{ image }}:{{ tag }}
+          docker build -t {{ image }} --target FEDRAMP .
+          docker push {{ image }}
         chdir: "/app"
 
     #- name: Build image 
