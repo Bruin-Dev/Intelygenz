@@ -39,6 +39,7 @@ bruin-bridge-test:
         - services/bruin-bridge/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
         - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .unittest_module_python_310
   needs: ["bruin-bridge-linter"]
