@@ -179,8 +179,7 @@ build {
     environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
     inline = [
       "echo '** Enable Ubuntu Pro services **'",
-      "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
-      "sudo killall apt-get",
+      "cloud-init status --wait",
       "sudo apt-get update && sudo apt-get upgrade -yq",
       "echo '** Enabling UA services already enabled will cause the pipeline to fail **'",
       "sudo pro enable cc-eal cis fips --assume-yes",
