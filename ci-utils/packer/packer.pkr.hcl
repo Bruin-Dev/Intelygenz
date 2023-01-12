@@ -162,7 +162,9 @@ build {
     inline = [
       "echo '** Create fips-enabled packages directory **'",
       "sudo mkdir -p /app/ubuntu18-fips/packages",
-      "sudo chmod -R 777 /app"
+      "sudo chmod -R 777 /app",
+      "sudo mkdir -p /pyutils_automation/py310",
+      "sudo chmod -R 777 /pyutils_automation/py310"
     ]
     inline_shebang = "/bin/bash -xe"
   }
@@ -172,6 +174,13 @@ build {
     sources      = [
       "${var.PACKER_DIR_MODULE}",
       "./"
+    ]
+  }
+
+  provisioner "file" {
+    destination = "/pyutils_automation/py310/"
+    sources      = [
+      "./../../pyutils_automation/py310",
     ]
   }
 
