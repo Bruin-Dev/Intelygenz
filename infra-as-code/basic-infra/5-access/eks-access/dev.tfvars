@@ -26,5 +26,6 @@ eks_ops_users = [
     "Swang@mettel.net",
     "srajvanshi@mettel.net",
     "hli@mettel.net",
-    "yornstein@mettel.net"
+    "yornstein@mettel.net",
+    "atawil@mettel.net"
 ]
