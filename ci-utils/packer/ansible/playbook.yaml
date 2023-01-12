@@ -31,7 +31,6 @@
     - name: Build image 
       community.docker.docker_image:
         build:
-          dockerfile: "{{ dockerfile_name }}"
           args:
              CONTAINER_VERSION: "{{ ecr_repository_tag }}"
           target: FEDRAMP
