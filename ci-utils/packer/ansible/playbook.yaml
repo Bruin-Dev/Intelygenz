@@ -34,11 +34,10 @@
         tag: "{{ ecr_repository_tag }}"
       ansible.builtin.shell:
         cmd: |-
+          export DOCKER_BUILDKIT=
           docker build -t {{ image }}:{{ tag }} --target FEDRAMP .
           docker push {{ image }}:{{ tag }}
         chdir: "/app"
-        environment: 
-          DOCKER_BUILDKIT: 1
 
     #- name: Build image 
     #  community.docker.docker_image:
