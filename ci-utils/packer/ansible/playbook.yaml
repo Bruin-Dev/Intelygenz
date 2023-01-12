@@ -28,14 +28,26 @@
       ansible.builtin.shell: "aws --region us-east-1 ecr get-login-password | docker login --username AWS --password-stdin {{ ecr_repository_uri }}"
       when: ecr_repository_uri is not none and ecr_repository_uri != ''
 
-    - name: Build image 
-      community.docker.docker_image:
-        build:
-          args:
-             CONTAINER_VERSION: "{{ ecr_repository_tag }}"
-          target: FEDRAMP
-          path: /app
-        name: "{{ ecr_repository_image }}"
+    - name: Build an image with BuildKit and push it to a private repo
+      vars:
+        image: "{{ ecr_repository_image }}"
         tag: "{{ ecr_repository_tag }}"
-        push: true
-        source: build
+      ansible.builtin.shell:
+        cmd: |-
+          docker build -t {{ image }}:{{ tag }} --target FEDRAMP .
+          docker push {{ image }}:{{ tag }}
+        chdir: "/app"
+        environment: 
+          DOCKER_BUILDKIT: 1
+
+    #- name: Build image 
+    #  community.docker.docker_image:
+    #    build:
+    #      args:
+    #         CONTAINER_VERSION: "{{ ecr_repository_tag }}"
+    #      target: FEDRAMP
+    #      path: /app
+    #    name: "{{ ecr_repository_image }}"
+    #    tag: "{{ ecr_repository_tag }}"
+    #    push: true
+    #    source: build
