@@ -173,6 +173,7 @@ build {
     destination = "/app/"
     sources      = [
       "${var.PACKER_DIR_MODULE}",
+       "./",
     ]
   }
 
