@@ -87,7 +87,7 @@ COPY --chown=${NON_ROOT_USER}:0 pyutils_automation/py310 /pyutils_automation/py3
 WORKDIR /pyutils_automation/py310
 RUN poetry install --only main
 
-COPY --chown=${NON_ROOT_USER}:0 bruin-bridge/ /home/${NON_ROOT_USER}/app
+COPY --chown=${NON_ROOT_USER}:0 app/ /home/${NON_ROOT_USER}/app
 WORKDIR /home/${NON_ROOT_USER}/app
 RUN poetry install --only main
 
