@@ -177,13 +177,6 @@ build {
   }
 
   provisioner "file" {
-    destination = "/"
-    sources      = [
-      "./",
-    ]
-  }
-
-  provisioner "file" {
     destination = "/pyutils_automation/py310/"
     sources      = [
       "./../../pyutils_automation/py310",

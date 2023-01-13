@@ -46,7 +46,7 @@ USER root
 WORKDIR /tmp
 
 # Copy and install FIPS compliant cryptography packages
-COPY ubuntu18-fips/packages packages/
+COPY /app/ubuntu18-fips/packages packages/
 
 # Install Python 3.10 and configure as default
 # DL3008 We won't pin versions here
@@ -95,4 +95,4 @@ RUN poetry install --only main
 EXPOSE 5000 9090
 
 # Run the service
-CMD ["python3", "-u", "src/app.py"]
+CMD ["python3", "-u", "/app/src/app.py"]
