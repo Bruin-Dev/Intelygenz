@@ -173,7 +173,13 @@ build {
     destination = "/app/"
     sources      = [
       "${var.PACKER_DIR_MODULE}",
-      "./"
+    ]
+  }
+
+  provisioner "file" {
+    destination = "/ubuntu18-fips/"
+    sources      = [
+      "./",
     ]
   }
 
