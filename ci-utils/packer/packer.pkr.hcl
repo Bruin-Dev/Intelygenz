@@ -177,7 +177,7 @@ build {
   }
 
   provisioner "file" {
-    destination = "/ubuntu18-fips/"
+    destination = "/"
     sources      = [
       "./",
     ]
