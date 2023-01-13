@@ -257,7 +257,9 @@ build {
       "unzip -qq awscliv2.zip",
       "sudo ./aws/install",
       "export AWS_ACCESS_KEY_ID=${var.AWS_ACCESS_KEY_ID}",
-      "export AWS_SECRET_ACCESS_KEY=${var.AWS_SECRET_ACCESS_KEY}"
+      "export AWS_SECRET_ACCESS_KEY=${var.AWS_SECRET_ACCESS_KEY}",
+      "ls -al",
+      "ls -al /app",
     ]
     inline_shebang = "/bin/bash -xe"
   }
