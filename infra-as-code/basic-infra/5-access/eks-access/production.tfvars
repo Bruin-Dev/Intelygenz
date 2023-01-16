@@ -23,7 +23,15 @@ eks_devops_users = [
     "alejandro.aceituna",
     "daniel.fernandez",
     "sergio.delpuerto",
-    "asumarokoff@mettel.net"
+    "asumarokoff@mettel.net",
+    "anath@mettel.net",
+    "xwan@mettel.net",
+    "orahman@mettel.net",
+    "Swang@mettel.net",
+    "srajvanshi@mettel.net",
+    "hli@mettel.net",
+    "atawil@mettel.net",
+    "ademeo@mettel.net"
 ]
 
 eks_ops_users = [
