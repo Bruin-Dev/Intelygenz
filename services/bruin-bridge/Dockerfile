@@ -60,10 +60,10 @@ RUN apt-get update && \
     ./configure --enable-optimizations && \
     make altinstall
 
-RUN cd .. && \
-    rm -rf Python-3.10.4.tgz && \
-    rm -rf Python-3.10.4 && \
-    apt-get remove wget build-essential checkinstall 
+#RUN cd .. && \
+#    rm -rf Python-3.10.4.tgz && \
+#    rm -rf Python-3.10.4 && \
+#    apt-get remove wget build-essential checkinstall 
 
 # Install Poetry in a system-wide location
 RUN wget -q https://install.python-poetry.org -O poetry-install.py && \
