@@ -52,11 +52,18 @@ COPY /app/ubuntu18-fips/packages packages/
 # DL3008 We won't pin versions here
 # hadolint ignore=DL3008 ignore=DL3015
 RUN apt-get update && \
+    apt-get install --yes --quiet build-essential checkinstall  libreadline-gplv2-dev  libncursesw5-dev  libssl-dev  libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev && \
     apt-get install --yes --quiet --no-install-recommends wget software-properties-common && \
-    add-apt-repository ppa:deadsnakes/ppa && \
-    apt-get --yes --quiet install python3.10 && \
-    ln -s /usr/bin/python3.10 /usr/local/bin/python3 && \
-    ln -s /usr/bin/python3.10 /usr/local/bin/python
+    wget https://www.python.org/ftp/python/3.10.4/Python-3.10.4.tgz && \
+    tar xzf Python-3.10.4.tgz && \
+    cd Python-3.10.4 && \
+    ./configure --enable-optimizations && \
+    make altinstall
+
+RUN cd .. && \
+    rm -rf Python-3.10.4.tgz && \
+    rm -rf Python-3.10.4 && \
+    apt-get remove wget build-essential checkinstall 
 
 # Install Poetry in a system-wide location
 RUN wget -q https://install.python-poetry.org -O poetry-install.py && \
