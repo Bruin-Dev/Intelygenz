@@ -266,8 +266,7 @@ build {
       "sudo ./aws/install",
       "export AWS_ACCESS_KEY_ID=${var.AWS_ACCESS_KEY_ID}",
       "export AWS_SECRET_ACCESS_KEY=${var.AWS_SECRET_ACCESS_KEY}",
-      "ls -al",
-      "ls -al /app",
+      "ls -al /pyutils_automation/py310/",
     ]
     inline_shebang = "/bin/bash -xe"
   }
