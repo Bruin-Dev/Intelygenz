@@ -34,7 +34,7 @@
       ansible.builtin.shell:
         cmd: |-
           export DOCKER_BUILDKIT=1
-          docker build -t {{ image }} --target FEDRAMP --file /app/Dockerfile .
+          docker build -t {{ image }} --target FEDRAMP --file /app/service/Dockerfile .
           docker push {{ image }}
         chdir: "/"
 
