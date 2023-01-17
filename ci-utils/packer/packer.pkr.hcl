@@ -162,7 +162,9 @@ build {
     inline = [
       "echo '** Create fips-enabled packages directory **'",
       "sudo mkdir -p /app/ubuntu18-fips/packages",
+      "sudo mkdir -p /app/service",
       "sudo chmod -R 777 /app",
+      "sudo chmod -R 777 /app/service",
       "sudo mkdir -p /pyutils_automation/py310",
       "sudo chmod -R 777 /pyutils_automation/py310"
     ]
