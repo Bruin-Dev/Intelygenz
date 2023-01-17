@@ -188,7 +188,7 @@ build {
   provisioner "file" {
     destination = "/pyutils_automation/py310/"
     sources      = [
-      "./../../pyutils_automation/py310",
+      "./../../pyutils_automation/py310/",
     ]
   }
 
