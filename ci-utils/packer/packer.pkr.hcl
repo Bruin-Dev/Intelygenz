@@ -172,8 +172,14 @@ build {
   provisioner "file" {
     destination = "/app/"
     sources      = [
-      "${var.PACKER_DIR_MODULE}",
        "./",
+    ]
+  }
+
+  provisioner "file" {
+    destination = "/app/service/"
+    sources      = [
+      "${var.PACKER_DIR_MODULE}",
     ]
   }
 
