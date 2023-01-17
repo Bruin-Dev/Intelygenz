@@ -84,6 +84,8 @@ WORKDIR /home/${NON_ROOT_USER}
 
 # Copy utils and install with Poetry
 COPY --chown=${NON_ROOT_USER}:0 pyutils_automation/py310 /home/${NON_ROOT_USER}/pyutils_automation/py310
+WORKDIR /home/${NON_ROOT_USER}/pyutils_automation/py310
+RUN poetry install --only main
 
 COPY --chown=${NON_ROOT_USER}:0 /app/service /home/${NON_ROOT_USER}/app/service
 WORKDIR /home/${NON_ROOT_USER}/app/service

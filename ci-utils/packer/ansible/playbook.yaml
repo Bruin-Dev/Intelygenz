@@ -37,15 +37,3 @@
           docker build -t {{ image }} --target FEDRAMP --file /app/service/Dockerfile .
           docker push {{ image }}
         chdir: "/"
-
-    #- name: Build image 
-    #  community.docker.docker_image:
-    #    build:
-    #      args:
-    #         CONTAINER_VERSION: "{{ ecr_repository_tag }}"
-    #      target: FEDRAMP
-    #      path: /app
-    #    name: "{{ ecr_repository_image }}"
-    #    tag: "{{ ecr_repository_tag }}"
-    #    push: true
-    #    source: build
