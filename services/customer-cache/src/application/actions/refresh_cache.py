@@ -266,7 +266,9 @@ class RefreshCache:
                 ticket_contact_response = await self._bruin_repository.get_ticket_contact(client_id)
                 if ticket_contact_response["status"] not in range(200, 300):
                     logger.error(
-                        f"Error while fetching ticket contact details for edge {serial_number}: {ticket_contact_response}")
+                        f"Error while fetching ticket contact details for edge {serial_number}: "
+                        f"{ticket_contact_response}"
+                    )
                     return
 
                 ticket_contact_details: dict = iter(ticket_contact_response["body"] or None)
