@@ -142,6 +142,12 @@ class GetSiteInfo(Subscription):
 
 
 @dataclass(kw_only=True)
+class GetTicketContacts(Subscription):
+    subject: str = "bruin.get.ticket.contacts"
+    queue: str = "bruin_bridge"
+
+
+@dataclass(kw_only=True)
 class MarkBruinEmailAsDone(Subscription):
     subject: str = "bruin.mark.email.done"
     queue: str = "bruin_bridge"

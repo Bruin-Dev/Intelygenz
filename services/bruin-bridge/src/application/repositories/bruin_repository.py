@@ -379,6 +379,29 @@ class BruinRepository:
         response["body"] = documents[0]
         return response
 
+    async def get_ticket_contacts(self, params):
+        response = await self._bruin_client.get_ticket_contacts(params)
+
+        if response["status"] not in range(200, 300):
+            logger.error(
+                f"Got response with status {response['status']} while getting ticket contacts information for params {params}. body: {response['body']}"
+            )
+            return response
+
+        results = response["body"].get("results", [])
+        if not results:
+            msg = f"No ticket contacts information was found for client {params['client_id']}"
+            logger.warning(msg)
+
+            response["status"] = 404
+            response[
+                "body"
+            ] = f"No ticket contacts information was found for client {params['client_id']}"
+            return response
+
+        response["body"] = results
+        return response
+
     async def mark_email_as_done(self, email_id: int):
         response = await self._bruin_client.mark_email_as_done(email_id)
 

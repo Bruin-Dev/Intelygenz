@@ -1104,6 +1104,67 @@ class BruinClient:
         except Exception as e:
             return {"body": e.args[0], "status": 500}
 
+    async def get_ticket_contacts(self, params):
+        try:
+            parsed_params = humps.pascalize(params)
+
+            logger.info(f"Getting Bruin Ticket Contacts for params: {params}")
+            logger.info(self._config.BRUIN_CONFIG["base_url"])
+            logger.info(parsed_params)
+            return_response = dict.fromkeys(["body", "status"])
+
+            try:
+                await self.login()
+                response = await self._session.get(
+                    f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/Contacts',
+                    params=parsed_params,
+                    headers=self._get_request_headers(),
+                    ssl=False,
+                )
+            except aiohttp.ClientConnectionError as e:
+                logger.error(f"A connection error happened while trying to connect to Bruin API. {e}")
+                return_response["body"] = f"Connection error in Bruin API. {e}"
+                return_response["status"] = 500
+                return return_response
+
+            if response.status in range(200, 300):
+                logger.info(f"Got HTTP 200 from GET /api/Ticket/Contacts for params {json.dumps(params)}")
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+
+            if response.status == 400:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                logger.error(f"Got error from Bruin {response_json}")
+
+            if response.status == 401:
+                logger.error(f"Got 401 from Bruin. Re-logging in...")
+                await self.login()
+                return_response["body"] = BRUIN_401_RESPONSE
+                return_response["status"] = response.status
+
+            if response.status == 403:
+                logger.error(f"Got HTTP 403 from Bruin")
+                return_response["body"] = {"error": "403 error"}
+                return_response["status"] = response.status
+
+            if response.status == 404:
+                logger.error(f"Got HTTP 404 from Bruin")
+                return_response["body"] = BRUIN_404_RESPONSE
+                return_response["status"] = response.status
+
+            if response.status in range(500, 513):
+                logger.error(f"Got HTTP {response.status} from Bruin")
+                return_response["body"] = BRUIN_500_RESPONSE
+                return_response["status"] = 500
+
+            return return_response
+
+        except Exception as e:
+            return {"body": e.args[0], "status": 500}
+
     async def mark_email_as_done(self, email_id: int):
         try:
             logger.info(f"Marking email as done: {email_id}")

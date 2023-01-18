@@ -2160,6 +2160,87 @@ class TestBruinRepository:
         assert result == expected_response
 
     @pytest.mark.asyncio
+    async def get_ticket_contacts_ok_test(self):
+        client_id = 72959
+        shared_payload = {"client_id": client_id}
+
+        logger = Mock()
+
+        ticket_contacts_info = [
+            {
+                "UserID": "8265b395-aab9-e711-8110-0050568529c0",
+                "DirID": 203013,
+                "ClientID": 9994,
+                "Username": "TEST0132@GMAIL.COM",
+                "Email": "test0132@gmail.com",
+                "FirstName": "Testyzhaitesting",
+                "LastName": "0132test"
+            },
+            {
+                "UserID": "6ef49805-f474-e611-80fb-0050568529c0",
+                "DirID": 202080,
+                "ClientID": 9994,
+                "Username": "rnkcnt9994@hotmail.com",
+                "Email": "rnkcnt9994@hotmail.com",
+                "FirstName": "Rnk",
+                "LastName": "9994cnt"
+            }
+        ]
+
+        get_ticket_contacts_response = {
+            "body": {
+                "results": ticket_contacts_info
+            },
+            "status": 200,
+        }
+
+        bruin_client = Mock()
+        bruin_client.get_ticket_contacts = AsyncMock(return_value=get_ticket_contacts_response)
+
+        bruin_repository = BruinRepository(config, bruin_client)
+
+        result = await bruin_repository.get_ticket_contacts(params=shared_payload)
+
+        bruin_client.get_ticket_contacts.assert_awaited_once_with(shared_payload)
+
+        expected_response = {
+            "body": ticket_contacts_info,
+            "status": 200,
+        }
+        assert result == expected_response
+
+    @pytest.mark.asyncio
+    async def get_ticket_contacts_with_response_having_empty_list_of_ticket_contacts_test(self):
+        client_id = 72959
+        shared_payload = {
+            "client_id": client_id
+        }
+
+        get_ticket_contacts_response = {
+            "body": {
+                "results": [],
+            },
+            "status": 200,
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.get_ticket_contacts = AsyncMock(return_value=get_ticket_contacts_response)
+
+        bruin_repository = BruinRepository(config, bruin_client)
+
+        result = await bruin_repository.get_ticket_contacts(params=shared_payload)
+
+        bruin_client.get_ticket_contacts.assert_awaited_once_with(shared_payload)
+
+        expected_response = {
+            "body": f"No ticket contacts information was found for client {client_id}",
+            "status": 404,
+        }
+        assert result == expected_response
+
+    @pytest.mark.asyncio
     async def mark_email_as_done_ok_test(self):
         email_id = 12345
 

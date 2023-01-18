@@ -3809,6 +3809,154 @@ class TestGetSite:
             assert ticket_details["status"] == 500
 
 
+class TestGetTicketContacts:
+    @pytest.mark.asyncio
+    async def get_ticket_contacts_test(self):
+        client_id = 72959
+        params = {"client_id": client_id}
+        get_ticket_contacts_response = {
+            "Results": [
+                {
+                    "UserID": "8265b395-aab9-e711-8110-0050568529c0",
+                    "DirID": 203013,
+                    "ClientID": 9994,
+                    "Username": "TEST0132@GMAIL.COM",
+                    "Email": "test0132@gmail.com",
+                    "FirstName": "Testyzhaitesting",
+                    "LastName": "0132test"
+                },
+                {
+                    "UserID": "6ef49805-f474-e611-80fb-0050568529c0",
+                    "DirID": 202080,
+                    "ClientID": 9994,
+                    "Username": "rnkcnt9994@hotmail.com",
+                    "Email": "rnkcnt9994@hotmail.com",
+                    "FirstName": "Rnk",
+                    "LastName": "9994cnt"
+                }
+            ]
+        }
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=get_ticket_contacts_response)
+        response_mock.status = 200
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
+            ticket_details = await bruin_client.get_ticket_contacts(params)
+
+            mock_get.assert_called_once()
+            assert ticket_details["body"] == get_ticket_contacts_response
+            assert ticket_details["status"] == 200
+
+    @pytest.mark.asyncio
+    async def get_site_with_400_status_test(self):
+        client_id = 72959
+        site_id = 343443
+        params = {"client_id": client_id, "site_id": site_id}
+        error_response = {"error": "400 error"}
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=error_response)
+        response_mock.status = 400
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = AsyncMock()
+
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
+            ticket_details = await bruin_client.get_site(params)
+
+            assert ticket_details["body"] == error_response
+            assert ticket_details["status"] == 400
+
+    @pytest.mark.asyncio
+    async def get_ticket_contacts_with_401_status_test(self):
+        client_id = 72959
+        params = {"client_id": client_id}
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value={})
+        response_mock.status = 401
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = AsyncMock()
+
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
+            ticket_details = await bruin_client.get_ticket_contacts(params)
+            bruin_client.login.assert_awaited()
+
+            assert ticket_details["body"] == "Got 401 from Bruin"
+            assert ticket_details["status"] == 401
+
+    @pytest.mark.asyncio
+    async def get_ticket_contacts_with_403_status_test(self):
+        client_id = 72959
+        params = {"client_id": client_id}
+        error_response = {"error": "403 error"}
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=error_response)
+        response_mock.status = 403
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = AsyncMock()
+
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
+            ticket_details = await bruin_client.get_ticket_contacts(params)
+
+            assert ticket_details["body"] == error_response
+            assert ticket_details["status"] == 403
+
+    @pytest.mark.asyncio
+    async def get_ticket_contacts_with_404_status_test(self):
+        client_id = 72959
+        params = {"client_id": client_id}
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value={})
+        response_mock.status = 404
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = AsyncMock()
+
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
+            ticket_details = await bruin_client.get_ticket_contacts(params)
+
+            assert ticket_details["body"] == "Resource not found"
+            assert ticket_details["status"] == 404
+
+    @pytest.mark.asyncio
+    async def get_ticket_contacts_with_500_status_test(self):
+        client_id = 72959
+        params = {"client_id": client_id}
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value={})
+        response_mock.status = 500
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = AsyncMock()
+
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
+            ticket_details = await bruin_client.get_ticket_contacts(params)
+
+            assert ticket_details["body"] == "Got internal error from Bruin"
+            assert ticket_details["status"] == 500
+
+
 class TestMarkEmailAsDone:
     @pytest.mark.asyncio
     async def mark_email_as_done_test(self):
