@@ -166,7 +166,7 @@ build {
       "sudo chmod -R 777 /app",
       "sudo chmod -R 777 /app/service",
       "sudo mkdir -p /pyutils_automation/py310",
-      "sudo chmod -R 777 /pyutils_automation/py310"
+      "sudo chmod -R 777 /pyutils_automation/py310",
     ]
     inline_shebang = "/bin/bash -xe"
   }
