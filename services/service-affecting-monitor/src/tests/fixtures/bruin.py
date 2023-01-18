@@ -191,6 +191,99 @@ def make_contact_info():
     return _inner
 
 
+@pytest.fixture(scope="session")
+def make_ticket_contact_details():
+    def _inner(
+        *,
+        first_name: str = "",
+        last_name: str = "",
+        email: str = "",
+        phone: int = 0
+    ):
+        return {
+            "FirstName": first_name,
+            "LastName": last_name,
+            "Email": email,
+            "Phone": phone
+        }
+
+    return _inner
+
+
+@pytest.fixture(scope="session")
+def make_ticket_contact_info():
+    def _inner(
+        *,
+        first_name: str = "",
+        last_name: str = "",
+        email: str = "",
+        phone: str = None,
+    ):
+        obj = [
+            {
+                "email": email,
+                "name": f'{first_name} {last_name}',
+                "type": "ticket",
+            },
+            {
+                "email": email,
+                "name": f'{first_name} {last_name}',
+                "type": "site",
+            },
+        ]
+
+        if phone:
+            obj[0]["phone"] = phone
+            obj[1]["phone"] = phone
+
+        return obj
+
+    return _inner
+
+
+@pytest.fixture(scope="session")
+def make_ticket_contact_additional_subscribers():
+    def _inner(
+        *,
+        first_name: str = "",
+        last_name: str = "",
+        email: str = "",
+        phone: int = 0
+    ):
+        obj = [
+            {
+                "FirstName": first_name,
+                "LastName": last_name,
+                "Email": email,
+                "Phone": phone
+            },
+            {
+                "FirstName": first_name,
+                "LastName": last_name,
+                "Email": email,
+                "Phone": phone
+            },
+        ]
+
+        return obj
+
+    return _inner
+
+
+@pytest.fixture(scope="session")
+def make_subscribers():
+    def _inner(
+        *,
+        email: str = ""
+    ):
+        if not email:
+            return []
+
+        return [email, email]
+
+    return _inner
+
+
 # RPC requests
 @pytest.fixture(scope="session")
 def make_get_tickets_request(make_rpc_request):

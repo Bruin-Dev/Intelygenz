@@ -277,6 +277,51 @@ class BruinRepository:
 
         return response
 
+    async def subscribe_user_to_ticket(self, ticket_id, subscriber):
+        err_msg = None
+        request_details = {
+            "request_id": uuid(),
+            "body": {
+                "subscriptionType": "2",
+                "user": {
+                    "email": subscriber
+                }
+            },
+        }
+
+        try:
+            logger.info(f"Subscribing user {subscriber} to ticket {ticket_id}...")
+
+            response = get_data_from_response_message(
+                await self._nats_client.request(
+                    "bruin.subscribe.user", to_json_bytes(request_details), timeout=150
+                )
+            )
+
+        except Exception as e:
+            err_msg = f"An error occurred while subscribing user {subscriber} to ticket {ticket_id} -> {e}"
+            response = nats_error_response
+        else:
+            response_body = response["body"]
+            response_status = response["status"]
+
+            if response_status in range(200, 300):
+                logger.info(
+                    f"Subscriber {subscriber} subscribed successfully to ticket {ticket_id}!"
+                )
+            else:
+                err_msg = (
+                    f"Error while subscribing user {subscriber} to ticket {ticket_id} in "
+                    f"{self._config.ENVIRONMENT_NAME.upper()} environment: "
+                    f"Error {response_status} - {response_body}"
+                )
+
+        if err_msg:
+            logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
     async def open_ticket(self, ticket_id: int, detail_id: int):
         err_msg = None
 
@@ -492,6 +537,49 @@ class BruinRepository:
             contact_info[1]["phone"] = site_detail_phone
 
         return contact_info
+
+    @staticmethod
+    def get_contact_info_for_ticket(ticket_contact_details):
+        ticket_contact_detail_first_name = ticket_contact_details["FirstName"]
+        ticket_contact_detail_last_name = ticket_contact_details["LastName"]
+        ticket_contact_detail_phone = ticket_contact_details["Phone"]
+        ticket_contact_detail_email = ticket_contact_details["Email"]
+
+        if (ticket_contact_detail_first_name is None
+            or ticket_contact_detail_last_name is None
+                or ticket_contact_detail_email is None):
+            return None
+
+        full_name = ticket_contact_detail_first_name + " " + ticket_contact_detail_last_name
+
+        contact_info = [
+            {
+                "email": ticket_contact_detail_email,
+                "name": full_name,
+                "type": "ticket",
+            },
+            {
+                "email": ticket_contact_detail_email,
+                "name": full_name,
+                "type": "site",
+            },
+        ]
+
+        if ticket_contact_detail_phone is not None:
+            contact_info[0]["phone"] = ticket_contact_detail_phone
+            contact_info[1]["phone"] = ticket_contact_detail_phone
+
+        return contact_info
+
+    @staticmethod
+    def get_ticket_contact_additional_subscribers(ticket_contact_additional_subscribers):
+        subscribers = []
+
+        for subscriber in ticket_contact_additional_subscribers:
+            if subscriber["Email"]:
+                subscribers.append(subscriber["Email"])
+
+        return subscribers
 
     async def get_affecting_tickets(self, client_id: int, ticket_statuses: list, *, service_number: str = None):
         ticket_topic = "VAS"

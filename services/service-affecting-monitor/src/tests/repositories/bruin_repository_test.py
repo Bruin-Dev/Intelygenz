@@ -1,5 +1,6 @@
 import asyncio
 import json
+import os
 from typing import Any
 from unittest.mock import AsyncMock, Mock, call, patch
 
@@ -788,6 +789,112 @@ class TestBruinRepository:
 
         assert contact_info is None
 
+    def get_contact_info_for_ticket__all_fields_ok_test(self, bruin_repository, make_ticket_contact_details, make_ticket_contact_info):
+        ticket_contact_detail_email = "test@email.com"
+        ticket_contact_detail_phone = "510-111-111"
+        ticket_contact_detail_first_name = "first"
+        ticket_contact_detail_last_name = "last"
+
+        ticket_contact_details = make_ticket_contact_details(
+            first_name=ticket_contact_detail_first_name,
+            last_name=ticket_contact_detail_last_name,
+            email=ticket_contact_detail_email,
+            phone=ticket_contact_detail_phone
+        )
+
+        contact_info = bruin_repository.get_contact_info_for_ticket(ticket_contact_details)
+
+        expected = make_ticket_contact_info(
+            first_name=ticket_contact_detail_first_name,
+            last_name=ticket_contact_detail_last_name,
+            email=ticket_contact_detail_email,
+            phone=ticket_contact_detail_phone
+        )
+
+        assert contact_info == expected
+
+    def get_contact_info_for_ticket__no_phone_test(self, bruin_repository, make_ticket_contact_details, make_ticket_contact_info):
+        ticket_contact_detail_email = "test@email.com"
+        ticket_contact_detail_phone = None
+        ticket_contact_detail_first_name = "first"
+        ticket_contact_detail_last_name = "last"
+
+        ticket_contact_details = make_ticket_contact_details(
+            first_name=ticket_contact_detail_first_name,
+            last_name=ticket_contact_detail_last_name,
+            email=ticket_contact_detail_email,
+            phone=ticket_contact_detail_phone
+        )
+
+        contact_info = bruin_repository.get_contact_info_for_ticket(ticket_contact_details)
+
+        expected = make_ticket_contact_info(
+            first_name=ticket_contact_detail_first_name,
+            last_name=ticket_contact_detail_last_name,
+            email=ticket_contact_detail_email,
+            phone=ticket_contact_detail_phone
+        )
+
+        assert contact_info == expected
+
+    def get_contact_info_for_ticket__no_email_test(self, bruin_repository, make_ticket_contact_details):
+        ticket_contact_detail_email = None
+        ticket_contact_detail_phone = "510-111-111"
+        ticket_contact_detail_first_name = "first"
+        ticket_contact_detail_last_name = "last"
+
+        ticket_contact_details = make_ticket_contact_details(
+            first_name=ticket_contact_detail_first_name,
+            last_name=ticket_contact_detail_last_name,
+            email=ticket_contact_detail_email,
+            phone=ticket_contact_detail_phone
+        )
+
+        contact_info = bruin_repository.get_contact_info_for_ticket(ticket_contact_details)
+
+        assert contact_info == None
+
+    def get_contact_info_for_ticket__no_name_test(self, bruin_repository, make_ticket_contact_details):
+        ticket_contact_detail_email = "test@email.com"
+        ticket_contact_detail_phone = "510-111-111"
+        ticket_contact_detail_first_name = "first"
+        ticket_contact_detail_last_name = None
+
+        ticket_contact_details = make_ticket_contact_details(
+            first_name=ticket_contact_detail_first_name,
+            last_name=ticket_contact_detail_last_name,
+            email=ticket_contact_detail_email,
+            phone=ticket_contact_detail_phone
+        )
+
+        contact_info = bruin_repository.get_contact_info_for_ticket(ticket_contact_details)
+
+        assert contact_info == None
+
+    def get_ticket_contact_additional_subscribers__all_fields_ok_test(self, bruin_repository, make_ticket_contact_additional_subscribers, make_subscribers):
+        ticket_contact_additional_subscriber_email = "test@email.com"
+
+        ticket_contact_additional_subscribers = make_ticket_contact_additional_subscribers(
+            email=ticket_contact_additional_subscriber_email)
+
+        subscribers = bruin_repository.get_ticket_contact_additional_subscribers(ticket_contact_additional_subscribers)
+
+        expected = make_subscribers(email=ticket_contact_additional_subscriber_email)
+
+        assert subscribers == expected
+
+    def get_ticket_contact_additional_subscribers__no_email(self, bruin_repository, make_ticket_contact_additional_subscribers):
+        ticket_contact_additional_subscriber_email = None
+
+        ticket_contact_additional_subscribers = make_ticket_contact_additional_subscribers(
+            email=ticket_contact_additional_subscriber_email)
+
+        subscribers = bruin_repository.get_ticket_contact_additional_subscribers(ticket_contact_additional_subscribers)
+
+        expected = []
+
+        assert subscribers == expected
+
     @pytest.mark.asyncio
     async def get_affecting_tickets__no_service_number_specified_test(self, bruin_repository):
         bruin_client_id = 12345
@@ -865,11 +972,11 @@ class TestBruinRepository:
 
         ticket_id = 11111
         ticket_note = (
-            "#*MetTel's IPA*#\n"
-            "All Service Affecting conditions (Latency, Packet Loss, Jitter, Bandwidth Over Utilization "
-            "and Circuit Instability) have stabilized.\n"
-            f"Auto-resolving task for serial: {serial_number}\n"
-            f"TimeStamp: {CURRENT_DATETIME}"
+            "#*MetTel's IPA*#" + os.linesep
+            + "All Service Affecting conditions (Latency, Packet Loss, Jitter, Bandwidth Over Utilization "
+            "and Circuit Instability) have stabilized." + os.linesep
+            + f"Auto-resolving task for serial: {serial_number}" + os.linesep
+            + f"TimeStamp: {CURRENT_DATETIME}"
         )
 
         bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
@@ -1212,10 +1319,10 @@ class TestBruinRepository:
         link = make_link(interface="GE1", display_name="Test", state="KO")
 
         ticket_note = (
-            "#*MetTel's IPA*#\n"
-            "Status of Wired Link GE1 (Test) is KO.\n"
-            "Moving task to: ASR Investigate\n"
-            f"TimeStamp: {CURRENT_DATETIME}"
+            "#*MetTel's IPA*#" + os.linesep
+            + "Status of Wired Link GE1 (Test) is KO." + os.linesep
+            + "Moving task to: ASR Investigate" + os.linesep
+            + f"TimeStamp: {CURRENT_DATETIME}"
         )
 
         bruin_repository.append_note_to_ticket.return_value = bruin_generic_200_response
