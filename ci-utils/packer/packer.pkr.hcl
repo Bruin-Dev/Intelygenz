@@ -266,7 +266,8 @@ build {
       "sudo ./aws/install",
       "export AWS_ACCESS_KEY_ID=${var.AWS_ACCESS_KEY_ID}",
       "export AWS_SECRET_ACCESS_KEY=${var.AWS_SECRET_ACCESS_KEY}",
-      "ls -al /pyutils_automation/py310/",
+      "wget 'https://github.com/sigstore/cosign/releases/download/v1.6.0/cosign_1.6.0_amd64.deb'",
+      "dpkg -i cosign_1.6.0_amd64.deb",
     ]
     inline_shebang = "/bin/bash -xe"
   }
