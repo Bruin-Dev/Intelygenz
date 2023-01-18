@@ -160,7 +160,7 @@ class RefreshCache:
             logger.info(f"Finished storing cache for host {host}")
 
     @staticmethod
-    def _add_ha_devices_to_cache(cache: List[dict]) -> NoReturn:
+    def _add_ha_devices_to_cache(cache: List[dict]):
         new_edges = []
 
         logger.info(f"Adding HA edges to the cache (current size: {len(cache)} edges)")
@@ -263,6 +263,15 @@ class RefreshCache:
                 site_details: dict = site_details_response["body"]
                 site_details["tzOffset"] = self._get_tz_offset(site_details)
 
+                ticket_contact_response = await self._bruin_repository.get_ticket_contact(client_id)
+                if ticket_contact_response["status"] not in range(200, 300):
+                    logger.error(
+                        f"Error while fetching ticket contact details for edge {serial_number}: {ticket_contact_response}")
+                    return
+
+                ticket_contact_details: dict = iter(ticket_contact_response["body"] or None)
+                ticket_contact_additional_subscribers = ticket_contact_response["body"][1:]
+
                 return {
                     "edge": edge_with_serial["edge"],
                     "edge_name": edge_with_serial["edge_name"],
@@ -272,6 +281,8 @@ class RefreshCache:
                     "ha_serial_number": edge_with_serial["ha_serial_number"],
                     "bruin_client_info": bruin_client_info,
                     "site_details": site_details,
+                    "ticket_contact_details": ticket_contact_details,
+                    "ticket_contact_additional_subscribers": ticket_contact_additional_subscribers,
                     "links_configuration": edge_with_serial["links_configuration"],
                 }
 

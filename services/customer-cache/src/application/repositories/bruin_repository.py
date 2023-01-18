@@ -126,5 +126,40 @@ class BruinRepository:
 
         return response
 
+    async def get_ticket_contact(self, client_id: int):
+        err_msg = None
+
+        request = {
+            "request_id": uuid(),
+            "body": {
+                "client_id": client_id
+            },
+        }
+
+        try:
+            logger.info(f"Getting ticket contact for client {client_id}...")
+            response = await self._nats_client.request("bruin.get.ticket.contacts", to_json_bytes(request), timeout=120)
+            response = json.loads(response.data)
+        except Exception as e:
+            err_msg = f"An error occurred while getting ticket contact for client {client_id}... -> {e}"
+            response = nats_error_response
+        else:
+            response_body = response["body"]
+            response_status = response["status"]
+
+            if response_status in range(200, 300):
+                logger.info(f"Got ticket contact for client {client_id} successfully!")
+            else:
+                err_msg = (
+                    f"Error while getting ticket contact for client {client_id} in "
+                    f"{self._config.ENVIRONMENT_NAME.upper()} environment: Error {response_status} - {response_body}"
+                )
+
+        if err_msg:
+            logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
     def is_management_status_active(self, management_status) -> bool:
         return management_status in self._config.REFRESH_CONFIG["monitorable_management_statuses"]
