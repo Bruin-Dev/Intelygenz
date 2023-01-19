@@ -271,7 +271,7 @@ class RefreshCache:
                     )
                     return
 
-                ticket_contact_details: dict = iter(ticket_contact_response["body"] or None)
+                ticket_contact_details: dict = next(iter(ticket_contact_response["body"]), None)
                 ticket_contact_additional_subscribers = ticket_contact_response["body"][1:]
 
                 return {
