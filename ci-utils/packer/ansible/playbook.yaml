@@ -33,8 +33,8 @@
     - name: Get key to sign the containers
       ansible.builtin.shell: 
         cmd: |-
-          export AWS_ACCESS_KEY_ID={{ aws_access_key_id }}
-          export AWS_SECRET_ACCESS_KEY={{ aws_secret_access_key }}
+          export AWS_ACCESS_KEY_ID="{{ aws_access_key_id }}"
+          export AWS_SECRET_ACCESS_KEY="{{ aws_secret_access_key }}"
           aws s3 sync s3://mettel-automation-keys/ . --exclude '*'' --include 'automation-engine-container-cosign*'
       when: ecr_repository_uri is not none and ecr_repository_uri != ''
 
