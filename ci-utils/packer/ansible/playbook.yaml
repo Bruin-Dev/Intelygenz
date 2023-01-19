@@ -25,8 +25,6 @@
     ecr_repository_image: "{{ ecr_repository_uri }}/{{ ecr_repository_name }}:{{ ecr_repository_tag }}"
   tasks:
     - name: Log into AWS ECR docker registry
-      args:
-        executable: /bin/bash
       ansible.builtin.shell: 
         cmd: |-
           "aws --region us-east-1 ecr get-login-password | docker login --username AWS --password-stdin {{ ecr_repository_uri }}"
@@ -35,8 +33,6 @@
     - name: Build an image with BuildKit and push it to a private repo
       vars:
         image: "{{ ecr_repository_image }}"
-      args:
-        executable: /bin/bash
       ansible.builtin.shell: 
         cmd: |-
           export DOCKER_BUILDKIT=1
