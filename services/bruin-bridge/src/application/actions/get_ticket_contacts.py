@@ -41,5 +41,5 @@ class GetTicketContacts:
         await msg.respond(to_json_bytes(response))
         logger.info(
             f"Bruin ticket_contacts published in event bus for request {json.dumps(payload)}. "
-            "Message published was {response}"
+            f"Message published was {response}"
         )

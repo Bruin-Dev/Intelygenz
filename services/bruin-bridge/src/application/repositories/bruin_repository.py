@@ -385,7 +385,7 @@ class BruinRepository:
         if response["status"] not in range(200, 300):
             logger.error(
                 f"Got response with status {response['status']} while getting "
-                "ticket contacts information for params {params}. body: {response['body']}"
+                f"ticket contacts information for params {params}. body: {response['body']}"
             )
             return response
 
