@@ -789,7 +789,9 @@ class TestBruinRepository:
 
         assert contact_info is None
 
-    def get_contact_info_for_ticket__all_fields_ok_test(self, bruin_repository, make_ticket_contact_details, make_ticket_contact_info):
+    def get_contact_info_for_ticket__all_fields_ok_test(
+        self, bruin_repository, make_ticket_contact_details, make_ticket_contact_inf
+    ):
         ticket_contact_detail_email = "test@email.com"
         ticket_contact_detail_phone = "510-111-111"
         ticket_contact_detail_first_name = "first"
@@ -813,7 +815,9 @@ class TestBruinRepository:
 
         assert contact_info == expected
 
-    def get_contact_info_for_ticket__no_phone_test(self, bruin_repository, make_ticket_contact_details, make_ticket_contact_info):
+    def get_contact_info_for_ticket__no_phone_test(
+        self, bruin_repository, make_ticket_contact_details, make_ticket_contact_info
+    ):
         ticket_contact_detail_email = "test@email.com"
         ticket_contact_detail_phone = None
         ticket_contact_detail_first_name = "first"
@@ -852,7 +856,9 @@ class TestBruinRepository:
 
         contact_info = bruin_repository.get_contact_info_for_ticket(ticket_contact_details)
 
-        assert contact_info == None
+        expected = None
+
+        assert contact_info == expected
 
     def get_contact_info_for_ticket__no_name_test(self, bruin_repository, make_ticket_contact_details):
         ticket_contact_detail_email = "test@email.com"
@@ -869,9 +875,13 @@ class TestBruinRepository:
 
         contact_info = bruin_repository.get_contact_info_for_ticket(ticket_contact_details)
 
-        assert contact_info == None
+        expected = None
 
-    def get_ticket_contact_additional_subscribers__all_fields_ok_test(self, bruin_repository, make_ticket_contact_additional_subscribers, make_subscribers):
+        assert contact_info == expected
+
+    def get_ticket_contact_additional_subscribers__all_fields_ok_test(
+        self, bruin_repository, make_ticket_contact_additional_subscribers, make_subscribers
+    ):
         ticket_contact_additional_subscriber_email = "test@email.com"
 
         ticket_contact_additional_subscribers = make_ticket_contact_additional_subscribers(
@@ -883,7 +893,9 @@ class TestBruinRepository:
 
         assert subscribers == expected
 
-    def get_ticket_contact_additional_subscribers__no_email(self, bruin_repository, make_ticket_contact_additional_subscribers):
+    def get_ticket_contact_additional_subscribers__no_email(
+        self, bruin_repository, make_ticket_contact_additional_subscribers
+    ):
         ticket_contact_additional_subscriber_email = None
 
         ticket_contact_additional_subscribers = make_ticket_contact_additional_subscribers(

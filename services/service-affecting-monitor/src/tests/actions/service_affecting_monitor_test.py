@@ -337,7 +337,8 @@ class TestServiceAffectingMonitor:
         edge_1_serial_number = "VCO123"
 
         edge_1_cache_info = make_cached_edge(serial_number=edge_1_serial_number, site_details=site_details,
-                                             ticket_contact_additional_subscribers=ticket_contact_additional_subscribers)
+                                             ticket_contact_additional_subscribers=
+                                             ticket_contact_additional_subscribers)
         edge_1 = make_edge(serial_number=edge_1_serial_number)
 
         edge_1_structured_metrics = make_structured_metrics_object(edge_info=edge_1)
