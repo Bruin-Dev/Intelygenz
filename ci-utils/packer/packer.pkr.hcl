@@ -266,7 +266,7 @@ build {
       "sudo ./aws/install",
       "export AWS_ACCESS_KEY_ID=${var.AWS_ACCESS_KEY_ID}",
       "export AWS_SECRET_ACCESS_KEY=${var.AWS_SECRET_ACCESS_KEY}",
-      "wget 'https://github.com/sigstore/cosign/releases/download/v1.6.0/cosign_1.13.1_amd64.deb'",
+      "wget 'https://github.com/sigstore/cosign/releases/download/v1.13.1/cosign_1.13.1_amd64.deb'",
       "sudo dpkg -i cosign_1.13.1_amd64.deb",
       "curl -LO 'https://github.com/sigstore/cosign/releases/download/v1.13.1/cosign-linux-amd64'",
       "chmod +x cosign-linux-amd64 && mv cosign-linux-amd64 /usr/local/bin/cosign"

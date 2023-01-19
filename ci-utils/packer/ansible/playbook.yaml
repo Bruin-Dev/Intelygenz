@@ -43,6 +43,6 @@
           docker build -t {{ image }} --target FEDRAMP --file /app/service/Dockerfile .
           docker push {{ image }}
           aws s3 sync s3://mettel-automation-keys/ . --exclude '*' --include 'automation-engine-container-cosign*'
-          bash cosign sign --key automation-engine-container-cosign-private.key {{ image }}
-          bash cosign triangulate ${REPOSITORY_URL}/${MODULE_NAME}:${TAG}
+          cosign sign --key automation-engine-container-cosign-private.key {{ image }}
+          cosign triangulate ${REPOSITORY_URL}/${MODULE_NAME}:${TAG}
         chdir: "/"
