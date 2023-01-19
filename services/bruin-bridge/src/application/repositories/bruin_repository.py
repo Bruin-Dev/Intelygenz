@@ -395,9 +395,7 @@ class BruinRepository:
             logger.warning(msg)
 
             response["status"] = 404
-            response[
-                "body"
-            ] = f"No ticket contacts information was found for client {params['client_id']}"
+            response["body"] = msg
             return response
 
         response["body"] = results
