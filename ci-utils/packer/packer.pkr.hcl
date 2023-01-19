@@ -269,7 +269,7 @@ build {
       "wget 'https://github.com/sigstore/cosign/releases/download/v1.13.1/cosign_1.13.1_amd64.deb'",
       "sudo dpkg -i cosign_1.13.1_amd64.deb",
       "curl -LO 'https://github.com/sigstore/cosign/releases/download/v1.13.1/cosign-linux-amd64'",
-      "chmod +x cosign-linux-amd64 && mv cosign-linux-amd64 /usr/local/bin/cosign"
+      "chmod +x cosign-linux-amd64 && sudo mv cosign-linux-amd64 /usr/local/bin/cosign"
     ]
     inline_shebang = "/bin/bash -xe"
   }
