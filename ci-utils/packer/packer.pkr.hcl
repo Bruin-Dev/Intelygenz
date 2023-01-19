@@ -279,6 +279,8 @@ build {
       "--extra-vars", "ecr_repository_uri=${var.ECR_REPOSITORY_URL}",
       "--extra-vars", "ecr_repository_name=${var.ECR_REPOSITORY_NAME}",
       "--extra-vars", "ecr_repository_tag=${var.ECR_REPOSITORY_TAG}",
+      "--extra-vars", "aws_access_key_id=${var.AWS_ACCESS_KEY_ID}",
+      "--extra-vars", "aws_secret_access_key=${var.AWS_SECRET_ACCESS_KEY}",
     ]
     command = "ANSIBLE_ROLES_PATH=/app/ansible/roles ansible-playbook"
     galaxy_collections_path = "/app/ansible/ansible_collections"
