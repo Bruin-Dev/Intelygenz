@@ -25,18 +25,24 @@
     ecr_repository_image: "{{ ecr_repository_uri }}/{{ ecr_repository_name }}:{{ ecr_repository_tag }}"
   tasks:
     - name: Log into AWS ECR docker registry
-      ansible.builtin.shell: "aws --region us-east-1 ecr get-login-password | docker login --username AWS --password-stdin {{ ecr_repository_uri }}"
+      ansible.builtin.shell: 
+        args:
+            executable: /bin/bash
+        cmd: |-
+          "aws --region us-east-1 ecr get-login-password | docker login --username AWS --password-stdin {{ ecr_repository_uri }}"
       when: ecr_repository_uri is not none and ecr_repository_uri != ''
 
     - name: Build an image with BuildKit and push it to a private repo
       vars:
         image: "{{ ecr_repository_image }}"
       ansible.builtin.shell:
+        args:
+          executable: /bin/bash
         cmd: |-
           export DOCKER_BUILDKIT=1
           docker build -t {{ image }} --target FEDRAMP --file /app/service/Dockerfile .
           docker push {{ image }}
           aws s3 sync s3://mettel-automation-keys/ . --exclude '*' --include 'automation-engine-container-cosign*'
-          cosign sign --key automation-engine-container-cosign-private.key {{ image }}
-          cosign triangulate ${REPOSITORY_URL}/${MODULE_NAME}:${TAG}
+          bash cosign sign --key automation-engine-container-cosign-private.key {{ image }}
+          bash cosign triangulate ${REPOSITORY_URL}/${MODULE_NAME}:${TAG}
         chdir: "/"
