@@ -38,8 +38,6 @@
 
     - name: Get key to sign the containers
       ansible.builtin.shell: aws s3 sync s3://mettel-automation-keys/ . --exclude "*" --include "automation-engine-container-cosign*"
-      args:
-        chdir: "/"
       environment:
         AWS_ACCESS_KEY_ID: "{{ aws_access_key_id }}"
         AWS_SECRET_ACCESS_KEY: "{{ aws_secret_access_key }}"
@@ -55,4 +53,3 @@
           docker push {{ image }}
           cosign sign --key automation-engine-container-cosign-private.key {{ image }}
           cosign triangulate {{ image }}
-        chdir: "/"
