@@ -102,7 +102,6 @@ variable "ECR_REPOSITORY_LAST_TAG" {
   default = env("ECR_REPOSITORY_LAST_TAG")
 }
 
-ECR_REPOSITORY_LAST_TAG
 variable "PACKER_DIR_MODULE" {
   type    = string
   default = env("PACKER_DIR_MODULE")
