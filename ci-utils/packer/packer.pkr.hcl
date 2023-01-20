@@ -102,6 +102,11 @@ variable "ECR_REPOSITORY_LAST_TAG" {
   default = env("ECR_REPOSITORY_LAST_TAG")
 }
 
+variable "COSIGN_PASSWORD" {
+  type    = string
+  default = env("COSIGN_PASSWORD")
+}
+
 variable "PACKER_DIR_MODULE" {
   type    = string
   default = env("PACKER_DIR_MODULE")
@@ -287,6 +292,7 @@ build {
       "--extra-vars", "ecr_repository_last_image=${var.ECR_REPOSITORY_LAST_TAG}",
       "--extra-vars", "aws_access_key_id=${var.AWS_ACCESS_KEY_ID}",
       "--extra-vars", "aws_secret_access_key=${var.AWS_SECRET_ACCESS_KEY}",
+      "--extra-vars", "COSIGN_PASSWORD=${var.COSIGN_PASSWORD}",
     ]
     command = "ANSIBLE_ROLES_PATH=/app/ansible/roles ansible-playbook"
     galaxy_collections_path = "/app/ansible/ansible_collections"

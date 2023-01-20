@@ -27,6 +27,7 @@
     ecr_repository_last_image: "{{ ecr_repository_last_image }}"
     aws_access_key_id: "{{ aws_access_key_id }}"
     aws_secret_access_key: "{{ aws_secret_access_key }}"
+    COSIGN_PASSWORD: "{{ COSIGN_PASSWORD }}"
   tasks:
     - name: Log into AWS ECR docker registry
       ansible.builtin.shell: "aws --region us-east-1 ecr get-login-password | docker login --username AWS --password-stdin {{ ecr_repository_uri }}"
@@ -61,3 +62,5 @@
           cosign sign --key automation-engine-container-cosign-private.key {{ last_image }}
           cosign triangulate {{ image }}
           cosign triangulate {{ last_image }}
+      environment:
+        COSIGN_PASSWORD: "{{ COSIGN_PASSWORD }}"
