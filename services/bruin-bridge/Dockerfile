@@ -102,4 +102,4 @@ RUN poetry install --only main
 EXPOSE 5000 9090
 
 # Run the service
-CMD ["python3", "-u", "/app/src/app.py"]
+CMD ["python3", "-u", "src/app.py"]
