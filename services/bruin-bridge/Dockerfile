@@ -20,7 +20,7 @@ COPY services/bruin-bridge/ /service/app
 WORKDIR /service/app
 RUN poetry install --only main
 
-CMD ["python3", "-u", "src/app.py"]
+CMD ["poetry", "run", "python", "src/app.py"]
 
 #
 # FEDRAMP DOCKERFILE
@@ -34,8 +34,8 @@ ARG REPOSITORY_URL
 ARG DOCKER_BASE_IMAGE_VERSION
 ARG DEBIAN_FRONTEND=noninteractive
 
-ENV PYTHONUNBUFFERED 1 \
-    POETRY_VIRTUALENVS_CREATE=false
+ENV PYTHONUNBUFFERED 1
+ENV POETRY_VIRTUALENVS_CREATE=false
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -102,4 +102,4 @@ RUN poetry install --only main
 EXPOSE 5000 9090
 
 # Run the service
-CMD ["python3", "-u", "src/app.py"]
+CMD ["poetry", "run", "python", "src/app.py"]
