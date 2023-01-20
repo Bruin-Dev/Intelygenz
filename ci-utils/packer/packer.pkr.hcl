@@ -97,6 +97,12 @@ variable "ECR_REPOSITORY_TAG" {
   default = env("ECR_REPOSITORY_TAG")
 }
 
+variable "ECR_REPOSITORY_LAST_TAG" {
+  type    = string
+  default = env("ECR_REPOSITORY_LAST_TAG")
+}
+
+ECR_REPOSITORY_LAST_TAG
 variable "PACKER_DIR_MODULE" {
   type    = string
   default = env("PACKER_DIR_MODULE")
@@ -279,6 +285,7 @@ build {
       "--extra-vars", "ecr_repository_uri=${var.ECR_REPOSITORY_URL}",
       "--extra-vars", "ecr_repository_name=${var.ECR_REPOSITORY_NAME}",
       "--extra-vars", "ecr_repository_tag=${var.ECR_REPOSITORY_TAG}",
+      "--extra-vars", "ecr_repository_last_image=${var.ECR_REPOSITORY_LAST_TAG}",
       "--extra-vars", "aws_access_key_id=${var.AWS_ACCESS_KEY_ID}",
       "--extra-vars", "aws_secret_access_key=${var.AWS_SECRET_ACCESS_KEY}",
     ]
