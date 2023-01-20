@@ -16,8 +16,8 @@
   hosts: localhost
   connection: local
   gather_facts: false
-  become: true
-  debugger: always
+  #become: true
+  #debugger: always
   vars:
     ecr_repository_name: "{{ ecr_repository_name }}"
     ecr_repository_uri: "{{ ecr_repository_uri }}"
