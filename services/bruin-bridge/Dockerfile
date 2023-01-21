@@ -88,11 +88,11 @@ RUN wget -q https://install.python-poetry.org -O poetry-install.py && \
 # Copy utils and install with Poetry
 COPY --chown=${NON_ROOT_USER}:0 /pyutils_automation/py310 /home/${NON_ROOT_USER}/pyutils_automation/py310
 WORKDIR /home/${NON_ROOT_USER}/pyutils_automation/py310
-RUN /home/${NON_ROOT_USER}/.local/bin/poetry install --only main
+RUN /home/${NON_ROOT_USER}/.local/bin/poetry install --no-root --only main
 
 COPY --chown=${NON_ROOT_USER}:0 /app/service /home/${NON_ROOT_USER}/app/service
 WORKDIR /home/${NON_ROOT_USER}/app/service
-RUN /home/${NON_ROOT_USER}/.local/bin/poetry install --only main
+RUN /home/${NON_ROOT_USER}/.local/bin/poetry install --no-root --only main
 
 # Expose ports for the service
 EXPOSE 5000 9090
