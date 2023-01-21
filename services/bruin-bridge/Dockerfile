@@ -37,7 +37,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED 1
 ENV POETRY_VIRTUALENVS_CREATE=false
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+#SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Change to ROOT user to do maintenance/install tasks
 USER root
