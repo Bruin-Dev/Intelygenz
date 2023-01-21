@@ -67,7 +67,7 @@ RUN apt-get update && \
 
 # Install Poetry in a system-wide location
 RUN wget -q https://install.python-poetry.org -O poetry-install.py && \
-    POETRY_HOME=/usr/local python3.10 poetry-install.py
+    POETRY_HOME=/usr/local python3 poetry-install.py
 
 # Install FIPS compliant cryptography packages and clean
 # hadolint ignore=DL3015 We want to install any extra FIPS packages
@@ -102,4 +102,4 @@ RUN poetry install --only main
 EXPOSE 5000 9090
 
 # Run the service
-CMD ["poetry", "run", "python", "src/app.py"]
+CMD ["python3", "-u", "src/app.py"]
