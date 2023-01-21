@@ -53,21 +53,7 @@ COPY /app/ubuntu18-fips/packages packages/
 # hadolint ignore=DL3008 ignore=DL3015
 RUN apt-get update && \
     apt-get install --yes --quiet build-essential checkinstall  libreadline-gplv2-dev  libncursesw5-dev  libssl-dev  libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev && \
-    apt-get install --yes --quiet --no-install-recommends wget software-properties-common && \
-    wget https://www.python.org/ftp/python/3.10.4/Python-3.10.4.tgz && \
-    tar xzf Python-3.10.4.tgz && \
-    cd Python-3.10.4 && \
-    ./configure --enable-optimizations && \
-    make install
-
-#RUN cd .. && \
-#    rm -rf Python-3.10.4.tgz && \
-#    rm -rf Python-3.10.4 && \
-#    apt-get remove wget build-essential checkinstall 
-
-# Install Poetry in a system-wide location
-RUN wget -q https://install.python-poetry.org -O poetry-install.py && \
-    POETRY_HOME=/usr/local python3 poetry-install.py
+    apt-get install --yes --quiet --no-install-recommends wget software-properties-common
 
 # Install FIPS compliant cryptography packages and clean
 # hadolint ignore=DL3015 We want to install any extra FIPS packages
@@ -89,17 +75,27 @@ USER ${NON_ROOT_USER}
 # Set workdir to user home
 WORKDIR /home/${NON_ROOT_USER}
 
+RUN wget https://www.python.org/ftp/python/3.10.4/Python-3.10.4.tgz && \
+    tar xzf Python-3.10.4.tgz
+
+RUN cd Python-3.10.4 && \
+    ./configure --enable-optimizations --prefix=/home/${NON_ROOT_USER}/.local && \
+    make install
+
+RUN wget -q https://install.python-poetry.org -O poetry-install.py && \
+    /home/${NON_ROOT_USER}/.local/bin/python3 poetry-install.py
+
 # Copy utils and install with Poetry
 COPY --chown=${NON_ROOT_USER}:0 /pyutils_automation/py310 /home/${NON_ROOT_USER}/pyutils_automation/py310
 WORKDIR /home/${NON_ROOT_USER}/pyutils_automation/py310
-RUN poetry install --only main
+RUN /home/${NON_ROOT_USER}/.local/bin/poetry install --only main
 
 COPY --chown=${NON_ROOT_USER}:0 /app/service /home/${NON_ROOT_USER}/app/service
 WORKDIR /home/${NON_ROOT_USER}/app/service
-RUN poetry install --only main
+RUN /home/${NON_ROOT_USER}/.local/bin/poetry install --only main
 
 # Expose ports for the service
 EXPOSE 5000 9090
 
 # Run the service
-CMD ["python3", "-u", "src/app.py"]
+CMD ["/home/nroot/.local/bin/python3", "-u", "src/app.py"]
