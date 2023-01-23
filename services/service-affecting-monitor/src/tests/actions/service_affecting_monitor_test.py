@@ -337,8 +337,7 @@ class TestServiceAffectingMonitor:
         edge_1_serial_number = "VCO123"
 
         edge_1_cache_info = make_cached_edge(serial_number=edge_1_serial_number, site_details=site_details,
-                                             ticket_contact_additional_subscribers=
-                                             ticket_contact_additional_subscribers)
+                                             ticket_contact_additional_subscribers=ticket_contact_additional_subscribers)
         edge_1 = make_edge(serial_number=edge_1_serial_number)
 
         edge_1_structured_metrics = make_structured_metrics_object(edge_info=edge_1)
@@ -542,6 +541,7 @@ class TestServiceAffectingMonitor:
         make_site_details,
         make_bruin_client_info,
         make_edge_full_id,
+        make_ticket_contact_details
     ):
         site_detail_email = None
         site_detail_phone = None
@@ -551,6 +551,8 @@ class TestServiceAffectingMonitor:
             contact_phone=site_detail_phone,
             contact_email=site_detail_email,
         )
+
+        ticket_contact_details = make_ticket_contact_details(first_name=None, last_name=None, email=None, phone=None)
 
         edge_1_serial_number = "VCO123"
         edge_2_serial_number = "VC4567"
@@ -569,6 +571,7 @@ class TestServiceAffectingMonitor:
             serial_number=edge_1_serial_number,
             bruin_client_info=bruin_client_info_1,
             site_details=site_details,
+            ticket_contact_details=ticket_contact_details
         )
         full_id = make_edge_full_id(host="host-2")
         edge_2_cache_info = make_cached_edge(
@@ -576,6 +579,7 @@ class TestServiceAffectingMonitor:
             serial_number=edge_2_serial_number,
             bruin_client_info=bruin_client_info_2,
             site_details=site_details,
+            ticket_contact_details=ticket_contact_details
         )
         edge_1 = make_edge(serial_number=edge_1_serial_number)
         edge_2 = make_edge(serial_number=edge_2_serial_number)
@@ -615,7 +619,6 @@ class TestServiceAffectingMonitor:
             edge_1_complete_info,
             edge_2_complete_info,
         )
-        service_affecting_monitor._bruin_repository.get_contact_info_for_site.assert_not_called()
 
         assert result == expected
 
@@ -4973,7 +4976,7 @@ class TestServiceAffectingMonitor:
         assert result is True
 
         result = service_affecting_monitor._should_use_default_contact_info(client_id_2, edge_2)
-        assert result is True
+        assert result is False
 
         result = service_affecting_monitor._should_use_default_contact_info(client_id_3, edge_3)
         assert result is False

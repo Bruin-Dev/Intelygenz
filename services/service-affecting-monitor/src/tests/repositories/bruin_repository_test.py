@@ -790,7 +790,7 @@ class TestBruinRepository:
         assert contact_info is None
 
     def get_contact_info_for_ticket__all_fields_ok_test(
-        self, bruin_repository, make_ticket_contact_details, make_ticket_contact_inf
+        self, bruin_repository, make_ticket_contact_details, make_ticket_contact_info
     ):
         ticket_contact_detail_email = "test@email.com"
         ticket_contact_detail_phone = "510-111-111"
