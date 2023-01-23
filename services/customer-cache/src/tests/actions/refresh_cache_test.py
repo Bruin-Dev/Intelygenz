@@ -747,6 +747,20 @@ class TestRefreshCache:
             "primaryContactPhone": "123-456-7890",
             "primaryContactEmail": "test@mail.com",
         }
+        ticket_contacts = [
+            {
+                "FirstName": "Test1",
+                "LastName": "Test1",
+                "Email": "test1@test.com",
+                "Phone": "123-456-1890",
+            },
+            {
+                "FirstName": "Test2",
+                "LastName": "Test2",
+                "Email": "test2@test.com",
+                "Phone": "123-456-2890",
+            }
+        ]
 
         last_contact = str(datetime.now())
         instance_edges_refresh_cache[0]["last_contact"] = last_contact
@@ -755,6 +769,8 @@ class TestRefreshCache:
         instance_cache_edges[0]["edge"]["host"] = "metvco02.mettel.net"
         instance_cache_edges[0]["last_contact"] = last_contact
         instance_cache_edges[0]["site_details"] = site_details
+        instance_cache_edges[0]["ticket_contact_details"] = next(iter(ticket_contacts))
+        instance_cache_edges[0]["ticket_contact_additional_subscribers"] = ticket_contacts[1:]
         instance_edges_refresh_cache[0]["bruin_client_info"] = [client_info]
         instance_edges_refresh_cache[0]["edge_name"] = "Big Boss"
         links_configuration = [
@@ -778,6 +794,9 @@ class TestRefreshCache:
         instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
         instance_refresh_cache._bruin_repository.get_site_details = AsyncMock(
             return_value={"body": site_details, "status": 200}
+        )
+        instance_refresh_cache._bruin_repository.get_ticket_contact = AsyncMock(
+            return_value={"body": ticket_contacts, "status": 200}
         )
 
         instance_refresh_cache._storage_repository.set_cache = Mock()
