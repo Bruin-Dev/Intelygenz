@@ -18,7 +18,7 @@ class GetSite:
         if "body" not in payload.keys():
             logger.error(f"Cannot get bruin site using {json.dumps(payload)}. JSON malformed")
             response["status"] = 400
-            response["body"] = "You must specify " '{.."body":{"client_id":...}} in the request'
+            response["body"] = 'You must specify {.."body":{"client_id":...}} in the request'
             await msg.respond(to_json_bytes(response))
             return
 

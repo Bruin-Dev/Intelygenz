@@ -49,7 +49,7 @@ class TestGetSite:
         request_msg.data = to_json_bytes(event_bus_request)
 
         event_bus_response = {
-            "body": "You must specify " '{.."body":{"client_id":...}} in the request',
+            "body": 'You must specify {.."body":{"client_id":...}} in the request',
             "status": 400,
         }
 

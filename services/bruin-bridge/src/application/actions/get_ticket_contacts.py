@@ -18,7 +18,7 @@ class GetTicketContacts:
         if "body" not in payload.keys():
             logger.error(f"Cannot get bruin ticket contacts using {json.dumps(payload)}. JSON malformed")
             response["status"] = 400
-            response["body"] = "You must specify " '{.."body":{"client_id":...}} in the request'
+            response["body"] = 'You must specify {.."body":{"client_id":...}} in the request'
             await msg.respond(to_json_bytes(response))
             return
 
@@ -41,5 +41,5 @@ class GetTicketContacts:
         await msg.respond(to_json_bytes(response))
         logger.info(
             f"Bruin ticket_contacts published in event bus for request {json.dumps(payload)}. "
-            "Message published was {response}"
+            f"Message published was {response}"
         )
