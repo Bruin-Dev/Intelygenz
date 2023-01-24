@@ -105,7 +105,9 @@ def make_structured_metrics_object_with_events(make_structured_metrics_object):
 def make_structured_metrics_object_with_cache_and_contact_info(
         make_structured_metrics_object,
         make_cached_edge):
-    def _inner(*, metrics_object: dict = None, cache_info: dict = None, contact_info: dict = None, subscribers: list[dict] = None):
+    def _inner(*, metrics_object: dict = None, cache_info: dict = None,
+               contact_info: dict = None, subscribers: list[dict] = None
+               ):
         cache_info = cache_info or make_cached_edge()
         metrics_object = metrics_object or make_structured_metrics_object()
         contact_info = contact_info or {}
@@ -125,7 +127,9 @@ def make_structured_metrics_object_with_cache_and_contact_info(
 def make_structured_metrics_object_with_cache_with_events_and_contact_info(
     make_structured_metrics_object_with_events, make_cached_edge
 ):
-    def _inner(*, metrics_object: dict = None, cache_info: dict = None, contact_info: dict = None, subscribers: list[dict] = None):
+    def _inner(*, metrics_object: dict = None, cache_info: dict = None,
+               contact_info: dict = None, subscribers: list[dict] = None
+               ):
         cache_info = cache_info or make_cached_edge()
         metrics_object = metrics_object or make_structured_metrics_object_with_events()
         contact_info = contact_info or {}

@@ -62,7 +62,9 @@ def make_cached_edge(make_edge_full_id, make_bruin_client_info, make_site_detail
         bruin_client_info = bruin_client_info or make_bruin_client_info()
         site_details = site_details or make_site_details()
         ticket_contact_details = ticket_contact_details or make_ticket_contact_details()
-        ticket_contact_additional_subscribers = ticket_contact_additional_subscribers or make_ticket_contact_additional_subscribers()
+        ticket_contact_additional_subscribers = (
+            ticket_contact_additional_subscribers
+            or make_ticket_contact_additional_subscribers())
         links_configuration = links_configuration or []
 
         return {
