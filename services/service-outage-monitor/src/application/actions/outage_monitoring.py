@@ -1108,6 +1108,15 @@ class OutageMonitor:
             }
         )
 
+    def _get_faulty_link_interfaces(self, links: List[dict], links_configuration: List[dict]) -> List[str]:
+        return list(
+            {
+                self._outage_repository.get_link_interfaces(link, links_configuration)
+                for link in links
+                if self._outage_repository.is_faulty_link(link["linkState"])
+            }
+        )
+
     def _was_digi_rebooted_recently(self, ticket_note) -> bool:
         current_datetime = datetime.now(utc)
         max_seconds_since_last_outage = self._config.MONITOR_CONFIG["last_digi_reboot_seconds"]
@@ -1408,11 +1417,13 @@ class OutageMonitor:
         has_faulty_digi_link = self._has_faulty_digi_link(edge_links, logical_id_list)
         has_faulty_byob_link = self._has_faulty_blacklisted_link(edge_links)
         faulty_link_types = self._get_faulty_link_types(edge_links, links_configuration)
+        faulty_link_interfaces = self._get_faulty_link_interfaces(edge_links, links_configuration)
 
         logger.info(f"[{outage_type.value}] Attempting outage ticket creation for serial {serial_number}...")
 
         try:
-            ticket_creation_response = await self._bruin_repository.create_outage_ticket(client_id, serial_number)
+            ticket_creation_response = await self._bruin_repository.create_outage_ticket(
+                client_id, serial_number, faulty_link_interfaces)
             ticket_id = ticket_creation_response["body"]
             ticket_creation_response_status = ticket_creation_response["status"]
             logger.info(
