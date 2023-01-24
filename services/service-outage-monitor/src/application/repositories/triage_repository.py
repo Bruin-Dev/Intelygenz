@@ -125,7 +125,8 @@ class TriageRepository:
 
         if last_offline_event_for_edge is not None:
             ticket_note_lines.append(
-                f"Last Edge Offline: {parse(last_offline_event_for_edge['eventTime']).astimezone(tz_object)}" + os.linesep
+                f"Last Edge Offline: {parse(last_offline_event_for_edge['eventTime']).astimezone(tz_object)}"
+                + os.linesep
             )
         else:
             ticket_note_lines.append("Last Edge Offline: Unknown" + os.linesep)
@@ -192,7 +193,8 @@ class TriageRepository:
             if last_offline_event_for_current_link is not None:
                 last_offline_event_time = last_offline_event_for_current_link["eventTime"]
                 ticket_note_lines.append(
-                    f"Last {interface_name} Interface Offline: {parse(last_offline_event_time).astimezone(tz_object)}" + os.linesep
+                    f"Last {interface_name} Interface Offline: {parse(last_offline_event_time).astimezone(tz_object)}"
+                    + os.linesep
                 )
             else:
                 ticket_note_lines.append(f"Last {interface_name} Interface Offline: Unknown" + os.linesep)
