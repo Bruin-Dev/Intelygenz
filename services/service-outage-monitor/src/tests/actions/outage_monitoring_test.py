@@ -5550,6 +5550,7 @@ class TestServiceOutageMonitor:
         has_faulty_digi_link = False
         has_faulty_byob_link = False
         faulty_link_types = []
+        faulty_link_interfaces = []
         edge_primary_serial = "VC1234567"
         edge_standby_serial = "VC5678901"
         edge_primary_initial_state = "OFFLINE"
@@ -5740,7 +5741,8 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(
+            client_id, edge_primary_serial, faulty_link_interfaces)
         outage_monitor._append_triage_note.assert_awaited_once_with(
             ticket_id,
             cached_edge_primary,
@@ -5784,6 +5786,7 @@ class TestServiceOutageMonitor:
         has_faulty_digi_link = False
         has_faulty_byob_link = False
         faulty_link_types = []
+        faulty_link_interfaces = []
 
         edge_primary_serial = "VC1234567"
         edge_standby_serial = "VC5678901"
@@ -5978,7 +5981,8 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(
+            client_id, edge_primary_serial, faulty_link_interfaces)
         outage_monitor._append_triage_note.assert_awaited_once_with(
             ticket_id,
             cached_edge_primary,
@@ -6012,6 +6016,7 @@ class TestServiceOutageMonitor:
         has_faulty_digi_link = False
         has_faulty_byob_link = False
         faulty_link_types = []
+        faulty_link_interfaces = []
 
         edge_primary_serial = "VC1234567"
         edge_standby_serial = "VC5678901"
@@ -6204,7 +6209,8 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(
+            client_id, edge_primary_serial, faulty_link_interfaces)
         outage_monitor._append_triage_note.assert_awaited_once_with(
             ticket_id,
             cached_edge_primary,
@@ -6238,6 +6244,7 @@ class TestServiceOutageMonitor:
         has_faulty_digi_link = False
         has_faulty_byob_link = False
         faulty_link_types = []
+        faulty_link_interfaces = []
 
         edge_primary_serial = "VC1234567"
         edge_standby_serial = "VC5678901"
@@ -6433,7 +6440,8 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(
+            client_id, edge_primary_serial, faulty_link_interfaces)
         outage_monitor._change_ticket_severity.assert_awaited_once_with(
             ticket_id=ticket_id,
             edge_status=links_grouped_by_primary_edge_with_ha_info,
@@ -6488,6 +6496,7 @@ class TestServiceOutageMonitor:
         has_faulty_digi_link = False
         has_faulty_byob_link = False
         faulty_link_types = []
+        faulty_link_interfaces = []
 
         edge_primary_serial = "VC1234567"
         edge_standby_serial = "VC5678901"
@@ -6688,7 +6697,8 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(
+            client_id, edge_primary_serial, faulty_link_interfaces)
         outage_monitor._change_ticket_severity.assert_awaited_once_with(
             ticket_id=ticket_id,
             edge_status=links_grouped_by_primary_edge_with_ha_info,
@@ -6735,6 +6745,7 @@ class TestServiceOutageMonitor:
         has_faulty_digi_link = False
         has_faulty_byob_link = False
         faulty_link_types = []
+        faulty_link_interfaces = []
 
         edge_primary_serial = "VC1234567"
         edge_standby_serial = "VC5678901"
@@ -6925,7 +6936,8 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(
+            client_id, edge_primary_serial, faulty_link_interfaces)
         outage_monitor._change_ticket_severity.assert_awaited_once_with(
             ticket_id=ticket_id,
             edge_status=links_grouped_by_primary_edge_with_ha_info,
@@ -6965,6 +6977,7 @@ class TestServiceOutageMonitor:
         has_faulty_digi_link = False
         has_faulty_byob_link = False
         faulty_link_types = []
+        faulty_link_interfaces = []
 
         edge_primary_serial = "VC1234567"
         edge_standby_serial = "VC5678901"
@@ -7158,7 +7171,8 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(
+            client_id, edge_primary_serial, faulty_link_interfaces)
         outage_monitor._change_ticket_severity.assert_awaited_once_with(
             ticket_id=ticket_id,
             edge_status=links_grouped_by_primary_edge_with_ha_info,
@@ -7189,6 +7203,7 @@ class TestServiceOutageMonitor:
         has_faulty_digi_link = False
         has_faulty_byob_link = False
         faulty_link_types = []
+        faulty_link_interfaces = []
 
         edge_primary_serial = "VC1234567"
         edge_standby_serial = "VC5678901"
@@ -7382,7 +7397,8 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(
+            client_id, edge_primary_serial, faulty_link_interfaces)
         outage_monitor._change_ticket_severity.assert_awaited_once_with(
             ticket_id=ticket_id,
             edge_status=links_grouped_by_primary_edge_with_ha_info,
@@ -7421,6 +7437,7 @@ class TestServiceOutageMonitor:
         has_faulty_digi_link = False
         has_faulty_byob_link = False
         faulty_link_types = []
+        faulty_link_interfaces = []
 
         edge_primary_serial = "VC1234567"
         edge_standby_serial = "VC5678901"
@@ -7614,7 +7631,8 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(
+            client_id, edge_primary_serial, faulty_link_interfaces)
         outage_monitor._change_ticket_severity.assert_awaited_once_with(
             ticket_id=ticket_id,
             edge_status=links_grouped_by_primary_edge_with_ha_info,
@@ -7644,6 +7662,7 @@ class TestServiceOutageMonitor:
         has_faulty_digi_link = False
         has_faulty_byob_link = False
         faulty_link_types = []
+        faulty_link_interfaces = []
 
         edge_primary_serial = "VC1234567"
         edge_standby_serial = "VC5678901"
@@ -7834,7 +7853,8 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(
+            client_id, edge_primary_serial, faulty_link_interfaces)
         outage_monitor._change_ticket_severity.assert_awaited_once_with(
             ticket_id=ticket_id,
             edge_status=links_grouped_by_primary_edge_with_ha_info,
@@ -7872,6 +7892,7 @@ class TestServiceOutageMonitor:
         has_faulty_digi_link = False
         has_faulty_byob_link = False
         faulty_link_types = []
+        faulty_link_interfaces = []
 
         edge_primary_serial = "VC1234567"
         edge_standby_serial = "VC5678901"
@@ -8065,7 +8086,8 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(
+            client_id, edge_primary_serial, faulty_link_interfaces)
         outage_monitor._change_ticket_severity.assert_awaited_once_with(
             ticket_id=ticket_id,
             edge_status=links_grouped_by_primary_edge_with_ha_info,

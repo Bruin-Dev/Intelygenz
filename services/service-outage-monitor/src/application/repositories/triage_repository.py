@@ -88,7 +88,7 @@ class TriageRepository:
         ]
 
         if outage_type is Outages.HA_HARD_DOWN:
-            ticket_note_lines.append("Both primary and secondary edges are DISCONNECTED.\n")
+            ticket_note_lines.append("Both primary and secondary edges are DISCONNECTED." + os.linesep)
 
         if not is_outage_happening or is_ha_outage:
             if edge_is_ha_primary:
@@ -125,10 +125,11 @@ class TriageRepository:
 
         if last_offline_event_for_edge is not None:
             ticket_note_lines.append(
-                f"Last Edge Offline: {parse(last_offline_event_for_edge['eventTime']).astimezone(tz_object)}\n"
+                f"Last Edge Offline: {parse(last_offline_event_for_edge['eventTime']).astimezone(tz_object)}"
+                + os.linesep
             )
         else:
-            ticket_note_lines.append("Last Edge Offline: Unknown\n")
+            ticket_note_lines.append("Last Edge Offline: Unknown" + os.linesep)
 
         if not is_outage_happening or is_ha_outage:
             if ha_partner_is_primary:
@@ -192,10 +193,11 @@ class TriageRepository:
             if last_offline_event_for_current_link is not None:
                 last_offline_event_time = last_offline_event_for_current_link["eventTime"]
                 ticket_note_lines.append(
-                    f"Last {interface_name} Interface Offline: {parse(last_offline_event_time).astimezone(tz_object)}\n"
+                    f"Last {interface_name} Interface Offline: {parse(last_offline_event_time).astimezone(tz_object)}"
+                    + os.linesep
                 )
             else:
-                ticket_note_lines.append(f"Last {interface_name} Interface Offline: Unknown\n")
+                ticket_note_lines.append(f"Last {interface_name} Interface Offline: Unknown" + os.linesep)
 
         return os.linesep.join(ticket_note_lines).strip()
 
