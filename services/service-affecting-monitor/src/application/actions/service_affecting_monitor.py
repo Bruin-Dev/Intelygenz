@@ -715,7 +715,7 @@ class ServiceAffectingMonitor:
 
         if is_byob:
             logger.warning(
-                f"Link blacklisted as BYOD. Interface {interface} of edge {serial_number}"
+                f"Link blacklisted as BYOB. Interface {interface} of edge {serial_number}"
             )
             return
 
