@@ -125,9 +125,6 @@ class ServiceAffectingMonitor:
         if client_id in self._config.MONITOR_CONFIG["customers_to_always_use_default_contact_info"]:
             return True
 
-        if edge["edge"]["host"] in self._config.UMBRELLA_HOSTS:
-            return True
-
         return False
 
     def _structure_links_metrics(self, links_metrics: list, events: dict = None) -> list:
@@ -245,19 +242,27 @@ class ServiceAffectingMonitor:
 
             client_id = cached_edge["bruin_client_info"]["client_id"]
             site_details = cached_edge["site_details"]
+            ticket_contact_details = cached_edge["ticket_contact_details"]
+            ticket_contact_additional_subscribers = cached_edge["ticket_contact_additional_subscribers"]
 
             default_contacts = self._default_contact_info_by_client_id.get(client_id)
             if self._should_use_default_contact_info(client_id, cached_edge):
                 logger.info(f"Using default contact info for edge {serial_number} and client {client_id}")
                 contacts = default_contacts
+                subscribers = []
             else:
                 logger.info(f"Using site-specific contact info for edge {serial_number} and client {client_id}")
-                contacts = self._bruin_repository.get_contact_info_for_site(site_details) or default_contacts
+                contacts = (self._bruin_repository.get_contact_info_for_site(site_details)
+                            or self._bruin_repository.get_contact_info_for_ticket(ticket_contact_details)
+                            or default_contacts)
+                subscribers = self._bruin_repository.get_ticket_contact_additional_subscribers(
+                    ticket_contact_additional_subscribers)
 
             result.append(
                 {
                     "cached_info": cached_edge,
                     "contact_info": contacts,
+                    "subscribers": subscribers,
                     **elem,
                 }
             )
@@ -981,6 +986,7 @@ class ServiceAffectingMonitor:
         interface = link_data["link_status"]["interface"]
         client_id = link_data["cached_info"]["bruin_client_info"]["client_id"]
         contact_info = link_data["contact_info"]
+        subscribers = link_data["subscribers"]
         client_name = link_data["cached_info"]["bruin_client_info"]["client_name"]
         link_label = link_data["link_status"]["displayName"]
         links_configuration = link_data["cached_info"]["links_configuration"]
@@ -1017,6 +1023,13 @@ class ServiceAffectingMonitor:
             f"Service Affecting ticket to report {trouble.value} trouble detected in interface {interface} "
             f"of edge {serial_number} was successfully created! Ticket ID is {ticket_id}"
         )
+
+        if subscribers:
+            for subscriber in subscribers:
+                subscriber_user_response = await self._bruin_repository.subscribe_user_to_ticket(ticket_id, subscriber)
+                if subscriber_user_response["status"] not in range(200, 300):
+                    logger.error(
+                        f"Error while subscribing {subscriber} to ticket {ticket_id}: {subscriber_user_response}.")
 
         self._metrics_repository.increment_tasks_created(
             client=client_name, trouble=trouble.value, has_byob=is_byob, link_type=link_type

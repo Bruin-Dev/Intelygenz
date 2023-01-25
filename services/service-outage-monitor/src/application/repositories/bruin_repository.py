@@ -341,7 +341,7 @@ class BruinRepository:
 
         return response
 
-    async def create_outage_ticket(self, client_id: int, service_number: str):
+    async def create_outage_ticket(self, client_id: int, service_number: str, interfaces: list[str]):
         err_msg = None
 
         request = {
@@ -349,6 +349,7 @@ class BruinRepository:
             "body": {
                 "client_id": client_id,
                 "service_number": service_number,
+                "interfaces": interfaces,
             },
         }
 
