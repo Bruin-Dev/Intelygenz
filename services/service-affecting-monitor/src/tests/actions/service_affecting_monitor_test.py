@@ -2039,6 +2039,48 @@ class TestServiceAffectingMonitor:
         )
         service_affecting_monitor._create_affecting_ticket.assert_not_awaited()
 
+    # @pytest.mark.asyncio
+    # async def fail_test(self):
+    #     assert True is False
+
+    @pytest.mark.asyncio
+    async def process_affecting_trouble__byob_link_test(
+        self,
+        service_affecting_monitor,
+        make_bruin_client_info,
+        make_cached_edge,
+        make_structured_metrics_object_with_cache_and_contact_info,
+        # make_structured_metrics_object,
+        # make_link
+    ):
+        # assert True is False
+        # link_id = 1
+        # link_display_name = 'byod'
+        service_number = "VC1234567"
+        client_id = 12345
+        trouble = AffectingTroubles.LATENCY  # We can use whatever trouble
+
+        # metrics_object = make_structured_metrics_object()
+            # link_info=make_link(
+            #     id=link_id, 
+            #     display_name=link_display_name))
+
+        bruin_client_info = make_bruin_client_info(client_id=client_id)
+        edge_cache_info = make_cached_edge(serial_number=service_number, bruin_client_info=bruin_client_info)
+        link_info = make_structured_metrics_object_with_cache_and_contact_info(
+            cache_info=edge_cache_info)
+            # ,
+            # metrics_object=metrics_object)
+
+        service_affecting_monitor._is_link_label_blacklisted_from_hnoc.return_value = True
+
+        result = await service_affecting_monitor._process_affecting_trouble(link_info, trouble)
+        
+        service_affecting_monitor._create_affecting_ticket.assert_not_awaited()
+
+        assert result is None
+
+
     @pytest.mark.asyncio
     async def process_affecting_trouble__no_open_or_resolved_ticket_found_test(
         self,

@@ -704,11 +704,20 @@ class ServiceAffectingMonitor:
         serial_number = link_data["cached_info"]["serial_number"]
         interface = link_data["link_status"]["interface"]
         client_id = link_data["cached_info"]["bruin_client_info"]["client_id"]
+        link_label = link_data["link_status"]["displayName"]
+
+        is_byob = self._is_link_label_blacklisted_from_hnoc(link_label)
 
         logger.info(
             f"Service Affecting trouble of type {trouble.value} detected in interface {interface} of edge "
             f"{serial_number}"
         )
+
+        if is_byob:
+            logger.warning(
+                f"Link blacklisted as BYOD. Interface {interface} of edge {serial_number}"
+            )
+            return
 
         open_affecting_tickets_response = await self._bruin_repository.get_open_affecting_tickets(
             client_id, service_number=serial_number
