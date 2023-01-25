@@ -201,10 +201,10 @@ def make_ticket_contact_details():
         phone: int = 0
     ):
         return {
-            "FirstName": first_name,
-            "LastName": last_name,
-            "Email": email,
-            "Phone": phone
+            "firstName": first_name,
+            "lastName": last_name,
+            "email": email,
+            "phone": phone
         }
 
     return _inner
@@ -252,16 +252,16 @@ def make_ticket_contact_additional_subscribers():
     ):
         obj = [
             {
-                "FirstName": first_name,
-                "LastName": last_name,
-                "Email": email,
-                "Phone": phone
+                "firstName": first_name,
+                "lastName": last_name,
+                "email": email,
+                "phone": phone
             },
             {
-                "FirstName": first_name,
-                "LastName": last_name,
-                "Email": email,
-                "Phone": phone
+                "firstName": first_name,
+                "lastName": last_name,
+                "email": email,
+                "phone": phone
             },
         ]
 

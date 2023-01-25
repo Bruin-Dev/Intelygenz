@@ -540,10 +540,10 @@ class BruinRepository:
 
     @staticmethod
     def get_contact_info_for_ticket(ticket_contact_details):
-        ticket_contact_detail_first_name = ticket_contact_details["FirstName"]
-        ticket_contact_detail_last_name = ticket_contact_details["LastName"]
-        ticket_contact_detail_phone = ticket_contact_details["Phone"]
-        ticket_contact_detail_email = ticket_contact_details["Email"]
+        ticket_contact_detail_first_name = ticket_contact_details["firstName"]
+        ticket_contact_detail_last_name = ticket_contact_details["lastName"]
+        ticket_contact_detail_phone = ticket_contact_details["phone"]
+        ticket_contact_detail_email = ticket_contact_details["email"]
 
         if (ticket_contact_detail_first_name is None
             or ticket_contact_detail_last_name is None
@@ -576,8 +576,8 @@ class BruinRepository:
         subscribers = []
 
         for subscriber in ticket_contact_additional_subscribers:
-            if subscriber["Email"]:
-                subscribers.append(subscriber["Email"])
+            if subscriber["email"]:
+                subscribers.append(subscriber["email"])
 
         return subscribers
 
