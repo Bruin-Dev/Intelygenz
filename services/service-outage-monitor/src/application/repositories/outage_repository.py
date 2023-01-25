@@ -26,11 +26,6 @@ class OutageRepository:
             if link["interface"] in link_configuration["interfaces"]:
                 return link_configuration["type"]
 
-    def get_link_interfaces(self, link, links_configuration):
-        for link_configuration in links_configuration:
-            if link["interface"] in link_configuration["interfaces"]:
-                return link_configuration["interfaces"]
-
     def _is_link_wired(self, link, links_configuration):
         link_type = self.get_link_type(link, links_configuration)
         return link_type == "WIRED"
