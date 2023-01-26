@@ -541,9 +541,9 @@ class BruinRepository:
 
     @staticmethod
     def get_contact_info_for_ticket(ticket_contact_details):
-        ticket_contact_detail_first_name = ticket_contact_details["FirstName"]
-        ticket_contact_detail_last_name = ticket_contact_details["LastName"]
-        ticket_contact_detail_email = ticket_contact_details["Email"]
+        ticket_contact_detail_first_name = ticket_contact_details["firstName"]
+        ticket_contact_detail_last_name = ticket_contact_details["lastName"]
+        ticket_contact_detail_email = ticket_contact_details["email"]
 
         if (ticket_contact_detail_first_name is None
             or ticket_contact_detail_last_name is None
@@ -565,17 +565,17 @@ class BruinRepository:
             },
         ]
 
-        if "Phone" in ticket_contact_details and ticket_contact_details["Phone"] is not None:
-            contact_info[0]["phone"] = ticket_contact_details["Phone"]
-            contact_info[1]["phone"] = ticket_contact_details["Phone"]
+        if "phone" in ticket_contact_details and ticket_contact_details["phone"] is not None:
+            contact_info[0]["phone"] = ticket_contact_details["phone"]
+            contact_info[1]["phone"] = ticket_contact_details["phone"]
 
         return contact_info
 
     @staticmethod
     def _get_ticket_contact_from_ticket_contact_details(ticket_contact_details):
-        ticket_contact_detail_first_name = ticket_contact_details["FirstName"]
-        ticket_contact_detail_last_name = ticket_contact_details["LastName"]
-        ticket_contact_detail_email = ticket_contact_details["Email"]
+        ticket_contact_detail_first_name = ticket_contact_details["firstName"]
+        ticket_contact_detail_last_name = ticket_contact_details["lastName"]
+        ticket_contact_detail_email = ticket_contact_details["email"]
 
         if (ticket_contact_detail_first_name is None
             or ticket_contact_detail_last_name is None
@@ -590,8 +590,8 @@ class BruinRepository:
             "type": "ticket",
         }
 
-        if "Phone" in ticket_contact_details and ticket_contact_details["Phone"] is not None:
-            ticket_contact["phone"] = ticket_contact_details["Phone"]
+        if "phone" in ticket_contact_details and ticket_contact_details["phone"] is not None:
+            ticket_contact["phone"] = ticket_contact_details["phone"]
 
         return ticket_contact
 
