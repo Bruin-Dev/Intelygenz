@@ -149,7 +149,7 @@ resource "helm_release" "external-dns" {
   repository    = "https://charts.bitnami.com/bitnami"
   chart         = "external-dns"
 
-  version       = "6.8.2"
+  version       = "6.13.1"
   namespace     = "kube-system"
   force_update  = true
   wait          = true
@@ -162,6 +162,18 @@ resource "helm_release" "external-dns" {
   set {
     name = "serviceAccount.annotations.\\eks\\.amazonaws\\.com/role-arn"
     value = aws_iam_role.external-dns-role-eks.arn
+    type  = "string"
+  }
+
+  set {
+    name = "aws.roleArn"
+    value = aws_iam_role.external-dns-role-eks.arn
+    type  = "string"
+  }
+
+  set {
+    name = "txtOwnerId"
+    value = "mettel-${var.CURRENT_ENVIRONMENT}"
     type  = "string"
   }
 

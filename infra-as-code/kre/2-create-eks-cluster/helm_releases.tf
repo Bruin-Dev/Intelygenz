@@ -67,6 +67,18 @@ resource "helm_release" "external-dns" {
     type  = "string"
   }
 
+  set {
+    name = "aws.roleArn"
+    value = aws_iam_role.external-dns-role-eks.arn
+    type  = "string"
+  }
+
+  set {
+    name = "txtOwnerId"
+    value = "kre-${var.CURRENT_ENVIRONMENT}"
+    type  = "string"
+  }
+
   depends_on = [
       kubectl_manifest.aws_auth,
       aws_eks_addon.vpc_cni,
