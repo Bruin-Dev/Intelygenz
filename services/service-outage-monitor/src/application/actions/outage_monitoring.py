@@ -1108,10 +1108,10 @@ class OutageMonitor:
             }
         )
 
-    def _get_faulty_link_interfaces(self, links: List[dict], links_configuration: List[dict]) -> List[str]:
+    def _get_faulty_link_interfaces(self, links: List[dict]) -> List[str]:
         return list(
             {
-                self._outage_repository.get_link_interfaces(link, links_configuration)
+                link['interface']
                 for link in links
                 if self._outage_repository.is_faulty_link(link["linkState"])
             }
@@ -1417,7 +1417,7 @@ class OutageMonitor:
         has_faulty_digi_link = self._has_faulty_digi_link(edge_links, logical_id_list)
         has_faulty_byob_link = self._has_faulty_blacklisted_link(edge_links)
         faulty_link_types = self._get_faulty_link_types(edge_links, links_configuration)
-        faulty_link_interfaces = self._get_faulty_link_interfaces(edge_links, links_configuration)
+        faulty_link_interfaces = self._get_faulty_link_interfaces(edge_links)
 
         logger.info(f"[{outage_type.value}] Attempting outage ticket creation for serial {serial_number}...")
 

@@ -638,8 +638,8 @@ class BruinRepository:
         subscribers = []
 
         for subscriber in ticket_contact_additional_subscribers:
-            if subscriber["Email"]:
-                subscribers.append(subscriber["Email"])
+            if subscriber["email"]:
+                subscribers.append(subscriber["email"])
 
         return subscribers
 

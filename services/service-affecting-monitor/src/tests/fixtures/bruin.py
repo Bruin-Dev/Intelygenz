@@ -244,14 +244,14 @@ def make_ticket_contact_details():
         email: str = "",
         phone: int = None
     ):
-        obj = {
-            "FirstName": first_name,
-            "LastName": last_name,
-            "Email": email
+        return {
+            "firstName": first_name,
+            "lastName": last_name,
+            "email": email
         }
 
         if phone is not None:
-            obj["Phone"] = phone
+            obj["phone"] = phone
 
         return obj
 
@@ -300,16 +300,16 @@ def make_ticket_contact_additional_subscribers():
     ):
         obj = [
             {
-                "FirstName": first_name,
-                "LastName": last_name,
-                "Email": email,
-                "Phone": phone
+                "firstName": first_name,
+                "lastName": last_name,
+                "email": email,
+                "phone": phone
             },
             {
-                "FirstName": first_name,
-                "LastName": last_name,
-                "Email": email,
-                "Phone": phone
+                "firstName": first_name,
+                "lastName": last_name,
+                "email": email,
+                "phone": phone
             },
         ]
 

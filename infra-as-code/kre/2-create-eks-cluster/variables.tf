@@ -4,7 +4,7 @@ variable "METRICS_SERVER_HELM_CHART_VERSION" {
 }
 
 variable "EXTERNAL_DNS_HELM_CHART_VERSION" {
-  default     = "6.2.1"
+  default     = "6.13.1"
   description = "Helm chart version used for external-dns"
 }
 
