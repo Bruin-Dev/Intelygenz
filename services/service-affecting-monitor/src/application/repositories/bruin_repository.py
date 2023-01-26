@@ -7,6 +7,7 @@ import re
 from collections import defaultdict
 from datetime import datetime
 from typing import Any
+from copy import deepcopy
 
 from application import AffectingTroubles, ForwardQueues
 from application.repositories import nats_error_response
@@ -542,7 +543,6 @@ class BruinRepository:
     def get_contact_info_for_ticket(ticket_contact_details):
         ticket_contact_detail_first_name = ticket_contact_details["FirstName"]
         ticket_contact_detail_last_name = ticket_contact_details["LastName"]
-        ticket_contact_detail_phone = ticket_contact_details["Phone"]
         ticket_contact_detail_email = ticket_contact_details["Email"]
 
         if (ticket_contact_detail_first_name is None
@@ -565,11 +565,73 @@ class BruinRepository:
             },
         ]
 
-        if ticket_contact_detail_phone is not None:
-            contact_info[0]["phone"] = ticket_contact_detail_phone
-            contact_info[1]["phone"] = ticket_contact_detail_phone
+        if "Phone" in ticket_contact_details and ticket_contact_details["Phone"] is not None:
+            contact_info[0]["phone"] = ticket_contact_details["Phone"]
+            contact_info[1]["phone"] = ticket_contact_details["Phone"]
 
         return contact_info
+
+    @staticmethod
+    def _get_ticket_contact_from_ticket_contact_details(ticket_contact_details):
+        ticket_contact_detail_first_name = ticket_contact_details["FirstName"]
+        ticket_contact_detail_last_name = ticket_contact_details["LastName"]
+        ticket_contact_detail_email = ticket_contact_details["Email"]
+
+        if (ticket_contact_detail_first_name is None
+            or ticket_contact_detail_last_name is None
+                or ticket_contact_detail_email is None):
+            return None
+
+        full_name = ticket_contact_detail_first_name + " " + ticket_contact_detail_last_name
+
+        ticket_contact = {
+            "email": ticket_contact_detail_email,
+            "name": full_name,
+            "type": "ticket",
+        }
+
+        if "Phone" in ticket_contact_details and ticket_contact_details["Phone"] is not None:
+            ticket_contact["phone"] = ticket_contact_details["Phone"]
+
+        return ticket_contact
+
+    @staticmethod
+    def _get_site_contact_from_site_details(site_details):
+        site_detail_name = site_details["primaryContactName"]
+        site_detail_phone = site_details["primaryContactPhone"]
+        site_detail_email = site_details["primaryContactEmail"]
+
+        if site_detail_name is None or site_detail_email is None:
+            return None
+
+        site_contact = {
+            "email": site_detail_email,
+            "name": site_detail_name,
+            "type": "site",
+        }
+
+        if site_detail_phone:
+            site_contact["phone"] = site_detail_phone
+
+        return site_contact
+
+    @staticmethod
+    def get_contact_info_from_site_and_ticket_contact_details(site_details, ticket_contact_details):
+        site_contact = BruinRepository._get_site_contact_from_site_details(site_details)
+        ticket_contact = BruinRepository._get_ticket_contact_from_ticket_contact_details(ticket_contact_details)
+
+        if site_contact is None and ticket_contact is None:
+            return None
+
+        if site_contact is None:
+            site_contact = deepcopy(ticket_contact)
+            site_contact["type"] = "site"
+
+        if ticket_contact is None:
+            ticket_contact = deepcopy(site_contact)
+            ticket_contact["type"] = "ticket"
+
+        return [site_contact, ticket_contact]
 
     @staticmethod
     def get_ticket_contact_additional_subscribers(ticket_contact_additional_subscribers):

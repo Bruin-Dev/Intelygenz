@@ -314,10 +314,11 @@ class TestServiceAffectingMonitor:
         make_list_of_structured_metrics_objects,
         make_structured_metrics_object_with_cache_and_contact_info,
         make_list_of_structured_metrics_objects_with_cache_and_contact_info,
-        make_contact_info,
+        make_site_and_ticket_contact_info,
         make_site_details,
         make_ticket_contact_additional_subscribers,
-        make_subscribers
+        make_subscribers,
+        make_ticket_contact_details
     ):
         site_detail_email = "test@email.com"
         site_detail_phone = "510-111-111"
@@ -328,10 +329,30 @@ class TestServiceAffectingMonitor:
             contact_email=site_detail_email,
         )
 
+        ticket_contact_first_name = "ticket"
+        ticket_contact_last_name = "contact"
+        ticket_contact_email = "ticket@support.com"
+        ticket_contact_phone = "510-222-222"
+        ticket_contact_details = make_ticket_contact_details(
+            first_name=ticket_contact_first_name,
+            last_name=ticket_contact_last_name,
+            email=ticket_contact_email,
+            phone=ticket_contact_phone
+        )
+
         subscriber_email = "sub@email.com"
         subscribers = make_subscribers(email=subscriber_email)
 
-        edge_contact_info = make_contact_info(email=site_detail_email, phone=site_detail_phone, name=site_detail_name)
+        edge_contact_info = make_site_and_ticket_contact_info(
+            site_contact_email=site_detail_email,
+            site_contact_name=site_detail_name,
+            site_contact_phone=site_detail_phone,
+            ticket_contact_email=ticket_contact_email,
+            ticket_contact_first_name=ticket_contact_first_name,
+            ticket_contact_last_name=ticket_contact_last_name,
+            ticket_contact_phone=ticket_contact_phone
+        )
+
         ticket_contact_additional_subscribers = make_ticket_contact_additional_subscribers(email=subscriber_email)
 
         edge_1_serial_number = "VCO123"
@@ -339,7 +360,8 @@ class TestServiceAffectingMonitor:
         edge_1_cache_info = make_cached_edge(
             serial_number=edge_1_serial_number,
             site_details=site_details,
-            ticket_contact_additional_subscribers=ticket_contact_additional_subscribers
+            ticket_contact_details=ticket_contact_details,
+            ticket_contact_additional_subscribers=ticket_contact_additional_subscribers,
         )
         edge_1 = make_edge(serial_number=edge_1_serial_number)
 
@@ -364,7 +386,8 @@ class TestServiceAffectingMonitor:
         )
 
         expected = make_list_of_structured_metrics_objects_with_cache_and_contact_info(edge_1_complete_info)
-        service_affecting_monitor._bruin_repository.get_contact_info_for_site.assert_called_once_with(site_details)
+        (service_affecting_monitor._bruin_repository.get_contact_info_from_site_and_ticket_contact_details
+         .assert_called_once_with(site_details, ticket_contact_details))
 
         assert result == expected
 
@@ -441,7 +464,8 @@ class TestServiceAffectingMonitor:
         )
 
         expected = make_list_of_structured_metrics_objects_with_cache_and_contact_info(edge_1_complete_info)
-        service_affecting_monitor._bruin_repository.get_contact_info_for_site.assert_called_once_with(site_details)
+        (service_affecting_monitor._bruin_repository.get_contact_info_from_site_and_ticket_contact_details
+         .assert_called_once_with(site_details, ticket_contact_details))
 
         assert result == expected
 
@@ -456,7 +480,7 @@ class TestServiceAffectingMonitor:
         make_list_of_structured_metrics_objects,
         make_structured_metrics_object_with_cache_and_contact_info,
         make_list_of_structured_metrics_objects_with_cache_and_contact_info,
-        make_contact_info,
+        make_site_and_ticket_contact_info,
         make_site_details,
         make_bruin_client_info,
         make_ticket_contact_additional_subscribers,
@@ -475,7 +499,7 @@ class TestServiceAffectingMonitor:
         ticket_contact_first_name = "first"
         ticket_contact_last_name = "last"
         ticket_contact_email = "email"
-        ticket_contact_phone = "email"
+        ticket_contact_phone = "333-333-3333"
         ticket_contact_details = make_ticket_contact_details(
             first_name=ticket_contact_first_name,
             last_name=ticket_contact_last_name,
@@ -488,10 +512,14 @@ class TestServiceAffectingMonitor:
         edge_1_serial_number = "VCO123"
 
         client_id = 12345
-        default_contact_info = make_contact_info(
-            email=ticket_contact_email,
-            phone=ticket_contact_phone,
-            name=f"{ticket_contact_first_name} {ticket_contact_last_name}",
+        default_contact_info = make_site_and_ticket_contact_info(
+            site_contact_email=site_detail_email,
+            site_contact_name=site_detail_name,
+            site_contact_phone=site_detail_phone,
+            ticket_contact_email=ticket_contact_email,
+            ticket_contact_first_name=ticket_contact_first_name,
+            ticket_contact_last_name=ticket_contact_last_name,
+            ticket_contact_phone=ticket_contact_phone
         )
 
         bruin_client_info = make_bruin_client_info(client_id=client_id)
@@ -525,7 +553,8 @@ class TestServiceAffectingMonitor:
         )
 
         expected = make_list_of_structured_metrics_objects_with_cache_and_contact_info(edge_1_complete_info)
-        service_affecting_monitor._bruin_repository.get_contact_info_for_site.assert_called_once_with(site_details)
+        (service_affecting_monitor._bruin_repository.get_contact_info_from_site_and_ticket_contact_details
+         .assert_called_once_with(site_details, ticket_contact_details))
 
         assert result == expected
 
@@ -797,10 +826,10 @@ class TestServiceAffectingMonitor:
         make_list_of_structured_metrics_objects,
         make_structured_metrics_object_with_cache_and_contact_info,
         make_rpc_response,
-        make_contact_info,
+        make_site_and_ticket_contact_info,
         make_subscribers
     ):
-        edge_contact_info = make_contact_info()
+        edge_contact_info = make_site_and_ticket_contact_info()
 
         subscribers = make_subscribers()
 
@@ -964,10 +993,10 @@ class TestServiceAffectingMonitor:
         make_list_of_structured_metrics_objects,
         make_structured_metrics_object_with_cache_and_contact_info,
         make_rpc_response,
-        make_contact_info,
+        make_site_and_ticket_contact_info,
         make_subscribers
     ):
-        edge_contact_info = make_contact_info()
+        edge_contact_info = make_site_and_ticket_contact_info()
         subscribers = make_subscribers()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
@@ -1130,10 +1159,10 @@ class TestServiceAffectingMonitor:
         make_list_of_structured_metrics_objects,
         make_structured_metrics_object_with_cache_and_contact_info,
         make_rpc_response,
-        make_contact_info,
+        make_site_and_ticket_contact_info,
         make_subscribers
     ):
-        edge_contact_info = make_contact_info()
+        edge_contact_info = make_site_and_ticket_contact_info()
         subscribers = make_subscribers()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
@@ -1432,10 +1461,10 @@ class TestServiceAffectingMonitor:
         make_list_of_structured_metrics_objects,
         make_structured_metrics_object_with_cache_and_contact_info,
         make_rpc_response,
-        make_contact_info,
+        make_site_and_ticket_contact_info,
         make_subscribers
     ):
-        edge_contact_info = make_contact_info()
+        edge_contact_info = make_site_and_ticket_contact_info()
         subscribers = make_subscribers()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
@@ -1636,10 +1665,10 @@ class TestServiceAffectingMonitor:
         make_list_of_structured_metrics_objects,
         make_structured_metrics_object_with_cache_and_contact_info,
         make_rpc_response,
-        make_contact_info,
+        make_site_and_ticket_contact_info,
         make_subscribers
     ):
-        edge_contact_info = make_contact_info()
+        edge_contact_info = make_site_and_ticket_contact_info()
         subscribers = make_subscribers()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 
@@ -2828,10 +2857,10 @@ class TestServiceAffectingMonitor:
         make_list_of_structured_metrics_objects_with_cache_and_contact_info,
         make_events_by_serial_and_interface,
         make_rpc_response,
-        make_contact_info,
+        make_site_and_ticket_contact_info,
         make_subscribers
     ):
-        edge_contact_info = make_contact_info()
+        edge_contact_info = make_site_and_ticket_contact_info()
         subscribers = make_subscribers()
         service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
 

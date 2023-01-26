@@ -251,10 +251,9 @@ class ServiceAffectingMonitor:
                 contacts = default_contacts
                 subscribers = []
             else:
-                logger.info(f"Using site-specific contact info for edge {serial_number} and client {client_id}")
-                contacts = (self._bruin_repository.get_contact_info_for_site(site_details)
-                            or self._bruin_repository.get_contact_info_for_ticket(ticket_contact_details)
-                            or default_contacts)
+                logger.info(f"Using site and ticket contact info for edge {serial_number} and client {client_id}")
+                contacts = (self._bruin_repository.get_contact_info_from_site_and_ticket_contact_details(
+                    site_details, ticket_contact_details) or default_contacts)
                 subscribers = self._bruin_repository.get_ticket_contact_additional_subscribers(
                     ticket_contact_additional_subscribers)
 
