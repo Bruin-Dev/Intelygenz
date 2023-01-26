@@ -2058,11 +2058,10 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._is_link_label_blacklisted_from_hnoc.return_value = True
 
         result = await service_affecting_monitor._process_affecting_trouble(link_info, trouble)
-        
+
         service_affecting_monitor._create_affecting_ticket.assert_not_awaited()
 
         assert result is None
-
 
     @pytest.mark.asyncio
     async def process_affecting_trouble__no_open_or_resolved_ticket_found_test(
