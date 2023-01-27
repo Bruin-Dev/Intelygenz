@@ -916,7 +916,7 @@
 <article class="md-content__inner md-typeset">
 <h1> bandwidth reports job</h1>
 <h2 id="run-daily-bandwidth-report-job">Run Daily Bandwidth Report job</h2>
-<div class="highlight"><pre><span></span><code><a href="#__codelineno-0-1" id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Running bandwidth reports process for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">clients</span><span class="p">)</span><span class="si">}</span><span class="s2"> client(s)"</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-0-1" id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[bandwidth-reports] Running bandwidth reports process for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">clients</span><span class="p">)</span><span class="si">}</span><span class="s2"> client(s)"</span><span class="p">)</span>
 </code></pre></div>
 <p><a href="../../../repositories/customer_cache_repository/get_cache/">CustomerCacheRepository::get_cache</a></p>
 <ul>
@@ -925,23 +925,34 @@
 </code></pre></div>
   END</li>
 </ul>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-2-1" id="__codelineno-2-1" name="__codelineno-2-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[bandwidth-reports] Creating enterprise id edge id_relation list"</span><span class="p">)</span>
+</code></pre></div>
 <p><a href="../../../repositories/velocloud_repository/get_links_metrics_by_host/">VelocloudRepository::get_links_metrics_by_host</a></p>
 <ul>
 <li>
 <p>If response status for get links metrics by VeloCloud host (VCO) is not ok:
-  <div class="highlight"><pre><span></span><code><a href="#__codelineno-2-1" id="__codelineno-2-1" name="__codelineno-2-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"[bandwidth-reports] Error getting links metrics. Process cannot keep going."</span><span class="p">)</span>
+  <div class="highlight"><pre><span></span><code><a href="#__codelineno-3-1" id="__codelineno-3-1" name="__codelineno-3-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"[bandwidth-reports] Error getting links metrics. Process cannot keep going."</span><span class="p">)</span>
 </code></pre></div>
   END</p>
 </li>
 <li>
 <p>For each client that should receive this report:</p>
-<p><a href="../_generate_bandwidth_report_for_client/">_generate_bandwidth_report_for_client</a></p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code><a href="#__codelineno-3-1" id="__codelineno-3-1" name="__codelineno-3-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-<a href="#__codelineno-3-2" id="__codelineno-3-2" name="__codelineno-3-2"></a>    <span class="sa">f</span><span class="s2">"[bandwidth-reports] Report generation for all clients finished. "</span>
-<a href="#__codelineno-3-3" id="__codelineno-3-3" name="__codelineno-3-3"></a>    <span class="sa">f</span><span class="s2">"Took </span><span class="si">{</span><span class="nb">round</span><span class="p">((</span><span class="n">bandwidth_report_end_time</span> <span class="o">-</span> <span class="n">bandwidth_report_init_time</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2"> minutes."</span>
-<a href="#__codelineno-3-4" id="__codelineno-3-4" name="__codelineno-3-4"></a><span class="p">)</span>
+<p><a href="../_generate_bandwidth_report_for_client/">_generate_bandwidth_report_for_client</a></p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-4-1" id="__codelineno-4-1" name="__codelineno-4-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[bandwidth-reports] Generating bandwidth report for client id </span><span class="si">{</span><span class="n">client_id</span><span class="si">}</span><span class="s2"> and client name </span><span class="si">{</span><span class="n">client_name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div>
+<p><a href="../_add_bandwidth_to_links_metrics/">_add_bandwitdh_to_links_metrics</a> </p>
+<p><a href="../prepare_items_for_bandwidth_report/">prepare_items_for_bandwidth_report</a></p>
+<ul>
+<li>If something fails:
+  <div class="highlight"><pre><span></span><code><a href="#__codelineno-5-1" id="__codelineno-5-1" name="__codelineno-5-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[bandwidth-reports] No report for client </span><span class="si">{</span><span class="n">client_id</span><span class="si">}</span><span class="s2"> was sent via email"</span><span class="p">)</span>
+</code></pre></div></li>
+</ul>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-6-1" id="__codelineno-6-1" name="__codelineno-6-1"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+<a href="#__codelineno-6-2" id="__codelineno-6-2" name="__codelineno-6-2"></a>    <span class="sa">f</span><span class="s2">"[bandwidth-reports] Report generation for all clients finished. "</span>
+<a href="#__codelineno-6-3" id="__codelineno-6-3" name="__codelineno-6-3"></a>    <span class="sa">f</span><span class="s2">"Took </span><span class="si">{</span><span class="nb">round</span><span class="p">((</span><span class="n">bandwidth_report_end_time</span> <span class="o">-</span> <span class="n">bandwidth_report_init_time</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2"> minutes."</span>
+<a href="#__codelineno-6-4" id="__codelineno-6-4" name="__codelineno-6-4"></a><span class="p">)</span>
 </code></pre></div>
 </article>
 </div>
