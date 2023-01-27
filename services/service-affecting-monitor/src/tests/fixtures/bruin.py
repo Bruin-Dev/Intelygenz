@@ -244,7 +244,7 @@ def make_ticket_contact_details():
         email: str = "",
         phone: int = None
     ):
-        return {
+        obj = {
             "firstName": first_name,
             "lastName": last_name,
             "email": email
