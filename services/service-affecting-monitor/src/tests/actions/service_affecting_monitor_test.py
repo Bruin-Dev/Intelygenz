@@ -386,7 +386,8 @@ class TestServiceAffectingMonitor:
         )
 
         expected = make_list_of_structured_metrics_objects_with_cache_and_contact_info(edge_1_complete_info)
-        (service_affecting_monitor._bruin_repository.get_contact_info_from_site_and_ticket_contact_details
+        (service_affecting_monitor._bruin_repository
+         .get_contact_info_from_site_and_ticket_contact_details
          .assert_called_once_with(site_details, ticket_contact_details))
 
         assert result == expected
