@@ -1726,7 +1726,8 @@ class TestServiceOutageMonitor:
             )
             outage_monitor._attempt_ticket_creation.assert_called_once_with(link_down_edges[0], Outages.LINK_DOWN)
             outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(
-                bruin_client_info["client_id"], edge_1_serial, [logical_id_list[0]["interface_name"]])
+                bruin_client_info["client_id"], edge_1_serial, [logical_id_list[0]["interface_name"]]
+            )
             outage_monitor._schedule_recheck_job_for_edges.assert_called_once_with(
                 [link_down_edges[1]], Outages.LINK_DOWN
             )
