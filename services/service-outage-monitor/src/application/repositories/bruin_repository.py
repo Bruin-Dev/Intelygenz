@@ -565,6 +565,10 @@ class BruinRepository:
         notification_type = "TicketBYOBOutageRepairReminder-E-Mail"
         return await self.post_notification_email_milestone(ticket_id, service_number, notification_type)
 
+    async def send_edge_is_down_email_notification(self, ticket_id: int, service_number: str) -> dict:
+        notification_type = "TicketServiceAffectingRepairVelo_E-Mail"
+        return await self.post_notification_email_milestone(ticket_id, service_number, notification_type)
+
     async def post_notification_email_milestone(self, ticket_id: int, service_number: str, notification_type: str):
         err_msg = None
 

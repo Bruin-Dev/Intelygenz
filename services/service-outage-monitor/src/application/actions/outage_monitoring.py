@@ -1498,6 +1498,19 @@ class OutageMonitor:
                                 f" {ticket_id}!"
                             )
 
+                if self._outage_repository.edge_has_all_links_down(edge["status"]):
+                    logger.info(
+                        f"Sending an email for ticket_id: {ticket_id} "
+                        f"with serial: {serial_number} because all links are down..."
+                    )
+                    email_edge_fully_down = await self._bruin_repository.send_edge_is_down_email_notification(
+                        ticket_id, serial_number)
+                    if email_edge_fully_down["status"] not in range(200, 300):
+                        logger.error(
+                            f"Failed sending all links down email for ticket_id: {ticket_id} "
+                            f"with serial: {serial_number}"
+                        )
+
                 await self._check_for_digi_reboot(ticket_id, logical_id_list, serial_number, edge_status)
             elif ticket_creation_response_status == 409:
                 logger.info(

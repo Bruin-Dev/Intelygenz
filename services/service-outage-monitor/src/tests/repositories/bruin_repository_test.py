@@ -1863,6 +1863,24 @@ class TestBruinRepository:
         assert response == bruin_generic_200_response
 
     @pytest.mark.asyncio
+    async def send_edge_is_down_email_notification_test(self, bruin_repository, bruin_generic_200_response):
+        ticket_id = 12345
+        service_number = "VC1234567"
+        notification_type = "TicketServiceAffectingRepairVelo_E-Mail"
+
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(bruin_generic_200_response)
+
+        bruin_repository._nats_client.request.return_value = response_msg
+
+        response = await bruin_repository.send_edge_is_down_email_notification(ticket_id, service_number)
+
+        bruin_repository.post_notification_email_milestone.assert_awaited_once_with(
+            ticket_id, service_number, notification_type
+        )
+        assert response == bruin_generic_200_response
+
+    @pytest.mark.asyncio
     async def post_notification_email_milestone_test(self, bruin_repository, bruin_generic_200_response):
         ticket_id = 12345
         service_number = "VC1234567"

@@ -1660,3 +1660,100 @@ class TestOutageRepository:
         ha_repository.is_ha_primary = Mock(return_value=True)
         result = outage_repository.should_document_outage(edge_status)
         assert result is True
+
+    def edge_has_all_links_down_test(self):
+        ha_repository = Mock()
+        outage_repository = OutageRepository(ha_repository)
+
+        edge_status = {
+            # Some fields omitted for simplicity
+            "host": "mettel.velocloud.net",
+            "enterpriseId": 1,
+            "edgeState": "CONNECTED",
+            "edgeId": 3,
+            "edgeSerialNumber": "VC1234567",
+            "edgeHASerialNumber": None,
+            "edgeHAState": None,
+            "edgeIsHAPrimary": None,
+            "links": [
+                {
+                    "interface": "RAY",
+                    "linkState": "DISCONNECTED",
+                },
+            ],
+        }
+
+        result = outage_repository.edge_has_all_links_down(edge_status)
+        assert result is False
+
+        edge_status = {
+            # Some fields omitted for simplicity
+            "host": "mettel.velocloud.net",
+            "enterpriseId": 1,
+            "edgeState": "OFFLINE",
+            "edgeId": 3,
+            "edgeSerialNumber": "VC1234567",
+            "edgeHASerialNumber": None,
+            "edgeHAState": None,
+            "edgeIsHAPrimary": None,
+            "links": [
+                {
+                    "interface": "RAY",
+                    "linkState": "DISCONNECTED",
+                },
+            ],
+        }
+
+        result = outage_repository.edge_has_all_links_down(edge_status)
+
+        assert result is True
+
+        edge_status = {
+            # Some fields omitted for simplicity
+            "host": "mettel.velocloud.net",
+            "enterpriseId": 1,
+            "edgeState": "OFFLINE",
+            "edgeId": 3,
+            "edgeSerialNumber": "VC1234567",
+            "edgeHASerialNumber": "VC9999999",
+            "edgeHAState": "CONNECTED",
+            "edgeIsHAPrimary": False,
+            "links": [
+                {
+                    "interface": "RAY",
+                    "linkState": "DISCONNECTED",
+                },
+                {
+                    "interface": "RAY",
+                    "linkState": "CONNECTED",
+                },
+            ],
+        }
+
+        result = outage_repository.edge_has_all_links_down(edge_status)
+        assert result is False
+
+        edge_status = {
+            # Some fields omitted for simplicity
+            "host": "mettel.velocloud.net",
+            "enterpriseId": 1,
+            "edgeState": "OFFLINE",
+            "edgeId": 3,
+            "edgeSerialNumber": "VC1234567",
+            "edgeHASerialNumber": "VC9999999",
+            "edgeHAState": "CONNECTED",
+            "edgeIsHAPrimary": True,
+            "links": [
+                {
+                    "interface": "RAY",
+                    "linkState": "DISCONNECTED",
+                },
+                {
+                    "interface": "RAY",
+                    "linkState": "DISCONNECTED",
+                },
+            ],
+        }
+
+        result = outage_repository.edge_has_all_links_down(edge_status)
+        assert result is True
