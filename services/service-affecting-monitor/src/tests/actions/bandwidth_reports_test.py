@@ -82,11 +82,13 @@ class TestBandwidthReports:
         bandwidth_reports._velocloud_repository.get_edge_link_series_for_bandwidth_reports.return_value = response_2
         bandwidth_reports._generate_bandwidth_report_for_client = AsyncMock()
 
+        enterprise_id_edge_id = bandwidth_reports.get_enterprise_id_and_edge_id_relation_from_customer_cache_response(
+            customer_cache, [client_id], bandwidth_reports._config.VELOCLOUD_HOST)
         await bandwidth_reports._bandwidth_reports_job()
 
         bandwidth_reports._customer_cache_repository.get_cache_for_affecting_monitoring.assert_awaited_once()
         bandwidth_reports._generate_bandwidth_report_for_client.assert_awaited_once_with(
-            client_id, client_name, {serial_number}, links_metrics
+            client_id, client_name, {serial_number}, links_metrics, enterprise_id_edge_id
         )
 
     @pytest.mark.asyncio
@@ -127,6 +129,9 @@ class TestBandwidthReports:
         edge = make_edge(
             host=host, enterprise_id=enterprise_id, id_=edge_id, serial_number=serial_number, name=edge_name
         )
+
+        enterprise_id_edge_id = bandwidth_reports.get_enterprise_id_and_edge_id_relation_from_customer_cache_response(
+            customer_cache, [client_id], host)
         link_with_edge = make_link_with_edge_info(link_info=link, edge_info=edge)
         # link_metrics = make_metrics_for_link(link_with_edge_info=link_with_edge)
         # links_metrics = [link_metrics]
@@ -228,11 +233,12 @@ class TestBandwidthReports:
 
         with patch.object(bandwidth_reports._config, "CURRENT_ENVIRONMENT", "production"):
             await bandwidth_reports._generate_bandwidth_report_for_client(
-                client_id, client_name, {serial_number}, link_series
+                client_id, client_name, {serial_number}, link_series, enterprise_id_edge_id
             )
 
         report_items = [
             {
+                "enterprise_id": enterprise_id,
                 "serial_number": serial_number,
                 "edge_name": edge_name,
                 "interface": interface,
@@ -365,12 +371,12 @@ class TestBandwidthReports:
     def get_start_date_test(self, bandwidth_reports):
         with patch.object(bandwidth_reports_module, "datetime", new=datetime_mock):
             result = bandwidth_reports._get_start_date()
-        assert result == "2021-12-19T00:00:00Z"
+        assert result == "2021-12-19T05:00:00Z"
 
     def get_end_date_test(self, bandwidth_reports):
         with patch.object(bandwidth_reports_module, "datetime", new=datetime_mock):
             result = bandwidth_reports._get_end_date()
-        assert result == "2021-12-20T00:00:00Z"
+        assert result == "2021-12-20T05:00:00Z"
 
     def add_bandwidth_to_links_metrics_not_none_test(self, bandwidth_reports, make_metrics):
         serial_number = "VC1234567"

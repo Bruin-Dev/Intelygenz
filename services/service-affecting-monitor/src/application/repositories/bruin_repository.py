@@ -895,13 +895,17 @@ class BruinRepository:
             "trouble": trouble,
         }
 
-    def prepare_items_for_bandwidth_report(self, links_metrics, grouped_ticket_details):
+    def prepare_items_for_bandwidth_report(self, links_metrics, grouped_ticket_details, enterprise_id_edge_id_relation):
         logger.info(f"[bandwidth-reports] Preparing items for bandwidth report")
         report_items = []
         for link_metrics in links_metrics:
             serial_number = link_metrics["serial_number"]
             interface = link_metrics["interface"]
+            enterprise_id = [edge["enterprise_id"]
+                             for edge in enterprise_id_edge_id_relation
+                             if edge["serial_number"] == serial_number][0]
             report_item = self.build_bandwidth_report_item(
+                enterprise_id=enterprise_id,
                 serial_number=serial_number,
                 edge_name=link_metrics["edge_name"],
                 interface=interface,
@@ -924,6 +928,7 @@ class BruinRepository:
 
     @staticmethod
     def build_bandwidth_report_item(
+        enterprise_id,
         serial_number,
         edge_name,
         interface,
@@ -943,6 +948,7 @@ class BruinRepository:
         logger.info(f"[bandwidth-reports] Building bandwidth report item for edge {serial_number} and \
                       interface {interface}")
         return {
+            "enterprise_id": enterprise_id,
             "serial_number": serial_number,
             "edge_name": edge_name,
             "interface": interface,

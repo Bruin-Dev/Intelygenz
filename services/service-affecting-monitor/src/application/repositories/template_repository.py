@@ -144,6 +144,7 @@ class TemplateRepository:
         }
         rows = []
         headers = [
+            "Enterprise Id",
             "Serial Number",
             "Edge Name",
             "Interface",
@@ -170,6 +171,7 @@ class TemplateRepository:
             serial_number_set.add(item["serial_number"])
             rows.append(
                 [
+                    item["enterprise_id"],
                     item["serial_number"],
                     item["edge_name"],
                     item["interface"],

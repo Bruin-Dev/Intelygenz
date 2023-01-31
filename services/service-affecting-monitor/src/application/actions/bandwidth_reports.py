@@ -63,7 +63,7 @@ class BandwidthReports:
             customer_cache_body, clients, velocloud_host
         )
 
-        now = datetime.now(utc)
+        now = datetime.now(utc).replace(hour=5, minute=0, second=0, microsecond=0)
         interval_for_metrics = {
             "start": now - timedelta(hours=self._config.BANDWIDTH_REPORT_CONFIG["lookup_interval_hours"]),
             "end": now,
@@ -90,7 +90,7 @@ class BandwidthReports:
         for client_id in clients:
             client_name = client_names_by_id[client_id]
             await self._generate_bandwidth_report_for_client(
-                client_id, client_name, serial_numbers, edge_links_metrics_response_body
+                client_id, client_name, serial_numbers, edge_links_metrics_response_body, enterprise_id_edge_id_relation
             )
 
         end = datetime.now()
@@ -122,7 +122,8 @@ class BandwidthReports:
 
         return enterprise_id_edge_id_relation
 
-    async def _generate_bandwidth_report_for_client(self, client_id, client_name, serial_numbers, links_metrics):
+    async def _generate_bandwidth_report_for_client(self, client_id, client_name, serial_numbers, links_metrics,
+                                                    enterprise_id_edge_id_relation):
         logger.info(f"[bandwidth-reports] Generating bandwidth report for client id {client_id} and \
                       client name {client_name}")
         start_date = self._get_start_date()
@@ -146,7 +147,8 @@ class BandwidthReports:
         grouped_ticket_details = self._bruin_repository.group_ticket_details_by_serial_and_interface(ticket_details)
         await asyncio.sleep(0)
 
-        report_items = self._bruin_repository.prepare_items_for_bandwidth_report(links_metrics, grouped_ticket_details)
+        report_items = self._bruin_repository.prepare_items_for_bandwidth_report(links_metrics, grouped_ticket_details,
+                                                                                 enterprise_id_edge_id_relation)
         report_items.sort(key=lambda item: (item["serial_number"], item["interface"]))
 
         if self._config.CURRENT_ENVIRONMENT != "production":
@@ -240,12 +242,10 @@ class BandwidthReports:
         return reported_metrics
 
     def _get_start_date(self):
-        now = datetime.utcnow()
+        now = datetime.utcnow().replace(hour=5, minute=0, second=0, microsecond=0)
         start_date = now - timedelta(hours=self._config.BANDWIDTH_REPORT_CONFIG["lookup_interval_hours"])
-        start_date = start_date.replace(microsecond=0)
         return start_date.isoformat() + "Z"
 
     def _get_end_date(self):
-        now = datetime.utcnow()
-        end_date = now.replace(microsecond=0)
+        end_date = datetime.utcnow().replace(hour=5, minute=0, second=0, microsecond=0)
         return end_date.isoformat() + "Z"
