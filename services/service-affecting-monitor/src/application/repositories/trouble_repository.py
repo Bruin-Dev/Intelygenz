@@ -124,7 +124,8 @@ class TroubleRepository:
         return len(events) < threshold
 
     def are_all_metrics_within_thresholds(
-        self, edge_data: dict, *, lookup_interval_minutes: int, check_bandwidth_troubles: bool, links_configuration: list[dict]
+        self, edge_data: dict, *, lookup_interval_minutes: int,
+        check_bandwidth_troubles: bool, links_configuration: list[dict]
     ) -> bool:
         all_metrics_within_thresholds = True
 
@@ -150,7 +151,8 @@ class TroubleRepository:
 
         return all_metrics_within_thresholds
 
-    def is_within_lookback_window(self, link_last_active: str, is_wireless_link: bool, trouble: AffectingTroubles) -> bool:
+    def is_within_lookback_window(self, link_last_active: str,
+                                  is_wireless_link: bool, trouble: AffectingTroubles) -> bool:
         lookback_window_minutes = self._config.MONITOR_CONFIG[
             self._utils_repository.monitoring_minutes_per_trouble_metric_to_use(is_wireless_link)][trouble]
 

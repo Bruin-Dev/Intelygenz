@@ -85,13 +85,15 @@ MONITOR_CONFIG = {
     },
     "wireless_monitoring_minutes_per_trouble": {
         AffectingTroubles.LATENCY: int(os.environ["MONITORING__WIRELESS_LATENCY_MONITORING_LOOKUP_INTERVAL"]) // 60,
-        AffectingTroubles.PACKET_LOSS: int(os.environ["MONITORING__WIRELESS_PACKET_LOSS_MONITORING_LOOKUP_INTERVAL"]) // 60,
+        AffectingTroubles.PACKET_LOSS: int(
+            os.environ["MONITORING__WIRELESS_PACKET_LOSS_MONITORING_LOOKUP_INTERVAL"]) // 60,
         AffectingTroubles.JITTER: int(os.environ["MONITORING__WIRELESS_JITTER_MONITORING_LOOKUP_INTERVAL"]) // 60,
         AffectingTroubles.BANDWIDTH_OVER_UTILIZATION: int(
             os.environ["MONITORING__WIRELESS_BANDWIDTH_OVER_UTILIZATION_MONITORING_LOOKUP_INTERVAL"]
         )
         // 60,
-        AffectingTroubles.BOUNCING: int(os.environ["MONITORING__WIRELESS_CIRCUIT_INSTABILITY_MONITORING_LOOKUP_INTERVAL"]) // 60,
+        AffectingTroubles.BOUNCING: int(
+            os.environ["MONITORING__WIRELESS_CIRCUIT_INSTABILITY_MONITORING_LOOKUP_INTERVAL"]) // 60,
     },
     "blacklisted_link_labels_for_asr_forwards": json.loads(os.environ["LINK_LABELS_BLACKLISTED_FROM_ASR_FORWARDS"]),
     "blacklisted_link_labels_for_hnoc_forwards": json.loads(os.environ["LINK_LABELS_BLACKLISTED_FROM_HNOC_FORWARDS"]),
