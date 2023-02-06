@@ -164,108 +164,222 @@ class TestTroubleRepository:
         )
 
     def is_latency_rx_within_threshold_test(self, trouble_repository, make_metrics):
+        is_wireless_link = False
         metrics = make_metrics(best_latency_ms_rx=139)
-        result = trouble_repository.is_latency_rx_within_threshold(metrics)
+        result = trouble_repository.is_latency_rx_within_threshold(metrics, is_wireless_link)
         assert result is True
 
         metrics = make_metrics(best_latency_ms_rx=140)
-        result = trouble_repository.is_latency_rx_within_threshold(metrics)
+        result = trouble_repository.is_latency_rx_within_threshold(metrics, is_wireless_link)
+        assert result is False
+
+        is_wireless_link = True
+        metrics = make_metrics(best_latency_ms_rx=139)
+        result = trouble_repository.is_latency_rx_within_threshold(metrics, is_wireless_link)
+        assert result is True
+
+        metrics = make_metrics(best_latency_ms_rx=140)
+        result = trouble_repository.is_latency_rx_within_threshold(metrics, is_wireless_link)
         assert result is False
 
     def is_latency_tx_within_threshold_test(self, trouble_repository, make_metrics):
+        is_wireless_link = False
         metrics = make_metrics(best_latency_ms_tx=139)
-        result = trouble_repository.is_latency_tx_within_threshold(metrics)
+        result = trouble_repository.is_latency_tx_within_threshold(metrics, is_wireless_link)
         assert result is True
 
         metrics = make_metrics(best_latency_ms_tx=140)
-        result = trouble_repository.is_latency_tx_within_threshold(metrics)
+        result = trouble_repository.is_latency_tx_within_threshold(metrics, is_wireless_link)
+        assert result is False
+
+        is_wireless_link = True
+        metrics = make_metrics(best_latency_ms_tx=139)
+        result = trouble_repository.is_latency_tx_within_threshold(metrics, is_wireless_link)
+        assert result is True
+
+        metrics = make_metrics(best_latency_ms_tx=140)
+        result = trouble_repository.is_latency_tx_within_threshold(metrics, is_wireless_link)
         assert result is False
 
     def are_latency_metrics_within_threshold_test(self, trouble_repository, make_metrics):
+        is_wireless_link = False
         metrics = make_metrics(best_latency_ms_tx=139, best_latency_ms_rx=139)
-        result = trouble_repository.are_latency_metrics_within_threshold(metrics)
+        result = trouble_repository.are_latency_metrics_within_threshold(metrics, is_wireless_link)
         assert result is True
 
         metrics = make_metrics(best_latency_ms_tx=140, best_latency_ms_rx=139)
-        result = trouble_repository.are_latency_metrics_within_threshold(metrics)
+        result = trouble_repository.are_latency_metrics_within_threshold(metrics, is_wireless_link)
         assert result is False
 
         metrics = make_metrics(best_latency_ms_tx=139, best_latency_ms_rx=140)
-        result = trouble_repository.are_latency_metrics_within_threshold(metrics)
+        result = trouble_repository.are_latency_metrics_within_threshold(metrics, is_wireless_link)
         assert result is False
 
         metrics = make_metrics(best_latency_ms_tx=140, best_latency_ms_rx=140)
-        result = trouble_repository.are_latency_metrics_within_threshold(metrics)
+        result = trouble_repository.are_latency_metrics_within_threshold(metrics, is_wireless_link)
+        assert result is False
+
+        is_wireless_link = True
+        metrics = make_metrics(best_latency_ms_tx=139, best_latency_ms_rx=139)
+        result = trouble_repository.are_latency_metrics_within_threshold(metrics, is_wireless_link)
+        assert result is True
+
+        metrics = make_metrics(best_latency_ms_tx=140, best_latency_ms_rx=139)
+        result = trouble_repository.are_latency_metrics_within_threshold(metrics, is_wireless_link)
+        assert result is False
+
+        metrics = make_metrics(best_latency_ms_tx=139, best_latency_ms_rx=140)
+        result = trouble_repository.are_latency_metrics_within_threshold(metrics, is_wireless_link)
+        assert result is False
+
+        metrics = make_metrics(best_latency_ms_tx=140, best_latency_ms_rx=140)
+        result = trouble_repository.are_latency_metrics_within_threshold(metrics, is_wireless_link)
         assert result is False
 
     def is_packet_loss_rx_within_threshold_test(self, trouble_repository, make_metrics):
+        is_wireless_link = False
         metrics = make_metrics(best_packet_loss_rx=7)
-        result = trouble_repository.is_packet_loss_rx_within_threshold(metrics)
+        result = trouble_repository.is_packet_loss_rx_within_threshold(metrics, is_wireless_link)
         assert result is True
 
         metrics = make_metrics(best_packet_loss_rx=8)
-        result = trouble_repository.is_packet_loss_rx_within_threshold(metrics)
+        result = trouble_repository.is_packet_loss_rx_within_threshold(metrics, is_wireless_link)
+        assert result is False
+
+        is_wireless_link = True
+        metrics = make_metrics(best_packet_loss_rx=8)
+        result = trouble_repository.is_packet_loss_rx_within_threshold(metrics, is_wireless_link)
+        assert result is True
+
+        metrics = make_metrics(best_packet_loss_rx=10)
+        result = trouble_repository.is_packet_loss_rx_within_threshold(metrics, is_wireless_link)
         assert result is False
 
     def is_packet_loss_tx_within_threshold_test(self, trouble_repository, make_metrics):
+        is_wireless_link = False
         metrics = make_metrics(best_packet_loss_tx=7)
-        result = trouble_repository.is_packet_loss_tx_within_threshold(metrics)
+        result = trouble_repository.is_packet_loss_tx_within_threshold(metrics, is_wireless_link)
         assert result is True
 
         metrics = make_metrics(best_packet_loss_tx=8)
-        result = trouble_repository.is_packet_loss_tx_within_threshold(metrics)
+        result = trouble_repository.is_packet_loss_tx_within_threshold(metrics, is_wireless_link)
+        assert result is False
+
+        is_wireless_link = True
+        metrics = make_metrics(best_packet_loss_tx=8)
+        result = trouble_repository.is_packet_loss_tx_within_threshold(metrics, is_wireless_link)
+        assert result is True
+
+        metrics = make_metrics(best_packet_loss_tx=10)
+        result = trouble_repository.is_packet_loss_tx_within_threshold(metrics, is_wireless_link)
         assert result is False
 
     def are_packet_loss_metrics_within_threshold_test(self, trouble_repository, make_metrics):
+        is_wireless_link = False
         metrics = make_metrics(best_packet_loss_tx=7, best_packet_loss_rx=7)
-        result = trouble_repository.are_packet_loss_metrics_within_threshold(metrics)
+        result = trouble_repository.are_packet_loss_metrics_within_threshold(metrics, is_wireless_link)
         assert result is True
 
         metrics = make_metrics(best_packet_loss_tx=8, best_packet_loss_rx=7)
-        result = trouble_repository.are_packet_loss_metrics_within_threshold(metrics)
+        result = trouble_repository.are_packet_loss_metrics_within_threshold(metrics, is_wireless_link)
         assert result is False
 
         metrics = make_metrics(best_packet_loss_tx=7, best_packet_loss_rx=8)
-        result = trouble_repository.are_packet_loss_metrics_within_threshold(metrics)
+        result = trouble_repository.are_packet_loss_metrics_within_threshold(metrics, is_wireless_link)
         assert result is False
 
         metrics = make_metrics(best_packet_loss_tx=8, best_packet_loss_rx=8)
-        result = trouble_repository.are_packet_loss_metrics_within_threshold(metrics)
+        result = trouble_repository.are_packet_loss_metrics_within_threshold(metrics, is_wireless_link)
+        assert result is False
+
+        is_wireless_link = True
+        metrics = make_metrics(best_packet_loss_tx=9, best_packet_loss_rx=9)
+        result = trouble_repository.are_packet_loss_metrics_within_threshold(metrics, is_wireless_link)
+        assert result is True
+
+        metrics = make_metrics(best_packet_loss_tx=10, best_packet_loss_rx=9)
+        result = trouble_repository.are_packet_loss_metrics_within_threshold(metrics, is_wireless_link)
+        assert result is False
+
+        metrics = make_metrics(best_packet_loss_tx=9, best_packet_loss_rx=10)
+        result = trouble_repository.are_packet_loss_metrics_within_threshold(metrics, is_wireless_link)
+        assert result is False
+
+        metrics = make_metrics(best_packet_loss_tx=10, best_packet_loss_rx=10)
+        result = trouble_repository.are_packet_loss_metrics_within_threshold(metrics, is_wireless_link)
         assert result is False
 
     def is_jitter_rx_within_threshold_test(self, trouble_repository, make_metrics):
+        is_wireless_link = False
         metrics = make_metrics(best_jitter_ms_rx=49)
-        result = trouble_repository.is_jitter_rx_within_threshold(metrics)
+        result = trouble_repository.is_jitter_rx_within_threshold(metrics, is_wireless_link)
         assert result is True
 
         metrics = make_metrics(best_jitter_ms_rx=50)
-        result = trouble_repository.is_jitter_rx_within_threshold(metrics)
+        result = trouble_repository.is_jitter_rx_within_threshold(metrics, is_wireless_link)
+        assert result is False
+
+        is_wireless_link = True
+        metrics = make_metrics(best_jitter_ms_rx=49)
+        result = trouble_repository.is_jitter_rx_within_threshold(metrics, is_wireless_link)
+        assert result is True
+
+        metrics = make_metrics(best_jitter_ms_rx=50)
+        result = trouble_repository.is_jitter_rx_within_threshold(metrics, is_wireless_link)
         assert result is False
 
     def is_jitter_tx_within_threshold_test(self, trouble_repository, make_metrics):
+        is_wireless_link = False
         metrics = make_metrics(best_jitter_ms_tx=49)
-        result = trouble_repository.is_jitter_tx_within_threshold(metrics)
+        result = trouble_repository.is_jitter_tx_within_threshold(metrics, is_wireless_link)
         assert result is True
 
         metrics = make_metrics(best_jitter_ms_tx=50)
-        result = trouble_repository.is_jitter_tx_within_threshold(metrics)
+        result = trouble_repository.is_jitter_tx_within_threshold(metrics, is_wireless_link)
+        assert result is False
+
+        is_wireless_link = True
+        metrics = make_metrics(best_jitter_ms_tx=49)
+        result = trouble_repository.is_jitter_tx_within_threshold(metrics, is_wireless_link)
+        assert result is True
+
+        metrics = make_metrics(best_jitter_ms_tx=50)
+        result = trouble_repository.is_jitter_tx_within_threshold(metrics, is_wireless_link)
         assert result is False
 
     def are_jitter_metrics_within_threshold_test(self, trouble_repository, make_metrics):
+        is_wireless_link = False
         metrics = make_metrics(best_jitter_ms_tx=49, best_jitter_ms_rx=49)
-        result = trouble_repository.are_jitter_metrics_within_threshold(metrics)
+        result = trouble_repository.are_jitter_metrics_within_threshold(metrics, is_wireless_link)
         assert result is True
 
         metrics = make_metrics(best_jitter_ms_tx=50, best_jitter_ms_rx=49)
-        result = trouble_repository.are_jitter_metrics_within_threshold(metrics)
+        result = trouble_repository.are_jitter_metrics_within_threshold(metrics, is_wireless_link)
         assert result is False
 
         metrics = make_metrics(best_jitter_ms_tx=49, best_jitter_ms_rx=50)
-        result = trouble_repository.are_jitter_metrics_within_threshold(metrics)
+        result = trouble_repository.are_jitter_metrics_within_threshold(metrics, is_wireless_link)
         assert result is False
 
         metrics = make_metrics(best_jitter_ms_tx=50, best_jitter_ms_rx=50)
-        result = trouble_repository.are_jitter_metrics_within_threshold(metrics)
+        result = trouble_repository.are_jitter_metrics_within_threshold(metrics, is_wireless_link)
+        assert result is False
+
+        is_wireless_link = True
+        metrics = make_metrics(best_jitter_ms_tx=49, best_jitter_ms_rx=49)
+        result = trouble_repository.are_jitter_metrics_within_threshold(metrics, is_wireless_link)
+        assert result is True
+
+        metrics = make_metrics(best_jitter_ms_tx=50, best_jitter_ms_rx=49)
+        result = trouble_repository.are_jitter_metrics_within_threshold(metrics, is_wireless_link)
+        assert result is False
+
+        metrics = make_metrics(best_jitter_ms_tx=49, best_jitter_ms_rx=50)
+        result = trouble_repository.are_jitter_metrics_within_threshold(metrics, is_wireless_link)
+        assert result is False
+
+        metrics = make_metrics(best_jitter_ms_tx=50, best_jitter_ms_rx=50)
+        result = trouble_repository.are_jitter_metrics_within_threshold(metrics, is_wireless_link)
         assert result is False
 
     def get_bandwidth_throughput_bps_test(self, trouble_repository):
@@ -285,25 +399,27 @@ class TestTroubleRepository:
         assert result == expected
 
     def is_bandwidth_rx_within_threshold_test(self, trouble_repository, make_metrics):
+        is_wireless_link = False
         lookup_interval_minutes = 30
 
         metrics = make_metrics(bytes_rx=1, bps_of_best_path_rx=100)
-        result = trouble_repository.is_bandwidth_rx_within_threshold(metrics, lookup_interval_minutes)
+        result = trouble_repository.is_bandwidth_rx_within_threshold(metrics, lookup_interval_minutes, is_wireless_link)
         assert result is True
 
         metrics = make_metrics(bytes_rx=1000000000, bps_of_best_path_rx=100)
-        result = trouble_repository.is_bandwidth_rx_within_threshold(metrics, lookup_interval_minutes)
+        result = trouble_repository.is_bandwidth_rx_within_threshold(metrics, lookup_interval_minutes, is_wireless_link)
         assert result is False
 
     def is_bandwidth_tx_within_threshold_test(self, trouble_repository, make_metrics):
+        is_wireless_link = False
         lookup_interval_minutes = 30
 
         metrics = make_metrics(bytes_tx=1, bps_of_best_path_tx=100)
-        result = trouble_repository.is_bandwidth_tx_within_threshold(metrics, lookup_interval_minutes)
+        result = trouble_repository.is_bandwidth_tx_within_threshold(metrics, lookup_interval_minutes, is_wireless_link)
         assert result is True
 
         metrics = make_metrics(bytes_tx=1000000000, bps_of_best_path_tx=100)
-        result = trouble_repository.is_bandwidth_tx_within_threshold(metrics, lookup_interval_minutes)
+        result = trouble_repository.is_bandwidth_tx_within_threshold(metrics, lookup_interval_minutes, is_wireless_link)
         assert result is False
 
     def is_valid_bps_metric_test(self, trouble_repository):
@@ -333,6 +449,7 @@ class TestTroubleRepository:
         assert result is False
 
     def are_bandwidth_metrics_within_threshold_test(self, trouble_repository, make_metrics):
+        is_wireless_link = False
         lookup_interval_minutes = 30
 
         metrics = make_metrics(
@@ -341,7 +458,8 @@ class TestTroubleRepository:
             bytes_rx=1,
             bps_of_best_path_rx=100,
         )
-        result = trouble_repository.are_bandwidth_metrics_within_threshold(metrics, lookup_interval_minutes)
+        result = trouble_repository.are_bandwidth_metrics_within_threshold(
+            metrics, lookup_interval_minutes, is_wireless_link)
         assert result is True
 
         metrics = make_metrics(
@@ -350,7 +468,8 @@ class TestTroubleRepository:
             bytes_rx=1,
             bps_of_best_path_rx=100,
         )
-        result = trouble_repository.are_bandwidth_metrics_within_threshold(metrics, lookup_interval_minutes)
+        result = trouble_repository.are_bandwidth_metrics_within_threshold(
+            metrics, lookup_interval_minutes, is_wireless_link)
         assert result is False
 
         metrics = make_metrics(
@@ -359,7 +478,8 @@ class TestTroubleRepository:
             bytes_rx=1000000000,
             bps_of_best_path_rx=100,
         )
-        result = trouble_repository.are_bandwidth_metrics_within_threshold(metrics, lookup_interval_minutes)
+        result = trouble_repository.are_bandwidth_metrics_within_threshold(
+            metrics, lookup_interval_minutes, is_wireless_link)
         assert result is False
 
         metrics = make_metrics(
@@ -368,20 +488,22 @@ class TestTroubleRepository:
             bytes_rx=1000000000,
             bps_of_best_path_rx=100,
         )
-        result = trouble_repository.are_bandwidth_metrics_within_threshold(metrics, lookup_interval_minutes)
+        result = trouble_repository.are_bandwidth_metrics_within_threshold(
+            metrics, lookup_interval_minutes, is_wireless_link)
         assert result is False
 
     def are_bouncing_events_within_threshold_test(self, trouble_repository, make_event):
+        is_wireless_link = False
         events = [make_event()] * 5
-        result = trouble_repository.are_bouncing_events_within_threshold(events)
+        result = trouble_repository.are_bouncing_events_within_threshold(events, is_wireless_link)
         assert result is True
 
         events = [make_event()] * 10
-        result = trouble_repository.are_bouncing_events_within_threshold(events)
+        result = trouble_repository.are_bouncing_events_within_threshold(events, is_wireless_link)
         assert result is False
 
         events = [make_event()] * 5
-        result = trouble_repository.are_bouncing_events_within_threshold(events, autoresolve=True)
+        result = trouble_repository.are_bouncing_events_within_threshold(events, is_wireless_link, autoresolve=True)
         assert result is False
 
     def are_all_metrics_within_thresholds__bandwidth_metrics_ignored_test(
@@ -391,6 +513,9 @@ class TestTroubleRepository:
         make_link_status_and_metrics_object_with_events,
         make_list_of_link_status_and_metrics_objects,
         make_links_by_edge_object,
+        make_links_configuration,
+        make_list_of_links_configurations,
+        make_link,
     ):
         lookup_interval_minutes = 30
 
@@ -406,13 +531,19 @@ class TestTroubleRepository:
             bytes_rx=1000000000,
             bps_of_best_path_rx=100,
         )
-        link_status_and_metrics_object = make_link_status_and_metrics_object_with_events(metrics=metrics)
+        interface = "GE1"
+        link_info = make_link(interface=interface)
+        link_status_and_metrics_object = make_link_status_and_metrics_object_with_events(
+            metrics=metrics, link_info=link_info)
         link_status_and_metrics_objects = make_list_of_link_status_and_metrics_objects(link_status_and_metrics_object)
         links_by_edge = make_links_by_edge_object(links=link_status_and_metrics_objects)
+        links_configuration = make_list_of_links_configurations(
+            make_links_configuration(type_="WIRED", interfaces=[interface]))
         result = trouble_repository.are_all_metrics_within_thresholds(
             links_by_edge,
             lookup_interval_minutes=lookup_interval_minutes,
             check_bandwidth_troubles=False,
+            links_configuration=links_configuration,
         )
         assert result is True
 
@@ -428,13 +559,15 @@ class TestTroubleRepository:
             bytes_rx=1000000000,
             bps_of_best_path_rx=100,
         )
-        link_status_and_metrics_object = make_link_status_and_metrics_object_with_events(metrics=metrics)
+        link_status_and_metrics_object = make_link_status_and_metrics_object_with_events(
+            metrics=metrics, link_info=link_info)
         link_status_and_metrics_objects = make_list_of_link_status_and_metrics_objects(link_status_and_metrics_object)
         links_by_edge = make_links_by_edge_object(links=link_status_and_metrics_objects)
         result = trouble_repository.are_all_metrics_within_thresholds(
             links_by_edge,
             lookup_interval_minutes=lookup_interval_minutes,
             check_bandwidth_troubles=False,
+            links_configuration=links_configuration,
         )
         assert result is False
 
@@ -445,6 +578,9 @@ class TestTroubleRepository:
         make_link_status_and_metrics_object_with_events,
         make_list_of_link_status_and_metrics_objects,
         make_links_by_edge_object,
+        make_links_configuration,
+        make_list_of_links_configurations,
+        make_link,
     ):
         lookup_interval_minutes = 30
 
@@ -460,13 +596,19 @@ class TestTroubleRepository:
             bytes_rx=1,
             bps_of_best_path_rx=100,
         )
-        link_status_and_metrics_object = make_link_status_and_metrics_object_with_events(metrics=metrics)
+        interface = "GE1"
+        link_info = make_link(interface=interface)
+        link_status_and_metrics_object = make_link_status_and_metrics_object_with_events(
+            metrics=metrics, link_info=link_info)
         link_status_and_metrics_objects = make_list_of_link_status_and_metrics_objects(link_status_and_metrics_object)
         links_by_edge = make_links_by_edge_object(links=link_status_and_metrics_objects)
+        links_configuration = make_list_of_links_configurations(
+            make_links_configuration(type_="WIRED", interfaces=[interface]))
         result = trouble_repository.are_all_metrics_within_thresholds(
             links_by_edge,
             lookup_interval_minutes=lookup_interval_minutes,
             check_bandwidth_troubles=True,
+            links_configuration=links_configuration,
         )
         assert result is True
 
@@ -482,13 +624,15 @@ class TestTroubleRepository:
             bytes_rx=1000000000,
             bps_of_best_path_rx=100,
         )
-        link_status_and_metrics_object = make_link_status_and_metrics_object_with_events(metrics=metrics)
+        link_status_and_metrics_object = make_link_status_and_metrics_object_with_events(
+            metrics=metrics, link_info=link_info)
         link_status_and_metrics_objects = make_list_of_link_status_and_metrics_objects(link_status_and_metrics_object)
         links_by_edge = make_links_by_edge_object(links=link_status_and_metrics_objects)
         result = trouble_repository.are_all_metrics_within_thresholds(
             links_by_edge,
             lookup_interval_minutes=lookup_interval_minutes,
             check_bandwidth_troubles=True,
+            links_configuration=links_configuration,
         )
         assert result is False
 
@@ -499,6 +643,9 @@ class TestTroubleRepository:
         make_link_status_and_metrics_object_with_events,
         make_list_of_link_status_and_metrics_objects,
         make_links_by_edge_object,
+        make_links_configuration,
+        make_list_of_links_configurations,
+        make_link,
     ):
         lookup_interval_minutes = 30
 
@@ -514,13 +661,19 @@ class TestTroubleRepository:
             bytes_rx=1000000000,
             bps_of_best_path_rx=0,
         )
-        link_status_and_metrics_object = make_link_status_and_metrics_object_with_events(metrics=metrics)
+        interface = "GE1"
+        link_info = make_link(interface=interface)
+        link_status_and_metrics_object = make_link_status_and_metrics_object_with_events(
+            metrics=metrics, link_info=link_info)
         link_status_and_metrics_objects = make_list_of_link_status_and_metrics_objects(link_status_and_metrics_object)
         links_by_edge = make_links_by_edge_object(links=link_status_and_metrics_objects)
+        links_configuration = make_list_of_links_configurations(
+            make_links_configuration(type_="WIRED", interfaces=[interface]))
         result = trouble_repository.are_all_metrics_within_thresholds(
             links_by_edge,
             lookup_interval_minutes=lookup_interval_minutes,
             check_bandwidth_troubles=True,
+            links_configuration=links_configuration,
         )
         assert result is True
 
@@ -536,12 +689,14 @@ class TestTroubleRepository:
             bytes_rx=1000000000,
             bps_of_best_path_rx=0,
         )
-        link_status_and_metrics_object = make_link_status_and_metrics_object_with_events(metrics=metrics)
+        link_status_and_metrics_object = make_link_status_and_metrics_object_with_events(
+            metrics=metrics, link_info=link_info)
         link_status_and_metrics_objects = make_list_of_link_status_and_metrics_objects(link_status_and_metrics_object)
         links_by_edge = make_links_by_edge_object(links=link_status_and_metrics_objects)
         result = trouble_repository.are_all_metrics_within_thresholds(
             links_by_edge,
             lookup_interval_minutes=lookup_interval_minutes,
             check_bandwidth_troubles=True,
+            links_configuration=links_configuration,
         )
         assert result is False

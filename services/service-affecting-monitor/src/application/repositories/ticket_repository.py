@@ -82,7 +82,8 @@ class TicketRepository:
         elif trouble is AffectingTroubles.BOUNCING:
             return self.build_bouncing_trouble_note
 
-    def build_latency_trouble_note(self, link_data: dict, *, is_reopen_note: bool = False) -> str:
+    def build_latency_trouble_note(self, link_data: dict, is_wireless_link: bool,
+                                   *, is_reopen_note: bool = False) -> str:
         edge_status = link_data["edge_status"]
         link_metrics = link_data["link_metrics"]
 
@@ -93,8 +94,10 @@ class TicketRepository:
         link_interface = link_status["interface"]
 
         trouble = AffectingTroubles.LATENCY
-        scan_interval = self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
-        metrics_threshold = self._config.MONITOR_CONFIG["thresholds"][trouble]
+        scan_interval = self._config.MONITOR_CONFIG[self._utils_repository.monitoring_minutes_per_trouble_metric_to_use(
+            is_wireless_link)][trouble]
+        metrics_threshold = self._config.MONITOR_CONFIG[self._utils_repository.threshold_metric_to_use(
+            is_wireless_link)][trouble]
 
         edge_full_id = edge_cached_info["edge"]
         velocloud_base_url = (
@@ -134,10 +137,10 @@ class TicketRepository:
             f"Threshold: {metrics_threshold} ms",
         ]
 
-        if not self._trouble_repository.is_latency_rx_within_threshold(link_metrics):
+        if not self._trouble_repository.is_latency_rx_within_threshold(link_metrics, is_wireless_link):
             note_lines.append(f'Receive: {link_metrics["bestLatencyMsRx"]} ms')
 
-        if not self._trouble_repository.is_latency_tx_within_threshold(link_metrics):
+        if not self._trouble_repository.is_latency_tx_within_threshold(link_metrics, is_wireless_link):
             note_lines.append(f'Transfer: {link_metrics["bestLatencyMsTx"]} ms')
 
         note_lines += [
@@ -151,7 +154,8 @@ class TicketRepository:
         ]
         return os.linesep.join(note_lines)
 
-    def build_packet_loss_trouble_note(self, link_data: dict, *, is_reopen_note: bool = False) -> str:
+    def build_packet_loss_trouble_note(self, link_data: dict, is_wireless_link: bool,
+                                       *, is_reopen_note: bool = False) -> str:
         edge_status = link_data["edge_status"]
         link_metrics = link_data["link_metrics"]
 
@@ -162,8 +166,10 @@ class TicketRepository:
         link_interface = link_status["interface"]
 
         trouble = AffectingTroubles.PACKET_LOSS
-        scan_interval = self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
-        metrics_threshold = self._config.MONITOR_CONFIG["thresholds"][trouble]
+        scan_interval = self._config.MONITOR_CONFIG[self._utils_repository.monitoring_minutes_per_trouble_metric_to_use(
+            is_wireless_link)][trouble]
+        metrics_threshold = self._config.MONITOR_CONFIG[self._utils_repository.threshold_metric_to_use(
+            is_wireless_link)][trouble]
 
         edge_full_id = edge_cached_info["edge"]
         velocloud_base_url = (
@@ -203,10 +209,10 @@ class TicketRepository:
             f"Threshold: {metrics_threshold} packets",
         ]
 
-        if not self._trouble_repository.is_packet_loss_rx_within_threshold(link_metrics):
+        if not self._trouble_repository.is_packet_loss_rx_within_threshold(link_metrics, is_wireless_link):
             note_lines.append(f'Receive: {link_metrics["bestLossPctRx"]} packets')
 
-        if not self._trouble_repository.is_packet_loss_tx_within_threshold(link_metrics):
+        if not self._trouble_repository.is_packet_loss_tx_within_threshold(link_metrics, is_wireless_link):
             note_lines.append(f'Transfer: {link_metrics["bestLossPctTx"]} packets')
 
         note_lines += [
@@ -220,7 +226,8 @@ class TicketRepository:
         ]
         return os.linesep.join(note_lines)
 
-    def build_jitter_trouble_note(self, link_data: dict, *, is_reopen_note: bool = False) -> str:
+    def build_jitter_trouble_note(self, link_data: dict, is_wireless_link: bool,
+                                  *, is_reopen_note: bool = False) -> str:
         edge_status = link_data["edge_status"]
         link_metrics = link_data["link_metrics"]
 
@@ -231,8 +238,10 @@ class TicketRepository:
         link_interface = link_status["interface"]
 
         trouble = AffectingTroubles.JITTER
-        scan_interval = self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
-        metrics_threshold = self._config.MONITOR_CONFIG["thresholds"][trouble]
+        scan_interval = self._config.MONITOR_CONFIG[self._utils_repository.monitoring_minutes_per_trouble_metric_to_use(
+            is_wireless_link)][trouble]
+        metrics_threshold = self._config.MONITOR_CONFIG[self._utils_repository.threshold_metric_to_use(
+            is_wireless_link)][trouble]
 
         edge_full_id = edge_cached_info["edge"]
         velocloud_base_url = (
@@ -272,10 +281,10 @@ class TicketRepository:
             f"Threshold: {metrics_threshold} ms",
         ]
 
-        if not self._trouble_repository.is_jitter_rx_within_threshold(link_metrics):
+        if not self._trouble_repository.is_jitter_rx_within_threshold(link_metrics, is_wireless_link):
             note_lines.append(f'Receive: {link_metrics["bestJitterMsRx"]} ms')
 
-        if not self._trouble_repository.is_jitter_tx_within_threshold(link_metrics):
+        if not self._trouble_repository.is_jitter_tx_within_threshold(link_metrics, is_wireless_link):
             note_lines.append(f'Transfer: {link_metrics["bestJitterMsTx"]} ms')
 
         note_lines += [
@@ -289,7 +298,8 @@ class TicketRepository:
         ]
         return os.linesep.join(note_lines)
 
-    def build_bandwidth_trouble_note(self, link_data: dict, *, is_reopen_note: bool = False) -> str:
+    def build_bandwidth_trouble_note(self, link_data: dict, is_wireless_link: bool,
+                                     *, is_reopen_note: bool = False) -> str:
         edge_status = link_data["edge_status"]
         link_metrics = link_data["link_metrics"]
 
@@ -300,8 +310,10 @@ class TicketRepository:
         link_interface = link_status["interface"]
 
         trouble = AffectingTroubles.BANDWIDTH_OVER_UTILIZATION
-        scan_interval = self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
-        metrics_threshold = self._config.MONITOR_CONFIG["thresholds"][trouble]
+        scan_interval = self._config.MONITOR_CONFIG[self._utils_repository.monitoring_minutes_per_trouble_metric_to_use(
+            is_wireless_link)][trouble]
+        metrics_threshold = self._config.MONITOR_CONFIG[self._utils_repository.threshold_metric_to_use(
+            is_wireless_link)][trouble]
 
         edge_full_id = edge_cached_info["edge"]
         velocloud_base_url = (
@@ -342,7 +354,8 @@ class TicketRepository:
 
         rx_bandwidth = link_metrics["bpsOfBestPathRx"]
         if self._trouble_repository.is_valid_bps_metric(rx_bandwidth):
-            if not self._trouble_repository.is_bandwidth_rx_within_threshold(link_metrics, scan_interval):
+            if not self._trouble_repository.is_bandwidth_rx_within_threshold(
+                    link_metrics, scan_interval, is_wireless_link):
                 rx_throughput = self._trouble_repository.get_bandwidth_throughput_bps(
                     total_bytes=link_metrics["bytesRx"],
                     lookup_interval_minutes=scan_interval,
@@ -357,7 +370,8 @@ class TicketRepository:
 
         tx_bandwidth = link_metrics["bpsOfBestPathTx"]
         if self._trouble_repository.is_valid_bps_metric(tx_bandwidth):
-            if not self._trouble_repository.is_bandwidth_tx_within_threshold(link_metrics, scan_interval):
+            if not self._trouble_repository.is_bandwidth_tx_within_threshold(
+                    link_metrics, scan_interval, is_wireless_link):
                 tx_throughput = self._trouble_repository.get_bandwidth_throughput_bps(
                     total_bytes=link_metrics["bytesTx"],
                     lookup_interval_minutes=scan_interval,
@@ -381,7 +395,8 @@ class TicketRepository:
         ]
         return os.linesep.join(note_lines)
 
-    def build_bouncing_trouble_note(self, link_data: dict, *, is_reopen_note: bool = False) -> str:
+    def build_bouncing_trouble_note(self, link_data: dict, is_wireless_link: bool,
+                                    *, is_reopen_note: bool = False) -> str:
         edge_status = link_data["edge_status"]
         link_events = link_data["link_events"]
 
@@ -392,8 +407,10 @@ class TicketRepository:
         link_interface = link_status["interface"]
 
         trouble = AffectingTroubles.BOUNCING
-        scan_interval = self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
-        metrics_threshold = self._config.MONITOR_CONFIG["thresholds"][trouble]
+        scan_interval = self._config.MONITOR_CONFIG[self._utils_repository.monitoring_minutes_per_trouble_metric_to_use(
+            is_wireless_link)][trouble]
+        metrics_threshold = self._config.MONITOR_CONFIG[self._utils_repository.threshold_metric_to_use(
+            is_wireless_link)][trouble]
 
         edge_full_id = edge_cached_info["edge"]
         velocloud_base_url = (

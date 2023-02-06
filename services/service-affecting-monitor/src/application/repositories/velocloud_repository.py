@@ -86,7 +86,7 @@ class VelocloudRepository:
         trouble = AffectingTroubles.LATENCY
 
         now = datetime.now(utc)
-        past_moment = now - timedelta(minutes=self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble])
+        past_moment = now - timedelta(minutes=self._get_greater_lookback(trouble))
 
         scan_interval_for_metrics = {
             "start": past_moment,
@@ -98,7 +98,7 @@ class VelocloudRepository:
         trouble = AffectingTroubles.PACKET_LOSS
 
         now = datetime.now(utc)
-        past_moment = now - timedelta(minutes=self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble])
+        past_moment = now - timedelta(minutes=self._get_greater_lookback(trouble))
 
         scan_interval_for_metrics = {
             "start": past_moment,
@@ -110,7 +110,7 @@ class VelocloudRepository:
         trouble = AffectingTroubles.JITTER
 
         now = datetime.now(utc)
-        past_moment = now - timedelta(minutes=self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble])
+        past_moment = now - timedelta(minutes=self._get_greater_lookback(trouble))
 
         scan_interval_for_metrics = {
             "start": past_moment,
@@ -122,7 +122,7 @@ class VelocloudRepository:
         trouble = AffectingTroubles.BANDWIDTH_OVER_UTILIZATION
 
         now = datetime.now(utc)
-        past_moment = now - timedelta(minutes=self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble])
+        past_moment = now - timedelta(minutes=self._get_greater_lookback(trouble))
 
         scan_interval_for_metrics = {
             "start": past_moment,
@@ -134,7 +134,7 @@ class VelocloudRepository:
         trouble = AffectingTroubles.BOUNCING
 
         now = datetime.now(utc)
-        past_moment = now - timedelta(minutes=self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble])
+        past_moment = now - timedelta(minutes=self._get_greater_lookback(trouble))
 
         scan_interval_for_metrics = {
             "start": past_moment,
@@ -226,7 +226,7 @@ class VelocloudRepository:
     async def get_enterprise_events(self, host, enterprise_id):
         err_msg = None
         now = datetime.now(utc)
-        minutes = self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][AffectingTroubles.BOUNCING]
+        minutes = self._get_greater_lookback(AffectingTroubles.BOUNCING)
         past_moment = now - timedelta(minutes=minutes)
         event_types = ["LINK_DEAD"]
 
@@ -346,3 +346,9 @@ class VelocloudRepository:
                 filtered_links_metrics.append(link_metrics)
 
         return filtered_links_metrics
+
+    def _get_greater_lookback(self, trouble: AffectingTroubles) -> int:
+        wired_lookback = self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
+        wireless_lookback = self._config.MONITOR_CONFIG["wireless_monitoring_minutes_per_trouble"][trouble]
+
+        return wired_lookback if wired_lookback > wireless_lookback else wireless_lookback

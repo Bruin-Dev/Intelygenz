@@ -221,8 +221,9 @@ class TestTicketRepository:
         )
 
         current_datetime = frozen_datetime.now()
+        is_wireless_link = False
         with patch.multiple(ticket_repository_module, datetime=frozen_datetime, timezone=Mock()):
-            result = ticket_repository.build_latency_trouble_note(link_complete_info)
+            result = ticket_repository.build_latency_trouble_note(link_complete_info, is_wireless_link)
             expected = os.linesep.join(
                 [
                     "#*MetTel's IPA*#",
@@ -248,7 +249,8 @@ class TestTicketRepository:
             )
             assert result == expected
 
-            result = ticket_repository.build_latency_trouble_note(link_complete_info, is_reopen_note=True)
+            result = ticket_repository.build_latency_trouble_note(
+                link_complete_info, is_wireless_link, is_reopen_note=True)
             expected = os.linesep.join(
                 [
                     "#*MetTel's IPA*#",
@@ -314,8 +316,9 @@ class TestTicketRepository:
         )
 
         current_datetime = frozen_datetime.now()
+        is_wireless_link = False
         with patch.multiple(ticket_repository_module, datetime=frozen_datetime, timezone=Mock()):
-            result = ticket_repository.build_packet_loss_trouble_note(link_complete_info)
+            result = ticket_repository.build_packet_loss_trouble_note(link_complete_info, is_wireless_link)
             expected = os.linesep.join(
                 [
                     "#*MetTel's IPA*#",
@@ -341,7 +344,8 @@ class TestTicketRepository:
             )
             assert result == expected
 
-            result = ticket_repository.build_packet_loss_trouble_note(link_complete_info, is_reopen_note=True)
+            result = ticket_repository.build_packet_loss_trouble_note(
+                link_complete_info, is_wireless_link, is_reopen_note=True)
             expected = os.linesep.join(
                 [
                     "#*MetTel's IPA*#",
@@ -407,8 +411,9 @@ class TestTicketRepository:
         )
 
         current_datetime = frozen_datetime.now()
+        is_wireless_link = False
         with patch.multiple(ticket_repository_module, datetime=frozen_datetime, timezone=Mock()):
-            result = ticket_repository.build_jitter_trouble_note(link_complete_info)
+            result = ticket_repository.build_jitter_trouble_note(link_complete_info, is_wireless_link)
             expected = os.linesep.join(
                 [
                     "#*MetTel's IPA*#",
@@ -434,7 +439,8 @@ class TestTicketRepository:
             )
             assert result == expected
 
-            result = ticket_repository.build_jitter_trouble_note(link_complete_info, is_reopen_note=True)
+            result = ticket_repository.build_jitter_trouble_note(
+                link_complete_info, is_wireless_link, is_reopen_note=True)
             expected = os.linesep.join(
                 [
                     "#*MetTel's IPA*#",
@@ -505,8 +511,9 @@ class TestTicketRepository:
         )
 
         current_datetime = frozen_datetime.now()
+        is_wireless_link = False
         with patch.multiple(ticket_repository_module, datetime=frozen_datetime, timezone=Mock()):
-            result = ticket_repository.build_bandwidth_trouble_note(link_complete_info)
+            result = ticket_repository.build_bandwidth_trouble_note(link_complete_info, is_wireless_link)
             expected = os.linesep.join(
                 [
                     "#*MetTel's IPA*#",
@@ -535,7 +542,8 @@ class TestTicketRepository:
             )
             assert result == expected
 
-            result = ticket_repository.build_bandwidth_trouble_note(link_complete_info, is_reopen_note=True)
+            result = ticket_repository.build_bandwidth_trouble_note(
+                link_complete_info, is_wireless_link, is_reopen_note=True)
             expected = os.linesep.join(
                 [
                     "#*MetTel's IPA*#",
@@ -609,8 +617,9 @@ class TestTicketRepository:
         )
 
         current_datetime = frozen_datetime.now()
+        is_wireless_link = False
         with patch.multiple(ticket_repository_module, datetime=frozen_datetime, timezone=Mock()):
-            result = ticket_repository.build_bouncing_trouble_note(link_complete_info)
+            result = ticket_repository.build_bouncing_trouble_note(link_complete_info, is_wireless_link)
             expected = os.linesep.join(
                 [
                     "#*MetTel's IPA*#",
@@ -634,7 +643,8 @@ class TestTicketRepository:
             )
             assert result == expected
 
-            result = ticket_repository.build_bouncing_trouble_note(link_complete_info, is_reopen_note=True)
+            result = ticket_repository.build_bouncing_trouble_note(
+                link_complete_info, is_wireless_link, is_reopen_note=True)
             expected = os.linesep.join(
                 [
                     "#*MetTel's IPA*#",

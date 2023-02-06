@@ -247,7 +247,7 @@ class TestVelocloudRepository:
         trouble = AffectingTroubles.LATENCY
         current_datetime = frozen_datetime.now()
 
-        lookup_interval = velocloud_repository._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
+        lookup_interval = velocloud_repository._get_greater_lookback(trouble)
         interval = {
             "start": current_datetime - timedelta(minutes=lookup_interval),
             "end": current_datetime,
@@ -263,7 +263,7 @@ class TestVelocloudRepository:
         trouble = AffectingTroubles.PACKET_LOSS
         current_datetime = frozen_datetime.now()
 
-        lookup_interval = velocloud_repository._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
+        lookup_interval = velocloud_repository._get_greater_lookback(trouble)
         interval = {
             "start": current_datetime - timedelta(minutes=lookup_interval),
             "end": current_datetime,
@@ -279,7 +279,7 @@ class TestVelocloudRepository:
         trouble = AffectingTroubles.JITTER
         current_datetime = frozen_datetime.now()
 
-        lookup_interval = velocloud_repository._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
+        lookup_interval = velocloud_repository._get_greater_lookback(trouble)
         interval = {
             "start": current_datetime - timedelta(minutes=lookup_interval),
             "end": current_datetime,
@@ -295,7 +295,7 @@ class TestVelocloudRepository:
         trouble = AffectingTroubles.BANDWIDTH_OVER_UTILIZATION
         current_datetime = frozen_datetime.now()
 
-        lookup_interval = velocloud_repository._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
+        lookup_interval = velocloud_repository._get_greater_lookback(trouble)
         interval = {
             "start": current_datetime - timedelta(minutes=lookup_interval),
             "end": current_datetime,
@@ -311,7 +311,7 @@ class TestVelocloudRepository:
         trouble = AffectingTroubles.BOUNCING
         current_datetime = frozen_datetime.now()
 
-        lookup_interval = velocloud_repository._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
+        lookup_interval = velocloud_repository._get_greater_lookback(trouble)
         interval = {
             "start": current_datetime - timedelta(minutes=lookup_interval),
             "end": current_datetime,
@@ -613,3 +613,12 @@ class TestVelocloudRepository:
         result = velocloud_repository.filter_links_metrics_by_client(links_metrics, client_id, customer_cache)
         expected = [link_1_metrics]
         assert result == expected
+
+    def get_greater_lookback_test(self, velocloud_repository):
+        trouble = AffectingTroubles.JITTER
+
+        wireless_monitoring_minutes_per_jitter = 90
+
+        result = velocloud_repository._get_greater_lookback(trouble)
+
+        assert result == wireless_monitoring_minutes_per_jitter

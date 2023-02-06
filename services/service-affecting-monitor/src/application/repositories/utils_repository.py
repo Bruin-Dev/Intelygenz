@@ -73,3 +73,20 @@ class UtilsRepository:
             current_datetime - documentation_cycle_start_datetime
         ).total_seconds()
         return seconds_elapsed_since_last_affecting_event <= max_seconds_since_last_event
+
+    @staticmethod
+    def get_is_wireless_link(interface: str, links_configuration: list[dict]) -> bool:
+        link_interface_type = ""
+        for link_configuration in links_configuration:
+            if interface in link_configuration["interfaces"]:
+                link_interface_type = link_configuration["type"]
+
+        return link_interface_type == "WIRELESS"
+
+    @staticmethod
+    def threshold_metric_to_use(is_wireless_link: bool) -> str:
+        return "wireless_thresholds" if is_wireless_link else "thresholds"
+
+    @staticmethod
+    def monitoring_minutes_per_trouble_metric_to_use(is_wireless_link: bool) -> str:
+        return "wireless_monitoring_minutes_per_trouble" if is_wireless_link else "monitoring_minutes_per_trouble"

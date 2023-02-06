@@ -296,6 +296,7 @@ class ServiceAffectingMonitor:
             serial_number = edge["cached_info"]["serial_number"]
             client_id = edge["cached_info"]["bruin_client_info"]["client_id"]
             client_name = edge["cached_info"]["bruin_client_info"]["client_name"]
+            links_configuration = edge["cached_info"]["links_configuration"]
 
             logger.info(f"Starting autoresolve for edge {serial_number}...")
 
@@ -305,6 +306,7 @@ class ServiceAffectingMonitor:
                 edge,
                 lookup_interval_minutes=metrics_lookup_interval,
                 check_bandwidth_troubles=check_bandwidth_troubles,
+                links_configuration=links_configuration,
             )
             if not all_metrics_within_thresholds:
                 logger.warning(
@@ -497,11 +499,22 @@ class ServiceAffectingMonitor:
             cached_info = elem["cached_info"]
             link_status = elem["link_status"]
             metrics = elem["link_metrics"]
+            interface = link_status["interface"]
+            links_configuration = cached_info["links_configuration"]
+            link_last_active = link_status["linkLastActive"]
+
+            is_wireless_link = self._utils_repository.get_is_wireless_link(interface, links_configuration)
+
+            if not self._trouble_repository.is_within_lookback_window(
+                    link_last_active, is_wireless_link, AffectingTroubles.LATENCY):
+                logger.info(f"Link {interface} from {serial_number} is not within lookback window. "
+                            + f"link_last_active: {link_last_active}. is_wireless_link: {is_wireless_link}")
+                continue
 
             serial_number = cached_info["serial_number"]
 
-            if self._trouble_repository.are_latency_metrics_within_threshold(metrics):
-                logger.info(f"Link {link_status['interface']} from {serial_number} didn't exceed latency thresholds")
+            if self._trouble_repository.are_latency_metrics_within_threshold(metrics, is_wireless_link):
+                logger.info(f"Link {interface} from {serial_number} didn't exceed latency thresholds")
                 continue
 
             await self._process_latency_trouble(elem)
@@ -529,12 +542,23 @@ class ServiceAffectingMonitor:
             cached_info = elem["cached_info"]
             link_status = elem["link_status"]
             metrics = elem["link_metrics"]
+            interface = link_status["interface"]
+            links_configuration = cached_info["links_configuration"]
+            link_last_active = link_status["linkLastActive"]
+
+            is_wireless_link = self._utils_repository.get_is_wireless_link(interface, links_configuration)
+
+            if not self._trouble_repository.is_within_lookback_window(
+                    link_last_active, is_wireless_link, AffectingTroubles.PACKET_LOSS):
+                logger.info(f"Link {interface} from {serial_number} is not within lookback window. "
+                            + f"link_last_active: {link_last_active}. is_wireless_link: {is_wireless_link}")
+                continue
 
             serial_number = cached_info["serial_number"]
 
-            if self._trouble_repository.are_packet_loss_metrics_within_threshold(metrics):
+            if self._trouble_repository.are_packet_loss_metrics_within_threshold(metrics, is_wireless_link):
                 logger.info(
-                    f"Link {link_status['interface']} from {serial_number} didn't exceed packet loss thresholds"
+                    f"Link {interface} from {serial_number} didn't exceed packet loss thresholds"
                 )
                 continue
 
@@ -563,11 +587,22 @@ class ServiceAffectingMonitor:
             cached_info = elem["cached_info"]
             link_status = elem["link_status"]
             metrics = elem["link_metrics"]
+            interface = link_status["interface"]
+            links_configuration = cached_info["links_configuration"]
+            link_last_active = link_status["linkLastActive"]
+
+            is_wireless_link = self._utils_repository.get_is_wireless_link(interface, links_configuration)
+
+            if not self._trouble_repository.is_within_lookback_window(
+                    link_last_active, is_wireless_link, AffectingTroubles.JITTER):
+                logger.info(f"Link {interface} from {serial_number} is not within lookback window. "
+                            + f"link_last_active: {link_last_active}. is_wireless_link: {is_wireless_link}")
+                continue
 
             serial_number = cached_info["serial_number"]
 
-            if self._trouble_repository.are_jitter_metrics_within_threshold(metrics):
-                logger.info(f"Link {link_status['interface']} from {serial_number} didn't exceed jitter thresholds")
+            if self._trouble_repository.are_jitter_metrics_within_threshold(metrics, is_wireless_link):
+                logger.info(f"Link {interface} from {serial_number} didn't exceed jitter thresholds")
                 continue
 
             await self._process_jitter_trouble(elem)
@@ -610,17 +645,33 @@ class ServiceAffectingMonitor:
             is_rx_bandwidth_valid = self._trouble_repository.is_valid_bps_metric(rx_bandwidth)
 
             serial_number = cached_info["serial_number"]
+
+            interface = link_status["interface"]
+            links_configuration = cached_info["links_configuration"]
+            link_last_active = link_status["linkLastActive"]
+
+            is_wireless_link = self._utils_repository.get_is_wireless_link(interface, links_configuration)
+
             trouble = AffectingTroubles.BANDWIDTH_OVER_UTILIZATION
-            scan_interval = self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
+            monitoring_minutes_per_trouble = self._utils_repository.monitoring_minutes_per_trouble_metric_to_use(
+                is_wireless_link)
+            scan_interval = self._config.MONITOR_CONFIG[monitoring_minutes_per_trouble][trouble]
+
+            if not self._trouble_repository.is_within_lookback_window(link_last_active, is_wireless_link, trouble):
+                logger.info(f"Link {interface} from {serial_number} is not within lookback window. "
+                            + f"link_last_active: {link_last_active}. is_wireless_link: {is_wireless_link}")
+                continue
 
             if is_tx_bandwidth_valid and is_rx_bandwidth_valid:
                 within_threshold = self._trouble_repository.are_bandwidth_metrics_within_threshold(
-                    metrics, scan_interval
+                    metrics, scan_interval, is_wireless_link
                 )
             elif is_tx_bandwidth_valid and not is_rx_bandwidth_valid:
-                within_threshold = self._trouble_repository.is_bandwidth_tx_within_threshold(metrics, scan_interval)
+                within_threshold = self._trouble_repository.is_bandwidth_tx_within_threshold(
+                    metrics, scan_interval, is_wireless_link)
             elif is_rx_bandwidth_valid and not is_tx_bandwidth_valid:
-                within_threshold = self._trouble_repository.is_bandwidth_rx_within_threshold(metrics, scan_interval)
+                within_threshold = self._trouble_repository.is_bandwidth_rx_within_threshold(
+                    metrics, scan_interval, is_wireless_link)
             else:
                 continue
 
@@ -656,6 +707,17 @@ class ServiceAffectingMonitor:
             cached_info = elem["cached_info"]
             link_status = elem["link_status"]
             events = elem["link_events"]
+            interface = link_status["interface"]
+            links_configuration = cached_info["links_configuration"]
+            link_last_active = link_status["linkLastActive"]
+
+            is_wireless_link = self._utils_repository.get_is_wireless_link(interface, links_configuration)
+
+            if not self._trouble_repository.is_within_lookback_window(
+                    link_last_active, is_wireless_link, AffectingTroubles.BOUNCING):
+                logger.info(f"Link {interface} from {serial_number} is not within lookback window. "
+                            + f"link_last_active: {link_last_active}. is_wireless_link: {is_wireless_link}")
+                continue
 
             serial_number = cached_info["serial_number"]
 
@@ -666,7 +728,7 @@ class ServiceAffectingMonitor:
                 )
                 continue
 
-            if self._trouble_repository.are_bouncing_events_within_threshold(events):
+            if self._trouble_repository.are_bouncing_events_within_threshold(events, is_wireless_link):
                 logger.info(f"Link {link_status['interface']} from {serial_number} didn't exceed bouncing thresholds")
                 continue
 
@@ -842,6 +904,9 @@ class ServiceAffectingMonitor:
         ticket_id = ticket_info["ticket_overview"]["ticketID"]
         serial_number = link_data["cached_info"]["serial_number"]
         interface = link_data["link_status"]["interface"]
+        links_configuration = link_data["cached_info"]["links_configuration"]
+
+        is_wireless_link = self._utils_repository.get_is_wireless_link(interface, links_configuration)
 
         logger.info(
             f"Appending Service Affecting trouble note to ticket {ticket_id} for {trouble.value} trouble detected in "
@@ -865,7 +930,7 @@ class ServiceAffectingMonitor:
             return
 
         build_note_fn = self._ticket_repository.get_build_note_fn_by_trouble(trouble)
-        affecting_trouble_note = build_note_fn(link_data)
+        affecting_trouble_note = build_note_fn(link_data, is_wireless_link)
 
         working_environment = self._config.CURRENT_ENVIRONMENT
         if not working_environment == "production":
@@ -903,6 +968,8 @@ class ServiceAffectingMonitor:
         client_name = link_data["cached_info"]["bruin_client_info"]["client_name"]
         link_label = link_data["link_status"]["displayName"]
         links_configuration = link_data["cached_info"]["links_configuration"]
+
+        is_wireless_link = self._utils_repository.get_is_wireless_link(interface, links_configuration)
 
         is_byob = self._is_link_label_blacklisted_from_hnoc(link_label)
         link_type = self._get_link_type(interface, links_configuration)
@@ -943,7 +1010,7 @@ class ServiceAffectingMonitor:
         await self._notifications_repository.notify_successful_reopen(ticket_id, serial_number, trouble)
 
         build_note_fn = self._ticket_repository.get_build_note_fn_by_trouble(trouble)
-        reopen_trouble_note = build_note_fn(link_data, is_reopen_note=True)
+        reopen_trouble_note = build_note_fn(link_data, is_wireless_link, is_reopen_note=True)
         await self._bruin_repository.append_note_to_ticket(
             ticket_id,
             reopen_trouble_note,
@@ -989,6 +1056,8 @@ class ServiceAffectingMonitor:
         client_name = link_data["cached_info"]["bruin_client_info"]["client_name"]
         link_label = link_data["link_status"]["displayName"]
         links_configuration = link_data["cached_info"]["links_configuration"]
+
+        is_wireless_link = self._utils_repository.get_is_wireless_link(interface, links_configuration)
 
         is_byob = self._is_link_label_blacklisted_from_hnoc(link_label)
         link_type = self._get_link_type(interface, links_configuration)
@@ -1036,7 +1105,7 @@ class ServiceAffectingMonitor:
         await self._notifications_repository.notify_successful_ticket_creation(ticket_id, serial_number, trouble)
 
         build_note_fn = self._ticket_repository.get_build_note_fn_by_trouble(trouble)
-        affecting_trouble_note = build_note_fn(link_data)
+        affecting_trouble_note = build_note_fn(link_data, is_wireless_link)
 
         await self._bruin_repository.append_note_to_ticket(
             ticket_id,

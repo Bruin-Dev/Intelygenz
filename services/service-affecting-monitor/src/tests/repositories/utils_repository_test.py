@@ -157,3 +157,27 @@ class TestUtilsRepository:
         )
 
         assert result is True
+
+    def get_is_wireless_link_test(self):
+        interface = "GE1"
+        links_configuration = [{"interfaces": ["GE1"], "type": "WIRELESS"}]
+        result = UtilsRepository.get_is_wireless_link(interface, links_configuration)
+        expected = True
+        assert result == expected
+
+        interface = "GE1"
+        links_configuration = [{"interfaces": ["GE1"], "type": "WIRED"}]
+        result = UtilsRepository.get_is_wireless_link(interface, links_configuration)
+        expected = False
+        assert result == expected
+
+    def threshold_metric_to_use_test(self):
+        is_wireless_link = True
+        result = UtilsRepository.threshold_metric_to_use(is_wireless_link)
+        expected = "wireless_thresholds"
+        assert result == expected
+
+        is_wireless_link = False
+        result = UtilsRepository.threshold_metric_to_use(is_wireless_link)
+        expected = "thresholds"
+        assert result == expected

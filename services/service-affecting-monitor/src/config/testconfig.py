@@ -95,11 +95,25 @@ MONITOR_CONFIG = {
         AffectingTroubles.BANDWIDTH_OVER_UTILIZATION: 90,  # percentage of total bandwidth
         AffectingTroubles.BOUNCING: 10,  # number of down / dead events
     },
+    "wireless_thresholds": {
+        AffectingTroubles.LATENCY: 140,  # milliseconds
+        AffectingTroubles.PACKET_LOSS: 10,  # packets
+        AffectingTroubles.JITTER: 50,  # milliseconds
+        AffectingTroubles.BANDWIDTH_OVER_UTILIZATION: 90,  # percentage of total bandwidth
+        AffectingTroubles.BOUNCING: 10,  # number of down / dead events
+    },
     "monitoring_minutes_per_trouble": {
         AffectingTroubles.LATENCY: 30,
         AffectingTroubles.PACKET_LOSS: 30,
         AffectingTroubles.JITTER: 30,
         AffectingTroubles.BANDWIDTH_OVER_UTILIZATION: 30,
+        AffectingTroubles.BOUNCING: 60,
+    },
+    "wireless_monitoring_minutes_per_trouble": {
+        AffectingTroubles.LATENCY: 90,
+        AffectingTroubles.PACKET_LOSS: 90,
+        AffectingTroubles.JITTER: 90,
+        AffectingTroubles.BANDWIDTH_OVER_UTILIZATION: 90,
         AffectingTroubles.BOUNCING: 60,
     },
     "blacklisted_link_labels_for_asr_forwards": ["byob"],
