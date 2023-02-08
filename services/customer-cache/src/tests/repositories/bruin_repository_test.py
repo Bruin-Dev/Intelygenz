@@ -292,6 +292,100 @@ class TestBruinRepository:
         instance_bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
         assert result == instance_response_message
 
+    @pytest.mark.asyncio
+    async def get_ticket_contact_test(
+        self, instance_bruin_repository, instance_request_message_without_topic, instance_response_message
+    ):
+        client_id = 9994
+
+        instance_request_message_without_topic["request_id"] = uuid_
+        instance_request_message_without_topic["body"] = {
+            "client_id": client_id
+        }
+        instance_response_message["request_id"] = uuid_
+        instance_response_message["body"] = [
+            {
+                "FirstName": "Test",
+                "LastName": "User",
+                "Email": "test@test.com",
+                "Phone": "123-456-7890"
+            },
+            {
+                "FirstName": "Test2",
+                "LastName": "User2",
+                "Email": "test2@test.com",
+                "Phone": "123-456-7890",
+            }
+        ]
+        instance_response_message["status"] = 200
+
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(instance_response_message)
+
+        instance_bruin_repository._nats_client.request = AsyncMock(return_value=response_msg)
+
+        with uuid_mock:
+            result = await instance_bruin_repository.get_ticket_contact(client_id)
+
+        instance_bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.get.ticket.contacts", to_json_bytes(instance_request_message_without_topic), timeout=120
+        )
+        assert result == instance_response_message
+
+    @pytest.mark.asyncio
+    async def get_ticket_contact_with_request_failing_test(
+        self, instance_bruin_repository, instance_request_message_without_topic
+    ):
+        client_id = 9994
+
+        instance_request_message_without_topic["request_id"] = uuid_
+        instance_request_message_without_topic["body"] = {
+            "client_id": client_id
+        }
+
+        instance_bruin_repository._nats_client.request = AsyncMock(side_effect=Exception)
+
+        instance_bruin_repository._notifications_repository.send_slack_message = AsyncMock()
+
+        with uuid_mock:
+            result = await instance_bruin_repository.get_ticket_contact(client_id)
+
+        instance_bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.get.ticket.contacts", to_json_bytes(instance_request_message_without_topic), timeout=120
+        )
+        instance_bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
+        assert result == nats_error_response
+
+    @pytest.mark.asyncio
+    async def get_ticket_contact_with_request_returning_non_2xx_status_test(
+        self, instance_bruin_repository, instance_request_message_without_topic, instance_response_message
+    ):
+        client_id = 9994
+
+        instance_request_message_without_topic["request_id"] = uuid_
+        instance_request_message_without_topic["body"] = {
+            "client_id": client_id
+        }
+
+        instance_response_message["request_id"] = uuid_
+        instance_response_message["body"] = "Got internal error from Bruin"
+        instance_response_message["status"] = 500
+
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(instance_response_message)
+
+        instance_bruin_repository._nats_client.request = AsyncMock(return_value=response_msg)
+        instance_bruin_repository._notifications_repository.send_slack_message = AsyncMock()
+
+        with uuid_mock:
+            result = await instance_bruin_repository.get_ticket_contact(client_id)
+
+        instance_bruin_repository._nats_client.request.assert_awaited_once_with(
+            "bruin.get.ticket.contacts", to_json_bytes(instance_request_message_without_topic), timeout=120
+        )
+        instance_bruin_repository._notifications_repository.send_slack_message.assert_awaited_once()
+        assert result == instance_response_message
+
     def is_management_status_active_test(self, instance_bruin_repository):
         management_status = "Pending"
         result = instance_bruin_repository.is_management_status_active(management_status)

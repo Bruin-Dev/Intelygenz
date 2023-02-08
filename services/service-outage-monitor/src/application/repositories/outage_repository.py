@@ -141,3 +141,13 @@ class OutageRepository:
         all_links_up = not self.is_any_link_disconnected(edge_status["links"])
 
         return is_edge_up and all_links_up
+
+    def edge_has_all_links_down(self, edge_status: dict) -> bool:
+        is_edge_down = self.is_faulty_edge(edge_status["edgeState"])
+
+        if not is_edge_down:
+            return False
+
+        links = edge_status["links"]
+
+        return all(self.is_faulty_link(link["linkState"]) for link in links)

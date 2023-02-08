@@ -606,7 +606,8 @@ class TestUpdateTicketStatus:
 
         ticket_id = 123
         detail_id = 321
-        ticket_status = "O"
+        ticket_status = {"Status": "O"}
+        interfaces = ["GE1", "GE2"]
         successful_status_change = "Success"
 
         response_mock = AsyncMock()
@@ -618,7 +619,8 @@ class TestUpdateTicketStatus:
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)) as mock_put:
-            update_ticket_status = await bruin_client.update_ticket_status(ticket_id, detail_id, ticket_status)
+            update_ticket_status = await bruin_client.update_ticket_status(
+                ticket_id, detail_id, ticket_status, interfaces)
             mock_put.assert_called_once()
             assert update_ticket_status["body"] == successful_status_change
             assert update_ticket_status["status"] == 200
@@ -629,6 +631,7 @@ class TestUpdateTicketStatus:
         ticket_id = 123
         detail_id = 321
         ticket_status = "X"
+        interfaces = None
         failure_status_change = "failed"
 
         response_mock = AsyncMock()
@@ -641,7 +644,8 @@ class TestUpdateTicketStatus:
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)):
-            update_ticket_status = await bruin_client.update_ticket_status(ticket_id, detail_id, ticket_status)
+            update_ticket_status = await bruin_client.update_ticket_status(
+                ticket_id, detail_id, ticket_status, interfaces)
 
             assert update_ticket_status["body"] == failure_status_change
             assert update_ticket_status["status"] == 400
@@ -652,6 +656,7 @@ class TestUpdateTicketStatus:
         ticket_id = 123
         detail_id = 321
         ticket_status = "X"
+        interfaces = None
         failure_status_change = "failed"
 
         response_mock = AsyncMock()
@@ -664,7 +669,8 @@ class TestUpdateTicketStatus:
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)):
-            update_ticket_status = await bruin_client.update_ticket_status(ticket_id, detail_id, ticket_status)
+            update_ticket_status = await bruin_client.update_ticket_status(
+                ticket_id, detail_id, ticket_status, interfaces)
 
             bruin_client.login.assert_awaited()
 
@@ -677,6 +683,7 @@ class TestUpdateTicketStatus:
         ticket_id = 123
         detail_id = 321
         ticket_status = "X"
+        interfaces = None
         failure_status_change = "failed"
 
         response_mock = AsyncMock()
@@ -689,7 +696,8 @@ class TestUpdateTicketStatus:
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)):
-            update_ticket_status = await bruin_client.update_ticket_status(ticket_id, detail_id, ticket_status)
+            update_ticket_status = await bruin_client.update_ticket_status(
+                ticket_id, detail_id, ticket_status, interfaces)
 
             assert update_ticket_status["body"] == failure_status_change
             assert update_ticket_status["status"] == 403
@@ -700,6 +708,7 @@ class TestUpdateTicketStatus:
         ticket_id = 123
         detail_id = 321
         ticket_status = "X"
+        interfaces = None
         failure_status_change = "failed"
 
         response_mock = AsyncMock()
@@ -712,7 +721,8 @@ class TestUpdateTicketStatus:
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)):
-            update_ticket_status = await bruin_client.update_ticket_status(ticket_id, detail_id, ticket_status)
+            update_ticket_status = await bruin_client.update_ticket_status(
+                ticket_id, detail_id, ticket_status, interfaces)
 
             assert update_ticket_status["body"] == "Resource not found"
             assert update_ticket_status["status"] == 404
@@ -723,6 +733,7 @@ class TestUpdateTicketStatus:
         ticket_id = 123
         detail_id = 321
         ticket_status = "X"
+        interfaces = None
         failure_status_change = "failed"
 
         response_mock = AsyncMock()
@@ -735,7 +746,8 @@ class TestUpdateTicketStatus:
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)):
-            update_ticket_status = await bruin_client.update_ticket_status(ticket_id, detail_id, ticket_status)
+            update_ticket_status = await bruin_client.update_ticket_status(
+                ticket_id, detail_id, ticket_status, interfaces)
 
             assert update_ticket_status["body"] == "Got internal error from Bruin"
             assert update_ticket_status["status"] == 500
@@ -1235,6 +1247,7 @@ class TestPostOutageTicket:
         client_id = (9994,)
         service_number = ["VC05400002265"]
         ticket_contact = None
+        interfaces = None
         connection_error_cause = "Connection timed out"
 
         request_params = {
@@ -1250,7 +1263,7 @@ class TestPostOutageTicket:
         with patch.object(
             bruin_client._session, "post", new=AsyncMock(side_effect=ClientConnectionError(connection_error_cause))
         ):
-            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
+            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact, interfaces)
 
             bruin_client._session.post.assert_awaited_with(
                 f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
@@ -1267,12 +1280,14 @@ class TestPostOutageTicket:
         client_id = 9994
         ticket_contact = {"email": "testmail@test.com"}
         service_number = ["VC05400002265"]
+        interfaces = ["GE1", "GE2"]
 
         request_params = {
             "ClientID": client_id,
             "WTNs": service_number,
             "RequestDescription": "MetTel's IPA -- Service Outage Trouble",
             "ticketContact": ticket_contact,
+            "WtnInterfaces": {service_number[0]: interfaces}
         }
 
         ticket_data = {
@@ -1294,7 +1309,7 @@ class TestPostOutageTicket:
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
-            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
+            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact, interfaces)
 
             bruin_client._session.post.assert_awaited_with(
                 f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
@@ -1314,6 +1329,7 @@ class TestPostOutageTicket:
         client_id = (9994,)
         ticket_contact = None
         service_number = ["VC05400002265"]
+        interfaces = None
 
         request_params = {
             "ClientID": client_id,
@@ -1340,7 +1356,7 @@ class TestPostOutageTicket:
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
-            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
+            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact, interfaces)
 
             bruin_client._session.post.assert_awaited_with(
                 f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
@@ -1360,6 +1376,7 @@ class TestPostOutageTicket:
         client_id = (9994,)
         ticket_contact = None
         service_number = "VC05400002265"
+        interfaces = None
 
         request_params = {
             "ClientID": client_id,
@@ -1386,7 +1403,7 @@ class TestPostOutageTicket:
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
-            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
+            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact, interfaces)
 
             bruin_client._session.post.assert_awaited_with(
                 f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
@@ -1406,6 +1423,7 @@ class TestPostOutageTicket:
         client_id = (9994,)
         ticket_contact = None
         service_number = ["VC05400002265"]
+        interfaces = None
 
         request_params = {
             "ClientID": client_id,
@@ -1436,7 +1454,7 @@ class TestPostOutageTicket:
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
-            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
+            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact, interfaces)
 
             bruin_client._session.post.assert_awaited_with(
                 f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
@@ -1456,6 +1474,7 @@ class TestPostOutageTicket:
         client_id = (9994,)
         ticket_contact = None
         service_number = ["VC05400002265"]
+        interfaces = None
 
         request_params = {
             "ClientID": client_id,
@@ -1483,7 +1502,7 @@ class TestPostOutageTicket:
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
-            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
+            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact, interfaces)
 
             bruin_client._session.post.assert_awaited_with(
                 f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
@@ -1503,6 +1522,7 @@ class TestPostOutageTicket:
         client_id = (9994,)
         ticket_contact = None
         service_number = ["VC05400002265"]
+        interfaces = None
 
         request_params = {
             "ClientID": client_id,
@@ -1530,7 +1550,7 @@ class TestPostOutageTicket:
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
-            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
+            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact, interfaces)
 
             bruin_client._session.post.assert_awaited_with(
                 f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
@@ -1550,6 +1570,7 @@ class TestPostOutageTicket:
         client_id = (9994,)
         ticket_contact = None
         service_number = ["VC05400002265"]
+        interfaces = None
 
         request_params = {
             "ClientID": client_id,
@@ -1577,7 +1598,7 @@ class TestPostOutageTicket:
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
-            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
+            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact, interfaces)
 
             bruin_client._session.post.assert_awaited_with(
                 f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
@@ -1597,6 +1618,7 @@ class TestPostOutageTicket:
         client_id = (9994,)
         ticket_contact = None
         service_number = ["VC05400002265"]
+        interfaces = None
 
         request_params = {
             "ClientID": client_id,
@@ -1624,7 +1646,7 @@ class TestPostOutageTicket:
         bruin_client._bearer_token = "Someverysecretaccesstoken"
 
         with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
-            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
+            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact, interfaces)
 
             bruin_client._session.post.assert_awaited_with(
                 f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
@@ -1644,6 +1666,7 @@ class TestPostOutageTicket:
         client_id = (9994,)
         ticket_contact = None
         service_number = ["VC05400002265"]
+        interfaces = None
 
         request_params = {
             "ClientID": client_id,
@@ -1662,7 +1685,7 @@ class TestPostOutageTicket:
         bruin_client.login = AsyncMock()
 
         with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
-            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
+            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact, interfaces)
 
             post_outage_ticket_call = call(
                 f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
@@ -1685,6 +1708,7 @@ class TestPostOutageTicket:
         client_id = (9994,)
         ticket_contact = None
         service_number = ["VC05400002265"]
+        interfaces = None
 
         request_params = {
             "ClientID": client_id,
@@ -1703,7 +1727,7 @@ class TestPostOutageTicket:
         bruin_client.login = AsyncMock()
 
         with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
-            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
+            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact, interfaces)
 
             bruin_client._session.post.assert_awaited_once_with(
                 f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
@@ -1726,6 +1750,7 @@ class TestPostOutageTicket:
         client_id = (9994,)
         ticket_contact = None
         service_number = ["VC05400002265"]
+        interfaces = None
 
         url = f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair'
         request_params = {
@@ -1745,7 +1770,7 @@ class TestPostOutageTicket:
         bruin_client.login = AsyncMock()
 
         with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
-            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
+            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact, interfaces)
 
             bruin_client._session.post.assert_awaited_once_with(
                 url, headers=bruin_client._get_request_headers(), json=request_params, ssl=False
@@ -1762,6 +1787,7 @@ class TestPostOutageTicket:
         client_id = (9994,)
         ticket_contact = None
         service_number = ["VC05400002265"]
+        interfaces = None
 
         request_params = {
             "ClientID": client_id,
@@ -1780,7 +1806,7 @@ class TestPostOutageTicket:
         bruin_client.login = AsyncMock()
 
         with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
-            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact)
+            result = await bruin_client.post_outage_ticket(client_id, service_number, ticket_contact, interfaces)
 
             post_outage_ticket_call = call(
                 f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
@@ -3778,6 +3804,154 @@ class TestGetSite:
 
         with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
             ticket_details = await bruin_client.get_site(params)
+
+            assert ticket_details["body"] == "Got internal error from Bruin"
+            assert ticket_details["status"] == 500
+
+
+class TestGetTicketContacts:
+    @pytest.mark.asyncio
+    async def get_ticket_contacts_test(self):
+        client_id = 72959
+        params = {"client_id": client_id}
+        get_ticket_contacts_response = {
+            "Results": [
+                {
+                    "UserID": "8265b395-aab9-e711-8110-0050568529c0",
+                    "DirID": 203013,
+                    "ClientID": 9994,
+                    "Username": "TEST0132@GMAIL.COM",
+                    "Email": "test0132@gmail.com",
+                    "FirstName": "Testyzhaitesting",
+                    "LastName": "0132test"
+                },
+                {
+                    "UserID": "6ef49805-f474-e611-80fb-0050568529c0",
+                    "DirID": 202080,
+                    "ClientID": 9994,
+                    "Username": "rnkcnt9994@hotmail.com",
+                    "Email": "rnkcnt9994@hotmail.com",
+                    "FirstName": "Rnk",
+                    "LastName": "9994cnt"
+                }
+            ]
+        }
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=get_ticket_contacts_response)
+        response_mock.status = 200
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
+            ticket_details = await bruin_client.get_ticket_contacts(params)
+
+            mock_get.assert_called_once()
+            assert ticket_details["body"] == get_ticket_contacts_response
+            assert ticket_details["status"] == 200
+
+    @pytest.mark.asyncio
+    async def get_site_with_400_status_test(self):
+        client_id = 72959
+        site_id = 343443
+        params = {"client_id": client_id, "site_id": site_id}
+        error_response = {"error": "400 error"}
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=error_response)
+        response_mock.status = 400
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = AsyncMock()
+
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
+            ticket_details = await bruin_client.get_site(params)
+
+            assert ticket_details["body"] == error_response
+            assert ticket_details["status"] == 400
+
+    @pytest.mark.asyncio
+    async def get_ticket_contacts_with_401_status_test(self):
+        client_id = 72959
+        params = {"client_id": client_id}
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value={})
+        response_mock.status = 401
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = AsyncMock()
+
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
+            ticket_details = await bruin_client.get_ticket_contacts(params)
+            bruin_client.login.assert_awaited()
+
+            assert ticket_details["body"] == "Got 401 from Bruin"
+            assert ticket_details["status"] == 401
+
+    @pytest.mark.asyncio
+    async def get_ticket_contacts_with_403_status_test(self):
+        client_id = 72959
+        params = {"client_id": client_id}
+        error_response = {"error": "403 error"}
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=error_response)
+        response_mock.status = 403
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = AsyncMock()
+
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
+            ticket_details = await bruin_client.get_ticket_contacts(params)
+
+            assert ticket_details["body"] == error_response
+            assert ticket_details["status"] == 403
+
+    @pytest.mark.asyncio
+    async def get_ticket_contacts_with_404_status_test(self):
+        client_id = 72959
+        params = {"client_id": client_id}
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value={})
+        response_mock.status = 404
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = AsyncMock()
+
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
+            ticket_details = await bruin_client.get_ticket_contacts(params)
+
+            assert ticket_details["body"] == "Resource not found"
+            assert ticket_details["status"] == 404
+
+    @pytest.mark.asyncio
+    async def get_ticket_contacts_with_500_status_test(self):
+        client_id = 72959
+        params = {"client_id": client_id}
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value={})
+        response_mock.status = 500
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = AsyncMock()
+
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
+            ticket_details = await bruin_client.get_ticket_contacts(params)
 
             assert ticket_details["body"] == "Got internal error from Bruin"
             assert ticket_details["status"] == 500

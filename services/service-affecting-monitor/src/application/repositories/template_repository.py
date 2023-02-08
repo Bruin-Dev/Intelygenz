@@ -144,17 +144,20 @@ class TemplateRepository:
         }
         rows = []
         headers = [
+            "Enterprise Id",
             "Serial Number",
             "Edge Name",
             "Interface",
-            "Available Bandwidth Down",
+            "Available Bandwidth Down Min",
+            "Available Bandwidth Down Max",
             "Peak Utilization Down",
             "Peak Utilization Time Down",
             "Peak Utilization % Down",
             "Total Number: Bandwidth Threshold Exceeded Down",
             "Bandwidth Trouble Tickets Down",
             "                      ",
-            "Available Bandwidth Up",
+            "Available Bandwidth Up Min",
+            "Available Bandwidth Up Max",
             "Peak Utilization Up",
             "Peak Utilization Time Up",
             "Peak Utilization % Up",
@@ -163,21 +166,26 @@ class TemplateRepository:
         ]
         centered_headers = [3, 4, 5]
 
+        serial_number_set = set()
         for index, item in enumerate(report_items):
+            serial_number_set.add(item["serial_number"])
             rows.append(
                 [
+                    item["enterprise_id"],
                     item["serial_number"],
                     item["edge_name"],
                     item["interface"],
-                    item["down_bytes_total"],
-                    item["peak_bytes_down"],
+                    item["down_Mbps_total_min"],
+                    item["down_Mbps_total_max"],
+                    item["peak_Mbps_down"],
                     item["peak_time_down"],
                     item["peak_percent_down"],
                     item["threshold_exceeded_down"],
                     ", ".join([str(_id) for _id in item["ticket_ids_down"]]),
                     " ",
-                    item["up_bytes_total"],
-                    item["peak_bytes_up"],
+                    item["up_Mbps_total_min"],
+                    item["up_Mbps_total_max"],
+                    item["peak_Mbps_up"],
                     item["peak_time_up"],
                     item["peak_percent_up"],
                     item["threshold_exceeded_up"],
@@ -188,9 +196,7 @@ class TemplateRepository:
         if rows:
             csv_report = {"name": f"daily-bandwidth-report_{date}.csv", "data": self._generate_csv(headers, rows)}
 
-            template_vars["__ROWS__"] = rows
-            template_vars["__HEADERS__"] = headers
-            template_vars["__CENTERED_HEADERS__"] = centered_headers
+            template_vars["__EDGE_COUNT__"] = len(serial_number_set)
         else:
             template_vars["__EMPTY_CSV__"] = True
             csv_report = None

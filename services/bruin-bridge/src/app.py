@@ -15,6 +15,7 @@ from application.actions.get_management_status import GetManagementStatus
 from application.actions.get_next_results_for_ticket_detail import GetNextResultsForTicketDetail
 from application.actions.get_single_ticket_basic_info import GetSingleTicketBasicInfo
 from application.actions.get_site import GetSite
+from application.actions.get_ticket_contacts import GetTicketContacts
 from application.actions.get_ticket_details import GetTicketDetails
 from application.actions.get_ticket_overview import GetTicketOverview
 from application.actions.get_ticket_task_history import GetTicketTaskHistory
@@ -155,6 +156,9 @@ class Container:
 
             cb = GetSite(self._bruin_repository)
             await self._nats_client.subscribe(**subscriptions.GetSiteInfo(cb=cb).__dict__)
+
+            cb = GetTicketContacts(self._bruin_repository)
+            await self._nats_client.subscribe(**subscriptions.GetTicketContacts(cb=cb).__dict__)
 
             cb = GetTicketDetails(self._bruin_repository)
             await self._nats_client.subscribe(**subscriptions.GetTicketDetails(cb=cb).__dict__)

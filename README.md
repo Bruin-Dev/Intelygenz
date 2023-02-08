@@ -9,9 +9,11 @@
 |        digi-bridge         |                [![digi-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=digi-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)                |
 |     digi-reboot-report     |         [![digi-reboot-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=digi-reboot-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)         |
 |         dri-bridge         |                 [![dri-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=dri-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)                 |
+|        email-bridge        |               [![email-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=email-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)               |
 |  email-tagger-kre-bridge   |    [![email-tagger-kre-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=email-tagger-kre-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)    |
 |    email-tagger-monitor    |       [![email-tagger-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=email-tagger-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)       |
 |       fraud-monitor        |              [![fraud-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=fraud-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)              |
+|      gateway-monitor       |            [![gateway-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=gateway-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)            |
 | hawkeye-affecting-monitor  |  [![hawkeye-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)  |
 |       hawkeye-bridge       |             [![hawkeye-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)             |
 |   hawkeye-customer-cache   |     [![hawkeye-customer-cache-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=hawkeye-customer-cache-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)     |
@@ -19,13 +21,14 @@
 | intermapper-outage-monitor | [![intermapper-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=intermapper-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master) |
 |    last-contact-report     |        [![last-contact-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=last-contact-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)        |
 |    lumin-billing-report    |         [![lumin-billing-report](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=lumin-billing-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)          |
-|        email-bridge        |               [![email-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=email-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)               |
 |    notifications-bridge    |       [![notifications-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=notifications-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)       |
 | repair-tickets-kre-bridge  |  [![repair-tickets-kre-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=repair-tickets-kre-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)  |
 |   repair-tickets-monitor   |     [![repair-tickets-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=repair-tickets-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)     |
 | service-affecting-monitor  |  [![service-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)  |
 |   service-outage-monitor   |     [![service-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)     |
+|     servicenow-bridge      |          [![servicenow-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=servicenow-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)          |
 |         t7-bridge          |                  [![t7-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=t7-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)                  |
+|      task-dispatcher       |            [![task-dispatcher-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=task-dispatcher-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)            |
 |       tnba-feedback        |              [![tnba-feedback-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=tnba-feedback-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)              |
 |        tnba-monitor        |               [![tnba-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=tnba-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)               |
 |      velocloud-bridge      |           [![velocloud-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=velocloud-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)           |
@@ -54,10 +57,11 @@
   - [Deploying just a subset of microservices](#deploying-just-a-subset-of-microservices)
   - [DOD(Definition of Done)](#doddefinition-of-done)
 - [Running the project](#running-the-project)
-  - [Python 3.6](#python-36)
+  - [Python 3.10](#python-310)
   - [Docker and Docker Compose](#docker-and-docker-compose)
   - [Docker ECR private repository](#docker-ecr-private-repository)
   - [Docker custom images and Python Libraries](#docker-custom-images-and-python-libraries)
+  - [Registry](#registry)
   - [Env files](#env-files)
   - [Finish up](#finish-up)
 - [EKS and KRE](#eks-and-kre)
@@ -88,6 +92,10 @@ it should be `package-example-env`
 
 From [PEP-0008](https://www.python.org/dev/peps/pep-0008/#package-and-module-names)
 Also check this, more synthesized [Python naming conventions](https://visualgit.readthedocs.io/en/latest/pages/naming_convention.html) 
+
+Please check [Welcome Pack](docs/WELCOME_PACK.md) if you are new to the project.
+
+Please refer to [Mettel's Documentation](https://docs-dev.mettel-automation.net/1.16.0/) for the latest updates to the project documentation and workflows.
 
 ## <a name="commit"></a> Commit Message Format
 *This specification is inspired by and supersedes the AngularJS commit message format.*
@@ -131,10 +139,10 @@ Any line of the commit message cannot be longer than 50 characters.
   └─⫸ Commit Type: build|ci|docs|feat|fix|perf|refactor|test
 ```
 The `<type>` and `<short summary>` fields are mandatory, the `(<scope>)` field is optional.
-**NOTE**: beware with space between `(scope):` and `short summary`, it's necessary for semantic-release functionality.
+**NOTE**: beware of space between `(scope):` and `short summary`, it's necessary for semantic-release functionality.
 
 #### Type
-This part is very important, depend of the type we use, the pipeline will trigger a job or not.
+This part is very important, depend on the type we use, the pipeline will trigger a job or not.
 Must be one of the following:
 
 * **build**: Changes that affect the build system or external dependencies (example scopes: terraform, npm)
@@ -196,7 +204,7 @@ The content of the commit message body should contain:
 The table below shows which commit message gets you which release type when semantic-release runs (using the default configuration):
 
 | Commit message                                                                                                                                                                                | Release type               | Tag       |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | --------- |
+|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------|-----------|
 | `fix(bruin-bridge): stop 'something' breaking when too much pressure applied`                                                                                                                 | Patch Release              | 1.0.**1** |
 | `feat(bruin-bridge): add 'something' option to 20`                                                                                                                                            | ~~Minor~~ Feature Release  | 1.**1**.0 |
 | `perf(bruin-bridge): remove something option`<br><br>`BREAKING CHANGE: The something option has been removed.`<br>`The default something value of 10 is always used for performance reasons.` | ~~Major~~ Breaking Release | **2**.0.0 |
@@ -213,16 +221,15 @@ You will need to add/modify files in the folders of the
 Any new env variables should be added to the gitlab. And if there are two different var for PRO and DEV
 specify it by appending `_PRO` or `_DEV` to the variable name on the gitlab.
 
-[FOLLOW THIS HOWTO](docs/CREATE_NEW_MICROSERVICE.md). explains step by step the whole process to create a new microservice that can be deployed in any environment with pipelines.
+[FOLLOW THIS HOW TO](docs/CREATE_NEW_MICROSERVICE.md). explains step by step the whole process to create a new microservice that can be deployed in any environment with pipelines.
 
 # Technologies used
 
-- [Python 3.6](https://www.python.org/downloads/release/python-360/)
+- [Python 3.10](https://www.python.org/downloads/release/python-310/)
 - [Python asyncio](https://docs.python.org/3/library/asyncio.html)
 - [Quart](http://pgjones.gitlab.io/quart/)
 - [Quart OpenAPI](https://github.com/factset/quart-openapi)
 - [Pytest](https://docs.pytest.org/en/latest/)
-- [Behave](https://pypi.org/project/behave/)
 - [Pip](https://pypi.org/project/pip/)
 - [Virtualenv](https://virtualenv.pypa.io/en/latest/)
 - [Hypercorn to deploy Quart server](https://pgjones.gitlab.io/hypercorn/)
@@ -231,7 +238,11 @@ specify it by appending `_PRO` or `_DEV` to the variable name on the gitlab.
 - [Docker](https://www.docker.com/)
 - [Docker-compose](https://docs.docker.com/compose/)
 - [markdown-toc (for Table of Contents generation in READMEs)](https://github.com/jonschlinkert/markdown-toc)
-- [PEP8 pre-commit hook](https://github.com/cbrueffer/pep8-git-hook) **MANDATORY**
+- [Pre-commit](https://pre-commit.com/)
+- [Black](https://github.com/psf/black/) **MANDATORY**
+- [Poetry](https://python-poetry.org/) **MANDATORY**
+- [Isort](https://pycqa.github.io/isort/) **MANDATORY**
+- [CodeSpell](https://github.com/codespell-project/codespell/)
 - [AWS Fargate](https://aws.amazon.com/fargate/)
 
 # Developing flow
@@ -307,22 +318,22 @@ If any of the next requirements is not fulfilled in a merge request, merge reque
 - Each service must have unit tests with a coverage percent of the 80% or more.
 - Each service must have it's dockerfile and must be referenced in the docker-compose.
 - Each service must have a linter job and a unit tests job in the gitlab.ci pipeline.
-- If it is a new service, all the terraform code to deploy it should be present.
+- If it is a new service, all the terraform files' code to deploy it should be present.
 - Developers should take care of notify the devops/tech lead of putting in the pipeline env any environment variable needed in the pipeline's execution.
 
 # Running the project
 
-This tutorial assumes Ubuntu 18.04 - it might work in other versions of Ubuntu though, but hasn't been tested.
+This tutorial assumes Ubuntu 20.04 - it might work in other versions of Ubuntu though, but hasn't been tested.
 
-## Python 3.6
+## Python 3.10
 
 Open a terminal and run:
 
 `$ python3 -V`
 
-Python 3.6 is pre-installed in Ubuntu 18.04 so the output should be something like:
+Python 3.10 is pre-installed in Ubuntu 20.04 so the output should be something like:
 
-`Python 3.6.8`
+`Python 3.10.4`
 
 ## Docker and Docker Compose
 
@@ -384,14 +395,27 @@ In order to use these images it will be necessary to have configured the authent
    The above command creates a temporary token in the `~/.docker/config.json` file, so it is possible that after a while an error like the one below will occur when trying to access the ECR repository:
 
     ```bash
-    ERROR: Service 'last-contact-report' failed to build: pull access denied for 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation-python-3.6, repository does not exist or may require 'docker login': denied: Your Authorization Token has expired. Please run 'aws ecr get-login --no-include-email' to fetch a new one.
+    ERROR: Service 'last-contact-report' failed to build: pull access denied for 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation-python-3.10, repository does not exist or may require 'docker login': denied: Your Authorization Token has expired. Please run 'aws ecr get-login --no-include-email' to fetch a new one.
     ```
 
    To solve this error, simply execute the command mentioned in this step for the generation of a new token.
 
+## Terraform roles
+
+Once aws is configured locally you need to add your aws user in the terraform file for production/dev so it can be deployed in the CI and you can get access.
+You can find this configuration in the [eks-access folder](infra-as-code/basic-infra/5-access/eks-access)
+
+## Registry
+
+A gitlab token is required so docker is able to log in gitlab in order to access the Intelygenz registry we use for common libraries
+`https://gitlab.intelygenz.com/-/profile/personal_access_tokens`
+
+Once you have this token login with the following command replacing username and token which yours
+`docker login registry.gitlab.intelygenz.com -u USERNAME -p TOKEN`
+
 ## Env files
 
-Clone the mettel repo and run:
+Clone the Mettel repo and run:
 
 ```bash
 $ cd installation-utils
@@ -411,7 +435,7 @@ Run:
 
 - Automation-engine is deployed in [Kubernetes](https://kubernetes.io/docs/home/) cluster using [EKS](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html).
 
-- Additionally we use [KRE](https://konstellation-io.github.io/website/) project for IA, it has been deployed as well in a [Kubernetes](https://kubernetes.io/docs/home/) cluster using [EKS](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html) for each of the necessary environments.
+- Additionally, we use [KRE](https://konstellation-io.github.io/website/) project for IA, it has been deployed as well in a [Kubernetes](https://kubernetes.io/docs/home/) cluster using [EKS](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html) for each of the necessary environments.
 
 **NOTE:** *to edit KRE environments we need to use specific commits messages to trigger pipeline jobs, see the [Commit Message Format](#commit) for more info.*
 ## Access Control
@@ -432,10 +456,10 @@ IAM roles are created for each of the users, although these are distinguished in
 
 Below are the roles created:
 
-| Environments   | Roles in Project       | IAM role per project                                                                                     |
-| -------------- | ---------------------- | -------------------------------------------------------------------------------------------------------- |
-| dev, pro       | developer, devops, ops | `automation-engine:` arn:aws:iam::[aws_account_id]:role/[env]-[role]-mettel-automation-[aws-username]    |
-|                |                        | `konstellation:` arn:aws:iam::[aws_account_id]:role/[env]-[role]-mettel-automation-kre-[aws-username]    |
+| Environments | Roles in Project       | IAM role per project                                                                                  |
+|--------------|------------------------|-------------------------------------------------------------------------------------------------------|
+| dev, pro     | developer, devops, ops | `automation-engine:` arn:aws:iam::[aws_account_id]:role/[env]-[role]-mettel-automation-[aws-username] |
+|              |                        | `konstellation:` arn:aws:iam::[aws_account_id]:role/[env]-[role]-mettel-automation-kre-[aws-username] |
 
 > The number of `aws_account_id` is available through the `.csv` file with the AWS credentials for each user. If the user does not have one value, contact the *DevOps* of the project to get the data.
 
@@ -558,7 +582,7 @@ The following steps must be followed to set up the configuration to access any o
 
 2. Add the configuration of the IAM role created for the user in the awscli config file. The role IAM arn created for each user uses the following format `arn:aws:iam::<aws_account_id>:role/<env>-<role>-mettel-automation-kre-<iam_user_name>`, where the `role_tag` value will be one of those explained in the [previous section](#roles).
 
-   The following is an example of the configuration for a a Ops role in dev, and Developer role in pro through the modification of the `~/.aws/config` file for Automation-Engine cluster:
+   The following is an example of the configuration for an Ops role in dev, and Developer role in pro through the modification of the `~/.aws/config` file for Automation-Engine cluster:
 
    ```
    [profile ops-role-automation-dev]
@@ -601,7 +625,7 @@ Remember: you have to know the role (developer, devops or ops) assigned per envi
     $ aws eks update-kubeconfig --name mettel-automation-kre --profile devops-role-kre-pro
     ```
 
-   > The name of the EKS cluster's are, production automation engine: `mettel-automation`, production konstelation: `mettel-automation-kre`, development automation engine: `mettel-automation-dev` and development konstellation: `mettel-automation-kre-dev`.
+   > The name of the EKS clusters are, production automation engine: `mettel-automation`, production konstelation: `mettel-automation-kre`, development automation engine: `mettel-automation-dev` and development konstellation: `mettel-automation-kre-dev`.
 
 4. Open k9s to connect to the cluster, if you have more clusters in you kubeconfig file you can chose you cluster with `context` command inside k9s:
 
@@ -614,31 +638,46 @@ Remember: you have to know the role (developer, devops or ops) assigned per envi
 
 NOTE: k9s works like text editor `vi` so you can use the most of shortcuts, like ':/' to find or ':q' to exit. You can find more information about k9s in his [github page](https://github.com/derailed/k9s).
 
-# Lists of projects READMEs
+# Lists of README by service
 
 ## Microservices
 
 - [Base microservice](base-microservice/README.md)
-- [Bruin bridge](bruin-bridge/README.md)
-- [Customer cache](customer-cache/README.md)
-- [Hawkeye affecting monitor](hawkeye-affecting-monitor/README.md)
-- [Hawkeye bridge](hawkeye-bridge/README.md)
-- [Hawkeye customer cache](hawkeye-customer-cache/README.md)
-- [Hawkeye outage monitor](hawkeye-outage-monitor/README.md)
-- [Last contact report](last-contact-report/README.md)
-- [Lumin billing report](lumin-billing-report/README.md)
-- [Email bridge](email-bridge/README.md)
-- [Notifications bridge](notifications-bridge/README.md)
-- [Service affecting monitor](service-affecting-monitor/README.md)
-- [Service outage monitor](service-outage-monitor/README.md)
-- [T7 bridge](t7-bridge/README.md)
-- [TNBA feedback](tnba-feedback/README.md)
-- [TNBA monitor](tnba-monitor/README.md)
-- [Velocloud bridge](velocloud-bridge/README.md)
+- [Bruin bridge](services/bruin-bridge/README.md)
+- [Customer cache](services/customer-cache/README.md)
+- [Digi bridge](services/digi-bridge/README.md)
+- [Digi reboot report](services/digi-reboot-report/README.md)
+- [Email bridge](services/email-bridge/README.md)
+- [Email tagger kr bridge](services/email-tagger-kre-bridge/README.md)
+- [Email tagger monitor](services/email-tagger-monitor/README.md)
+- [Fraud monitor](services/fraud-monitor/README.md)
+- [Gateway monitor](services/gateway-monitor/README.md)
+- [Hawkeye affecting monitor](services/hawkeye-affecting-monitor/README.md)
+- [Hawkeye bridge](services/hawkeye-bridge/README.md)
+- [Hawkeye customer cache](services/hawkeye-customer-cache/README.md)
+- [Hawkeye outage monitor](services/hawkeye-outage-monitor/README.md)
+- [Intermapper outage monitor](services/intermapper-outage-monitor/README.md)
+- [Last contact report](services/last-contact-report/README.md)
+- [Lumin billing report](services/lumin-billing-report/README.md)
+- [Notifications bridge](services/notifications-bridge/README.md)
+- [Service affecting monitor](services/service-affecting-monitor/README.md)
+- [Service outage monitor](services/service-outage-monitor/README.md)
+- [Repair tickets kr bridge](services/repair-tickets-kre-bridge/README.md)
+- [Repair tickets monitor](services/repair-tickets-monitor/README.md)
+- [Servicenow bridge](services/servicenow-bridge/README.md)
+- [T7 bridge](services/t7-bridge/README.md)
+- [Task dispatcher](services/task-dispatcher/README.md)
+- [TNBA feedback](services/tnba-feedback/README.md)
+- [TNBA monitor](services/tnba-monitor/README.md)
+- [Velocloud bridge](services/velocloud-bridge/README.md)
+
+Please refer to [Mettel's Documentation](https://docs-dev.mettel-automation.net/1.16.0/) for the latest updates to the project documentation and workflows.
 
 ## Acceptance Tests
 
 - [Acceptance tests](acceptance-tests/README.md)
+
+This feature is deprecated.
 
 # Good Practices
 
@@ -650,6 +689,7 @@ NOTE: k9s works like text editor `vi` so you can use the most of shortcuts, like
 
 [Papertrail](https://papertrailapp.com/) is used as a centralized system of logs, for each microservice a series of predefined searches are used, with the possibility of creating new ones and/or modifying the current ones. It is necessary to use the [papertrail-provisioning](ci-utils/papertrail-provisioning) tool for this purpose.
 
+Papertrail was deprecated for no being fedramp-compliance
 
 # Testing device
 In order to create a new test ticket for a VCE the following data should be used:

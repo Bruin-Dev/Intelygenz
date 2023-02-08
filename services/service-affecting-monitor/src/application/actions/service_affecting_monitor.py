@@ -125,9 +125,6 @@ class ServiceAffectingMonitor:
         if client_id in self._config.MONITOR_CONFIG["customers_to_always_use_default_contact_info"]:
             return True
 
-        if edge["edge"]["host"] in self._config.UMBRELLA_HOSTS:
-            return True
-
         return False
 
     def _structure_links_metrics(self, links_metrics: list, events: dict = None) -> list:
@@ -245,19 +242,26 @@ class ServiceAffectingMonitor:
 
             client_id = cached_edge["bruin_client_info"]["client_id"]
             site_details = cached_edge["site_details"]
+            ticket_contact_details = cached_edge["ticket_contact_details"]
+            ticket_contact_additional_subscribers = cached_edge["ticket_contact_additional_subscribers"]
 
             default_contacts = self._default_contact_info_by_client_id.get(client_id)
             if self._should_use_default_contact_info(client_id, cached_edge):
                 logger.info(f"Using default contact info for edge {serial_number} and client {client_id}")
                 contacts = default_contacts
+                subscribers = []
             else:
-                logger.info(f"Using site-specific contact info for edge {serial_number} and client {client_id}")
-                contacts = self._bruin_repository.get_contact_info_for_site(site_details) or default_contacts
+                logger.info(f"Using site and ticket contact info for edge {serial_number} and client {client_id}")
+                contacts = (self._bruin_repository.get_contact_info_from_site_and_ticket_contact_details(
+                    site_details, ticket_contact_details) or default_contacts)
+                subscribers = self._bruin_repository.get_ticket_contact_additional_subscribers(
+                    ticket_contact_additional_subscribers)
 
             result.append(
                 {
                     "cached_info": cached_edge,
                     "contact_info": contacts,
+                    "subscribers": subscribers,
                     **elem,
                 }
             )
@@ -699,11 +703,20 @@ class ServiceAffectingMonitor:
         serial_number = link_data["cached_info"]["serial_number"]
         interface = link_data["link_status"]["interface"]
         client_id = link_data["cached_info"]["bruin_client_info"]["client_id"]
+        link_label = link_data["link_status"]["displayName"]
+
+        is_byob = self._is_link_label_blacklisted_from_hnoc(link_label)
 
         logger.info(
             f"Service Affecting trouble of type {trouble.value} detected in interface {interface} of edge "
             f"{serial_number}"
         )
+
+        if is_byob:
+            logger.warning(
+                f"Link blacklisted as BYOB. Interface {interface} of edge {serial_number}"
+            )
+            return
 
         open_affecting_tickets_response = await self._bruin_repository.get_open_affecting_tickets(
             client_id, service_number=serial_number
@@ -972,6 +985,7 @@ class ServiceAffectingMonitor:
         interface = link_data["link_status"]["interface"]
         client_id = link_data["cached_info"]["bruin_client_info"]["client_id"]
         contact_info = link_data["contact_info"]
+        subscribers = link_data["subscribers"]
         client_name = link_data["cached_info"]["bruin_client_info"]["client_name"]
         link_label = link_data["link_status"]["displayName"]
         links_configuration = link_data["cached_info"]["links_configuration"]
@@ -1008,6 +1022,13 @@ class ServiceAffectingMonitor:
             f"Service Affecting ticket to report {trouble.value} trouble detected in interface {interface} "
             f"of edge {serial_number} was successfully created! Ticket ID is {ticket_id}"
         )
+
+        if subscribers:
+            for subscriber in subscribers:
+                subscriber_user_response = await self._bruin_repository.subscribe_user_to_ticket(ticket_id, subscriber)
+                if subscriber_user_response["status"] not in range(200, 300):
+                    logger.error(
+                        f"Error while subscribing {subscriber} to ticket {ticket_id}: {subscriber_user_response}.")
 
         self._metrics_repository.increment_tasks_created(
             client=client_name, trouble=trouble.value, has_byob=is_byob, link_type=link_type
@@ -1054,8 +1075,6 @@ class ServiceAffectingMonitor:
         return ticket_id
 
     def _should_forward_to_hnoc(self, link_label: str) -> bool:
-        if self._config.VELOCLOUD_HOST == "metvco04.mettel.net":
-            return True
         return not self._is_link_label_blacklisted_from_hnoc(link_label)
 
     def _schedule_forward_to_hnoc_queue(self, forward_time, ticket_id, serial_number, link_data, trouble):

@@ -26,9 +26,13 @@ class ResolveTicket:
         if body.get("ticket_id") and body.get("detail_id"):
             ticket_id = body["ticket_id"]
             detail_id = body["detail_id"]
+            interfaces = None
+
+            if body.get("interfaces"):
+                interfaces = body["interfaces"]
 
             logger.info(f"Updating the ticket status for ticket id: {ticket_id} to RESOLVED")
-            result = await self._bruin_repository.resolve_ticket(ticket_id, detail_id)
+            result = await self._bruin_repository.resolve_ticket(ticket_id, detail_id, interfaces)
 
             response["body"] = result["body"]
             response["status"] = result["status"]

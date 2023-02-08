@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import List, Optional
+from copy import deepcopy
 
 import pytest
 from tests.fixtures._helpers import _missing, _undefined, bruinize_date
@@ -187,6 +188,146 @@ def make_contact_info():
             obj[1]["phone"] = phone
 
         return obj
+
+    return _inner
+
+
+@pytest.fixture(scope="session")
+def make_site_and_ticket_contact_info():
+    def _inner(
+        *,
+        site_contact_email: Optional[str] = "",
+        site_contact_phone: str = _missing,
+        site_contact_name: Optional[str] = "",
+        ticket_contact_email: Optional[str] = "",
+        ticket_contact_phone: str = _missing,
+        ticket_contact_first_name: Optional[str] = "",
+        ticket_contact_last_name: Optional[str] = ""
+    ):
+        site_contact = {
+            "email": site_contact_email,
+            "name": site_contact_name,
+            "type": "site",
+        }
+
+        if site_contact_phone is not _missing:
+            site_contact["phone"] = site_contact_phone
+
+        ticket_contact = {
+            "email": ticket_contact_email,
+            "name": f"{ticket_contact_first_name} {ticket_contact_last_name}",
+            "type": "ticket"
+        }
+
+        if ticket_contact_phone is not _missing:
+            ticket_contact["phone"] = ticket_contact_phone
+
+        if site_contact["email"] is None:
+            site_contact = deepcopy(ticket_contact)
+            site_contact["type"] = "site"
+
+        if ticket_contact["email"] is None:
+            ticket_contact = deepcopy(site_contact)
+            ticket_contact["type"] = "ticket"
+
+        return [site_contact, ticket_contact]
+
+    return _inner
+
+
+@pytest.fixture(scope="session")
+def make_ticket_contact_details():
+    def _inner(
+        *,
+        first_name: str = "",
+        last_name: str = "",
+        email: str = "",
+        phone: int = None
+    ):
+        obj = {
+            "firstName": first_name,
+            "lastName": last_name,
+            "email": email
+        }
+
+        if phone is not None:
+            obj["phone"] = phone
+
+        return obj
+
+    return _inner
+
+
+@pytest.fixture(scope="session")
+def make_ticket_contact_info():
+    def _inner(
+        *,
+        first_name: str = "",
+        last_name: str = "",
+        email: str = "",
+        phone: str = None,
+    ):
+        obj = [
+            {
+                "email": email,
+                "name": f'{first_name} {last_name}',
+                "type": "ticket",
+            },
+            {
+                "email": email,
+                "name": f'{first_name} {last_name}',
+                "type": "site",
+            },
+        ]
+
+        if phone:
+            obj[0]["phone"] = phone
+            obj[1]["phone"] = phone
+
+        return obj
+
+    return _inner
+
+
+@pytest.fixture(scope="session")
+def make_ticket_contact_additional_subscribers():
+    def _inner(
+        *,
+        first_name: str = "",
+        last_name: str = "",
+        email: str = "",
+        phone: int = 0
+    ):
+        obj = [
+            {
+                "firstName": first_name,
+                "lastName": last_name,
+                "email": email,
+                "phone": phone
+            },
+            {
+                "firstName": first_name,
+                "lastName": last_name,
+                "email": email,
+                "phone": phone
+            },
+        ]
+
+        return obj
+
+    return _inner
+
+
+@pytest.fixture(scope="session")
+def make_subscribers():
+    def _inner(
+        *,
+        email: str = ""
+    ):
+        if not email:
+            return []
+
+        return [email, email]
 
     return _inner
 

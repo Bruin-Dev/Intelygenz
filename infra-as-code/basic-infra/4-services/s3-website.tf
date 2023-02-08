@@ -15,6 +15,10 @@ module "docs_s3_website" {
       value = "52.51.50.68/32" # VPN igz
       type  = "IPV4"
     },
+    {
+      value = "216.194.28.130/32" # VPN Mettel
+      type  = "IPV4"
+    },
   ]
 }
 

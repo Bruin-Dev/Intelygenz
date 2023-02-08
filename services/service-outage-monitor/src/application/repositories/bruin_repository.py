@@ -341,7 +341,7 @@ class BruinRepository:
 
         return response
 
-    async def create_outage_ticket(self, client_id: int, service_number: str):
+    async def create_outage_ticket(self, client_id: int, service_number: str, interfaces: list[str]):
         err_msg = None
 
         request = {
@@ -349,6 +349,7 @@ class BruinRepository:
             "body": {
                 "client_id": client_id,
                 "service_number": service_number,
+                "interfaces": interfaces,
             },
         }
 
@@ -562,6 +563,10 @@ class BruinRepository:
 
     async def send_reminder_email_milestone_notification(self, ticket_id: int, service_number: str) -> dict:
         notification_type = "TicketBYOBOutageRepairReminder-E-Mail"
+        return await self.post_notification_email_milestone(ticket_id, service_number, notification_type)
+
+    async def send_edge_is_down_email_notification(self, ticket_id: int, service_number: str) -> dict:
+        notification_type = "TicketServiceAffectingRepairVelo_E-Mail"
         return await self.post_notification_email_milestone(ticket_id, service_number, notification_type)
 
     async def post_notification_email_milestone(self, ticket_id: int, service_number: str, notification_type: str):

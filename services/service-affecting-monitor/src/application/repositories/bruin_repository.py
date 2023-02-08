@@ -7,6 +7,7 @@ import re
 from collections import defaultdict
 from datetime import datetime
 from typing import Any
+from copy import deepcopy
 
 from application import AffectingTroubles, ForwardQueues
 from application.repositories import nats_error_response
@@ -277,6 +278,51 @@ class BruinRepository:
 
         return response
 
+    async def subscribe_user_to_ticket(self, ticket_id, subscriber):
+        err_msg = None
+        request_details = {
+            "request_id": uuid(),
+            "body": {
+                "subscriptionType": "2",
+                "user": {
+                    "email": subscriber
+                }
+            },
+        }
+
+        try:
+            logger.info(f"Subscribing user {subscriber} to ticket {ticket_id}...")
+
+            response = get_data_from_response_message(
+                await self._nats_client.request(
+                    "bruin.subscribe.user", to_json_bytes(request_details), timeout=150
+                )
+            )
+
+        except Exception as e:
+            err_msg = f"An error occurred while subscribing user {subscriber} to ticket {ticket_id} -> {e}"
+            response = nats_error_response
+        else:
+            response_body = response["body"]
+            response_status = response["status"]
+
+            if response_status in range(200, 300):
+                logger.info(
+                    f"Subscriber {subscriber} subscribed successfully to ticket {ticket_id}!"
+                )
+            else:
+                err_msg = (
+                    f"Error while subscribing user {subscriber} to ticket {ticket_id} in "
+                    f"{self._config.ENVIRONMENT_NAME.upper()} environment: "
+                    f"Error {response_status} - {response_body}"
+                )
+
+        if err_msg:
+            logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
     async def open_ticket(self, ticket_id: int, detail_id: int):
         err_msg = None
 
@@ -492,6 +538,110 @@ class BruinRepository:
             contact_info[1]["phone"] = site_detail_phone
 
         return contact_info
+
+    @staticmethod
+    def get_contact_info_for_ticket(ticket_contact_details):
+        ticket_contact_detail_first_name = ticket_contact_details["firstName"]
+        ticket_contact_detail_last_name = ticket_contact_details["lastName"]
+        ticket_contact_detail_email = ticket_contact_details["email"]
+
+        if (ticket_contact_detail_first_name is None
+            or ticket_contact_detail_last_name is None
+                or ticket_contact_detail_email is None):
+            return None
+
+        full_name = ticket_contact_detail_first_name + " " + ticket_contact_detail_last_name
+
+        contact_info = [
+            {
+                "email": ticket_contact_detail_email,
+                "name": full_name,
+                "type": "ticket",
+            },
+            {
+                "email": ticket_contact_detail_email,
+                "name": full_name,
+                "type": "site",
+            },
+        ]
+
+        if "phone" in ticket_contact_details and ticket_contact_details["phone"] is not None:
+            contact_info[0]["phone"] = ticket_contact_details["phone"]
+            contact_info[1]["phone"] = ticket_contact_details["phone"]
+
+        return contact_info
+
+    @staticmethod
+    def _get_ticket_contact_from_ticket_contact_details(ticket_contact_details):
+        ticket_contact_detail_first_name = ticket_contact_details["firstName"]
+        ticket_contact_detail_last_name = ticket_contact_details["lastName"]
+        ticket_contact_detail_email = ticket_contact_details["email"]
+
+        if (ticket_contact_detail_first_name is None
+            or ticket_contact_detail_last_name is None
+                or ticket_contact_detail_email is None):
+            return None
+
+        full_name = ticket_contact_detail_first_name + " " + ticket_contact_detail_last_name
+
+        ticket_contact = {
+            "email": ticket_contact_detail_email,
+            "name": full_name,
+            "type": "ticket",
+        }
+
+        if "phone" in ticket_contact_details and ticket_contact_details["phone"] is not None:
+            ticket_contact["phone"] = ticket_contact_details["phone"]
+
+        return ticket_contact
+
+    @staticmethod
+    def _get_site_contact_from_site_details(site_details):
+        site_detail_name = site_details["primaryContactName"]
+        site_detail_phone = site_details["primaryContactPhone"]
+        site_detail_email = site_details["primaryContactEmail"]
+
+        if site_detail_name is None or site_detail_email is None:
+            return None
+
+        site_contact = {
+            "email": site_detail_email,
+            "name": site_detail_name,
+            "type": "site",
+        }
+
+        if site_detail_phone:
+            site_contact["phone"] = site_detail_phone
+
+        return site_contact
+
+    @staticmethod
+    def get_contact_info_from_site_and_ticket_contact_details(site_details, ticket_contact_details):
+        site_contact = BruinRepository._get_site_contact_from_site_details(site_details)
+        ticket_contact = BruinRepository._get_ticket_contact_from_ticket_contact_details(ticket_contact_details)
+
+        if site_contact is None and ticket_contact is None:
+            return None
+
+        if site_contact is None:
+            site_contact = deepcopy(ticket_contact)
+            site_contact["type"] = "site"
+
+        if ticket_contact is None:
+            ticket_contact = deepcopy(site_contact)
+            ticket_contact["type"] = "ticket"
+
+        return [site_contact, ticket_contact]
+
+    @staticmethod
+    def get_ticket_contact_additional_subscribers(ticket_contact_additional_subscribers):
+        subscribers = []
+
+        for subscriber in ticket_contact_additional_subscribers:
+            if subscriber["email"]:
+                subscribers.append(subscriber["email"])
+
+        return subscribers
 
     async def get_affecting_tickets(self, client_id: int, ticket_statuses: list, *, service_number: str = None):
         ticket_topic = "VAS"
@@ -745,22 +895,28 @@ class BruinRepository:
             "trouble": trouble,
         }
 
-    def prepare_items_for_bandwidth_report(self, links_metrics, grouped_ticket_details):
+    def prepare_items_for_bandwidth_report(self, links_metrics, grouped_ticket_details, enterprise_id_edge_id_relation):
+        logger.info(f"[bandwidth-reports] Preparing items for bandwidth report")
         report_items = []
-
         for link_metrics in links_metrics:
             serial_number = link_metrics["serial_number"]
             interface = link_metrics["interface"]
+            enterprise_id = [edge["enterprise_id"]
+                             for edge in enterprise_id_edge_id_relation
+                             if edge["serial_number"] == serial_number][0]
             report_item = self.build_bandwidth_report_item(
+                enterprise_id=enterprise_id,
                 serial_number=serial_number,
                 edge_name=link_metrics["edge_name"],
                 interface=interface,
                 ticket_details_up=grouped_ticket_details[serial_number][interface]["bandwidth_up_exceeded"],
                 ticket_details_down=grouped_ticket_details[serial_number][interface]["bandwidth_down_exceeded"],
-                down_bytes_total=link_metrics["down_bytes_total"],
-                up_bytes_total=link_metrics["up_bytes_total"],
-                peak_bytes_down=link_metrics["peak_bytes_down"],
-                peak_bytes_up=link_metrics["peak_bytes_up"],
+                down_Mbps_total_min=link_metrics["down_Mbps_total_min"],
+                down_Mbps_total_max=link_metrics["down_Mbps_total_max"],
+                up_Mbps_total_min=link_metrics["up_Mbps_total_min"],
+                up_Mbps_total_max=link_metrics["up_Mbps_total_max"],
+                peak_Mbps_down=link_metrics["peak_Mbps_down"],
+                peak_Mbps_up=link_metrics["peak_Mbps_up"],
                 peak_percent_down=link_metrics["peak_percent_down"],
                 peak_percent_up=link_metrics["peak_percent_up"],
                 peak_time_down=link_metrics["peak_time_down"],
@@ -772,28 +928,36 @@ class BruinRepository:
 
     @staticmethod
     def build_bandwidth_report_item(
+        enterprise_id,
         serial_number,
         edge_name,
         interface,
         ticket_details_up,
         ticket_details_down,
-        down_bytes_total,
-        up_bytes_total,
-        peak_bytes_down,
-        peak_bytes_up,
+        down_Mbps_total_min,
+        down_Mbps_total_max,
+        up_Mbps_total_min,
+        up_Mbps_total_max,
+        peak_Mbps_down,
+        peak_Mbps_up,
         peak_percent_down,
         peak_percent_up,
         peak_time_down,
         peak_time_up,
     ):
+        logger.info(f"[bandwidth-reports] Building bandwidth report item for edge {serial_number} and \
+                      interface {interface}")
         return {
+            "enterprise_id": enterprise_id,
             "serial_number": serial_number,
             "edge_name": edge_name,
             "interface": interface,
-            "down_bytes_total": down_bytes_total,
-            "up_bytes_total": up_bytes_total,
-            "peak_bytes_down": peak_bytes_down,
-            "peak_bytes_up": peak_bytes_up,
+            "down_Mbps_total_min": down_Mbps_total_min,
+            "down_Mbps_total_max": down_Mbps_total_max,
+            "up_Mbps_total_min": up_Mbps_total_min,
+            "up_Mbps_total_max": up_Mbps_total_max,
+            "peak_Mbps_down": peak_Mbps_down,
+            "peak_Mbps_up": peak_Mbps_up,
             "peak_percent_down": peak_percent_down,
             "peak_percent_up": peak_percent_up,
             "peak_time_down": peak_time_down,

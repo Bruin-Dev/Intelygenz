@@ -37,9 +37,6 @@ bruin-bridge-test:
   extends: .unittest_module_python_310
   needs: ["bruin-bridge-linter"]
 
-# ==========================================
-# Images builds jobs for bruin-bridge module
-# ==========================================
 bruin-bridge-build:
   stage: build
   variables:

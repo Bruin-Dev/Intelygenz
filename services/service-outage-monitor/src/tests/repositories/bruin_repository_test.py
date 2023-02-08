@@ -1236,12 +1236,14 @@ class TestBruinRepository:
     async def create_outage_ticket_returning_2xx_status_test(self):
         client_id = 12345
         service_number = "VC1234567"
+        interfaces = ["eth0"]
 
         request = {
             "request_id": uuid_,
             "body": {
                 "client_id": client_id,
                 "service_number": service_number,
+                "interfaces": interfaces,
             },
         }
         response = {
@@ -1262,7 +1264,7 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
-            result = await bruin_repository.create_outage_ticket(client_id, service_number)
+            result = await bruin_repository.create_outage_ticket(client_id, service_number, interfaces)
 
         nats_client.request.assert_awaited_once_with(
             "bruin.ticket.creation.outage.request", to_json_bytes(request), timeout=90
@@ -1273,12 +1275,14 @@ class TestBruinRepository:
     async def create_outage_ticket_returning_409_status_test(self):
         client_id = 12345
         service_number = "VC1234567"
+        interfaces = ["eth0"]
 
         request = {
             "request_id": uuid_,
             "body": {
                 "client_id": client_id,
                 "service_number": service_number,
+                "interfaces": interfaces,
             },
         }
         response = {
@@ -1299,7 +1303,7 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
-            result = await bruin_repository.create_outage_ticket(client_id, service_number)
+            result = await bruin_repository.create_outage_ticket(client_id, service_number, interfaces)
 
         nats_client.request.assert_awaited_once_with(
             "bruin.ticket.creation.outage.request", to_json_bytes(request), timeout=90
@@ -1310,12 +1314,14 @@ class TestBruinRepository:
     async def create_outage_ticket_returning_471_status_test(self):
         client_id = 12345
         service_number = "VC1234567"
+        interfaces = ["eth0"]
 
         request = {
             "request_id": uuid_,
             "body": {
                 "client_id": client_id,
                 "service_number": service_number,
+                "interfaces": interfaces,
             },
         }
         response = {
@@ -1336,7 +1342,7 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
-            result = await bruin_repository.create_outage_ticket(client_id, service_number)
+            result = await bruin_repository.create_outage_ticket(client_id, service_number, interfaces)
 
         nats_client.request.assert_awaited_once_with(
             "bruin.ticket.creation.outage.request", to_json_bytes(request), timeout=90
@@ -1347,12 +1353,14 @@ class TestBruinRepository:
     async def create_outage_ticket_returning_472_status_test(self):
         client_id = 12345
         service_number = "VC1234567"
+        interfaces = ["eth0"]
 
         request = {
             "request_id": uuid_,
             "body": {
                 "client_id": client_id,
                 "service_number": service_number,
+                "interfaces": interfaces,
             },
         }
         response = {
@@ -1373,7 +1381,7 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
-            result = await bruin_repository.create_outage_ticket(client_id, service_number)
+            result = await bruin_repository.create_outage_ticket(client_id, service_number, interfaces)
 
         nats_client.request.assert_awaited_once_with(
             "bruin.ticket.creation.outage.request", to_json_bytes(request), timeout=90
@@ -1384,12 +1392,14 @@ class TestBruinRepository:
     async def create_outage_ticket_returning_473_status_test(self):
         client_id = 12345
         service_number = "VC1234567"
+        interfaces = ["eth0"]
 
         request = {
             "request_id": uuid_,
             "body": {
                 "client_id": client_id,
                 "service_number": service_number,
+                "interfaces": interfaces,
             },
         }
         response = {
@@ -1410,7 +1420,7 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
-            result = await bruin_repository.create_outage_ticket(client_id, service_number)
+            result = await bruin_repository.create_outage_ticket(client_id, service_number, interfaces)
 
         nats_client.request.assert_awaited_once_with(
             "bruin.ticket.creation.outage.request", to_json_bytes(request), timeout=90
@@ -1421,12 +1431,14 @@ class TestBruinRepository:
     async def create_outage_ticket_with_request_failing_test(self):
         client_id = 12345
         service_number = "VC1234567"
+        interfaces = ["eth0"]
 
         request = {
             "request_id": uuid_,
             "body": {
                 "client_id": client_id,
                 "service_number": service_number,
+                "interfaces": interfaces,
             },
         }
 
@@ -1441,7 +1453,7 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
-            result = await bruin_repository.create_outage_ticket(client_id, service_number)
+            result = await bruin_repository.create_outage_ticket(client_id, service_number, interfaces)
 
         nats_client.request.assert_awaited_once_with(
             "bruin.ticket.creation.outage.request", to_json_bytes(request), timeout=90
@@ -1453,12 +1465,14 @@ class TestBruinRepository:
     async def create_outage_ticket_with_request_returning_no_2xx_or_409_or_471_status_test(self):
         client_id = 12345
         service_number = "VC1234567"
+        interfaces = ["eth0"]
 
         request = {
             "request_id": uuid_,
             "body": {
                 "client_id": client_id,
                 "service_number": service_number,
+                "interfaces": interfaces,
             },
         }
         response = {
@@ -1481,7 +1495,7 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
-            result = await bruin_repository.create_outage_ticket(client_id, service_number)
+            result = await bruin_repository.create_outage_ticket(client_id, service_number, interfaces)
 
         nats_client.request.assert_awaited_once_with(
             "bruin.ticket.creation.outage.request", to_json_bytes(request), timeout=90
@@ -1849,6 +1863,24 @@ class TestBruinRepository:
         assert response == bruin_generic_200_response
 
     @pytest.mark.asyncio
+    async def send_edge_is_down_email_notification_test(self, bruin_repository, bruin_generic_200_response):
+        ticket_id = 12345
+        service_number = "VC1234567"
+        notification_type = "TicketServiceAffectingRepairVelo_E-Mail"
+
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(bruin_generic_200_response)
+
+        bruin_repository._nats_client.request.return_value = response_msg
+
+        response = await bruin_repository.send_edge_is_down_email_notification(ticket_id, service_number)
+
+        bruin_repository.post_notification_email_milestone.assert_awaited_once_with(
+            ticket_id, service_number, notification_type
+        )
+        assert response == bruin_generic_200_response
+
+    @pytest.mark.asyncio
     async def post_notification_email_milestone_test(self, bruin_repository, bruin_generic_200_response):
         ticket_id = 12345
         service_number = "VC1234567"
@@ -1945,7 +1977,9 @@ class TestBruinRepository:
         current_datetime = datetime.now()
         ticket_id = 11111
         ticket_note = (
-            f"#*MetTel's IPA*#\nAuto-resolving detail for serial: {serial_number}\nTimeStamp: {current_datetime}"
+            f"#*MetTel's IPA*#" + os.linesep
+            + f"Auto-resolving detail for serial: {serial_number}" + os.linesep
+            + f"TimeStamp: {current_datetime}"
         )
 
         response = {
@@ -1978,7 +2012,12 @@ class TestBruinRepository:
         ticket_id = 11111
         service_number = "VC1234567"
         outage_causes = "Some causes of the outage"
-        ticket_note = f"#*MetTel's IPA*#\nRe-opening ticket.\n{outage_causes}\nTimeStamp: {current_datetime}"
+        ticket_note = (
+            f"#*MetTel's IPA*#" + os.linesep
+            + f"Re-opening ticket." + os.linesep
+            + f"{outage_causes}" + os.linesep
+            + f"TimeStamp: {current_datetime}"
+        )
 
         response = {
             "request_id": uuid_,

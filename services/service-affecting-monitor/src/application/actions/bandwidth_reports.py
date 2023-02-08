@@ -35,7 +35,7 @@ class BandwidthReports:
         self._metrics_repository = metrics_repository
 
     async def start_bandwidth_reports_job(self, exec_on_start=False):
-        logger.info(f"Scheduled task: bandwidth reports")
+        logger.info(f"[bandwidth-reports] Scheduled task: bandwidth reports")
 
         if exec_on_start:
             await self._bandwidth_reports_job()
@@ -48,7 +48,7 @@ class BandwidthReports:
     async def _bandwidth_reports_job(self):
         velocloud_host = self._config.VELOCLOUD_HOST
         clients = self._config.BANDWIDTH_REPORT_CONFIG["client_ids_by_host"][velocloud_host]
-        logger.info(f"Running bandwidth reports process for {len(clients)} client(s)")
+        logger.info(f"[bandwidth-reports] Running bandwidth reports process for {len(clients)} client(s)")
         start = datetime.now()
 
         customer_cache_response = await self._customer_cache_repository.get_cache_for_affecting_monitoring()
@@ -63,7 +63,7 @@ class BandwidthReports:
             customer_cache_body, clients, velocloud_host
         )
 
-        now = datetime.now(utc)
+        now = datetime.now(utc).replace(hour=5, minute=0, second=0, microsecond=0)
         interval_for_metrics = {
             "start": now - timedelta(hours=self._config.BANDWIDTH_REPORT_CONFIG["lookup_interval_hours"]),
             "end": now,
@@ -90,7 +90,7 @@ class BandwidthReports:
         for client_id in clients:
             client_name = client_names_by_id[client_id]
             await self._generate_bandwidth_report_for_client(
-                client_id, client_name, serial_numbers, edge_links_metrics_response_body
+                client_id, client_name, serial_numbers, edge_links_metrics_response_body, enterprise_id_edge_id_relation
             )
 
         end = datetime.now()
@@ -102,6 +102,7 @@ class BandwidthReports:
     def get_enterprise_id_and_edge_id_relation_from_customer_cache_response(
         self, customer_cache_response_body, clients_id, velocloud_host
     ):
+        logger.info(f"[bandwidth-reports] Creating enterprise id edge id_relation list")
         enterprise_id_edge_id_relation = []
         for edge_info in customer_cache_response_body:
 
@@ -121,7 +122,10 @@ class BandwidthReports:
 
         return enterprise_id_edge_id_relation
 
-    async def _generate_bandwidth_report_for_client(self, client_id, client_name, serial_numbers, links_metrics):
+    async def _generate_bandwidth_report_for_client(self, client_id, client_name, serial_numbers, links_metrics,
+                                                    enterprise_id_edge_id_relation):
+        logger.info(f"[bandwidth-reports] Generating bandwidth report for client id {client_id} and \
+                      client name {client_name}")
         start_date = self._get_start_date()
         end_date = self._get_end_date()
 
@@ -143,7 +147,8 @@ class BandwidthReports:
         grouped_ticket_details = self._bruin_repository.group_ticket_details_by_serial_and_interface(ticket_details)
         await asyncio.sleep(0)
 
-        report_items = self._bruin_repository.prepare_items_for_bandwidth_report(links_metrics, grouped_ticket_details)
+        report_items = self._bruin_repository.prepare_items_for_bandwidth_report(links_metrics, grouped_ticket_details,
+                                                                                 enterprise_id_edge_id_relation)
         report_items.sort(key=lambda item: (item["serial_number"], item["interface"]))
 
         if self._config.CURRENT_ENVIRONMENT != "production":
@@ -164,6 +169,8 @@ class BandwidthReports:
             await self._email_repository.send_email(email_object=email)
             self._metrics_repository.increment_reports_signet_execution_OK()
             logger.info(f"[bandwidth-reports] Report for client {client_id} sent via email")
+        else:
+            logger.error(f"[bandwidth-reports] No report for client {client_id} was sent via email")
 
     @staticmethod
     def find_metric_by_field_value(value, metrics):
@@ -172,12 +179,24 @@ class BandwidthReports:
                 return metric
 
     def _add_bandwidth_to_links_metrics(self, links_metrics):
+        logger.info(f"[bandwidth-reports] Adding bandwidth data to link metrics")
         reported_metrics = []
         for link_metric in links_metrics:
+            logger.info(f"[bandwidth-report] Adding bandwidth data for edge {link_metric['serial_number']} and \
+                         interface {link_metric['link']['interface']}")
             down_bytes_metrics = self.find_metric_by_field_value("bytesRx", link_metric["series"])
             up_bytes_metrics = self.find_metric_by_field_value("bytesTx", link_metric["series"])
-            down_bytes_total = down_bytes_metrics["total"]
-            up_bytes_total = up_bytes_metrics["total"]
+            down_bps_metrics = self.find_metric_by_field_value("bpsOfBestPathRx", link_metric["series"])
+            up_bps_metrics = self.find_metric_by_field_value("bpsOfBestPathTx", link_metric["series"])
+
+            down_bytes_metrics_time = down_bytes_metrics["tickInterval"] / 1000
+            up_bytes_metrics_time = up_bytes_metrics["tickInterval"] / 1000
+
+            down_bps_total_min = down_bps_metrics["min"]
+            down_bps_total_max = down_bps_metrics["max"]
+
+            up_bps_total_min = up_bps_metrics["min"]
+            up_bps_total_max = up_bps_metrics["max"]
 
             peak_bytes_down = down_bytes_metrics["max"]
             peak_bytes_up = up_bytes_metrics["max"]
@@ -191,25 +210,25 @@ class BandwidthReports:
             bandwidth_down_data_list = down_bytes_metrics["data"]
             bandwidth_up_data_list = up_bytes_metrics["data"]
 
-            peak_time_down = start_time + timedelta(minutes=(5 * bandwidth_down_data_list.index(peak_bytes_down)))
-            peak_time_up = start_time + timedelta(minutes=(5 * bandwidth_up_data_list.index(peak_bytes_up)))
+            peak_time_down = start_time + timedelta(seconds=(down_bytes_metrics_time * bandwidth_down_data_list.index(
+                                                    peak_bytes_down)))
+            peak_time_up = start_time + timedelta(seconds=(up_bytes_metrics_time * bandwidth_up_data_list.index(
+                                                  peak_bytes_up)))
 
-            time = self._config.BANDWIDTH_REPORT_CONFIG["lookup_interval_hours"] * 60 * 60
+            peak_bps_down = self._utils_repository.convert_bytes_to_bps(peak_bytes_down, down_bytes_metrics_time)
+            peak_bps_up = self._utils_repository.convert_bytes_to_bps(peak_bytes_up, up_bytes_metrics_time)
 
-            down_bytes_total = self._utils_repository.convert_bytes_to_bps(down_bytes_total, time)
-            up_bytes_total = self._utils_repository.convert_bytes_to_bps(up_bytes_total, time)
-            peak_bytes_down = self._utils_repository.convert_bytes_to_bps(peak_bytes_down, time)
-            peak_bytes_up = self._utils_repository.convert_bytes_to_bps(peak_bytes_up, time)
-
-            peak_percent_down = round((peak_bytes_down * 100) / down_bytes_total if down_bytes_total > 0 else 0.0, 2)
-            peak_percent_up = round((peak_bytes_up * 100) / up_bytes_total if up_bytes_total > 0 else 0.0, 2)
+            peak_percent_down = round((peak_bps_down * 100) / down_bps_total_min if down_bps_total_min > 0 else 0.0, 2)
+            peak_percent_up = round((peak_bps_up * 100) / up_bps_total_min if up_bps_total_min > 0 else 0.0, 2)
 
             reported_metrics.append(
                 {
-                    "down_bytes_total": self._utils_repository.humanize_bps_for_bandwidth_report(down_bytes_total),
-                    "up_bytes_total": self._utils_repository.humanize_bps_for_bandwidth_report(up_bytes_total),
-                    "peak_bytes_down": self._utils_repository.humanize_bps_for_bandwidth_report(peak_bytes_down),
-                    "peak_bytes_up": self._utils_repository.humanize_bps_for_bandwidth_report(peak_bytes_up),
+                    "down_Mbps_total_min": self._utils_repository.humanize_bps_for_bandwidth_report(down_bps_total_min),
+                    "down_Mbps_total_max": self._utils_repository.humanize_bps_for_bandwidth_report(down_bps_total_max),
+                    "up_Mbps_total_min": self._utils_repository.humanize_bps_for_bandwidth_report(up_bps_total_min),
+                    "up_Mbps_total_max": self._utils_repository.humanize_bps_for_bandwidth_report(up_bps_total_max),
+                    "peak_Mbps_down": self._utils_repository.humanize_bps_for_bandwidth_report(peak_bps_down),
+                    "peak_Mbps_up": self._utils_repository.humanize_bps_for_bandwidth_report(peak_bps_up),
                     "peak_percent_down": peak_percent_down,
                     "peak_percent_up": peak_percent_up,
                     "peak_time_down": peak_time_down.strftime("%I:%M %p EST"),
@@ -223,12 +242,10 @@ class BandwidthReports:
         return reported_metrics
 
     def _get_start_date(self):
-        now = datetime.utcnow()
+        now = datetime.utcnow().replace(hour=5, minute=0, second=0, microsecond=0)
         start_date = now - timedelta(hours=self._config.BANDWIDTH_REPORT_CONFIG["lookup_interval_hours"])
-        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
         return start_date.isoformat() + "Z"
 
     def _get_end_date(self):
-        now = datetime.utcnow()
-        end_date = now.replace(microsecond=0)
+        end_date = datetime.utcnow().replace(hour=5, minute=0, second=0, microsecond=0)
         return end_date.isoformat() + "Z"

@@ -4,9 +4,14 @@ This folder contains some scripts used as tools for solving issues when on call.
 
 **Table of content:**
 
++ [Common on-call requests](#common-on-call)
 + [Autoresolve tickets](#autoresolve_tickets)
     - [Description](#autoresolve_tickets_description)
     - [Usage](#autoresolve_tickets_usage)
+
+## Common on-call requests
+
+Please refer to the [on-call playbook](docs/ON-CALL%20PLAYBOOK.md)
 
 ## Autoresolve ticekts <a name="autoresolve_tickets"></a>
 

@@ -41,7 +41,8 @@ def make_list_of_links_configurations():
 
 
 @pytest.fixture(scope="session")
-def make_cached_edge(make_edge_full_id, make_bruin_client_info, make_site_details):
+def make_cached_edge(make_edge_full_id, make_bruin_client_info, make_site_details,
+                     make_ticket_contact_details, make_ticket_contact_additional_subscribers):
     def _inner(
         *,
         full_id: dict = None,
@@ -51,6 +52,8 @@ def make_cached_edge(make_edge_full_id, make_bruin_client_info, make_site_detail
         serial_number: str = "",
         bruin_client_info: dict = None,
         site_details: dict = None,
+        ticket_contact_details: dict = None,
+        ticket_contact_additional_subscribers: List[dict] = None,
         links_configuration: List[dict] = None,
     ):
         full_id = full_id or make_edge_full_id()
@@ -58,6 +61,10 @@ def make_cached_edge(make_edge_full_id, make_bruin_client_info, make_site_detail
         logical_ids = logical_ids or []
         bruin_client_info = bruin_client_info or make_bruin_client_info()
         site_details = site_details or make_site_details()
+        ticket_contact_details = ticket_contact_details or make_ticket_contact_details()
+        ticket_contact_additional_subscribers = (
+            ticket_contact_additional_subscribers
+            or make_ticket_contact_additional_subscribers())
         links_configuration = links_configuration or []
 
         return {
@@ -68,6 +75,8 @@ def make_cached_edge(make_edge_full_id, make_bruin_client_info, make_site_detail
             "serial_number": serial_number,
             "bruin_client_info": bruin_client_info,
             "site_details": site_details,
+            "ticket_contact_details": ticket_contact_details,
+            "ticket_contact_additional_subscribers": ticket_contact_additional_subscribers,
             "links_configuration": links_configuration,
         }
 

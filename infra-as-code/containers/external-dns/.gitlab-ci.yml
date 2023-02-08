@@ -3,7 +3,7 @@ packer-external-dns:
   extends: .packer_eks_build_image
   stage: k8s_packer
   variables:
-    ECR_REPOSITORY_NAME: external-dns
+    ECR_REPOSITORY_NAME: eks_external-dns
     PACKER_DIR_MODULE: "../../infra-as-code/containers/external-dns/"
     ECR_REPOSITORY_TAG: "v0.12.1"
   rules:

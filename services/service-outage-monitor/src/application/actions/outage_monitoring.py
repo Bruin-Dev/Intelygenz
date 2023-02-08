@@ -595,8 +595,6 @@ class OutageMonitor:
             return self._config.MONITOR_CONFIG["jobs_intervals"]["forward_to_hnoc_edge_down"]
 
     def _should_forward_to_hnoc(self, link_data: list, is_edge_down: bool) -> bool:
-        if self._config.VELOCLOUD_HOST == "metvco04.mettel.net":
-            return True
         if is_edge_down:
             return True
         return self._has_faulty_non_blacklisted_link(link_data)
@@ -1110,6 +1108,15 @@ class OutageMonitor:
             }
         )
 
+    def _get_faulty_link_interfaces(self, links: List[dict]) -> List[str]:
+        return list(
+            {
+                link['interface']
+                for link in links
+                if self._outage_repository.is_faulty_link(link["linkState"])
+            }
+        )
+
     def _was_digi_rebooted_recently(self, ticket_note) -> bool:
         current_datetime = datetime.now(utc)
         max_seconds_since_last_outage = self._config.MONITOR_CONFIG["last_digi_reboot_seconds"]
@@ -1410,11 +1417,13 @@ class OutageMonitor:
         has_faulty_digi_link = self._has_faulty_digi_link(edge_links, logical_id_list)
         has_faulty_byob_link = self._has_faulty_blacklisted_link(edge_links)
         faulty_link_types = self._get_faulty_link_types(edge_links, links_configuration)
+        faulty_link_interfaces = self._get_faulty_link_interfaces(edge_links)
 
         logger.info(f"[{outage_type.value}] Attempting outage ticket creation for serial {serial_number}...")
 
         try:
-            ticket_creation_response = await self._bruin_repository.create_outage_ticket(client_id, serial_number)
+            ticket_creation_response = await self._bruin_repository.create_outage_ticket(
+                client_id, serial_number, faulty_link_interfaces)
             ticket_id = ticket_creation_response["body"]
             ticket_creation_response_status = ticket_creation_response["status"]
             logger.info(
@@ -1488,6 +1497,19 @@ class OutageMonitor:
                                 f"Reminder note of edge {serial_number} could not be appended to ticket"
                                 f" {ticket_id}!"
                             )
+
+                if self._outage_repository.edge_has_all_links_down(edge["status"]):
+                    logger.info(
+                        f"Sending an email for ticket_id: {ticket_id} "
+                        f"with serial: {serial_number} because all links are down..."
+                    )
+                    email_edge_fully_down = await self._bruin_repository.send_edge_is_down_email_notification(
+                        ticket_id, serial_number)
+                    if email_edge_fully_down["status"] not in range(200, 300):
+                        logger.error(
+                            f"Failed sending all links down email for ticket_id: {ticket_id} "
+                            f"with serial: {serial_number}"
+                        )
 
                 await self._check_for_digi_reboot(ticket_id, logical_id_list, serial_number, edge_status)
             elif ticket_creation_response_status == 409:

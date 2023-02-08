@@ -1490,6 +1490,253 @@ class TestServiceOutageMonitor:
             outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
     @pytest.mark.asyncio
+    async def process_velocloud_host_with_business_and_commercial_grade_edges_edge_fully_down_email_test(
+        self, outage_monitor
+    ):
+        velocloud_host = "metvco04.mettel.net"
+        edge_1_serial = "VC1234567"
+        edge_2_serial = "VC5678901"
+        edge_1_ha_serial = None
+        edge_2_ha_serial = None
+        edge_1_state = "OFFLINE"
+        edge_2_state = "OFFLINE"
+        edge_1_ha_state = None
+        edge_2_ha_state = None
+        edge_1_enterprise_id = 1
+        edge_1_id = 1
+        edge_1_full_id = {"host": velocloud_host, "enterprise_id": edge_1_enterprise_id, "edge_id": edge_1_id}
+        edge_2_enterprise_id = 3
+        edge_2_id = 1
+        edge_2_full_id = {"host": velocloud_host, "enterprise_id": edge_2_enterprise_id, "edge_id": edge_2_id}
+        bruin_client_info = {
+            "client_id": 9994,
+            "client_name": "METTEL/NEW YORK",
+        }
+        logical_id_list = [{"interface_name": "REX", "logical_id": "123"}]
+        links_configuration = []
+        cached_edge_1 = {
+            "edge": edge_1_full_id,
+            "last_contact": "2020-08-17T02:23:59",
+            "serial_number": edge_1_serial,
+            "ha_serial_number": edge_1_ha_serial,
+            "bruin_client_info": bruin_client_info,
+            "logical_ids": logical_id_list,
+            "links_configuration": links_configuration,
+        }
+        cached_edge_2 = {
+            "edge": edge_2_full_id,
+            "last_contact": "2020-08-17T02:23:59",
+            "serial_number": edge_2_serial,
+            "ha_serial_number": edge_2_ha_serial,
+            "bruin_client_info": bruin_client_info,
+            "logical_ids": logical_id_list,
+            "links_configuration": links_configuration,
+        }
+        customer_cache_for_velocloud_host = [
+            cached_edge_1,
+            cached_edge_2,
+        ]
+        links_with_edge_1_info = {
+            # Some fields omitted for simplicity
+            "host": velocloud_host,
+            "enterpriseId": edge_1_enterprise_id,
+            "edgeName": "Big Boss",
+            "edgeState": edge_1_state,
+            "edgeId": edge_1_id,
+            "edgeSerialNumber": edge_1_serial,
+            "edgeHASerialNumber": edge_1_ha_serial,
+            "interface": "REX",
+            "linkState": "DISCONNECTED",
+            "linkId": 5293,
+        }
+        links_with_edge_2_info = {
+            # Some fields omitted for simplicity
+            "host": velocloud_host,
+            "enterpriseId": edge_2_enterprise_id,
+            "edgeName": "Adam Jensen",
+            "edgeState": edge_2_state,
+            "edgeId": edge_2_id,
+            "edgeSerialNumber": edge_2_serial,
+            "edgeHASerialNumber": edge_2_ha_serial,
+            "interface": "Augmented",
+            "linkState": "DISCONNECTED",
+            "linkId": 5293,
+        }
+        links_with_edge_info = [
+            links_with_edge_1_info,
+            links_with_edge_2_info,
+        ]
+        links_with_edge_info_response = {
+            "body": links_with_edge_info,
+            "status": 200,
+        }
+        edge_1_network_enterprises = {
+            # Some fields omitted for simplicity
+            "edgeState": edge_1_state,
+            "enterpriseId": edge_1_enterprise_id,
+            "haSerialNumber": edge_1_ha_serial,
+            "haState": edge_1_ha_state,
+            "id": edge_1_id,
+            "name": "Big Boss",
+            "serialNumber": edge_1_serial,
+        }
+        edge_2_network_enterprises = {
+            # Some fields omitted for simplicity
+            "edgeState": edge_2_state,
+            "enterpriseId": edge_2_enterprise_id,
+            "haSerialNumber": edge_2_ha_serial,
+            "haState": edge_2_ha_state,
+            "id": edge_2_id,
+            "name": "Adam Jensen",
+            "serialNumber": edge_2_serial,
+        }
+        edges_network_enterprises = [
+            edge_1_network_enterprises,
+            edge_2_network_enterprises,
+        ]
+        network_enterprises_response = {
+            "body": edges_network_enterprises,
+            "status": 200,
+        }
+        links_grouped_by_edge_1 = {
+            # Some fields omitted for simplicity
+            "host": velocloud_host,
+            "enterpriseId": edge_1_enterprise_id,
+            "edgeName": "Big Boss",
+            "edgeState": edge_1_state,
+            "edgeId": edge_1_id,
+            "edgeSerialNumber": edge_1_serial,
+            "edgeHASerialNumber": edge_1_ha_serial,
+            "links": [
+                {
+                    "interface": "REX",
+                    "displayName": "Iface DIA 192.168.1.1",
+                    "linkState": "DISCONNECTED",
+                    "linkId": 5293,
+                },
+            ],
+        }
+        links_grouped_by_edge_2 = {
+            # Some fields omitted for simplicity
+            "host": velocloud_host,
+            "displayName": "OTHER",
+            "enterpriseId": edge_2_enterprise_id,
+            "edgeName": "Adam Jensen",
+            "edgeState": edge_2_state,
+            "edgeId": edge_2_id,
+            "edgeSerialNumber": edge_2_serial,
+            "edgeHASerialNumber": edge_2_ha_serial,
+            "links": [
+                {
+                    "interface": "Augmented",
+                    "displayName": "OTHER",
+                    "linkState": "DISCONNECTED",
+                    "linkId": 5293,
+                },
+            ],
+        }
+        links_grouped_by_edge = [
+            links_grouped_by_edge_1,
+            links_grouped_by_edge_2,
+        ]
+        links_grouped_by_edge_1_with_ha_info = {
+            **links_grouped_by_edge_1,
+            "edgeHAState": edge_1_ha_state,
+            "edgeIsHAPrimary": None,
+        }
+        links_grouped_by_edge_2_with_ha_info = {
+            **links_grouped_by_edge_2,
+            "edgeHAState": edge_2_ha_state,
+            "edgeIsHAPrimary": None,
+        }
+        links_grouped_by_edge_with_ha_info = [
+            links_grouped_by_edge_1_with_ha_info,
+            links_grouped_by_edge_2_with_ha_info,
+        ]
+        all_edges = [
+            links_grouped_by_edge_1_with_ha_info,
+            links_grouped_by_edge_2_with_ha_info,
+        ]
+        edge_1_full_info = {
+            "cached_info": cached_edge_1,
+            "status": links_grouped_by_edge_1,
+        }
+        edge_2_full_info = {
+            "cached_info": cached_edge_2,
+            "status": links_grouped_by_edge_2,
+        }
+        edges_full_info = [
+            edge_1_full_info,
+            edge_2_full_info,
+        ]
+        link_down_edges = [
+            edge_1_full_info,
+            edge_2_full_info,
+        ]
+        hard_down_edges = []
+        ha_link_down_edges = []
+        ha_soft_down_edges = []
+        ha_hard_down_edges = []
+        send_edge_is_down_email_notification_response = {"status": 200, "body": {}}
+        outage_monitor._velocloud_repository.get_links_with_edge_info = AsyncMock(
+            return_value=links_with_edge_info_response
+        )
+        outage_monitor._velocloud_repository.get_network_enterprises = AsyncMock(
+            return_value=network_enterprises_response
+        )
+        outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=links_grouped_by_edge)
+        outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(
+            side_effect=[link_down_edges, hard_down_edges, ha_link_down_edges, ha_soft_down_edges, ha_hard_down_edges]
+        )
+        outage_monitor._outage_repository.should_document_outage = Mock(return_value=True)
+        outage_monitor._outage_repository.is_edge_up = Mock(return_value=False)
+        outage_monitor._ha_repository.map_edges_with_ha_info = Mock(return_value=links_grouped_by_edge_with_ha_info)
+        outage_monitor._ha_repository.get_edges_with_standbys_as_standalone_edges = Mock(return_value=all_edges)
+        outage_monitor._map_cached_edges_with_edges_status = Mock(return_value=edges_full_info)
+        outage_monitor._schedule_recheck_job_for_edges = Mock()
+        outage_monitor._run_ticket_autoresolve_for_edge = AsyncMock()
+        forward_time = outage_monitor._config.MONITOR_CONFIG["jobs_intervals"]["forward_to_hnoc_edge_down"]
+        outage_monitor._get_hnoc_forward_time_by_outage_type = Mock(return_value=forward_time)
+        ticket_id = 12345
+        create_outage_ticket_response = {"status": 200, "body": ticket_id}
+        outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(
+            return_value=create_outage_ticket_response)
+        send_edge_is_down_email_notification_response = {"status": 200, "body": {}}
+        outage_monitor._bruin_repository.send_edge_is_down_email_notification = AsyncMock(
+            return_value=send_edge_is_down_email_notification_response)
+
+        with patch.object(outage_monitor._config, "VELOCLOUD_HOST", "metvco04.mettel.net"):
+            await outage_monitor._process_velocloud_host(velocloud_host, customer_cache_for_velocloud_host)
+
+            outage_monitor._velocloud_repository.get_links_with_edge_info.assert_awaited_once_with(
+                velocloud_host=velocloud_host
+            )
+            outage_monitor._velocloud_repository.get_network_enterprises.assert_awaited_once_with(
+                velocloud_host=velocloud_host
+            )
+            outage_monitor._velocloud_repository.group_links_by_edge.assert_called_once_with(links_with_edge_info)
+            outage_monitor._ha_repository.map_edges_with_ha_info.assert_called_once_with(
+                links_grouped_by_edge, edges_network_enterprises
+            )
+            outage_monitor._ha_repository.get_edges_with_standbys_as_standalone_edges.assert_called_once_with(
+                links_grouped_by_edge_with_ha_info
+            )
+            outage_monitor._map_cached_edges_with_edges_status.assert_called_once_with(
+                customer_cache_for_velocloud_host, all_edges
+            )
+            outage_monitor._attempt_ticket_creation.assert_called_once_with(link_down_edges[0], Outages.LINK_DOWN)
+            outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(
+                bruin_client_info["client_id"], edge_1_serial, [logical_id_list[0]["interface_name"]]
+            )
+            outage_monitor._schedule_recheck_job_for_edges.assert_called_once_with(
+                [link_down_edges[1]], Outages.LINK_DOWN
+            )
+            outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
+            outage_monitor._bruin_repository.send_edge_is_down_email_notification.assert_awaited_once_with(
+                ticket_id, edge_1_serial
+            )
+
+    @pytest.mark.asyncio
     async def process_velocloud_host_with_business_and_commercial_grade_edges_in_link_down_state_exception_test(
         self, outage_monitor
     ):
@@ -5550,6 +5797,7 @@ class TestServiceOutageMonitor:
         has_faulty_digi_link = False
         has_faulty_byob_link = False
         faulty_link_types = []
+        faulty_link_interfaces = []
         edge_primary_serial = "VC1234567"
         edge_standby_serial = "VC5678901"
         edge_primary_initial_state = "OFFLINE"
@@ -5740,7 +5988,8 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(
+            client_id, edge_primary_serial, faulty_link_interfaces)
         outage_monitor._append_triage_note.assert_awaited_once_with(
             ticket_id,
             cached_edge_primary,
@@ -5784,6 +6033,7 @@ class TestServiceOutageMonitor:
         has_faulty_digi_link = False
         has_faulty_byob_link = False
         faulty_link_types = []
+        faulty_link_interfaces = []
 
         edge_primary_serial = "VC1234567"
         edge_standby_serial = "VC5678901"
@@ -5978,7 +6228,8 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(
+            client_id, edge_primary_serial, faulty_link_interfaces)
         outage_monitor._append_triage_note.assert_awaited_once_with(
             ticket_id,
             cached_edge_primary,
@@ -6012,6 +6263,7 @@ class TestServiceOutageMonitor:
         has_faulty_digi_link = False
         has_faulty_byob_link = False
         faulty_link_types = []
+        faulty_link_interfaces = []
 
         edge_primary_serial = "VC1234567"
         edge_standby_serial = "VC5678901"
@@ -6204,7 +6456,8 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(
+            client_id, edge_primary_serial, faulty_link_interfaces)
         outage_monitor._append_triage_note.assert_awaited_once_with(
             ticket_id,
             cached_edge_primary,
@@ -6238,6 +6491,7 @@ class TestServiceOutageMonitor:
         has_faulty_digi_link = False
         has_faulty_byob_link = False
         faulty_link_types = []
+        faulty_link_interfaces = []
 
         edge_primary_serial = "VC1234567"
         edge_standby_serial = "VC5678901"
@@ -6433,7 +6687,8 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(
+            client_id, edge_primary_serial, faulty_link_interfaces)
         outage_monitor._change_ticket_severity.assert_awaited_once_with(
             ticket_id=ticket_id,
             edge_status=links_grouped_by_primary_edge_with_ha_info,
@@ -6488,6 +6743,7 @@ class TestServiceOutageMonitor:
         has_faulty_digi_link = False
         has_faulty_byob_link = False
         faulty_link_types = []
+        faulty_link_interfaces = []
 
         edge_primary_serial = "VC1234567"
         edge_standby_serial = "VC5678901"
@@ -6688,7 +6944,8 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(
+            client_id, edge_primary_serial, faulty_link_interfaces)
         outage_monitor._change_ticket_severity.assert_awaited_once_with(
             ticket_id=ticket_id,
             edge_status=links_grouped_by_primary_edge_with_ha_info,
@@ -6735,6 +6992,7 @@ class TestServiceOutageMonitor:
         has_faulty_digi_link = False
         has_faulty_byob_link = False
         faulty_link_types = []
+        faulty_link_interfaces = []
 
         edge_primary_serial = "VC1234567"
         edge_standby_serial = "VC5678901"
@@ -6925,7 +7183,8 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(
+            client_id, edge_primary_serial, faulty_link_interfaces)
         outage_monitor._change_ticket_severity.assert_awaited_once_with(
             ticket_id=ticket_id,
             edge_status=links_grouped_by_primary_edge_with_ha_info,
@@ -6965,6 +7224,7 @@ class TestServiceOutageMonitor:
         has_faulty_digi_link = False
         has_faulty_byob_link = False
         faulty_link_types = []
+        faulty_link_interfaces = []
 
         edge_primary_serial = "VC1234567"
         edge_standby_serial = "VC5678901"
@@ -7158,7 +7418,8 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(
+            client_id, edge_primary_serial, faulty_link_interfaces)
         outage_monitor._change_ticket_severity.assert_awaited_once_with(
             ticket_id=ticket_id,
             edge_status=links_grouped_by_primary_edge_with_ha_info,
@@ -7189,6 +7450,7 @@ class TestServiceOutageMonitor:
         has_faulty_digi_link = False
         has_faulty_byob_link = False
         faulty_link_types = []
+        faulty_link_interfaces = []
 
         edge_primary_serial = "VC1234567"
         edge_standby_serial = "VC5678901"
@@ -7382,7 +7644,8 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(
+            client_id, edge_primary_serial, faulty_link_interfaces)
         outage_monitor._change_ticket_severity.assert_awaited_once_with(
             ticket_id=ticket_id,
             edge_status=links_grouped_by_primary_edge_with_ha_info,
@@ -7421,6 +7684,7 @@ class TestServiceOutageMonitor:
         has_faulty_digi_link = False
         has_faulty_byob_link = False
         faulty_link_types = []
+        faulty_link_interfaces = []
 
         edge_primary_serial = "VC1234567"
         edge_standby_serial = "VC5678901"
@@ -7614,7 +7878,8 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(
+            client_id, edge_primary_serial, faulty_link_interfaces)
         outage_monitor._change_ticket_severity.assert_awaited_once_with(
             ticket_id=ticket_id,
             edge_status=links_grouped_by_primary_edge_with_ha_info,
@@ -7644,6 +7909,7 @@ class TestServiceOutageMonitor:
         has_faulty_digi_link = False
         has_faulty_byob_link = False
         faulty_link_types = []
+        faulty_link_interfaces = []
 
         edge_primary_serial = "VC1234567"
         edge_standby_serial = "VC5678901"
@@ -7834,7 +8100,8 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(
+            client_id, edge_primary_serial, faulty_link_interfaces)
         outage_monitor._change_ticket_severity.assert_awaited_once_with(
             ticket_id=ticket_id,
             edge_status=links_grouped_by_primary_edge_with_ha_info,
@@ -7872,6 +8139,7 @@ class TestServiceOutageMonitor:
         has_faulty_digi_link = False
         has_faulty_byob_link = False
         faulty_link_types = []
+        faulty_link_interfaces = []
 
         edge_primary_serial = "VC1234567"
         edge_standby_serial = "VC5678901"
@@ -8065,7 +8333,8 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
-        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(client_id, edge_primary_serial)
+        outage_monitor._bruin_repository.create_outage_ticket.assert_awaited_once_with(
+            client_id, edge_primary_serial, faulty_link_interfaces)
         outage_monitor._change_ticket_severity.assert_awaited_once_with(
             ticket_id=ticket_id,
             edge_status=links_grouped_by_primary_edge_with_ha_info,
@@ -8083,22 +8352,6 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
-
-    def should_forward_to_hnoc_metvco4_host_byob_link_display_test(self, outage_monitor):
-        link_data = [
-            {
-                # Some fields omitted for simplicity
-                "displayName": "BYOB Jeff",
-                "interface": "REX",
-                "linkState": "DISCONNECTED",
-                "linkId": 5293,
-            }
-        ]
-        is_edge_down = False
-
-        with patch.object(outage_monitor._config, "VELOCLOUD_HOST", "metvco04.mettel.net"):
-            result = outage_monitor._should_forward_to_hnoc(link_data, is_edge_down)
-        assert result is True
 
     def should_forward_to_hnoc_non_byob_and_not_faulty_display_name_test(self, outage_monitor):
         link_data = [
