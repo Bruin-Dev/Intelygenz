@@ -45,7 +45,8 @@ class VelocloudRepository:
         for edge in edge_list:
             logger.info(f"Mapping links' logical IDs to edge {edge}...")
 
-            edge_full_id = {"host": edge["host"], "enterprise_id": edge["enterpriseId"], "edge_id": edge["edgeId"]}
+            edge_full_id = {"host": edge["host"], "enterprise_id": edge["enterpriseId"],
+                            "enterprise_name": edge["enterpriseName"], "edge_id": edge["edgeId"]}
             serial_number = edge.get("edgeSerialNumber")
             ha_serial_number = edge.get("edgeHASerialNumber")
             last_contact = edge.get("edgeLastContact")
