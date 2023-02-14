@@ -901,11 +901,16 @@ class BruinRepository:
         for link_metrics in links_metrics:
             serial_number = link_metrics["serial_number"]
             interface = link_metrics["interface"]
-            enterprise_id = [edge["enterprise_id"]
-                             for edge in enterprise_id_edge_id_relation
-                             if edge["serial_number"] == serial_number][0]
+            enterprise_info = [
+                {
+                    "id" : edge["enterprise_id"],
+                    "name": edge["enterprise_name"]
+                }
+                for edge in enterprise_id_edge_id_relation
+                if edge["serial_number"] == serial_number][0]
             report_item = self.build_bandwidth_report_item(
-                enterprise_id=enterprise_id,
+                enterprise_id=enterprise_info["id"],
+                enterprise_name=enterprise_info["name"],
                 serial_number=serial_number,
                 edge_name=link_metrics["edge_name"],
                 interface=interface,
@@ -929,6 +934,7 @@ class BruinRepository:
     @staticmethod
     def build_bandwidth_report_item(
         enterprise_id,
+        enterprise_name,
         serial_number,
         edge_name,
         interface,
@@ -949,6 +955,7 @@ class BruinRepository:
                       interface {interface}")
         return {
             "enterprise_id": enterprise_id,
+            "enterprise_name": enterprise_name,
             "serial_number": serial_number,
             "edge_name": edge_name,
             "interface": interface,
