@@ -518,10 +518,10 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitor-wait-time-befo
   })
 }
 
-resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-latency-monitoring-threshould" {
+resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-latency-monitoring-threshold" {
   count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
-  name        = "/automation-engine/common/service-affecting/monitor/monitoring-wireless-latency-monitoring-threshold"
-  description = "<fill this>"
+  name        = "/automation-engine/common/service-affecting/monitor/wireless-latency-monitoring-threshold"
+  description = "Threshold for wireless Latency troubles"
   type        = "SecureString"
   value       = "-"  # to edit go to parameter store dashboard.
   key_id      =  aws_kms_alias.kms_key.name
@@ -540,8 +540,8 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-la
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-packet-loss-monitoring-threshold" {
   count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
-  name        = "/automation-engine/common/service-affecting/monitor/monitoring-wireless-packet-loss-monitoring-threshold"
-  description = "<fill this>"
+  name        = "/automation-engine/common/service-affecting/monitor/wireless-packet-loss-monitoring-threshold"
+  description = "Threshold for wireless Packet Loss troubles"
   type        = "SecureString"
   value       = "-"  # to edit go to parameter store dashboard.
   key_id      =  aws_kms_alias.kms_key.name
@@ -560,8 +560,8 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-pa
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-jitter-monitoring-threshold" {
   count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
-  name        = "/automation-engine/common/service-affecting/monitor/monitoring-wireless-jitter-monitoring-threshold"
-  description = "<fill this>"
+  name        = "/automation-engine/common/service-affecting/monitor/wireless-jitter-monitoring-threshold"
+  description = "Threshold for wireless Jitter troubles"
   type        = "SecureString"
   value       = "-"  # to edit go to parameter store dashboard.
   key_id      =  aws_kms_alias.kms_key.name
@@ -580,8 +580,8 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-ji
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-bandwidth-over-utilization-monitoring-threshold" {
   count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
-  name        = "/automation-engine/common/service-affecting/monitor/monitoring-wireless-bandwidth-over-utilization-monitoring-threshold"
-  description = "<fill this>"
+  name        = "/automation-engine/common/service-affecting/monitor/wireless-bandwidth-over-utilization-monitoring-threshold"
+  description = "Threshold for wireless Bandwidth Over Utilization troubles"
   type        = "SecureString"
   value       = "-"  # to edit go to parameter store dashboard.
   key_id      =  aws_kms_alias.kms_key.name
@@ -600,8 +600,8 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-ba
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-circuit-instability-monitoring-threshold" {
   count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
-  name        = "/automation-engine/common/service-affecting/monitor/monitoring-wireless-circuit-instability-monitoring-threshold"
-  description = "<fill this>"
+  name        = "/automation-engine/common/service-affecting/monitor/wireless-circuit-instability-monitoring-threshold"
+  description = "Threshold for wireless Circuit Instability troubles"
   type        = "SecureString"
   value       = "-"  # to edit go to parameter store dashboard.
   key_id      =  aws_kms_alias.kms_key.name
@@ -620,8 +620,8 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-ci
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-latency-monitoring-lookup-interval" {
   count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
-  name        = "/automation-engine/common/service-affecting/monitor/monitoring-wireless-latency-monitoring-lookup-interval"
-  description = "<fill this>"
+  name        = "/automation-engine/common/service-affecting/monitor/wireless-latency-monitoring-lookup-interval"
+  description = "Defines how much time back to look for wireless Latency metrics in Latency checks"
   type        = "SecureString"
   value       = "-"  # to edit go to parameter store dashboard.
   key_id      =  aws_kms_alias.kms_key.name
@@ -640,8 +640,8 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-la
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-packet-loss-monitoring-lookup-interval" {
   count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
-  name        = "/automation-engine/common/service-affecting/monitor/monitoring-wireless-packet-loss-monitoring-lookup-interval"
-  description = "<fill this>"
+  name        = "/automation-engine/common/service-affecting/monitor/wireless-packet-loss-monitoring-lookup-interval"
+  description = "Defines how much time back to look for wireless Packet Loss metrics in Packet Loss checks"
   type        = "SecureString"
   value       = "-"  # to edit go to parameter store dashboard.
   key_id      =  aws_kms_alias.kms_key.name
@@ -660,8 +660,8 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-pa
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-jitter-monitoring-lookup-interval" {
   count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
-  name        = "/automation-engine/common/service-affecting/monitor/monitoring-wireless-jitter-monitoring-lookup-interval"
-  description = "<fill this>"
+  name        = "/automation-engine/common/service-affecting/monitor/wireless-jitter-monitoring-lookup-interval"
+  description = "Defines how much time back to look for wireless Jitter metrics in Jitter checks"
   type        = "SecureString"
   value       = "-"  # to edit go to parameter store dashboard.
   key_id      =  aws_kms_alias.kms_key.name
@@ -680,8 +680,8 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-ji
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-bandwidth-over-utilization-monitoring-lookup-interval" {
   count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
-  name        = "/automation-engine/common/service-affecting/monitor/monitoring-wireless-bandwidth-over-utilization-monitoring-lookup-interval"
-  description = "<fill this>"
+  name        = "/automation-engine/common/service-affecting/monitor/wireless-bandwidth-over-utilization-monitoring-lookup-interval"
+  description = "Defines how much time back to look for wireless Bandwidth metrics in Bandwidth Over Utilization checks"
   type        = "SecureString"
   value       = "-"  # to edit go to parameter store dashboard.
   key_id      =  aws_kms_alias.kms_key.name
@@ -700,8 +700,8 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-ba
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-circuit-instability-monitoring-lookup-interval" {
   count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
-  name        = "/automation-engine/common/service-affecting/monitor/monitoring-wireless-circuit-instability-monitoring-lookup-interval"
-  description = "<fill this>"
+  name        = "/automation-engine/common/service-affecting/monitor/wireless-circuit-instability-monitoring-lookup-interval"
+  description = "Defines how much time back to look for wireless circuit instalbility metrics in Circuit Instability checks"
   type        = "SecureString"
   value       = "-"  # to edit go to parameter store dashboard.
   key_id      =  aws_kms_alias.kms_key.name
