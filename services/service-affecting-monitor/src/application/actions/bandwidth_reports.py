@@ -113,6 +113,7 @@ class BandwidthReports:
                 enterprise_id_edge_id_relation.append(
                     {
                         "enterprise_id": edge_info["edge"]["enterprise_id"],
+                        "enterprise_name": edge_info["edge"]["enterprise_name"],
                         "host": edge_info["edge"]["host"],
                         "edge_id": edge_info["edge"]["edge_id"],
                         "serial_number": edge_info["serial_number"],

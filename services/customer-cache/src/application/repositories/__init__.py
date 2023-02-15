@@ -2,7 +2,9 @@ from collections import namedtuple
 
 nats_error_response = {"body": None, "status": 503}
 
-EdgeIdentifier = namedtuple(typename="EdgeIdentifier", field_names=["host", "enterprise_id", "edge_id"])
+EdgeIdentifier = namedtuple(
+    typename="EdgeIdentifier",
+    field_names=["host", "enterprise_id", "enterprise_name", "edge_id"])
 
 
 class EdgeIdentifier(EdgeIdentifier):
