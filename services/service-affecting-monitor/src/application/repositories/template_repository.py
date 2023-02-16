@@ -19,7 +19,7 @@ class TemplateRepository:
     def _build_email(subject, recipients, template_vars, template_name, csv_report=None):
         attachments = []
 
-        template = os.path.join("src", "templates", template_name)
+        template = "/".join(["src", "templates", template_name])
         template_loader = jinja2.FileSystemLoader(searchpath=".")
         template_env = jinja2.Environment(loader=template_loader, autoescape=True)
         template = template_env.get_template(template)

@@ -66,7 +66,7 @@ class TestBandwidthReports:
         client_id = 9994
         client_name = "MetTel"
         serial_number = "VC1234567"
-        edge = {"host": "test", "edge_id": 1, "enterprise_id": 2}
+        edge = {"host": "test", "edge_id": 1, "enterprise_id": 2, "enterprise_name": "Test"}
 
         bruin_client_info = make_bruin_client_info(client_id=client_id, client_name=client_name)
         cached_edge = make_cached_edge(full_id=edge, serial_number=serial_number, bruin_client_info=bruin_client_info)
@@ -110,6 +110,7 @@ class TestBandwidthReports:
     ):
         host = "mettel.velocloud.net"
         enterprise_id = 1
+        enterprise_name = "Test"
         edge_id = 123
         client_id = 9994
         client_name = "MetTel"
@@ -118,7 +119,8 @@ class TestBandwidthReports:
         edge_name = "Test Edge"
         interface = "GE1"
 
-        edge_full_id = make_edge_full_id(host=host, enterprise_id=enterprise_id, edge_id=edge_id)
+        edge_full_id = make_edge_full_id(
+            host=host, enterprise_id=enterprise_id, enterprise_name=enterprise_name, edge_id=edge_id)
         bruin_client_info = make_bruin_client_info(client_id=client_id, client_name=client_name)
         cached_edge = make_cached_edge(
             serial_number=serial_number, full_id=edge_full_id, bruin_client_info=bruin_client_info
@@ -239,6 +241,7 @@ class TestBandwidthReports:
         report_items = [
             {
                 "enterprise_id": enterprise_id,
+                "enterprise_name": enterprise_name,
                 "serial_number": serial_number,
                 "edge_name": edge_name,
                 "interface": interface,

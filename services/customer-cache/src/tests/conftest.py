@@ -114,7 +114,7 @@ def instance_response_message():
 def instance_cache_edges():
     return [
         {
-            "edge": {"host": "some host", "enterprise_id": 123, "edge_id": 321},
+            "edge": {"host": "some host", "enterprise_id": 123, "enterprise_name": "Test", "edge_id": 321},
             "edge_name": "Big Boss",
             "last_contact": str(datetime.now()),
             "logical_ids": ["list of logical ids"],
@@ -129,7 +129,7 @@ def instance_cache_edges():
             },
         },
         {
-            "edge": {"host": "some host", "enterprise_id": 1, "edge_id": 321},
+            "edge": {"host": "some host", "enterprise_id": 1, "enterprise_name": "Test two", "edge_id": 321},
             "edge_name": "Otacon",
             "last_contact": str(datetime.now()),
             "logical_ids": ["list of logical ids"],
@@ -155,13 +155,13 @@ def example_response_velo_host():
 def instance_edges_refresh_cache():
     return [
         {
-            "edge": {"host": "metvco02.mettel.net", "enterprise_id": 123, "edge_id": 321},
+            "edge": {"host": "metvco02.mettel.net", "enterprise_id": 123, "enterprise_name": "Test", "edge_id": 321},
             "logical_ids": ["list of logical ids"],
             "serial_number": "VC01",
             "ha_serial_number": "VC011",
         },
         {
-            "edge": {"host": "metvco04.mettel.net", "enterprise_id": 123, "edge_id": 321},
+            "edge": {"host": "metvco04.mettel.net", "enterprise_id": 123, "enterprise_name": "Test", "edge_id": 321},
             "logical_ids": ["list of logical ids"],
             "serial_number": "VC02",
             "ha_serial_number": "VC022",

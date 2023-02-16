@@ -178,7 +178,7 @@ class TestRefreshCache:
     async def partial_refresh_cache_with_edges_and_not_invalid_edges_test(self, instance_refresh_cache):
         # Scenario: Bruin returns all management statuses correctly
         edge_from_bruin_1 = {
-            "edge": {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            "edge": {"host": "mettel.velocloud.net", "enterprise_id": 19, "enterprise_name": "Test", "edge_id": 1919},
             "edge_name": "Big Boss",
             "last_contact": "0000-00-00 00:00:00",
             "logical_ids": "8456-cg76-sdf3-h64j",
@@ -187,7 +187,7 @@ class TestRefreshCache:
             "bruin_client_info": {"client_id": 1991, "client_name": "Tet Corporation", "site_id": 1234},
         }
         edge_from_bruin_1_with_config = {
-            "edge": {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            "edge": {"host": "mettel.velocloud.net", "enterprise_id": 19, "enterprise_name": "Test", "edge_id": 1919},
             "edge_name": "Big Boss",
             "last_contact": "0000-00-00 00:00:00",
             "logical_ids": "8456-cg76-sdf3-h64j",
@@ -205,7 +205,7 @@ class TestRefreshCache:
             ],
         }
         edge_from_bruin_2 = {
-            "edge": {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 2020},
+            "edge": {"host": "mettel.velocloud.net", "enterprise_id": 19, "enterprise_name": "Test", "edge_id": 2020},
             "edge_name": "Otacon",
             "last_contact": "0000-00-00 00:00:00",
             "logical_ids": "8456-cg76-sdf3-h64j",
@@ -214,7 +214,7 @@ class TestRefreshCache:
             "bruin_client_info": {"client_id": 1991, "client_name": "Tet Corporation", "site_id": 1234},
         }
         edge_from_bruin_2_with_config = {
-            "edge": {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            "edge": {"host": "mettel.velocloud.net", "enterprise_id": 19, "enterprise_name": "Test", "edge_id": 1919},
             "edge_name": "Otacon",
             "last_contact": "0000-00-00 00:00:00",
             "logical_ids": "8456-cg76-sdf3-h64j",
@@ -232,7 +232,7 @@ class TestRefreshCache:
             ],
         }
         edge_from_bruin_3_with_config = {
-            "edge": {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            "edge": {"host": "mettel.velocloud.net", "enterprise_id": 19, "enterprise_name": "Test", "edge_id": 1919},
             "edge_name": "Big Boss",
             "last_contact": "0000-00-00 00:00:00",
             "logical_ids": "8456-cg76-sdf3-h64j",
@@ -250,7 +250,7 @@ class TestRefreshCache:
             ],
         }
         edge_from_bruin_4_with_config = {
-            "edge": {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            "edge": {"host": "mettel.velocloud.net", "enterprise_id": 19, "enterprise_name": "Test", "edge_id": 1919},
             "edge_name": "Otacon",
             "last_contact": "0000-00-00 00:00:00",
             "logical_ids": "8456-cg76-sdf3-h64j",
@@ -268,8 +268,8 @@ class TestRefreshCache:
             ],
         }
         edge_list = [
-            {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
-            {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1991},
+            {"host": "mettel.velocloud.net", "enterprise_id": 19, "enterprise_name": "Test", "edge_id": 1919},
+            {"host": "mettel.velocloud.net", "enterprise_id": 19, "enterprise_name": "Test", "edge_id": 1991},
         ]
         serials_with_more_than_one_status = {
             "VC05200037714": [
@@ -316,7 +316,7 @@ class TestRefreshCache:
         host = "mettel.velocloud.net"
 
         edge_from_bruin_1_with_config = {
-            "edge": {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            "edge": {"host": "mettel.velocloud.net", "enterprise_id": 19, "enterprise_name": "Test", "edge_id": 1919},
             "edge_name": "Big Boss",
             "last_contact": "0000-00-00 00:00:00",
             "logical_ids": "8456-cg76-sdf3-h64j",
@@ -332,7 +332,7 @@ class TestRefreshCache:
             },
         }
         edge_from_bruin_2_with_config = {
-            "edge": {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1920},
+            "edge": {"host": "mettel.velocloud.net", "enterprise_id": 19, "enterprise_name": "Test", "edge_id": 1920},
             "edge_name": "Otacon",
             "last_contact": "0000-00-00 00:00:00",
             "logical_ids": "8456-cg76-sdf3-h64j",
@@ -348,7 +348,7 @@ class TestRefreshCache:
             },
         }
         edge_from_bruin_3_with_config = {
-            "edge": {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
+            "edge": {"host": "mettel.velocloud.net", "enterprise_id": 19, "enterprise_name": "Test", "edge_id": 1919},
             "edge_name": "Big Boss",
             "last_contact": "0000-00-00 00:00:00",
             "logical_ids": "8456-cg76-sdf3-h64j",
@@ -364,7 +364,7 @@ class TestRefreshCache:
             },
         }
         edge_from_bruin_4_with_config = {
-            "edge": {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1920},
+            "edge": {"host": "mettel.velocloud.net", "enterprise_id": 19, "enterprise_name": "Test", "edge_id": 1920},
             "edge_name": "Otacon",
             "last_contact": "0000-00-00 00:00:00",
             "logical_ids": "8456-cg76-sdf3-h64j",
@@ -380,8 +380,8 @@ class TestRefreshCache:
             },
         }
         edge_list = [
-            {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1919},
-            {"host": "mettel.velocloud.net", "enterprise_id": 19, "edge_id": 1991},
+            {"host": "mettel.velocloud.net", "enterprise_id": 19, "enterprise_name": "Test", "edge_id": 1919},
+            {"host": "mettel.velocloud.net", "enterprise_id": 19, "enterprise_name": "Test", "edge_id": 1991},
         ]
         stored_cache = [edge_from_bruin_1_with_config, edge_from_bruin_2_with_config]
         new_cache = [edge_from_bruin_1_with_config, edge_from_bruin_3_with_config]

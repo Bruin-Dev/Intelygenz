@@ -334,6 +334,7 @@ class VelocloudRepository:
             edge_full_id = {
                 "host": link_metrics["link"]["host"],
                 "enterprise_id": link_metrics["link"]["enterpriseId"],
+                "enterprise_name": link_metrics["link"]["enterpriseName"],
                 "edge_id": link_metrics["link"]["edgeId"],
             }
 

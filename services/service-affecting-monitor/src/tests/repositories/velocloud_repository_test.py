@@ -597,15 +597,17 @@ class TestVelocloudRepository:
     ):
         host = "mettel.velocloud.net"
         enterprise_id = 123
+        enterprise_name = "Test"
         edge_id = 456
         client_id = 789
 
-        edge = make_edge(host=host, enterprise_id=enterprise_id, id_=edge_id)
+        edge = make_edge(host=host, enterprise_name=enterprise_name, enterprise_id=enterprise_id, id_=edge_id)
         link_1_metrics = make_metrics_for_link(link_with_edge_info=edge)
         link_2_metrics = make_metrics_for_link()
         links_metrics = [link_1_metrics, link_2_metrics]
 
-        edge_full_id = make_edge_full_id(host=host, enterprise_id=enterprise_id, edge_id=edge_id)
+        edge_full_id = make_edge_full_id(
+            host=host, enterprise_id=enterprise_id, enterprise_name=enterprise_name, edge_id=edge_id)
         bruin_client_info = make_bruin_client_info(client_id=client_id)
         cached_edge = make_cached_edge(full_id=edge_full_id, bruin_client_info=bruin_client_info)
         customer_cache = make_customer_cache(cached_edge)

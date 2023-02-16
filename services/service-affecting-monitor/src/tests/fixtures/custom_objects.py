@@ -7,10 +7,11 @@ import pytest
 # Factories
 @pytest.fixture(scope="session")
 def make_edge_full_id():
-    def _inner(*, host: str = "", enterprise_id: int = 0, edge_id: int = 0):
+    def _inner(*, host: str = "", enterprise_id: int = 0, enterprise_name: str = "", edge_id: int = 0):
         return {
             "host": host,
             "enterprise_id": enterprise_id,
+            "enterprise_name": enterprise_name,
             "edge_id": edge_id,
         }
 
