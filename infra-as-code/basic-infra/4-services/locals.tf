@@ -22,6 +22,7 @@ locals {
   // S3 bucket
   bucket_eks_name = var.CURRENT_ENVIRONMENT == "dev" ? "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}-eks" : "${var.common_info.project}-eks"
   bucket_chartmuseum_name = var.CURRENT_ENVIRONMENT == "dev" ? "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}-chartmuseum" : "${var.common_info.project}-chartmuseum"
+  bucket_bandwidth_reports_name = var.CURRENT_ENVIRONMENT == "dev" ? "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}-bandwidth_reports" : "${var.common_info.project}-bandwidth_reports"
   
   // common tags
   common_tags = {

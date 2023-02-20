@@ -233,6 +233,7 @@ class TestBandwidthReports:
         }
 
         bandwidth_reports._bruin_repository.get_affecting_ticket_for_report.return_value = tickets
+        bandwidth_reports._s3_repository.upload_file_to_s3.return_value = 200
 
         with patch.object(bandwidth_reports._config, "CURRENT_ENVIRONMENT", "production"):
             await bandwidth_reports._generate_bandwidth_report_for_client(
@@ -268,6 +269,7 @@ class TestBandwidthReports:
             client_id=client_id, client_name=client_name, report_items=report_items
         )
         bandwidth_reports._email_repository.send_email.assert_awaited_once()
+        bandwidth_reports._s3_repository.upload_file_to_s3.assert_called_once()
 
     def add_bandwidth_to_links_metrics_test(self, bandwidth_reports, make_metrics):
         serial_number = "VC1234567"

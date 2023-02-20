@@ -19,6 +19,7 @@ parser.add_argument("--aws-profile", default="ops-mettel")
 aws_profile = parser.parse_args().aws_profile
 
 session = boto3.Session(profile_name=aws_profile)
+aws_credentials = session.get_credentials().get_frozen_credentials()
 ssm = session.client("ssm")
 paginator = ssm.get_paginator("get_parameters_by_path")
 response_iterator = paginator.paginate(Path="/automation-engine", Recursive=True, WithDecryption=True)
@@ -234,6 +235,7 @@ SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__EXECUTION_CRON_EXPRESSION = parameter
 SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__LOOKUP_INTERVAL = parameters["common"]["service-affecting"]["daily-bandwidth-report"]["lookup-interval"]
 SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__ENABLED_CUSTOMERS_PER_HOST = json.dumps(json.loads(parameters["common"]["service-affecting"]["daily-bandwidth-report"]["enabled-customers-per-host"]))
 SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__RECIPIENTS = json.dumps(json.loads(parameters["common"]["service-affecting"]["daily-bandwidth-report"]["recipients"]))
+SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__S3_BUCKET = "eee"  # json.dumps(json.loads(parameters["dev"]["service-affecting"]["daily-bandwidth-report"]["s3-bucket"]))
 SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__EXEC_ON_START = False
 
 # Service Outage Monitor - Shared variables
@@ -953,6 +955,9 @@ for host in SERVICE_AFFECTING__MONITOR__MONITORED_VELOCLOUD_HOSTS:
         f"DAILY_BANDWIDTH_REPORT__LOOKUP_INTERVAL={SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__LOOKUP_INTERVAL}",
         f"DAILY_BANDWIDTH_REPORT__ENABLED_CUSTOMERS_PER_HOST={SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__ENABLED_CUSTOMERS_PER_HOST}",
         f"DAILY_BANDWIDTH_REPORT__RECIPIENTS={SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__RECIPIENTS}",
+        f"DAILY_BANDWIDTH_REPORT__S3_BUCKET={SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__S3_BUCKET}",
+        f"DAILY_BANDWIDTH_REPORT__AWS_KEY={aws_credentials.access_key}",
+        f"DAILY_BANDWIDTH_REPORT__AWS_SECRET={aws_credentials.secret_key}",
     ]
 
 for host in TNBA_MONITOR__MONITORED_VELOCLOUD_HOSTS:

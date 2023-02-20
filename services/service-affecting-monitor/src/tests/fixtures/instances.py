@@ -38,6 +38,11 @@ def task_dispatcher_client():
 
 
 @pytest.fixture(scope="function")
+def s3_repository():
+    return Mock()
+
+
+@pytest.fixture(scope="function")
 def notifications_repository(nats_client):
     instance = NotificationsRepository(nats_client=nats_client, config=config)
     wrap_all_methods(instance)
