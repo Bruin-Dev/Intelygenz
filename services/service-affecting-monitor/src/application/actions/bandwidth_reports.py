@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import base64
 from datetime import datetime, timedelta
 
 from application import AffectingTroubles
@@ -22,6 +23,7 @@ class BandwidthReports:
         utils_repository,
         template_repository,
         metrics_repository,
+        s3_repository,
     ):
         self._scheduler = scheduler
         self._config = config
@@ -33,6 +35,7 @@ class BandwidthReports:
         self._utils_repository = utils_repository
         self._template_repository = template_repository
         self._metrics_repository = metrics_repository
+        self._s3_repository = s3_repository
 
     async def start_bandwidth_reports_job(self, exec_on_start=False):
         logger.info(f"[bandwidth-reports] Scheduled task: bandwidth reports")
@@ -172,6 +175,24 @@ class BandwidthReports:
             logger.info(f"[bandwidth-reports] Report for client {client_id} sent via email")
         else:
             logger.error(f"[bandwidth-reports] No report for client {client_id} was sent via email")
+            return
+
+        csv_attachment = next(iter(email["body"]["email_data"]["attachments"]), None)
+        if (csv_attachment):
+            file_name = csv_attachment["name"]
+            logger.info(f'[bandwidth-reports] Csv attachment {file_name} found')
+
+            file_name_split = file_name.split(".")
+            file_name_and_client_id = f'{file_name_split[0]}_{client_id}.{file_name_split[1]}'
+
+            csv_content = base64.b64decode(csv_attachment["data"]).decode("utf-8")
+            logger.info(f'[bandwidth-reports] Uploading csv attachment {file_name_and_client_id} to S3')
+
+            s3_response_code = self._s3_repository.upload_file_to_s3(file_name_and_client_id, csv_content)
+            if (s3_response_code != 200):
+                logger.error(f'[bandwidth-reports] Csv attachment {file_name_and_client_id} not sent to S3')
+            else:
+                logger.info(f'[bandwidth-reports] Csv attachment {file_name_and_client_id} sent to S3')
 
     @staticmethod
     def find_metric_by_field_value(value, metrics):

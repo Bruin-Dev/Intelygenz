@@ -19,6 +19,7 @@ from application.repositories.ticket_repository import TicketRepository
 from application.repositories.trouble_repository import TroubleRepository
 from application.repositories.utils_repository import UtilsRepository
 from application.repositories.velocloud_repository import VelocloudRepository
+from application.repositories.s3_repository import S3Repository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import config
 from framework.http.server import Config as QuartConfig
@@ -34,6 +35,7 @@ from framework.nats.temp_payload_storage import RedisLegacy as RedisStorage
 from framework.storage.task_dispatcher_client import TaskDispatcherClient, TaskTypes
 from prometheus_client import start_http_server
 from pytz import timezone
+import boto3
 
 base_handler = StdoutHandler()
 base_handler.setFormatter(StandardFormatter(environment_name=config.ENVIRONMENT_NAME))
@@ -104,6 +106,17 @@ class Container:
             utils_repository=self._utils_repository,
             notifications_repository=self._notifications_repository,
         )
+
+        session = boto3.Session(
+            aws_access_key_id=config.BANDWIDTH_REPORT_CONFIG["aws_access_key_id"],
+            aws_secret_access_key=config.BANDWIDTH_REPORT_CONFIG["aws_secret_access_key"],
+        )
+
+        self._s3_repository = S3Repository(
+            s3_client=session.client('s3'),
+            config=config,
+        )
+
         self._customer_cache_repository = CustomerCacheRepository(
             nats_client=self._nats_client,
             config=config,
@@ -150,6 +163,7 @@ class Container:
             utils_repository=self._utils_repository,
             template_repository=self._template_repository,
             metrics_repository=self._metrics_repository,
+            s3_repository=self._s3_repository,
         )
         self._server = QuartServer(QuartConfig(port=config.QUART_CONFIG["port"]))
 
@@ -168,17 +182,17 @@ class Container:
         await self._init_nats_conn()
         await self._init_subscriptions()
 
-        await self._service_affecting_monitor.start_service_affecting_monitor(exec_on_start=True)
+        # await self._service_affecting_monitor.start_service_affecting_monitor(exec_on_start=True)
 
-        if config.VELOCLOUD_HOST in config.MONITOR_REPORT_CONFIG["recipients_by_host_and_client_id"]:
-            await self._service_affecting_monitor_reports.start_service_affecting_monitor_reports_job(
-                exec_on_start=config.MONITOR_REPORT_CONFIG["exec_on_start"]
-            )
-        else:
-            app_logger.warning(
-                f"Job for Reoccurring Affecting Trouble Reports will not be scheduled for {config.VELOCLOUD_HOST} "
-                "as these reports are disabled for this host"
-            )
+        # if config.VELOCLOUD_HOST in config.MONITOR_REPORT_CONFIG["recipients_by_host_and_client_id"]:
+        #     await self._service_affecting_monitor_reports.start_service_affecting_monitor_reports_job(
+        #         exec_on_start=config.MONITOR_REPORT_CONFIG["exec_on_start"]
+        #     )
+        # else:
+        #     app_logger.warning(
+        #         f"Job for Reoccurring Affecting Trouble Reports will not be scheduled for {config.VELOCLOUD_HOST} "
+        #         "as these reports are disabled for this host"
+        #     )
 
         if config.VELOCLOUD_HOST in config.BANDWIDTH_REPORT_CONFIG["client_ids_by_host"]:
             await self._bandwidth_reports.start_bandwidth_reports_job(

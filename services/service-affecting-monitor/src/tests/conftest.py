@@ -49,6 +49,7 @@ def bandwidth_reports(
     utils_repository,
     template_repository,
     metrics_repository,
+    s3_repository,
 ):
     return BandwidthReports(
         scheduler,
@@ -61,6 +62,7 @@ def bandwidth_reports(
         utils_repository,
         template_repository,
         metrics_repository,
+        s3_repository,
     )
 
 
