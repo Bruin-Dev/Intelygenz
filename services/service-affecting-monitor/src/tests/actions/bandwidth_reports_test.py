@@ -118,6 +118,7 @@ class TestBandwidthReports:
         ticket_id = 12345
         edge_name = "Test Edge"
         interface = "GE1"
+        link_name = "Verizon Wireless( MTL- 544825157)"
 
         edge_full_id = make_edge_full_id(
             host=host, enterprise_id=enterprise_id, enterprise_name=enterprise_name, edge_id=edge_id)
@@ -195,7 +196,7 @@ class TestBandwidthReports:
                     "netmask": None,
                     "networkSide": "WAN",
                     "networkType": "ETHERNET",
-                    "displayName": "Verizon Wireless( MTL- 544825157)",
+                    "displayName": link_name,
                     "userOverride": 0,
                     "isp": "Verizon Wireless",
                     "org": "Verizon Wireless",
@@ -245,6 +246,7 @@ class TestBandwidthReports:
                 "serial_number": serial_number,
                 "edge_name": edge_name,
                 "interface": interface,
+                "link_name": link_name,
                 "down_Mbps_total_min": "0.000 Mbps",
                 "down_Mbps_total_max": "0.000 Mbps",
                 "up_Mbps_total_min": "0.000 Mbps",
@@ -271,6 +273,7 @@ class TestBandwidthReports:
         serial_number = "VC1234567"
         edge_name = "Test Edge"
         interface = "GE1"
+        link_name = "Verizon Wireless( MTL- 544825157)"
         link_series = [
             {
                 "series": [
@@ -329,7 +332,7 @@ class TestBandwidthReports:
                     "netmask": None,
                     "networkSide": "WAN",
                     "networkType": "ETHERNET",
-                    "displayName": "Verizon Wireless( MTL- 544825157)",
+                    "displayName": link_name,
                     "userOverride": 0,
                     "isp": "Verizon Wireless",
                     "org": "Verizon Wireless",
@@ -365,6 +368,7 @@ class TestBandwidthReports:
                 "serial_number": serial_number,
                 "edge_name": edge_name,
                 "interface": interface,
+                "link_name": link_name,
             }
         ]
 
