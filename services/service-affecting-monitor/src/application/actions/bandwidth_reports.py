@@ -184,7 +184,8 @@ class BandwidthReports:
         reported_metrics = []
         for link_metric in links_metrics:
             logger.info(f"[bandwidth-report] Adding bandwidth data for edge {link_metric['serial_number']} and \
-                         interface {link_metric['link']['interface']} and link name {link_metric['link']['displayName']}")
+                interface {link_metric['link']['interface']} and \
+                link name {link_metric['link']['displayName']}")
             down_bytes_metrics = self.find_metric_by_field_value("bytesRx", link_metric["series"])
             up_bytes_metrics = self.find_metric_by_field_value("bytesTx", link_metric["series"])
             down_bps_metrics = self.find_metric_by_field_value("bpsOfBestPathRx", link_metric["series"])
