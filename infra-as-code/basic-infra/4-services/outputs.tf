@@ -20,7 +20,7 @@ output "oreilly-security-group-id" {
 ###############################
 output "service-affecting-monitor-s3-name" {
   description = "Service Affecting monitor S3 Name"
-  value       = aws_s3_bucket.service_affecting_monitor.name
+  value       = aws_s3_bucket.service_affecting_monitor.bucket
   sensitive   = true
 }
 
