@@ -5,7 +5,7 @@ data "aws_iam_role" "automation" {
 resource "aws_iam_role_policy" "test_policy" {
   name   = "s3_service_affecting_monitor"
   role   = data.aws_iam_role.automation.id
-  policy = aws_iam_policy_document.service_affecting_monitor_s3_role.json
+  policy = data.aws_iam_policy_document.service_affecting_monitor_s3_role.json
 }
 
 data "aws_iam_policy_document" "service_affecting_monitor_s3_role" {
