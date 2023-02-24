@@ -1,6 +1,6 @@
 
 resource "aws_ssm_parameter" "service-affecting-s3-service-account-access-key" {
-  name        = "/automation-engine/${var.CURRENT_ENVIRONMENT}/service-affecting/s3-serving-affecting-iam-user-access-key"
+  name        = "/automation-engine/${var.environment}/service-affecting/s3-serving-affecting-iam-user-access-key"
   description = "Secret key of serving affecting monitor service account to access the s3 bucket with the same name(Automatic value, don´t update it manually)."
   type        = "SecureString"
   value       = var.service_affecting_monitor_s3_access_key
@@ -13,7 +13,7 @@ resource "aws_ssm_parameter" "service-affecting-s3-service-account-access-key" {
 }
 
 resource "aws_ssm_parameter" "service-affecting-s3-service-account-secret-key" {
-  name        = "/automation-engine/${var.CURRENT_ENVIRONMENT}/service-affecting/s3-serving-affecting-iam-user-secret-key"
+  name        = "/automation-engine/${var.environment}/service-affecting/s3-serving-affecting-iam-user-secret-key"
   description = "Secret key of serving affecting monitor service account to access the s3 bucket with the same name(Automatic value, don´t update it manually)."
   type        = "SecureString"
   value       = var.service_affecting_monitor_s3_secret_key
@@ -26,7 +26,7 @@ resource "aws_ssm_parameter" "service-affecting-s3-service-account-secret-key" {
 }
 
 resource "aws_ssm_parameter" "service-affecting-s3-bucket-name" {
-  name        = "/automation-engine/${var.CURRENT_ENVIRONMENT}/service-affecting/s3-bucket-name"
+  name        = "/automation-engine/${var.environment}/service-affecting/s3-bucket-name"
   description = "serving affecting monitor s3 bucket name (Automatic value, don´t update it manually)."
   type        = "SecureString"
   value       = var.service_affecting_monitor_s3_bucket_name
