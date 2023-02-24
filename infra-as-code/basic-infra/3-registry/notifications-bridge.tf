@@ -1,9 +1,9 @@
 resource "aws_ecr_repository" "notifications-bridge-repository" {
   name = "notifications-bridge"
   tags = {
-    Project       = var.common_info.project
-    Provisioning  = var.common_info.provisioning
-    Module        = "notifications-bridge"
+    Project      = var.common_info.project
+    Provisioning = var.common_info.provisioning
+    Module       = "notifications-bridge"
   }
 }
 

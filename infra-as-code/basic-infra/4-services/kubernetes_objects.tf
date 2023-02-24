@@ -42,7 +42,7 @@ data "template_file" "yaml_kyverno_cluster_policy" {
 
 resource "kubectl_manifest" "kyverno_cluster_policy" {
   yaml_body = data.template_file.yaml_kyverno_cluster_policy.rendered
-  
+
   depends_on = [
     module.mettel-automation-eks-cluster,
     helm_release.descheduler,
@@ -52,5 +52,5 @@ resource "kubectl_manifest" "kyverno_cluster_policy" {
     helm_release.metrics-server,
     helm_release.reloader,
     helm_release.kyverno,
-  ]  
+  ]
 }

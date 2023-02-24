@@ -19,8 +19,8 @@ variable "worker_node_instance_type" {
   type = map(string)
 
   default = {
-    "dev"         = "m6a.large"
-    "production"  = "m6a.large"
+    "dev"        = "m6a.large"
+    "production" = "m6a.large"
   }
 }
 

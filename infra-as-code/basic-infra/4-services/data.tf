@@ -14,7 +14,7 @@ data "aws_subnet_ids" "mettel-automation-private-subnets" {
   vpc_id = data.aws_vpc.mettel-automation-vpc.id
 
   filter {
-    name   = "tag:Name"
+    name = "tag:Name"
     values = [
       "mettel-automation-private-subnet-1a-${var.CURRENT_ENVIRONMENT}",
       "mettel-automation-private-subnet-1b-${var.CURRENT_ENVIRONMENT}"
@@ -46,7 +46,7 @@ data "aws_subnet_ids" "mettel-automation-private-subnets" {
 # Data from EKS Cluster Workers SG
 data "aws_security_group" "eks_nodes_security_group" {
   filter {
-    name   = "tag:Environment"
+    name = "tag:Environment"
     values = [
       var.CURRENT_ENVIRONMENT
     ]

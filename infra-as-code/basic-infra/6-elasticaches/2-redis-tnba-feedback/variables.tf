@@ -1,10 +1,10 @@
 variable "CURRENT_ENVIRONMENT" {
-  default = "dev"
+  default     = "dev"
   description = "Name of the environment to identify common resources to be used"
-  type = string
+  type        = string
 }
 
 variable "ENVIRONMENT" {
-  default = "test"
+  default     = "test"
   description = "Name of the current environment"
 }

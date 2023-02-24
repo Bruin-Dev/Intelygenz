@@ -32,7 +32,7 @@ resource "aws_internet_gateway" "automation-igw" {
 
 /* Elastic IP for NAT */
 resource "aws_eip" "automation-nat_eip-1a" {
-  vpc  = true
+  vpc = true
   tags = {
     Name         = local.automation-nat_eip-1a-tag-Name
     Environment  = var.CURRENT_ENVIRONMENT
@@ -42,7 +42,7 @@ resource "aws_eip" "automation-nat_eip-1a" {
 }
 
 resource "aws_eip" "automation-nat_eip-1b" {
-  vpc  = true
+  vpc = true
   tags = {
     Name         = local.automation-nat_eip-1b-tag-Name
     Environment  = var.CURRENT_ENVIRONMENT
@@ -244,7 +244,7 @@ resource "aws_route_table_association" "automation-private-1a" {
 
 resource "aws_route_table_association" "automation-private-1b" {
   subnet_id      = aws_subnet.automation-private_subnet-1b.id
-  route_table_id = aws_route_table.automation-private-1b .id
+  route_table_id = aws_route_table.automation-private-1b.id
 }
 
 /*====

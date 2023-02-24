@@ -2,8 +2,8 @@ resource "aws_ssm_parameter" "parameter-service-outage-monitor-blacklisted-edges
   name        = "/automation-engine/${local.env}/service-outage/monitor/blacklisted-edges"
   description = "List of edges that are excluded from Service Outage monitoring"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -18,12 +18,12 @@ resource "aws_ssm_parameter" "parameter-service-outage-monitor-blacklisted-edges
 }
 
 resource "aws_ssm_parameter" "parameter-service-outage-monitor-grace-period-to-autoresolve-after-last-documented-outage-day-time" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-outage/monitor/grace-period-to-autoresolve-after-last-documented-outage-day-time"
   description = "Defines for how long the monitor will wait before attempting a new DiGi Reboot on an edge"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -38,12 +38,12 @@ resource "aws_ssm_parameter" "parameter-service-outage-monitor-grace-period-to-a
 }
 
 resource "aws_ssm_parameter" "parameter-service-outage-monitor-grace-period-to-autoresolve-after-last-documented-outage-night-time" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-outage/monitor/grace-period-to-autoresolve-after-last-documented-outage-night-time"
   description = "Defines for how long the monitor will wait before attempting a new DiGi Reboot on an edge"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -58,12 +58,12 @@ resource "aws_ssm_parameter" "parameter-service-outage-monitor-grace-period-to-a
 }
 
 resource "aws_ssm_parameter" "parameter-service-outage-monitor-grace-period-before-attempting-new-digi-reboots" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-outage/monitor/grace-period-before-attempting-new-digi-reboots"
   description = "Defines for how long the monitor will wait before attempting a new DiGi Reboot on an edge"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -78,12 +78,12 @@ resource "aws_ssm_parameter" "parameter-service-outage-monitor-grace-period-befo
 }
 
 resource "aws_ssm_parameter" "parameter-service-outage-monitor-max-autoresolves-per-ticket" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-outage/monitor/max-autoresolves-per-ticket"
   description = "Defines how many times a ticket can be auto-resolved"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -98,12 +98,12 @@ resource "aws_ssm_parameter" "parameter-service-outage-monitor-max-autoresolves-
 }
 
 resource "aws_ssm_parameter" "parameter-service-outage-monitor-missing-edges-from-cache-report-recipient" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-outage/monitor/missing-edges-from-cache-report-recipient"
   description = "E-mail address that will receive a tiny report showing which edges from VeloCloud responses are not in the cache of customers"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -121,8 +121,8 @@ resource "aws_ssm_parameter" "parameter-service-outage-monitor-monitored-veloclo
   name        = "/automation-engine/${local.env}/service-outage/monitor/monitored-velocloud-hosts"
   description = "VeloCloud hosts whose edges will be monitored"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -137,12 +137,12 @@ resource "aws_ssm_parameter" "parameter-service-outage-monitor-monitored-veloclo
 }
 
 resource "aws_ssm_parameter" "parameter-service-outage-monitor-monitoring-job-interval" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-outage/monitor/monitoring-job-interval"
   description = "Defines how often devices are checked to find and report issues"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -157,12 +157,12 @@ resource "aws_ssm_parameter" "parameter-service-outage-monitor-monitoring-job-in
 }
 
 resource "aws_ssm_parameter" "parameter-service-outage-monitor-quarantine-for-edges-in-ha-hard-down-outage" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-outage/monitor/quarantine-for-edges-in-ha-hard-down-outage"
   description = "Defines how much time to wait before re-checking an edge currently in Hard Down (HA) state"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -177,12 +177,12 @@ resource "aws_ssm_parameter" "parameter-service-outage-monitor-quarantine-for-ed
 }
 
 resource "aws_ssm_parameter" "parameter-service-outage-monitor-quarantine-for-edges-in-ha-link-down-outage" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-outage/monitor/quarantine-for-edges-in-ha-link-down-outage"
   description = "Defines how much time to wait before re-checking an edge currently in Link Down (HA) state"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -197,12 +197,12 @@ resource "aws_ssm_parameter" "parameter-service-outage-monitor-quarantine-for-ed
 }
 
 resource "aws_ssm_parameter" "parameter-service-outage-monitor-quarantine-for-edges-in-ha-soft-down-outage" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-outage/monitor/quarantine-for-edges-in-ha-soft-down-outage"
   description = "Defines how much time to wait before re-checking an edge currently in Soft Down (HA) state"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -217,12 +217,12 @@ resource "aws_ssm_parameter" "parameter-service-outage-monitor-quarantine-for-ed
 }
 
 resource "aws_ssm_parameter" "parameter-service-outage-monitor-quarantine-for-edges-in-hard-down-outage" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-outage/monitor/quarantine-for-edges-in-hard-down-outage"
   description = "Defines how much time to wait before re-checking an edge currently in Hard Down state"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -237,12 +237,12 @@ resource "aws_ssm_parameter" "parameter-service-outage-monitor-quarantine-for-ed
 }
 
 resource "aws_ssm_parameter" "parameter-service-outage-monitor-quarantine-for-edges-in-link-down-outage" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-outage/monitor/quarantine-for-edges-in-link-down-outage"
   description = "Defines how much time to wait before re-checking an edge currently in Link Down state"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -257,12 +257,12 @@ resource "aws_ssm_parameter" "parameter-service-outage-monitor-quarantine-for-ed
 }
 
 resource "aws_ssm_parameter" "parameter-service-outage-monitor-severity-for-edge-down-outages" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-outage/monitor/severity-for-edge-down-outages"
   description = "Severity level for Edge Down outages"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -277,12 +277,12 @@ resource "aws_ssm_parameter" "parameter-service-outage-monitor-severity-for-edge
 }
 
 resource "aws_ssm_parameter" "parameter-service-outage-monitor-severity-for-link-down-outages" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-outage/monitor/severity-for-link-down-outages"
   description = "Severity level for Link Down outages"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -297,12 +297,12 @@ resource "aws_ssm_parameter" "parameter-service-outage-monitor-severity-for-link
 }
 
 resource "aws_ssm_parameter" "parameter-service-outage-monitor-wait-time-before-sending-new-milestone-reminder" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-outage/monitor/wait-time-before-sending-new-milestone-reminder"
   description = "How long we need to wait for the milestone reminder email to be sent"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -317,12 +317,12 @@ resource "aws_ssm_parameter" "parameter-service-outage-monitor-wait-time-before-
 }
 
 resource "aws_ssm_parameter" "parameter-service-outage-monitor-business-grade-link-labels" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-outage/monitor/business-grade-link-labels"
   description = "List of labels that define a link as business grade"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -337,12 +337,12 @@ resource "aws_ssm_parameter" "parameter-service-outage-monitor-business-grade-li
 }
 
 resource "aws_ssm_parameter" "parameter-service-outage-monitored-product-category" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-outage/monitored-product-category"
   description = "Bruin's product category under monitoring"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -357,12 +357,12 @@ resource "aws_ssm_parameter" "parameter-service-outage-monitored-product-categor
 }
 
 resource "aws_ssm_parameter" "parameter-service-outage-triage-max-events-per-event-note" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-outage/triage/max-events-per-event-note"
   description = "Defines how many events will be included in events notes"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -380,8 +380,8 @@ resource "aws_ssm_parameter" "parameter-service-outage-triage-monitored-veloclou
   name        = "/automation-engine/${local.env}/service-outage/triage/monitored-velocloud-hosts"
   description = "VeloCloud hosts whose edges will be monitored"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -396,12 +396,12 @@ resource "aws_ssm_parameter" "parameter-service-outage-triage-monitored-veloclou
 }
 
 resource "aws_ssm_parameter" "parameter-service-outage-triage-monitoring-job-interval" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-outage/triage/monitoring-job-interval"
   description = "Defines how often tickets are checked to see if it needs an initial triage or events note"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -416,12 +416,12 @@ resource "aws_ssm_parameter" "parameter-service-outage-triage-monitoring-job-int
 }
 
 resource "aws_ssm_parameter" "parameter-service-outage-triage-last-note-interval" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-outage/triage/last-note-interval"
   description = "Defines how long the last note on a ticket is considered recent"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [

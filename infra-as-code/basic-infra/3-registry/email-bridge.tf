@@ -1,9 +1,9 @@
 resource "aws_ecr_repository" "email-bridge-repository" {
   name = "email-bridge"
   tags = {
-    Project       = var.common_info.project
-    Provisioning  = var.common_info.provisioning
-    Module        = "email-bridge"
+    Project      = var.common_info.project
+    Provisioning = var.common_info.provisioning
+    Module       = "email-bridge"
   }
 }
 

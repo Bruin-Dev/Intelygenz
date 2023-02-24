@@ -1,16 +1,16 @@
 // IAM roles local vars
 locals {
-  eks_cluster_oidc_issuer_arn = trim(data.aws_eks_cluster.cluster.identity[0]["oidc"][0]["issuer"], "https://")
-  external-dns-role-name =  "${local.cluster_name}-external-dns-oidc"
-  external-dns-policy-name = "${local.cluster_name}-external-dns-oidc-policy"
-  cluster-autoscaler-role-name =  "${local.cluster_name}-cluster-autoscaler-oidc"
+  eks_cluster_oidc_issuer_arn    = trim(data.aws_eks_cluster.cluster.identity[0]["oidc"][0]["issuer"], "https://")
+  external-dns-role-name         = "${local.cluster_name}-external-dns-oidc"
+  external-dns-policy-name       = "${local.cluster_name}-external-dns-oidc-policy"
+  cluster-autoscaler-role-name   = "${local.cluster_name}-cluster-autoscaler-oidc"
   cluster-autoscaler-policy-name = "${local.cluster_name}-cluster-autoscaler-oidc-policy"
-  chartmuseum-role-name =  "${local.cluster_name}-chartmuseum-oidc"
-  chartmuseum-policy-name = "${local.cluster_name}-chartmuseum-oidc-policy"
-  fluent-bit-role-name =  "${local.cluster_name}-fluent-bit-oidc"
-  fluent-bit-policy-name = "${local.cluster_name}-fluent-bit-oidc-policy"
-  external-secrets-role-name =  "${local.cluster_name}-external-secrets-oidc"
-  external-secrets-policy-name = "${local.cluster_name}-external-secrets-oidc-policy"
+  chartmuseum-role-name          = "${local.cluster_name}-chartmuseum-oidc"
+  chartmuseum-policy-name        = "${local.cluster_name}-chartmuseum-oidc-policy"
+  fluent-bit-role-name           = "${local.cluster_name}-fluent-bit-oidc"
+  fluent-bit-policy-name         = "${local.cluster_name}-fluent-bit-oidc-policy"
+  external-secrets-role-name     = "${local.cluster_name}-external-secrets-oidc"
+  external-secrets-policy-name   = "${local.cluster_name}-external-secrets-oidc-policy"
 }
 
 ######################
@@ -21,7 +21,7 @@ data "template_file" "cluster-autoscaler-eks-role" {
 
   vars = {
     eks_cluster_oidc_arn = local.eks_cluster_oidc_issuer_arn
-    account_id = data.aws_caller_identity.current.account_id
+    account_id           = data.aws_caller_identity.current.account_id
   }
 }
 
@@ -30,7 +30,7 @@ resource "aws_iam_role" "cluster-autoscaler-role-eks" {
   assume_role_policy    = data.template_file.cluster-autoscaler-eks-role.rendered
   force_detach_policies = true
 
-  tags                  = local.common_tags
+  tags = local.common_tags
 }
 
 data "template_file" "cluster-autoscaler-eks-policy" {
@@ -55,7 +55,7 @@ data "template_file" "external-secrets-eks-role" {
 
   vars = {
     eks_cluster_oidc_arn = local.eks_cluster_oidc_issuer_arn
-    account_id = data.aws_caller_identity.current.account_id
+    account_id           = data.aws_caller_identity.current.account_id
   }
 }
 
@@ -64,7 +64,7 @@ resource "aws_iam_role" "external-secrets-role-eks" {
   assume_role_policy    = data.template_file.external-secrets-eks-role.rendered
   force_detach_policies = true
 
-  tags                  = local.common_tags
+  tags = local.common_tags
 }
 
 data "template_file" "external-secrets-eks-policy" {
@@ -106,7 +106,7 @@ data "template_file" "chartmuseum-eks-role" {
 
   vars = {
     eks_cluster_oidc_arn = local.eks_cluster_oidc_issuer_arn
-    account_id = data.aws_caller_identity.current.account_id
+    account_id           = data.aws_caller_identity.current.account_id
   }
 }
 
@@ -116,20 +116,20 @@ resource "aws_iam_role" "chartmuseum-role-eks" {
   assume_role_policy    = data.template_file.chartmuseum-eks-role[0].rendered
   force_detach_policies = true
 
-  tags                  = local.common_tags
+  tags = local.common_tags
 }
 
 data "template_file" "chartmuseum-eks-policy" {
   count    = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
   template = file("${path.module}/policies/chartmuseum-policy.json")
-  
+
   vars = {
     bucket_chartmuseum = aws_s3_bucket.bucket_chartmuseum[0].id
   }
 }
 
 resource "aws_iam_policy" "chartmuseum-eks" {
-  count    = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
+  count  = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
   name   = local.chartmuseum-policy-name
   policy = data.template_file.chartmuseum-eks-policy[0].rendered
 }
@@ -149,7 +149,7 @@ data "template_file" "fluent-bit-eks-role" {
 
   vars = {
     eks_cluster_oidc_arn = local.eks_cluster_oidc_issuer_arn
-    account_id = data.aws_caller_identity.current.account_id
+    account_id           = data.aws_caller_identity.current.account_id
   }
 }
 
@@ -159,7 +159,7 @@ resource "aws_iam_role" "fluent-bit-role-eks" {
   assume_role_policy    = data.template_file.fluent-bit-eks-role[0].rendered
   force_detach_policies = true
 
-  tags                  = local.common_tags
+  tags = local.common_tags
 }
 
 data "template_file" "fluent-bit-eks-policy" {
@@ -187,7 +187,7 @@ data "template_file" "external-dns-eks-role" {
 
   vars = {
     eks_cluster_oidc_arn = local.eks_cluster_oidc_issuer_arn
-    account_id = data.aws_caller_identity.current.account_id
+    account_id           = data.aws_caller_identity.current.account_id
   }
 }
 
@@ -196,7 +196,7 @@ resource "aws_iam_role" "external-dns-role-eks" {
   assume_role_policy    = data.template_file.external-dns-eks-role.rendered
   force_detach_policies = true
 
-  tags                  = local.common_tags
+  tags = local.common_tags
 }
 
 data "template_file" "external-dns-eks-policy" {

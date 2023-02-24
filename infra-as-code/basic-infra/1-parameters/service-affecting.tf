@@ -1,10 +1,10 @@
 resource "aws_ssm_parameter" "parameter-service-affecting-daily-bandwidth-report-enabled-customers-per-host" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/daily-bandwidth-report/enabled-customers-per-host"
   description = "Mapping of VeloCloud hosts and Bruin customer IDs for whom this report will trigger periodically"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -19,12 +19,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-daily-bandwidth-report
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-daily-bandwidth-report-execution-cron-expression" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/daily-bandwidth-report/execution-cron-expression"
   description = "Cron expression that determines when to build and deliver this report"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -39,12 +39,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-daily-bandwidth-report
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-daily-bandwidth-report-lookup-interval" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/daily-bandwidth-report/lookup-interval"
   description = "Defines how much time back to look for bandwidth metrics and Bruin tickets"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -59,12 +59,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-daily-bandwidth-report
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-daily-bandwidth-report-recipients" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/daily-bandwidth-report/recipients"
   description = "List of recipients that will get these reports"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -79,12 +79,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-daily-bandwidth-report
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitor-autoresolve-lookup-interval" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/autoresolve-lookup-interval"
   description = "Defines how much time back to look for all kinds of metrics while running auto-resolves"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -99,12 +99,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitor-autoresolve-lo
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitor-bandwidth-over-utilization-monitoring-lookup-interval" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/bandwidth-over-utilization-monitoring-lookup-interval"
   description = "Defines how much time back to look for Bandwidth metrics in Bandwidth Over Utilization checks"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -119,12 +119,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitor-bandwidth-over
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitor-bandwidth-over-utilization-monitoring-threshold" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/bandwidth-over-utilization-monitoring-threshold"
   description = "Threshold for Bandwidth Over Utilization troubles"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -139,12 +139,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitor-bandwidth-over
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitor-circuit-instability-autoresolve-threshold" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/circuit-instability-autoresolve-threshold"
   description = "Max DOWN events allowed in Circuit Instability checks while auto-resolving tickets"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -159,12 +159,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitor-circuit-instab
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitor-circuit-instability-monitoring-lookup-interval" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/circuit-instability-monitoring-lookup-interval"
   description = "Mapping of VeloCloud hosts and Bruin customer IDs for whom this report will trigger periodically"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -179,12 +179,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitor-circuit-instab
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitor-circuit-instability-monitoring-threshold" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/circuit-instability-monitoring-threshold"
   description = "Threshold for Circuit Instability troubles"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -199,12 +199,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitor-circuit-instab
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitor-customers-to-always-use-default-contact-info" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/customers-to-always-use-default-contact-info"
   description = "[Monitoring] List Bruin customers that should always use the default contact info"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -219,12 +219,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitor-customers-to-a
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitor-customers-with-bandwidth-over-utilization-monitoring" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/customers-with-bandwidth-over-utilization-monitoring"
   description = "List of client IDs for which Bandwidth Over Utilization checks are enabled"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -239,12 +239,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitor-customers-with
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitor-default-contact-info-per-customer" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/default-contact-info-per-customer"
   description = "Mapping of VeloCloud hosts, Bruin customers and default contact info"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
   tier        = "Advanced"
 
   lifecycle {
@@ -260,12 +260,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitor-default-contac
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitor-grace-period-to-autoresolve-after-last-documented-trouble-day-time" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/grace-period-to-autoresolve-after-last-documented-trouble-day-time"
   description = "Defines for how long a ticket can be auto-resolved after the last documented trouble during the day"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -280,12 +280,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitor-grace-period-t
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitor-grace-period-to-autoresolve-after-last-documented-trouble-night-time" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/grace-period-to-autoresolve-after-last-documented-trouble-night-time"
   description = "Defines for how long a ticket can be auto-resolved after the last documented trouble during the night"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -300,12 +300,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitor-grace-period-t
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitor-jitter-monitoring-lookup-interval" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/jitter-monitoring-lookup-interval"
   description = "Defines how much time back to look for Jitter metrics in Jitter checks"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -320,12 +320,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitor-jitter-monitor
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitor-jitter-monitoring-threshold" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/jitter-monitoring-threshold"
   description = "Threshold for Jitter troubles"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -340,12 +340,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitor-jitter-monitor
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitor-latency-monitoring-lookup-interval" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/latency-monitoring-lookup-interval"
   description = "Defines how much time back to look for Latency metrics in Latency checks"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -360,12 +360,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitor-latency-monito
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitor-latency-monitoring-threshold" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/latency-monitoring-threshold"
   description = "Threshold for Latency troubles"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -380,12 +380,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitor-latency-monito
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitor-max-autoresolves-per-ticket" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/max-autoresolves-per-ticket"
   description = "Defines how many times a ticket can be auto-resolved"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -403,8 +403,8 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitor-monitored-velo
   name        = "/automation-engine/${local.env}/service-affecting/monitor/monitored-velocloud-hosts"
   description = "VeloCloud hosts whose edges will be monitored"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -419,12 +419,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitor-monitored-velo
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitor-monitoring-job-interval" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/monitoring-job-interval"
   description = "Defines how often devices are checked to find and report issues"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -439,12 +439,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitor-monitoring-job
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitor-packet-loss-monitoring-lookup-interval" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/packet-loss-monitoring-lookup-interval"
   description = "Defines how much time back to look for Packet Loss metrics in Packet Loss checks"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -459,12 +459,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitor-packet-loss-mo
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitor-packet-loss-monitoring-threshold" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/packet-loss-monitoring-threshold"
   description = "Threshold for Packet Loss troubles"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -479,12 +479,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitor-packet-loss-mo
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitored-product-category" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitored-product-category"
   description = "Bruin's product category under monitoring"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -499,12 +499,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitored-product-cate
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitor-wait-time-before-sending-new-milestone-reminder" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/wait-time-before-sending-new-milestone-reminder"
   description = "How long we need to wait for the milestone reminder email to be sent"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -519,12 +519,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitor-wait-time-befo
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-latency-monitoring-threshold" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/wireless-latency-monitoring-threshold"
   description = "Threshold for wireless Latency troubles"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -539,12 +539,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-la
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-packet-loss-monitoring-threshold" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/wireless-packet-loss-monitoring-threshold"
   description = "Threshold for wireless Packet Loss troubles"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -559,12 +559,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-pa
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-jitter-monitoring-threshold" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/wireless-jitter-monitoring-threshold"
   description = "Threshold for wireless Jitter troubles"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -579,12 +579,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-ji
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-bandwidth-over-utilization-monitoring-threshold" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/wireless-bandwidth-over-utilization-monitoring-threshold"
   description = "Threshold for wireless Bandwidth Over Utilization troubles"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -599,12 +599,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-ba
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-circuit-instability-monitoring-threshold" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/wireless-circuit-instability-monitoring-threshold"
   description = "Threshold for wireless Circuit Instability troubles"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -619,12 +619,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-ci
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-latency-monitoring-lookup-interval" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/wireless-latency-monitoring-lookup-interval"
   description = "Defines how much time back to look for wireless Latency metrics in Latency checks"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -639,12 +639,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-la
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-packet-loss-monitoring-lookup-interval" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/wireless-packet-loss-monitoring-lookup-interval"
   description = "Defines how much time back to look for wireless Packet Loss metrics in Packet Loss checks"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -659,12 +659,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-pa
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-jitter-monitoring-lookup-interval" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/wireless-jitter-monitoring-lookup-interval"
   description = "Defines how much time back to look for wireless Jitter metrics in Jitter checks"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -679,12 +679,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-ji
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-bandwidth-over-utilization-monitoring-lookup-interval" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/wireless-bandwidth-over-utilization-monitoring-lookup-interval"
   description = "Defines how much time back to look for wireless Bandwidth metrics in Bandwidth Over Utilization checks"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -699,12 +699,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-ba
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-circuit-instability-monitoring-lookup-interval" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/wireless-circuit-instability-monitoring-lookup-interval"
   description = "Defines how much time back to look for wireless circuit instalbility metrics in Circuit Instability checks"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -719,12 +719,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitoring-wireless-ci
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-reoccurring-trouble-report-execution-cron-expression" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/reoccurring-trouble-report/execution-cron-expression"
   description = "Cron expression that determines when to build and deliver this report"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -738,12 +738,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-reoccurring-trouble-re
   })
 }
 resource "aws_ssm_parameter" "parameter-service-affecting-reoccurring-trouble-report-default-contacts" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/reoccurring-trouble-report/default-contacts"
   description = "List of default contacts to whom this report will always be delivered to"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -758,12 +758,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-reoccurring-trouble-re
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-reoccurring-trouble-report-recipients-per-host-and-customer" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/reoccurring-trouble-report/recipients-per-host-and-customer"
   description = "Mapping of VeloCloud hosts, Bruin customer IDs and recipients of these reports"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -778,12 +778,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-reoccurring-trouble-re
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-reoccurring-trouble-report-reoccurring-trouble-tickets-threshold" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/reoccurring-trouble-report/reoccurring-trouble-tickets-threshold"
   description = "Number of different tickets a trouble must appear in for a particular edge and interface to include it in the report"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -798,12 +798,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-reoccurring-trouble-re
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-reoccurring-trouble-report-reported-troubles" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/reoccurring-trouble-report/reported-troubles"
   description = "Troubles that will be reported"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -818,12 +818,12 @@ resource "aws_ssm_parameter" "parameter-service-affecting-reoccurring-trouble-re
 }
 
 resource "aws_ssm_parameter" "parameter-service-affecting-reoccurring-trouble-report-tickets-lookup-interval" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/reoccurring-trouble-report/tickets-lookup-interval"
   description = "Defines how much time back to look for Bruin tickets"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [

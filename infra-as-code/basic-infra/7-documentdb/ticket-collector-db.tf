@@ -6,23 +6,23 @@ resource "aws_db_subnet_group" "db_subnet_group" {
   subnet_ids = data.aws_subnet_ids.mettel-automation-private-subnets.ids
 
   tags = {
-    Name = "${local.docdb-ticket-collector-cluster}-subnet-group"
+    Name        = "${local.docdb-ticket-collector-cluster}-subnet-group"
     Environment = var.CURRENT_ENVIRONMENT
-    Project = local.project_name
+    Project     = local.project_name
   }
 }
 
 resource "aws_security_group" "docdb_security_group" {
-  count    = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
-  name     = "${local.docdb-ticket-collector-cluster}-security-group"
-  vpc_id   = data.aws_vpc.mettel-automation-vpc.id
+  count  = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
+  name   = "${local.docdb-ticket-collector-cluster}-security-group"
+  vpc_id = data.aws_vpc.mettel-automation-vpc.id
 
   ingress {
     description = "Allow connections from ticket-collector"
     from_port   = 27017
     to_port     = 27017
     protocol    = "tcp"
-    cidr_blocks = [var.cdir_private_1[var.CURRENT_ENVIRONMENT],var.cdir_private_2[var.CURRENT_ENVIRONMENT]]
+    cidr_blocks = [var.cdir_private_1[var.CURRENT_ENVIRONMENT], var.cdir_private_2[var.CURRENT_ENVIRONMENT]]
   }
 
   egress {
@@ -44,29 +44,29 @@ resource "aws_docdb_cluster_parameter_group" "docdb_parameter_group" {
   }
 
   tags = {
-    Name = "${local.docdb-ticket-collector-cluster}-parameter-group"
+    Name        = "${local.docdb-ticket-collector-cluster}-parameter-group"
     Environment = var.CURRENT_ENVIRONMENT
-    Project = local.project_name
+    Project     = local.project_name
   }
 }
 
 resource "aws_docdb_cluster" "docdb" {
-  count                   = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
-  cluster_identifier      = "${local.docdb-ticket-collector-cluster}-docdb-cluster"
-  engine                  = "docdb"
-  master_username         = var.TICKET_COLLECTOR_MONGO_USERNAME
-  master_password         = var.TICKET_COLLECTOR_MONGO_PASSWORD
-  backup_retention_period = 5
-  preferred_backup_window = "07:00-09:00"
-  skip_final_snapshot     = true
-  db_subnet_group_name    = aws_db_subnet_group.db_subnet_group[0].id
-  vpc_security_group_ids  = [aws_security_group.docdb_security_group[0].id]
+  count                           = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
+  cluster_identifier              = "${local.docdb-ticket-collector-cluster}-docdb-cluster"
+  engine                          = "docdb"
+  master_username                 = var.TICKET_COLLECTOR_MONGO_USERNAME
+  master_password                 = var.TICKET_COLLECTOR_MONGO_PASSWORD
+  backup_retention_period         = 5
+  preferred_backup_window         = "07:00-09:00"
+  skip_final_snapshot             = true
+  db_subnet_group_name            = aws_db_subnet_group.db_subnet_group[0].id
+  vpc_security_group_ids          = [aws_security_group.docdb_security_group[0].id]
   db_cluster_parameter_group_name = aws_docdb_cluster_parameter_group.docdb_parameter_group[0].name
 
   tags = {
-    Name = "${local.docdb-ticket-collector-cluster}-docdb-cluster"
+    Name        = "${local.docdb-ticket-collector-cluster}-docdb-cluster"
     Environment = var.CURRENT_ENVIRONMENT
-    Project = local.project_name
+    Project     = local.project_name
   }
 }
 
@@ -77,9 +77,9 @@ resource "aws_docdb_cluster_instance" "data_collector_docdb_instance_1" {
   instance_class     = "db.t3.medium"
 
   tags = {
-    Name = "${local.docdb-ticket-collector-cluster}-docdb-instance-1"
+    Name        = "${local.docdb-ticket-collector-cluster}-docdb-instance-1"
     Environment = var.CURRENT_ENVIRONMENT
-    Project = local.project_name
+    Project     = local.project_name
   }
 }
 
@@ -90,8 +90,8 @@ resource "aws_docdb_cluster_instance" "data_collector_docdb_instance_2" {
   instance_class     = "db.t3.medium"
 
   tags = {
-    Name = "${local.docdb-ticket-collector-cluster}-docdb-instance-2"
+    Name        = "${local.docdb-ticket-collector-cluster}-docdb-instance-2"
     Environment = var.CURRENT_ENVIRONMENT
-    Project = local.project_name
+    Project     = local.project_name
   }
 }

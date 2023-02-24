@@ -29,7 +29,7 @@ resource "aws_sns_topic" "emails-error-logging-in-to-the-inbox" {
   name = "emails-error-logging-in-to-the-inbox"
 }
 
-resource "aws_sns_topic_subscription" "emails-error-logging-in-to-the-inbox"{
+resource "aws_sns_topic_subscription" "emails-error-logging-in-to-the-inbox" {
   for_each  = toset(["mettel.team@intelygenz.com"])
   topic_arn = aws_sns_topic.emails-error-logging-in-to-the-inbox.arn
   protocol  = "email"

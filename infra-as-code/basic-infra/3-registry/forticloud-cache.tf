@@ -1,9 +1,9 @@
 resource "aws_ecr_repository" "forticloud-cache-repository" {
   name = "forticloud-cache"
   tags = {
-    Project       = var.common_info.project
-    Provisioning  = var.common_info.provisioning
-    Module        = "forticloud-cache"
+    Project      = var.common_info.project
+    Provisioning = var.common_info.provisioning
+    Module       = "forticloud-cache"
   }
 }
 

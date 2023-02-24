@@ -3,7 +3,7 @@
 terraform {
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
       version = "=3.47.0"
     }
   }
@@ -12,6 +12,6 @@ terraform {
 
 # AWS provider config
 provider "aws" {
-  region = "us-east-1"
+  region      = "us-east-1"
   max_retries = 25
 }
