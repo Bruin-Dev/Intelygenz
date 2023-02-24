@@ -22,9 +22,6 @@ data "aws_iam_policy_document" "service_affecting_monitor_s3" {
       "s3:PutObject",
     ]
 
-    principal = [
-
-    ]
     principals {
       type = "AWS"
       identifiers = [
