@@ -1,4 +1,4 @@
-locals = {
+locals {
   service_affecting_monitor_s3_name = "service-affecting-monitor-${var.CURRENT_ENVIRONMENT}"
 }
 
