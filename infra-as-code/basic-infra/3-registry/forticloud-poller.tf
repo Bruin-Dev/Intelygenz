@@ -1,9 +1,9 @@
 resource "aws_ecr_repository" "forticloud-poller-repository" {
   name = "forticloud-poller"
   tags = {
-    Project       = var.common_info.project
-    Provisioning  = var.common_info.provisioning
-    Module        = "forticloud-poller"
+    Project      = var.common_info.project
+    Provisioning = var.common_info.provisioning
+    Module       = "forticloud-poller"
   }
 }
 

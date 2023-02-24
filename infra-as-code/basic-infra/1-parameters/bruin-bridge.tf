@@ -2,8 +2,8 @@ resource "aws_ssm_parameter" "parameter-bruin-bridge-base-url" {
   name        = "/automation-engine/${local.env}/bruin-bridge/base-url"
   description = "Base URL for Bruin's API"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -21,8 +21,8 @@ resource "aws_ssm_parameter" "parameter-bruin-bridge-test-base-url" {
   name        = "/automation-engine/${local.env}/bruin-bridge/test-base-url"
   description = "Base URL for Bruin's TEST API"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -40,8 +40,8 @@ resource "aws_ssm_parameter" "parameter-bruin-bridge-client-id" {
   name        = "/automation-engine/${local.env}/bruin-bridge/client-id"
   description = "Client ID credential to authenticate against Bruin's API"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -59,8 +59,8 @@ resource "aws_ssm_parameter" "parameter-bruin-bridge-client-secret" {
   name        = "/automation-engine/${local.env}/bruin-bridge/client-secret"
   description = "Client Secret credential to authenticate against Bruin's API"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -78,8 +78,8 @@ resource "aws_ssm_parameter" "parameter-bruin-bridge-login-url" {
   name        = "/automation-engine/${local.env}/bruin-bridge/login-url"
   description = "Login URL for Bruin's API"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -97,8 +97,8 @@ resource "aws_ssm_parameter" "parameter-bruin-bridge-test-login-url" {
   name        = "/automation-engine/${local.env}/bruin-bridge/test-login-url"
   description = "Login URL for Bruin's TEST API"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -116,8 +116,8 @@ resource "aws_ssm_parameter" "parameter-bruin-bridge-test-client-id" {
   name        = "/automation-engine/${local.env}/bruin-bridge/test-client-id"
   description = "Client ID credential to authenticate against Bruin's TEST API"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -135,8 +135,8 @@ resource "aws_ssm_parameter" "parameter-bruin-bridge-test-client-secret" {
   name        = "/automation-engine/${local.env}/bruin-bridge/test-client-secret"
   description = "Client secret credential to authenticate against Bruin's TEST API"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [

@@ -1,9 +1,9 @@
 resource "aws_ecr_repository" "fraud-monitor-repository" {
   name = "fraud-monitor"
   tags = {
-    Project       = var.common_info.project
-    Provisioning  = var.common_info.provisioning
-    Module        = "fraud-monitor"
+    Project      = var.common_info.project
+    Provisioning = var.common_info.provisioning
+    Module       = "fraud-monitor"
   }
 }
 

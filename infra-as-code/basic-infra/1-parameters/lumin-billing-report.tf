@@ -1,10 +1,10 @@
 resource "aws_ssm_parameter" "parameter-lumin-billing-report-lumin-billing-api-base-url" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/lumin-billing-report/lumin-billing-api-base-url"
   description = "Base URL for Lumin's Billing API"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -19,12 +19,12 @@ resource "aws_ssm_parameter" "parameter-lumin-billing-report-lumin-billing-api-b
 }
 
 resource "aws_ssm_parameter" "parameter-lumin-billing-report-access-token" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/lumin-billing-report/access-token"
   description = "Access token for Lumin's Billing API"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -39,12 +39,12 @@ resource "aws_ssm_parameter" "parameter-lumin-billing-report-access-token" {
 }
 
 resource "aws_ssm_parameter" "parameter-lumin-billing-report-customer-name" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/lumin-billing-report/customer-name"
   description = "Name of the customer for which the Billing Report will be generated"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -59,12 +59,12 @@ resource "aws_ssm_parameter" "parameter-lumin-billing-report-customer-name" {
 }
 
 resource "aws_ssm_parameter" "parameter-lumin-billing-report-recipient" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/lumin-billing-report/recipient"
   description = "Email address to send the report to"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -79,12 +79,12 @@ resource "aws_ssm_parameter" "parameter-lumin-billing-report-recipient" {
 }
 
 resource "aws_ssm_parameter" "parameter-lumin-billing-report-email-account-for-message-delivery-password" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/lumin-billing-report/email-account-for-message-delivery-password"
   description = "Email account used to send messages to other accounts (password)"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [

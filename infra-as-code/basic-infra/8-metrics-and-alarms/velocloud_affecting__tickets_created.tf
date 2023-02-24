@@ -29,11 +29,11 @@ resource "aws_sns_topic" "velocloud-affecting-too-many-tickets" {
   name = "velocloud-affecting-too-many-tickets"
 }
 
-resource "aws_sns_topic_subscription" "velocloud-affecting-too-many-tickets"{
+resource "aws_sns_topic_subscription" "velocloud-affecting-too-many-tickets" {
   for_each  = toset(["HNOCleaderteam@mettel.net", "jhicks@mettel.net", "kiyer@mettel.net", "mettel.team@intelygenz.com"])
   topic_arn = aws_sns_topic.velocloud-affecting-too-many-tickets.arn
-  protocol = "email"
-  endpoint = each.value
+  protocol  = "email"
+  endpoint  = each.value
 }
 
 resource "aws_cloudwatch_metric_alarm" "velocloud-affecting-no-tickets-created" {
@@ -55,7 +55,7 @@ resource "aws_sns_topic" "velocloud-affecting-no-tickets-created" {
   name = "velocloud-affecting-no-tickets-created"
 }
 
-resource "aws_sns_topic_subscription" "velocloud-affecting-no-tickets-created"{
+resource "aws_sns_topic_subscription" "velocloud-affecting-no-tickets-created" {
   for_each  = toset(["mettel.team@intelygenz.com"])
   topic_arn = aws_sns_topic.velocloud-affecting-no-tickets-created.arn
   protocol  = "email"

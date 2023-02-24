@@ -10,8 +10,8 @@ locals {
 # Cloudfront
 resource "aws_cloudfront_distribution" "s3_distribution_website" {
   origin {
-    domain_name = aws_s3_bucket.s3_bucket_website.website_endpoint
-    origin_id   = local.s3_origin_id
+    domain_name         = aws_s3_bucket.s3_bucket_website.website_endpoint
+    origin_id           = local.s3_origin_id
     connection_attempts = 3
     connection_timeout  = 10
     custom_origin_config {
@@ -39,19 +39,19 @@ resource "aws_cloudfront_distribution" "s3_distribution_website" {
   }
 
   aliases    = var.domain_name
-  web_acl_id  = aws_waf_web_acl.waf.id
-  
+  web_acl_id = aws_waf_web_acl.waf.id
+
   custom_error_response {
-      error_caching_min_ttl = 0
-      error_code            = 403
-      response_code         = 200
-      response_page_path    = "/${var.error_document}"
+    error_caching_min_ttl = 0
+    error_code            = 403
+    response_code         = 200
+    response_page_path    = "/${var.error_document}"
   }
   custom_error_response {
-      error_caching_min_ttl = 0
-      error_code            = 404
-      response_code         = 200
-      response_page_path    = "/${var.error_document}"
+    error_caching_min_ttl = 0
+    error_code            = 404
+    response_code         = 200
+    response_page_path    = "/${var.error_document}"
   }
 
   default_cache_behavior {
@@ -59,14 +59,14 @@ resource "aws_cloudfront_distribution" "s3_distribution_website" {
     cached_methods   = ["GET", "HEAD", "OPTIONS"]
     target_origin_id = local.s3_origin_id
 
-  forwarded_values {
-    query_string = false
-    #headers      = ["Origin", "Access-Control-Request-Headers", "Access-Control-Request-Method", "Accept", "Content-Type"]
+    forwarded_values {
+      query_string = false
+      #headers      = ["Origin", "Access-Control-Request-Headers", "Access-Control-Request-Method", "Accept", "Content-Type"]
 
-    cookies {
-      forward = "none"
+      cookies {
+        forward = "none"
+      }
     }
-  }
 
     viewer_protocol_policy = "redirect-to-https"
     min_ttl                = 0

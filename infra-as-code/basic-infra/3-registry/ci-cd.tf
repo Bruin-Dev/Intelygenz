@@ -1,9 +1,9 @@
 resource "aws_ecr_repository" "terraform-1x-repository" {
   name = "images/terraform-1.x"
   tags = {
-    Project       = "ci-cd-${var.common_info.project}"
-    Provisioning  = var.common_info.provisioning
-    Module        = "terraform-1x"
+    Project      = "ci-cd-${var.common_info.project}"
+    Provisioning = var.common_info.provisioning
+    Module       = "terraform-1x"
   }
 }
 

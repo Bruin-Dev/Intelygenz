@@ -1,9 +1,9 @@
 resource "aws_ecr_repository" "servicenow-bridge-repository" {
   name = "servicenow-bridge"
   tags = {
-    Project       = var.common_info.project
-    Provisioning  = var.common_info.provisioning
-    Module        = "servicenow-bridge"
+    Project      = var.common_info.project
+    Provisioning = var.common_info.provisioning
+    Module       = "servicenow-bridge"
   }
 }
 

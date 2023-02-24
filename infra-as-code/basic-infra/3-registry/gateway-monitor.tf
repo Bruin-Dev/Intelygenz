@@ -1,9 +1,9 @@
 resource "aws_ecr_repository" "gateway-monitor-repository" {
   name = "gateway-monitor"
   tags = {
-    Project       = var.common_info.project
-    Provisioning  = var.common_info.provisioning
-    Module        = "gateway-monitor"
+    Project      = var.common_info.project
+    Provisioning = var.common_info.provisioning
+    Module       = "gateway-monitor"
   }
 }
 

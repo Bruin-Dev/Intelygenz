@@ -2,11 +2,11 @@
 ### Create CERT and dns resources for VALIDATE it and avoid to do manual steps
 
 resource "aws_acm_certificate" "ssl_certificate" {
-  domain_name               = "*.mettel-automation.net"
-  validation_method         = "DNS"
+  domain_name       = "*.mettel-automation.net"
+  validation_method = "DNS"
 
   tags = {
-    Name        = "SSL Certificate us-east-1"
+    Name         = "SSL Certificate us-east-1"
     Environment  = "all"
     Project      = var.common_info.project
     Provisioning = var.common_info.provisioning

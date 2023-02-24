@@ -29,7 +29,7 @@ resource "aws_sns_topic" "bruin-too-many-invalid-service-outage-ticket-creations
   name = "bruin-too-many-invalid-service-outage-ticket-creations"
 }
 
-resource "aws_sns_topic_subscription" "bruin-too-many-invalid-service-outage-ticket-creations"{
+resource "aws_sns_topic_subscription" "bruin-too-many-invalid-service-outage-ticket-creations" {
   for_each  = toset(["managedservices@mettel.net", "ndimuro@mettel.net", "bsullivan@mettel.net", "jhicks@mettel.net", "mettel.team@intelygenz.com"])
   topic_arn = aws_sns_topic.bruin-too-many-invalid-service-outage-ticket-creations.arn
   protocol  = "email"

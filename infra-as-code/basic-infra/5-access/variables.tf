@@ -1,6 +1,6 @@
 variable "eks_developer_users" {
   description = "List of users with developer role access in EKS cluster"
-  type    = list(string)
+  type        = list(string)
   default = [
     "some.user",
     "foo.var"
@@ -9,7 +9,7 @@ variable "eks_developer_users" {
 
 variable "eks_devops_users" {
   description = "List of users with devops role access in EKS cluster"
-  type    = list(string)
+  type        = list(string)
   default = [
     "foo.vartwo"
   ]
@@ -17,7 +17,7 @@ variable "eks_devops_users" {
 
 variable "eks_ops_users" {
   description = "List of users with ops role access in EKS cluster"
-  type    = list(string)
+  type        = list(string)
   default = [
     "jon.du"
   ]
@@ -25,6 +25,6 @@ variable "eks_ops_users" {
 
 variable "EKS_CLUSTER_NAME" {
   description = "EKS Cluster name to obtain data"
-  default = ""
+  default     = ""
 }
 

@@ -1,9 +1,9 @@
 resource "aws_ecr_repository" "forticloud-monitor-repository" {
   name = "forticloud-monitor"
   tags = {
-    Project       = var.common_info.project
-    Provisioning  = var.common_info.provisioning
-    Module        = "forticloud-monitor"
+    Project      = var.common_info.project
+    Provisioning = var.common_info.provisioning
+    Module       = "forticloud-monitor"
   }
 }
 

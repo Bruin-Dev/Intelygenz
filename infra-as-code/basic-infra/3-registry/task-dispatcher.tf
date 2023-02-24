@@ -1,9 +1,9 @@
 resource "aws_ecr_repository" "task-dispatcher-repository" {
   name = "task-dispatcher"
   tags = {
-    Project       = var.common_info.project
-    Provisioning  = var.common_info.provisioning
-    Module        = "task-dispatcher"
+    Project      = var.common_info.project
+    Provisioning = var.common_info.provisioning
+    Module       = "task-dispatcher"
   }
 }
 

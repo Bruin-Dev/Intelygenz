@@ -29,7 +29,7 @@ resource "aws_sns_topic" "velocloud-outage-too-many-errors" {
   name = "velocloud-outage-too-many-errors"
 }
 
-resource "aws_sns_topic_subscription" "velocloud-outage-too-many-errors"{
+resource "aws_sns_topic_subscription" "velocloud-outage-too-many-errors" {
   for_each  = toset(["mettel.team@intelygenz.com"])
   topic_arn = aws_sns_topic.velocloud-outage-too-many-errors.arn
   protocol  = "email"

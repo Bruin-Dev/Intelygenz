@@ -2,8 +2,8 @@ resource "aws_ssm_parameter" "parameter-digi-bridge-digi-reboot-api-base-url" {
   name        = "/automation-engine/${local.env}/digi-bridge/digi-reboot-api-base-url"
   description = "Base URL for Digi API"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -21,8 +21,8 @@ resource "aws_ssm_parameter" "parameter-digi-bridge-digi-reboot-api-client-id" {
   name        = "/automation-engine/${local.env}/digi-bridge/digi-reboot-api-client-id"
   description = "Client ID credentials for Digi API"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -40,8 +40,8 @@ resource "aws_ssm_parameter" "parameter-digi-bridge-digi-reboot-api-client-secre
   name        = "/automation-engine/${local.env}/digi-bridge/digi-reboot-api-client-secret"
   description = "Client Secret credentials for Digi API"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -56,12 +56,12 @@ resource "aws_ssm_parameter" "parameter-digi-bridge-digi-reboot-api-client-secre
 }
 
 resource "aws_ssm_parameter" "parameter-digi-bridge-digi-reboot-api-token-ttl" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/digi-bridge/digi-reboot-api-token-ttl"
   description = "Auth tokens TTL"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -76,12 +76,12 @@ resource "aws_ssm_parameter" "parameter-digi-bridge-digi-reboot-api-token-ttl" {
 }
 
 resource "aws_ssm_parameter" "parameter-digi-bridge-digi-headers" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/digi-bridge/digi-headers"
   description = "List of possible headers included in all DiGi links"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [

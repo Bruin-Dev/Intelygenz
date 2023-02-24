@@ -1,9 +1,9 @@
 resource "aws_ecr_repository" "dri-bridge-repository" {
   name = "dri-bridge"
   tags = {
-    Project       = var.common_info.project
-    Provisioning  = var.common_info.provisioning
-    Module        = "dri-bridge"
+    Project      = var.common_info.project
+    Provisioning = var.common_info.provisioning
+    Module       = "dri-bridge"
   }
 }
 

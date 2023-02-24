@@ -2,8 +2,8 @@ resource "aws_ssm_parameter" "parameter-tnba-monitor-blacklisted-edges" {
   name        = "/automation-engine/${local.env}/tnba-monitor/blacklisted-edges"
   description = "List of edges that are excluded from TNBA monitoring"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -18,12 +18,12 @@ resource "aws_ssm_parameter" "parameter-tnba-monitor-blacklisted-edges" {
 }
 
 resource "aws_ssm_parameter" "parameter-tnba-monitor-grace-period-before-appending-new-tnba-notes" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/tnba-monitor/grace-period-before-appending-new-tnba-notes"
   description = "Defines for how long a ticket needs to wait since it was opened before appending a new TNBA note"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -38,12 +38,12 @@ resource "aws_ssm_parameter" "parameter-tnba-monitor-grace-period-before-appendi
 }
 
 resource "aws_ssm_parameter" "parameter-tnba-monitor-grace-period-before-monitoring-tickets-based-on-last-documented-outage" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/tnba-monitor/grace-period-before-monitoring-tickets-based-on-last-documented-outage"
   description = "Defines for how long a Service Outage ticket needs to wait after the last documented outage to get a new TNBA note appended"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -58,12 +58,12 @@ resource "aws_ssm_parameter" "parameter-tnba-monitor-grace-period-before-monitor
 }
 
 resource "aws_ssm_parameter" "parameter-tnba-monitor-min-required-confidence-for-request-and-repair-completed-predictions" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/tnba-monitor/min-required-confidence-for-request-and-repair-completed-predictions"
   description = "Defines the minimum confidence level required to consider a Request Completed / Repair Completed prediction accurate in TNBA auto-resolves"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -78,12 +78,12 @@ resource "aws_ssm_parameter" "parameter-tnba-monitor-min-required-confidence-for
 }
 
 resource "aws_ssm_parameter" "parameter-tnba-monitor-monitored-product-category" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/tnba-monitor/monitored-product-category"
   description = "Bruin's product category under monitoring"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -101,8 +101,8 @@ resource "aws_ssm_parameter" "parameter-tnba-monitor-monitored-velocloud-hosts" 
   name        = "/automation-engine/${local.env}/tnba-monitor/monitored-velocloud-hosts"
   description = "VeloCloud hosts whose edges will be monitored"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [
@@ -117,12 +117,12 @@ resource "aws_ssm_parameter" "parameter-tnba-monitor-monitored-velocloud-hosts" 
 }
 
 resource "aws_ssm_parameter" "parameter-tnba-monitor-monitoring-job-interval" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/tnba-monitor/monitoring-job-interval"
   description = "Defines how often tickets are checked to see if they need a new TNBA note"
   type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
 
   lifecycle {
     ignore_changes = [

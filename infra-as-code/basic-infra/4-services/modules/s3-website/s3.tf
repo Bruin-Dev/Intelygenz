@@ -30,7 +30,7 @@ data "aws_iam_policy_document" "cloudfront_policy_website" {
       variable = "aws:SourceIp"
       values   = var.vpn_remote_ipset[*].value
     }
-  }  
+  }
 
   statement {
     sid       = "Allow get requests originating from docs site"

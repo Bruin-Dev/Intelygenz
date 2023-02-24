@@ -2,7 +2,7 @@ resource "aws_vpn_gateway" "vpn_gw" {
   vpc_id = aws_vpc.automation-vpc.id
 
   tags = {
-    Name = local.virtual-private-gateway-tag-Name
+    Name         = local.virtual-private-gateway-tag-Name
     Project      = var.common_info.project
     Provisioning = var.common_info.provisioning
     Environment  = var.CURRENT_ENVIRONMENT

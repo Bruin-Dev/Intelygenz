@@ -1,4 +1,4 @@
- resource "null_resource" "associate-iam-oidc-provider" {
+resource "null_resource" "associate-iam-oidc-provider" {
 
   provisioner "local-exec" {
     command = "eksctl utils associate-iam-oidc-provider --region us-east-1 --cluster ${local.cluster_name} --approve"
@@ -9,9 +9,9 @@
   }
 
   depends_on = [
-      module.mettel-automation-eks-cluster,
-      aws_iam_role.external-dns-role-eks
-   ]
+    module.mettel-automation-eks-cluster,
+    aws_iam_role.external-dns-role-eks
+  ]
 }
 
 resource "null_resource" "update_kube_config" {
@@ -24,6 +24,6 @@ resource "null_resource" "update_kube_config" {
   }
 
   depends_on = [
-      module.mettel-automation-eks-cluster,
-   ]
+    module.mettel-automation-eks-cluster,
+  ]
 }
