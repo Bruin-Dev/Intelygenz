@@ -25,3 +25,9 @@ variable "global_ssm_kms_name" {
   sensitive   = true
   type        = string
 }
+
+variable "environment" {
+  description = "Environment."
+  sensitive   = true
+  type        = string
+}

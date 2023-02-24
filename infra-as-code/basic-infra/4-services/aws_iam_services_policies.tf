@@ -28,7 +28,7 @@ data "aws_iam_policy_document" "service_affecting_monitor_s3" {
     principals {
       type = "AWS"
       identifiers = [
-        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/${aws_iam_user.service_affecting_monitor_s3.bucket}",
+        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/${aws_iam_user.service_affecting_monitor_s3.name}",
       ]
     }
     resources = [

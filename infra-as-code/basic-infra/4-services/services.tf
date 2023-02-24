@@ -10,4 +10,5 @@ module "service_affecting_monitor" {
   service_affecting_monitor_s3_access_key  = aws_iam_access_key.service_affecting_monitor_s3.id
   service_affecting_monitor_s3_secret_key  = aws_iam_access_key.service_affecting_monitor_s3.secret
   global_ssm_kms_name                      = data.aws_kms_key.ssm-kms-key.id
+  environment                              = var.CURRENT_ENVIRONMENT
 }
