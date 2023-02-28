@@ -713,6 +713,8 @@ class ServiceAffectingMonitor:
 
             is_wireless_link = self._utils_repository.get_is_wireless_link(interface, links_configuration)
 
+            serial_number = cached_info["serial_number"]
+
             if is_wireless_link:
                 logger.info(f"Link {interface} from {serial_number} is wireless. Skipping bouncing check...")
                 continue
@@ -722,8 +724,6 @@ class ServiceAffectingMonitor:
                 logger.info(f"Link {interface} from {serial_number} is not within lookback window. "
                             + f"link_last_active: {link_last_active}. is_wireless_link: {is_wireless_link}")
                 continue
-
-            serial_number = cached_info["serial_number"]
 
             if not events:
                 logger.warning(

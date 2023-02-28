@@ -926,6 +926,7 @@ class BruinRepository:
                 peak_percent_up=link_metrics["peak_percent_up"],
                 peak_time_down=link_metrics["peak_time_down"],
                 peak_time_up=link_metrics["peak_time_up"],
+                link_name=link_metrics["link_name"],
             )
             report_items.append(report_item)
 
@@ -950,6 +951,7 @@ class BruinRepository:
         peak_percent_up,
         peak_time_down,
         peak_time_up,
+        link_name,
     ):
         logger.info(f"[bandwidth-reports] Building bandwidth report item for edge {serial_number} and \
                       interface {interface}")
@@ -959,6 +961,7 @@ class BruinRepository:
             "serial_number": serial_number,
             "edge_name": edge_name,
             "interface": interface,
+            "link_name": link_name,
             "down_Mbps_total_min": down_Mbps_total_min,
             "down_Mbps_total_max": down_Mbps_total_max,
             "up_Mbps_total_min": up_Mbps_total_min,
