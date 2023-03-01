@@ -21,15 +21,3 @@ resource "aws_s3_bucket" "bucket_chartmuseum" {
     Provisioning = var.common_info.provisioning
   }
 }
-
-resource "aws_s3_bucket" "bucket_bandwidth_reports" {
-  bucket        = local.bucket_bandwidth_reports_name
-  acl           = "private"
-  force_destroy = true
-
-  tags = {
-    Name         = local.bucket_bandwidth_reports_name
-    Environment  = var.CURRENT_ENVIRONMENT
-    Project      = var.common_info.project
-  }
-}

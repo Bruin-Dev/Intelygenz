@@ -107,10 +107,7 @@ class Container:
             notifications_repository=self._notifications_repository,
         )
 
-        session = boto3.Session(
-            aws_access_key_id=config.BANDWIDTH_REPORT_CONFIG["aws_access_key_id"],
-            aws_secret_access_key=config.BANDWIDTH_REPORT_CONFIG["aws_secret_access_key"],
-        )
+        session = boto3.Session()
 
         self._s3_repository = S3Repository(
             s3_client=session.client('s3'),
@@ -182,17 +179,17 @@ class Container:
         await self._init_nats_conn()
         await self._init_subscriptions()
 
-        # await self._service_affecting_monitor.start_service_affecting_monitor(exec_on_start=True)
+        await self._service_affecting_monitor.start_service_affecting_monitor(exec_on_start=True)
 
-        # if config.VELOCLOUD_HOST in config.MONITOR_REPORT_CONFIG["recipients_by_host_and_client_id"]:
-        #     await self._service_affecting_monitor_reports.start_service_affecting_monitor_reports_job(
-        #         exec_on_start=config.MONITOR_REPORT_CONFIG["exec_on_start"]
-        #     )
-        # else:
-        #     app_logger.warning(
-        #         f"Job for Reoccurring Affecting Trouble Reports will not be scheduled for {config.VELOCLOUD_HOST} "
-        #         "as these reports are disabled for this host"
-        #     )
+        if config.VELOCLOUD_HOST in config.MONITOR_REPORT_CONFIG["recipients_by_host_and_client_id"]:
+            await self._service_affecting_monitor_reports.start_service_affecting_monitor_reports_job(
+                exec_on_start=config.MONITOR_REPORT_CONFIG["exec_on_start"]
+            )
+        else:
+            app_logger.warning(
+                f"Job for Reoccurring Affecting Trouble Reports will not be scheduled for {config.VELOCLOUD_HOST} "
+                "as these reports are disabled for this host"
+            )
 
         if config.VELOCLOUD_HOST in config.BANDWIDTH_REPORT_CONFIG["client_ids_by_host"]:
             await self._bandwidth_reports.start_bandwidth_reports_job(

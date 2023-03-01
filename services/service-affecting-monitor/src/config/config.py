@@ -146,10 +146,6 @@ BANDWIDTH_REPORT_CONFIG = {
     "client_ids_by_host": json.loads(os.environ["DAILY_BANDWIDTH_REPORT__ENABLED_CUSTOMERS_PER_HOST"]),
     "recipients": json.loads(os.environ["DAILY_BANDWIDTH_REPORT__RECIPIENTS"]),
     "s3_bucket": os.environ["DAILY_BANDWIDTH_REPORT__S3_BUCKET"],
-    "aws_access_key_id": (os.environ["DAILY_BANDWIDTH_REPORT__AWS_KEY"]
-                          if os.environ.get('DAILY_BANDWIDTH_REPORT__AWS_KEY') is not None else None),
-    "aws_secret_access_key": (os.environ["DAILY_BANDWIDTH_REPORT__AWS_SECRET"]
-                              if os.environ.get('DAILY_BANDWIDTH_REPORT__AWS_SECRET') is not None else None),
 }
 
 CURRENT_ENVIRONMENT = os.environ["CURRENT_ENVIRONMENT"]
