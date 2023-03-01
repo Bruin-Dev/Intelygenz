@@ -235,7 +235,7 @@ SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__EXECUTION_CRON_EXPRESSION = parameter
 SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__LOOKUP_INTERVAL = parameters["common"]["service-affecting"]["daily-bandwidth-report"]["lookup-interval"]
 SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__ENABLED_CUSTOMERS_PER_HOST = json.dumps(json.loads(parameters["common"]["service-affecting"]["daily-bandwidth-report"]["enabled-customers-per-host"]))
 SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__RECIPIENTS = json.dumps(json.loads(parameters["common"]["service-affecting"]["daily-bandwidth-report"]["recipients"]))
-SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__S3_BUCKET = "eee"  # json.dumps(json.loads(parameters["dev"]["service-affecting"]["daily-bandwidth-report"]["s3-bucket"]))
+SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__S3_BUCKET = parameters["dev"]["service-affecting"]["s3-bucket-name"]
 SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__EXEC_ON_START = False
 
 # Service Outage Monitor - Shared variables
@@ -956,8 +956,8 @@ for host in SERVICE_AFFECTING__MONITOR__MONITORED_VELOCLOUD_HOSTS:
         f"DAILY_BANDWIDTH_REPORT__ENABLED_CUSTOMERS_PER_HOST={SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__ENABLED_CUSTOMERS_PER_HOST}",
         f"DAILY_BANDWIDTH_REPORT__RECIPIENTS={SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__RECIPIENTS}",
         f"DAILY_BANDWIDTH_REPORT__S3_BUCKET={SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__S3_BUCKET}",
-        f"DAILY_BANDWIDTH_REPORT__AWS_KEY={aws_credentials.access_key}",
-        f"DAILY_BANDWIDTH_REPORT__AWS_SECRET={aws_credentials.secret_key}",
+        f"AWS_ACCESS_KEY_ID={aws_credentials.access_key}",
+        f"AWS_SECRET_ACCESS_KEY={aws_credentials.secret_key}",
     ]
 
 for host in TNBA_MONITOR__MONITORED_VELOCLOUD_HOSTS:

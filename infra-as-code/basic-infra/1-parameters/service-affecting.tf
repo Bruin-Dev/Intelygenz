@@ -78,25 +78,6 @@ resource "aws_ssm_parameter" "parameter-service-affecting-daily-bandwidth-report
   })
 }
 
-resource "aws_ssm_parameter" "parameter-service-affecting-daily-bandwidth-report-s3-bucket" {
-  name        = "/automation-engine/${local.env}/service-affecting/daily-bandwidth-report/s3-bucket"
-  description = "s3-bucket that reports will be stored in"
-  type        = "SecureString"
-  value       = "-"  # to edit go to parameter store dashboard.
-  key_id      =  aws_kms_alias.kms_key.name
-
-  lifecycle {
-    ignore_changes = [
-      value,
-    ]
-  }
-
-  tags = merge(var.common_info, {
-    Name = "DAILY_BANDWIDTH_REPORT__S3_BUCKET"
-    note = "can be updated from the parameter store dashboard"
-  })
-}
-
 resource "aws_ssm_parameter" "parameter-service-affecting-monitor-autoresolve-lookup-interval" {
   count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0   # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/autoresolve-lookup-interval"
