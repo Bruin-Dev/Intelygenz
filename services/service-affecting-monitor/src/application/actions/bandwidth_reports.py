@@ -170,7 +170,7 @@ class BandwidthReports:
 
         if email:
             logger.info(self._config.BANDWIDTH_REPORT_CONFIG["recipients"])
-            # await self._email_repository.send_email(email_object=email)
+            await self._email_repository.send_email(email_object=email)
             self._metrics_repository.increment_reports_signet_execution_OK()
             logger.info(f"[bandwidth-reports] Report for client {client_id} sent via email")
         else:
