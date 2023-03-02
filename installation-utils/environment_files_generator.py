@@ -19,7 +19,6 @@ parser.add_argument("--aws-profile", default="ops-mettel")
 aws_profile = parser.parse_args().aws_profile
 
 session = boto3.Session(profile_name=aws_profile)
-aws_credentials = session.get_credentials().get_frozen_credentials()
 ssm = session.client("ssm")
 paginator = ssm.get_paginator("get_parameters_by_path")
 response_iterator = paginator.paginate(Path="/automation-engine", Recursive=True, WithDecryption=True)
@@ -237,6 +236,8 @@ SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__ENABLED_CUSTOMERS_PER_HOST = json.dum
 SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__RECIPIENTS = json.dumps(json.loads(parameters["common"]["service-affecting"]["daily-bandwidth-report"]["recipients"]))
 SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__S3_BUCKET = parameters["dev"]["service-affecting"]["s3-bucket-name"]
 SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__EXEC_ON_START = False
+AWS_ACCESS_KEY_ID = parameters["dev"]["service-affecting"]["s3-serving-affecting-iam-user-access-key"]
+AWS_SECRET_ACCESS_KEY = parameters["dev"]["service-affecting"]["s3-serving-affecting-iam-user-secret-key"]
 
 # Service Outage Monitor - Shared variables
 SERVICE_OUTAGE__MONITORED_PRODUCT_CATEGORY = parameters["common"]["service-outage"]["monitored-product-category"]
@@ -956,8 +957,8 @@ for host in SERVICE_AFFECTING__MONITOR__MONITORED_VELOCLOUD_HOSTS:
         f"DAILY_BANDWIDTH_REPORT__ENABLED_CUSTOMERS_PER_HOST={SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__ENABLED_CUSTOMERS_PER_HOST}",
         f"DAILY_BANDWIDTH_REPORT__RECIPIENTS={SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__RECIPIENTS}",
         f"DAILY_BANDWIDTH_REPORT__S3_BUCKET={SERVICE_AFFECTING__DAILY_BANDWIDTH_REPORT__S3_BUCKET}",
-        f"AWS_ACCESS_KEY_ID={aws_credentials.access_key}",
-        f"AWS_SECRET_ACCESS_KEY={aws_credentials.secret_key}",
+        f"AWS_ACCESS_KEY_ID={AWS_ACCESS_KEY_ID}",
+        f"AWS_SECRET_ACCESS_KEY={AWS_SECRET_ACCESS_KEY}",
     ]
 
 for host in TNBA_MONITOR__MONITORED_VELOCLOUD_HOSTS:
