@@ -4,7 +4,7 @@ FROM registry.gitlab.intelygenz.com/mettel/dockers/images/python3.10-alpine-base
 RUN apk add gcc libffi-dev musl-dev git
 
 RUN wget https://install.python-poetry.org -O poetry-install.py
-RUN python poetry-install.py
+RUN python poetry-install.py --version 1.3.2
 ENV PATH="/root/.local/bin:$PATH"
 ENV POETRY_VIRTUALENVS_CREATE=false
 

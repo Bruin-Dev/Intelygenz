@@ -9,7 +9,7 @@ ENV POETRY_VIRTUALENVS_CREATE=false
 
 RUN apk add gcc libffi-dev musl-dev git
 RUN wget https://install.python-poetry.org -O poetry-install.py
-RUN python poetry-install.py
+RUN python poetry-install.py --version 1.3.2
 
 COPY pyutils_automation/py310 /pyutils_automation/py310
 WORKDIR /pyutils_automation/py310
