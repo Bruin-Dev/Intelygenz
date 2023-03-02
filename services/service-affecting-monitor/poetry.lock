@@ -331,7 +331,7 @@ category = "main"
 optional = false
 python-versions = "3.10.4"
 files = []
-develop = false
+develop = true
 
 [package.dependencies]
 blinker = "1.5"
