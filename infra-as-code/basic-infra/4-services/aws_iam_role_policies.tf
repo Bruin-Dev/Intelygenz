@@ -5,7 +5,7 @@ data "aws_iam_group" "automation" {
 
 resource "aws_iam_group_policy" "automation_policy" {
   name   = "s3_service_affecting_monitor"
-  role   = data.aws_iam_group.automation.id
+  group   = data.aws_iam_group.automation.id
   policy = data.aws_iam_policy_document.service_affecting_monitor_s3_role.json
 }
 
