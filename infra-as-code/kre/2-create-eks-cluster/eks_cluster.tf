@@ -1,5 +1,5 @@
 module "mettel-automation-eks-cluster" {
-  source = "terraform-aws-modules/eks/aws"
+  source  = "terraform-aws-modules/eks/aws"
   version = "18.21.0"
 
   cluster_name                    = local.cluster_name
@@ -75,8 +75,8 @@ module "mettel-automation-eks-cluster" {
     echo "you are free little kubelet!"
     EOT 
 
-    ebs_optimized          = true
-    enable_monitoring      = true
+    ebs_optimized                          = true
+    enable_monitoring                      = true
     cloudwatch_log_group_retention_in_days = 30
 
     block_device_mappings = {
@@ -86,8 +86,8 @@ module "mettel-automation-eks-cluster" {
           delete_on_termination = true
           encrypted             = false
           # kms_key_id            = aws_kms_key.kms_key.arn
-          volume_size           = local.volume_size
-          volume_type           = local.eks_worker_root_volume_type
+          volume_size = local.volume_size
+          volume_type = local.eks_worker_root_volume_type
         }
 
       }
@@ -105,9 +105,9 @@ module "mettel-automation-eks-cluster" {
       max_size     = local.max-general-worker-nodes
       desired_size = local.min-general-worker-nodes
 
-      iam_role_name            = "general-role"
-      iam_role_description     = "general-role"
-      
+      iam_role_name        = "general-role"
+      iam_role_description = "general-role"
+
       iam_role_tags = {
         Purpose = "general-role"
       }
@@ -123,14 +123,14 @@ module "mettel-automation-eks-cluster" {
       bootstrap_extra_args = "--kubelet-extra-args '${local.max-pods-per-node} --node-labels=dedicated=mongo --register-with-taints=dedicated=mongo:NoSchedule'"
 
       # at this moment we only use 1 node, so force to use only one AZ for the EBS storage dependency
-      subnet_ids   = [local.subnet_public_1a]
+      subnet_ids = [local.subnet_public_1a]
 
       min_size     = local.min-mongo-worker-nodes
       max_size     = local.max-mongo-worker-nodes
       desired_size = local.min-mongo-worker-nodes
 
-      iam_role_name            = "mongo-role"
-      iam_role_description     = "mongo-role"
+      iam_role_name        = "mongo-role"
+      iam_role_description = "mongo-role"
       iam_role_tags = {
         Purpose = "mongo-role"
       }
@@ -145,14 +145,14 @@ module "mettel-automation-eks-cluster" {
       bootstrap_extra_args = "--kubelet-extra-args '--max-pods=110 --node-labels=dedicated=influx --register-with-taints=dedicated=influx:NoSchedule'"
 
       # at this moment we only use 1 node, so force to use only one AZ for the EBS storage dependency
-      subnet_ids   = [local.subnet_public_1b]
+      subnet_ids = [local.subnet_public_1b]
 
       min_size     = local.min-influx-worker-nodes
       max_size     = local.max-influx-worker-nodes
       desired_size = local.min-influx-worker-nodes
 
-      iam_role_name            = "influx-role"
-      iam_role_description     = "influx-role"
+      iam_role_name        = "influx-role"
+      iam_role_description = "influx-role"
 
       iam_role_tags = {
         Purpose = "influx-role"
@@ -164,9 +164,9 @@ module "mettel-automation-eks-cluster" {
   }
 
   tags = merge(var.common_info, {
-    name         = local.cluster_name
-    Environment  = terraform.workspace
-    "k8s.io/cluster-autoscaler/enabled" = "true"
+    name                                              = local.cluster_name
+    Environment                                       = terraform.workspace
+    "k8s.io/cluster-autoscaler/enabled"               = "true"
     "k8s.io/cluster-autoscaler/${local.cluster_name}" = "true"
   })
 }
@@ -243,7 +243,7 @@ resource "aws_eks_addon" "vpc_cni" {
 }
 
 module "vpc_cni_irsa" {
-  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
 
   role_name             = "${local.cluster_name}_vpc_cni"
   attach_vpc_cni_policy = true
@@ -257,7 +257,7 @@ module "vpc_cni_irsa" {
   }
 
   tags = merge(var.common_info, {
-    name         = "vpc_cni_irsa"
+    name = "vpc_cni_irsa"
   })
 }
 

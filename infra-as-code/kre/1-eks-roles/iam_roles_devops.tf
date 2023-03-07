@@ -3,7 +3,7 @@ data "template_file" "devops_eks_role" {
   template = file("${path.module}/policies/user-role.json")
   vars = {
     account_id = data.aws_caller_identity.current.account_id
-    user_name = var.eks_devops_users[count.index]
+    user_name  = var.eks_devops_users[count.index]
   }
 }
 
@@ -13,16 +13,16 @@ resource "aws_iam_role" "devops_eks" {
   assume_role_policy    = data.template_file.devops_eks_role[count.index].rendered
   force_detach_policies = true
   tags = {
-    Project-Role  = "devops"
-    Project-Env   = substr(var.CURRENT_ENVIRONMENT, 0, 3)
-    Project       = var.common_info.project
-    Provisioning  = var.common_info.provisioning
-    User          = var.eks_devops_users[count.index]
+    Project-Role = "devops"
+    Project-Env  = substr(var.CURRENT_ENVIRONMENT, 0, 3)
+    Project      = var.common_info.project
+    Provisioning = var.common_info.provisioning
+    User         = var.eks_devops_users[count.index]
   }
 }
 
 data "template_file" "assume-devops-role" {
-  count   = length(var.eks_devops_users)
+  count    = length(var.eks_devops_users)
   template = file("${path.module}/policies/assume-role-policy.json")
 
   vars = {
@@ -37,14 +37,14 @@ resource "aws_iam_policy" "assume-devops-role" {
 }
 
 data "template_file" "devops-role-policy" {
-  count   = length(var.eks_devops_users)
+  count    = length(var.eks_devops_users)
   template = file("${path.module}/policies/role-policy-eks.json")
 }
 
 resource "aws_iam_role_policy" "devops-role-policy-permissions" {
   count = length(var.eks_devops_users)
-  name = "role-policy-${substr(var.CURRENT_ENVIRONMENT, 0, 3)}-devops-${var.common_info.project}-${var.eks_devops_users[count.index]}"
-  role = aws_iam_role.devops_eks[count.index].id
+  name  = "role-policy-${substr(var.CURRENT_ENVIRONMENT, 0, 3)}-devops-${var.common_info.project}-${var.eks_devops_users[count.index]}"
+  role  = aws_iam_role.devops_eks[count.index].id
 
   policy = data.template_file.devops-role-policy[count.index].rendered
 }

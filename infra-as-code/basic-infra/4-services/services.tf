@@ -1,5 +1,5 @@
 data "aws_kms_key" "ssm-kms-key" {
-  key_id = "alias/kms-key-${var.CURRENT_ENVIRONMENT}-parameters"
+  key_id = "alias/kms-key-${local.short_current_environment}-parameters"
 }
 
 

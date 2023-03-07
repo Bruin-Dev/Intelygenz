@@ -1,12 +1,12 @@
-locals  {
+locals {
   // EKS cluster local variables
   cluster_name                = var.CURRENT_ENVIRONMENT == "dev" ? "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}" : var.common_info.project
   k8s_version                 = "1.21"
   eks_worker_root_volume_type = "gp3"
   volume_size                 = var.CURRENT_ENVIRONMENT == "dev" ? 50 : 100
-  
-  special_instance_type       = var.CURRENT_ENVIRONMENT == "dev" ? "m6a.large" : "m6i.xlarge" 
-  general_instance_type       = var.CURRENT_ENVIRONMENT == "dev" ? "m6a.large" : "m6a.xlarge" 
+
+  special_instance_type = var.CURRENT_ENVIRONMENT == "dev" ? "m6a.large" : "m6i.xlarge"
+  general_instance_type = var.CURRENT_ENVIRONMENT == "dev" ? "m6a.large" : "m6a.xlarge"
 
   min-general-worker-nodes = var.CURRENT_ENVIRONMENT == "dev" ? 3 : 3
   max-general-worker-nodes = var.CURRENT_ENVIRONMENT == "dev" ? 4 : 6
@@ -27,7 +27,7 @@ locals  {
   bucket_name = var.CURRENT_ENVIRONMENT == "dev" ? "${var.common_info.project}-${var.CURRENT_ENVIRONMENT}-eks" : "${var.common_info.project}-eks"
 
   // public subnets used in cluster
-  subnets         = [
+  subnets = [
     data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-public-1a.id,
     data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-public-1b.id
   ]

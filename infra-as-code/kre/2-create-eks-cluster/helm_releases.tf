@@ -4,10 +4,10 @@
 ####################################################
 
 resource "helm_release" "aws-ebs-csi-driver" {
-  name          = "aws-ebs-csi-driver"
+  name = "aws-ebs-csi-driver"
 
-  repository    = "https://kubernetes-sigs.github.io/aws-ebs-csi-driver"
-  chart         = "aws-ebs-csi-driver"
+  repository = "https://kubernetes-sigs.github.io/aws-ebs-csi-driver"
+  chart      = "aws-ebs-csi-driver"
 
   version       = var.EBS_CSI_HELM_CHART_VERSION
   namespace     = "kube-system"
@@ -27,29 +27,29 @@ resource "helm_release" "aws-ebs-csi-driver" {
   }
 
   set {
-    name = "controller.serviceAccount.annotations.\\eks\\.amazonaws\\.com/role-arn"
+    name  = "controller.serviceAccount.annotations.\\eks\\.amazonaws\\.com/role-arn"
     value = aws_iam_role.aws-ebs-csi-driver-role-eks.arn
     type  = "string"
   }
 
   depends_on = [
-      kubectl_manifest.aws_auth,
-      aws_eks_addon.vpc_cni,
-      aws_eks_addon.kube_proxy,
-      aws_eks_addon.coredns,
-      aws_iam_role.aws-ebs-csi-driver-role-eks,
-      module.mettel-automation-eks-cluster,
-      data.aws_eks_cluster_auth.cluster,
-      data.aws_eks_cluster.cluster
-   ]
+    kubectl_manifest.aws_auth,
+    aws_eks_addon.vpc_cni,
+    aws_eks_addon.kube_proxy,
+    aws_eks_addon.coredns,
+    aws_iam_role.aws-ebs-csi-driver-role-eks,
+    module.mettel-automation-eks-cluster,
+    data.aws_eks_cluster_auth.cluster,
+    data.aws_eks_cluster.cluster
+  ]
 }
 
 
 resource "helm_release" "external-dns" {
-  name          = "external-dns"
+  name = "external-dns"
 
-  repository    = "https://charts.bitnami.com/bitnami"
-  chart         = "external-dns"
+  repository = "https://charts.bitnami.com/bitnami"
+  chart      = "external-dns"
 
   version       = var.EXTERNAL_DNS_HELM_CHART_VERSION
   namespace     = "kube-system"
@@ -62,41 +62,41 @@ resource "helm_release" "external-dns" {
   ]
 
   set {
-    name = "serviceAccount.annotations.\\eks\\.amazonaws\\.com/role-arn"
+    name  = "serviceAccount.annotations.\\eks\\.amazonaws\\.com/role-arn"
     value = aws_iam_role.external-dns-role-eks.arn
     type  = "string"
   }
 
   set {
-    name = "aws.roleArn"
+    name  = "aws.roleArn"
     value = aws_iam_role.external-dns-role-eks.arn
     type  = "string"
   }
 
   set {
-    name = "txtOwnerId"
+    name  = "txtOwnerId"
     value = "kre-${var.CURRENT_ENVIRONMENT}"
     type  = "string"
   }
 
   depends_on = [
-      kubectl_manifest.aws_auth,
-      aws_eks_addon.vpc_cni,
-      helm_release.aws-ebs-csi-driver,
-      aws_eks_addon.kube_proxy,
-      aws_eks_addon.coredns,
-      aws_iam_role.external-dns-role-eks,
-      module.mettel-automation-eks-cluster,
-      data.aws_eks_cluster_auth.cluster,
-      data.aws_eks_cluster.cluster
-   ]
+    kubectl_manifest.aws_auth,
+    aws_eks_addon.vpc_cni,
+    helm_release.aws-ebs-csi-driver,
+    aws_eks_addon.kube_proxy,
+    aws_eks_addon.coredns,
+    aws_iam_role.external-dns-role-eks,
+    module.mettel-automation-eks-cluster,
+    data.aws_eks_cluster_auth.cluster,
+    data.aws_eks_cluster.cluster
+  ]
 }
 
 resource "helm_release" "ingress-nginx" {
-  name          = "ingress-nginx"
+  name = "ingress-nginx"
 
-  repository    = "https://kubernetes.github.io/ingress-nginx"
-  chart         = "ingress-nginx"
+  repository = "https://kubernetes.github.io/ingress-nginx"
+  chart      = "ingress-nginx"
 
   version       = var.INGRESS_NGINX_HELM_CHART_VERSION
   namespace     = "kube-system"
@@ -111,28 +111,28 @@ resource "helm_release" "ingress-nginx" {
   dynamic "set" {
     for_each = var.WHITELISTED_IPS
     content {
-      name = join("", ["controller.service.loadBalancerSourceRanges[", set.key, "]"])
+      name  = join("", ["controller.service.loadBalancerSourceRanges[", set.key, "]"])
       value = set.value
     }
   }
 
   depends_on = [
-      kubectl_manifest.aws_auth,
-      aws_eks_addon.vpc_cni,
-      helm_release.aws-ebs-csi-driver,
-      aws_eks_addon.kube_proxy,
-      aws_eks_addon.coredns,
-      module.mettel-automation-eks-cluster,
-      aws_iam_role.external-dns-role-eks,
-      data.aws_eks_cluster_auth.cluster,
-   ]
+    kubectl_manifest.aws_auth,
+    aws_eks_addon.vpc_cni,
+    helm_release.aws-ebs-csi-driver,
+    aws_eks_addon.kube_proxy,
+    aws_eks_addon.coredns,
+    module.mettel-automation-eks-cluster,
+    aws_iam_role.external-dns-role-eks,
+    data.aws_eks_cluster_auth.cluster,
+  ]
 }
 
 resource "helm_release" "metrics-server" {
-  name          = "metrics-server"
+  name = "metrics-server"
 
-  repository    = "https://kubernetes-sigs.github.io/metrics-server/"
-  chart         = "metrics-server"
+  repository = "https://kubernetes-sigs.github.io/metrics-server/"
+  chart      = "metrics-server"
 
   version       = var.METRICS_SERVER_HELM_CHART_VERSION
   namespace     = "kube-system"
@@ -141,22 +141,22 @@ resource "helm_release" "metrics-server" {
   wait          = true
 
   depends_on = [
-      kubectl_manifest.aws_auth,
-      aws_eks_addon.vpc_cni,
-      helm_release.aws-ebs-csi-driver,
-      aws_eks_addon.kube_proxy,
-      aws_eks_addon.coredns,
-      module.mettel-automation-eks-cluster,
-      data.aws_eks_cluster_auth.cluster,
-   ]
+    kubectl_manifest.aws_auth,
+    aws_eks_addon.vpc_cni,
+    helm_release.aws-ebs-csi-driver,
+    aws_eks_addon.kube_proxy,
+    aws_eks_addon.coredns,
+    module.mettel-automation-eks-cluster,
+    data.aws_eks_cluster_auth.cluster,
+  ]
 }
 
 
 resource "helm_release" "descheduler" {
-  name          = "descheduler"
+  name = "descheduler"
 
-  repository    = "https://kubernetes-sigs.github.io/descheduler/"
-  chart         = "descheduler"
+  repository = "https://kubernetes-sigs.github.io/descheduler/"
+  chart      = "descheduler"
 
   version       = var.DESCHEDULER_HELM_CHART_VERSION
   namespace     = "kube-system"
@@ -169,12 +169,12 @@ resource "helm_release" "descheduler" {
   ]
 
   depends_on = [
-      kubectl_manifest.aws_auth,
-      aws_eks_addon.vpc_cni,
-      helm_release.aws-ebs-csi-driver,
-      aws_eks_addon.kube_proxy,
-      aws_eks_addon.coredns,
-      module.mettel-automation-eks-cluster,
-      data.aws_eks_cluster_auth.cluster,
-   ]
+    kubectl_manifest.aws_auth,
+    aws_eks_addon.vpc_cni,
+    helm_release.aws-ebs-csi-driver,
+    aws_eks_addon.kube_proxy,
+    aws_eks_addon.coredns,
+    module.mettel-automation-eks-cluster,
+    data.aws_eks_cluster_auth.cluster,
+  ]
 }

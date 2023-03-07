@@ -1,10 +1,10 @@
 locals {
-  eks_cluster_oidc_issuer_arn = trim(data.aws_eks_cluster.cluster.identity[0]["oidc"][0]["issuer"], "https://")
-  external-dns-role-name =  "${local.cluster_name}-external-dns-oidc"
-  external-dns-policy-name = "${local.cluster_name}-external-dns-oidc-policy"
-  cert-manager-role-name =  "${local.cluster_name}-cert-manager-oidc"
-  cert-manager-policy-name = "${local.cluster_name}-cert-manager-oidc-policy"
-  aws-ebs-csi-driver-role-name =  "${local.cluster_name}-aws-ebs-csi-driver-oidc"
+  eks_cluster_oidc_issuer_arn    = trim(data.aws_eks_cluster.cluster.identity[0]["oidc"][0]["issuer"], "https://")
+  external-dns-role-name         = "${local.cluster_name}-external-dns-oidc"
+  external-dns-policy-name       = "${local.cluster_name}-external-dns-oidc-policy"
+  cert-manager-role-name         = "${local.cluster_name}-cert-manager-oidc"
+  cert-manager-policy-name       = "${local.cluster_name}-cert-manager-oidc-policy"
+  aws-ebs-csi-driver-role-name   = "${local.cluster_name}-aws-ebs-csi-driver-oidc"
   aws-ebs-csi-driver-policy-name = "${local.cluster_name}-aws-ebs-csi-driver-oidc-policy"
 }
 
@@ -18,7 +18,7 @@ data "template_file" "external-dns-eks-role" {
 
   vars = {
     eks_cluster_oidc_arn = local.eks_cluster_oidc_issuer_arn
-    account_id = data.aws_caller_identity.current.account_id
+    account_id           = data.aws_caller_identity.current.account_id
   }
 }
 
@@ -26,7 +26,7 @@ resource "aws_iam_role" "external-dns-role-eks" {
   name                  = local.external-dns-role-name
   assume_role_policy    = data.template_file.external-dns-eks-role.rendered
   force_detach_policies = true
-  
+
   tags = {
     Environment  = terraform.workspace
     Project      = var.common_info.project
@@ -58,7 +58,7 @@ data "template_file" "cert-manager-eks-role" {
 
   vars = {
     eks_cluster_oidc_arn = local.eks_cluster_oidc_issuer_arn
-    account_id = data.aws_caller_identity.current.account_id
+    account_id           = data.aws_caller_identity.current.account_id
   }
 }
 
@@ -66,7 +66,7 @@ resource "aws_iam_role" "cert-manager-role-eks" {
   name                  = local.cert-manager-role-name
   assume_role_policy    = data.template_file.cert-manager-eks-role.rendered
   force_detach_policies = true
-  
+
   tags = {
     Environment  = terraform.workspace
     Project      = var.common_info.project
@@ -98,7 +98,7 @@ data "template_file" "aws-ebs-csi-driver-eks-role" {
 
   vars = {
     eks_cluster_oidc_arn = local.eks_cluster_oidc_issuer_arn
-    account_id = data.aws_caller_identity.current.account_id
+    account_id           = data.aws_caller_identity.current.account_id
   }
 }
 
@@ -106,7 +106,7 @@ resource "aws_iam_role" "aws-ebs-csi-driver-role-eks" {
   name                  = local.aws-ebs-csi-driver-role-name
   assume_role_policy    = data.template_file.aws-ebs-csi-driver-eks-role.rendered
   force_detach_policies = true
-  
+
   tags = {
     Environment  = terraform.workspace
     Project      = var.common_info.project

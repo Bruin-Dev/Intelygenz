@@ -20,9 +20,9 @@ resource "aws_s3_object" "pem_file" {
   content = tls_private_key.tls_private_key_eks.private_key_pem
 
   tags = {
-    Name          = "${local.cluster_name}.pem"
-    Environment   = terraform.workspace
-    Project       = var.common_info.project
-    Provisioning  = var.common_info.provisioning
+    Name         = "${local.cluster_name}.pem"
+    Environment  = terraform.workspace
+    Project      = var.common_info.project
+    Provisioning = var.common_info.provisioning
   }
 }

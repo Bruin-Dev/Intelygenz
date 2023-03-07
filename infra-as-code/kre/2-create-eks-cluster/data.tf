@@ -7,7 +7,7 @@ data "terraform_remote_state" "tfstate-network-resources" {
   config = {
     bucket = "automation-infrastructure"
     region = "us-east-1"
-    key = "terraform-${terraform.workspace}-network-resources.tfstate"
+    key    = "terraform-${terraform.workspace}-network-resources.tfstate"
   }
 }
 
@@ -17,7 +17,7 @@ data "terraform_remote_state" "tfstate-s3-bucket-eks" {
   config = {
     bucket = "automation-infrastructure"
     region = "us-east-1"
-    key = "env:/${terraform.workspace}/mettel-automation-eks-kre-bucket.tfstate"
+    key    = "env:/${terraform.workspace}/mettel-automation-eks-kre-bucket.tfstate"
   }
 }
 

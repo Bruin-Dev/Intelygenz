@@ -1,15 +1,15 @@
 variable "subdomain_name_prefix" {
-  type = string
+  type    = string
   default = "intelygenz"
 }
 
 variable "region" {
-  type = string
+  type    = string
   default = "us-east-1"
 }
 
 variable "enable_spf_record" {
-  type = bool
+  type    = bool
   default = true
 }
 

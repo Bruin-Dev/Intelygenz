@@ -10,13 +10,13 @@ variable "common_info" {
 
 # Current environment variable
 variable "CURRENT_ENVIRONMENT" {
-  default = "dev"
+  default     = "dev"
   description = "Name of the environment to identify common resources to be used"
-  type = string
+  type        = string
 }
 
 variable "HOSTED_ZONE_DOMAIN_NAME" {
-  default = "mettel-automation.net"
+  default     = "mettel-automation.net"
   description = "Name of the common domain name used in the project"
 }
 

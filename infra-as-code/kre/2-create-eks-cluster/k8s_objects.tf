@@ -2,18 +2,18 @@ resource "kubernetes_storage_class" "gp3" {
   metadata {
     name = "gp3"
   }
-  storage_provisioner  = "ebs.csi.aws.com"
-  reclaim_policy       = "Delete"
-  volume_binding_mode  = "WaitForFirstConsumer"
+  storage_provisioner = "ebs.csi.aws.com"
+  reclaim_policy      = "Delete"
+  volume_binding_mode = "WaitForFirstConsumer"
   parameters = {
-    type = "gp3",
+    type      = "gp3",
     encrypted = false
   }
   mount_options = ["debug"]
 
   depends_on = [
     module.mettel-automation-eks-cluster,
-          helm_release.aws-ebs-csi-driver
+    helm_release.aws-ebs-csi-driver
   ]
 }
 
@@ -25,9 +25,9 @@ module "cert_manager" {
 
   additional_set = [
     {
-        name  = "serviceAccount.annotations.\\eks\\.amazonaws\\.com/role-arn"
-        value = aws_iam_role.cert-manager-role-eks.arn
-        type  = "string"
+      name  = "serviceAccount.annotations.\\eks\\.amazonaws\\.com/role-arn"
+      value = aws_iam_role.cert-manager-role-eks.arn
+      type  = "string"
     }
   ]
 
@@ -35,7 +35,7 @@ module "cert_manager" {
     {
       dns01 = {
         route53 = {
-          region  = local.aws_default_region
+          region = local.aws_default_region
         }
       },
       selector = {
@@ -56,12 +56,12 @@ module "cert_manager" {
   ]
 
   depends_on = [
-      kubectl_manifest.aws_auth,
-      aws_eks_addon.vpc_cni,
-      helm_release.aws-ebs-csi-driver,
-      aws_eks_addon.kube_proxy,
-      aws_eks_addon.coredns,
-      module.mettel-automation-eks-cluster,
-      data.aws_eks_cluster_auth.cluster,
-   ]
+    kubectl_manifest.aws_auth,
+    aws_eks_addon.vpc_cni,
+    helm_release.aws-ebs-csi-driver,
+    aws_eks_addon.kube_proxy,
+    aws_eks_addon.coredns,
+    module.mettel-automation-eks-cluster,
+    data.aws_eks_cluster_auth.cluster,
+  ]
 }
