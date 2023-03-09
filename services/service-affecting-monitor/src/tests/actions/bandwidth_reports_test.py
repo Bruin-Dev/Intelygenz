@@ -67,6 +67,7 @@ class TestBandwidthReports:
         client_name = "MetTel"
         serial_number = "VC1234567"
         edge = {"host": "test", "edge_id": 1, "enterprise_id": 2, "enterprise_name": "Test"}
+        should_send_email = True
 
         bruin_client_info = make_bruin_client_info(client_id=client_id, client_name=client_name)
         cached_edge = make_cached_edge(full_id=edge, serial_number=serial_number, bruin_client_info=bruin_client_info)
@@ -83,12 +84,12 @@ class TestBandwidthReports:
         bandwidth_reports._generate_bandwidth_report_for_client = AsyncMock()
 
         enterprise_id_edge_id = bandwidth_reports.get_enterprise_id_and_edge_id_relation_from_customer_cache_response(
-            customer_cache, [client_id], bandwidth_reports._config.VELOCLOUD_HOST)
+            customer_cache, bandwidth_reports._config.VELOCLOUD_HOST)
         await bandwidth_reports._bandwidth_reports_job()
 
         bandwidth_reports._customer_cache_repository.get_cache_for_affecting_monitoring.assert_awaited_once()
         bandwidth_reports._generate_bandwidth_report_for_client.assert_awaited_once_with(
-            client_id, client_name, {serial_number}, links_metrics, enterprise_id_edge_id
+            client_id, client_name, {serial_number}, links_metrics, enterprise_id_edge_id, should_send_email
         )
 
     @pytest.mark.asyncio
@@ -119,6 +120,7 @@ class TestBandwidthReports:
         edge_name = "Test Edge"
         interface = "GE1"
         link_name = "Verizon Wireless( MTL- 544825157)"
+        should_send_email = True
 
         edge_full_id = make_edge_full_id(
             host=host, enterprise_id=enterprise_id, enterprise_name=enterprise_name, edge_id=edge_id)
@@ -134,7 +136,7 @@ class TestBandwidthReports:
         )
 
         enterprise_id_edge_id = bandwidth_reports.get_enterprise_id_and_edge_id_relation_from_customer_cache_response(
-            customer_cache, [client_id], host)
+            customer_cache, host)
         link_with_edge = make_link_with_edge_info(link_info=link, edge_info=edge)
         # link_metrics = make_metrics_for_link(link_with_edge_info=link_with_edge)
         # links_metrics = [link_metrics]
@@ -237,7 +239,7 @@ class TestBandwidthReports:
 
         with patch.object(bandwidth_reports._config, "CURRENT_ENVIRONMENT", "production"):
             await bandwidth_reports._generate_bandwidth_report_for_client(
-                client_id, client_name, {serial_number}, link_series, enterprise_id_edge_id
+                client_id, client_name, {serial_number}, link_series, enterprise_id_edge_id, should_send_email
             )
 
         report_items = [

@@ -895,11 +895,15 @@ class BruinRepository:
             "trouble": trouble,
         }
 
-    def prepare_items_for_bandwidth_report(self, links_metrics, grouped_ticket_details, enterprise_id_edge_id_relation):
+    def prepare_items_for_bandwidth_report(self, links_metrics, grouped_ticket_details,
+                                           enterprise_id_edge_id_relation, serial_numbers):
         logger.info(f"[bandwidth-reports] Preparing items for bandwidth report")
         report_items = []
         for link_metrics in links_metrics:
             serial_number = link_metrics["serial_number"]
+            if serial_number not in serial_numbers:
+                continue
+
             interface = link_metrics["interface"]
             enterprise_info = [
                 {

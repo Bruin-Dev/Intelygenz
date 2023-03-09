@@ -50,8 +50,12 @@ class BandwidthReports:
 
     async def _bandwidth_reports_job(self):
         velocloud_host = self._config.VELOCLOUD_HOST
-        clients = self._config.BANDWIDTH_REPORT_CONFIG["client_ids_by_host"][velocloud_host]
-        logger.info(f"[bandwidth-reports] Running bandwidth reports process for {len(clients)} client(s)")
+        clients_to_email = []
+        if self._config.BANDWIDTH_REPORT_CONFIG["client_ids_by_host"].get(velocloud_host):
+            clients_to_email = self._config.BANDWIDTH_REPORT_CONFIG["client_ids_by_host"][velocloud_host]
+
+        logger.info(f"[bandwidth-reports] Running bandwidth reports process for all clients")
+        logger.info(f"[bandwidth-reports] Emailing bandwidth reports to {len(clients_to_email)} clients")
         start = datetime.now()
 
         customer_cache_response = await self._customer_cache_repository.get_cache_for_affecting_monitoring()
@@ -63,7 +67,7 @@ class BandwidthReports:
             return
 
         enterprise_id_edge_id_relation = self.get_enterprise_id_and_edge_id_relation_from_customer_cache_response(
-            customer_cache_body, clients, velocloud_host
+            customer_cache_body, velocloud_host
         )
 
         now = datetime.now(utc).replace(hour=5, minute=0, second=0, microsecond=0)
@@ -82,37 +86,43 @@ class BandwidthReports:
             self._metrics_repository.increment_reports_signet_execution_KO()
             return
 
-        serial_numbers = set()
+        clients = set()
         client_names_by_id = {}
 
         for edge in customer_cache_body:
-            serial_numbers.add(edge["serial_number"])
             client = edge["bruin_client_info"]
+            clients.add(client["client_id"])
             client_names_by_id[client["client_id"]] = client["client_name"]
+
+        logger.info(f"[bandwidth-reports] Generating bandwidth reports for {len(clients)} clients")
 
         for client_id in clients:
             client_name = client_names_by_id[client_id]
+            should_email_report = client_id in clients_to_email
+            serial_numbers = set([
+                edge["serial_number"]
+                for edge in customer_cache_body
+                if edge["bruin_client_info"]["client_id"] == client_id
+            ])
             await self._generate_bandwidth_report_for_client(
-                client_id, client_name, serial_numbers, edge_links_metrics_response_body, enterprise_id_edge_id_relation
+                client_id, client_name, serial_numbers, edge_links_metrics_response_body,
+                enterprise_id_edge_id_relation, should_email_report
             )
 
         end = datetime.now()
         logger.info(
-            f"[bandwidth-reports] Report generation for all clients finished. "
+            f"[bandwidth-reports] Report generation for all {len(clients)} clients finished. "
             f"Took {round((end - start).total_seconds() / 60, 2)} minutes."
         )
 
     def get_enterprise_id_and_edge_id_relation_from_customer_cache_response(
-        self, customer_cache_response_body, clients_id, velocloud_host
+        self, customer_cache_response_body, velocloud_host
     ):
         logger.info(f"[bandwidth-reports] Creating enterprise id edge id_relation list")
         enterprise_id_edge_id_relation = []
         for edge_info in customer_cache_response_body:
 
-            if (
-                edge_info["edge"]["host"] == velocloud_host
-                and edge_info["bruin_client_info"]["client_id"] in clients_id
-            ):
+            if edge_info["edge"]["host"] == velocloud_host:
                 enterprise_id_edge_id_relation.append(
                     {
                         "enterprise_id": edge_info["edge"]["enterprise_id"],
@@ -127,9 +137,9 @@ class BandwidthReports:
         return enterprise_id_edge_id_relation
 
     async def _generate_bandwidth_report_for_client(self, client_id, client_name, serial_numbers, links_metrics,
-                                                    enterprise_id_edge_id_relation):
+                                                    enterprise_id_edge_id_relation, should_email_report):
         logger.info(f"[bandwidth-reports] Generating bandwidth report for client id {client_id} and \
-                      client name {client_name}")
+                      client name {client_name}, serial numbers {len(serial_numbers)}, {serial_numbers}")
         start_date = self._get_start_date()
         end_date = self._get_end_date()
 
@@ -152,7 +162,7 @@ class BandwidthReports:
         await asyncio.sleep(0)
 
         report_items = self._bruin_repository.prepare_items_for_bandwidth_report(links_metrics, grouped_ticket_details,
-                                                                                 enterprise_id_edge_id_relation)
+                                                                                 enterprise_id_edge_id_relation, serial_numbers)
         report_items.sort(key=lambda item: (item["serial_number"], item["interface"]))
 
         if self._config.CURRENT_ENVIRONMENT != "production":
@@ -168,14 +178,15 @@ class BandwidthReports:
             report_items=report_items,
         )
 
-        if email:
-            logger.info(self._config.BANDWIDTH_REPORT_CONFIG["recipients"])
-            await self._email_repository.send_email(email_object=email)
-            self._metrics_repository.increment_reports_signet_execution_OK()
-            logger.info(f"[bandwidth-reports] Report for client {client_id} sent via email")
-        else:
-            logger.error(f"[bandwidth-reports] No report for client {client_id} was sent via email")
-            return
+        if should_email_report:
+            if email:
+                logger.info(self._config.BANDWIDTH_REPORT_CONFIG["recipients"])
+                await self._email_repository.send_email(email_object=email)
+                self._metrics_repository.increment_reports_signet_execution_OK()
+                logger.info(f"[bandwidth-reports] Report for client {client_id} sent via email")
+            else:
+                logger.error(f"[bandwidth-reports] No report for client {client_id} was sent via email")
+                return
 
         csv_attachment = next(iter(email["body"]["email_data"]["attachments"]), None)
         if (csv_attachment):

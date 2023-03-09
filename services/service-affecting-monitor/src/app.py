@@ -191,15 +191,9 @@ class Container:
                 "as these reports are disabled for this host"
             )
 
-        if config.VELOCLOUD_HOST in config.BANDWIDTH_REPORT_CONFIG["client_ids_by_host"]:
-            await self._bandwidth_reports.start_bandwidth_reports_job(
-                exec_on_start=config.BANDWIDTH_REPORT_CONFIG["exec_on_start"]
-            )
-        else:
-            app_logger.warning(
-                f"Job for Daily Bandwidth Reports will not be scheduled for {config.VELOCLOUD_HOST} "
-                "as these reports are disabled for this host"
-            )
+        await self._bandwidth_reports.start_bandwidth_reports_job(
+            exec_on_start=config.BANDWIDTH_REPORT_CONFIG["exec_on_start"]
+        )
 
         self._scheduler.start()
 
