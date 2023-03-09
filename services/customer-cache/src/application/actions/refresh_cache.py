@@ -232,7 +232,8 @@ class RefreshCache:
                 inventory_attributes_response_status = inventory_attributes_response["status"]
                 if inventory_attributes_response_status not in range(200, 300):
                     logger.error(
-                        f"Error while fetching inventory attributes for edge {serial_number}: {inventory_attributes_response}"
+                        f"Error while fetching inventory attributes for edge {serial_number}: "
+                        f"{inventory_attributes_response}"
                     )
                     return
 
