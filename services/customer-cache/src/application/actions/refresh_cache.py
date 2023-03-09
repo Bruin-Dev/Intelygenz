@@ -226,24 +226,28 @@ class RefreshCache:
                 bruin_client_info = client_info_response_body[0]
                 client_id = bruin_client_info.get("client_id")
 
-                management_status_response = await self._bruin_repository.get_management_status(
+                inventory_attributes_response = await self._bruin_repository.get_inventory_attributes(
                     client_id, serial_number
                 )
-                management_status_response_status = management_status_response["status"]
-                if management_status_response_status not in range(200, 300):
+                inventory_attributes_response_status = inventory_attributes_response["status"]
+                if inventory_attributes_response_status not in range(200, 300):
                     logger.error(
-                        f"Error while fetching management status for edge {serial_number}: {management_status_response}"
+                        f"Error while fetching inventory attributes for edge {serial_number}: {inventory_attributes_response}"
                     )
                     return
 
-                management_status_response_body = management_status_response["body"]
-                if not self._bruin_repository.is_management_status_active(management_status_response_body):
+                inventory_attributes_response_body = inventory_attributes_response["body"]
+                management_status = self._bruin_repository.get_management_status_from_inventory_attributes(
+                    inventory_attributes_response_body
+                )
+
+                if not self._bruin_repository.is_management_status_active(management_status):
                     logger.warning(f"Management status is not active for {edge_identifier}. Skipping...")
                     self._invalid_edges[host].append(edge_identifier)
                     return
                 else:
                     if (
-                        management_status_response_body == "Pending"
+                        management_status == "Pending"
                         and client_id in self._config.REFRESH_CONFIG["blacklisted_client_ids"]
                     ):
                         logger.warning(
@@ -253,6 +257,11 @@ class RefreshCache:
                         self._invalid_edges[host].append(edge_identifier)
                         return
                     logger.info(f"Management status for {serial_number} seems active")
+
+                logical_ids = edge_with_serial["logical_ids"]
+                logical_ids_with_access_types = self._add_access_type_to_logical_ids(
+                    inventory_attributes_response_body, logical_ids
+                )
 
                 site_id = bruin_client_info["site_id"]
                 site_details_response = await self._bruin_repository.get_site_details(client_id, site_id)
@@ -278,7 +287,7 @@ class RefreshCache:
                     "edge": edge_with_serial["edge"],
                     "edge_name": edge_with_serial["edge_name"],
                     "last_contact": edge_with_serial["last_contact"],
-                    "logical_ids": edge_with_serial["logical_ids"],
+                    "logical_ids": logical_ids_with_access_types,
                     "serial_number": serial_number,
                     "ha_serial_number": edge_with_serial["ha_serial_number"],
                     "bruin_client_info": bruin_client_info,
@@ -292,6 +301,26 @@ class RefreshCache:
             return await _filter_edge_list()
         except Exception as e:
             logger.error(f"An error occurred while checking if edge {serial_number} should be cached or not -> {e}")
+
+    def _add_access_type_to_logical_ids(self, inventory_attributes_response_body, logical_ids):
+        logical_ids_with_access_types = []
+        for logical_id in logical_ids:
+            attr_key = f'{logical_id["interface_name"]} Access Type'
+            access_type = [
+                attribute["value"]
+                for attribute in inventory_attributes_response_body["attributes"]
+                if attribute["key"] == attr_key
+            ]
+            if len(access_type) > 0:
+                access_type = access_type[0]
+            else:
+                access_type = None
+
+            logical_id_with_access_type = logical_id
+            logical_id_with_access_type["access_type"] = access_type
+            logical_ids_with_access_types.append(logical_id_with_access_type)
+
+        return logical_ids_with_access_types
 
     async def _send_email_snapshot(self, host, old_cache, new_cache):
         logger.info("Sending email with snapshots of cache...")

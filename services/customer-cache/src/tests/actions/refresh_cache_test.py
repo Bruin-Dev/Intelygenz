@@ -761,6 +761,7 @@ class TestRefreshCache:
                 "Phone": "123-456-2890",
             }
         ]
+        logical_ids = ["list of logical ids"]
 
         last_contact = str(datetime.now())
         instance_edges_refresh_cache[0]["last_contact"] = last_contact
@@ -771,6 +772,7 @@ class TestRefreshCache:
         instance_cache_edges[0]["site_details"] = site_details
         instance_cache_edges[0]["ticket_contact_details"] = next(iter(ticket_contacts))
         instance_cache_edges[0]["ticket_contact_additional_subscribers"] = ticket_contacts[1:]
+        instance_cache_edges[0]["logical_ids"] = logical_ids
         instance_edges_refresh_cache[0]["bruin_client_info"] = [client_info]
         instance_edges_refresh_cache[0]["edge_name"] = "Big Boss"
         links_configuration = [
@@ -788,9 +790,13 @@ class TestRefreshCache:
         instance_refresh_cache._bruin_repository.get_client_info = AsyncMock(
             return_value={"body": [client_info, client_info], "status": 200}
         )
-        instance_refresh_cache._bruin_repository.get_management_status = AsyncMock(
-            return_value={"body": ["some management status"], "status": 200}
+        instance_refresh_cache._bruin_repository.get_inventory_attributes = AsyncMock(
+            return_value={"body": ["some attributes"], "status": 200}
         )
+        instance_refresh_cache._bruin_repository.get_management_status_from_inventory_attributes = Mock(
+            return_value="active"
+        )
+        instance_refresh_cache._add_access_type_to_logical_ids = Mock(return_value=logical_ids)
         instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
         instance_refresh_cache._bruin_repository.get_site_details = AsyncMock(
             return_value={"body": site_details, "status": 200}
@@ -805,7 +811,9 @@ class TestRefreshCache:
         cache_return = await instance_refresh_cache._filter_edge_list(instance_edges_refresh_cache[0])
 
         instance_refresh_cache._bruin_repository.get_client_info.assert_awaited()
-        instance_refresh_cache._bruin_repository.get_management_status.assert_awaited()
+        instance_refresh_cache._bruin_repository.get_inventory_attributes.assert_awaited()
+        instance_refresh_cache._bruin_repository.get_management_status_from_inventory_attributes.assert_called()
+        instance_refresh_cache._add_access_type_to_logical_ids.assert_called()
         instance_refresh_cache._bruin_repository.is_management_status_active.assert_called()
         instance_refresh_cache._bruin_repository.get_site_details.assert_awaited()
         instance_refresh_cache._get_tz_offset.assert_called_with(site_details)
@@ -905,17 +913,23 @@ class TestRefreshCache:
         instance_refresh_cache._bruin_repository.get_client_info = AsyncMock(
             return_value={"body": [{"client_id": "some client info"}], "status": 200}
         )
-        instance_refresh_cache._bruin_repository.get_management_status = AsyncMock(
-            return_value={"body": "some management status", "status": 400}
+        instance_refresh_cache._bruin_repository.get_inventory_attributes = AsyncMock(
+            return_value={"body": ["some attributes"], "status": 200}
         )
+        instance_refresh_cache._bruin_repository.get_management_status_from_inventory_attributes = Mock(
+            return_value="active"
+        )
+        instance_refresh_cache._add_access_type_to_logical_ids = Mock()
         instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
 
         instance_refresh_cache._storage_repository.set_cache = Mock()
 
         cache_return = await instance_refresh_cache._filter_edge_list(instance_edges_refresh_cache[0])
         instance_refresh_cache._bruin_repository.get_client_info.assert_awaited()
-        instance_refresh_cache._bruin_repository.get_management_status.assert_awaited()
-        instance_refresh_cache._bruin_repository.is_management_status_active.assert_not_called()
+        instance_refresh_cache._bruin_repository.get_inventory_attributes.assert_awaited()
+        instance_refresh_cache._bruin_repository.get_management_status_from_inventory_attributes.assert_called()
+        instance_refresh_cache._bruin_repository.is_management_status_active.assert_called()
+        instance_refresh_cache._add_access_type_to_logical_ids.assert_called()
 
         assert cache_return is None
         assert instance_refresh_cache._invalid_edges == {}
@@ -934,8 +948,11 @@ class TestRefreshCache:
         instance_refresh_cache._bruin_repository.get_client_info = AsyncMock(
             return_value={"body": [{"client_id": "some client info"}], "status": 200}
         )
-        instance_refresh_cache._bruin_repository.get_management_status = AsyncMock(
-            return_value={"body": "some management status", "status": 200}
+        instance_refresh_cache._bruin_repository.get_inventory_attributes = AsyncMock(
+            return_value={"body": ["some attributes"], "status": 200}
+        )
+        instance_refresh_cache._bruin_repository.get_management_status_from_inventory_attributes = Mock(
+            return_value="not active"
         )
         instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=False)
         instance_refresh_cache._storage_repository.set_cache = Mock()
@@ -943,7 +960,8 @@ class TestRefreshCache:
 
         cache_return = await instance_refresh_cache._filter_edge_list(instance_edges_refresh_cache[0])
         instance_refresh_cache._bruin_repository.get_client_info.assert_awaited()
-        instance_refresh_cache._bruin_repository.get_management_status.assert_awaited()
+        instance_refresh_cache._bruin_repository.get_inventory_attributes.assert_awaited()
+        instance_refresh_cache._bruin_repository.get_management_status_from_inventory_attributes.assert_called()
         instance_refresh_cache._bruin_repository.is_management_status_active.assert_called()
 
         assert cache_return is None
@@ -965,9 +983,13 @@ class TestRefreshCache:
         instance_refresh_cache._bruin_repository.get_client_info = AsyncMock(
             return_value={"body": [{"client_id": 30000, "client_name": "MetTel", "site_id": 12345}], "status": 200}
         )
-        instance_refresh_cache._bruin_repository.get_management_status = AsyncMock(
-            return_value={"body": "some management status", "status": 200}
+        instance_refresh_cache._bruin_repository.get_inventory_attributes = AsyncMock(
+            return_value={"body": ["some attributes"], "status": 200}
         )
+        instance_refresh_cache._bruin_repository.get_management_status_from_inventory_attributes = Mock(
+            return_value="active"
+        )
+        instance_refresh_cache._add_access_type_to_logical_ids = Mock()
         instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
         instance_refresh_cache._bruin_repository.get_site_details = AsyncMock(
             return_value={
@@ -979,8 +1001,10 @@ class TestRefreshCache:
 
         cache_return = await instance_refresh_cache._filter_edge_list(instance_edges_refresh_cache[0])
         instance_refresh_cache._bruin_repository.get_client_info.assert_awaited()
-        instance_refresh_cache._bruin_repository.get_management_status.assert_awaited()
+        instance_refresh_cache._bruin_repository.get_inventory_attributes.assert_awaited()
+        instance_refresh_cache._bruin_repository.get_management_status_from_inventory_attributes.assert_called()
         instance_refresh_cache._bruin_repository.is_management_status_active.assert_called()
+        instance_refresh_cache._add_access_type_to_logical_ids.assert_called()
         instance_refresh_cache._bruin_repository.get_site_details.assert_awaited()
 
         assert cache_return is None
@@ -1012,8 +1036,11 @@ class TestRefreshCache:
         instance_refresh_cache._bruin_repository.get_client_info = AsyncMock(
             return_value={"body": [bruin_client_info, bruin_client_info], "status": 200}
         )
-        instance_refresh_cache._bruin_repository.get_management_status = AsyncMock(
-            return_value={"body": "Pending", "status": 200}
+        instance_refresh_cache._bruin_repository.get_inventory_attributes = AsyncMock(
+            return_value={"body": ["some attributes"], "status": 200}
+        )
+        instance_refresh_cache._bruin_repository.get_management_status_from_inventory_attributes = Mock(
+            return_value="Pending"
         )
         instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
 
@@ -1024,7 +1051,8 @@ class TestRefreshCache:
         cache_return = await instance_refresh_cache._filter_edge_list(instance_edges_refresh_cache[0])
 
         instance_refresh_cache._bruin_repository.get_client_info.assert_awaited()
-        instance_refresh_cache._bruin_repository.get_management_status.assert_awaited()
+        instance_refresh_cache._bruin_repository.get_inventory_attributes.assert_awaited()
+        instance_refresh_cache._bruin_repository.get_management_status_from_inventory_attributes.assert_called()
         instance_refresh_cache._bruin_repository.is_management_status_active.assert_called()
 
         assert cache_return is None
@@ -1123,3 +1151,49 @@ class TestRefreshCache:
 
             tz_offset = instance_refresh_cache._get_offset_from_tz_name("UTC")
             assert tz_offset == 0
+
+    def _add_access_type_to_logical_ids_test(self, instance_refresh_cache):
+        logical_ids = [
+            {
+                "interface_name": "GE2",
+                "logical_id": "00:04:2d:0c:27:ab:0000"
+            },
+            {
+                "interface_name": "GE1",
+                "logical_id": "ac:8f:a9:ef:78:82:0000"
+            }
+        ]
+
+        inventory_attributes_response_body = {
+            "inventoryId": "12161075",
+            "serviceNumber": "VC05200014481",
+            "attributes": [
+                {
+                    "key": "GE2 Access Type",
+                    "value": "Ethernet/T1/MPLS"
+                },
+                {
+                    "key": "GE1 Access Type",
+                    "value": "Wireless"
+                }
+            ]
+        }
+
+        expected_result = [
+            {
+                "interface_name": "GE2",
+                "logical_id": "00:04:2d:0c:27:ab:0000",
+                "access_type": "Ethernet/T1/MPLS"
+            },
+            {
+                "interface_name": "GE1",
+                "logical_id": "ac:8f:a9:ef:78:82:0000",
+                "access_type": "Wireless"
+            }
+        ]
+
+        result = instance_refresh_cache._add_access_type_to_logical_ids(
+            inventory_attributes_response_body, logical_ids
+        )
+
+        assert result == expected_result

@@ -207,6 +207,9 @@ class BruinRepository:
     async def get_management_status(self, filters):
         return await self._get_attribute_from_inventory(filters, attr_key="Management Status")
 
+    async def get_inventory_attributes(self, filters):
+        return await self._bruin_client.get_inventory_attributes(filters)
+
     async def post_outage_ticket(self, client_id, service_number, ticket_contact, interfaces):
         response = await self._bruin_client.post_outage_ticket(client_id, service_number, ticket_contact, interfaces)
 

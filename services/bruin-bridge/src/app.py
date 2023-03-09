@@ -8,6 +8,7 @@ from application.actions.change_detail_work_queue import ChangeDetailWorkQueue
 from application.actions.change_ticket_severity import ChangeTicketSeverity
 from application.actions.get_asset_topics import GetAssetTopics
 from application.actions.get_attributes_serial import GetAttributeSerial
+from application.actions.get_inventory_attributes import GetInventoryAttributes
 from application.actions.get_circuit_id import GetCircuitID
 from application.actions.get_client_info import GetClientInfo
 from application.actions.get_client_info_by_did import GetClientInfoByDID
@@ -135,6 +136,9 @@ class Container:
 
             cb = GetAttributeSerial(self._bruin_repository)
             await self._nats_client.subscribe(**subscriptions.GetSerialNumberFromInventoryAttributes(cb=cb).__dict__)
+
+            cb = GetInventoryAttributes(self._bruin_repository)
+            await self._nats_client.subscribe(**subscriptions.GetInventoryAttributes(cb=cb).__dict__)
 
             cb = GetCircuitID(self._bruin_repository)
             await self._nats_client.subscribe(**subscriptions.GetServiceNumberByCircuitId(cb=cb).__dict__)
