@@ -161,8 +161,8 @@ class BandwidthReports:
         grouped_ticket_details = self._bruin_repository.group_ticket_details_by_serial_and_interface(ticket_details)
         await asyncio.sleep(0)
 
-        report_items = self._bruin_repository.prepare_items_for_bandwidth_report(links_metrics, grouped_ticket_details,
-                                                                                 enterprise_id_edge_id_relation, serial_numbers)
+        report_items = self._bruin_repository.prepare_items_for_bandwidth_report(
+            links_metrics, grouped_ticket_details, enterprise_id_edge_id_relation, serial_numbers)
         report_items.sort(key=lambda item: (item["serial_number"], item["interface"]))
 
         if self._config.CURRENT_ENVIRONMENT != "production":
