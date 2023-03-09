@@ -18,7 +18,7 @@ class GetInventoryAttributes:
 
         filters = payload.get("body")
         if "body" not in payload.keys():
-            logger.error(f"Cannot get attribute's serial number using {json.dumps(payload)}. JSON malformed")
+            logger.error(f"Cannot get inventory attributes using {json.dumps(payload)}. JSON malformed")
             response["status"] = 400
             response["body"] = (
                 "You must specify " '{.."body":{"client_id", "status", "service_number"}...} in the request'
@@ -28,7 +28,7 @@ class GetInventoryAttributes:
 
         if not all(key in filters.keys() for key in ("client_id", "status", "service_number")):
             logger.info(
-                f"Cannot get attribute's serial number using {json.dumps(filters)}. "
+                f"Cannot get inventory attributes using {json.dumps(filters)}. "
                 f'Need "client_id", "status", "service_number"'
             )
             response["status"] = 400
@@ -38,10 +38,10 @@ class GetInventoryAttributes:
 
         logger.info(f"'Getting inventory attributes with filters: {json.dumps(filters)}'")
 
-        get_attributes_serial = await self._bruin_repository.get_attributes_serial(filters)
+        get_inventory_attributes = await self._bruin_repository.get_inventory_attributes(filters)
 
-        response["body"] = get_attributes_serial["body"]
-        response["status"] = get_attributes_serial["status"]
+        response["body"] = get_inventory_attributes["body"]
+        response["status"] = get_inventory_attributes["status"]
 
         await msg.respond(to_json_bytes(response))
         logger.info(
