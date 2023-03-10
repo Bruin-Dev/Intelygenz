@@ -203,7 +203,7 @@ class BruinRepository:
 
         return response
 
-    def get_management_status_from_inventory_attributes(inventory_attributes):
+    def get_management_status_from_inventory_attributes(self, inventory_attributes):
         attr_key = "Management Status"
         attribute = [
             attribute["value"]
