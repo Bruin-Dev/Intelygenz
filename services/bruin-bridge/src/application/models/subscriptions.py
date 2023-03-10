@@ -70,6 +70,12 @@ class GetSerialNumberFromInventoryAttributes(Subscription):
 
 
 @dataclass(kw_only=True)
+class GetInventoryAttributes(Subscription):
+    subject: str = "bruin.inventory.attributes"
+    queue: str = "bruin_bridge"
+
+
+@dataclass(kw_only=True)
 class GetManagementStatus(Subscription):
     subject: str = "bruin.inventory.management.status"
     queue: str = "bruin_bridge"

@@ -90,6 +90,48 @@ class BruinRepository:
 
         return response
 
+    async def get_inventory_attributes(self, client_id: int, service_number: str):
+        err_msg = None
+
+        request = {
+            "request_id": uuid(),
+            "body": {
+                "client_id": client_id,
+                "service_number": service_number,
+                "status": "A",
+            },
+        }
+
+        try:
+            logger.info(f"Getting inventory attributes for service number {service_number} and client {client_id}...")
+            response = await self._nats_client.request(
+                "bruin.inventory.attributes", to_json_bytes(request), timeout=90
+            )
+            response = json.loads(response.data)
+            logger.info(f"Got inventory attributes for service number {service_number} and client {client_id}!")
+        except Exception as e:
+            err_msg = (
+                f"An error occurred when getting inventory attributes for service number {service_number} and "
+                f"client {client_id} -> {e}"
+            )
+            response = nats_error_response
+        else:
+            response_body = response["body"]
+            response_status = response["status"]
+
+            if response_status not in range(200, 300):
+                err_msg = (
+                    f"Error while getting inventory attributes for service number {service_number} and "
+                    f"client {client_id} in {self._config.ENVIRONMENT_NAME.upper()} environment: "
+                    f"Error {response_status} - {response_body}"
+                )
+
+        if err_msg:
+            logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
     async def get_site_details(self, client_id: int, site_id: int):
         err_msg = None
 
@@ -160,6 +202,20 @@ class BruinRepository:
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response
+
+    def get_management_status_from_inventory_attributes(self, inventory_attributes):
+        attr_key = "Management Status"
+        attribute = [
+            attribute["value"]
+            for attribute in inventory_attributes["attributes"]
+            if attribute["key"] == attr_key
+        ]
+        if len(attribute) > 0:
+            attribute = attribute[0]
+        else:
+            attribute = None
+
+        return attribute
 
     def is_management_status_active(self, management_status) -> bool:
         return management_status in self._config.REFRESH_CONFIG["monitorable_management_statuses"]

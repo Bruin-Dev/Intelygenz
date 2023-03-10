@@ -995,7 +995,7 @@ project_path = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__f
 
 for file_path, file_content in env_dict.items():
     print(f"Creating file {file_path}")
-    with open(os.path.join(project_path, file_path), "w+") as env_file:
+    with open(os.path.join(project_path, file_path), "w+", encoding="utf-8") as env_file:
         env_file.write(os.linesep.join(file_content))
 
 print("Finished creating environment files")
