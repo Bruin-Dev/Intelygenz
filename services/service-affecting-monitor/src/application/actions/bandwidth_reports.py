@@ -50,9 +50,7 @@ class BandwidthReports:
 
     async def _bandwidth_reports_job(self):
         velocloud_host = self._config.VELOCLOUD_HOST
-        clients_to_email = []
-        if self._config.BANDWIDTH_REPORT_CONFIG["client_ids_by_host"].get(velocloud_host):
-            clients_to_email = self._config.BANDWIDTH_REPORT_CONFIG["client_ids_by_host"][velocloud_host]
+        clients_to_email = self._config.BANDWIDTH_REPORT_CONFIG["client_ids_by_host"].get(velocloud_host, [])
 
         logger.info(f"[bandwidth-reports] Running bandwidth reports process for all clients")
         logger.info(f"[bandwidth-reports] Emailing bandwidth reports to {len(clients_to_email)} clients")
