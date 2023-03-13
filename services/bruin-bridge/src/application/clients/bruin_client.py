@@ -44,8 +44,9 @@ class BruinClient:
                 headers=headers,
             )
 
-            logger.info(f"Got response from Bruin login: {response.status} {response.text()}")
-
+            logger.info(f"Got response from Bruin login status: {response.status}")
+            response_text = await response.text()
+            logger.info(f"Got response from Bruin login text: {response_text}")
             self._bearer_token = (await response.json())["access_token"]
             self._bruin_session.access_token = self._bearer_token
             logger.info("Logged into Bruin!")

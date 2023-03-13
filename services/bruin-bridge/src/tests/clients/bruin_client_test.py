@@ -4299,6 +4299,7 @@ class TestGetAssetTopics:
         mocked_access_token = "access_token"
         login_response = Mock()
         login_response.json = AsyncMock(return_value={"access_token": mocked_access_token})
+        login_response.text = AsyncMock(return_value={"access_token": mocked_access_token})
 
         bruin_client = BruinClient(config)
         bruin_client._session = Mock(spec_set=ClientSession)
