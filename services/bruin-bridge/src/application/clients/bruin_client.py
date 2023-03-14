@@ -37,6 +37,8 @@ class BruinClient:
         }
         form_data = {"grant_type": "client_credentials", "scope": "public_api"}
 
+        logger.info(f'Using url: {self._config.BRUIN_CONFIG["login_url"]} to login')
+
         try:
             response = await self._session.post(
                 f'{self._config.BRUIN_CONFIG["login_url"]}/identity/connect/token',
@@ -45,11 +47,13 @@ class BruinClient:
             )
 
             logger.info(f"Got response from Bruin login status: {response.status}")
-            response_text = await response.text()
-            logger.info(f"Got response from Bruin login text: {response_text}")
-            self._bearer_token = (await response.json())["access_token"]
+            response_json = await response.json()
+            logger.info(f"Got response from Bruin login text: {response_json}")
+            self._bearer_token = (response_json)["access_token"]
             self._bruin_session.access_token = self._bearer_token
             logger.info("Logged into Bruin!")
+        except aiohttp.ClientConnectionError as e:
+            logger.error(f"A connection error happened while trying to connect to Bruin API: {e}")
         except Exception as err:
             logger.error(f"An error occurred while trying to login to Bruin: {err}")
 

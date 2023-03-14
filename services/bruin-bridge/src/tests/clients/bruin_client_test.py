@@ -22,11 +22,14 @@ class TestBruinClient:
     async def login_test(self):
         access_token_str = "Someverysecretaccesstoken"
 
-        response_mock = AsyncMock()
+        response_mock = Mock()
         response_mock.json = AsyncMock(return_value={"access_token": access_token_str})
 
         bruin_client = BruinClient(config)
         bruin_client._session = Mock(spec_set=ClientSession)
+
+        bruin_client._bruin_session = Mock(spec_set=BruinSession)
+
         with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=response_mock)) as mock_post:
             await bruin_client.login()
 
@@ -37,7 +40,12 @@ class TestBruinClient:
     async def login_with_failure_test(self):
         bruin_client = BruinClient(config)
         bruin_client._session = Mock(spec_set=ClientSession)
-        with patch.object(bruin_client._session, "post", new=AsyncMock(side_effect=Exception)) as mock_post:
+
+        bruin_client._bruin_session = Mock(spec_set=BruinSession)
+
+        err_msg = "Failed"
+        post_mock_error = AsyncMock(side_effect=ClientConnectionError(err_msg))
+        with patch.object(bruin_client._session, "post", new=AsyncMock(side_effect=post_mock_error)) as mock_post:
             await bruin_client.login()
 
             assert bruin_client._bearer_token == ""
@@ -2600,6 +2608,7 @@ class TestGetTicketTaskHistory:
         bruin_client = BruinClient(config)
         bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = AsyncMock()
 
         with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=bruin_response)):
             result = await bruin_client.get_ticket_task_history(filter)
@@ -3533,7 +3542,7 @@ class TestChangeTicketSeverity:
         bruin_client = BruinClient(config)
         bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-
+        bruin_client.login = AsyncMock()
         with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)) as mock_put:
             result = await bruin_client.change_ticket_severity(ticket_id, payload)
 
@@ -3844,7 +3853,7 @@ class TestGetTicketContacts:
         bruin_client = BruinClient(config)
         bruin_client._session = Mock(spec_set=ClientSession)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-
+        bruin_client.login = AsyncMock()
         with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_get:
             ticket_details = await bruin_client.get_ticket_contacts(params)
 
@@ -4299,7 +4308,6 @@ class TestGetAssetTopics:
         mocked_access_token = "access_token"
         login_response = Mock()
         login_response.json = AsyncMock(return_value={"access_token": mocked_access_token})
-        login_response.text = AsyncMock(return_value={"access_token": mocked_access_token})
 
         bruin_client = BruinClient(config)
         bruin_client._session = Mock(spec_set=ClientSession)
