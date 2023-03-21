@@ -297,17 +297,13 @@ class ServiceAffectingMonitor:
             client_id = edge["cached_info"]["bruin_client_info"]["client_id"]
             client_name = edge["cached_info"]["bruin_client_info"]["client_name"]
             links_configuration = edge["cached_info"]["links_configuration"]
-            host = edge["cached_info"]["edge"]["host"]
 
             logger.info(f"Starting autoresolve for edge {serial_number}...")
 
-            check_bandwidth_troubles = (client_id in self._config.MONITOR_CONFIG["customers_with_bandwidth_enabled"]
-                                        or host == "metvco04.mettel.net")
             metrics_lookup_interval = self._config.MONITOR_CONFIG["autoresolve"]["metrics_lookup_interval_minutes"]
             all_metrics_within_thresholds = self._trouble_repository.are_all_metrics_within_thresholds(
                 edge,
                 lookup_interval_minutes=metrics_lookup_interval,
-                check_bandwidth_troubles=check_bandwidth_troubles,
                 links_configuration=links_configuration,
             )
             if not all_metrics_within_thresholds:
@@ -632,15 +628,6 @@ class ServiceAffectingMonitor:
             cached_info = elem["cached_info"]
             link_status = elem["link_status"]
             metrics = elem["link_metrics"]
-            host = cached_info["edge"]["host"]
-
-            if host != "metvco04.mettel.net":
-                # TODO: Remove this check as soon as the customer asks to release Bandwidth check for all edges
-                client_id = cached_info["bruin_client_info"]["client_id"]
-                check_bandwidth_troubles = client_id in self._config.MONITOR_CONFIG["customers_with_bandwidth_enabled"]
-                if not check_bandwidth_troubles:
-                    logger.warning(f"Bandwidth checks are not enabled for client {client_id}. Skipping...")
-                    continue
 
             tx_bandwidth = metrics["bpsOfBestPathTx"]
             rx_bandwidth = metrics["bpsOfBestPathRx"]

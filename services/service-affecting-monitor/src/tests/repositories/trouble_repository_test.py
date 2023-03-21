@@ -506,71 +506,6 @@ class TestTroubleRepository:
         result = trouble_repository.are_bouncing_events_within_threshold(events, is_wireless_link, autoresolve=True)
         assert result is False
 
-    def are_all_metrics_within_thresholds__bandwidth_metrics_ignored_test(
-        self,
-        trouble_repository,
-        make_metrics,
-        make_link_status_and_metrics_object_with_events,
-        make_list_of_link_status_and_metrics_objects,
-        make_links_by_edge_object,
-        make_links_configuration,
-        make_list_of_links_configurations,
-        make_link,
-    ):
-        lookup_interval_minutes = 30
-
-        metrics = make_metrics(
-            best_latency_ms_tx=139,
-            best_latency_ms_rx=139,
-            best_packet_loss_tx=7,
-            best_packet_loss_rx=7,
-            best_jitter_ms_tx=49,
-            best_jitter_ms_rx=49,
-            bytes_tx=1000000000,
-            bps_of_best_path_tx=100,
-            bytes_rx=1000000000,
-            bps_of_best_path_rx=100,
-        )
-        interface = "GE1"
-        link_info = make_link(interface=interface)
-        link_status_and_metrics_object = make_link_status_and_metrics_object_with_events(
-            metrics=metrics, link_info=link_info)
-        link_status_and_metrics_objects = make_list_of_link_status_and_metrics_objects(link_status_and_metrics_object)
-        links_by_edge = make_links_by_edge_object(links=link_status_and_metrics_objects)
-        links_configuration = make_list_of_links_configurations(
-            make_links_configuration(type_="WIRED", interfaces=[interface]))
-        result = trouble_repository.are_all_metrics_within_thresholds(
-            links_by_edge,
-            lookup_interval_minutes=lookup_interval_minutes,
-            check_bandwidth_troubles=False,
-            links_configuration=links_configuration,
-        )
-        assert result is True
-
-        metrics = make_metrics(
-            best_latency_ms_tx=140,
-            best_latency_ms_rx=139,
-            best_packet_loss_tx=7,
-            best_packet_loss_rx=7,
-            best_jitter_ms_tx=49,
-            best_jitter_ms_rx=49,
-            bytes_tx=1000000000,
-            bps_of_best_path_tx=100,
-            bytes_rx=1000000000,
-            bps_of_best_path_rx=100,
-        )
-        link_status_and_metrics_object = make_link_status_and_metrics_object_with_events(
-            metrics=metrics, link_info=link_info)
-        link_status_and_metrics_objects = make_list_of_link_status_and_metrics_objects(link_status_and_metrics_object)
-        links_by_edge = make_links_by_edge_object(links=link_status_and_metrics_objects)
-        result = trouble_repository.are_all_metrics_within_thresholds(
-            links_by_edge,
-            lookup_interval_minutes=lookup_interval_minutes,
-            check_bandwidth_troubles=False,
-            links_configuration=links_configuration,
-        )
-        assert result is False
-
     def are_all_metrics_within_thresholds__bandwidth_metrics_taken_into_account_test(
         self,
         trouble_repository,
@@ -607,7 +542,6 @@ class TestTroubleRepository:
         result = trouble_repository.are_all_metrics_within_thresholds(
             links_by_edge,
             lookup_interval_minutes=lookup_interval_minutes,
-            check_bandwidth_troubles=True,
             links_configuration=links_configuration,
         )
         assert result is True
@@ -631,7 +565,6 @@ class TestTroubleRepository:
         result = trouble_repository.are_all_metrics_within_thresholds(
             links_by_edge,
             lookup_interval_minutes=lookup_interval_minutes,
-            check_bandwidth_troubles=True,
             links_configuration=links_configuration,
         )
         assert result is False
@@ -672,7 +605,6 @@ class TestTroubleRepository:
         result = trouble_repository.are_all_metrics_within_thresholds(
             links_by_edge,
             lookup_interval_minutes=lookup_interval_minutes,
-            check_bandwidth_troubles=True,
             links_configuration=links_configuration,
         )
         assert result is True
@@ -696,7 +628,6 @@ class TestTroubleRepository:
         result = trouble_repository.are_all_metrics_within_thresholds(
             links_by_edge,
             lookup_interval_minutes=lookup_interval_minutes,
-            check_bandwidth_troubles=True,
             links_configuration=links_configuration,
         )
         assert result is False
