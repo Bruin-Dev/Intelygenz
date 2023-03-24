@@ -4117,6 +4117,7 @@ class TestServiceOutageMonitor:
         serial_number_1 = "VC1234567"
         serial_number_2 = "VC9999999"
         client_id = 12345
+        interface = "REX"
         edge = {
             "cached_info": {
                 "edge": {"host": "mettel.velocloud.net", "enterprise_id": 1, "edge_id": 1},
@@ -4148,7 +4149,7 @@ class TestServiceOutageMonitor:
                     {
                         "displayName": "test name",
                         "isp": None,
-                        "interface": "REX",
+                        "interface": interface,
                         "internalId": "00000001-ac48-47a0-81a7-80c8c320f486",
                         "linkState": "DISCONNECTED",
                         "linkLastActive": "2020-09-29T04:45:15.000Z",
@@ -4263,6 +4264,7 @@ class TestServiceOutageMonitor:
         outage_monitor._is_detail_resolved = Mock(return_value=False)
         outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         outage_monitor._notify_successful_autoresolve = AsyncMock()
+        outage_monitor._get_faulty_interfaces_from_ticket_notes = Mock(return_value=[interface])
 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._run_ticket_autoresolve_for_edge(edge)
@@ -4285,7 +4287,7 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._is_detail_resolved.assert_called_once_with(outage_ticket_detail_1)
         outage_monitor._bruin_repository.resolve_ticket.assert_awaited_once_with(
-            outage_ticket_1_id, outage_ticket_detail_1_id
+            outage_ticket_1_id, outage_ticket_detail_1_id, [interface]
         )
         outage_monitor._bruin_repository.unpause_ticket_detail.assert_awaited_once_with(
             outage_ticket_1_id, service_number=serial_number_1, detail_id=outage_ticket_detail_1_id
@@ -4298,6 +4300,7 @@ class TestServiceOutageMonitor:
         serial_number_1 = "VC1234567"
         serial_number_2 = "VC9999999"
         client_id = 12345
+        interface = "REX"
         edge = {
             "cached_info": {
                 "edge": {"host": "mettel.velocloud.net", "enterprise_id": 1, "edge_id": 1},
@@ -4329,7 +4332,7 @@ class TestServiceOutageMonitor:
                     {
                         "displayName": "BYOB test name",
                         "isp": None,
-                        "interface": "REX",
+                        "interface": interface,
                         "internalId": "00000001-ac48-47a0-81a7-80c8c320f486",
                         "linkState": "DISCONNECTED",
                         "linkLastActive": "2020-09-29T04:45:15.000Z",
@@ -4441,6 +4444,7 @@ class TestServiceOutageMonitor:
         outage_monitor._is_detail_resolved = Mock(return_value=False)
         outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         outage_monitor._notify_successful_autoresolve = AsyncMock()
+        outage_monitor._get_faulty_interfaces_from_ticket_notes = Mock(return_value=[interface])
 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._run_ticket_autoresolve_for_edge(edge)
@@ -4457,7 +4461,7 @@ class TestServiceOutageMonitor:
             outage_ticket_1_id, service_number=serial_number_1, detail_id=outage_ticket_detail_1_id
         )
         outage_monitor._bruin_repository.resolve_ticket.assert_awaited_once_with(
-            outage_ticket_1_id, outage_ticket_detail_1_id
+            outage_ticket_1_id, outage_ticket_detail_1_id, [interface]
         )
         outage_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_awaited_once_with(
             outage_ticket_1_id, serial_number_1
@@ -4657,6 +4661,7 @@ class TestServiceOutageMonitor:
         serial_number_1 = "VC1234567"
         serial_number_2 = "VC9999999"
         client_id = 12345
+        interface = "REX"
         edge = {
             "cached_info": {
                 "edge": {"host": "mettel.velocloud.net", "enterprise_id": 1, "edge_id": 1},
@@ -4688,7 +4693,7 @@ class TestServiceOutageMonitor:
                     {
                         "displayName": "test name",
                         "isp": None,
-                        "interface": "REX",
+                        "interface": interface,
                         "internalId": "00000001-ac48-47a0-81a7-80c8c320f486",
                         "linkState": "DISCONNECTED",
                         "linkLastActive": "2020-09-29T04:45:15.000Z",
@@ -4806,6 +4811,7 @@ class TestServiceOutageMonitor:
         outage_monitor._is_detail_resolved = Mock(return_value=False)
         outage_monitor._get_notes_appended_since_latest_reopen_or_ticket_creation = Mock(return_value=[])
         outage_monitor._notify_successful_autoresolve = AsyncMock()
+        outage_monitor._get_faulty_interfaces_from_ticket_notes = Mock(return_value=[interface])
 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._run_ticket_autoresolve_for_edge(edge)
@@ -4831,7 +4837,7 @@ class TestServiceOutageMonitor:
             outage_ticket_1_id, service_number=serial_number_1, detail_id=outage_ticket_detail_1_id
         )
         outage_monitor._bruin_repository.resolve_ticket.assert_awaited_once_with(
-            outage_ticket_1_id, outage_ticket_detail_1_id
+            outage_ticket_1_id, outage_ticket_detail_1_id, [interface]
         )
         outage_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_awaited_once_with(
             outage_ticket_1_id, serial_number_1

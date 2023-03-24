@@ -268,7 +268,7 @@ class BruinRepository:
 
         return response
 
-    async def resolve_ticket(self, ticket_id: int, detail_id: int):
+    async def resolve_ticket(self, ticket_id: int, detail_id: int, interfaces: list = None):
         err_msg = None
 
         request = {
@@ -276,11 +276,12 @@ class BruinRepository:
             "body": {
                 "ticket_id": ticket_id,
                 "detail_id": detail_id,
+                "interfaces": interfaces,
             },
         }
 
         try:
-            logger.info(f"Resolving ticket {ticket_id} (affected detail ID: {detail_id})...")
+            logger.info(f"Resolving ticket {ticket_id} (affected detail ID: {detail_id}, interfaces: {interfaces})...")
             response = await self._nats_client.request(
                 "bruin.ticket.status.resolve", to_json_bytes(request), timeout=75
             )

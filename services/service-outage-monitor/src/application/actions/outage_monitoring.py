@@ -384,6 +384,7 @@ class OutageMonitor:
             has_faulty_byob_link = self._get_has_faulty_byob_link_from_triage_note(triage_note)
             faulty_link_types = self._get_faulty_link_types_from_triage_note(triage_note)
             is_task_in_ipa_queue = self._is_ticket_task_in_ipa_queue(detail_for_ticket_resolution)
+            previously_faulty_interfaces = self._get_faulty_interfaces_from_ticket_notes(last_cycle_notes)
 
             if has_faulty_byob_link and is_task_in_ipa_queue:
                 logger.info(
@@ -439,7 +440,8 @@ class OutageMonitor:
             await self._bruin_repository.unpause_ticket_detail(
                 outage_ticket_id, service_number=serial_number, detail_id=ticket_detail_id
             )
-            resolve_ticket_response = await self._bruin_repository.resolve_ticket(outage_ticket_id, ticket_detail_id)
+            resolve_ticket_response = await self._bruin_repository.resolve_ticket(
+                outage_ticket_id, ticket_detail_id, previously_faulty_interfaces)
             if resolve_ticket_response["status"] not in range(200, 300):
                 logger.error(
                     f"Error while resolving task of ticket {outage_ticket_id} for edge {serial_number}: "
@@ -1294,6 +1296,20 @@ class OutageMonitor:
                     return True
 
         return False
+
+    def _get_faulty_interfaces_from_ticket_notes(self, ticket_notes: List[dict]) -> Optional[list[str]]:
+        interfaces = set()
+        for note in ticket_notes:
+            matches = LINK_INFO_REGEX.finditer(note["noteValue"])
+
+            for match in matches:
+                link_interface = match.group("interface")
+                link_status = match.group("status")
+
+                if self._outage_repository.is_faulty_link(link_status):
+                    interfaces.add(link_interface)
+
+        return list(interfaces)
 
     def _get_has_faulty_byob_link_from_triage_note(self, triage_note: Optional[dict]) -> Optional[bool]:
         if not triage_note:

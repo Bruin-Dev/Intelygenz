@@ -780,12 +780,14 @@ class TestBruinRepository:
     async def resolve_ticket_test(self):
         ticket_id = 12345
         detail_id = 67890
+        interfaces = ["REX"]
 
         request = {
             "request_id": uuid_,
             "body": {
                 "ticket_id": ticket_id,
                 "detail_id": detail_id,
+                "interfaces": interfaces,
             },
         }
         response = {
@@ -806,7 +808,7 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
-            result = await bruin_repository.resolve_ticket(ticket_id, detail_id)
+            result = await bruin_repository.resolve_ticket(ticket_id, detail_id, interfaces)
 
         nats_client.request.assert_awaited_once_with("bruin.ticket.status.resolve", to_json_bytes(request), timeout=75)
         assert result == response
@@ -815,12 +817,14 @@ class TestBruinRepository:
     async def resolve_ticket_with_request_failing_test(self):
         ticket_id = 12345
         detail_id = 67890
+        interfaces = ["REX"]
 
         request = {
             "request_id": uuid_,
             "body": {
                 "ticket_id": ticket_id,
                 "detail_id": detail_id,
+                "interfaces": interfaces,
             },
         }
 
@@ -835,7 +839,7 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
-            result = await bruin_repository.resolve_ticket(ticket_id, detail_id)
+            result = await bruin_repository.resolve_ticket(ticket_id, detail_id, interfaces)
 
         nats_client.request.assert_awaited_once_with("bruin.ticket.status.resolve", to_json_bytes(request), timeout=75)
         notifications_repository.send_slack_message.assert_awaited_once()
@@ -845,12 +849,14 @@ class TestBruinRepository:
     async def resolve_ticket_with_request_returning_non_2xx_status_test(self):
         ticket_id = 12345
         detail_id = 67890
+        interfaces = ["REX"]
 
         request = {
             "request_id": uuid_,
             "body": {
                 "ticket_id": ticket_id,
                 "detail_id": detail_id,
+                "interfaces": interfaces,
             },
         }
         response = {
@@ -873,7 +879,7 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(nats_client, config, notifications_repository)
 
         with uuid_mock:
-            result = await bruin_repository.resolve_ticket(ticket_id, detail_id)
+            result = await bruin_repository.resolve_ticket(ticket_id, detail_id, interfaces)
 
         nats_client.request.assert_awaited_once_with("bruin.ticket.status.resolve", to_json_bytes(request), timeout=75)
         notifications_repository.send_slack_message.assert_awaited_once()
