@@ -75,15 +75,14 @@ USER ${NON_ROOT_USER}
 # Set workdir to user home
 WORKDIR /home/${NON_ROOT_USER}
 
-RUN wget https://www.python.org/ftp/python/3.10.4/Python-3.10.4.tgz && \
-    tar xzf Python-3.10.4.tgz
+RUN wget https://www.python.org/ftp/python/3.10.4/Python-3.10.4.tgz
+RUN tar xzf Python-3.10.4.tgz
 
-RUN cd Python-3.10.4 && \
-    ./configure --enable-optimizations --prefix=/home/${NON_ROOT_USER}/.local && \
-    make install
+RUN cd Python-3.10.4
+RUN ./configure --enable-optimizations --prefix=/home/${NON_ROOT_USER}/.local 
+RUN make install
 
-RUN wget -q https://install.python-poetry.org -O poetry-install.py
-RUN python3 poetry-install.py
+RUN curl -sSL https://install.python-poetry.org | /home/${NON_ROOT_USER}/.local/python3 -
 
 # Copy utils and install with Poetry
 COPY --chown=${NON_ROOT_USER}:0 /pyutils_automation/py310 /home/${NON_ROOT_USER}/pyutils_automation/py310
