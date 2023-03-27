@@ -1327,7 +1327,9 @@ class OutageMonitor:
 
         return list(interfaces)
 
-    def _get_link_access_types_from_affecting_trouble_note(self, interfaces: List[str], logical_id_list: List[dict]) -> Optional[str]:
+    def _get_link_access_types_from_affecting_trouble_note(
+        self, interfaces: List[str], logical_id_list: List[dict]
+    ) -> Optional[str]:
         if not interfaces:
             return None
 
