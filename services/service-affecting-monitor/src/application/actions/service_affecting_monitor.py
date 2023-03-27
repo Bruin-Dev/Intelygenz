@@ -297,6 +297,7 @@ class ServiceAffectingMonitor:
             client_id = edge["cached_info"]["bruin_client_info"]["client_id"]
             client_name = edge["cached_info"]["bruin_client_info"]["client_name"]
             links_configuration = edge["cached_info"]["links_configuration"]
+            logical_ids = edge["cached_info"]["logical_ids"]
 
             logger.info(f"Starting autoresolve for edge {serial_number}...")
 
@@ -372,6 +373,8 @@ class ServiceAffectingMonitor:
                 troubles = self._get_troubles_from_ticket_notes(last_cycle_notes)
                 is_byob = self._get_is_byob_from_affecting_trouble_note(affecting_trouble_note)
                 link_type = self._get_link_type_from_affecting_trouble_note(affecting_trouble_note)
+                link_access_type = self._get_link_access_type_from_affecting_trouble_note(
+                    affecting_trouble_note, logical_ids)
 
                 max_seconds_since_last_trouble = self._get_max_seconds_since_last_trouble(edge)
                 last_trouble_was_detected_recently = self._trouble_repository.was_last_trouble_detected_recently(
@@ -381,11 +384,18 @@ class ServiceAffectingMonitor:
                 )
 
                 is_task_in_ipa_queue = self._ticket_repository.is_ticket_task_in_ipa_queue(detail_for_ticket_resolution)
+                is_task_assigned = self._ticket_repository.is_ticket_task_assigned(detail_for_ticket_resolution)
                 if is_byob and is_task_in_ipa_queue:
                     logger.info(
                         f"Task for serial {serial_number} in ticket {affecting_ticket_id} is related to a BYOB link "
                         f"and is in the IPA Investigate queue. Ignoring auto-resolution restrictions..."
                     )
+                elif link_access_type == "Ethernet/T1/MPLS" and is_task_assigned:
+                    logger.info(
+                        f"Task for serial {serial_number} in ticket {affecting_ticket_id} is related to an Ethernet"
+                        f" link and is assigned. Ignoring auto-resolution..."
+                    )
+                    return
                 else:
                     if not last_trouble_was_detected_recently:
                         logger.warning(
@@ -1340,6 +1350,22 @@ class ServiceAffectingMonitor:
         if match:
             link_label = match.group("label")
             return self._is_link_label_blacklisted_from_hnoc(link_label)
+
+    def _get_link_access_type_from_affecting_trouble_note(self, affecting_trouble_note: Optional[dict], logical_id_list: List[dict]) -> Optional[str]:
+        if not affecting_trouble_note:
+            return None
+
+        match = LINK_INFO_REGEX.search(affecting_trouble_note["noteValue"])
+
+        if match:
+            link_label = match.group("interface")
+            link_access_type = [
+                logical_id["access_type"]
+                for logical_id in logical_id_list
+                if logical_id["interface_name"] == link_label
+            ]
+            if link_access_type:
+                return link_access_type[0]
 
     @staticmethod
     def _get_link_type_from_affecting_trouble_note(affecting_trouble_note: Optional[dict]) -> Optional[str]:

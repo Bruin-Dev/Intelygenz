@@ -690,6 +690,29 @@ class TestTicketRepository:
 
         assert not result
 
+    def is_ticket_task_assigned__is_assigned_test(self, ticket_repository, make_detail_item):
+        assigned_to = "Test User"
+        detail_item = make_detail_item(assigned_to=assigned_to)
+
+        result = ticket_repository.is_ticket_task_assigned(detail_item)
+
+        assert result
+
+    def is_ticket_task_assigned__not_assigned_test(self, ticket_repository, make_detail_item):
+        assigned_to = " "
+        detail_item = make_detail_item(assigned_to=assigned_to)
+
+        result = ticket_repository.is_ticket_task_assigned(detail_item)
+
+        assert not result
+
+        assigned_to = "0"
+        detail_item = make_detail_item(assigned_to=assigned_to)
+
+        result = ticket_repository.is_ticket_task_assigned(detail_item)
+
+        assert not result
+
     def build_reminder_note_test(self, ticket_repository):
         expected = os.linesep.join(["#*MetTel's IPA*#", "Client Reminder"])
 

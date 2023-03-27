@@ -469,3 +469,8 @@ class TicketRepository:
     @staticmethod
     def is_ticket_task_in_ipa_queue(ticket_task: dict) -> bool:
         return ticket_task["currentTaskName"] == "IPA Investigate"
+
+    @staticmethod
+    def is_ticket_task_assigned(ticket_task: dict) -> bool:
+        assigned_to = ticket_task["assignedToName"]
+        return assigned_to and not assigned_to.isspace() and assigned_to != "0"

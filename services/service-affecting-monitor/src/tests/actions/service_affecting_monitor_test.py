@@ -5037,3 +5037,39 @@ class TestServiceAffectingMonitor:
 
         result = service_affecting_monitor._should_use_default_contact_info(client_id_3, edge_3)
         assert result is False
+
+    def _get_link_access_type_from_affecting_trouble_note_test(
+        self,
+        service_affecting_monitor,
+        make_ticket_note,
+    ):
+        note_text = (
+            "#*MetTel's IPA*#\n",
+            "Trouble: Bandwidth Over Utilization\n",
+            "Edge Name: FIS | 540\n",
+            "Name: VERIZON DIA\n",
+            "Interface: GE1\n",
+            "IP Address: 152.179.2.74\n",
+            "Link Type: Public Wired\n",
+        )
+
+        note = make_ticket_note(text=''.join(note_text))
+
+        access_type = "Ethernet/T1/MPLS"
+
+        logical_ids = [
+            {
+                "interface_name": "GE1",
+                "logical_id": "00:22:83:45:e8:fe:0000",
+                "access_type": access_type
+            },
+            {
+                "interface_name": "GE2",
+                "logical_id": "00:04:2d:0a:e5:fe:0000",
+                "access_type": "Wireless"
+            }
+        ]
+
+        result = service_affecting_monitor._get_link_access_type_from_affecting_trouble_note(note, logical_ids)
+
+        assert result == access_type
