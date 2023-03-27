@@ -46,14 +46,14 @@ USER root
 WORKDIR /tmp
 
 # Copy and install FIPS compliant cryptography packages
-COPY /app/ubuntu18-fips/packages packages/
+#COPY /app/ubuntu18-fips/packages packages/
 
 # Install Python 3.10 and configure as default
 # DL3008 We won't pin versions here
 # hadolint ignore=DL3008 ignore=DL3015
 RUN apt-get update && \
     apt-get -y upgrade && \
-    apt-get install --yes --quiet build-essential checkinstall  libreadline-gplv2-dev  libncursesw5-dev  libssl-dev  libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev curl && \
+    apt-get install --yes --quiet build-essential checkinstall  libreadline-gplv2-dev  libncursesw5-dev  libssl-dev  libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev curl openssl && \
     apt-get install --yes --quiet --no-install-recommends wget software-properties-common
 
 # Install FIPS compliant cryptography packages and clean
@@ -91,9 +91,9 @@ COPY --chown=${NON_ROOT_USER}:0 /pyutils_automation/py310 /home/${NON_ROOT_USER}
 WORKDIR /home/${NON_ROOT_USER}/pyutils_automation/py310
 RUN ~/.local/share/pypoetry/venv/bin/poetry install --only main
 
-COPY --chown=${NON_ROOT_USER}:0 /app/service /home/${NON_ROOT_USER}/app/service
-WORKDIR /home/${NON_ROOT_USER}/app/service
-RUN ~/.local/share/pypoetry/venv/bin/poetry install --only main
+#COPY --chown=${NON_ROOT_USER}:0 /app/service /home/${NON_ROOT_USER}/app/service
+#WORKDIR /home/${NON_ROOT_USER}/app/service
+#RUN ~/.local/share/pypoetry/venv/bin/poetry install --only main
 
 # Expose ports for the service
 EXPOSE 5000 9090
