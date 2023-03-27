@@ -83,7 +83,7 @@ RUN cd Python-3.10.4 && \
     make install
 
 RUN wget -q https://install.python-poetry.org -O poetry-install.py
-RUN /home/${NON_ROOT_USER}/.local/bin/python3 poetry-install.py
+RUN python3 poetry-install.py
 
 # Copy utils and install with Poetry
 COPY --chown=${NON_ROOT_USER}:0 /pyutils_automation/py310 /home/${NON_ROOT_USER}/pyutils_automation/py310

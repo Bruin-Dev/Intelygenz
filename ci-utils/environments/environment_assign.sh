@@ -12,6 +12,7 @@ if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
   export PROMETHEUS_INGRESS_EXTERNAL_URL="https://${PROMETHEUS_INGRESS_HOSTNAME}"
   export GRAFANA_INGRESS_HOSTNAME="grafana-${TF_VAR_CURRENT_ENVIRONMENT}.mettel-automation.net"
   export GRAFANA_INGRESS_ROOT_URL="https://${GRAFANA_INGRESS_HOSTNAME}"
+  export ECR_REPOSITORY_TAG="${TAG}"
 else
   export ENVIRONMENT_ID="production"
   export ENVIRONMENT_VAR="automation-master"
@@ -23,9 +24,5 @@ else
   export PROMETHEUS_INGRESS_EXTERNAL_URL="https://${PROMETHEUS_INGRESS_HOSTNAME}"
   export GRAFANA_INGRESS_HOSTNAME="grafana.mettel-automation.net"
   export GRAFANA_INGRESS_ROOT_URL="https://${GRAFANA_INGRESS_HOSTNAME}"
-fi
-
-if [ -z "$ECR_REPOSITORY_TAG" ]
-then
   export ECR_REPOSITORY_TAG="${TAG}"
 fi
