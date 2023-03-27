@@ -316,6 +316,7 @@ class OutageMonitor:
             serial_number = cached_edge["serial_number"]
             client_id = cached_edge["bruin_client_info"]["client_id"]
             client_name = cached_edge["bruin_client_info"]["client_name"]
+            logical_ids = edge["cached_info"]["logical_ids"]
 
             logger.info(f"Starting autoresolve for edge {serial_number}...")
 
@@ -385,12 +386,22 @@ class OutageMonitor:
             faulty_link_types = self._get_faulty_link_types_from_triage_note(triage_note)
             is_task_in_ipa_queue = self._is_ticket_task_in_ipa_queue(detail_for_ticket_resolution)
             previously_faulty_interfaces = self._get_faulty_interfaces_from_ticket_notes(last_cycle_notes)
+            link_access_types = self._get_link_access_types_from_affecting_trouble_note(
+                previously_faulty_interfaces, logical_ids)
+            is_task_assigned = self._is_ticket_task_assigned(detail_for_ticket_resolution)
 
             if has_faulty_byob_link and is_task_in_ipa_queue:
                 logger.info(
                     f"Task for serial {serial_number} in ticket {outage_ticket_id} is related to a BYOB link "
                     f"and is in the IPA Investigate queue. Ignoring auto-resolution restrictions..."
                 )
+
+            elif self._is_ethernet_link_access_type(link_access_types) and is_task_assigned:
+                logger.info(
+                    f"Task for serial {serial_number} in ticket {outage_ticket_id} is related to an Ethernet link"
+                    f" and is assigned. Ignoring auto-resolution..."
+                )
+                return
 
             else:
                 max_seconds_since_last_outage = self._get_max_seconds_since_last_outage(edge)
@@ -1225,6 +1236,11 @@ class OutageMonitor:
     def _is_ticket_task_in_ipa_queue(ticket_task: dict) -> bool:
         return ticket_task["currentTaskName"] == "IPA Investigate"
 
+    @staticmethod
+    def _is_ticket_task_assigned(ticket_task: dict) -> bool:
+        assigned_to = ticket_task["assignedToName"]
+        return assigned_to and not assigned_to.isspace() and assigned_to != "0"
+
     def _get_max_seconds_since_last_outage(self, edge: dict) -> int:
         from datetime import timezone
 
@@ -1310,6 +1326,27 @@ class OutageMonitor:
                     interfaces.add(link_interface)
 
         return list(interfaces)
+
+    def _get_link_access_types_from_affecting_trouble_note(self, interfaces: List[str], logical_id_list: List[dict]) -> Optional[str]:
+        if not interfaces:
+            return None
+
+        access_types = set()
+
+        for interface in interfaces:
+            link_access_type = [
+                logical_id["access_type"]
+                for logical_id in logical_id_list
+                if logical_id["interface_name"] == interface
+            ]
+            if link_access_type:
+                access_types.add(link_access_type[0])
+
+        return list(access_types)
+
+    def _is_ethernet_link_access_type(self, link_access_types: List[str]) -> bool:
+        return (link_access_types
+                and any([access_type for access_type in link_access_types if access_type == "Ethernet/T1/MPLS"]))
 
     def _get_has_faulty_byob_link_from_triage_note(self, triage_note: Optional[dict]) -> Optional[bool]:
         if not triage_note:

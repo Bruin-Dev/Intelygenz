@@ -3158,6 +3158,13 @@ class TestServiceOutageMonitor:
                     "client_id": 9994,
                     "client_name": "METTEL/NEW YORK",
                 },
+                "logical_ids": [
+                    {
+                        "interface_name": "REX",
+                        "logical_id": "00:22:83:45:e8:fe:0000",
+                        "access_type": "Wireless"
+                    }
+                ]
             },
             "status": [
                 {
@@ -3214,6 +3221,13 @@ class TestServiceOutageMonitor:
                     "client_id": client_id,
                     "client_name": "METTEL/NEW YORK",
                 },
+                "logical_ids": [
+                    {
+                        "interface_name": "REX",
+                        "logical_id": "00:22:83:45:e8:fe:0000",
+                        "access_type": "Wireless"
+                    }
+                ]
             },
             "status": {
                 "host": "mettel.velocloud.net",
@@ -3277,6 +3291,13 @@ class TestServiceOutageMonitor:
                     "client_id": client_id,
                     "client_name": "METTEL/NEW YORK",
                 },
+                "logical_ids": [
+                    {
+                        "interface_name": "REX",
+                        "logical_id": "00:22:83:45:e8:fe:0000",
+                        "access_type": "Wireless"
+                    }
+                ]
             },
             "status": {
                 "host": "mettel.velocloud.net",
@@ -3339,6 +3360,13 @@ class TestServiceOutageMonitor:
                     "client_id": client_id,
                     "client_name": "METTEL/NEW YORK",
                 },
+                "logical_ids": [
+                    {
+                        "interface_name": "REX",
+                        "logical_id": "00:22:83:45:e8:fe:0000",
+                        "access_type": "Wireless"
+                    }
+                ]
             },
             "status": {
                 "host": "mettel.velocloud.net",
@@ -3416,6 +3444,13 @@ class TestServiceOutageMonitor:
                     "client_id": client_id,
                     "client_name": "METTEL/NEW YORK",
                 },
+                "logical_ids": [
+                    {
+                        "interface_name": "REX",
+                        "logical_id": "00:22:83:45:e8:fe:0000",
+                        "access_type": "Wireless"
+                    }
+                ]
             },
             "status": {
                 "host": "mettel.velocloud.net",
@@ -3498,6 +3533,13 @@ class TestServiceOutageMonitor:
                     "client_id": client_id,
                     "client_name": "METTEL/NEW YORK",
                 },
+                "logical_ids": [
+                    {
+                        "interface_name": "REX",
+                        "logical_id": "00:22:83:45:e8:fe:0000",
+                        "access_type": "Wireless"
+                    }
+                ]
             },
             "status": {
                 "host": "mettel.velocloud.net",
@@ -3553,6 +3595,7 @@ class TestServiceOutageMonitor:
             "detailValue": serial_number_1,
             "detailStatus": "I",
             "currentTaskName": "test",
+            "assignedToName": "0",
         }
         ticket_note_1 = {
             "noteId": 68246614,
@@ -3649,6 +3692,13 @@ class TestServiceOutageMonitor:
                     "client_id": client_id,
                     "client_name": "METTEL/NEW YORK",
                 },
+                "logical_ids": [
+                    {
+                        "interface_name": "REX",
+                        "logical_id": "00:22:83:45:e8:fe:0000",
+                        "access_type": "Wireless"
+                    }
+                ]
             },
             "status": {
                 "host": "mettel.velocloud.net",
@@ -3704,6 +3754,7 @@ class TestServiceOutageMonitor:
             "detailValue": serial_number_1,
             "detailStatus": "I",
             "currentTaskName": "test",
+            "assignedToName": "0",
         }
         ticket_note_1 = {
             "noteId": 68246614,
@@ -3807,6 +3858,13 @@ class TestServiceOutageMonitor:
                     "client_id": client_id,
                     "client_name": "METTEL/NEW YORK",
                 },
+                "logical_ids": [
+                    {
+                        "interface_name": "REX",
+                        "logical_id": "00:22:83:45:e8:fe:0000",
+                        "access_type": "Wireless"
+                    }
+                ]
             },
             "status": {
                 "host": "mettel.velocloud.net",
@@ -3862,6 +3920,7 @@ class TestServiceOutageMonitor:
             "detailValue": serial_number_1,
             "detailStatus": "R",
             "currentTaskName": "test",
+            "assignedToName": "0",
         }
         ticket_note_1 = {
             "noteId": 68246614,
@@ -3962,6 +4021,13 @@ class TestServiceOutageMonitor:
                     "client_id": client_id,
                     "client_name": "METTEL/NEW YORK",
                 },
+                "logical_ids": [
+                    {
+                        "interface_name": "REX",
+                        "logical_id": "00:22:83:45:e8:fe:0000",
+                        "access_type": "Wireless"
+                    }
+                ]
             },
             "status": {
                 "host": "mettel.velocloud.net",
@@ -4017,6 +4083,7 @@ class TestServiceOutageMonitor:
             "detailValue": serial_number_1,
             "detailStatus": "R",
             "currentTaskName": "test",
+            "assignedToName": "0",
         }
         ticket_note_1 = {
             "noteId": 68246614,
@@ -4127,6 +4194,13 @@ class TestServiceOutageMonitor:
                     "client_id": client_id,
                     "client_name": "METTEL/NEW YORK",
                 },
+                "logical_ids": [
+                    {
+                        "interface_name": "REX",
+                        "logical_id": "00:22:83:45:e8:fe:0000",
+                        "access_type": "Wireless"
+                    }
+                ]
             },
             "status": {
                 "host": "mettel.velocloud.net",
@@ -4183,6 +4257,7 @@ class TestServiceOutageMonitor:
             "detailValue": serial_number_1,
             "detailStatus": "I",
             "currentTaskName": "test",
+            "assignedToName": "0",
         }
         ticket_note_1 = {
             "noteId": 68246614,
@@ -4310,6 +4385,13 @@ class TestServiceOutageMonitor:
                     "client_id": client_id,
                     "client_name": "METTEL/NEW YORK",
                 },
+                "logical_ids": [
+                    {
+                        "interface_name": "REX",
+                        "logical_id": "00:22:83:45:e8:fe:0000",
+                        "access_type": "Wireless"
+                    }
+                ]
             },
             "status": {
                 "host": "mettel.velocloud.net",
@@ -4366,6 +4448,7 @@ class TestServiceOutageMonitor:
             "detailValue": serial_number_1,
             "detailStatus": "I",
             "currentTaskName": "IPA Investigate",
+            "assignedToName": "0",
         }
         ticket_note_1 = {
             "noteId": 68246614,
@@ -4483,6 +4566,13 @@ class TestServiceOutageMonitor:
                     "client_id": client_id,
                     "client_name": "METTEL/NEW YORK",
                 },
+                "logical_ids": [
+                    {
+                        "interface_name": "REX",
+                        "logical_id": "00:22:83:45:e8:fe:0000",
+                        "access_type": "Wireless"
+                    }
+                ]
             },
             "status": {
                 "host": "mettel.velocloud.net",
@@ -4539,6 +4629,7 @@ class TestServiceOutageMonitor:
             "detailValue": serial_number_1,
             "detailStatus": "I",
             "currentTaskName": "test",
+            "assignedToName": "0",
         }
         ticket_note_1 = {
             "noteId": 68246614,
@@ -4671,6 +4762,13 @@ class TestServiceOutageMonitor:
                     "client_id": client_id,
                     "client_name": "METTEL/NEW YORK",
                 },
+                "logical_ids": [
+                    {
+                        "interface_name": "REX",
+                        "logical_id": "00:22:83:45:e8:fe:0000",
+                        "access_type": "Wireless"
+                    }
+                ]
             },
             "status": {
                 "host": "mettel.velocloud.net",
@@ -4727,6 +4825,7 @@ class TestServiceOutageMonitor:
             "detailValue": serial_number_1,
             "detailStatus": "I",
             "currentTaskName": "test",
+            "assignedToName": "0",
         }
         ticket_note_1 = {
             "noteId": 68246614,
@@ -12582,11 +12681,11 @@ class TestServiceOutageMonitor:
 
         assert response is True
 
-    def _get_faulty_interfaces_from_ticket_notes_test(self, outage_monitor):
+    def get_faulty_interfaces_from_ticket_notes_test(self, outage_monitor):
         serial_number_1 = "VC1234567"
         interface_1 = "GE4"
         interface_2 = "GE5"
-        interfaces = [interface_2, interface_1]
+        interfaces = [interface_1, interface_2]
         ticket_note_1 = {
             "noteId": 68246614,
             "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
@@ -12634,4 +12733,38 @@ class TestServiceOutageMonitor:
 
         response = outage_monitor._get_faulty_interfaces_from_ticket_notes(outage_ticket_notes)
 
-        assert response == interfaces
+        assert sorted(response) == sorted(interfaces)
+
+    def is_ticket_task_assigned__is_assigned_test(self, outage_monitor, make_detail_item):
+        assigned_to = "Test User"
+        detail_item = make_detail_item(assigned_to=assigned_to)
+
+        result = outage_monitor._is_ticket_task_assigned(detail_item)
+
+        assert result
+
+    def is_ticket_task_assigned__not_assigned_test(self, outage_monitor, make_detail_item):
+        assigned_to = " "
+        detail_item = make_detail_item(assigned_to=assigned_to)
+
+        result = outage_monitor._is_ticket_task_assigned(detail_item)
+
+        assert not result
+
+        assigned_to = "0"
+        detail_item = make_detail_item(assigned_to=assigned_to)
+
+        result = outage_monitor._is_ticket_task_assigned(detail_item)
+
+        assert not result
+
+    def is_ethernet_link_access_type__is_ethernet_link_test(self, outage_monitor):
+        result = outage_monitor._is_ethernet_link_access_type(["Ethernet/T1/MPLS"])
+        assert result
+
+    def is_ethernet_link_access_type__not_ethernet_link_test(self, outage_monitor):
+        result = outage_monitor._is_ethernet_link_access_type([])
+        assert not result
+
+        result = outage_monitor._is_ethernet_link_access_type(["Wireless"])
+        assert not result
