@@ -12581,3 +12581,42 @@ class TestServiceOutageMonitor:
         response = outage_monitor._is_business_grade_link_label(edge["status"]["links"][0]["displayName"])
 
         assert response is True
+
+    def _get_faulty_interfaces_from_ticket_notes_test(self, outage_monitor):
+        serial_number_1 = "VC1234567"
+        interface_1 = "GE4"
+        interface_2 = "GE5"
+        interfaces = [interface_1, interface_2]
+        ticket_note_1 = {
+            "noteId": 68246614,
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            "createdDate": "",
+            "serviceNumber": [
+                serial_number_1,
+            ],
+        }
+        ticket_note_2 = {
+            "noteId": 68246615,
+            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            "createdDate": "",
+            "serviceNumber": [
+                serial_number_1,
+            ],
+        }
+        ticket_note_3 = {
+            "noteId": 68246616,
+            "noteValue": "#*MetTel's IPA*#\nTriage (VeloCloud)\nOutage Type: Hard Down (no HA)\nOrchestrator Instance: metvco04.mettel.net\nEdge Name: FIS | EID1508_CID2034_HCBTC_KOSCIUSKO_620\nLinks: Edge  - QoE  - Transport  - Events \nSerial: 2S6NV43\nEdge Status: OFFLINE\nLast Edge Online: Unknown\nLast Edge Offline: 2023-03-27 09:41:00-04:00\nInterface GE4\nInterface GE4 Label: APEX U10Meg/D10Meg | MetTel # BBT.120548\nInterface GE4 IP Address: 32.143.194.50\nInterface GE4 Type: Public Wired\nInterface GE4 Status: DISCONNECTED\nLast GE4 Interface Online: 2023-03-24 22:34:12-04:00\nLast GE4 Interface Offline: Unknown\nInterface GE5\nInterface GE5 Label: MaxxSouth Fiber U10Meg/D100Meg | MetTel # BCB.151729\nInterface GE5 IP Address: 24.233.236.6\nInterface GE5 Type: Public Wired\nInterface GE5 Status: DISCONNECTED\nLast GE5 Interface Online: 2023-03-24 22:37:17-04:00\nLast GE5 Interface Offline: 2023-03-21 11:09:33-04:00",
+            "createdDate": "",
+            "serviceNumber": [
+                serial_number_1,
+            ],
+        }
+        outage_ticket_notes = [
+            ticket_note_1,
+            ticket_note_2,
+            ticket_note_3,
+        ]
+
+        response = outage_monitor._get_faulty_interfaces_from_ticket_notes(outage_ticket_notes)
+
+        assert response == interfaces
