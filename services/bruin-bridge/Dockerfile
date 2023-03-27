@@ -82,7 +82,9 @@ RUN cd Python-3.10.4 && \
     ./configure --enable-optimizations --prefix=/home/${NON_ROOT_USER}/.local && \
     make install
 
-RUN curl -sSL https://install.python-poetry.org | /home/${NON_ROOT_USER}/.local/python3 -
+RUN ls -al /home/${NON_ROOT_USER}/.local 
+
+RUN curl -sSL https://install.python-poetry.org | /home/${NON_ROOT_USER}/.local/python3.10 -
 
 # Copy utils and install with Poetry
 COPY --chown=${NON_ROOT_USER}:0 /pyutils_automation/py310 /home/${NON_ROOT_USER}/pyutils_automation/py310
