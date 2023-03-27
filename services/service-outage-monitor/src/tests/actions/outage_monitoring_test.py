@@ -12586,7 +12586,7 @@ class TestServiceOutageMonitor:
         serial_number_1 = "VC1234567"
         interface_1 = "GE4"
         interface_2 = "GE5"
-        interfaces = [interface_1, interface_2]
+        interfaces = [interface_2, interface_1]
         ticket_note_1 = {
             "noteId": 68246614,
             "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
