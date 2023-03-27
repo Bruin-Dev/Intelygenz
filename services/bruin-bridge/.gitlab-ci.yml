@@ -48,7 +48,7 @@ bruin-bridge-test:
 # ==========================================
 packer-bruin-bridge:
   extends: .packer_app_build_image
-  stage: validation
+  stage: packer
   variables:
     ECR_REPOSITORY_NAME: bruin-bridge
     PACKER_DIR_MODULE: "../../services/bruin-bridge/"
@@ -66,8 +66,8 @@ packer-bruin-bridge:
         - gitlab-ci/basic-templates/**/*
         - ci-utils/packer/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  #needs:
-  #  - job: bruin-bridge-test
-  #  - job: sonar-analysis
-  #  - job: semantic-release
-  #    optional: true
+  needs:
+    - job: bruin-bridge-test
+    - job: sonar-analysis
+    - job: semantic-release
+      optional: true
