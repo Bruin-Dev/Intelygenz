@@ -1351,7 +1351,9 @@ class ServiceAffectingMonitor:
             link_label = match.group("label")
             return self._is_link_label_blacklisted_from_hnoc(link_label)
 
-    def _get_link_access_type_from_affecting_trouble_note(self, affecting_trouble_note: Optional[dict], logical_id_list: List[dict]) -> Optional[str]:
+    def _get_link_access_type_from_affecting_trouble_note(
+        self, affecting_trouble_note: Optional[dict], logical_id_list: List[dict]
+    ) -> Optional[str]:
         if not affecting_trouble_note:
             return None
 
