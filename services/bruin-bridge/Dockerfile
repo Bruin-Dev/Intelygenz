@@ -52,7 +52,7 @@ COPY /app/ubuntu18-fips/packages packages/
 # DL3008 We won't pin versions here
 # hadolint ignore=DL3008 ignore=DL3015
 RUN apt-get update && \
-    apt-get install --yes --quiet build-essential checkinstall  libreadline-gplv2-dev  libncursesw5-dev  libssl-dev  libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev && \
+    apt-get install --yes --quiet build-essential checkinstall  libreadline-gplv2-dev  libncursesw5-dev  libssl-dev  libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev curl && \
     apt-get install --yes --quiet --no-install-recommends wget software-properties-common
 
 # Install FIPS compliant cryptography packages and clean
