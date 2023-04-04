@@ -385,7 +385,7 @@ class OutageMonitor:
             has_faulty_byob_link = self._get_has_faulty_byob_link_from_triage_note(triage_note)
             faulty_link_types = self._get_faulty_link_types_from_triage_note(triage_note)
             is_task_in_ipa_queue = self._is_ticket_task_in_ipa_queue(detail_for_ticket_resolution)
-            previously_faulty_interfaces = self._get_faulty_interfaces_from_ticket_notes(last_cycle_notes)
+            previously_faulty_interfaces = self._get_faulty_interfaces_from_ticket_notes(notes_from_outage_ticket)
             link_access_types = self._get_link_access_types_from_affecting_trouble_note(
                 previously_faulty_interfaces, logical_ids)
             is_task_assigned = self._is_ticket_task_assigned(detail_for_ticket_resolution)
