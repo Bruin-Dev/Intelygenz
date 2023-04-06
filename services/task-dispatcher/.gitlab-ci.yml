@@ -20,13 +20,14 @@ task-dispatcher-linter:
 # ==============================================
 # Images builds jobs for task-dispatcher module
 # ==============================================
-task-dispatcher-build:
-  stage: build
+packer-task-dispatcher:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: task-dispatcher
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: task-dispatcher
+    PACKER_DIR_MODULE: "../../services/task-dispatcher/"
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $TASK_DISPATCHER_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
         - services/task-dispatcher/src/application/**/*
         - services/task-dispatcher/src/config/**/*
@@ -34,9 +35,12 @@ task-dispatcher-build:
         - services/task-dispatcher/Dockerfile
         - services/task-dispatcher/pyproject.toml
         - services/task-dispatcher/poetry.lock
+        - services/task-dispatcher/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $TASK_DISPATCHER_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   needs:
+    - job: sonar-analysis
     - job: semantic-release
       optional: true

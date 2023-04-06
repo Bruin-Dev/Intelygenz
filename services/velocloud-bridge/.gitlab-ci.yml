@@ -40,13 +40,15 @@ velocloud-bridge-test:
 # ==============================================
 # Images builds jobs for velocloud-bridge module
 # ==============================================
-velocloud-bridge-build:
-  stage: build
+
+packer-velocloud-bridge:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: velocloud-bridge
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: velocloud-bridge
+    PACKER_DIR_MODULE: "../../services/velocloud-bridge/"
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $VELOCLOUD_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
         - services/velocloud-bridge/src/application/**/*
         - services/velocloud-bridge/src/config/**/*
@@ -54,10 +56,13 @@ velocloud-bridge-build:
         - services/velocloud-bridge/Dockerfile
         - services/velocloud-bridge/pyproject.toml
         - services/velocloud-bridge/poetry.lock
+        - services/velocloud-bridge/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $VELOCLOUD_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   needs:
     - job: velocloud-bridge-test
+    - job: sonar-analysis
     - job: semantic-release
       optional: true
