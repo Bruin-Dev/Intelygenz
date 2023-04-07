@@ -48,7 +48,7 @@ packer-tnba-monitor:
     ECR_REPOSITORY_NAME: tnba-monitor
     PACKER_DIR_MODULE: "../../services/tnba-monitor/"
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $TNBA_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
         - services/tnba-monitor/src/application/**/*
         - services/tnba-monitor/src/config/**/*
@@ -60,7 +60,7 @@ packer-tnba-monitor:
         - pyutils_automation/py310/**/*
         - gitlab-ci/basic-templates/**/*
         - ci-utils/packer/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $TNBA_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   needs:
     - job: tnba-monitor-test
     - job: sonar-analysis

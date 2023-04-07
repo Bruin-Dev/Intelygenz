@@ -59,7 +59,6 @@ packer-bruin-bridge:
         - services/bruin-bridge/src/config/**/*
         - services/bruin-bridge/src/app.py
         - services/bruin-bridge/Dockerfile
-        - services/bruin-bridge/Dockerfile.packer
         - services/bruin-bridge/pyproject.toml
         - services/bruin-bridge/poetry.lock
         - pyutils_automation/py310/**/*

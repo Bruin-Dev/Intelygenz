@@ -46,24 +46,25 @@ packer-email-tagger-monitor:
   extends: .packer_app_build_image
   stage: packer
   variables:
-    ECR_REPOSITORY_NAME: bruin-bridge
-    PACKER_DIR_MODULE: "../../services/bruin-bridge/"
+    ECR_REPOSITORY_NAME: email-tagger-monitor
+    PACKER_DIR_MODULE: "../../services/email-tagger-monitor/"
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $EMAIL_TAGGER_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
-        - services/bruin-bridge/src/application/**/*
-        - services/bruin-bridge/src/config/**/*
-        - services/bruin-bridge/src/app.py
-        - services/bruin-bridge/Dockerfile
-        - services/bruin-bridge/pyproject.toml
-        - services/bruin-bridge/poetry.lock
-        - services/bruin-bridge/.gitlab-ci.yml
+        - services/email-tagger-monitor/src/application/**/*
+        - services/email-tagger-monitor/src/config/**/*
+        - services/email-tagger-monitor/src/tests/**/*
+        - services/email-tagger-monitor/src/app.py
+        - services/email-tagger-monitor/Dockerfile
+        - services/email-tagger-monitor/pyproject.toml
+        - services/email-tagger-monitor/poetry.lock
+        - services/email-tagger-monitor/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
         - gitlab-ci/basic-templates/**/*
         - ci-utils/packer/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $EMAIL_TAGGER_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   needs:
-    - job: bruin-bridge-test
+    - job: email-tagger-monitor-test
     - job: sonar-analysis
     - job: semantic-release
       optional: true

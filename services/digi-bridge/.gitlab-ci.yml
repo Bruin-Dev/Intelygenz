@@ -47,7 +47,7 @@ packer-digi-bridge:
     ECR_REPOSITORY_NAME: digi-bridge
     PACKER_DIR_MODULE: "../../services/digi-bridge/"
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $DIGI_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
         - services/digi-bridge/src/application/**/*
         - services/digi-bridge/src/config/**/*
@@ -59,7 +59,7 @@ packer-digi-bridge:
         - pyutils_automation/py310/**/*
         - gitlab-ci/basic-templates/**/*
         - ci-utils/packer/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $DIGI_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   needs:
     - job: digi-bridge-test
     - job: sonar-analysis

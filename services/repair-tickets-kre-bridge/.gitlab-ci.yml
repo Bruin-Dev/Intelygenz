@@ -47,7 +47,7 @@ packer-repair-tickets-kre-bridge:
     ECR_REPOSITORY_NAME: repair-tickets-kre-bridge
     PACKER_DIR_MODULE: "../../services/repair-tickets-kre-bridge/"
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $REPAIR_TICKET_KRE_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
         - services/repair-tickets-kre-bridge/src/application/**/*
         - services/repair-tickets-kre-bridge/src/config/**/*
@@ -59,7 +59,7 @@ packer-repair-tickets-kre-bridge:
         - pyutils_automation/py310/**/*
         - gitlab-ci/basic-templates/**/*
         - ci-utils/packer/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $REPAIR_TICKET_KRE_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   needs:
     - job: repair-tickets-kre-bridge-test
     - job: sonar-analysis

@@ -46,7 +46,7 @@ packer-hawkeye-outage-monitor:
     ECR_REPOSITORY_NAME: hawkeye-outage-monitor
     PACKER_DIR_MODULE: "../../services/hawkeye-outage-monitor/"
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $HAWKEYE_OUTAGE_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
         - services/hawkeye-outage-monitor/src/application/**/*
         - services/hawkeye-outage-monitor/src/config/**/*
@@ -58,7 +58,7 @@ packer-hawkeye-outage-monitor:
         - pyutils_automation/py310/**/*
         - gitlab-ci/basic-templates/**/*
         - ci-utils/packer/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $HAWKEYE_OUTAGE_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   needs:
     - job: hawkeye-outage-monitor-test
     - job: sonar-analysis

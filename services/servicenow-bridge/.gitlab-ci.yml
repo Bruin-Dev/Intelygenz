@@ -47,19 +47,21 @@ packer-servicenow-bridge:
     ECR_REPOSITORY_NAME: servicenow-bridge
     PACKER_DIR_MODULE: "../../services/servicenow-bridge/"
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $SERVICENOW_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
         - services/servicenow-bridge/src/application/**/*
         - services/servicenow-bridge/src/config/**/*
         - services/servicenow-bridge/src/app.py
         - services/servicenow-bridge/Dockerfile
+        - services/velocloud-bridge/pyproject.toml
+        - services/velocloud-bridge/poetry.lock
         - services/servicenow-bridge/pyproject.toml
         - services/servicenow-bridge/poetry.lock
         - services/servicenow-bridge/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
         - gitlab-ci/basic-templates/**/*
         - ci-utils/packer/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $SERVICENOW_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   needs:
     - job: servicenow-bridge-test
     - job: sonar-analysis
