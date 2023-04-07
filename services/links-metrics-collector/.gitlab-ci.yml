@@ -20,13 +20,14 @@ links-metrics-collector-linter:
 # =====================================================
 # Images builds jobs for links-metrics-collector module
 # =====================================================
-links-metrics-collector-build:
-  stage: build
+packer-links-metrics-collector:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: links-metrics-collector
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: links-metrics-collector
+    PACKER_DIR_MODULE: "../../services/links-metrics-collector/"
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $LINKS_METRICS_COLLECTOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
         - services/links-metrics-collector/src/application/**/*
         - services/links-metrics-collector/src/config/**/*
@@ -34,10 +35,12 @@ links-metrics-collector-build:
         - services/links-metrics-collector/Dockerfile
         - services/links-metrics-collector/pyproject.toml
         - services/links-metrics-collector/poetry.lock
+        - services/links-metrics-collector/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $LINKS_METRICS_COLLECTOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   needs:
-    - job: links-metrics-collector-linter
+    - job: sonar-analysis
     - job: semantic-release
       optional: true
