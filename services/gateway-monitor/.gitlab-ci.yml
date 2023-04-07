@@ -40,13 +40,14 @@ gateway-monitor-test:
 # ====================================================
 # Images builds jobs for gateway-monitor module
 # ====================================================
-gateway-monitor-build:
-  stage: build
+packer-gateway-monitor:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: gateway-monitor
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: gateway-monitor
+    PACKER_DIR_MODULE: "../../services/gateway-monitor/"
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && ($GATEWAY_MONITOR_DESIRED_TASKS != "0") && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
         - services/gateway-monitor/src/application/**/*
         - services/gateway-monitor/src/config/**/*
@@ -54,10 +55,13 @@ gateway-monitor-build:
         - services/gateway-monitor/Dockerfile
         - services/gateway-monitor/pyproject.toml
         - services/gateway-monitor/poetry.lock
+        - services/gateway-monitor/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && ($GATEWAY_MONITOR_DESIRED_TASKS != "0") && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   needs:
     - job: gateway-monitor-test
+    - job: sonar-analysis
     - job: semantic-release
       optional: true

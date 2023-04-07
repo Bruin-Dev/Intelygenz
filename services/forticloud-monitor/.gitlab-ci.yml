@@ -44,13 +44,14 @@ forticloud-monitor-test:
 # ====================================================
 # Images builds jobs for forticloud-monitor module
 # ====================================================
-forticloud-monitor-build:
-  stage: build
+packer-forticloud-monitor:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: forticloud-monitor
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: forticloud-monitor
+    PACKER_DIR_MODULE: "../../services/forticloud-monitor/"
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $FORTICLOUD_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
         - services/forticloud-monitor/src/application/**/*
         - services/forticloud-monitor/src/config/**/*
@@ -58,12 +59,13 @@ forticloud-monitor-build:
         - services/forticloud-monitor/Dockerfile
         - services/forticloud-monitor/pyproject.toml
         - services/forticloud-monitor/poetry.lock
-        - pyutils_automation/bruin-client/**/*
-        - pyutils_automation/clients/forticloud/**/*
+        - services/forticloud-monitor/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $FORTICLOUD_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   needs:
     - job: forticloud-monitor-test
+    - job: sonar-analysis
     - job: semantic-release
       optional: true

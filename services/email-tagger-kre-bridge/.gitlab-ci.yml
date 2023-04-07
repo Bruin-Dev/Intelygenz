@@ -40,13 +40,14 @@ email-tagger-kre-bridge-test:
 # ============================================
 # Images builds jobs for email-tagger-kre-bridge module
 # ============================================
-email-tagger-kre-bridge-build:
-  stage: build
+packer-email-tagger-kre-bridge:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: email-tagger-kre-bridge
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: email-tagger-kre-bridge
+    PACKER_DIR_MODULE: "../../services/email-tagger-kre-bridge/"
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $EMAIL_TAGGER_KRE_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
         - services/email-tagger-kre-bridge/src/application/**/*
         - services/email-tagger-kre-bridge/src/config/**/*
@@ -54,10 +55,13 @@ email-tagger-kre-bridge-build:
         - services/email-tagger-kre-bridge/Dockerfile
         - services/email-tagger-kre-bridge/pyproject.toml
         - services/email-tagger-kre-bridge/poetry.lock
+        - services/email-tagger-kre-bridge/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $EMAIL_TAGGER_KRE_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   needs:
     - job: email-tagger-kre-bridge-test
+    - job: sonar-analysis
     - job: semantic-release
       optional: true

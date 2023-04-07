@@ -40,13 +40,14 @@ customer-cache-test:
 # ==============================================
 # Images builds jobs for customer-cache module
 # ==============================================
-customer-cache-build:
-  stage: build
+packer-customer-cache:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: customer-cache
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: customer-cache
+    PACKER_DIR_MODULE: "../../services/customer-cache/"
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CUSTOMER_CACHE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
         - services/customer-cache/src/application/**/*
         - services/customer-cache/src/config/**/*
@@ -54,10 +55,13 @@ customer-cache-build:
         - services/customer-cache/Dockerfile
         - services/customer-cache/pyproject.toml
         - services/customer-cache/poetry.lock
+        - services/customer-cache/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CUSTOMER_CACHE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   needs:
     - job: customer-cache-test
+    - job: sonar-analysis
     - job: semantic-release
       optional: true

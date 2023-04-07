@@ -40,13 +40,14 @@ hawkeye-customer-cache-test:
 # ====================================================
 # Images builds jobs for hawkeye-customer-cache module
 # ====================================================
-hawkeye-customer-cache-build:
-  stage: build
+packer-hawkeye-customer-cache:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: hawkeye-customer-cache
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: hawkeye-customer-cache
+    PACKER_DIR_MODULE: "../../services/hawkeye-customer-cache/"
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $HAWKEYE_CUSTOMER_CACHE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
         - services/hawkeye-customer-cache/src/application/**/*
         - services/hawkeye-customer-cache/src/config/**/*
@@ -54,10 +55,13 @@ hawkeye-customer-cache-build:
         - services/hawkeye-customer-cache/Dockerfile
         - services/hawkeye-customer-cache/pyproject.toml
         - services/hawkeye-customer-cache/poetry.lock
+        - services/hawkeye-customer-cache/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $HAWKEYE_CUSTOMER_CACHE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   needs:
     - job: hawkeye-customer-cache-test
+    - job: sonar-analysis
     - job: semantic-release
       optional: true

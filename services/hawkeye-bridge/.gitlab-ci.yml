@@ -40,13 +40,14 @@ hawkeye-bridge-test:
 # ============================================
 # Images builds jobs for hawkeye-bridge module
 # ============================================
-hawkeye-bridge-build:
-  stage: build
+packer-hawkeye-bridge:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: hawkeye-bridge
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: hawkeye-bridge
+    PACKER_DIR_MODULE: "../../services/hawkeye-bridge/"
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $HAWKEYE_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
         - services/hawkeye-bridge/src/application/**/*
         - services/hawkeye-bridge/src/config/**/*
@@ -54,10 +55,13 @@ hawkeye-bridge-build:
         - services/hawkeye-bridge/Dockerfile
         - services/hawkeye-bridge/pyproject.toml
         - services/hawkeye-bridge/poetry.lock
+        - services/hawkeye-bridge/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $HAWKEYE_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   needs:
     - job: hawkeye-bridge-test
+    - job: sonar-analysis
     - job: semantic-release
       optional: true

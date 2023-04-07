@@ -40,13 +40,14 @@ hawkeye-affecting-monitor-test:
 # ================================================
 # Images builds jobs for hawkeye-affecting-monitor module
 # ================================================
-hawkeye-affecting-monitor-build:
-  stage: build
+packer-hawkeye-affecting-monitor:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: hawkeye-affecting-monitor
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: hawkeye-affecting-monitor
+    PACKER_DIR_MODULE: "../../services/hawkeye-affecting-monitor/"
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $HAWKEYE_AFFECTING_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
         - services/hawkeye-affecting-monitor/src/application/**/*
         - services/hawkeye-affecting-monitor/src/config/**/*
@@ -54,10 +55,13 @@ hawkeye-affecting-monitor-build:
         - services/hawkeye-affecting-monitor/Dockerfile
         - services/hawkeye-affecting-monitor/pyproject.toml
         - services/hawkeye-affecting-monitor/poetry.lock
+        - services/hawkeye-affecting-monitor/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $HAWKEYE_AFFECTING_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
   needs:
     - job: hawkeye-affecting-monitor-test
+    - job: sonar-analysis
     - job: semantic-release
       optional: true
