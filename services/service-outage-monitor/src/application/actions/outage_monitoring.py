@@ -404,19 +404,20 @@ class OutageMonitor:
                 return
 
             else:
-                max_seconds_since_last_outage = self._get_max_seconds_since_last_outage(edge)
-                was_last_outage_detected_recently = self._has_last_event_happened_recently(
-                    ticket_notes=relevant_notes,
-                    documentation_cycle_start_date=outage_ticket_creation_date,
-                    max_seconds_since_last_event=max_seconds_since_last_outage,
-                    note_regex=REOPEN_NOTE_REGEX,
-                )
-                if not was_last_outage_detected_recently:
-                    logger.info(
-                        f"Edge {serial_number} has been in outage state for a long time, so the task from ticket "
-                        f"{outage_ticket_id} will not be autoresolved. Skipping autoresolve..."
-                    )
-                    return
+                # commenting out the following since we want to autoresolve even if the last outage was detected a while ago
+                # max_seconds_since_last_outage = self._get_max_seconds_since_last_outage(edge)
+                # was_last_outage_detected_recently = self._has_last_event_happened_recently(
+                #     ticket_notes=relevant_notes,
+                #     documentation_cycle_start_date=outage_ticket_creation_date,
+                #     max_seconds_since_last_event=max_seconds_since_last_outage,
+                #     note_regex=REOPEN_NOTE_REGEX,
+                # )
+                # if not was_last_outage_detected_recently:
+                #     logger.info(
+                #         f"Edge {serial_number} has been in outage state for a long time, so the task from ticket "
+                #         f"{outage_ticket_id} will not be autoresolved. Skipping autoresolve..."
+                #     )
+                #     return
 
                 can_detail_be_autoresolved_one_more_time = (
                     self._outage_repository.is_outage_ticket_detail_auto_resolvable(

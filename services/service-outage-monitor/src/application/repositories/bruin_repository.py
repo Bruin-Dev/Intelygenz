@@ -632,7 +632,7 @@ class BruinRepository:
             ]
         )
 
-        return await self.append_note_to_ticket(ticket_id, autoresolve_note, service_numbers=[serial_number])
+        return await self.append_note_to_ticket(ticket_id, autoresolve_note)
 
     async def append_reopening_note_to_ticket(self, ticket_id: int, service_number: str, outage_causes: str):
         current_datetime_tz_aware = datetime.now(timezone(self._config.TIMEZONE))

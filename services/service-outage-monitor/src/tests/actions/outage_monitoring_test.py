@@ -3670,13 +3670,13 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
-        outage_monitor._has_last_event_happened_recently.assert_called_once_with(
-            ticket_notes=relevant_notes_for_edge,
-            documentation_cycle_start_date=outage_ticket_1_creation_date,
-            max_seconds_since_last_event="",
-            note_regex=REOPEN_NOTE_REGEX,
-        )
-        outage_monitor._outage_repository.is_outage_ticket_detail_auto_resolvable.assert_not_called()
+        # outage_monitor._has_last_event_happened_recently.assert_called_once_with(
+        #     ticket_notes=relevant_notes_for_edge,
+        #     documentation_cycle_start_date=outage_ticket_1_creation_date,
+        #     max_seconds_since_last_event="",
+        #     note_regex=REOPEN_NOTE_REGEX,
+        # )
+        outage_monitor._outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once()
 
     @pytest.mark.asyncio
     async def run_ticket_autoresolve_with_resolve_limit_exceeded_test(self, outage_monitor):
@@ -3831,12 +3831,12 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
-        outage_monitor._has_last_event_happened_recently.assert_called_once_with(
-            ticket_notes=relevant_notes_for_edge,
-            documentation_cycle_start_date=outage_ticket_1_creation_date,
-            max_seconds_since_last_event="",
-            note_regex=REOPEN_NOTE_REGEX,
-        )
+        # outage_monitor._has_last_event_happened_recently.assert_called_once_with(
+        #     ticket_notes=relevant_notes_for_edge,
+        #     documentation_cycle_start_date=outage_ticket_1_creation_date,
+        #     max_seconds_since_last_event="",
+        #     note_regex=REOPEN_NOTE_REGEX,
+        # )
         outage_monitor._outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
             outage_ticket_notes,
             serial_number_1,
@@ -3991,12 +3991,12 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
-        outage_monitor._has_last_event_happened_recently.assert_called_once_with(
-            ticket_notes=relevant_notes_for_edge,
-            documentation_cycle_start_date=outage_ticket_1_creation_date,
-            max_seconds_since_last_event="",
-            note_regex=REOPEN_NOTE_REGEX,
-        )
+        # outage_monitor._has_last_event_happened_recently.assert_called_once_with(
+        #     ticket_notes=relevant_notes_for_edge,
+        #     documentation_cycle_start_date=outage_ticket_1_creation_date,
+        #     max_seconds_since_last_event="",
+        #     note_regex=REOPEN_NOTE_REGEX,
+        # )
         outage_monitor._outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
             outage_ticket_notes,
             serial_number_1,
@@ -4163,12 +4163,12 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
-        outage_monitor._has_last_event_happened_recently.assert_called_once_with(
-            ticket_notes=relevant_notes_for_edge,
-            documentation_cycle_start_date=outage_ticket_1_creation_date,
-            max_seconds_since_last_event="",
-            note_regex=REOPEN_NOTE_REGEX,
-        )
+        # outage_monitor._has_last_event_happened_recently.assert_called_once_with(
+        #     ticket_notes=relevant_notes_for_edge,
+        #     documentation_cycle_start_date=outage_ticket_1_creation_date,
+        #     max_seconds_since_last_event="",
+        #     note_regex=REOPEN_NOTE_REGEX,
+        # )
         outage_monitor._outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
             outage_ticket_notes,
             serial_number_1,
@@ -4349,12 +4349,12 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
-        outage_monitor._has_last_event_happened_recently.assert_called_once_with(
-            ticket_notes=relevant_notes_for_edge,
-            documentation_cycle_start_date=outage_ticket_1_creation_date,
-            max_seconds_since_last_event="",
-            note_regex=REOPEN_NOTE_REGEX,
-        )
+        # outage_monitor._has_last_event_happened_recently.assert_called_once_with(
+        #     ticket_notes=relevant_notes_for_edge,
+        #     documentation_cycle_start_date=outage_ticket_1_creation_date,
+        #     max_seconds_since_last_event="",
+        #     note_regex=REOPEN_NOTE_REGEX,
+        # )
         outage_monitor._outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
             outage_ticket_notes,
             serial_number_1,
@@ -4723,12 +4723,12 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
-        outage_monitor._has_last_event_happened_recently.assert_called_once_with(
-            ticket_notes=relevant_notes_for_edge,
-            documentation_cycle_start_date=outage_ticket_1_creation_date,
-            max_seconds_since_last_event="",
-            note_regex=REOPEN_NOTE_REGEX,
-        )
+        # outage_monitor._has_last_event_happened_recently.assert_called_once_with(
+        #     ticket_notes=relevant_notes_for_edge,
+        #     documentation_cycle_start_date=outage_ticket_1_creation_date,
+        #     max_seconds_since_last_event="",
+        #     note_regex=REOPEN_NOTE_REGEX,
+        # )
         outage_monitor._outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
             outage_ticket_notes,
             serial_number_1,
@@ -4920,12 +4920,12 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._was_ticket_created_by_automation_engine.assert_called_once_with(outage_ticket_1)
         outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(outage_ticket_1_id)
-        outage_monitor._has_last_event_happened_recently.assert_called_once_with(
-            ticket_notes=relevant_notes_for_edge,
-            documentation_cycle_start_date=outage_ticket_1_creation_date,
-            max_seconds_since_last_event="",
-            note_regex=REOPEN_NOTE_REGEX,
-        )
+        # outage_monitor._has_last_event_happened_recently.assert_called_once_with(
+        #     ticket_notes=relevant_notes_for_edge,
+        #     documentation_cycle_start_date=outage_ticket_1_creation_date,
+        #     max_seconds_since_last_event="",
+        #     note_regex=REOPEN_NOTE_REGEX,
+        # )
         outage_monitor._outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once_with(
             outage_ticket_notes,
             serial_number_1,

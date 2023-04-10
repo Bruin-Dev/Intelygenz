@@ -3298,6 +3298,7 @@ class TestServiceAffectingMonitor:
         make_list_of_ticket_notes,
         make_ticket_details,
         make_rpc_response,
+        bruin_generic_200_response,
     ):
         serial_number = "VC1234567"
         client_id = 12345
@@ -3340,18 +3341,20 @@ class TestServiceAffectingMonitor:
             body=ticket_details,
             status=200,
         )
+        service_affecting_monitor._bruin_repository.resolve_ticket.return_value = bruin_generic_200_response
 
-        await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
+            await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
             client_id,
             service_number=serial_number,
         )
 
-        service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_not_awaited()
-        service_affecting_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
-        service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_not_awaited()
-        service_affecting_monitor._notifications_repository.notify_successful_autoresolve.assert_not_awaited()
+        service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_awaited()
+        service_affecting_monitor._bruin_repository.resolve_ticket.assert_awaited()
+        service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_awaited()
+        service_affecting_monitor._notifications_repository.notify_successful_autoresolve.assert_awaited()
 
     @pytest.mark.asyncio
     async def run_autoresolve_for_edge__last_trouble_documented_after_reopen_and_detected_long_ago_test(
@@ -3371,6 +3374,7 @@ class TestServiceAffectingMonitor:
         make_list_of_ticket_notes,
         make_ticket_details,
         make_rpc_response,
+        bruin_generic_200_response,
     ):
         serial_number = "VC1234567"
         client_id = 12345
@@ -3414,17 +3418,19 @@ class TestServiceAffectingMonitor:
             body=ticket_details,
             status=200,
         )
+        service_affecting_monitor._bruin_repository.resolve_ticket.return_value = bruin_generic_200_response
 
-        await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
+        with patch.object(service_affecting_monitor._config, "CURRENT_ENVIRONMENT", "production"):
+            await service_affecting_monitor._run_autoresolve_for_edge(links_grouped_by_edge_obj)
 
         service_affecting_monitor._bruin_repository.get_open_affecting_tickets.assert_awaited_once_with(
             client_id,
             service_number=serial_number,
         )
-        service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_not_awaited()
-        service_affecting_monitor._bruin_repository.resolve_ticket.assert_not_awaited()
-        service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_not_awaited()
-        service_affecting_monitor._notifications_repository.notify_successful_autoresolve.assert_not_awaited()
+        service_affecting_monitor._bruin_repository.unpause_ticket_detail.assert_awaited()
+        service_affecting_monitor._bruin_repository.resolve_ticket.assert_awaited()
+        service_affecting_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_awaited()
+        service_affecting_monitor._notifications_repository.notify_successful_autoresolve.assert_awaited()
 
     @pytest.mark.asyncio
     async def run_autoresolve_for_edge__maximum_number_of_autoresolves_reached_test(

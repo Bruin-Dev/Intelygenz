@@ -379,12 +379,13 @@ class ServiceAffectingMonitor:
                 link_access_type = self._get_link_access_type_from_affecting_trouble_note(
                     affecting_trouble_note, logical_ids)
 
-                max_seconds_since_last_trouble = self._get_max_seconds_since_last_trouble(edge)
-                last_trouble_was_detected_recently = self._trouble_repository.was_last_trouble_detected_recently(
-                    relevant_notes,
-                    affecting_ticket_creation_date,
-                    max_seconds_since_last_trouble=max_seconds_since_last_trouble,
-                )
+                # commenting out the following since we want to autoresolve even if the last outage was detected a while ago
+                # max_seconds_since_last_trouble = self._get_max_seconds_since_last_trouble(edge)
+                # last_trouble_was_detected_recently = self._trouble_repository.was_last_trouble_detected_recently(
+                #     relevant_notes,
+                #     affecting_ticket_creation_date,
+                #     max_seconds_since_last_trouble=max_seconds_since_last_trouble,
+                # )
 
                 is_task_in_ipa_queue = self._ticket_repository.is_ticket_task_in_ipa_queue(detail_for_ticket_resolution)
                 is_task_assigned = self._ticket_repository.is_ticket_task_assigned(detail_for_ticket_resolution)
@@ -400,13 +401,14 @@ class ServiceAffectingMonitor:
                     )
                     return
                 else:
-                    if not last_trouble_was_detected_recently:
-                        logger.warning(
-                            f"Edge with serial number {serial_number} has been under an affecting trouble for a long "
-                            f"time, so the detail of ticket {affecting_ticket_id} related to it will not be "
-                            f"autoresolved. Skipping autoresolve..."
-                        )
-                        continue
+                    # commenting out the following since we want to autoresolve even if the last outage was detected a while ago
+                    # if not last_trouble_was_detected_recently:
+                    #     logger.warning(
+                    #         f"Edge with serial number {serial_number} has been under an affecting trouble for a long "
+                    #         f"time, so the detail of ticket {affecting_ticket_id} related to it will not be "
+                    #         f"autoresolved. Skipping autoresolve..."
+                    #     )
+                    #     continue
 
                     if self._ticket_repository.is_autoresolve_threshold_maxed_out(relevant_notes):
                         logger.warning(
