@@ -124,7 +124,8 @@ class TroubleRepository:
         return len(events) < threshold
 
     def are_all_metrics_within_thresholds(
-        self, edge_data: dict, *, lookup_interval_minutes: int, links_configuration: list[dict]
+        self, edge_data: dict, *, lookup_interval_minutes: int,
+        check_bandwidth_troubles: bool, links_configuration: list[dict]
     ) -> bool:
         all_metrics_within_thresholds = True
 
@@ -142,7 +143,7 @@ class TroubleRepository:
                 self.are_bouncing_events_within_threshold(events, is_wireless_link, autoresolve=True),
             ]
 
-            if self.are_bps_metrics_valid(metrics):
+            if check_bandwidth_troubles and self.are_bps_metrics_valid(metrics):
                 checks.append(
                     self.are_bandwidth_metrics_within_threshold(metrics, lookup_interval_minutes, is_wireless_link))
 
