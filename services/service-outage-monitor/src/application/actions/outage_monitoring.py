@@ -404,7 +404,7 @@ class OutageMonitor:
                 return
 
             else:
-                # commenting out the following since we want to autoresolve even if the last outage was detected a while ago
+                # commented out the following since we want to autoresolve even if last outage was detected a while ago
                 # max_seconds_since_last_outage = self._get_max_seconds_since_last_outage(edge)
                 # was_last_outage_detected_recently = self._has_last_event_happened_recently(
                 #     ticket_notes=relevant_notes,

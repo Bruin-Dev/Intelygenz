@@ -379,7 +379,7 @@ class ServiceAffectingMonitor:
                 link_access_type = self._get_link_access_type_from_affecting_trouble_note(
                     affecting_trouble_note, logical_ids)
 
-                # commenting out the following since we want to autoresolve even if the last outage was detected a while ago
+                # commented out the following since we want to autoresolve even if last outage was detected a while ago
                 # max_seconds_since_last_trouble = self._get_max_seconds_since_last_trouble(edge)
                 # last_trouble_was_detected_recently = self._trouble_repository.was_last_trouble_detected_recently(
                 #     relevant_notes,
@@ -401,7 +401,7 @@ class ServiceAffectingMonitor:
                     )
                     return
                 else:
-                    # commenting out the following since we want to autoresolve even if the last outage was detected a while ago
+                    # commented out since we want to autoresolve even if last outage was detected a while ago
                     # if not last_trouble_was_detected_recently:
                     #     logger.warning(
                     #         f"Edge with serial number {serial_number} has been under an affecting trouble for a long "
