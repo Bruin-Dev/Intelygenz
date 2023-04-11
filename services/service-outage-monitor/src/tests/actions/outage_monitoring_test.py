@@ -3676,7 +3676,7 @@ class TestServiceOutageMonitor:
             max_seconds_since_last_event="",
             note_regex=REOPEN_NOTE_REGEX,
         )
-        outage_monitor._outage_repository.is_outage_ticket_detail_auto_resolvable.assert_called_once()
+        outage_monitor._outage_repository.is_outage_ticket_detail_auto_resolvable.assert_not_called()
 
     @pytest.mark.asyncio
     async def run_ticket_autoresolve_with_resolve_limit_exceeded_test(self, outage_monitor):
