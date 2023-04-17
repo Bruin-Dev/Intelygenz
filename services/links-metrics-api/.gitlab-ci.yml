@@ -20,11 +20,12 @@ links-metrics-api-linter:
 # ===============================================
 # Images builds jobs for links-metrics-api module
 # ===============================================
-links-metrics-api-build:
-  stage: build
+packer-links-metrics-api:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: links-metrics-api
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: links-metrics-api
+    PACKER_DIR_MODULE: "../../services/links-metrics-api/"
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $LINKS_METRICS_API_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
@@ -34,10 +35,12 @@ links-metrics-api-build:
         - services/links-metrics-api/Dockerfile
         - services/links-metrics-api/pyproject.toml
         - services/links-metrics-api/poetry.lock
+        - services/links-metrics-api/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $LINKS_METRICS_API_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
   needs:
-    - job: links-metrics-api-linter
+    - job: sonar-analysis
     - job: semantic-release
       optional: true

@@ -39,23 +39,28 @@ digi-reboot-report-test:
 # =================================================
 # Images builds jobs for digi-reboot-report module
 # =================================================
-digi-reboot-report-build:
-  stage: build
+packer-digi-reboot-report:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: digi-reboot-report
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: digi-reboot-report
+    PACKER_DIR_MODULE: "../../services/digi-reboot-report/"
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $DIGI_REBOOT_REPORT_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
         - services/digi-reboot-report/src/application/**/*
         - services/digi-reboot-report/src/config/**/*
         - services/digi-reboot-report/src/app.py
+        - services/digi-reboot-report/Dockerfile
         - services/digi-reboot-report/pyproject.toml
         - services/digi-reboot-report/poetry.lock
+        - services/digi-reboot-report/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $DIGI_REBOOT_REPORT_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
   needs:
     - job: digi-reboot-report-test
+    - job: sonar-analysis
     - job: semantic-release
       optional: true

@@ -40,11 +40,12 @@ servicenow-bridge-test:
 # ===============================================
 # Images builds jobs for servicenow-bridge module
 # ===============================================
-servicenow-bridge-build:
-  stage: build
+packer-servicenow-bridge:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: servicenow-bridge
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: servicenow-bridge
+    PACKER_DIR_MODULE: "../../services/servicenow-bridge/"
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $SERVICENOW_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
@@ -54,10 +55,15 @@ servicenow-bridge-build:
         - services/servicenow-bridge/Dockerfile
         - services/velocloud-bridge/pyproject.toml
         - services/velocloud-bridge/poetry.lock
+        - services/servicenow-bridge/pyproject.toml
+        - services/servicenow-bridge/poetry.lock
+        - services/servicenow-bridge/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $SERVICENOW_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
   needs:
     - job: servicenow-bridge-test
+    - job: sonar-analysis
     - job: semantic-release
       optional: true

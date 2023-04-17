@@ -40,11 +40,12 @@ lumin-billing-report-test:
 # =================================================
 # Images builds jobs for lumin-billing-report module
 # =================================================
-lumin-billing-report-build:
-  stage: build
+packer-lumin-billing-report:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: lumin-billing-report
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: lumin-billing-report
+    PACKER_DIR_MODULE: "../../services/lumin-billing-report/"
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $LUMIN_BILLING_REPORT_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
@@ -54,10 +55,13 @@ lumin-billing-report-build:
         - services/lumin-billing-report/Dockerfile
         - services/lumin-billing-report/pyproject.toml
         - services/lumin-billing-report/poetry.lock
+        - services/lumin-billing-report/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $LUMIN_BILLING_REPORT_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
   needs:
     - job: lumin-billing-report-test
+    - job: sonar-analysis
     - job: semantic-release
       optional: true

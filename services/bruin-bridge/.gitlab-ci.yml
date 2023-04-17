@@ -13,7 +13,10 @@ bruin-bridge-linter:
         - services/bruin-bridge/Dockerfile
         - services/bruin-bridge/pyproject.toml
         - services/bruin-bridge/poetry.lock
+        - services/bruin-bridge/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .lint_module
 
@@ -32,16 +35,23 @@ bruin-bridge-test:
         - services/bruin-bridge/Dockerfile
         - services/bruin-bridge/pyproject.toml
         - services/bruin-bridge/poetry.lock
+        - services/bruin-bridge/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
   extends: .unittest_module_python_310
   needs: ["bruin-bridge-linter"]
 
-bruin-bridge-build:
-  stage: build
+# ==========================================
+# Images builds jobs for bruin-bridge module
+# ==========================================
+packer-bruin-bridge:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: bruin-bridge
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: bruin-bridge
+    PACKER_DIR_MODULE: "../../services/bruin-bridge/"
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
@@ -52,9 +62,11 @@ bruin-bridge-build:
         - services/bruin-bridge/pyproject.toml
         - services/bruin-bridge/poetry.lock
         - pyutils_automation/py310/**/*
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $BRUIN_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
   needs:
     - job: bruin-bridge-test
+    - job: sonar-analysis
     - job: semantic-release
       optional: true

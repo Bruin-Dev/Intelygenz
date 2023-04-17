@@ -42,11 +42,12 @@ email-tagger-monitor-test:
 # ================================================
 # Images builds jobs for email-tagger-monitor module
 # ================================================
-email-tagger-monitor-build:
-  stage: build
+packer-email-tagger-monitor:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: email-tagger-monitor
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: email-tagger-monitor
+    PACKER_DIR_MODULE: "../../services/email-tagger-monitor/"
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $EMAIL_TAGGER_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
@@ -57,10 +58,13 @@ email-tagger-monitor-build:
         - services/email-tagger-monitor/Dockerfile
         - services/email-tagger-monitor/pyproject.toml
         - services/email-tagger-monitor/poetry.lock
+        - services/email-tagger-monitor/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $EMAIL_TAGGER_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
   needs:
     - job: email-tagger-monitor-test
+    - job: sonar-analysis
     - job: semantic-release
       optional: true

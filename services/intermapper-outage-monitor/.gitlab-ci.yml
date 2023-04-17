@@ -40,11 +40,12 @@ intermapper-outage-monitor-test:
 # ====================================================
 # Images builds jobs for intermapper-outage-monitor module
 # ====================================================
-intermapper-outage-monitor-build:
-  stage: build
+packer-intermapper-outage-monitor:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: intermapper-outage-monitor
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: intermapper-outage-monitor
+    PACKER_DIR_MODULE: "../../services/intermapper-outage-monitor/"
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $INTERMAPPER_OUTAGE_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
@@ -54,10 +55,13 @@ intermapper-outage-monitor-build:
         - services/intermapper-outage-monitor/Dockerfile
         - services/intermapper-outage-monitor/pyproject.toml
         - services/intermapper-outage-monitor/poetry.lock
+        - services/intermapper-outage-monitor/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $INTERMAPPER_OUTAGE_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
   needs:
     - job: intermapper-outage-monitor-test
+    - job: sonar-analysis
     - job: semantic-release
       optional: true

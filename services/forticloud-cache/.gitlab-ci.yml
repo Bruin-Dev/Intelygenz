@@ -40,11 +40,12 @@ forticloud-cache-test:
 # ==============================================
 # Images builds jobs for forticloud-cache module
 # ==============================================
-forticloud-cache-build:
-  stage: build
+packer-forticloud-cache:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: forticloud-cache
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: forticloud-cache
+    PACKER_DIR_MODULE: "../../services/forticloud-cache/"
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $FORTICLOUD_CACHE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
@@ -54,10 +55,13 @@ forticloud-cache-build:
         - services/forticloud-cache/Dockerfile
         - services/forticloud-cache/pyproject.toml
         - services/forticloud-cache/poetry.lock
+        - services/forticloud-cache/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $FORTICLOUD_CACHE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
   needs:
     - job: forticloud-cache-test
+    - job: sonar-analysis
     - job: semantic-release
       optional: true

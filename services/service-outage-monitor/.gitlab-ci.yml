@@ -40,11 +40,12 @@ service-outage-monitor-test:
 # ====================================================
 # Images builds jobs for service-outage-monitor module
 # ====================================================
-service-outage-monitor-build:
-  stage: build
+packer-service-outage-monitor:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: service-outage-monitor
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: service-outage-monitor
+    PACKER_DIR_MODULE: "../../services/service-outage-monitor/"
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && ($SERVICE_OUTAGE_MONITOR_DESIRED_TASKS != "0" || $SERVICE_OUTAGE_MONITOR_TRIAGE_DESIRED_TASKS != "0") && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
@@ -55,9 +56,12 @@ service-outage-monitor-build:
         - services/service-outage-monitor/pyproject.toml
         - services/service-outage-monitor/poetry.lock
         - pyutils_automation/py310/**/*
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
+
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && ($SERVICE_OUTAGE_MONITOR_DESIRED_TASKS != "0" || $SERVICE_OUTAGE_MONITOR_TRIAGE_DESIRED_TASKS != "0") && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
   needs:
     - job: service-outage-monitor-test
+    - job: sonar-analysis
     - job: semantic-release
       optional: true

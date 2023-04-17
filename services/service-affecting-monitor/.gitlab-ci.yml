@@ -40,11 +40,12 @@ service-affecting-monitor-test:
 # =======================================================
 # Images builds jobs for service-affecting-monitor module
 # =======================================================
-service-affecting-monitor-build:
-  stage: build
+packer-service-affecting-monitor:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: service-affecting-monitor
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: service-affecting-monitor
+    PACKER_DIR_MODULE: "../../services/service-affecting-monitor/"
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $SERVICE_AFFECTING_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
@@ -54,10 +55,13 @@ service-affecting-monitor-build:
         - services/service-affecting-monitor/Dockerfile
         - services/service-affecting-monitor/pyproject.toml
         - services/service-affecting-monitor/poetry.lock
+        - services/service-affecting-monitor/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $SERVICE_AFFECTING_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
   needs:
     - job: service-affecting-monitor-test
+    - job: sonar-analysis
     - job: semantic-release
       optional: true

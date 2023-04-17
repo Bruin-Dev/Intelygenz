@@ -40,11 +40,12 @@ forticloud-poller-test:
 # ======================================
 # Images builds jobs for forticloud-poller module
 # ======================================
-forticloud-poller-build:
-  stage: build
+packer-forticloud-poller:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: forticloud-poller
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: forticloud-poller
+    PACKER_DIR_MODULE: "../../services/forticloud-poller/"
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $FORTICLOUD_POLLER_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
@@ -54,10 +55,13 @@ forticloud-poller-build:
         - services/forticloud-poller/Dockerfile
         - services/forticloud-poller/pyproject.toml
         - services/forticloud-poller/poetry.lock
+        - services/forticloud-poller/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $FORTICLOUD_POLLER_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
   needs:
     - job: forticloud-poller-test
+    - job: sonar-analysis
     - job: semantic-release
       optional: true

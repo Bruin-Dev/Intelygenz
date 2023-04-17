@@ -40,11 +40,12 @@ last-contact-report-test:
 # =================================================
 # Images builds jobs for last-contact-report module
 # =================================================
-last-contact-report-build:
-  stage: build
+packer-last-contact-report:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: last-contact-report
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: last-contact-report
+    PACKER_DIR_MODULE: "../../services/last-contact-report/"
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $LAST_CONTACT_REPORT_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
@@ -54,10 +55,15 @@ last-contact-report-build:
         - services/last-contact-report/Dockerfile
         - services/intermapper-outage-monitor/pyproject.toml
         - services/intermapper-outage-monitor/poetry.lock
+        - services/last-contact-report/pyproject.toml
+        - services/last-contact-report/poetry.lock
+        - services/last-contact-report/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $LAST_CONTACT_REPORT_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
   needs:
     - job: last-contact-report-test
+    - job: sonar-analysis
     - job: semantic-release
       optional: true

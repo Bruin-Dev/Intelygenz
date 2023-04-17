@@ -42,11 +42,12 @@ repair-tickets-monitor-test:
 # ====================================================
 # Images builds jobs for repair-tickets-monitor module
 # ====================================================
-repair-tickets-monitor-build:
-  stage: build
+packer-repair-tickets-monitor:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: repair-tickets-monitor
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: repair-tickets-monitor
+    PACKER_DIR_MODULE: "../../services/repair-tickets-monitor/"
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $REPAIR_TICKETS_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
@@ -56,10 +57,13 @@ repair-tickets-monitor-build:
         - services/repair-tickets-monitor/Dockerfile
         - services/repair-tickets-monitor/pyproject.toml
         - services/repair-tickets-monitor/poetry.lock
+        - services/repair-tickets-monitor/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $REPAIR_TICKETS_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
   needs:
     - job: repair-tickets-monitor-test
+    - job: sonar-analysis
     - job: semantic-release
       optional: true

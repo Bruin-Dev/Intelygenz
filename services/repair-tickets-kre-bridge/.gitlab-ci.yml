@@ -40,11 +40,12 @@ repair-tickets-kre-bridge-test:
 # ======================================================
 # Images builds jobs for repair-tickets-kre-bridge module
 # ======================================================
-repair-tickets-kre-bridge-build:
-  stage: build
+packer-repair-tickets-kre-bridge:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: repair-tickets-kre-bridge
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: repair-tickets-kre-bridge
+    PACKER_DIR_MODULE: "../../services/repair-tickets-kre-bridge/"
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $REPAIR_TICKET_KRE_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
@@ -54,10 +55,13 @@ repair-tickets-kre-bridge-build:
         - services/repair-tickets-kre-bridge/Dockerfile
         - services/repair-tickets-kre-bridge/pyproject.toml
         - services/repair-tickets-kre-bridge/poetry.lock
+        - services/repair-tickets-kre-bridge/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $REPAIR_TICKET_KRE_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
   needs:
-#    - job: repair-tickets-kre-bridge-test
+    - job: repair-tickets-kre-bridge-test
+    - job: sonar-analysis
     - job: semantic-release
       optional: true

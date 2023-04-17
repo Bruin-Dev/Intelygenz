@@ -97,6 +97,16 @@ variable "ECR_REPOSITORY_TAG" {
   default = env("ECR_REPOSITORY_TAG")
 }
 
+variable "ECR_REPOSITORY_LAST_TAG" {
+  type    = string
+  default = env("ECR_REPOSITORY_LAST_TAG")
+}
+
+variable "COSIGN_PASSWORD" {
+  type    = string
+  default = env("COSIGN_PASSWORD")
+}
+
 variable "PACKER_DIR_MODULE" {
   type    = string
   default = env("PACKER_DIR_MODULE")
@@ -162,7 +172,11 @@ build {
     inline = [
       "echo '** Create fips-enabled packages directory **'",
       "sudo mkdir -p /app/ubuntu18-fips/packages",
-      "sudo chmod -R 777 /app"
+      "sudo mkdir -p /app/service",
+      "sudo chmod -R 777 /app",
+      "sudo chmod -R 777 /app/service",
+      "sudo mkdir -p /pyutils_automation/py310",
+      "sudo chmod -R 777 /pyutils_automation/py310",
     ]
     inline_shebang = "/bin/bash -xe"
   }
@@ -170,8 +184,21 @@ build {
   provisioner "file" {
     destination = "/app/"
     sources      = [
+       "./",
+    ]
+  }
+
+  provisioner "file" {
+    destination = "/app/service/"
+    sources      = [
       "${var.PACKER_DIR_MODULE}",
-      "./"
+    ]
+  }
+
+  provisioner "file" {
+    destination = "/pyutils_automation/py310/"
+    sources      = [
+      "./../../pyutils_automation/py310/",
     ]
   }
 
@@ -179,8 +206,7 @@ build {
     environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
     inline = [
       "echo '** Enable Ubuntu Pro services **'",
-      "sudo killall apt-get",
-      "ls -al /app",
+      "cloud-init status --wait",
       "sudo apt-get update && sudo apt-get upgrade -yq",
       "echo '** Enabling UA services already enabled will cause the pipeline to fail **'",
       "sudo pro enable cc-eal cis fips --assume-yes",
@@ -249,7 +275,11 @@ build {
       "unzip -qq awscliv2.zip",
       "sudo ./aws/install",
       "export AWS_ACCESS_KEY_ID=${var.AWS_ACCESS_KEY_ID}",
-      "export AWS_SECRET_ACCESS_KEY=${var.AWS_SECRET_ACCESS_KEY}"
+      "export AWS_SECRET_ACCESS_KEY=${var.AWS_SECRET_ACCESS_KEY}",
+      "wget 'https://github.com/sigstore/cosign/releases/download/v1.13.1/cosign_1.13.1_amd64.deb'",
+      "sudo dpkg -i cosign_1.13.1_amd64.deb",
+      "curl -LO 'https://github.com/sigstore/cosign/releases/download/v1.13.1/cosign-linux-amd64'",
+      "chmod +x cosign-linux-amd64 && sudo mv cosign-linux-amd64 /usr/local/bin/cosign"
     ]
     inline_shebang = "/bin/bash -xe"
   }
@@ -259,6 +289,10 @@ build {
       "--extra-vars", "ecr_repository_uri=${var.ECR_REPOSITORY_URL}",
       "--extra-vars", "ecr_repository_name=${var.ECR_REPOSITORY_NAME}",
       "--extra-vars", "ecr_repository_tag=${var.ECR_REPOSITORY_TAG}",
+      "--extra-vars", "ecr_repository_last_image=${var.ECR_REPOSITORY_LAST_TAG}",
+      "--extra-vars", "aws_access_key_id=${var.AWS_ACCESS_KEY_ID}",
+      "--extra-vars", "aws_secret_access_key=${var.AWS_SECRET_ACCESS_KEY}",
+      "--extra-vars", "COSIGN_PASSWORD=${var.COSIGN_PASSWORD}",
     ]
     command = "ANSIBLE_ROLES_PATH=/app/ansible/roles ansible-playbook"
     galaxy_collections_path = "/app/ansible/ansible_collections"

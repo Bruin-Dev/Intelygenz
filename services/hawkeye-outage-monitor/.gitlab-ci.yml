@@ -39,23 +39,28 @@ hawkeye-outage-monitor-test:
 # ====================================================
 # Images builds jobs for hawkeye-outage-monitor module
 # ====================================================
-hawkeye-outage-monitor-build:
-  stage: build
+packer-hawkeye-outage-monitor:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: hawkeye-outage-monitor
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: hawkeye-outage-monitor
+    PACKER_DIR_MODULE: "../../services/hawkeye-outage-monitor/"
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $HAWKEYE_OUTAGE_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
         - services/hawkeye-outage-monitor/src/application/**/*
         - services/hawkeye-outage-monitor/src/config/**/*
         - services/hawkeye-outage-monitor/src/app.py
+        - services/hawkeye-outage-monitor/Dockerfile
         - services/hawkeye-outage-monitor/pyproject.toml
         - services/hawkeye-outage-monitor/poetry.lock
+        - services/hawkeye-outage-monitor/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $HAWKEYE_OUTAGE_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
   needs:
     - job: hawkeye-outage-monitor-test
+    - job: sonar-analysis
     - job: semantic-release
       optional: true

@@ -40,11 +40,12 @@ fraud-monitor-test:
 # ====================================================
 # Images builds jobs for fraud-monitor module
 # ====================================================
-fraud-monitor-build:
-  stage: build
+packer-fraud-monitor:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: fraud-monitor
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: fraud-monitor
+    PACKER_DIR_MODULE: "../../services/fraud-monitor/"
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $FRAUD_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
@@ -54,10 +55,13 @@ fraud-monitor-build:
         - services/fraud-monitor/Dockerfile
         - services/fraud-monitor/pyproject.toml
         - services/fraud-monitor/poetry.lock
+        - services/fraud-monitor/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $FRAUD_MONITOR_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
   needs:
     - job: fraud-monitor-test
+    - job: sonar-analysis
     - job: semantic-release
       optional: true

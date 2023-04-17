@@ -40,11 +40,12 @@ digi-bridge-test:
 # ==========================================
 # Images builds jobs for digi-bridge module
 # ==========================================
-digi-bridge-build:
-  stage: build
+packer-digi-bridge:
+  extends: .packer_app_build_image
+  stage: packer
   variables:
-    MODULE_NAME: digi-bridge
-    MODULE_VERSION: ${CI_PIPELINE_ID}
+    ECR_REPOSITORY_NAME: digi-bridge
+    PACKER_DIR_MODULE: "../../services/digi-bridge/"
   rules:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $DIGI_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TITLE =~ /(feat|fix|perf|refactor)\(.*\): .*$/'
       changes:
@@ -54,10 +55,13 @@ digi-bridge-build:
         - services/digi-bridge/Dockerfile
         - services/digi-bridge/pyproject.toml
         - services/digi-bridge/poetry.lock
+        - services/digi-bridge/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
+        - gitlab-ci/basic-templates/**/*
+        - ci-utils/packer/**/*
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $DIGI_BRIDGE_DESIRED_TASKS != "0" && $CI_PIPELINE_SOURCE == "web"'
-  extends: .build_app_image
   needs:
     - job: digi-bridge-test
+    - job: sonar-analysis
     - job: semantic-release
       optional: true
