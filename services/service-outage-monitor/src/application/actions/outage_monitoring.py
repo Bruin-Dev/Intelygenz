@@ -316,7 +316,8 @@ class OutageMonitor:
             serial_number = cached_edge["serial_number"]
             client_id = cached_edge["bruin_client_info"]["client_id"]
             client_name = cached_edge["bruin_client_info"]["client_name"]
-            logical_ids = edge["cached_info"]["logical_ids"]
+            logical_ids = cached_edge["logical_ids"]
+            links = edge["status"]["links"]
 
             logger.info(f"Starting autoresolve for edge {serial_number}...")
 
@@ -386,8 +387,9 @@ class OutageMonitor:
             faulty_link_types = self._get_faulty_link_types_from_triage_note(triage_note)
             is_task_in_ipa_queue = self._is_ticket_task_in_ipa_queue(detail_for_ticket_resolution)
             previously_faulty_interfaces = self._get_faulty_interfaces_from_ticket_notes(notes_from_outage_ticket)
+            resolved_faulty_interfaces = self._get_resolved_faulty_interfaces(previously_faulty_interfaces, links)
             link_access_types = self._get_link_access_types_from_affecting_trouble_note(
-                previously_faulty_interfaces, logical_ids)
+                resolved_faulty_interfaces, logical_ids)
             is_task_assigned = self._is_ticket_task_assigned(detail_for_ticket_resolution)
 
             if has_faulty_byob_link and is_task_in_ipa_queue:
@@ -452,7 +454,7 @@ class OutageMonitor:
                 outage_ticket_id, service_number=serial_number, detail_id=ticket_detail_id
             )
             resolve_ticket_response = await self._bruin_repository.resolve_ticket(
-                outage_ticket_id, ticket_detail_id, previously_faulty_interfaces)
+                outage_ticket_id, ticket_detail_id, resolved_faulty_interfaces)
             if resolve_ticket_response["status"] not in range(200, 300):
                 logger.error(
                     f"Error while resolving task of ticket {outage_ticket_id} for edge {serial_number}: "
@@ -1326,6 +1328,16 @@ class OutageMonitor:
                     interfaces.add(link_interface)
 
         return list(interfaces)
+
+    def _get_resolved_faulty_interfaces(self, previously_faulty_interfaces: List[str], links: List[dict]) -> List[str]:
+        resolved_interfaces = set()
+        for previous_faulty_interface in previously_faulty_interfaces:
+            for link in links:
+                if link["interface"] == previous_faulty_interface:
+                    resolved_interfaces.add(previous_faulty_interface)
+                    break
+
+        return list(resolved_interfaces)
 
     def _get_link_access_types_from_affecting_trouble_note(
         self, interfaces: List[str], logical_id_list: List[dict]
