@@ -8,6 +8,7 @@
   before_script:
     - source ci-utils/environments/environment_assign.sh
   script:
+    - source ci-utils/environments/environment_assign.sh
     - cd ci-utils/packer
     - export ECR_REPOSITORY_LAST_TAG=$ECR_REPOSITORY_TAG
     - packer build packer.pkr.hcl
@@ -24,6 +25,7 @@
   before_script:
     - source ci-utils/environments/environment_assign.sh
   script:
+    - source ci-utils/environments/environment_assign.sh
     - cd ci-utils/packer
     - export ECR_REPOSITORY_LAST_TAG=$DOCKER_BUILD_LATEST_TAG
     - packer build packer.pkr.hcl
