@@ -26,5 +26,5 @@ else
   export PROMETHEUS_INGRESS_EXTERNAL_URL="https://${PROMETHEUS_INGRESS_HOSTNAME}"
   export GRAFANA_INGRESS_HOSTNAME="grafana.mettel-automation.net"
   export GRAFANA_INGRESS_ROOT_URL="https://${GRAFANA_INGRESS_HOSTNAME}"
-  export ECR_REPOSITORY_TAG="${TAG}"
+  export ECR_REPOSITORY_TAG=${TAG}
 fi

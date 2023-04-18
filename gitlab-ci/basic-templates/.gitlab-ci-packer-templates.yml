@@ -27,5 +27,9 @@
   script:
     - source ci-utils/environments/environment_assign.sh
     - cd ci-utils/packer
+    - echo $TAG
+    - echo $ECR_REPOSITORY_NAME
+    - echo $MODULE_NAME
+    - echo $ECR_REPOSITORY_TAG
     - export ECR_REPOSITORY_LAST_TAG=$DOCKER_BUILD_LATEST_TAG
     - packer build packer.pkr.hcl
