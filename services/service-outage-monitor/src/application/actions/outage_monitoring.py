@@ -388,6 +388,12 @@ class OutageMonitor:
             is_task_in_ipa_queue = self._is_ticket_task_in_ipa_queue(detail_for_ticket_resolution)
             previously_faulty_interfaces = self._get_faulty_interfaces_from_ticket_notes(notes_from_outage_ticket)
             resolved_faulty_interfaces = self._get_resolved_faulty_interfaces(previously_faulty_interfaces, links)
+
+            logger.info(
+                f"Previously faulty interfaces: {previously_faulty_interfaces}. "
+                f"Resolved faulty interfaces: {resolved_faulty_interfaces}."
+            )
+
             link_access_types = self._get_link_access_types_from_affecting_trouble_note(
                 resolved_faulty_interfaces, logical_ids)
             is_task_assigned = self._is_ticket_task_assigned(detail_for_ticket_resolution)
