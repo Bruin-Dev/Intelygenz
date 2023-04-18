@@ -1,4 +1,5 @@
 #!/bin/bash
+apk update && apk add coreutils
 
 if [[ "${CI_COMMIT_REF_SLUG}" != "master" ]]; then
   export MODULE_NAME=$ECR_REPOSITORY_NAME
