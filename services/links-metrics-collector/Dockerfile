@@ -91,6 +91,8 @@ COPY --chown=${NON_ROOT_USER}:0 /app/service /home/${NON_ROOT_USER}/app/service
 WORKDIR /home/${NON_ROOT_USER}/app/service
 RUN ~/.local/bin/poetry install --only main
 
+RUN wget https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem
+
 # Expose ports for the service
 EXPOSE 5000 9090
 
