@@ -55,6 +55,7 @@ packer-service-outage-monitor:
         - services/service-outage-monitor/Dockerfile
         - services/service-outage-monitor/pyproject.toml
         - services/service-outage-monitor/poetry.lock
+        - services/service-outage-monitor/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
         - gitlab-ci/basic-templates/**/*
         - ci-utils/packer/**/*
