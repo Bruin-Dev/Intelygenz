@@ -73,6 +73,9 @@ USER ${NON_ROOT_USER}
 # Set workdir to user home
 WORKDIR /home/${NON_ROOT_USER}
 
+# Create variable with path to service
+ENV SERVICE_PATH="/home/nroot/app/service"
+
 RUN wget https://www.python.org/ftp/python/3.10.4/Python-3.10.4.tgz && \
     tar xzf Python-3.10.4.tgz
 
