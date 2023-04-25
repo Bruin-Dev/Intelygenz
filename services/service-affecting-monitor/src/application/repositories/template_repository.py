@@ -130,11 +130,19 @@ class TemplateRepository:
             recipients = recipients + recipients_by_client[client_id]
         return recipients
 
+    def get_recipients_for_bandwidth_report(self, client_id):
+        recipients_by_host_and_client = self._config.BANDWIDTH_REPORT_CONFIG["recipients_by_host_and_client_id"]
+        recipients_by_client = recipients_by_host_and_client[self._config.VELOCLOUD_HOST]
+        recipients = self._config.BANDWIDTH_REPORT_CONFIG["default_contacts"]
+        if client_id in recipients_by_client:
+            recipients = recipients + recipients_by_client[client_id]
+        return recipients
+
     def compose_bandwidth_report_email(self, client_id, client_name, report_items):
         now = datetime.now(timezone(self._config.TIMEZONE))
         date = now.strftime(DATE_FORMAT)
 
-        recipients = self._config.BANDWIDTH_REPORT_CONFIG["recipients"]
+        recipients = self.get_recipients_for_bandwidth_report(client_id)
         subject = f"{client_name} - Daily Bandwidth Report - {date}"
         template_vars = {
             "__DATE__": date,

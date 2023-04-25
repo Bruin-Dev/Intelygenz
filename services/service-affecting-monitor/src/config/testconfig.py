@@ -156,10 +156,12 @@ BANDWIDTH_REPORT_CONFIG = {
     "timezone": "US/Eastern",
     "crontab": "0 8 * * *",
     "lookup_interval_hours": 24,
-    "client_ids_by_host": {
-        "test-host": [9994],
+    "default_contacts": ["mettel.automation@intelygenz.com"],
+    "recipients_by_host_and_client_id": {
+        "test-host": {
+            9994: ["HNOCleaderteam@mettel.net"],
+        },
     },
-    "recipients": ["mettel.automation@intelygenz.com"],
 }
 
 CURRENT_ENVIRONMENT = "dev"

@@ -1,7 +1,7 @@
-resource "aws_ssm_parameter" "parameter-service-affecting-daily-bandwidth-report-enabled-customers-per-host" {
+resource "aws_ssm_parameter" "parameter-service-affecting-daily-bandwidth-report-default-contacts" {
   count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
-  name        = "/automation-engine/common/service-affecting/daily-bandwidth-report/enabled-customers-per-host"
-  description = "Mapping of VeloCloud hosts and Bruin customer IDs for whom this report will trigger periodically"
+  name        = "/automation-engine/common/service-affecting/daily-bandwidth-report/default-contacts"
+  description = "List of default contacts to whom this report will always be delivered to"
   type        = "SecureString"
   value       = "-" # to edit go to parameter store dashboard.
   key_id      = aws_kms_alias.kms_key.name
@@ -13,11 +13,30 @@ resource "aws_ssm_parameter" "parameter-service-affecting-daily-bandwidth-report
   }
 
   tags = merge(var.common_info, {
-    Name = "DAILY_BANDWIDTH_REPORT__ENABLED_CUSTOMERS_PER_HOST"
+    Name = "DAILY_BANDWIDTH_REPORT__DEFAULT_CONTACTS"
     note = "can be updated from the parameter store dashboard"
   })
 }
 
+resource "aws_ssm_parameter" "parameter-service-affecting-daily-bandwidth-report-recipients-per-host-and-customer" {
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  name        = "/automation-engine/common/service-affecting/daily-bandwidth-report/recipients-per-host-and-customer"
+  description = "Mapping of VeloCloud hosts, Bruin customer IDs and recipients of these reports"
+  type        = "SecureString"
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
+
+  lifecycle {
+    ignore_changes = [
+      value,
+    ]
+  }
+
+  tags = merge(var.common_info, {
+    Name = "DAILY_BANDWIDTH_REPORT__RECIPIENTS_PER_HOST_AND_CUSTOMER"
+    note = "can be updated from the parameter store dashboard"
+  })
+}
 resource "aws_ssm_parameter" "parameter-service-affecting-daily-bandwidth-report-execution-cron-expression" {
   count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/daily-bandwidth-report/execution-cron-expression"
@@ -54,26 +73,6 @@ resource "aws_ssm_parameter" "parameter-service-affecting-daily-bandwidth-report
 
   tags = merge(var.common_info, {
     Name = "DAILY_BANDWIDTH_REPORT__LOOKUP_INTERVAL"
-    note = "can be updated from the parameter store dashboard"
-  })
-}
-
-resource "aws_ssm_parameter" "parameter-service-affecting-daily-bandwidth-report-recipients" {
-  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
-  name        = "/automation-engine/common/service-affecting/daily-bandwidth-report/recipients"
-  description = "List of recipients that will get these reports"
-  type        = "SecureString"
-  value       = "-" # to edit go to parameter store dashboard.
-  key_id      = aws_kms_alias.kms_key.name
-
-  lifecycle {
-    ignore_changes = [
-      value,
-    ]
-  }
-
-  tags = merge(var.common_info, {
-    Name = "DAILY_BANDWIDTH_REPORT__RECIPIENTS"
     note = "can be updated from the parameter store dashboard"
   })
 }

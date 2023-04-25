@@ -143,8 +143,10 @@ BANDWIDTH_REPORT_CONFIG = {
     "environment": os.environ["CURRENT_ENVIRONMENT"],
     "crontab": os.environ["DAILY_BANDWIDTH_REPORT__EXECUTION_CRON_EXPRESSION"],
     "lookup_interval_hours": int(os.environ["DAILY_BANDWIDTH_REPORT__LOOKUP_INTERVAL"]) // 60 // 60,
-    "client_ids_by_host": json.loads(os.environ["DAILY_BANDWIDTH_REPORT__ENABLED_CUSTOMERS_PER_HOST"]),
-    "recipients": json.loads(os.environ["DAILY_BANDWIDTH_REPORT__RECIPIENTS"]),
+    "default_contacts": json.loads(os.environ["DAILY_BANDWIDTH_REPORT__DEFAULT_CONTACTS"]),
+    "recipients_by_host_and_client_id": parse_client_ids(
+        json.loads(os.environ["DAILY_BANDWIDTH_REPORT__RECIPIENTS_PER_HOST_AND_CUSTOMER"])
+    ),
     "s3_bucket": os.environ["DAILY_BANDWIDTH_REPORT__S3_BUCKET"],
 }
 

@@ -50,7 +50,10 @@ class BandwidthReports:
 
     async def _bandwidth_reports_job(self):
         velocloud_host = self._config.VELOCLOUD_HOST
-        clients_to_email = self._config.BANDWIDTH_REPORT_CONFIG["client_ids_by_host"].get(velocloud_host, [])
+        clients_to_email = []
+        if velocloud_host in self._config.BANDWIDTH_REPORT_CONFIG["recipients_by_host_and_client_id"]:
+            configuration = self._config.BANDWIDTH_REPORT_CONFIG["recipients_by_host_and_client_id"][velocloud_host]
+            clients_to_email = list(configuration.keys())
 
         logger.info(f"[bandwidth-reports] Running bandwidth reports process for all clients")
         logger.info(f"[bandwidth-reports] Emailing bandwidth reports to {len(clients_to_email)} clients")
@@ -178,7 +181,10 @@ class BandwidthReports:
 
         if should_email_report:
             if email:
-                logger.info(self._config.BANDWIDTH_REPORT_CONFIG["recipients"])
+                logger.info(
+                    f'[bandwidth-reports] Emailing report for client {client_id} to '
+                    f'{self._template_repository.get_recipients_for_bandwidth_report(client_id)}'
+                )
                 await self._email_repository.send_email(email_object=email)
                 self._metrics_repository.increment_reports_signet_execution_OK()
                 logger.info(f"[bandwidth-reports] Report for client {client_id} sent via email")
