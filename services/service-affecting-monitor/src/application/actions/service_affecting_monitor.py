@@ -398,7 +398,7 @@ class ServiceAffectingMonitor:
                         f"Task for serial {serial_number} in ticket {affecting_ticket_id} is related to an Ethernet"
                         f" link and is assigned. Ignoring auto-resolution..."
                     )
-                    return
+                    continue
                 else:
                     if not last_trouble_was_detected_recently:
                         logger.warning(

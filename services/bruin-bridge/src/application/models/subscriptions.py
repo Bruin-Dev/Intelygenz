@@ -193,3 +193,9 @@ class UpdateBruinEmailStatus(Subscription):
 class ReplyToAllContactsInBruinEmail(Subscription):
     subject: str = "bruin.email.reply"
     queue: str = "bruin_bridge"
+
+
+@dataclass(kw_only=True)
+class GetDetailIdsByTicketDetailInterfaces(Subscription):
+    subject: str = "bruin.ticket.detailIds.request"
+    queue: str = "bruin_bridge"

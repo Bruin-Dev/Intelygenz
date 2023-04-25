@@ -469,6 +469,29 @@ class OutageMonitor:
                 return
 
             await self._bruin_repository.append_autoresolve_note_to_ticket(outage_ticket_id, serial_number)
+            if resolved_faulty_interfaces:
+                ticket_detailIds_resolved_interfaces_response = (
+                    await self._bruin_repository.
+                    get_ticket_detail_ids_by_ticket_detail_interfaces(
+                        outage_ticket_id, ticket_detail_id, resolved_faulty_interfaces)
+                )
+                if ticket_detailIds_resolved_interfaces_response["status"] not in range(200, 300):
+                    logger.error(
+                        f"Error while resolving task of ticket {outage_ticket_id} for edge {serial_number}: "
+                        f"{resolve_ticket_response}. Skipping autoresolve ..."
+                    )
+                else:
+                    ticket_detailIds_resolved_interfaces = ticket_detailIds_resolved_interfaces_response["body"]
+                    ticket_details = [
+                        detail
+                        for detail in details_from_ticket
+                        if detail["detailID"] in ticket_detailIds_resolved_interfaces
+                        and detail["detailValue"] != serial_number
+                    ]
+                    for ticket_detail in ticket_details:
+                        await self._bruin_repository.append_autoresolve_line_note_to_ticket(
+                            outage_ticket_id, ticket_detail["detailValue"])
+
             await self._notify_successful_autoresolve(outage_ticket_id)
 
             self._metrics_repository.increment_tasks_autoresolved(

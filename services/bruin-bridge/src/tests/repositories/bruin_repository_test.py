@@ -2431,3 +2431,31 @@ class TestBruinRepository:
 
         # Then
         assert response == mocked_response
+
+    @pytest.mark.asyncio
+    async def get_ticket_detail_ids_by_ticket_detail_interfaces_test(self):
+        # Given
+        ticket_id = 321
+        detail_id = 123
+        interface = ["GE1", "GE2"]
+
+        mocked_response = {
+            "status": 200,
+            "body": {
+                "detailIds": [
+                    345,
+                    435
+                ]
+            },
+        }
+
+        bruin_client = Mock()
+        bruin_client.get_ticket_detail_ids_by_ticket_detail_interfaces = AsyncMock(return_value=mocked_response)
+
+        bruin_repository = BruinRepository(config, bruin_client)
+
+        # When
+        response = await bruin_repository.get_ticket_detail_ids_by_ticket_detail_interfaces(ticket_id, detail_id, interface)
+
+        # Then
+        assert response == mocked_response

@@ -440,3 +440,7 @@ class BruinRepository:
 
     async def get_asset_topics(self, params) -> BruinResponse:
         return await self._bruin_client.get_asset_topics(params)
+
+    async def get_ticket_detail_ids_by_ticket_detail_interfaces(self, ticket_id, detail_id, interfaces):
+        return await self._bruin_client.get_ticket_detail_ids_by_ticket_detail_interfaces(
+            ticket_id, detail_id, interfaces)

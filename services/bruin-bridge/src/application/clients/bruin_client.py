@@ -1321,3 +1321,54 @@ class BruinClient:
             await self.login()
 
         return response
+
+    async def get_ticket_detail_ids_by_ticket_detail_interfaces(self, ticket_id, detail_id, interfaces):
+        try:
+            logger.info(f"Getting ticket details ids for ticket id: {ticket_id}, "
+                        f"detail id: {detail_id}, interfaces: {interfaces}")
+
+            response = await self._session.get(
+                f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/details/{detail_id}/detailids?interfaces={",".join(interfaces)}',
+                headers=self._get_request_headers(),
+                ssl=False,
+            )
+            return_response = dict.fromkeys(["body", "status"])
+
+            if response.status in range(200, 300):
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+
+            if response.status == 400:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                logger.error(f"Got error from Bruin {response_json}")
+
+            if response.status == 401:
+                logger.error(f"Got 401 from Bruin. Re-logging in...")
+                await self.login()
+                return_response["body"] = BRUIN_401_RESPONSE
+                return_response["status"] = response.status
+
+            if response.status == 403:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                logger.error(f"Forbidden error from Bruin {response_json}")
+
+            if response.status == 404:
+                logger.error(f"Got 404 from Bruin, resource not posted for for ticket id: {ticket_id}, "
+                             f"detail id: {detail_id}, interfaces: {interfaces}")
+                return_response["body"] = BRUIN_404_RESPONSE
+                return_response["status"] = 404
+
+            if response.status in range(500, 513):
+                logger.error(f"Got {response.status}.")
+                return_response["body"] = BRUIN_500_RESPONSE
+                return_response["status"] = 500
+
+            return return_response
+
+        except Exception as e:
+            return {"body": e.args[0], "status": 500}

@@ -2013,6 +2013,42 @@ class TestBruinRepository:
         assert result == response
 
     @pytest.mark.asyncio
+    async def append_autoresolve_line_note_to_ticket_test(self):
+        service_number = "VC1234567"
+
+        current_datetime = datetime.now()
+        ticket_id = 11111
+        ticket_note = (
+            f"#*MetTel's IPA*#" + os.linesep
+            + f"Auto-resolving detail for line: {service_number}" + os.linesep
+            + f"TimeStamp: {current_datetime}"
+        )
+
+        response = {
+            "request_id": uuid_,
+            "body": "Note appended with success",
+            "status": 200,
+        }
+
+        nats_client = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        bruin_repository = BruinRepository(nats_client, config, notifications_repository)
+        bruin_repository.append_note_to_ticket = AsyncMock(return_value=response)
+
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
+        with patch.object(bruin_repository_module, "datetime", new=datetime_mock):
+            with patch.object(bruin_repository_module, "timezone", new=Mock()):
+                result = await bruin_repository.append_autoresolve_line_note_to_ticket(ticket_id, service_number)
+
+        bruin_repository.append_note_to_ticket.assert_awaited_once_with(
+            ticket_id, ticket_note, service_numbers=[service_number]
+        )
+        assert result == response
+
+    @pytest.mark.asyncio
     async def append_reopening_note_to_ticket_test(self):
         current_datetime = datetime.now()
         ticket_id = 11111
@@ -2764,3 +2800,46 @@ class TestBruinRepository:
         await bruin_repository.change_ticket_severity_for_disconnected_links(ticket_id, links)
 
         bruin_repository.change_ticket_severity.assert_awaited_once_with(ticket_id, severity_level, reason_for_change)
+
+    @pytest.mark.asyncio
+    async def get_ticket_detail_ids_by_ticket_detail_interfaces_test(self):
+        ticket_id = 12345
+        detail_id = 54321
+        interfaces = ["REX", "RAY"]
+
+        request = {
+            "request_id": uuid_,
+            "body": {
+                "ticket_id": 12345,
+                "detail_id": 54321,
+                "interfaces": ["REX", "RAY"],
+            },
+        }
+
+        response = {
+            "request_id": uuid_,
+            "body": {
+                "detailIds": [12345, 54321],
+            },
+            "status": 200,
+        }
+
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+
+        config = testconfig
+        notifications_repository = Mock()
+
+        nats_client = Mock()
+        nats_client.request = AsyncMock(return_value=response_msg)
+
+        bruin_repository = BruinRepository(nats_client, config, notifications_repository)
+
+        with uuid_mock:
+            result = (
+                await bruin_repository.get_ticket_detail_ids_by_ticket_detail_interfaces(
+                    ticket_id, detail_id, interfaces))
+
+        nats_client.request.assert_awaited_once_with(
+            "bruin.ticket.detailIds.request", to_json_bytes(request), timeout=150)
+        assert result == response

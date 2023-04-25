@@ -634,6 +634,18 @@ class BruinRepository:
 
         return await self.append_note_to_ticket(ticket_id, autoresolve_note, service_numbers=[serial_number])
 
+    async def append_autoresolve_line_note_to_ticket(self, ticket_id: int, service_number):
+        current_datetime_tz_aware = datetime.now(timezone(self._config.TIMEZONE))
+        autoresolve_note = os.linesep.join(
+            [
+                "#*MetTel's IPA*#",
+                f"Auto-resolving detail for line: {service_number}",
+                f"TimeStamp: {current_datetime_tz_aware}",
+            ]
+        )
+
+        return await self.append_note_to_ticket(ticket_id, autoresolve_note, service_numbers=[service_number])
+
     async def append_reopening_note_to_ticket(self, ticket_id: int, service_number: str, outage_causes: str):
         current_datetime_tz_aware = datetime.now(timezone(self._config.TIMEZONE))
         reopening_note = os.linesep.join(
@@ -815,3 +827,47 @@ class BruinRepository:
 
         reason_for_change = os.linesep.join(reason_for_change_lines)
         return await self.change_ticket_severity(ticket_id, severity_level, reason_for_change)
+
+    async def get_ticket_detail_ids_by_ticket_detail_interfaces(
+        self, ticket_id: int, detail_id: int, interfaces: list[str]
+    ):
+        err_msg = None
+
+        request = {
+            "request_id": uuid(),
+            "body": {
+                "ticket_id": ticket_id,
+                "detail_id": detail_id,
+                "interfaces": interfaces,
+            },
+        }
+
+        try:
+            logger.info(f"Geting detailIds for ticket {ticket_id}, detail ID: {detail_id}, "
+                        f"interfaces: {interfaces} ...")
+            response = await self._nats_client.request(
+                "bruin.ticket.detailIds.request", to_json_bytes(request), timeout=150
+            )
+            response = json.loads(response.data)
+            logger.info(f"Got detailIds of ticket {ticket_id}, detail ID: {detail_id}, "
+                        f"interfaces: {interfaces} from Bruin!")
+        except Exception as e:
+            err_msg = f"An error occurred when requesting ticket detailIds from Bruin API for ticket {ticket_id} -> {e}"
+            response = nats_error_response
+        else:
+            response_body = response["body"]
+            response_status = response["status"]
+
+            if response_status not in range(200, 300):
+                err_msg = (
+                    f"Error while retrieving details of ticket{ticket_id}, "
+                    f"detail ID: {detail_id}, interfaces: {interfaces} in "
+                    f"{self._config.CURRENT_ENVIRONMENT.upper()} environment: "
+                    f"Error {response_status} - {response_body}"
+                )
+
+        if err_msg:
+            logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response

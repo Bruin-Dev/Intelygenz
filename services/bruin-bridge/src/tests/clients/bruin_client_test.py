@@ -4312,3 +4312,156 @@ class TestGetAssetTopics:
         # Then
         assert response == mocked_response
         assert bruin_client._bruin_session.access_token == mocked_access_token
+
+
+class TestGetDetailIdsByTicketDetailInterfaces:
+    @pytest.mark.asyncio
+    async def get_ticket_detail_ids_by_ticket_detail_interfaces_test(self):
+
+        ticket_id = 123
+        detail_id = 321
+        interfaces = ["GE1", "GE2"]
+        detail_ids_response = [1223, 2321]
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=detail_ids_response)
+        response_mock.status = 200
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_put:
+            get_ticket_detail_ids_by_ticket_detail_interfaces = (
+                await bruin_client.get_ticket_detail_ids_by_ticket_detail_interfaces(
+                    ticket_id, detail_id, interfaces))
+            mock_put.assert_called_once()
+            assert get_ticket_detail_ids_by_ticket_detail_interfaces["body"] == detail_ids_response
+            assert get_ticket_detail_ids_by_ticket_detail_interfaces["status"] == 200
+
+    @pytest.mark.asyncio
+    async def update_ticket_status_400_error_status_test(self):
+
+        ticket_id = 123
+        detail_id = 321
+        interfaces = ["GE1", "GE2"]
+        detail_ids_response = "failed"
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=detail_ids_response)
+        response_mock.status = 400
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
+            get_ticket_detail_ids_by_ticket_detail_interfaces = (
+                await bruin_client.get_ticket_detail_ids_by_ticket_detail_interfaces(
+                    ticket_id, detail_id, interfaces))
+
+            assert get_ticket_detail_ids_by_ticket_detail_interfaces["body"] == detail_ids_response
+            assert get_ticket_detail_ids_by_ticket_detail_interfaces["status"] == 400
+
+    @pytest.mark.asyncio
+    async def get_ticket_detail_ids_by_ticket_detail_interfaces_401_error_status_test(self):
+
+        ticket_id = 123
+        detail_id = 321
+        interfaces = ["GE1", "GE2"]
+        detail_ids_response = "failed"
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=detail_ids_response)
+        response_mock.status = 401
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
+            get_ticket_detail_ids_by_ticket_detail_interfaces = (
+                await bruin_client.get_ticket_detail_ids_by_ticket_detail_interfaces(
+                    ticket_id, detail_id, interfaces))
+
+            bruin_client.login.assert_awaited()
+
+            assert get_ticket_detail_ids_by_ticket_detail_interfaces["body"] == "Got 401 from Bruin"
+            assert get_ticket_detail_ids_by_ticket_detail_interfaces["status"] == 401
+
+    @pytest.mark.asyncio
+    async def get_ticket_detail_ids_by_ticket_detail_interfaces_403_error_status_test(self):
+
+        ticket_id = 123
+        detail_id = 321
+        interfaces = ["GE1", "GE2"]
+        detail_ids_response = "failed"
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=detail_ids_response)
+        response_mock.status = 403
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
+            get_ticket_detail_ids_by_ticket_detail_interfaces = (
+                await bruin_client.get_ticket_detail_ids_by_ticket_detail_interfaces(
+                    ticket_id, detail_id, interfaces))
+
+            assert get_ticket_detail_ids_by_ticket_detail_interfaces["body"] == detail_ids_response
+            assert get_ticket_detail_ids_by_ticket_detail_interfaces["status"] == 403
+
+    @pytest.mark.asyncio
+    async def get_ticket_detail_ids_by_ticket_detail_interfaces_404_error_status_test(self):
+
+        ticket_id = 123
+        detail_id = 321
+        interfaces = ["GE1", "GE2"]
+        detail_ids_response = "failed"
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=detail_ids_response)
+        response_mock.status = 404
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
+            get_ticket_detail_ids_by_ticket_detail_interfaces = (
+                await bruin_client.get_ticket_detail_ids_by_ticket_detail_interfaces(
+                    ticket_id, detail_id, interfaces))
+
+            assert get_ticket_detail_ids_by_ticket_detail_interfaces["body"] == "Resource not found"
+            assert get_ticket_detail_ids_by_ticket_detail_interfaces["status"] == 404
+
+    @pytest.mark.asyncio
+    async def get_ticket_detail_ids_by_ticket_detail_interfaces_500_error_status_test(self):
+
+        ticket_id = 123
+        detail_id = 321
+        interfaces = ["GE1", "GE2"]
+        detail_ids_response = "failed"
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=detail_ids_response)
+        response_mock.status = 500
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)):
+            get_ticket_detail_ids_by_ticket_detail_interfaces = (
+                await bruin_client.get_ticket_detail_ids_by_ticket_detail_interfaces(
+                    ticket_id, detail_id, interfaces))
+
+            assert get_ticket_detail_ids_by_ticket_detail_interfaces["body"] == "Got internal error from Bruin"
+            assert get_ticket_detail_ids_by_ticket_detail_interfaces["status"] == 500
