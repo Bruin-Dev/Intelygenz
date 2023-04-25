@@ -21,7 +21,7 @@ resource "aws_ssm_parameter" "parameter-service-affecting-daily-bandwidth-report
 resource "aws_ssm_parameter" "parameter-service-affecting-daily-bandwidth-report-recipients-per-host-and-customer" {
   count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/daily-bandwidth-report/recipients-per-host-and-customer"
-  description = "Mapping of VeloCloud hosts, Bruin customer IDs and recipients of these reports"
+  description = "Mapping of VeloCloud hosts, Bruin customer IDs and recipients for these reports"
   type        = "SecureString"
   value       = "-" # to edit go to parameter store dashboard.
   key_id      = aws_kms_alias.kms_key.name
