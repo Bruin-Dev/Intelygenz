@@ -132,7 +132,7 @@ class TemplateRepository:
 
     def get_recipients_for_bandwidth_report(self, client_id):
         recipients_by_host_and_client = self._config.BANDWIDTH_REPORT_CONFIG["recipients_by_host_and_client_id"]
-        recipients_by_client = recipients_by_host_and_client[self._config.VELOCLOUD_HOST]
+        recipients_by_client = recipients_by_host_and_client.get(self._config.VELOCLOUD_HOST, {})
         recipients = self._config.BANDWIDTH_REPORT_CONFIG["default_contacts"]
         if client_id in recipients_by_client:
             recipients = recipients + recipients_by_client[client_id]
