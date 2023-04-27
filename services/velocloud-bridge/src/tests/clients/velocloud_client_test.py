@@ -53,6 +53,8 @@ class TestVelocloudClient:
         response_mock.status = 200
 
         velocloud_client._json_return = Mock(return_value=response_mock.json())
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
 
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)) as mock_post:
             events = await velocloud_client.get_all_events(host, body)
@@ -82,6 +84,9 @@ class TestVelocloudClient:
 
         velocloud_client._cookies = {host: "cookie"}
         velocloud_client._json_return = Mock(return_value=response_mock.json())
+
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
 
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)) as mock_post:
             events = await velocloud_client.get_all_events(host, body)
@@ -182,6 +187,9 @@ class TestVelocloudClient:
 
         velocloud_client._cookies = {host: "cookie"}
 
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
+
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)):
             result = await velocloud_client.get_links_with_edge_info(host)
 
@@ -205,6 +213,9 @@ class TestVelocloudClient:
 
         velocloud_client._cookies = {host: "cookie"}
 
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
+
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)):
             result = await velocloud_client.get_links_with_edge_info(host)
 
@@ -227,6 +238,9 @@ class TestVelocloudClient:
         response_mock.status = http_status_code
 
         velocloud_client._cookies = {host: "cookie"}
+
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
 
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)):
             result = await velocloud_client.get_links_with_edge_info(host)
@@ -257,6 +271,9 @@ class TestVelocloudClient:
         velocloud_client._cookies = {host: "cookie"}
         velocloud_client._login = AsyncMock()
 
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
+
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)):
             result = await velocloud_client.get_links_with_edge_info(host)
 
@@ -284,6 +301,9 @@ class TestVelocloudClient:
 
         velocloud_client._login = AsyncMock()
 
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
+
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)):
             result = await velocloud_client.get_links_with_edge_info(host)
 
@@ -300,6 +320,9 @@ class TestVelocloudClient:
         }
 
         velocloud_client._cookies = {host: "cookie"}
+
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
 
         with patch.object(velocloud_client._session, "post", new=AsyncMock(side_effect=ClientConnectionError)):
             result = await velocloud_client.get_links_with_edge_info(host)
@@ -393,6 +416,9 @@ class TestVelocloudClient:
 
         velocloud_client._cookies = {host: "cookie"}
 
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
+
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)):
             result = await velocloud_client.get_links_metric_info(host, interval)
 
@@ -420,6 +446,9 @@ class TestVelocloudClient:
 
         velocloud_client._cookies = {host: "cookie"}
 
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
+
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)):
             result = await velocloud_client.get_links_metric_info(host, interval)
 
@@ -446,6 +475,9 @@ class TestVelocloudClient:
         response_mock.status = http_status_code
 
         velocloud_client._cookies = {host: "cookie"}
+
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
 
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)):
             result = await velocloud_client.get_links_metric_info(host, interval)
@@ -480,6 +512,9 @@ class TestVelocloudClient:
         velocloud_client._cookies = {host: "cookie"}
         velocloud_client._login = AsyncMock()
 
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
+
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)):
             result = await velocloud_client.get_links_metric_info(host, interval)
 
@@ -500,6 +535,9 @@ class TestVelocloudClient:
         }
 
         velocloud_client._cookies = {host: "cookie"}
+
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
 
         with patch.object(velocloud_client._session, "post", new=AsyncMock(side_effect=ClientConnectionError)):
             result = await velocloud_client.get_links_metric_info(host, interval)
@@ -626,6 +664,9 @@ class TestVelocloudClient:
 
         velocloud_client._cookies = {host: "cookie"}
 
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
+
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)):
             result = await velocloud_client.get_enterprise_edges(host, enterprise_id)
 
@@ -650,6 +691,9 @@ class TestVelocloudClient:
 
         velocloud_client._cookies = {host: "cookie"}
 
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
+
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)):
             result = await velocloud_client.get_enterprise_edges(host, enterprise_id)
 
@@ -673,6 +717,9 @@ class TestVelocloudClient:
         response_mock.status = http_status_code
 
         velocloud_client._cookies = {host: "cookie"}
+
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
 
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)):
             result = await velocloud_client.get_enterprise_edges(host, enterprise_id)
@@ -704,6 +751,9 @@ class TestVelocloudClient:
         velocloud_client._cookies = {host: "cookie"}
         velocloud_client._login = AsyncMock()
 
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
+
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)):
             result = await velocloud_client.get_enterprise_edges(host, enterprise_id)
 
@@ -721,6 +771,9 @@ class TestVelocloudClient:
         }
 
         velocloud_client._cookies = {host: "cookie"}
+
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
 
         with patch.object(velocloud_client._session, "post", new=AsyncMock(side_effect=ClientConnectionError)):
             result = await velocloud_client.get_enterprise_edges(host, enterprise_id)
@@ -755,6 +808,9 @@ class TestVelocloudClient:
 
         velocloud_client._cookies = {host: "cookie"}
 
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
+
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)):
             result = await velocloud_client.get_edge_configuration_modules(edge_full_id)
 
@@ -779,6 +835,9 @@ class TestVelocloudClient:
 
         velocloud_client._cookies = {host: "cookie"}
 
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
+
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)):
             result = await velocloud_client.get_edge_configuration_modules(edge_full_id)
 
@@ -802,6 +861,9 @@ class TestVelocloudClient:
         response_mock.status = 400
 
         velocloud_client._cookies = {host: "cookie"}
+
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
 
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)):
             result = await velocloud_client.get_edge_configuration_modules(edge_full_id)
@@ -830,6 +892,9 @@ class TestVelocloudClient:
 
         velocloud_client._cookies = {host: "cookie"}
 
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
+
         with patch.object(velocloud_client._session, "post", new=AsyncMock(side_effect=ClientConnectionError)):
             result = await velocloud_client.get_edge_configuration_modules(edge_full_id)
 
@@ -846,6 +911,9 @@ class TestVelocloudClient:
         response_mock = make_http_response(status=200, body=body_response)
 
         expected_response = {"body": body_response, "status": 200}
+
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
 
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)):
             result = await velocloud_client.get_network_enterprises(host, enterprise_ids)
@@ -867,6 +935,9 @@ class TestVelocloudClient:
             "status": 400,
         }
 
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
+
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=error_response)):
             result = await velocloud_client.get_network_enterprises(host, enterprise_ids)
 
@@ -887,6 +958,9 @@ class TestVelocloudClient:
             "status": 500,
         }
 
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
+
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=error_response)):
             result = await velocloud_client.get_network_enterprises(host, enterprise_ids)
 
@@ -903,6 +977,9 @@ class TestVelocloudClient:
             "body": "Error while connecting to Velocloud API",
             "status": 500,
         }
+
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
 
         with patch.object(velocloud_client._session, "post", new=AsyncMock(side_effect=ClientConnectionError)):
             result = await velocloud_client.get_network_enterprises(host, enterprise_ids)
@@ -926,6 +1003,9 @@ class TestVelocloudClient:
         response_mock.status = http_status_code
 
         velocloud_client._cookies = {host: "cookie"}
+
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
 
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)):
             result = await velocloud_client.get_network_gateways(host)
@@ -952,6 +1032,9 @@ class TestVelocloudClient:
         response_mock.status = http_status_code
 
         velocloud_client._cookies = {host: "cookie"}
+
+        velocloud_client._session.cookie_jar.filter_cookies = Mock(
+            return_value={'velocloud.session': 'some_session_id'})
 
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)):
             result = await velocloud_client.get_gateway_status_metrics(host, gateway_id, interval, metrics)

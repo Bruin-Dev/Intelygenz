@@ -82,6 +82,8 @@ class VelocloudClient:
             logger.exception(e)
 
     async def get_all_events(self, host, body):
+        await self.__login_if_missing_cookie(host)
+
         try:
             return_response = dict.fromkeys(["body", "status"])
             headers = self._get_headers()
@@ -119,6 +121,8 @@ class VelocloudClient:
             return {"body": e.args[0], "status": 500}
 
     async def get_monitoring_aggregates(self, host):
+        await self.__login_if_missing_cookie(host)
+
         try:
             logger.info(f"Getting monitoring aggregates for host {host}")
             headers = self._get_headers()
@@ -170,6 +174,8 @@ class VelocloudClient:
         return response
 
     async def get_links_with_edge_info(self, velocloud_host: str):
+        await self.__login_if_missing_cookie(velocloud_host)
+
         result = dict.fromkeys(["body", "status"])
 
         request_body = {}
@@ -210,6 +216,8 @@ class VelocloudClient:
         return result
 
     async def get_links_metric_info(self, velocloud_host: str, interval: dict):
+        await self.__login_if_missing_cookie(velocloud_host)
+
         result = dict.fromkeys(["body", "status"])
 
         request_body = {
@@ -253,7 +261,8 @@ class VelocloudClient:
         return result
 
     async def get_edge_links_series(self, velocloud_host: str, payload):
-        v = await self.get_all_enterprise_names()
+        await self.__login_if_missing_cookie(velocloud_host)
+
         headers = self._get_headers()
         result = dict.fromkeys(["body", "status"])
         logger.info(
@@ -295,6 +304,8 @@ class VelocloudClient:
         return result
 
     async def get_enterprise_edges(self, velocloud_host: str, enterprise_id: str):
+        await self.__login_if_missing_cookie(velocloud_host)
+
         result = dict.fromkeys(["body", "status"])
 
         request_body = {"enterpriseId": enterprise_id, "with": ["links"]}
@@ -340,6 +351,7 @@ class VelocloudClient:
 
     async def get_edge_configuration_modules(self, edge):
         velocloud_host = edge["host"]
+        await self.__login_if_missing_cookie(velocloud_host)
 
         result = dict.fromkeys(["body", "status"])
 
@@ -392,6 +404,8 @@ class VelocloudClient:
         return result
 
     async def get_network_enterprises(self, velocloud_host: str, enterprise_ids: list[int]) -> dict[str, Any]:
+        await self.__login_if_missing_cookie(velocloud_host)
+
         result = dict.fromkeys(["body", "status"])
         request_body = {"enterprises": enterprise_ids, "with": ["edges"]}
 
@@ -434,6 +448,8 @@ class VelocloudClient:
         return result
 
     async def get_network_gateways(self, velocloud_host: str):
+        await self.__login_if_missing_cookie(velocloud_host)
+
         request_body = {}
         result = dict.fromkeys(["body", "status"])
 
@@ -482,6 +498,8 @@ class VelocloudClient:
     async def get_gateway_status_metrics(
         self, velocloud_host: str, gateway_id: int, interval: dict, metrics: List[str]
     ):
+        await self.__login_if_missing_cookie(velocloud_host)
+
         request_body = {
             "gatewayId": gateway_id,
             "interval": interval,
@@ -543,6 +561,10 @@ class VelocloudClient:
             logger.info(f"Auth token expired for host {velocloud_host}. Logging in...")
             await self._login(velocloud_host)
             response.status = 401
+
+    async def __login_if_missing_cookie(self, velocloud_host: str):
+        if 'velocloud.session' not in self._session.cookie_jar.filter_cookies(f"https://{velocloud_host}"):
+            await self._login(velocloud_host)
 
     @staticmethod
     async def __token_expired(response: aiohttp.client.ClientResponse) -> bool:
