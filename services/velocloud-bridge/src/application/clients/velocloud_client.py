@@ -112,6 +112,8 @@ class VelocloudClient:
                 return_response["body"] = f"Got internal error from Velocloud"
                 return_response["status"] = 500
 
+            await self.__login_if_needed(host, response)
+
             return return_response
         except Exception as e:
             return {"body": e.args[0], "status": 500}

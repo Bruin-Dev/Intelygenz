@@ -34,21 +34,6 @@ class TestVelocloudClient:
         velocloud_client._scheduler.add_job.assert_called_once()
 
     @pytest.mark.asyncio
-    async def login_test(self, velocloud_client):
-        host = "some_host"
-        session_cookie = "velocloud.session=qwerty"
-        response_cookies = f"cookie1=test;{session_cookie};cookie2=test"
-
-        response_mock = Mock()
-        response_mock.headers = {"Set-Cookie": response_cookies}
-        response_mock.status = 200
-
-        with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)) as mock_post:
-            assert velocloud_client._cookies == {host: ""}
-            await velocloud_client._login(host)
-            assert velocloud_client._cookies == {host: session_cookie}
-
-    @pytest.mark.asyncio
     async def get_all_event_information_test(self, velocloud_client):
         host = "some_host"
         edge_id = {"host": host, "enterprise_id": 19, "edge_id": 99}
@@ -67,7 +52,6 @@ class TestVelocloudClient:
         response_mock.json = AsyncMock(return_value=events_status)
         response_mock.status = 200
 
-        velocloud_client._cookies = {host: "cookie"}
         velocloud_client._json_return = Mock(return_value=response_mock.json())
 
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)) as mock_post:
@@ -76,68 +60,7 @@ class TestVelocloudClient:
             mock_post.assert_called_once()
             assert edge_id["host"] in mock_post.call_args[0][0]
             assert mock_post.call_args[1]["json"] == body
-            assert mock_post.call_args[1]["headers"]["Cookie"] == velocloud_client._cookies[host]
             assert events["body"] == events_status
-
-    @pytest.mark.asyncio
-    async def get_all_event_information_error_400_test(self, velocloud_client):
-        host = "some_host"
-        edge_id = {"host": host, "enterprise_id": 19, "edge_id": 99}
-        interval_start = "Some interval start time"
-        interval_end = "Some interval end time"
-        limit = "some_limit"
-        events_status = "Some Enterprise Information"
-        body = {
-            "enterpriseId": edge_id["enterprise_id"],
-            "interval": {"start": interval_start, "end": interval_end},
-            "filter": {"limit": limit},
-            "edgeId": [edge_id["edge_id"]],
-        }
-
-        response_mock = Mock()
-        response_mock.json = AsyncMock(return_value=events_status)
-        response_mock.status = 400
-
-        velocloud_client._cookies = {host: "cookie"}
-        velocloud_client._json_return = Mock(return_value=response_mock.json())
-
-        with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)) as mock_post:
-            events = await velocloud_client.get_all_events(host, body)
-
-            mock_post.assert_called_once()
-            assert events["body"] == events_status
-
-    @pytest.mark.asyncio
-    async def get_all_event_information_error_404_test(self, velocloud_client):
-        host = "some_host"
-        edge_id = {"host": host, "enterprise_id": 19, "edge_id": 99}
-        interval_start = "Some interval start time"
-        interval_end = "Some interval end time"
-        limit = "some_limit"
-        events_status = "Some Enterprise Information"
-        body = {
-            "enterpriseId": edge_id["enterprise_id"],
-            "interval": {"start": interval_start, "end": interval_end},
-            "filter": {"limit": limit},
-            "edgeId": [edge_id["edge_id"]],
-        }
-
-        response_mock = Mock()
-        response_mock.json = AsyncMock(return_value=events_status)
-        response_mock.status = 400
-
-        velocloud_client._cookies = {host: ""}
-        velocloud_client._json_return = Mock(return_value=response_mock.json())
-        velocloud_client._login = AsyncMock()
-
-        with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)) as mock_post:
-            events = await velocloud_client.get_all_events(host, body)
-
-            mock_post.assert_not_called()
-            velocloud_client._login.assert_awaited_once()
-
-            assert events["status"] == 404
-            assert events["body"] == f'Cannot find a cookie for {edge_id["host"]}'
 
     @pytest.mark.asyncio
     async def get_get_all_event_information_error_500_test(self, velocloud_client):
@@ -319,14 +242,13 @@ class TestVelocloudClient:
         response_body = {"error": {"code": -32000, "message": "tokenError [expired session cookie]"}}
         http_status_code = 200
 
-        token_expired_msg = f"Auth token expired for host {host}"
         expected_result = {
-            "body": token_expired_msg,
+            "body": response_body,
             "status": 401,
         }
 
         response_mock = Mock()
-        response_mock.json = AsyncMock(return_value=token_expired_msg)
+        response_mock.json = AsyncMock(return_value=response_body)
         response_mock.status = http_status_code
         response_mock.headers = {
             "Expires": "0",
@@ -345,15 +267,24 @@ class TestVelocloudClient:
     async def get_links_with_edge_info_with_cookie_missing_for_target_host_test(self, velocloud_client):
         host = "some_host"
 
+        response_body = {"error": {"code": -32000, "message": "tokenError [expired session cookie]"}}
+        http_status_code = 200
+
         expected_result = {
-            "body": f"Cannot find a cookie for {host}",
-            "status": 404,
+            "body": response_body,
+            "status": 401,
         }
 
-        velocloud_client._cookies = {host: ""}
+        response_mock = Mock()
+        response_mock.json = AsyncMock(return_value=response_body)
+        response_mock.status = http_status_code
+        response_mock.headers = {
+            "Expires": "0",
+        }
+
         velocloud_client._login = AsyncMock()
 
-        with patch.object(velocloud_client._session, "post", new=AsyncMock(side_effect=ClientConnectionError)):
+        with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)):
             result = await velocloud_client.get_links_with_edge_info(host)
 
         velocloud_client._login.assert_awaited_once_with(host)
@@ -534,14 +465,13 @@ class TestVelocloudClient:
         response_body = {"error": {"code": -32000, "message": "tokenError [expired session cookie]"}}
         http_status_code = 200
 
-        token_expired_msg = f"Auth token expired for host {host}"
         expected_result = {
-            "body": token_expired_msg,
+            "body": response_body,
             "status": 401,
         }
 
         response_mock = Mock()
-        response_mock.json = AsyncMock(return_value=token_expired_msg)
+        response_mock.json = AsyncMock(return_value=response_body)
         response_mock.status = http_status_code
         response_mock.headers = {
             "Expires": "0",
@@ -551,28 +481,6 @@ class TestVelocloudClient:
         velocloud_client._login = AsyncMock()
 
         with patch.object(velocloud_client._session, "post", new=AsyncMock(return_value=response_mock)):
-            result = await velocloud_client.get_links_metric_info(host, interval)
-
-        velocloud_client._login.assert_awaited_once_with(host)
-        assert result == expected_result
-
-    @pytest.mark.asyncio
-    async def get_links_metric_info_with_cookie_missing_for_target_host_test(self, velocloud_client):
-        host = "some_host"
-        interval = {
-            "start": "2020-10-19T15:22:03.345Z",
-            "end": "2020-10-19T16:22:03.345Z",
-        }
-
-        expected_result = {
-            "body": f"Cannot find a cookie for {host}",
-            "status": 404,
-        }
-
-        velocloud_client._cookies = {host: ""}
-        velocloud_client._login = AsyncMock()
-
-        with patch.object(velocloud_client._session, "post", new=AsyncMock(side_effect=ClientConnectionError)):
             result = await velocloud_client.get_links_metric_info(host, interval)
 
         velocloud_client._login.assert_awaited_once_with(host)
@@ -778,18 +686,16 @@ class TestVelocloudClient:
         host = "some_host"
         enterprise_id = 115
 
-        enterprise_edge_list = {"error": {"code": -32600, "message": "tokenError [expired session cookie]"}}
+        error_result = {"error": {"code": -32600, "message": "tokenError [expired session cookie]"}}
         http_status_code = 200
 
-        token_expired_msg = f"Auth token expired for host {host}"
-
         expected_result = {
-            "body": token_expired_msg,
+            "body": error_result,
             "status": 401,
         }
 
         response_mock = Mock()
-        response_mock.json = AsyncMock(return_value=token_expired_msg)
+        response_mock.json = AsyncMock(return_value=error_result)
         response_mock.status = http_status_code
         response_mock.headers = {
             "Expires": "0",
@@ -802,23 +708,6 @@ class TestVelocloudClient:
             result = await velocloud_client.get_enterprise_edges(host, enterprise_id)
 
         velocloud_client._login.assert_awaited_once_with(host)
-        assert result == expected_result
-
-    @pytest.mark.asyncio
-    async def get_enterprise_with_cookie_missing_for_target_host_test(self, velocloud_client):
-        host = "some_host"
-        enterprise_id = 115
-
-        expected_result = {
-            "body": f"Cannot find a cookie for {host}",
-            "status": 404,
-        }
-
-        velocloud_client._cookies = {host: ""}
-        velocloud_client._login = AsyncMock()
-
-        result = await velocloud_client.get_enterprise_edges(host, enterprise_id)
-
         assert result == expected_result
 
     @pytest.mark.asyncio
