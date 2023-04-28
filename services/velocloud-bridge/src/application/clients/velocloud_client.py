@@ -118,7 +118,11 @@ class VelocloudClient:
 
             return return_response
         except Exception as e:
-            return {"body": e.args[0], "status": 500}
+            logger.exception(e)
+            return {
+                "body": f"Exception thrown when getting all events from host {host} using payload {body}...",
+                "status": 500
+            }
 
     async def get_monitoring_aggregates(self, host):
         await self.__login_if_missing_cookie(host)
