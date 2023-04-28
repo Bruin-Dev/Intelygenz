@@ -386,7 +386,7 @@ class BruinClient:
         except Exception as e:
             return {"body": e.args[0], "status": 500}
 
-    async def update_ticket_status(self, ticket_id, detail_id, payload, interfaces):
+    async def update_ticket_status(self, ticket_id, detail_id, payload, interfaces=None):
         try:
             logger.info(f"Updating ticket status for ticket id: {ticket_id}")
 
