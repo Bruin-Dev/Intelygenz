@@ -2,7 +2,7 @@
 FROM ubuntu:18.04 AS FEDRAMP
 
 ARG NON_ROOT_USER=nroot
-ARG CONTAINER_VERSION
+ARG CONTAINER_VERSION=v0.0.103
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
