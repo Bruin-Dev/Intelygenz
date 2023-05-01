@@ -61,6 +61,7 @@ packer-bruin-bridge:
         - services/bruin-bridge/Dockerfile
         - services/bruin-bridge/pyproject.toml
         - services/bruin-bridge/poetry.lock
+        - services/bruin-bridge/.gitlab-ci.yml
         - pyutils_automation/py310/**/*
         - gitlab-ci/basic-templates/**/*
         - ci-utils/packer/**/*

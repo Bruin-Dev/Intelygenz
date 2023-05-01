@@ -626,6 +626,29 @@ class TestUpdateTicketStatus:
             assert update_ticket_status["status"] == 200
 
     @pytest.mark.asyncio
+    async def update_ticket_status_without_interfaces_test(self):
+
+        ticket_id = 123
+        detail_id = 321
+        ticket_status = {"Status": "O"}
+        successful_status_change = "Success"
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=successful_status_change)
+        response_mock.status = 200
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)) as mock_put:
+            update_ticket_status = await bruin_client.update_ticket_status(
+                ticket_id, detail_id, ticket_status)
+            mock_put.assert_called_once()
+            assert update_ticket_status["body"] == successful_status_change
+            assert update_ticket_status["status"] == 200
+
+    @pytest.mark.asyncio
     async def update_ticket_status_400_error_status_test(self):
 
         ticket_id = 123
