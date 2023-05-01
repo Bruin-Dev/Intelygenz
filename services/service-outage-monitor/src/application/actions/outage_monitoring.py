@@ -481,7 +481,9 @@ class OutageMonitor:
                         f"{ticket_detailIds_resolved_interfaces_response}. Skipping autoresolve ..."
                     )
                 else:
-                    ticket_detailIds_resolved_interfaces = ticket_detailIds_resolved_interfaces_response["body"]["detailIds"]
+                    ticket_detailIds_resolved_interfaces = (
+                        ticket_detailIds_resolved_interfaces_response["body"]["detailIds"]
+                    )
                     ticket_details = [
                         detail
                         for detail in details_from_ticket
