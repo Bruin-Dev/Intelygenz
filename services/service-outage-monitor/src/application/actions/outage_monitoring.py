@@ -478,10 +478,10 @@ class OutageMonitor:
                 if ticket_detailIds_resolved_interfaces_response["status"] not in range(200, 300):
                     logger.error(
                         f"Error while resolving task of ticket {outage_ticket_id} for edge {serial_number}: "
-                        f"{resolve_ticket_response}. Skipping autoresolve ..."
+                        f"{ticket_detailIds_resolved_interfaces_response}. Skipping autoresolve ..."
                     )
                 else:
-                    ticket_detailIds_resolved_interfaces = ticket_detailIds_resolved_interfaces_response["body"]
+                    ticket_detailIds_resolved_interfaces = ticket_detailIds_resolved_interfaces_response["body"]["detailIds"]
                     ticket_details = [
                         detail
                         for detail in details_from_ticket
