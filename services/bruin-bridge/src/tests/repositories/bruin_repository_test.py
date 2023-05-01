@@ -2455,7 +2455,10 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(config, bruin_client)
 
         # When
-        response = await bruin_repository.get_ticket_detail_ids_by_ticket_detail_interfaces(ticket_id, detail_id, interface)
+        response = (
+            await bruin_repository.
+            get_ticket_detail_ids_by_ticket_detail_interfaces(ticket_id, detail_id, interface)
+        )
 
         # Then
         assert response == mocked_response

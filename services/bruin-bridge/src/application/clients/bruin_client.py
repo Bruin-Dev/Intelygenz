@@ -1327,8 +1327,13 @@ class BruinClient:
             logger.info(f"Getting ticket details ids for ticket id: {ticket_id}, "
                         f"detail id: {detail_id}, interfaces: {interfaces}")
 
+            url = (
+                f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/'
+                f'details/{detail_id}/detailids?interfaces={",".join(interfaces)}'
+            )
+
             response = await self._session.get(
-                f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/details/{detail_id}/detailids?interfaces={",".join(interfaces)}',
+                url=url,
                 headers=self._get_request_headers(),
                 ssl=False,
             )
