@@ -114,3 +114,14 @@ data "aws_eks_cluster" "cluster" {
 data "aws_eks_cluster_auth" "cluster" {
   name = module.mettel-automation-eks-cluster.cluster_id
 }
+
+data "terraform_remote_state" "registry" {
+  backend = "s3"
+
+  config = {
+    bucket = "automation-infrastructure"
+    region = "us-east-1"
+    key    = "terraform-automation-ecr-repositories.tfstate"
+  }
+}
+
