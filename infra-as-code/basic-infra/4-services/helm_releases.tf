@@ -255,7 +255,7 @@ resource "helm_release" "reloader" {
   recreate_pods = false
   wait          = true
 
-  values = [templatefile("helm/reloader/values.yaml", {
+  values = [templatefile("helm/external-charts/reloader-values.yaml", {
     KUBERNETES_RELOADER_IMAGE_URL = data.terraform_remote_state.registry.outputs.KUBERNETES_RELOADER_IMAGE_URL,
     KUBERNETES_RELOADER_IMAGE_VERSION = "v0.0.103"
   })]
