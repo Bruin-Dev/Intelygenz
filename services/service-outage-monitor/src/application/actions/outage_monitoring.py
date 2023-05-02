@@ -477,19 +477,21 @@ class OutageMonitor:
                 )
                 if ticket_detailIds_resolved_interfaces_response["status"] not in range(200, 300):
                     logger.error(
-                        f"Error while resolving task of ticket {outage_ticket_id} for edge {serial_number}: "
-                        f"{ticket_detailIds_resolved_interfaces_response}. Skipping autoresolve ..."
+                        f"Error while getting deailIds {outage_ticket_id} for details {ticket_detail_id} "
+                        f"and interfaces {resolved_faulty_interfaces}: {ticket_detailIds_resolved_interfaces_response}"
                     )
                 else:
                     ticket_detailIds_resolved_interfaces = (
                         ticket_detailIds_resolved_interfaces_response["body"]["detailIds"]
                     )
+                    logger.info(f'Ticket detailIds resolved interfaces: {ticket_detailIds_resolved_interfaces}')
                     ticket_details = [
                         detail
                         for detail in details_from_ticket
                         if detail["detailID"] in ticket_detailIds_resolved_interfaces
                         and detail["detailValue"] != serial_number
                     ]
+                    logger.info(f'Ticket details resolved interfaces count: {len(ticket_details)}')
                     for ticket_detail in ticket_details:
                         await self._bruin_repository.append_autoresolve_line_note_to_ticket(
                             outage_ticket_id, ticket_detail["detailValue"])
