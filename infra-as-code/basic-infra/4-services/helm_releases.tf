@@ -251,8 +251,8 @@ resource "helm_release" "reloader" {
 
   version       = var.RELOADER_HELM_CHART_VERSION
   namespace     = "kube-system"
-  force_update  = false
-  recreate_pods = false
+  force_update  = true
+  recreate_pods = true
   wait          = true
 
   values = [templatefile("helm/external-charts/reloader-values.yaml", {
