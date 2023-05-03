@@ -3,7 +3,7 @@ packer-reloader:
   extends: .packer_eks_build_image
   stage: k8s_packer
   variables:
-    ECR_REPOSITORY_NAME: reloader
+    ECR_REPOSITORY_NAME: eks_reloader
     PACKER_DIR_MODULE: "../../infra-as-code/containers/reloader/"
     ECR_REPOSITORY_TAG: "v0.0.103"
   rules:

@@ -251,9 +251,14 @@ resource "helm_release" "reloader" {
 
   version       = var.RELOADER_HELM_CHART_VERSION
   namespace     = "kube-system"
-  force_update  = false
-  recreate_pods = false
+  force_update  = true
+  recreate_pods = true
   wait          = true
+
+  values = [templatefile("helm/external-charts/reloader-values.yaml", {
+    KUBERNETES_RELOADER_IMAGE_URL = data.terraform_remote_state.registry.outputs.KUBERNETES_RELOADER_IMAGE_URL,
+    KUBERNETES_RELOADER_IMAGE_VERSION = "v0.0.103"
+  })]
 
   depends_on = [
     module.mettel-automation-eks-cluster,

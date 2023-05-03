@@ -7,7 +7,7 @@ packer-ingress-nginx-controller:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   variables:
-    ECR_REPOSITORY_NAME: ingress-nginx-controller
+    ECR_REPOSITORY_NAME: eks_ingress-nginx-controller
     PACKER_DIR_MODULE: "../../../infra-as-code/containers/ingress-nginx-controller/"
     ECR_REPOSITORY_TAG: "controller-v1.1.0"
   before_script:
