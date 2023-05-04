@@ -2843,3 +2843,106 @@ class TestBruinRepository:
         nats_client.request.assert_awaited_once_with(
             "bruin.ticket.detailIds.request", to_json_bytes(request), timeout=150)
         assert result == response
+
+    @pytest.mark.asyncio
+    async def close_ticket_test(self):
+        ticket_id = 12345
+        close_note = "This is the close note"
+
+        request = {
+            "request_id": uuid_,
+            "body": {
+                "ticket_id": ticket_id,
+                "close_note": close_note,
+            },
+        }
+        response = {
+            "request_id": uuid_,
+            "body": "ok",
+            "status": 200,
+        }
+
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+
+        config = testconfig
+        notifications_repository = Mock()
+
+        nats_client = Mock()
+        nats_client.request = AsyncMock(return_value=response_msg)
+
+        bruin_repository = BruinRepository(nats_client, config, notifications_repository)
+
+        with uuid_mock:
+            result = await bruin_repository.close_ticket(ticket_id, close_note)
+
+        nats_client.request.assert_awaited_once_with("bruin.ticket.close", to_json_bytes(request), timeout=75)
+        assert result == response
+
+    @pytest.mark.asyncio
+    async def close_ticket_with_request_failing_test(self):
+        ticket_id = 12345
+        close_note = "This is the close note"
+
+        request = {
+            "request_id": uuid_,
+            "body": {
+                "ticket_id": ticket_id,
+                "close_note": close_note,
+            },
+        }
+
+        config = testconfig
+
+        nats_client = Mock()
+        nats_client.request = AsyncMock(side_effect=Exception)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = AsyncMock()
+
+        bruin_repository = BruinRepository(nats_client, config, notifications_repository)
+
+        with uuid_mock:
+            result = await bruin_repository.close_ticket(ticket_id, close_note)
+
+        nats_client.request.assert_awaited_once_with("bruin.ticket.close", to_json_bytes(request), timeout=75)
+        notifications_repository.send_slack_message.assert_awaited_once()
+        assert result == nats_error_response
+
+    @pytest.mark.asyncio
+    async def close_ticket_with_request_returning_non_2xx_status_test(self):
+        ticket_id = 12345
+        close_note = "This is the close note"
+
+        request = {
+            "request_id": uuid_,
+            "body": {
+                "ticket_id": ticket_id,
+                "close_note": close_note,
+            },
+        }
+        response = {
+            "request_id": uuid_,
+            "body": "Got internal error from Bruin",
+            "status": 500,
+        }
+
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+
+        config = testconfig
+
+        nats_client = Mock()
+        nats_client.request = AsyncMock(return_value=response_msg)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = AsyncMock()
+
+        bruin_repository = BruinRepository(nats_client, config, notifications_repository)
+
+        with uuid_mock:
+            result = await bruin_repository.close_ticket(ticket_id, close_note)
+
+        nats_client.request.assert_awaited_once_with("bruin.ticket.close", to_json_bytes(request), timeout=75)
+        notifications_repository.send_slack_message.assert_awaited_once()
+        assert result == response

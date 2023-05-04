@@ -496,6 +496,16 @@ class OutageMonitor:
                         await self._bruin_repository.append_autoresolve_line_note_to_ticket(
                             outage_ticket_id, ticket_detail["detailValue"])
 
+            if has_faulty_byob_link and is_task_in_ipa_queue:
+                logger.info(f'Closing ticket {outage_ticket_id} for edge {serial_number} due to byob...')
+                close_note = 'Closing ticket due to byob link.'
+                close_ticket_response = await self._bruin_repository.close_ticket(outage_ticket_id, close_note)
+                if close_ticket_response["status"] not in range(200, 300):
+                    logger.error(
+                        f"Error while closing ticket {outage_ticket_id} for edge {serial_number}: "
+                        f"{close_ticket_response}"
+                    )
+
             await self._notify_successful_autoresolve(outage_ticket_id)
 
             self._metrics_repository.increment_tasks_autoresolved(

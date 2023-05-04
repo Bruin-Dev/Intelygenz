@@ -37,6 +37,7 @@ from application.actions.resolve_ticket import ResolveTicket
 from application.actions.subscribe_user import SubscribeUser
 from application.actions.unpause_ticket import UnpauseTicket
 from application.actions.get_ticket_detail_ids_by_ticket_detail_interfaces import GetDetailIdsByTicketDetailInterfaces
+from application.actions.close_ticket import CloseTicket
 from application.clients.bruin_client import BruinClient
 from application.models import subscriptions
 from application.repositories.bruin_repository import BruinRepository
@@ -224,6 +225,9 @@ class Container:
 
             cb = GetDetailIdsByTicketDetailInterfaces(self._bruin_repository)
             await self._nats_client.subscribe(**subscriptions.GetDetailIdsByTicketDetailInterfaces(cb=cb).__dict__)
+
+            cb = CloseTicket(self._bruin_repository)
+            await self._nats_client.subscribe(**subscriptions.CloseTicketTask(cb=cb).__dict__)
         except NatsException as e:
             app_logger.exception(e)
             bail_out()

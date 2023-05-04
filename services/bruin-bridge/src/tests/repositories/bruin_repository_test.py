@@ -2462,3 +2462,20 @@ class TestBruinRepository:
 
         # Then
         assert response == mocked_response
+
+    @pytest.mark.asyncio
+    async def close_ticket_test(self):
+        logger = Mock()
+
+        ticket_id = 123
+        close_note = "Test close note"
+        payload = dict(CloseNote=close_note)
+        successful_close_ticket = "closed"
+
+        bruin_client = Mock()
+        bruin_client.close_ticket = AsyncMock(return_value=successful_close_ticket)
+
+        bruin_repository = BruinRepository(config, bruin_client)
+        close_ticket = await bruin_repository.close_ticket(ticket_id, close_note)
+        bruin_client.close_ticket.assert_awaited_once_with(ticket_id, payload)
+        assert close_ticket == successful_close_ticket

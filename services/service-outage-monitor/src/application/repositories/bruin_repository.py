@@ -871,3 +871,39 @@ class BruinRepository:
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response
+
+    async def close_ticket(self, ticket_id: int, close_note: str):
+        err_msg = None
+
+        request = {
+            "request_id": uuid(),
+            "body": {
+                "ticket_id": ticket_id,
+                "close_note": close_note,
+            },
+        }
+
+        try:
+            logger.info(f"Closing ticket {ticket_id} (closing note: {close_note})...")
+            response = await self._nats_client.request("bruin.ticket.close", to_json_bytes(request), timeout=75)
+            response = json.loads(response.data)
+            logger.info(f"Ticket {ticket_id} closed!")
+        except Exception as e:
+            err_msg = f"An error occurred when closing outage ticket {ticket_id} -> {e}"
+            response = nats_error_response
+        else:
+            response_body = response["body"]
+            response_status = response["status"]
+
+            if response_status not in range(200, 300):
+                err_msg = (
+                    f"Error while closing outage ticket {ticket_id} in "
+                    f"{self._config.CURRENT_ENVIRONMENT.upper()} environment: "
+                    f"Error {response_status} - {response_body}"
+                )
+
+        if err_msg:
+            logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response

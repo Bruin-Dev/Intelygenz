@@ -4488,3 +4488,138 @@ class TestGetDetailIdsByTicketDetailInterfaces:
 
             assert get_ticket_detail_ids_by_ticket_detail_interfaces["body"] == "Got internal error from Bruin"
             assert get_ticket_detail_ids_by_ticket_detail_interfaces["status"] == 500
+
+
+class TestCloseTicket:
+    @pytest.mark.asyncio
+    async def close_ticket_test(self):
+
+        ticket_id = 123
+        payload = {"CloseNote": "Some note"}
+        successful_close_ticket = "closed"
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=successful_close_ticket)
+        response_mock.status = 200
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)) as mock_put:
+            close_ticket = await bruin_client.close_ticket(ticket_id, payload)
+            mock_put.assert_called_once()
+            assert close_ticket["body"] == successful_close_ticket
+            assert close_ticket["status"] == 200
+
+    @pytest.mark.asyncio
+    async def close_ticket_400_error_status_test(self):
+
+        ticket_id = 123
+        payload = {"CloseNote": "Some note"}
+        failure_close_ticket = "failed"
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=failure_close_ticket)
+        response_mock.status = 400
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)):
+            close_ticket = await bruin_client.close_ticket(ticket_id, payload)
+
+            assert close_ticket["body"] == failure_close_ticket
+            assert close_ticket["status"] == 400
+
+    @pytest.mark.asyncio
+    async def close_ticket_401_error_status_test(self):
+
+        ticket_id = 123
+        payload = {"CloseNote": "Some note"}
+        failure_close_ticket = "Got 401 from Bruin"
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=failure_close_ticket)
+        response_mock.status = 401
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)):
+            close_ticket = await bruin_client.close_ticket(ticket_id, payload)
+
+            bruin_client.login.assert_awaited()
+
+            assert close_ticket["body"] == failure_close_ticket
+            assert close_ticket["status"] == 401
+
+    @pytest.mark.asyncio
+    async def close_ticket_403_error_status_test(self):
+
+        ticket_id = 123
+        payload = {"CloseNote": "Some note"}
+        failure_close_ticket = "failed"
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=failure_close_ticket)
+        response_mock.status = 403
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)):
+            close_ticket = await bruin_client.close_ticket(ticket_id, payload)
+
+            assert close_ticket["body"] == failure_close_ticket
+            assert close_ticket["status"] == 403
+
+    @pytest.mark.asyncio
+    async def close_ticket_404_error_status_test(self):
+
+        ticket_id = 123
+        payload = {"CloseNote": "Some note"}
+        failure_close_ticket = "Resource not found"
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=failure_close_ticket)
+        response_mock.status = 404
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)):
+            close_ticket = await bruin_client.close_ticket(ticket_id, payload)
+
+            assert close_ticket["body"] == failure_close_ticket
+            assert close_ticket["status"] == 404
+
+    @pytest.mark.asyncio
+    async def close_ticket_500_error_status_test(self):
+
+        ticket_id = 123
+        payload = {"CloseNote": "Some note"}
+        failure_close_ticket = "Got internal error from Bruin"
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=failure_close_ticket)
+        response_mock.status = 500
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client.login = AsyncMock()
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, "put", new=AsyncMock(return_value=response_mock)):
+            close_ticket = await bruin_client.close_ticket(ticket_id, payload)
+
+            assert close_ticket["body"] == failure_close_ticket
+            assert close_ticket["status"] == 500

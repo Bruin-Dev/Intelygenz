@@ -444,3 +444,7 @@ class BruinRepository:
     async def get_ticket_detail_ids_by_ticket_detail_interfaces(self, ticket_id, detail_id, interfaces):
         return await self._bruin_client.get_ticket_detail_ids_by_ticket_detail_interfaces(
             ticket_id, detail_id, interfaces)
+
+    async def close_ticket(self, ticket_id, close_note):
+        payload = {"CloseNote": close_note}
+        return await self._bruin_client.close_ticket(ticket_id, payload)
