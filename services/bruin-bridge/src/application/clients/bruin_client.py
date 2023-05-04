@@ -1425,8 +1425,6 @@ class BruinClient:
                 return_response["body"] = BRUIN_500_RESPONSE
                 return_response["status"] = 500
 
-            return_response["body"] = "closed"
-            return_response["status"] = 200
             return return_response
 
         except Exception as e:
