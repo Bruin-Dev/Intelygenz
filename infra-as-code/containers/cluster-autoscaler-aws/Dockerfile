@@ -12,7 +12,7 @@ USER root
 WORKDIR /tmp
 
 # Copy and install FIPS compliant cryptography packages
-COPY ubuntu18-fips/packages packages/
+COPY /app/ubuntu18-fips/packages packages/
 
 # Install golang
 RUN apt-get update -y -q && apt-get upgrade -y -q

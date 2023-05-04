@@ -12,7 +12,7 @@ USER root
 WORKDIR /tmp
 
 # Copy and install FIPS compliant cryptography packages
-COPY ubuntu18-fips/packages packages/
+COPY /app/ubuntu18-fips/packages packages/
 
 RUN apt-get update -y -q && apt-get upgrade -y -q
 RUN DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y -q curl build-essential ca-certificates git
