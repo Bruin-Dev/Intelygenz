@@ -1462,4 +1462,4 @@ velocloud-bridge:
     minReplicas: ${VELOCLOUD_BRIDGE_DESIRED_TASKS}
     maxReplicas: 3
     targetCPUUtilizationPercentage: 80
-    targetMemoryUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80 
