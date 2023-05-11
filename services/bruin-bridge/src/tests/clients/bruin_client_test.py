@@ -4363,6 +4363,45 @@ class TestGetDetailIdsByTicketDetailInterfaces:
             assert get_ticket_detail_ids_by_ticket_detail_interfaces["status"] == 200
 
     @pytest.mark.asyncio
+    async def get_ticket_detail_ids_by_ticket_detail_interfaces_v2_test(self):
+
+        ticket_id = 123
+        detail_id = 321
+        interfaces = ["GE1", "GE2"]
+        detail_ids_response = [1223, 2321]
+
+        response_mock = AsyncMock()
+        response_mock.json = AsyncMock(return_value=detail_ids_response)
+        response_mock.status = 200
+
+        access_token_str = "Someverysecretaccesstoken"
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        expected_headers = {
+            "authorization": f"Bearer {access_token_str}",
+            "Content-Type": "application/json-patch+json",
+            "Cache-control": "no-cache, no-store, no-transform, max-age=0, only-if-cached",
+            "api-version": "2.0"
+        }
+
+        url = (
+            f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/'
+            f'details/{detail_id}/detailids?interfaces={",".join(interfaces)}'
+        )
+
+        with patch.object(bruin_client._session, "get", new=AsyncMock(return_value=response_mock)) as mock_put:
+            get_ticket_detail_ids_by_ticket_detail_interfaces = (
+                await bruin_client.get_ticket_detail_ids_by_ticket_detail_interfaces(
+                    ticket_id, detail_id, interfaces))
+            mock_put.assert_called_once_with(
+                url=url, headers=expected_headers, ssl=False
+            )
+            assert get_ticket_detail_ids_by_ticket_detail_interfaces["body"] == detail_ids_response
+            assert get_ticket_detail_ids_by_ticket_detail_interfaces["status"] == 200
+
+    @pytest.mark.asyncio
     async def update_ticket_status_400_error_status_test(self):
 
         ticket_id = 123

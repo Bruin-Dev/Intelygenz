@@ -4250,9 +4250,17 @@ class TestServiceOutageMonitor:
             "status": 200,
         }
         outage_ticket_detail_1_id = 2746937
+        outage_ticket_detail_2_id = 2746938
         outage_ticket_detail_1 = {
             "detailID": outage_ticket_detail_1_id,
             "detailValue": serial_number_1,
+            "detailStatus": "I",
+            "currentTaskName": "test",
+            "assignedToName": "0",
+        }
+        outage_ticket_detail_2 = {
+            "detailID": outage_ticket_detail_2_id,
+            "detailValue": serial_number_2,
             "detailStatus": "I",
             "currentTaskName": "test",
             "assignedToName": "0",
@@ -4309,6 +4317,7 @@ class TestServiceOutageMonitor:
             "body": {
                 "ticketDetails": [
                     outage_ticket_detail_1,
+                    outage_ticket_detail_2,
                 ],
                 "ticketNotes": outage_ticket_notes,
             },
@@ -4324,11 +4333,24 @@ class TestServiceOutageMonitor:
             "body": "Got internal error from Bruin",
             "status": 500,
         }
+        get_ticket_detail_ids_by_ticket_detail_interfaces_response = {
+            "status": 200,
+            "body": {
+                "results": [
+                    {
+                        "ticketDetailId": outage_ticket_detail_2_id,
+                        "interface": interface,
+                    }
+                ]
+            }
+        }
         outage_monitor._bruin_repository.get_open_outage_tickets = AsyncMock(return_value=outage_ticket_response)
         outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         outage_monitor._bruin_repository.unpause_ticket_detail = AsyncMock()
         outage_monitor._bruin_repository.resolve_ticket = AsyncMock(return_value=resolve_outage_ticket_response)
         outage_monitor._bruin_repository.append_autoresolve_note_to_ticket = AsyncMock()
+        outage_monitor._bruin_repository.get_ticket_detail_ids_by_ticket_detail_interfaces = AsyncMock(
+            return_value=get_ticket_detail_ids_by_ticket_detail_interfaces_response)
         outage_monitor._outage_repository.is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
@@ -4441,11 +4463,19 @@ class TestServiceOutageMonitor:
             "status": 200,
         }
         outage_ticket_detail_1_id = 2746937
+        outage_ticket_detail_2_id = 2746938
         outage_ticket_detail_1 = {
             "detailID": outage_ticket_detail_1_id,
             "detailValue": serial_number_1,
             "detailStatus": "I",
             "currentTaskName": "IPA Investigate",
+            "assignedToName": "0",
+        }
+        outage_ticket_detail_2 = {
+            "detailID": outage_ticket_detail_2_id,
+            "detailValue": serial_number_2,
+            "detailStatus": "I",
+            "currentTaskName": "test",
             "assignedToName": "0",
         }
         ticket_note_1 = {
@@ -4500,6 +4530,7 @@ class TestServiceOutageMonitor:
             "body": {
                 "ticketDetails": [
                     outage_ticket_detail_1,
+                    outage_ticket_detail_2,
                 ],
                 "ticketNotes": outage_ticket_notes,
             },
@@ -4509,6 +4540,17 @@ class TestServiceOutageMonitor:
             "body": "ok",
             "status": 200,
         }
+        get_ticket_detail_ids_by_ticket_detail_interfaces_response = {
+            "status": 200,
+            "body": {
+                "results": [
+                    {
+                        "ticketDetailId": outage_ticket_detail_2_id,
+                        "interface": interface,
+                    }
+                ]
+            }
+        }
         task_type = TaskTypes.TICKET_FORWARDS
         task_key = f"{outage_ticket_1_id}-{serial_number_1}-{ForwardQueues.HNOC.name}"
 
@@ -4517,6 +4559,8 @@ class TestServiceOutageMonitor:
         outage_monitor._bruin_repository.unpause_ticket_detail = AsyncMock()
         outage_monitor._bruin_repository.resolve_ticket = AsyncMock(return_value=resolve_outage_ticket_response)
         outage_monitor._bruin_repository.append_autoresolve_note_to_ticket = AsyncMock()
+        outage_monitor._bruin_repository.get_ticket_detail_ids_by_ticket_detail_interfaces = AsyncMock(
+            return_value=get_ticket_detail_ids_by_ticket_detail_interfaces_response)
         outage_monitor._outage_repository.is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
@@ -4551,7 +4595,7 @@ class TestServiceOutageMonitor:
         outage_monitor._task_dispatcher_client.clear_task.assert_called_with(task_type, task_key)
 
     @pytest.mark.asyncio
-    async def run_ticket_autoresolve_with_all_conditions_met_test(self, outage_monitor):
+    async def run_ticket_autoresolve_with_interface_mapping_failure_test(self, outage_monitor):
         serial_number_1 = "VC1234567"
         serial_number_2 = "VC9999999"
         client_id = 12345
@@ -4622,9 +4666,17 @@ class TestServiceOutageMonitor:
             "status": 200,
         }
         outage_ticket_detail_1_id = 2746937
+        outage_ticket_detail_2_id = 2746938
         outage_ticket_detail_1 = {
             "detailID": outage_ticket_detail_1_id,
             "detailValue": serial_number_1,
+            "detailStatus": "I",
+            "currentTaskName": "test",
+            "assignedToName": "0",
+        }
+        outage_ticket_detail_2 = {
+            "detailID": outage_ticket_detail_2_id,
+            "detailValue": serial_number_2,
             "detailStatus": "I",
             "currentTaskName": "test",
             "assignedToName": "0",
@@ -4681,6 +4733,7 @@ class TestServiceOutageMonitor:
             "body": {
                 "ticketDetails": [
                     outage_ticket_detail_1,
+                    outage_ticket_detail_2,
                 ],
                 "ticketNotes": outage_ticket_notes,
             },
@@ -4696,6 +4749,11 @@ class TestServiceOutageMonitor:
             "body": "ok",
             "status": 200,
         }
+        get_ticket_detail_ids_by_ticket_detail_interfaces_response = {
+            "status": 500,
+            "body": "Bruin Internal Server Error",
+        }
+        resolved_interfaces = []
         task_type = TaskTypes.TICKET_FORWARDS
         task_key = f"{outage_ticket_1_id}-{serial_number_1}-{ForwardQueues.HNOC.name}"
 
@@ -4704,6 +4762,8 @@ class TestServiceOutageMonitor:
         outage_monitor._bruin_repository.unpause_ticket_detail = AsyncMock()
         outage_monitor._bruin_repository.resolve_ticket = AsyncMock(return_value=resolve_outage_ticket_response)
         outage_monitor._bruin_repository.append_autoresolve_note_to_ticket = AsyncMock()
+        outage_monitor._bruin_repository.get_ticket_detail_ids_by_ticket_detail_interfaces = AsyncMock(
+            return_value=get_ticket_detail_ids_by_ticket_detail_interfaces_response)
         outage_monitor._outage_repository.is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
@@ -4737,7 +4797,7 @@ class TestServiceOutageMonitor:
             outage_ticket_1_id, service_number=serial_number_1, detail_id=outage_ticket_detail_1_id
         )
         outage_monitor._bruin_repository.resolve_ticket.assert_awaited_once_with(
-            outage_ticket_1_id, outage_ticket_detail_1_id
+            outage_ticket_1_id, outage_ticket_detail_1_id, resolved_interfaces
         )
         outage_monitor._bruin_repository.append_autoresolve_note_to_ticket.assert_awaited_once_with(
             outage_ticket_1_id, serial_number_1
@@ -4818,9 +4878,17 @@ class TestServiceOutageMonitor:
             "status": 200,
         }
         outage_ticket_detail_1_id = 2746937
+        outage_ticket_detail_2_id = 2746938
         outage_ticket_detail_1 = {
             "detailID": outage_ticket_detail_1_id,
             "detailValue": serial_number_1,
+            "detailStatus": "I",
+            "currentTaskName": "test",
+            "assignedToName": "0",
+        }
+        outage_ticket_detail_2 = {
+            "detailID": outage_ticket_detail_2_id,
+            "detailValue": serial_number_2,
             "detailStatus": "I",
             "currentTaskName": "test",
             "assignedToName": "0",
@@ -4877,6 +4945,7 @@ class TestServiceOutageMonitor:
             "body": {
                 "ticketDetails": [
                     outage_ticket_detail_1,
+                    outage_ticket_detail_2,
                 ],
                 "ticketNotes": outage_ticket_notes,
             },
@@ -4892,6 +4961,17 @@ class TestServiceOutageMonitor:
             "body": "ok",
             "status": 200,
         }
+        get_ticket_detail_ids_by_ticket_detail_interfaces_response = {
+            "status": 200,
+            "body": {
+                "results": [
+                    {
+                        "ticketDetailId": outage_ticket_detail_2_id,
+                        "interface": interface,
+                    }
+                ]
+            }
+        }
         task_type = TaskTypes.TICKET_FORWARDS
         task_key = f"{outage_ticket_1_id}-{serial_number_1}-{ForwardQueues.HNOC.name}"
 
@@ -4900,6 +4980,8 @@ class TestServiceOutageMonitor:
         outage_monitor._bruin_repository.unpause_ticket_detail = AsyncMock()
         outage_monitor._bruin_repository.resolve_ticket = AsyncMock(return_value=resolve_outage_ticket_response)
         outage_monitor._bruin_repository.append_autoresolve_note_to_ticket = AsyncMock()
+        outage_monitor._bruin_repository.get_ticket_detail_ids_by_ticket_detail_interfaces = AsyncMock(
+            return_value=get_ticket_detail_ids_by_ticket_detail_interfaces_response)
         outage_monitor._outage_repository.is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
@@ -12679,59 +12761,81 @@ class TestServiceOutageMonitor:
 
         assert response is True
 
-    def get_faulty_interfaces_from_ticket_notes_test(self, outage_monitor):
+    @pytest.mark.asyncio
+    async def get_resolved_detailIds_service_numbers_and_interfaces_test(self, outage_monitor):
         serial_number_1 = "VC1234567"
-        interface_1 = "GE4"
-        interface_2 = "GE5"
-        interfaces = [interface_1, interface_2]
-        ticket_note_1 = {
-            "noteId": 68246614,
-            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-02 10:18:16-05:00",
-            "createdDate": "",
-            "serviceNumber": [
-                serial_number_1,
-            ],
+        serial_number_2 = "VC9999999"
+        interface = "REX"
+        edge = {
+            "status": {
+                "host": "mettel.velocloud.net",
+                "enterpriseName": "Militaires Sans Frontières",
+                "enterpriseId": 1,
+                "enterpriseProxyId": None,
+                "enterpriseProxyName": None,
+                "edgeName": "Big Boss",
+                "edgeState": "CONNECTED",
+                "edgeId": 1,
+                "links": [
+                    {
+                        "displayName": "test name",
+                        "isp": None,
+                        "interface": "REX",
+                        "internalId": "00000001-ac48-47a0-81a7-80c8c320f486",
+                        "linkState": "DISCONNECTED",
+                    },
+                ],
+            },
         }
-        ticket_note_2 = {
-            "noteId": 68246615,
-            "noteValue": "#*MetTel's IPA*#\nAuto-resolving detail.\nTimeStamp: 2021-01-03 10:18:16-05:00",
-            "createdDate": "",
-            "serviceNumber": [
-                serial_number_1,
-            ],
+        outage_ticket_1_id = 1234
+        outage_ticket_detail_1_id = 2746937
+        outage_ticket_detail_2_id = 2746938
+        outage_ticket_detail_1 = {
+            "detailID": outage_ticket_detail_1_id,
+            "detailValue": serial_number_1,
+            "detailStatus": "I",
+            "currentTaskName": "test",
+            "assignedToName": "0",
         }
-        ticket_note_3 = {
-            "noteId": 68246616,
-            "noteValue": ("#*MetTel's IPA*#\nTriage (VeloCloud)\nOutage Type: Hard Down (no HA)\n"
-                          "Orchestrator Instance: metvco04.mettel.net\n"
-                          "Edge Name: FIS | EID1508_CID2034_HCBTC_KOSCIUSKO_620\n"
-                          "Links: Edge  - QoE  - Transport  - Events \nSerial: 2S6NV43\n"
-                          "Edge Status: OFFLINE\nLast Edge Online: Unknown\n"
-                          "Last Edge Offline: 2023-03-27 09:41:00-04:00\nInterface GE4\n"
-                          "Interface GE4 Label: APEX U10Meg/D10Meg | "
-                          "MetTel # BBT.120548\nInterface GE4 IP Address: 32.143.194.50\n"
-                          "Interface GE4 Type: Public Wired\n"
-                          "Interface GE4 Status: DISCONNECTED\nLast GE4 Interface Online: 2023-03-24 22:34:12-04:00\n"
-                          "Last GE4 Interface Offline: Unknown\nInterface GE5\n"
-                          "Interface GE5 Label: MaxxSouth Fiber U10Meg/D100Meg | "
-                          "MetTel # BCB.151729\nInterface GE5 IP Address: 24.233.236.6\n"
-                          "Interface GE5 Type: Public Wired\n"
-                          "Interface GE5 Status: DISCONNECTED\nLast GE5 Interface Online: 2023-03-24 22:37:17-04:00\n"
-                          "Last GE5 Interface Offline: 2023-03-21 11:09:33-04:00"),
-            "createdDate": "",
-            "serviceNumber": [
-                serial_number_1,
-            ],
+        outage_ticket_detail_2 = {
+            "detailID": outage_ticket_detail_2_id,
+            "detailValue": serial_number_2,
+            "detailStatus": "I",
+            "currentTaskName": "test",
+            "assignedToName": "0",
         }
-        outage_ticket_notes = [
-            ticket_note_1,
-            ticket_note_2,
-            ticket_note_3,
+        ticketDetails = [
+            outage_ticket_detail_1,
+            outage_ticket_detail_2,
+        ]
+        get_ticket_detail_ids_by_ticket_detail_interfaces_response = {
+            "status": 200,
+            "body": {
+                "results": [
+                    {
+                        "ticketDetailId": outage_ticket_detail_2_id,
+                        "interface": interface,
+                    }
+                ]
+            }
+        }
+
+        expexted_output = [
+            {
+                "detailId": outage_ticket_detail_2_id,
+                "interface": interface,
+                "service_number": serial_number_2,
+            }
         ]
 
-        response = outage_monitor._get_faulty_interfaces_from_ticket_notes(outage_ticket_notes)
+        outage_monitor._bruin_repository.get_ticket_detail_ids_by_ticket_detail_interfaces = AsyncMock(
+            return_value=get_ticket_detail_ids_by_ticket_detail_interfaces_response)
 
-        assert sorted(response) == sorted(interfaces)
+        result = (await outage_monitor._get_resolved_detailIds_service_numbers_and_interfaces(
+            outage_ticket_1_id, outage_ticket_detail_1_id, edge["status"]["links"],
+            ticketDetails))
+
+        assert result == expexted_output
 
     def is_ticket_task_assigned__is_assigned_test(self, outage_monitor, make_detail_item):
         assigned_to = "Test User"

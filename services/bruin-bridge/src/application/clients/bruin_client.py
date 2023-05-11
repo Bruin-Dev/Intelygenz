@@ -1332,9 +1332,12 @@ class BruinClient:
                 f'details/{detail_id}/detailids?interfaces={",".join(interfaces)}'
             )
 
+            headers = self._get_request_headers()
+            headers["api-version"] = "2.0"
+
             response = await self._session.get(
                 url=url,
-                headers=self._get_request_headers(),
+                headers=headers,
                 ssl=False,
             )
             return_response = dict.fromkeys(["body", "status"])

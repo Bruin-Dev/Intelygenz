@@ -386,13 +386,23 @@ class OutageMonitor:
             has_faulty_byob_link = self._get_has_faulty_byob_link_from_triage_note(triage_note)
             faulty_link_types = self._get_faulty_link_types_from_triage_note(triage_note)
             is_task_in_ipa_queue = self._is_ticket_task_in_ipa_queue(detail_for_ticket_resolution)
-            previously_faulty_interfaces = self._get_faulty_interfaces_from_ticket_notes(notes_from_outage_ticket)
-            resolved_faulty_interfaces = self._get_resolved_faulty_interfaces(previously_faulty_interfaces, links)
 
-            logger.info(
-                f"Previously faulty interfaces: {previously_faulty_interfaces}. "
-                f"Resolved faulty interfaces: {resolved_faulty_interfaces}."
+            healthy_link_interfaces = [
+                link["interface"]
+                for link in links
+            ]
+
+            detailIds_service_numbers_and_interfaces = (
+                await self._get_resolved_detailIds_service_numbers_and_interfaces(
+                    outage_ticket_id, ticket_detail_id, healthy_link_interfaces, details_from_ticket)
             )
+
+            resolved_faulty_interfaces = [
+                detailId_service_number_and_interface["interface"]
+                for detailId_service_number_and_interface in detailIds_service_numbers_and_interfaces
+            ]
+
+            logger.info(f"Resolved faulty interfaces: {resolved_faulty_interfaces}.")
 
             link_access_types = self._get_link_access_types_from_affecting_trouble_note(
                 resolved_faulty_interfaces, logical_ids)
@@ -469,32 +479,9 @@ class OutageMonitor:
                 return
 
             await self._bruin_repository.append_autoresolve_note_to_ticket(outage_ticket_id, serial_number)
-            if resolved_faulty_interfaces:
-                ticket_detailIds_resolved_interfaces_response = (
-                    await self._bruin_repository.
-                    get_ticket_detail_ids_by_ticket_detail_interfaces(
-                        outage_ticket_id, ticket_detail_id, resolved_faulty_interfaces)
-                )
-                if ticket_detailIds_resolved_interfaces_response["status"] not in range(200, 300):
-                    logger.error(
-                        f"Error while getting deailIds {outage_ticket_id} for details {ticket_detail_id} "
-                        f"and interfaces {resolved_faulty_interfaces}: {ticket_detailIds_resolved_interfaces_response}"
-                    )
-                else:
-                    ticket_detailIds_resolved_interfaces = (
-                        ticket_detailIds_resolved_interfaces_response["body"]["detailIds"]
-                    )
-                    logger.info(f'Ticket detailIds resolved interfaces: {ticket_detailIds_resolved_interfaces}')
-                    ticket_details = [
-                        detail
-                        for detail in details_from_ticket
-                        if detail["detailID"] in ticket_detailIds_resolved_interfaces
-                        and detail["detailValue"] != serial_number
-                    ]
-                    logger.info(f'Ticket details resolved interfaces count: {len(ticket_details)}')
-                    for ticket_detail in ticket_details:
-                        await self._bruin_repository.append_autoresolve_line_note_to_ticket(
-                            outage_ticket_id, ticket_detail["detailValue"])
+            for detailId_service_number_and_interface in detailIds_service_numbers_and_interfaces:
+                await self._bruin_repository.append_autoresolve_line_note_to_ticket(
+                    outage_ticket_id, detailId_service_number_and_interface["service_number"])
 
             if has_faulty_byob_link and is_task_in_ipa_queue:
                 logger.info(f'Closing ticket {outage_ticket_id} for edge {serial_number} due to byob...')
@@ -1358,29 +1345,48 @@ class OutageMonitor:
 
         return False
 
-    def _get_faulty_interfaces_from_ticket_notes(self, ticket_notes: List[dict]) -> Optional[list[str]]:
-        interfaces = set()
-        for note in ticket_notes:
-            matches = LINK_INFO_REGEX.finditer(note["noteValue"])
+    async def _get_resolved_detailIds_service_numbers_and_interfaces(
+        self, outage_ticket_id: int, ticket_detail_id: int, links: List[dict], details_from_ticket: List[dict]
+    ) -> List[dict]:
+        ticket_detailIds_mapped_to_interfaces_response = (
+            await self._bruin_repository.
+            get_ticket_detail_ids_by_ticket_detail_interfaces(
+                outage_ticket_id, ticket_detail_id, links)
+        )
 
-            for match in matches:
-                link_interface = match.group("interface")
-                link_status = match.group("status")
+        detailIds_service_numbers_and_interfaces = []
+        if ticket_detailIds_mapped_to_interfaces_response["status"] not in range(200, 300):
+            logger.error(
+                f"Error while getting deailIds {outage_ticket_id} for details {ticket_detail_id} "
+                f"and interfaces {links}: {ticket_detailIds_mapped_to_interfaces_response}"
+            )
+        else:
+            detailIds_and_interfaces = (
+                ticket_detailIds_mapped_to_interfaces_response["body"]["results"]
+            )
+            logger.info(f'Ticket detailIds and interfaces: {detailIds_and_interfaces}')
+            detailIds_service_numbers_and_interfaces = [
+                {
+                    "detailId": detailId_and_interface["ticketDetailId"],
+                    "interface": detailId_and_interface["interface"],
+                    "service_number": self._get_service_number_for_detailId(
+                        details_from_ticket, detailId_and_interface["ticketDetailId"])
+                }
+                for detailId_and_interface in detailIds_and_interfaces
+                if detailId_and_interface["ticketDetailId"] != ticket_detail_id
+            ]
 
-                if self._outage_repository.is_faulty_link(link_status):
-                    interfaces.add(link_interface)
+            logger.info(f'Ticket details resolved interfaces count: '
+                        f'{len(detailIds_service_numbers_and_interfaces)}')
 
-        return list(interfaces)
+        return detailIds_service_numbers_and_interfaces
 
-    def _get_resolved_faulty_interfaces(self, previously_faulty_interfaces: List[str], links: List[dict]) -> List[str]:
-        resolved_interfaces = set()
-        for previous_faulty_interface in previously_faulty_interfaces:
-            for link in links:
-                if link["interface"] == previous_faulty_interface:
-                    resolved_interfaces.add(previous_faulty_interface)
-                    break
+    def _get_service_number_for_detailId(self, ticket_details: List[dict], detailId: int) -> str:
+        for detail in ticket_details:
+            if detail["detailID"] == detailId:
+                return detail["detailValue"]
 
-        return list(resolved_interfaces)
+        return None
 
     def _get_link_access_types_from_affecting_trouble_note(
         self, interfaces: List[str], logical_id_list: List[dict]
