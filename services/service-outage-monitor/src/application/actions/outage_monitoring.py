@@ -371,21 +371,6 @@ class OutageMonitor:
             ticket_detail_id = detail_for_ticket_resolution["detailID"]
 
             notes_from_outage_ticket = ticket_details_response_body["ticketNotes"]
-            relevant_notes = [
-                note
-                for note in notes_from_outage_ticket
-                if note["serviceNumber"] is not None
-                if serial_number in note["serviceNumber"]
-                if note["noteValue"] is not None
-            ]
-
-            last_cycle_notes = self._get_notes_appended_since_latest_reopen_or_ticket_creation(relevant_notes)
-            triage_note = self._get_triage_or_reopen_note(last_cycle_notes)
-            outage_type = self._get_outage_type_from_ticket_notes(last_cycle_notes)
-            has_faulty_digi_link = self._get_has_faulty_digi_link_from_ticket_notes(last_cycle_notes, triage_note)
-            has_faulty_byob_link = self._get_has_faulty_byob_link_from_triage_note(triage_note)
-            faulty_link_types = self._get_faulty_link_types_from_triage_note(triage_note)
-            is_task_in_ipa_queue = self._is_ticket_task_in_ipa_queue(detail_for_ticket_resolution)
 
             healthy_link_interfaces = [
                 link["interface"]
@@ -402,7 +387,30 @@ class OutageMonitor:
                 for detailId_service_number_and_interface in detailIds_service_numbers_and_interfaces
             ]
 
-            logger.info(f"Resolved faulty interfaces: {resolved_faulty_interfaces}.")
+            logger.info(f"Resolved faulty interfaces for ticket {outage_ticket_id}: {resolved_faulty_interfaces}.")
+
+            service_numbers = [serial_number]
+
+            for detailId_service_number_and_interface in detailIds_service_numbers_and_interfaces:
+                service_numbers.append(detailId_service_number_and_interface["service_number"])
+
+            logger.info(f"Resolved Service numbers for ticket {outage_ticket_id}: {service_numbers}.")
+
+            relevant_notes = [
+                note
+                for note in notes_from_outage_ticket
+                if note["serviceNumber"] is not None
+                if any(service_number in service_numbers for service_number in note["serviceNumber"])
+                if note["noteValue"] is not None
+            ]
+
+            last_cycle_notes = self._get_notes_appended_since_latest_reopen_or_ticket_creation(relevant_notes)
+            triage_note = self._get_triage_or_reopen_note(last_cycle_notes)
+            outage_type = self._get_outage_type_from_ticket_notes(last_cycle_notes)
+            has_faulty_digi_link = self._get_has_faulty_digi_link_from_ticket_notes(last_cycle_notes, triage_note)
+            has_faulty_byob_link = self._get_has_faulty_byob_link_from_triage_note(triage_note)
+            faulty_link_types = self._get_faulty_link_types_from_triage_note(triage_note)
+            is_task_in_ipa_queue = self._is_ticket_task_in_ipa_queue(detail_for_ticket_resolution)
 
             link_access_types = self._get_link_access_types_from_affecting_trouble_note(
                 resolved_faulty_interfaces, logical_ids)

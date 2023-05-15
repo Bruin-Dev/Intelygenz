@@ -4181,6 +4181,7 @@ class TestServiceOutageMonitor:
     async def run_ticket_autoresolve_with_resolve_outage_return_non_2xx_status_test(self, outage_monitor):
         serial_number_1 = "VC1234567"
         serial_number_2 = "VC9999999"
+        serial_number_3 = "VC9999998"
         client_id = 12345
         interface = "REX"
         edge = {
@@ -4294,7 +4295,7 @@ class TestServiceOutageMonitor:
             "noteValue": "Some note",
             "createdDate": "",
             "serviceNumber": [
-                serial_number_2,
+                serial_number_3,
             ],
         }
         ticket_note_5 = {
@@ -4809,6 +4810,7 @@ class TestServiceOutageMonitor:
     async def run_ticket_autoresolve_with_all_conditions_met_test(self, outage_monitor):
         serial_number_1 = "VC1234567"
         serial_number_2 = "VC9999999"
+        serial_number_3 = "VC9999998"
         client_id = 12345
         interface = "REX"
         edge = {
@@ -4922,7 +4924,7 @@ class TestServiceOutageMonitor:
             "noteValue": "Some note",
             "createdDate": "",
             "serviceNumber": [
-                serial_number_2,
+                serial_number_3,
             ],
         }
         ticket_note_5 = {
