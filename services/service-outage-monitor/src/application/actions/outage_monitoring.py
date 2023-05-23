@@ -378,7 +378,7 @@ class OutageMonitor:
             ]
 
             detailIds_service_numbers_and_interfaces = (
-                await self._get_resolved_detailIds_service_numbers_and_interfaces(
+                await self._get_detailIds_service_numbers_and_interfaces_mapping(
                     outage_ticket_id, ticket_detail_id, healthy_link_interfaces, details_from_ticket)
             )
 
@@ -694,8 +694,101 @@ class OutageMonitor:
             },
         )
 
+    async def _schedule_forward_to_work_queue(
+        self,
+        forward_time,
+        ticket_id,
+        serial_number,
+        client_name,
+        outage_type,
+        severity,
+        has_faulty_digi_link,
+        has_faulty_byob_link,
+        faulty_link_types,
+        ticket_details_response,
+    ):
+        if ticket_details_response["status"] not in range(200, 300):
+            logger.error(
+                f"Error while getting details of ticket {ticket_id}: {ticket_details_response}. "
+                f"Skipping forward to work queue..."
+            )
+            return
+
+        if not faulty_link_types:
+            logger.info(f'No faulty links found for ticket {ticket_id}. Skipping forward to work queue...')
+            return
+
+        details_from_ticket = ticket_details_response["body"]["ticketDetails"]
+        detail_for_edge = self._utils_repository.get_first_element_matching(
+            details_from_ticket,
+            lambda detail: detail["detailValue"] == serial_number,
+        )
+        ticket_detail_id = detail_for_edge["detailID"]
+        detailIds_service_numbers_and_interfaces = (
+            await self._get_detailIds_service_numbers_and_interfaces_mapping(
+                ticket_id, ticket_detail_id, faulty_link_types, details_from_ticket)
+        )
+
+        logger.info(
+            f"Details for faulty interfaces {faulty_link_types} for ticket {ticket_id} and"
+            f" detailsId {ticket_detail_id} -> {detailIds_service_numbers_and_interfaces}."
+        )
+
+        open_ticket_details_in_ipa_queue = [
+            ticket_detail
+            for ticket_detail in details_from_ticket
+            if any([
+                detailId_service_number_interface
+                for detailId_service_number_interface in detailIds_service_numbers_and_interfaces
+                if detailId_service_number_interface["detailId"] == ticket_detail["detailID"]])
+            and self._is_ticket_task_in_ipa_queue(ticket_detail)
+            and ticket_detail['status'] != 'R'
+        ]
+
+        logger.info(
+            f"Open ticket details in ipa queue {faulty_link_types} for ticket {ticket_id} and"
+            f" detailsId {ticket_detail_id} -> {open_ticket_details_in_ipa_queue}."
+        )
+
+        # if there's an open detail for any of the faulty links, schedule forward to work queue
+        for open_ticket_detail in open_ticket_details_in_ipa_queue:
+            target_queue = ForwardQueues.WORKER
+            current_datetime = datetime.utcnow()
+            forward_task_run_date = current_datetime + timedelta(minutes=forward_time)
+            detail_id = open_ticket_detail['detailID']
+
+            logger.info(
+                f"Scheduling forward to {target_queue.value} for ticket {ticket_id} and serial number {serial_number} "
+                f"and detail Id {detail_id} and work_queue_id {self._config.TICKET_TASK_WORKER_QUEUE_ID}"
+                f"to happen in {forward_time} minutes"
+            )
+
+            self._task_dispatcher_client.schedule_task(
+                date=forward_task_run_date,
+                task_type=TaskTypes.TICKET_FORWARDS,
+                task_key=f"{ticket_id}-{serial_number}-{detail_id}-{target_queue.name}",
+                task_data={
+                    "service": self._config.LOG_CONFIG["name"],
+                    "ticket_id": ticket_id,
+                    "serial_number": serial_number,
+                    "target_queue": target_queue.value,
+                    "work_queue_id": self._config.TICKET_TASK_WORKER_QUEUE_ID,
+                    "detail_id": detail_id,
+                    "metrics_labels": {
+                        "client": client_name,
+                        "outage_type": outage_type.value,
+                        "severity": severity,
+                        "target_queue": target_queue.value,
+                        "has_digi": has_faulty_digi_link,
+                        "has_byob": has_faulty_byob_link,
+                        "link_types": faulty_link_types,
+                    },
+                },
+            )
+
     async def _append_triage_note(
-        self, ticket_id: int, cached_edge: dict, edge_status: dict, outage_type: Outages, *, is_reopen_note=False
+        self, ticket_id: int, cached_edge: dict, edge_status: dict,
+        outage_type: Outages, ticket_details_response, *, is_reopen_note=False
     ):
         edge_full_id = cached_edge["edge"]
         serial_number = cached_edge["serial_number"]
@@ -718,7 +811,6 @@ class OutageMonitor:
         recent_events = recent_events_response["body"]
         recent_events.sort(key=lambda event: event["eventTime"], reverse=True)
 
-        ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
         if ticket_details_response["status"] not in range(200, 300):
             logger.error(
                 f"Error while getting details of ticket {ticket_id}: {ticket_details_response}. "
@@ -739,11 +831,12 @@ class OutageMonitor:
 
         logger.info(f"Triage note appended to ticket {ticket_id} for edge {serial_number}")
 
-    async def _reopen_outage_ticket(self, ticket_id: int, edge_status: dict, cached_edge: dict, outage_type: Outages):
+    async def _reopen_outage_ticket(
+        self, ticket_id: int, edge_status: dict, cached_edge: dict, outage_type: Outages, ticket_details_response
+    ):
         serial_number = edge_status["edgeSerialNumber"]
         logger.info(f"Reopening task for serial {serial_number} from ticket {ticket_id}...")
 
-        ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
         ticket_details_response_body = ticket_details_response["body"]
         ticket_details_response_status = ticket_details_response["status"]
         if ticket_details_response_status not in range(200, 300):
@@ -768,7 +861,9 @@ class OutageMonitor:
                 f"Task for edge {serial_number} of ticket {ticket_id} reopened: https://app.bruin.com/t/{ticket_id}"
             )
             await self._notifications_repository.send_slack_message(slack_message)
-            await self._append_triage_note(ticket_id, cached_edge, edge_status, outage_type, is_reopen_note=True)
+            await self._append_triage_note(
+                ticket_id, cached_edge, edge_status, outage_type, ticket_details_response, is_reopen_note=True
+            )
             return True
         else:
             logger.error(
@@ -1194,7 +1289,8 @@ class OutageMonitor:
             return self._config.MONITOR_CONFIG["severity_by_outage_type"]["link_down"]
 
     async def _change_ticket_severity(
-        self, ticket_id: int, edge_status: dict, target_severity: int, *, check_ticket_tasks: bool
+        self, ticket_id: int, edge_status: dict, target_severity: int,
+        ticket_details_response, *, check_ticket_tasks: bool
     ):
         logger.info(f"Attempting to change severity level of ticket {ticket_id}...")
 
@@ -1208,7 +1304,6 @@ class OutageMonitor:
             change_severity_task = self._bruin_repository.change_ticket_severity_for_offline_edge(ticket_id)
         else:
             if check_ticket_tasks:
-                ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
                 if ticket_details_response["status"] not in range(200, 300):
                     logger.error(
                         f"Error while getting details of ticket {ticket_id}: {ticket_details_response}. "
@@ -1353,20 +1448,20 @@ class OutageMonitor:
 
         return False
 
-    async def _get_resolved_detailIds_service_numbers_and_interfaces(
-        self, outage_ticket_id: int, ticket_detail_id: int, links: List[dict], details_from_ticket: List[dict]
+    async def _get_detailIds_service_numbers_and_interfaces_mapping(
+        self, outage_ticket_id: int, ticket_detail_id: int, interfaces: List[str], details_from_ticket: List[dict]
     ) -> List[dict]:
         ticket_detailIds_mapped_to_interfaces_response = (
             await self._bruin_repository.
             get_ticket_detail_ids_by_ticket_detail_interfaces(
-                outage_ticket_id, ticket_detail_id, links)
+                outage_ticket_id, ticket_detail_id, interfaces)
         )
 
         detailIds_service_numbers_and_interfaces = []
         if ticket_detailIds_mapped_to_interfaces_response["status"] not in range(200, 300):
             logger.error(
                 f"Error while getting deailIds {outage_ticket_id} for details {ticket_detail_id} "
-                f"and interfaces {links}: {ticket_detailIds_mapped_to_interfaces_response}"
+                f"and interfaces {interfaces}: {ticket_detailIds_mapped_to_interfaces_response}"
             )
         else:
             detailIds_and_interfaces = (
@@ -1384,7 +1479,7 @@ class OutageMonitor:
                 if detailId_and_interface["ticketDetailId"] != ticket_detail_id
             ]
 
-            logger.info(f'Ticket details resolved interfaces count: '
+            logger.info(f'Ticket details interfaces mappings count: '
                         f'{len(detailIds_service_numbers_and_interfaces)}')
 
         return detailIds_service_numbers_and_interfaces
@@ -1571,12 +1666,17 @@ class OutageMonitor:
                     f"https://app.bruin.com/t/{ticket_id}."
                 )
                 await self._notifications_repository.send_slack_message(slack_message)
-                await self._append_triage_note(ticket_id, cached_edge, edge_status, outage_type)
+
+                ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
+                await self._append_triage_note(
+                    ticket_id, cached_edge, edge_status, outage_type, ticket_details_response
+                )
                 await self._change_ticket_severity(
                     ticket_id=ticket_id,
                     edge_status=edge_status,
                     target_severity=target_severity,
                     check_ticket_tasks=False,
+                    ticket_details_response=ticket_details_response,
                 )
 
                 if self._should_forward_to_hnoc(edge_links, is_edge_down):
@@ -1595,6 +1695,18 @@ class OutageMonitor:
                         has_faulty_digi_link,
                         has_faulty_byob_link,
                         faulty_link_types,
+                    )
+                    await self._schedule_forward_to_work_queue(
+                        forward_time,
+                        ticket_id,
+                        serial_number,
+                        client_name,
+                        outage_type,
+                        target_severity,
+                        has_faulty_digi_link,
+                        has_faulty_byob_link,
+                        faulty_link_types,
+                        ticket_details_response,
                     )
                 else:
                     logger.info(
@@ -1642,11 +1754,13 @@ class OutageMonitor:
                     f"progress (ID = {ticket_id}). Skipping outage ticket creation for "
                     "this edge..."
                 )
+                ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
                 await self._change_ticket_severity(
                     ticket_id=ticket_id,
                     edge_status=edge_status,
                     target_severity=target_severity,
                     check_ticket_tasks=True,
+                    ticket_details_response=ticket_details_response,
                 )
 
                 if self._should_forward_to_hnoc(edge_links, is_edge_down):
@@ -1666,14 +1780,25 @@ class OutageMonitor:
                         has_faulty_byob_link,
                         faulty_link_types,
                     )
+                    await self._schedule_forward_to_work_queue(
+                        forward_time,
+                        ticket_id,
+                        serial_number,
+                        client_name,
+                        outage_type,
+                        target_severity,
+                        has_faulty_digi_link,
+                        has_faulty_byob_link,
+                        faulty_link_types,
+                        ticket_details_response,
+                    )
                 else:
                     logger.info(
                         f"Ticket_id: {ticket_id} for serial: {serial_number} "
                         f"with link_data: {edge_links} has a blacklisted link and "
                         f"should not be forwarded to HNOC. Skipping forward to HNOC..."
                     )
-                    ticket_details = await self._bruin_repository.get_ticket_details(ticket_id)
-                    ticket_notes = ticket_details["body"]["ticketNotes"]
+                    ticket_notes = ticket_details_response["body"]["ticketNotes"]
                     await self._send_reminder(
                         ticket_id=ticket_id, service_number=serial_number, ticket_notes=ticket_notes
                     )
@@ -1706,7 +1831,10 @@ class OutageMonitor:
                     f"[{outage_type.value}] Faulty edge {serial_number} has a resolved outage ticket "
                     f"(ID = {ticket_id}). Re-opening ticket..."
                 )
-                was_ticket_reopened = await self._reopen_outage_ticket(ticket_id, edge_status, cached_edge, outage_type)
+                ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
+                was_ticket_reopened = await self._reopen_outage_ticket(
+                    ticket_id, edge_status, cached_edge, outage_type, ticket_details_response
+                )
                 if was_ticket_reopened:
                     self._metrics_repository.increment_tasks_reopened(
                         client=client_name,
@@ -1722,6 +1850,7 @@ class OutageMonitor:
                     edge_status=edge_status,
                     target_severity=target_severity,
                     check_ticket_tasks=True,
+                    ticket_details_response=ticket_details_response,
                 )
 
                 if self._should_forward_to_hnoc(edge_links, is_edge_down):
@@ -1740,6 +1869,18 @@ class OutageMonitor:
                         has_faulty_digi_link,
                         has_faulty_byob_link,
                         faulty_link_types,
+                    )
+                    await self._schedule_forward_to_work_queue(
+                        forward_time,
+                        ticket_id,
+                        serial_number,
+                        client_name,
+                        outage_type,
+                        target_severity,
+                        has_faulty_digi_link,
+                        has_faulty_byob_link,
+                        faulty_link_types,
+                        ticket_details_response,
                     )
                 else:
                     logger.info(
@@ -1783,11 +1924,14 @@ class OutageMonitor:
                     link_types=faulty_link_types,
                 )
 
+                ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
+
                 await self._append_triage_note(
                     ticket_id,
                     cached_edge,
                     edge_status,
                     outage_type,
+                    ticket_details_response,
                     is_reopen_note=True,
                 )
                 await self._change_ticket_severity(
@@ -1795,6 +1939,7 @@ class OutageMonitor:
                     edge_status=edge_status,
                     target_severity=target_severity,
                     check_ticket_tasks=True,
+                    ticket_details_response=ticket_details_response,
                 )
 
                 if self._should_forward_to_hnoc(edge_links, is_edge_down):
@@ -1813,6 +1958,18 @@ class OutageMonitor:
                         has_faulty_digi_link,
                         has_faulty_byob_link,
                         faulty_link_types,
+                    )
+                    await self._schedule_forward_to_work_queue(
+                        forward_time,
+                        ticket_id,
+                        serial_number,
+                        client_name,
+                        outage_type,
+                        target_severity,
+                        has_faulty_digi_link,
+                        has_faulty_byob_link,
+                        faulty_link_types,
+                        ticket_details_response,
                     )
                 else:
                     logger.info(
@@ -1856,12 +2013,17 @@ class OutageMonitor:
                     link_types=faulty_link_types,
                 )
 
-                await self._append_triage_note(ticket_id, cached_edge, edge_status, outage_type)
+                ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
+
+                await self._append_triage_note(
+                    ticket_id, cached_edge, edge_status, outage_type, ticket_details_response
+                )
                 await self._change_ticket_severity(
                     ticket_id=ticket_id,
                     edge_status=edge_status,
                     target_severity=target_severity,
                     check_ticket_tasks=False,
+                    ticket_details_response=ticket_details_response,
                 )
 
                 if self._should_forward_to_hnoc(edge_links, is_edge_down):
@@ -1880,6 +2042,18 @@ class OutageMonitor:
                         has_faulty_digi_link,
                         has_faulty_byob_link,
                         faulty_link_types,
+                    )
+                    await self._schedule_forward_to_work_queue(
+                        forward_time,
+                        ticket_id,
+                        serial_number,
+                        client_name,
+                        outage_type,
+                        target_severity,
+                        has_faulty_digi_link,
+                        has_faulty_byob_link,
+                        faulty_link_types,
+                        ticket_details_response,
                     )
                 else:
                     logger.info(

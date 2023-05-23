@@ -44,6 +44,7 @@ else:
     METRICS_RELEVANT_CLIENTS = json.loads(os.environ["METRICS_RELEVANT_CLIENTS"])
     IPA_SYSTEM_USERNAME_IN_BRUIN = os.environ["IPA_SYSTEM_USERNAME_IN_BRUIN"]
     DIGI_HEADERS = json.loads(os.environ["DIGI_HEADERS"])
+    TICKET_TASK_WORKER_QUEUE_ID = os.environ["TICKET_TASK_WORKER_QUEUE_ID"]
 
     MONITOR_CONFIG = {
         "multiplier": 5,

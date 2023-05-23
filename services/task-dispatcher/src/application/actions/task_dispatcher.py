@@ -89,9 +89,10 @@ class TaskDispatcher:
         logger.info(f"Published result for task {topic} on NATS!")
 
     async def _forward_ticket(
-        self, target_queue: str, ticket_id: int, detail_id: int = None, serial_number: str = None, **_kwargs
+        self, target_queue: str, ticket_id: int, detail_id: int = None,
+        serial_number: str = None, work_queue_id: str = None, **_kwargs
     ):
         change_detail_work_queue_response = await self._bruin_repository.change_detail_work_queue(
-            target_queue, ticket_id, detail_id, serial_number
+            target_queue, ticket_id, detail_id, serial_number, work_queue_id
         )
         return change_detail_work_queue_response["status"] in range(200, 300)

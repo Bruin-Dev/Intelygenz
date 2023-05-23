@@ -15,6 +15,7 @@ class ForwardQueues(Enum):
     ASR = "ASR Investigate"
     HNOC = "HNOC Investigate"
     WIRELESS = "Wireless Repair Intervention Needed"
+    WORKER = "Dedicated Worker Queue"
 
 
 TRIAGE_NOTE_REGEX = re.compile(r"^#\*(Automation Engine|MetTel's IPA)\*#\nTriage \(VeloCloud\)")

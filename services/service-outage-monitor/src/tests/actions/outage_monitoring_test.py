@@ -6142,6 +6142,7 @@ class TestServiceOutageMonitor:
             "body": ticket_id,
             "status": 200,
         }
+        ticket_details_response = {"status": 200, }
         outage_monitor._velocloud_repository.get_links_with_edge_info = AsyncMock(
             return_value=links_with_edge_info_response
         )
@@ -6151,6 +6152,7 @@ class TestServiceOutageMonitor:
         outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
         outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=ticket_creation_response)
         outage_monitor._bruin_repository.send_initial_email_milestone_notification = AsyncMock()
+        outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_monitor._outage_repository.is_edge_up = Mock(return_value=False)
         outage_monitor._notifications_repository.send_slack_message = AsyncMock()
@@ -6182,12 +6184,14 @@ class TestServiceOutageMonitor:
             cached_edge_primary,
             links_grouped_by_primary_edge_with_ha_info,
             outage_type,
+            ticket_details_response,
         )
         outage_monitor._change_ticket_severity.assert_awaited_once_with(
             ticket_id=ticket_id,
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             target_severity=target_severity,
             check_ticket_tasks=False,
+            ticket_details_response=ticket_details_response,
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         outage_monitor._append_reminder_note.assert_not_awaited()
@@ -6378,6 +6382,7 @@ class TestServiceOutageMonitor:
             "body": ticket_id,
             "status": 200,
         }
+        ticket_details_response = {"status": 200, }
         outage_monitor._velocloud_repository.get_links_with_edge_info = AsyncMock(
             return_value=links_with_edge_info_response
         )
@@ -6389,6 +6394,7 @@ class TestServiceOutageMonitor:
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = (
             bruin_generic_200_response
         )
+        outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_monitor._outage_repository.is_edge_up = Mock(return_value=False)
         outage_monitor._notifications_repository.send_slack_message = AsyncMock()
@@ -6422,12 +6428,14 @@ class TestServiceOutageMonitor:
             cached_edge_primary,
             links_grouped_by_primary_edge_with_ha_info,
             outage_type,
+            ticket_details_response,
         )
         outage_monitor._change_ticket_severity.assert_awaited_once_with(
             ticket_id=ticket_id,
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             target_severity=target_severity,
             check_ticket_tasks=False,
+            ticket_details_response=ticket_details_response,
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_awaited_once()
         outage_monitor._append_reminder_note.assert_awaited_once()
@@ -6608,6 +6616,7 @@ class TestServiceOutageMonitor:
             "body": ticket_id,
             "status": 200,
         }
+        ticket_details_response = {"status": 200, }
         outage_monitor._velocloud_repository.get_links_with_edge_info = AsyncMock(
             return_value=links_with_edge_info_response
         )
@@ -6617,6 +6626,7 @@ class TestServiceOutageMonitor:
         outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
         outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=ticket_creation_response)
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = bruin_500_response
+        outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_monitor._outage_repository.is_edge_up = Mock(return_value=False)
         outage_monitor._notifications_repository.send_slack_message = AsyncMock()
@@ -6650,12 +6660,14 @@ class TestServiceOutageMonitor:
             cached_edge_primary,
             links_grouped_by_primary_edge_with_ha_info,
             outage_type,
+            ticket_details_response,
         )
         outage_monitor._change_ticket_severity.assert_awaited_once_with(
             ticket_id=ticket_id,
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             target_severity=target_severity,
             check_ticket_tasks=False,
+            ticket_details_response=ticket_details_response,
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_awaited_once()
         outage_monitor._append_reminder_note.assert_not_awaited()
@@ -6838,6 +6850,7 @@ class TestServiceOutageMonitor:
             "body": ticket_id,
             "status": 409,
         }
+        ticket_details_response = {"status": 200, }
         wait_seconds_until_forward = outage_monitor._config.MONITOR_CONFIG["autoresolve"]["last_outage_seconds"]["day"]
         forward_time = wait_seconds_until_forward / 60
         outage_monitor._velocloud_repository.get_links_with_edge_info = AsyncMock(
@@ -6849,6 +6862,7 @@ class TestServiceOutageMonitor:
         outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
         outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=ticket_creation_response)
         outage_monitor._bruin_repository.send_initial_email_milestone_notification = AsyncMock()
+        outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_monitor._outage_repository.is_edge_up = Mock(return_value=False)
         outage_monitor._ha_repository.map_edges_with_ha_info = Mock(
@@ -6881,6 +6895,7 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             target_severity=target_severity,
             check_ticket_tasks=True,
+            ticket_details_response=ticket_details_response,
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         outage_monitor._append_reminder_note.assert_not_awaited()
@@ -7104,6 +7119,7 @@ class TestServiceOutageMonitor:
         outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
         outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=ticket_creation_response)
         outage_monitor._bruin_repository.send_initial_email_milestone_notification = AsyncMock()
+        outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_monitor._outage_repository.is_edge_up = Mock(return_value=False)
         outage_monitor._ha_repository.map_edges_with_ha_info = Mock(
@@ -7138,6 +7154,7 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             target_severity=target_severity,
             check_ticket_tasks=True,
+            ticket_details_response=ticket_details_response,
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         outage_monitor._append_reminder_note.assert_not_awaited()
@@ -7338,6 +7355,7 @@ class TestServiceOutageMonitor:
             "body": ticket_id,
             "status": 471,
         }
+        ticket_details_response = {"status": 200, }
         outage_monitor._velocloud_repository.get_links_with_edge_info = AsyncMock(
             return_value=links_with_edge_info_response
         )
@@ -7347,6 +7365,7 @@ class TestServiceOutageMonitor:
         outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
         outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=ticket_creation_response)
         outage_monitor._bruin_repository.send_initial_email_milestone_notification = AsyncMock()
+        outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_monitor._outage_repository.is_edge_up = Mock(return_value=False)
         outage_monitor._ha_repository.map_edges_with_ha_info = Mock(
@@ -7377,6 +7396,7 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             target_severity=target_severity,
             check_ticket_tasks=True,
+            ticket_details_response=ticket_details_response,
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         outage_monitor._append_reminder_note.assert_not_awaited()
@@ -7398,7 +7418,8 @@ class TestServiceOutageMonitor:
             links_grouped_by_primary_edge_with_ha_info,
         )
         outage_monitor._reopen_outage_ticket.assert_awaited_once_with(
-            ticket_id, links_grouped_by_primary_edge_with_ha_info, cached_edge_primary, outage_type
+            ticket_id, links_grouped_by_primary_edge_with_ha_info,
+            cached_edge_primary, outage_type, ticket_details_response
         )
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
@@ -7569,6 +7590,7 @@ class TestServiceOutageMonitor:
             "body": ticket_id,
             "status": 471,
         }
+        ticket_details_response = {"status": 200, }
         outage_monitor._velocloud_repository.get_links_with_edge_info = AsyncMock(
             return_value=links_with_edge_info_response
         )
@@ -7580,6 +7602,7 @@ class TestServiceOutageMonitor:
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = (
             bruin_generic_200_response
         )
+        outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_monitor._outage_repository.is_edge_up = Mock(return_value=False)
         outage_monitor._ha_repository.map_edges_with_ha_info = Mock(
@@ -7612,6 +7635,7 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             target_severity=target_severity,
             check_ticket_tasks=True,
+            ticket_details_response=ticket_details_response,
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_awaited_once()
         outage_monitor._append_reminder_note.assert_awaited_once()
@@ -7623,7 +7647,8 @@ class TestServiceOutageMonitor:
             links_grouped_by_primary_edge_with_ha_info,
         )
         outage_monitor._reopen_outage_ticket.assert_awaited_once_with(
-            ticket_id, links_grouped_by_primary_edge_with_ha_info, cached_edge_primary, outage_type
+            ticket_id, links_grouped_by_primary_edge_with_ha_info,
+            cached_edge_primary, outage_type, ticket_details_response
         )
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
@@ -7796,6 +7821,7 @@ class TestServiceOutageMonitor:
             "body": ticket_id,
             "status": 472,
         }
+        ticket_details_response = {"status": 200, }
         wait_seconds_until_forward = testconfig.MONITOR_CONFIG["autoresolve"]["last_outage_seconds"]["day"]
         forward_time = wait_seconds_until_forward / 60
         outage_monitor._velocloud_repository.get_links_with_edge_info = AsyncMock(
@@ -7807,6 +7833,7 @@ class TestServiceOutageMonitor:
         outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
         outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=ticket_creation_response)
         outage_monitor._bruin_repository.send_initial_email_milestone_notification = AsyncMock()
+        outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_monitor._outage_repository.is_edge_up = Mock(return_value=False)
         outage_monitor._ha_repository.map_edges_with_ha_info = Mock(
@@ -7838,6 +7865,7 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             target_severity=target_severity,
             check_ticket_tasks=True,
+            ticket_details_response=ticket_details_response,
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         outage_monitor._append_reminder_note.assert_not_awaited()
@@ -7857,6 +7885,7 @@ class TestServiceOutageMonitor:
             cached_edge_primary,
             links_grouped_by_primary_edge_with_ha_info,
             outage_type,
+            ticket_details_response,
             is_reopen_note=True,
         )
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
@@ -8029,6 +8058,7 @@ class TestServiceOutageMonitor:
             "body": ticket_id,
             "status": 472,
         }
+        ticket_details_response = {"status": 200, }
         wait_seconds_until_forward = testconfig.MONITOR_CONFIG["autoresolve"]["last_outage_seconds"]["day"]
         outage_monitor._velocloud_repository.get_links_with_edge_info = AsyncMock(
             return_value=links_with_edge_info_response
@@ -8041,6 +8071,7 @@ class TestServiceOutageMonitor:
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = (
             bruin_generic_200_response
         )
+        outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_monitor._outage_repository.is_edge_up = Mock(return_value=False)
         outage_monitor._ha_repository.map_edges_with_ha_info = Mock(
@@ -8072,6 +8103,7 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             target_severity=target_severity,
             check_ticket_tasks=True,
+            ticket_details_response=ticket_details_response,
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_awaited_once()
         outage_monitor._append_reminder_note.assert_awaited_once()
@@ -8081,6 +8113,7 @@ class TestServiceOutageMonitor:
             cached_edge_primary,
             links_grouped_by_primary_edge_with_ha_info,
             outage_type,
+            ticket_details_response,
             is_reopen_note=True,
         )
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
@@ -8255,6 +8288,7 @@ class TestServiceOutageMonitor:
             "body": ticket_id,
             "status": 473,
         }
+        ticket_details_response = {"status": 200, }
         outage_monitor._velocloud_repository.get_links_with_edge_info = AsyncMock(
             return_value=links_with_edge_info_response
         )
@@ -8264,6 +8298,7 @@ class TestServiceOutageMonitor:
         outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
         outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=ticket_creation_response)
         outage_monitor._bruin_repository.send_initial_email_milestone_notification = AsyncMock()
+        outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_monitor._outage_repository.is_edge_up = Mock(return_value=False)
         outage_monitor._ha_repository.map_edges_with_ha_info = Mock(
@@ -8294,6 +8329,7 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             target_severity=target_severity,
             check_ticket_tasks=False,
+            ticket_details_response=ticket_details_response,
         )
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_not_awaited()
         outage_monitor._append_reminder_note.assert_not_awaited()
@@ -8313,6 +8349,7 @@ class TestServiceOutageMonitor:
             cached_edge_primary,
             links_grouped_by_primary_edge_with_ha_info,
             outage_type,
+            ticket_details_response,
         )
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
@@ -8484,6 +8521,7 @@ class TestServiceOutageMonitor:
             "body": ticket_id,
             "status": 473,
         }
+        ticket_details_response = {"status": 200, }
         outage_monitor._velocloud_repository.get_links_with_edge_info = AsyncMock(
             return_value=links_with_edge_info_response
         )
@@ -8495,6 +8533,7 @@ class TestServiceOutageMonitor:
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = (
             bruin_generic_200_response
         )
+        outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_monitor._outage_repository.is_edge_up = Mock(return_value=False)
         outage_monitor._ha_repository.map_edges_with_ha_info = Mock(
@@ -8527,6 +8566,7 @@ class TestServiceOutageMonitor:
             edge_status=links_grouped_by_primary_edge_with_ha_info,
             target_severity=target_severity,
             check_ticket_tasks=False,
+            ticket_details_response=ticket_details_response,
         )
         outage_monitor._schedule_forward_to_hnoc_queue.assert_not_called()
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.assert_awaited_once()
@@ -8536,6 +8576,7 @@ class TestServiceOutageMonitor:
             cached_edge_primary,
             links_grouped_by_primary_edge_with_ha_info,
             outage_type,
+            ticket_details_response,
         )
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
@@ -8654,6 +8695,7 @@ class TestServiceOutageMonitor:
             "body": "Got internal error from Bruin",
             "status": 500,
         }
+        ticket_details_response = {"status": 200, }
         outage_monitor._bruin_repository.get_ticket_details = AsyncMock()
         outage_monitor._velocloud_repository.get_last_edge_events = AsyncMock(return_value=edge_events_response)
         past_moment_for_events_lookup = CURRENT_DATETIME - timedelta(days=7)
@@ -8661,7 +8703,8 @@ class TestServiceOutageMonitor:
         datetime_mock.now = Mock(return_value=CURRENT_DATETIME)
 
         with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
-            await outage_monitor._append_triage_note(ticket_id, cached_edge, edge_status, outage_type)
+            await outage_monitor._append_triage_note(
+                ticket_id, cached_edge, edge_status, outage_type, ticket_details_response)
 
         outage_monitor._velocloud_repository.get_last_edge_events.assert_awaited_once_with(
             edge_full_id, since=past_moment_for_events_lookup
@@ -8760,7 +8803,6 @@ class TestServiceOutageMonitor:
         triage_note = "This is a triage note"
         outage_monitor._triage_repository.build_triage_note = Mock(return_value=triage_note)
         outage_monitor._velocloud_repository.get_last_edge_events = AsyncMock(return_value=edge_events_response)
-        outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         outage_monitor._bruin_repository.append_triage_note = AsyncMock()
         outage_monitor._notifications_repository.send_slack_message = AsyncMock()
         past_moment_for_events_lookup = CURRENT_DATETIME - timedelta(days=7)
@@ -8769,12 +8811,12 @@ class TestServiceOutageMonitor:
 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "dev"):
             with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
-                await outage_monitor._append_triage_note(ticket_id, cached_edge, edge_status, outage_type)
+                await outage_monitor._append_triage_note(
+                    ticket_id, cached_edge, edge_status, outage_type, ticket_details_response)
 
         outage_monitor._velocloud_repository.get_last_edge_events.assert_awaited_once_with(
             edge_full_id, since=past_moment_for_events_lookup
         )
-        outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         outage_monitor._triage_repository.build_triage_note.assert_called_once_with(
             cached_edge,
             edge_status,
@@ -8875,7 +8917,6 @@ class TestServiceOutageMonitor:
         triage_note = "This is a triage note"
         outage_monitor._triage_repository.build_triage_note = Mock(return_value=triage_note)
         outage_monitor._velocloud_repository.get_last_edge_events = AsyncMock(return_value=edge_events_response)
-        outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         outage_monitor._bruin_repository.append_triage_note = AsyncMock(return_value=503)
         outage_monitor._notifications_repository.send_slack_message = AsyncMock()
         past_moment_for_events_lookup = CURRENT_DATETIME - timedelta(days=7)
@@ -8884,12 +8925,12 @@ class TestServiceOutageMonitor:
 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "dev"):
             with patch.object(outage_monitoring_module, "datetime", new=datetime_mock):
-                await outage_monitor._append_triage_note(ticket_id, cached_edge, edge_status, outage_type)
+                await outage_monitor._append_triage_note(
+                    ticket_id, cached_edge, edge_status, outage_type, ticket_details_response)
 
         outage_monitor._velocloud_repository.get_last_edge_events.assert_awaited_once_with(
             edge_full_id, since=past_moment_for_events_lookup
         )
-        outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         outage_monitor._triage_repository.build_triage_note.assert_called_once_with(
             cached_edge,
             edge_status,
@@ -8989,14 +9030,13 @@ class TestServiceOutageMonitor:
             "body": "Got internal error from Bruin",
             "status": 500,
         }
-        outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_result)
         outage_monitor._bruin_repository.open_ticket = AsyncMock(return_value=reopen_ticket_result)
         outage_monitor._notifications_repository.send_slack_message = AsyncMock()
         outage_monitor._append_triage_note = AsyncMock()
 
-        await outage_monitor._reopen_outage_ticket(ticket_id, edge_status, cached_edge, outage_type)
+        await outage_monitor._reopen_outage_ticket(
+            ticket_id, edge_status, cached_edge, outage_type, ticket_details_result)
 
-        outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         outage_monitor._bruin_repository.open_ticket.assert_awaited_once_with(ticket_id, detail_2_id)
         outage_monitor._append_triage_note.assert_not_awaited()
 
@@ -9090,17 +9130,16 @@ class TestServiceOutageMonitor:
             "body": "ok",
             "status": 200,
         }
-        outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_result)
         outage_monitor._bruin_repository.open_ticket = AsyncMock(return_value=reopen_ticket_result)
         outage_monitor._notifications_repository.send_slack_message = AsyncMock()
         outage_monitor._append_triage_note = AsyncMock()
 
-        await outage_monitor._reopen_outage_ticket(ticket_id, edge_status, cached_edge, outage_type)
+        await outage_monitor._reopen_outage_ticket(
+            ticket_id, edge_status, cached_edge, outage_type, ticket_details_result)
 
-        outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         outage_monitor._bruin_repository.open_ticket.assert_awaited_once_with(ticket_id, detail_2_id)
         outage_monitor._append_triage_note.assert_awaited_once_with(
-            ticket_id, cached_edge, edge_status, outage_type, is_reopen_note=True
+            ticket_id, cached_edge, edge_status, outage_type, ticket_details_result, is_reopen_note=True
         )
         outage_monitor._notifications_repository.send_slack_message.assert_called_once_with(
             f"Task for edge {serial_number_1} of ticket {ticket_id} reopened: https://app.bruin.com/t/{ticket_id}"
@@ -11757,6 +11796,7 @@ class TestServiceOutageMonitor:
             "status": 200,
         }
         severity_change_success = {"body": "Success", "status": 200}
+        ticket_details_response = {"status": 200, }
         target_severity = testconfig.MONITOR_CONFIG["severity_by_outage_type"]["edge_down"]
         outage_monitor._outage_repository.is_faulty_edge = Mock(return_value=True)
         outage_monitor._bruin_repository.get_ticket = AsyncMock(return_value=get_ticket_response)
@@ -11766,7 +11806,9 @@ class TestServiceOutageMonitor:
         outage_monitor._is_ticket_already_in_severity_level = Mock(return_value=False)
 
         # check_ticket_tasks is irrelevant for edge outages, so it's safe to set it to False
-        await outage_monitor._change_ticket_severity(ticket_id, edge_status, target_severity, check_ticket_tasks=False)
+        await outage_monitor._change_ticket_severity(
+            ticket_id, edge_status, target_severity,
+            check_ticket_tasks=False, ticket_details_response=ticket_details_response)
 
         outage_monitor._bruin_repository.get_ticket.assert_awaited_once_with(ticket_id)
         outage_monitor._is_ticket_already_in_severity_level.assert_called_once_with(ticket_info, target_severity)
@@ -11794,6 +11836,7 @@ class TestServiceOutageMonitor:
             "status": 200,
         }
         severity_change_success = {"body": "Failed", "status": 400}
+        ticket_details_response = {"status": 200, }
         target_severity = testconfig.MONITOR_CONFIG["severity_by_outage_type"]["edge_down"]
         outage_monitor._outage_repository.is_faulty_edge = Mock(return_value=True)
         outage_monitor._bruin_repository.get_ticket = AsyncMock(return_value=get_ticket_response)
@@ -11803,7 +11846,9 @@ class TestServiceOutageMonitor:
         outage_monitor._is_ticket_already_in_severity_level = Mock(return_value=False)
 
         # check_ticket_tasks is irrelevant for edge outages, so it's safe to set it to False
-        await outage_monitor._change_ticket_severity(ticket_id, edge_status, target_severity, check_ticket_tasks=False)
+        await outage_monitor._change_ticket_severity(
+            ticket_id, edge_status, target_severity,
+            check_ticket_tasks=False, ticket_details_response=ticket_details_response)
 
         outage_monitor._bruin_repository.get_ticket.assert_awaited_once_with(ticket_id)
         outage_monitor._is_ticket_already_in_severity_level.assert_called_once_with(ticket_info, target_severity)
@@ -11858,6 +11903,7 @@ class TestServiceOutageMonitor:
             "body": ticket_info,
             "status": 200,
         }
+        ticket_details_response = {"status": 200, }
         severity_change_success = {"body": "Success", "status": 200}
         target_severity = testconfig.MONITOR_CONFIG["severity_by_outage_type"]["link_down"]
         outage_monitor._outage_repository.is_faulty_edge = Mock(return_value=False)
@@ -11868,7 +11914,8 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._is_ticket_already_in_severity_level = Mock(return_value=False)
 
-        await outage_monitor._change_ticket_severity(ticket_id, edge_status, target_severity, check_ticket_tasks=False)
+        await outage_monitor._change_ticket_severity(
+            ticket_id, edge_status, target_severity, ticket_details_response, check_ticket_tasks=False)
 
         outage_monitor._bruin_repository.get_ticket.assert_awaited_once_with(ticket_id)
         outage_monitor._is_ticket_already_in_severity_level.assert_called_once_with(ticket_info, target_severity)
@@ -11946,7 +11993,6 @@ class TestServiceOutageMonitor:
         severity_change_success = {"body": "Success", "status": 200}
         outage_monitor._outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_monitor._outage_repository.find_disconnected_links = Mock(return_value=disconnected_links)
-        outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         outage_monitor._bruin_repository.get_ticket = AsyncMock(return_value=get_ticket_response)
         outage_monitor._bruin_repository.change_ticket_severity_for_disconnected_links = AsyncMock(
             return_value=severity_change_success
@@ -11954,9 +12000,9 @@ class TestServiceOutageMonitor:
         outage_monitor._has_ticket_multiple_unresolved_tasks = Mock(return_value=False)
         outage_monitor._is_ticket_already_in_severity_level = Mock(return_value=False)
 
-        await outage_monitor._change_ticket_severity(ticket_id, edge_status, target_severity, check_ticket_tasks=True)
+        await outage_monitor._change_ticket_severity(
+            ticket_id, edge_status, target_severity, ticket_details_response, check_ticket_tasks=True)
 
-        outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         outage_monitor._has_ticket_multiple_unresolved_tasks.assert_called_once_with(ticket_tasks)
         outage_monitor._bruin_repository.get_ticket.assert_awaited_once_with(ticket_id)
         outage_monitor._is_ticket_already_in_severity_level.assert_called_once_with(ticket_info, target_severity)
@@ -12027,7 +12073,6 @@ class TestServiceOutageMonitor:
         severity_change_success = {"body": "Success", "status": 200}
         outage_monitor._outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_monitor._outage_repository.find_disconnected_links = Mock(return_value=disconnected_links)
-        outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         outage_monitor._bruin_repository.get_ticket = AsyncMock()
         outage_monitor._bruin_repository.change_ticket_severity_for_disconnected_links = AsyncMock(
             return_value=severity_change_success
@@ -12035,9 +12080,9 @@ class TestServiceOutageMonitor:
         outage_monitor._has_ticket_multiple_unresolved_tasks = Mock(return_value=True)
         outage_monitor._is_ticket_already_in_severity_level = Mock()
 
-        await outage_monitor._change_ticket_severity(ticket_id, edge_status, target_severity, check_ticket_tasks=True)
+        await outage_monitor._change_ticket_severity(
+            ticket_id, edge_status, target_severity, ticket_details_response, check_ticket_tasks=True)
 
-        outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         outage_monitor._has_ticket_multiple_unresolved_tasks.assert_called_once_with(ticket_tasks)
         outage_monitor._bruin_repository.get_ticket.assert_not_awaited()
         outage_monitor._is_ticket_already_in_severity_level.assert_not_called()
@@ -12089,7 +12134,6 @@ class TestServiceOutageMonitor:
         severity_change_success = {"body": "Success", "status": 200}
         outage_monitor._outage_repository.is_faulty_edge = Mock(return_value=False)
         outage_monitor._outage_repository.find_disconnected_links = Mock(return_value=disconnected_links)
-        outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         outage_monitor._bruin_repository.get_ticket = AsyncMock()
         outage_monitor._bruin_repository.change_ticket_severity_for_disconnected_links = AsyncMock(
             return_value=severity_change_success
@@ -12097,9 +12141,9 @@ class TestServiceOutageMonitor:
         outage_monitor._has_ticket_multiple_unresolved_tasks = Mock(return_value=True)
         outage_monitor._is_ticket_already_in_severity_level = Mock()
 
-        await outage_monitor._change_ticket_severity(ticket_id, edge_status, target_severity, check_ticket_tasks=True)
+        await outage_monitor._change_ticket_severity(
+            ticket_id, edge_status, target_severity, ticket_details_response, check_ticket_tasks=True)
 
-        outage_monitor._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         outage_monitor._has_ticket_multiple_unresolved_tasks.assert_not_called()
         outage_monitor._bruin_repository.get_ticket.assert_not_awaited()
         outage_monitor._is_ticket_already_in_severity_level.assert_not_called()
@@ -12122,12 +12166,14 @@ class TestServiceOutageMonitor:
             "body": "Got internal error from Bruin",
             "status": 500,
         }
+        ticket_details_response = {"status": 200, }
         outage_monitor._outage_repository.is_faulty_edge = Mock(return_value=True)
         outage_monitor._bruin_repository.get_ticket = AsyncMock(return_value=get_ticket_response)
         outage_monitor._bruin_repository.change_ticket_severity_for_offline_edge = AsyncMock()
         outage_monitor._is_ticket_already_in_severity_level = Mock()
 
-        await outage_monitor._change_ticket_severity(ticket_id, edge_status, target_severity, check_ticket_tasks=False)
+        await outage_monitor._change_ticket_severity(
+            ticket_id, edge_status, target_severity, ticket_details_response, check_ticket_tasks=False)
 
         outage_monitor._bruin_repository.get_ticket.assert_awaited_once_with(ticket_id)
         outage_monitor._is_ticket_already_in_severity_level.assert_not_called()
@@ -12154,13 +12200,15 @@ class TestServiceOutageMonitor:
             "body": ticket_info,
             "status": 200,
         }
+        ticket_details_response = {"status": 200, }
         target_severity = testconfig.MONITOR_CONFIG["severity_by_outage_type"]["edge_down"]
         outage_monitor._outage_repository.is_faulty_edge = Mock(return_value=True)
         outage_monitor._bruin_repository.get_ticket = AsyncMock(return_value=get_ticket_response)
         outage_monitor._bruin_repository.change_ticket_severity_for_offline_edge = AsyncMock()
         outage_monitor._is_ticket_already_in_severity_level = Mock(return_value=True)
 
-        await outage_monitor._change_ticket_severity(ticket_id, edge_status, target_severity, check_ticket_tasks=False)
+        await outage_monitor._change_ticket_severity(
+            ticket_id, edge_status, target_severity, ticket_details_response, check_ticket_tasks=False)
 
         outage_monitor._bruin_repository.get_ticket.assert_awaited_once_with(ticket_id)
         outage_monitor._is_ticket_already_in_severity_level.assert_called_once_with(ticket_info, target_severity)
@@ -12833,7 +12881,7 @@ class TestServiceOutageMonitor:
         outage_monitor._bruin_repository.get_ticket_detail_ids_by_ticket_detail_interfaces = AsyncMock(
             return_value=get_ticket_detail_ids_by_ticket_detail_interfaces_response)
 
-        result = (await outage_monitor._get_resolved_detailIds_service_numbers_and_interfaces(
+        result = (await outage_monitor._get_detailIds_service_numbers_and_interfaces_mapping(
             outage_ticket_1_id, outage_ticket_detail_1_id, edge["status"]["links"],
             ticketDetails))
 

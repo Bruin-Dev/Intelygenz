@@ -42,6 +42,7 @@ ENVIRONMENT_NAME = getpass.getuser() + "-local"
 CURRENT_ENVIRONMENT = "local"
 TIMEZONE = parameters["common"]["timezone"]
 IPA_SYSTEM_USERNAME_IN_BRUIN = parameters["common"]["bruin-ipa-system-username"]
+TICKET_TASK_WORKER_QUEUE_ID = parameters["pro"]["ticket-task-worker-queue-id"]
 UMBRELLA_HOSTS = json.dumps(json.loads(parameters["common"]["umbrella-hosts"]))
 AUTORESOLVE_DAY_START_HOUR = parameters["common"]["autoresolve-day-start-hour"]
 AUTORESOLVE_DAY_END_HOUR = parameters["common"]["autoresolve-day-end-hour"]
@@ -871,6 +872,7 @@ for host in SERVICE_OUTAGE__MONITOR__MONITORED_VELOCLOUD_HOSTS:
         f"METRICS_RELEVANT_CLIENTS={METRICS_RELEVANT_CLIENTS}",
         f"MONITORED_PRODUCT_CATEGORY={SERVICE_OUTAGE__MONITORED_PRODUCT_CATEGORY}",
         f"IPA_SYSTEM_USERNAME_IN_BRUIN={IPA_SYSTEM_USERNAME_IN_BRUIN}",
+        f"TICKET_TASK_WORKER_QUEUE_ID={TICKET_TASK_WORKER_QUEUE_ID}",
         f"LINK_LABELS_BLACKLISTED_FROM_ASR_FORWARDS={LINK_LABELS_BLACKLISTED_FROM_ASR_FORWARDS}",
         f"LINK_LABELS_BLACKLISTED_FROM_HNOC_FORWARDS={LINK_LABELS_BLACKLISTED_FROM_HNOC_FORWARDS}",
         f"DIGI_HEADERS={DIGI_HEADERS}",

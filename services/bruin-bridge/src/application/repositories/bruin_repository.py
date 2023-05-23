@@ -283,46 +283,48 @@ class BruinRepository:
             service_number = filters["service_number"]
             get_work_queues_filters["ServiceNumber"] = service_number
             put_work_queues_filters["serviceNumber"] = service_number
-        possible_work_queues_response = await self._bruin_client.get_possible_detail_next_result(
-            ticket_id, get_work_queues_filters
-        )
-        possible_work_queues_response_body = possible_work_queues_response["body"]
-        possible_work_queues_response_status = possible_work_queues_response["status"]
-        if possible_work_queues_response_status not in range(200, 300):
-            return {
-                "body": f"Error while claiming possible work queues for ticket {ticket_id} and filters "
-                f"{get_work_queues_filters}: {possible_work_queues_response_body}",
-                "status": possible_work_queues_response_status,
-            }
 
-        work_queues = possible_work_queues_response_body["nextResults"]
-        queue_name = filters["queue_name"]
-        current_task_name = possible_work_queues_response_body["currentTaskName"]
-        if current_task_name is not None and current_task_name.strip() == queue_name:
-            return {
-                "body": f"Ticket {ticket_id} is already in the queue {queue_name}",
-                "status": 400,
-            }
-        if not work_queues:
-            return {
-                "body": f"No work queues were found for ticket {ticket_id} and filters {get_work_queues_filters}",
-                "status": 404,
-            }
+        work_queue_id = filters.get("work_queue_id", None)
+        if work_queue_id is None:
+            possible_work_queues_response = await self._bruin_client.get_possible_detail_next_result(
+                ticket_id, get_work_queues_filters
+            )
+            possible_work_queues_response_body = possible_work_queues_response["body"]
+            possible_work_queues_response_status = possible_work_queues_response["status"]
+            if possible_work_queues_response_status not in range(200, 300):
+                return {
+                    "body": f"Error while claiming possible work queues for ticket {ticket_id} and filters "
+                    f"{get_work_queues_filters}: {possible_work_queues_response_body}",
+                    "status": possible_work_queues_response_status,
+                }
 
-        work_queue_id = None
-        for possible_work_queue in work_queues:
-            result_name = possible_work_queue["resultName"]
-            if result_name is not None and result_name.strip() == queue_name:
-                work_queue_id = possible_work_queue["resultTypeId"]
-                break
+            work_queues = possible_work_queues_response_body["nextResults"]
+            queue_name = filters["queue_name"]
+            current_task_name = possible_work_queues_response_body["currentTaskName"]
+            if current_task_name is not None and current_task_name.strip() == queue_name:
+                return {
+                    "body": f"Ticket {ticket_id} is already in the queue {queue_name}",
+                    "status": 400,
+                }
+            if not work_queues:
+                return {
+                    "body": f"No work queues were found for ticket {ticket_id} and filters {get_work_queues_filters}",
+                    "status": 404,
+                }
 
-        if not work_queue_id:
-            result = {
-                "body": f"No work queue with name {queue_name} was found using ticket ID {ticket_id} and "
-                f"filters {get_work_queues_filters}",
-                "status": 404,
-            }
-            return result
+            for possible_work_queue in work_queues:
+                result_name = possible_work_queue["resultName"]
+                if result_name is not None and result_name.strip() == queue_name:
+                    work_queue_id = possible_work_queue["resultTypeId"]
+                    break
+
+            if not work_queue_id:
+                result = {
+                    "body": f"No work queue with name {queue_name} was found using ticket ID {ticket_id} and "
+                    f"filters {get_work_queues_filters}",
+                    "status": 404,
+                }
+                return result
 
         put_work_queue_payload = {"details": [put_work_queues_filters], "notes": [], "resultTypeId": work_queue_id}
         return await self._bruin_client.change_detail_work_queue(ticket_id, put_work_queue_payload)

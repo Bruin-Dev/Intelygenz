@@ -1615,6 +1615,46 @@ class TestBruinRepository:
         assert result == change_work_queue_response
 
     @pytest.mark.asyncio
+    async def change_detail_work_queue_with_work_queue_id_test(self):
+        ticket_id = 4503440
+        detail_id = 4806634
+        service_number = "VC05400002265"
+
+        work_queue_id = 139
+        filters = {
+            "service_number": service_number,
+            "detail_id": detail_id,
+            "queue_name": "Repair Completed",
+            "work_queue_id": work_queue_id,
+        }
+
+        change_work_queue_payload = {
+            "details": [
+                {
+                    "detailId": detail_id,
+                    "serviceNumber": service_number,
+                }
+            ],
+            "notes": [],
+            "resultTypeId": work_queue_id,
+        }
+        change_work_queue_response = {"body": {"message": "success"}, "status": 200}
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.get_possible_detail_next_result = AsyncMock()
+        bruin_client.change_detail_work_queue = AsyncMock(return_value=change_work_queue_response)
+
+        bruin_repository = BruinRepository(config, bruin_client)
+
+        result = await bruin_repository.change_detail_work_queue(ticket_id, filters)
+
+        bruin_client.get_possible_detail_next_result.assert_not_awaited()
+        bruin_client.change_detail_work_queue.assert_awaited_once_with(ticket_id, change_work_queue_payload)
+        assert result == change_work_queue_response
+
+    @pytest.mark.asyncio
     async def post_multiple_ticket_notes_with_response_not_having_2xx_code_test(self):
         ticket_id = 12345
         notes = [

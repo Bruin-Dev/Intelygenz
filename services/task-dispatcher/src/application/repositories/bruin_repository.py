@@ -14,7 +14,9 @@ class BruinRepository:
         self._config = config
         self._notifications_repository = notifications_repository
 
-    async def change_detail_work_queue(self, target_queue: str, ticket_id: int, detail_id: int, serial_number: str):
+    async def change_detail_work_queue(
+            self, target_queue: str, ticket_id: int, detail_id: int,
+            serial_number: str, work_queue_id: int = None):
         err_msg = None
 
         request = {
@@ -31,17 +33,20 @@ class BruinRepository:
         if serial_number:
             request["body"]["service_number"] = serial_number
 
+        if work_queue_id:
+            request["body"]["work_queue_id"] = work_queue_id
+
         try:
             logger.info(
                 f"Changing work queue for ticket {ticket_id}, detail {detail_id} and serial number {serial_number} "
-                f"to the {target_queue} queue..."
+                f" and work queue Id {work_queue_id} to the {target_queue} queue..."
             )
             response = await self._nats_client.request("bruin.ticket.change.work", to_json_bytes(request), timeout=150)
             response = json.loads(response.data)
         except Exception as e:
             err_msg = (
                 f"An error occurred when changing work queue for ticket {ticket_id}, detail {detail_id} "
-                f"and serial number {serial_number} -> {e}"
+                f"and serial number {serial_number} and work queue Id {work_queue_id} -> {e}"
             )
             response = nats_error_response
         else:
