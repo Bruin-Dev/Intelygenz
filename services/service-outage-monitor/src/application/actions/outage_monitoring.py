@@ -708,7 +708,7 @@ class OutageMonitor:
         self,
         ticket_id,
         serial_number,
-        faulty_link_types,
+        faulty_link_interfaces,
         ticket_details_response,
     ):
         if ticket_details_response["status"] not in range(200, 300):
@@ -718,7 +718,7 @@ class OutageMonitor:
             )
             return None
 
-        if not faulty_link_types:
+        if not faulty_link_interfaces:
             logger.info(f'No faulty links found for ticket {ticket_id}. Skipping get open line tasks...')
             return None
 
@@ -742,11 +742,11 @@ class OutageMonitor:
 
         detailIds_service_numbers_and_interfaces = (
             await self._get_detailIds_service_numbers_and_interfaces_mapping(
-                ticket_id, ticket_detail_for_edge_id, faulty_link_types, details_from_ticket)
+                ticket_id, ticket_detail_for_edge_id, faulty_link_interfaces, details_from_ticket)
         )
 
         logger.info(
-            f"Details for faulty interfaces {faulty_link_types} for ticket {ticket_id} and"
+            f"Details for faulty interfaces {faulty_link_interfaces} for ticket {ticket_id} and"
             f" detailsId {ticket_detail_for_edge_id} -> {detailIds_service_numbers_and_interfaces}."
         )
 
@@ -1739,7 +1739,7 @@ class OutageMonitor:
                 open_ticket_line_details = await self._get_open_ticket_line_details(
                     ticket_id,
                     serial_number,
-                    faulty_link_types,
+                    faulty_link_interfaces,
                     ticket_details_response,
                 )
 
@@ -1837,7 +1837,7 @@ class OutageMonitor:
                 open_ticket_line_details = await self._get_open_ticket_line_details(
                     ticket_id,
                     serial_number,
-                    faulty_link_types,
+                    faulty_link_interfaces,
                     ticket_details_response,
                 )
                 await self._forward_ticket_tasks_to_ipa_queue(open_ticket_line_details, serial_number, ticket_id)
@@ -1922,7 +1922,7 @@ class OutageMonitor:
                 open_ticket_line_details = await self._get_open_ticket_line_details(
                     ticket_id,
                     serial_number,
-                    faulty_link_types,
+                    faulty_link_interfaces,
                     ticket_details_response,
                 )
                 await self._forward_ticket_tasks_to_ipa_queue(open_ticket_line_details, serial_number, ticket_id)
@@ -2023,7 +2023,7 @@ class OutageMonitor:
                 open_ticket_line_details = await self._get_open_ticket_line_details(
                     ticket_id,
                     serial_number,
-                    faulty_link_types,
+                    faulty_link_interfaces,
                     ticket_details_response,
                 )
                 await self._forward_ticket_tasks_to_ipa_queue(open_ticket_line_details, serial_number, ticket_id)
@@ -2120,7 +2120,7 @@ class OutageMonitor:
                 open_ticket_line_details = await self._get_open_ticket_line_details(
                     ticket_id,
                     serial_number,
-                    faulty_link_types,
+                    faulty_link_interfaces,
                     ticket_details_response,
                 )
                 await self._forward_ticket_tasks_to_ipa_queue(open_ticket_line_details, serial_number, ticket_id)

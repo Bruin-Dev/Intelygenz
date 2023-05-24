@@ -5984,8 +5984,8 @@ class TestServiceOutageMonitor:
         has_faulty_digi_link = False
         has_faulty_byob_link = False
         interface = "REX"
-        faulty_link_types = [interface]
-        faulty_link_interfaces = []
+        faulty_link_types = []
+        faulty_link_interfaces = [interface]
         edge_primary_serial = "VC1234567"
         edge_standby_serial = "VC5678901"
         edge_primary_initial_state = "OFFLINE"
@@ -6027,7 +6027,7 @@ class TestServiceOutageMonitor:
         edge_link_1_info = {
             # Some fields omitted for simplicity
             "interface": interface,
-            "linkState": "STABLE",
+            "linkState": "DISCONNECTED",
             "linkId": 5293,
         }
         edge_primary_info = {
@@ -6266,12 +6266,12 @@ class TestServiceOutageMonitor:
         outage_monitor._bruin_repository.get_ticket_detail_ids_by_ticket_detail_interfaces.assert_awaited_once_with(
             ticket_id,
             outage_ticket_detail_1_id,
-            faulty_link_types,
+            faulty_link_interfaces,
         )
         outage_monitor._get_open_ticket_line_details.assert_awaited_once_with(
             ticket_id,
             edge_primary_serial,
-            faulty_link_types,
+            faulty_link_interfaces,
             ticket_details_response,
         )
         outage_monitor._task_dispatcher_client.schedule_task.assert_called_once()
