@@ -737,7 +737,7 @@ class OutageMonitor:
         ]
 
         if not details_for_lines:
-            print(f'No lines found for ticket {ticket_id}. Skipping get open line tasks...')
+            logger.info(f'No lines found for ticket {ticket_id}. Skipping get open line tasks...')
             return None
 
         detailIds_service_numbers_and_interfaces = (
@@ -1735,21 +1735,20 @@ class OutageMonitor:
                 await self._notifications_repository.send_slack_message(slack_message)
 
                 ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
-                print("hello")
+
                 open_ticket_line_details = await self._get_open_ticket_line_details(
                     ticket_id,
                     serial_number,
                     faulty_link_types,
                     ticket_details_response,
                 )
-                print("hello1")
-                print(open_ticket_line_details)
+
                 await self._forward_ticket_tasks_to_ipa_queue(open_ticket_line_details, serial_number, ticket_id)
-                print("hello2")
+
                 await self._append_triage_note(
                     ticket_id, cached_edge, edge_status, outage_type, ticket_details_response
                 )
-                print("hello3")
+
                 await self._change_ticket_severity(
                     ticket_id=ticket_id,
                     edge_status=edge_status,
