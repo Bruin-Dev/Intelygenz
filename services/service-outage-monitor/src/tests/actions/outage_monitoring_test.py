@@ -4553,7 +4553,7 @@ class TestServiceOutageMonitor:
             }
         }
         task_type = TaskTypes.TICKET_FORWARDS
-        task_key = f"{outage_ticket_1_id}-{serial_number_1}-{ForwardQueues.HNOC.name}"
+        task_key = f"{outage_ticket_1_id}-{serial_number_1}-{outage_ticket_detail_2_id}-{ForwardQueues.WORKER.name}"
 
         outage_monitor._bruin_repository.get_open_outage_tickets = AsyncMock(return_value=outage_ticket_response)
         outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
@@ -4975,7 +4975,7 @@ class TestServiceOutageMonitor:
             }
         }
         task_type = TaskTypes.TICKET_FORWARDS
-        task_key = f"{outage_ticket_1_id}-{serial_number_1}-{ForwardQueues.HNOC.name}"
+        task_key = f"{outage_ticket_1_id}-{serial_number_1}-{outage_ticket_detail_2_id}-{ForwardQueues.WORKER.name}"
 
         outage_monitor._bruin_repository.get_open_outage_tickets = AsyncMock(return_value=outage_ticket_response)
         outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
@@ -5983,7 +5983,8 @@ class TestServiceOutageMonitor:
         forward_time = outage_monitor._config.MONITOR_CONFIG["jobs_intervals"]["forward_to_hnoc_edge_down"]
         has_faulty_digi_link = False
         has_faulty_byob_link = False
-        faulty_link_types = []
+        interface = "REX"
+        faulty_link_types = [interface]
         faulty_link_interfaces = []
         edge_primary_serial = "VC1234567"
         edge_standby_serial = "VC5678901"
@@ -6000,6 +6001,7 @@ class TestServiceOutageMonitor:
         links_configuration = []
         client_id = 9994
         client_name = "METTEL/NEW YORK"
+        serial_number_2 = "VC9999999"
         bruin_client_info = {
             "client_id": client_id,
             "client_name": client_name,
@@ -6024,7 +6026,7 @@ class TestServiceOutageMonitor:
         }
         edge_link_1_info = {
             # Some fields omitted for simplicity
-            "interface": "REX",
+            "interface": interface,
             "linkState": "STABLE",
             "linkId": 5293,
         }
@@ -6142,7 +6144,46 @@ class TestServiceOutageMonitor:
             "body": ticket_id,
             "status": 200,
         }
-        ticket_details_response = {"status": 200, }
+
+        outage_ticket_1_id = 1234
+        outage_ticket_detail_1_id = 2746937
+        outage_ticket_detail_2_id = 2746938
+        outage_ticket_detail_1 = {
+            "detailID": outage_ticket_detail_1_id,
+            "detailValue": edge_primary_serial,
+            "detailStatus": "I",
+            "currentTaskName": "test",
+            "assignedToName": "0",
+        }
+        outage_ticket_detail_2 = {
+            "detailID": outage_ticket_detail_2_id,
+            "detailValue": serial_number_2,
+            "detailStatus": "I",
+            "currentTaskName": "IPA Investigate",
+            "assignedToName": "0",
+        }
+        ticketDetails = [
+            outage_ticket_detail_1,
+            outage_ticket_detail_2,
+        ]
+        get_ticket_detail_ids_by_ticket_detail_interfaces_response = {
+            "status": 200,
+            "body": {
+                "results": [
+                    {
+                        "ticketDetailId": outage_ticket_detail_2_id,
+                        "interface": interface,
+                    }
+                ]
+            }
+        }
+        ticket_details_response = {
+            "body": {
+                "ticketDetails": ticketDetails,
+                "ticketNotes": [],
+            },
+            "status": 200,
+        }
         outage_monitor._velocloud_repository.get_links_with_edge_info = AsyncMock(
             return_value=links_with_edge_info_response
         )
@@ -6153,6 +6194,8 @@ class TestServiceOutageMonitor:
         outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=ticket_creation_response)
         outage_monitor._bruin_repository.send_initial_email_milestone_notification = AsyncMock()
         outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
+        outage_monitor._bruin_repository.get_ticket_detail_ids_by_ticket_detail_interfaces = AsyncMock(
+            return_value=get_ticket_detail_ids_by_ticket_detail_interfaces_response)
         outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_monitor._outage_repository.is_edge_up = Mock(return_value=False)
         outage_monitor._notifications_repository.send_slack_message = AsyncMock()
@@ -6173,6 +6216,7 @@ class TestServiceOutageMonitor:
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
         outage_monitor._schedule_forward_to_hnoc_queue = Mock()
+        outage_monitor._task_dispatcher_client.schedule_task = Mock()
 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
@@ -6206,6 +6250,24 @@ class TestServiceOutageMonitor:
             has_faulty_byob_link,
             faulty_link_types,
         )
+        outage_monitor._schedule_forward_to_work_queue.assert_called_once_with(
+            forward_time,
+            ticket_id,
+            edge_primary_serial,
+            client_name,
+            outage_type,
+            target_severity,
+            has_faulty_digi_link,
+            has_faulty_byob_link,
+            faulty_link_types,
+            ticket_details_response,
+        )
+        outage_monitor._bruin_repository.get_ticket_detail_ids_by_ticket_detail_interfaces.assert_awaited_once_with(
+            ticket_id,
+            outage_ticket_detail_1_id,
+            faulty_link_types,
+        )
+        outage_monitor._task_dispatcher_client.schedule_task.assert_called_once()
         outage_monitor._check_for_digi_reboot.assert_awaited_once_with(
             ticket_id,
             logical_id_list,

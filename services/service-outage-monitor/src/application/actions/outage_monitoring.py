@@ -522,6 +522,16 @@ class OutageMonitor:
                     f"for auto-resolved task of ticket {outage_ticket_id} for edge {serial_number}"
                 )
 
+            for detailId_service_number_and_interface in detailIds_service_numbers_and_interfaces:
+                detail_id = detailId_service_number_and_interface['detailId']
+                task_key = f"{outage_ticket_id}-{serial_number}-{detail_id}-{ForwardQueues.WORKER.name}"
+
+                if self._task_dispatcher_client.clear_task(task_type, task_key):
+                    logger.info(
+                        f"Removed scheduled task to forward to {ForwardQueues.WORKER.value} for auto-resolved "
+                        f"task of ticket {outage_ticket_id} for detail {detail_id} for edge {serial_number}"
+                    )
+
     def _was_ticket_created_by_automation_engine(self, ticket: dict) -> bool:
         return ticket["createdBy"] == self._config.IPA_SYSTEM_USERNAME_IN_BRUIN
 
@@ -723,15 +733,27 @@ class OutageMonitor:
             details_from_ticket,
             lambda detail: detail["detailValue"] == serial_number,
         )
-        ticket_detail_id = detail_for_edge["detailID"]
+
+        ticket_detail_for_edge_id = detail_for_edge["detailID"]
+
+        details_for_lines = [
+            ticket_detail
+            for ticket_detail in details_from_ticket
+            if ticket_detail["detailID"] != ticket_detail_for_edge_id
+        ]
+
+        if not details_for_lines:
+            print(f'No lines found for ticket {ticket_id}. Skipping forward to work queue...')
+            return
+
         detailIds_service_numbers_and_interfaces = (
             await self._get_detailIds_service_numbers_and_interfaces_mapping(
-                ticket_id, ticket_detail_id, faulty_link_types, details_from_ticket)
+                ticket_id, ticket_detail_for_edge_id, faulty_link_types, details_from_ticket)
         )
 
         logger.info(
             f"Details for faulty interfaces {faulty_link_types} for ticket {ticket_id} and"
-            f" detailsId {ticket_detail_id} -> {detailIds_service_numbers_and_interfaces}."
+            f" detailsId {ticket_detail_for_edge_id} -> {detailIds_service_numbers_and_interfaces}."
         )
 
         open_ticket_details_in_ipa_queue = [
@@ -742,12 +764,12 @@ class OutageMonitor:
                 for detailId_service_number_interface in detailIds_service_numbers_and_interfaces
                 if detailId_service_number_interface["detailId"] == ticket_detail["detailID"]])
             and self._is_ticket_task_in_ipa_queue(ticket_detail)
-            and ticket_detail['status'] != 'R'
+            and not self._is_detail_resolved(ticket_detail)
         ]
 
         logger.info(
             f"Open ticket details in ipa queue {faulty_link_types} for ticket {ticket_id} and"
-            f" detailsId {ticket_detail_id} -> {open_ticket_details_in_ipa_queue}."
+            f" detailsId {ticket_detail_for_edge_id} -> {open_ticket_details_in_ipa_queue}."
         )
 
         # if there's an open detail for any of the faulty links, schedule forward to work queue
