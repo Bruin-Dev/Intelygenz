@@ -1030,6 +1030,50 @@ class TestBruinRepository:
         assert result == response
 
     @pytest.mark.asyncio
+    async def change_detail_work_queue_by_work_queue_id_test(self):
+        ticket_id = 12345
+        detail_id = 67890
+        work_queue_id = 123
+        task_result = "IPA Investigate"
+        service_number = "VC1234567"
+
+        request = {
+            "request_id": uuid_,
+            "body": {
+                "ticket_id": ticket_id,
+                "queue_name": task_result,
+                "service_number": service_number,
+                "detail_id": detail_id,
+                "work_queue_id": work_queue_id,
+            },
+        }
+        response = {
+            "request_id": uuid_,
+            "body": "ok",
+            "status": 200,
+        }
+
+        response_msg = Mock(spec_set=Msg)
+        response_msg.data = to_json_bytes(response)
+
+        config = testconfig
+        notifications_repository = Mock()
+
+        nats_client = Mock()
+        nats_client.request = AsyncMock(return_value=response_msg)
+
+        bruin_repository = BruinRepository(nats_client, config, notifications_repository)
+
+        with uuid_mock:
+            result = await bruin_repository.change_detail_work_queue(
+                serial_number=service_number, ticket_id=ticket_id, detail_id=detail_id,
+                task_result=task_result, work_queue_id=work_queue_id
+            )
+
+        nats_client.request.assert_awaited_once_with("bruin.ticket.change.work", to_json_bytes(request), timeout=150)
+        assert result == response
+
+    @pytest.mark.asyncio
     async def get_ticket_overview_test(self):
         ticket_id = 12345
 

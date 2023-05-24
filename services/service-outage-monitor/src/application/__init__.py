@@ -15,6 +15,7 @@ class ForwardQueues(Enum):
     ASR = "ASR Investigate"
     HNOC = "HNOC Investigate"
     WIRELESS = "Wireless Repair Intervention Needed"
+    IPA = "IPA Investigate"
     WORKER = "Dedicated Worker Queue"
 
 

@@ -6145,7 +6145,6 @@ class TestServiceOutageMonitor:
             "status": 200,
         }
 
-        outage_ticket_1_id = 1234
         outage_ticket_detail_1_id = 2746937
         outage_ticket_detail_2_id = 2746938
         outage_ticket_detail_1 = {
@@ -6184,6 +6183,7 @@ class TestServiceOutageMonitor:
             },
             "status": 200,
         }
+        open_ticket_line_details = [outage_ticket_detail_2]
         outage_monitor._velocloud_repository.get_links_with_edge_info = AsyncMock(
             return_value=links_with_edge_info_response
         )
@@ -6261,11 +6261,18 @@ class TestServiceOutageMonitor:
             has_faulty_byob_link,
             faulty_link_types,
             ticket_details_response,
+            open_ticket_line_details,
         )
         outage_monitor._bruin_repository.get_ticket_detail_ids_by_ticket_detail_interfaces.assert_awaited_once_with(
             ticket_id,
             outage_ticket_detail_1_id,
             faulty_link_types,
+        )
+        outage_monitor._get_open_ticket_line_details.assert_awaited_once_with(
+            ticket_id,
+            edge_primary_serial,
+            faulty_link_types,
+            ticket_details_response,
         )
         outage_monitor._task_dispatcher_client.schedule_task.assert_called_once()
         outage_monitor._check_for_digi_reboot.assert_awaited_once_with(
@@ -6711,6 +6718,7 @@ class TestServiceOutageMonitor:
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
         outage_monitor._schedule_forward_to_hnoc_queue = Mock()
+        outage_monitor._get_open_ticket_line_details = AsyncMock(return_value=None)
 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)

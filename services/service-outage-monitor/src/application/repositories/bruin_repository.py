@@ -386,7 +386,8 @@ class BruinRepository:
         return response
 
     async def change_detail_work_queue(
-        self, ticket_id: int, task_result: str, *, serial_number: str = None, detail_id: int = None
+        self, ticket_id: int, task_result: str, *, serial_number: str = None,
+        detail_id: int = None, work_queue_id: int = None
     ):
         err_msg = None
 
@@ -398,10 +399,12 @@ class BruinRepository:
             request["body"]["service_number"] = serial_number
         if detail_id:
             request["body"]["detail_id"] = detail_id
+        if work_queue_id:
+            request["body"]["work_queue_id"] = work_queue_id
         try:
             logger.info(
                 f"Changing task result for ticket {ticket_id} and detail id {detail_id} for device "
-                f"{serial_number} to {task_result}..."
+                f"{serial_number} to {task_result} and work queue Id {work_queue_id}..."
             )
             response = await self._nats_client.request("bruin.ticket.change.work", to_json_bytes(request), timeout=150)
             response = json.loads(response.data)

@@ -45,6 +45,7 @@ else:
     IPA_SYSTEM_USERNAME_IN_BRUIN = os.environ["IPA_SYSTEM_USERNAME_IN_BRUIN"]
     DIGI_HEADERS = json.loads(os.environ["DIGI_HEADERS"])
     TICKET_TASK_WORKER_QUEUE_ID = os.environ["TICKET_TASK_WORKER_QUEUE_ID"]
+    TICKET_TASK_IPA_QUEUE_ID = os.environ["TICKET_TASK_IPA_QUEUE_ID"]
 
     MONITOR_CONFIG = {
         "multiplier": 5,
