@@ -1514,6 +1514,7 @@ class TestServiceOutageMonitor:
         }
         logical_id_list = [{"interface_name": "REX", "logical_id": "123"}]
         links_configuration = []
+        site_details = {"tzOffset": -4}
         cached_edge_1 = {
             "edge": edge_1_full_id,
             "last_contact": "2020-08-17T02:23:59",
@@ -1522,6 +1523,7 @@ class TestServiceOutageMonitor:
             "bruin_client_info": bruin_client_info,
             "logical_ids": logical_id_list,
             "links_configuration": links_configuration,
+            "site_details": site_details,
         }
         cached_edge_2 = {
             "edge": edge_2_full_id,
@@ -1531,6 +1533,7 @@ class TestServiceOutageMonitor:
             "bruin_client_info": bruin_client_info,
             "logical_ids": logical_id_list,
             "links_configuration": links_configuration,
+            "site_details": site_details,
         }
         customer_cache_for_velocloud_host = [
             cached_edge_1,
@@ -6006,6 +6009,7 @@ class TestServiceOutageMonitor:
             "client_id": client_id,
             "client_name": client_name,
         }
+        site_details = {"tzOffset": -4}
         cached_edge_primary = {
             "edge": edge_full_id,
             "last_contact": "2020-08-17T02:23:59",
@@ -6014,6 +6018,7 @@ class TestServiceOutageMonitor:
             "bruin_client_info": bruin_client_info,
             "logical_ids": logical_id_list,
             "links_configuration": links_configuration,
+            "site_details": site_details,
         }
         cached_edge_standby = {
             "edge": edge_full_id,
@@ -6023,6 +6028,7 @@ class TestServiceOutageMonitor:
             "bruin_client_info": bruin_client_info,
             "logical_ids": logical_id_list,
             "links_configuration": links_configuration,
+            "site_details": site_details,
         }
         edge_link_1_info = {
             # Some fields omitted for simplicity
@@ -6217,6 +6223,7 @@ class TestServiceOutageMonitor:
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
         outage_monitor._schedule_forward_to_hnoc_queue = Mock()
         outage_monitor._task_dispatcher_client.schedule_task = Mock()
+        outage_monitor._get_worker_queue_forward_time_by_outage_type = Mock(return_value=forward_time)
 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
@@ -6782,6 +6789,7 @@ class TestServiceOutageMonitor:
             "client_id": client_id,
             "client_name": client_name,
         }
+        site_details = {"tzOffset": -4}
         cached_edge_primary = {
             "edge": edge_full_id,
             "last_contact": "2020-08-17T02:23:59",
@@ -6790,6 +6798,7 @@ class TestServiceOutageMonitor:
             "bruin_client_info": bruin_client_info,
             "logical_ids": logical_id_list,
             "links_configuration": links_configuration,
+            "site_details": site_details,
         }
         cached_edge_standby = {
             "edge": edge_full_id,
@@ -6799,6 +6808,7 @@ class TestServiceOutageMonitor:
             "bruin_client_info": bruin_client_info,
             "logical_ids": logical_id_list,
             "links_configuration": links_configuration,
+            "site_details": site_details,
         }
         edge_link_1_info = {
             # Some fields omitted for simplicity
@@ -7288,6 +7298,7 @@ class TestServiceOutageMonitor:
             "client_id": client_id,
             "client_name": client_name,
         }
+        site_details = {"tzOffset": -4}
         cached_edge_primary = {
             "edge": edge_full_id,
             "last_contact": "2020-08-17T02:23:59",
@@ -7296,6 +7307,7 @@ class TestServiceOutageMonitor:
             "bruin_client_info": bruin_client_info,
             "logical_ids": logical_id_list,
             "links_configuration": links_configuration,
+            "site_details": site_details,
         }
         cached_edge_standby = {
             "edge": edge_full_id,
@@ -7305,6 +7317,7 @@ class TestServiceOutageMonitor:
             "bruin_client_info": bruin_client_info,
             "logical_ids": logical_id_list,
             "links_configuration": links_configuration,
+            "site_details": site_details,
         }
         edge_link_1_info = {
             # Some fields omitted for simplicity

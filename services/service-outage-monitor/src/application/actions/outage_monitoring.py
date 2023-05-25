@@ -1,6 +1,4 @@
 import asyncio
-import base64
-import json
 import logging
 import os
 import time
@@ -25,7 +23,6 @@ from apscheduler.util import undefined
 from dateutil.parser import parse
 from framework.storage.task_dispatcher_client import TaskTypes
 from pytz import timezone, utc
-from shortuuid import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -656,6 +653,14 @@ class OutageMonitor:
                 return max_seconds_since_last_outage / 60
         else:
             return self._config.MONITOR_CONFIG["jobs_intervals"]["forward_to_hnoc_edge_down"]
+
+    def _get_worker_queue_forward_time_by_outage_type(self, outage_type: Outages, edge: dict) -> float:
+        ticket_time = self._get_ticket_time(edge)
+
+        if self._is_ticket_time_in_night_hours(ticket_time):
+            return self._get_minutes_until_morning(ticket_time)
+        else:
+            return self._get_hnoc_forward_time_by_outage_type(outage_type, edge)
 
     def _should_forward_to_hnoc(self, link_data: list, is_edge_down: bool) -> bool:
         if is_edge_down:
@@ -1463,6 +1468,35 @@ class OutageMonitor:
         else:
             return last_outage_seconds["night"]
 
+    def _get_ticket_time(self, edge: dict) -> datetime:
+        from datetime import timezone
+        tz_offset = edge["cached_info"]["site_details"]["tzOffset"]
+        tz = timezone(timedelta(hours=tz_offset))
+        return datetime.now(tz=tz)
+
+    def _is_ticket_time_in_night_hours(self, now: datetime) -> bool:
+        day_schedule = self._config.MONITOR_CONFIG["autoresolve"]["day_schedule"]
+        day_start_hour = day_schedule["start_hour"]
+        day_end_hour = day_schedule["end_hour"]
+
+        if day_start_hour >= day_end_hour:
+            day_end_hour += 24
+
+        return not (day_start_hour <= now.hour < day_end_hour)
+
+    def _get_minutes_until_morning(self, dt) -> int:
+        from datetime import time
+        day_schedule = self._config.MONITOR_CONFIG["autoresolve"]["day_schedule"]["start_hour"]
+        target_time = time(day_schedule, 0, 0)
+
+        target_datetime = datetime.combine(dt.date(), target_time, tzinfo=dt.tzinfo)
+
+        if dt.time() > target_time:
+            target_datetime += timedelta(days=1)
+
+        time_difference = target_datetime - dt
+        return time_difference.total_seconds() // 60
+
     def _get_notes_appended_since_latest_reopen_or_ticket_creation(self, ticket_notes: List[dict]) -> List[dict]:
         sorted_ticket_notes = sorted(ticket_notes, key=lambda note: note["createdDate"])
         latest_reopen = self._utils_repository.get_last_element_matching(
@@ -1774,8 +1808,9 @@ class OutageMonitor:
                         has_faulty_byob_link,
                         faulty_link_types,
                     )
+                    line_forward_time = self._get_worker_queue_forward_time_by_outage_type(outage_type, edge)
                     await self._schedule_forward_to_work_queue(
-                        forward_time,
+                        line_forward_time,
                         ticket_id,
                         serial_number,
                         client_name,
@@ -1834,13 +1869,6 @@ class OutageMonitor:
                     "this edge..."
                 )
                 ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
-                open_ticket_line_details = await self._get_open_ticket_line_details(
-                    ticket_id,
-                    serial_number,
-                    faulty_link_interfaces,
-                    ticket_details_response,
-                )
-                await self._forward_ticket_tasks_to_ipa_queue(open_ticket_line_details, serial_number, ticket_id)
                 await self._change_ticket_severity(
                     ticket_id=ticket_id,
                     edge_status=edge_status,
@@ -1866,8 +1894,16 @@ class OutageMonitor:
                         has_faulty_byob_link,
                         faulty_link_types,
                     )
+
+                    open_ticket_line_details = await self._get_open_ticket_line_details(
+                        ticket_id,
+                        serial_number,
+                        faulty_link_interfaces,
+                        ticket_details_response,
+                    )
+                    line_forward_time = self._get_worker_queue_forward_time_by_outage_type(outage_type, edge)
                     await self._schedule_forward_to_work_queue(
-                        forward_time,
+                        line_forward_time,
                         ticket_id,
                         serial_number,
                         client_name,
@@ -1964,8 +2000,9 @@ class OutageMonitor:
                         has_faulty_byob_link,
                         faulty_link_types,
                     )
+                    line_forward_time = self._get_worker_queue_forward_time_by_outage_type(outage_type, edge)
                     await self._schedule_forward_to_work_queue(
-                        forward_time,
+                        line_forward_time,
                         ticket_id,
                         serial_number,
                         client_name,
@@ -2061,8 +2098,9 @@ class OutageMonitor:
                         has_faulty_byob_link,
                         faulty_link_types,
                     )
+                    line_forward_time = self._get_worker_queue_forward_time_by_outage_type(outage_type, edge)
                     await self._schedule_forward_to_work_queue(
-                        forward_time,
+                        line_forward_time,
                         ticket_id,
                         serial_number,
                         client_name,
@@ -2153,8 +2191,9 @@ class OutageMonitor:
                         has_faulty_byob_link,
                         faulty_link_types,
                     )
+                    line_forward_time = self._get_worker_queue_forward_time_by_outage_type(outage_type, edge)
                     await self._schedule_forward_to_work_queue(
-                        forward_time,
+                        line_forward_time,
                         ticket_id,
                         serial_number,
                         client_name,
