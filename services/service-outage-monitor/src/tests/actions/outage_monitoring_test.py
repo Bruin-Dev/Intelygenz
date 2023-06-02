@@ -6963,8 +6963,8 @@ class TestServiceOutageMonitor:
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
         outage_monitor._schedule_forward_to_hnoc_queue = Mock()
-        outage_monitor._attempt_forward_to_asr = AsyncMock()
-
+        # removing for now, since we're keeping in ipa queue for grace period and then forwarding to work queue
+        # 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
@@ -7002,17 +7002,18 @@ class TestServiceOutageMonitor:
             has_faulty_byob_link,
             faulty_link_types,
         )
-        outage_monitor._attempt_forward_to_asr.assert_awaited_once_with(
-            cached_edge_primary,
-            links_grouped_by_primary_edge_with_ha_info,
-            ticket_id,
-            client_name,
-            outage_type,
-            target_severity,
-            has_faulty_digi_link,
-            has_faulty_byob_link,
-            faulty_link_types,
-        )
+        # removing for now, since we're keeping in ipa queue for grace period and then forwarding to work queue
+        # outage_monitor._attempt_forward_to_asr.assert_awaited_once_with(
+        #     cached_edge_primary,
+        #     links_grouped_by_primary_edge_with_ha_info,
+        #     ticket_id,
+        #     client_name,
+        #     outage_type,
+        #     target_severity,
+        #     has_faulty_digi_link,
+        #     has_faulty_byob_link,
+        #     faulty_link_types,
+        # )
         outage_monitor._reopen_outage_ticket.assert_not_awaited()
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
@@ -7222,8 +7223,7 @@ class TestServiceOutageMonitor:
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
         outage_monitor._schedule_forward_to_hnoc_queue = Mock()
-        outage_monitor._attempt_forward_to_asr = AsyncMock()
-
+        
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
@@ -7245,17 +7245,6 @@ class TestServiceOutageMonitor:
             logical_id_list,
             edge_primary_serial,
             links_grouped_by_primary_edge_with_ha_info,
-            client_name,
-            outage_type,
-            target_severity,
-            has_faulty_digi_link,
-            has_faulty_byob_link,
-            faulty_link_types,
-        )
-        outage_monitor._attempt_forward_to_asr.assert_awaited_once_with(
-            cached_edge_primary,
-            links_grouped_by_primary_edge_with_ha_info,
-            ticket_id,
             client_name,
             outage_type,
             target_severity,

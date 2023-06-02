@@ -1941,17 +1941,18 @@ class OutageMonitor:
                     has_faulty_byob_link,
                     faulty_link_types,
                 )
-                await self._attempt_forward_to_asr(
-                    cached_edge,
-                    edge_status,
-                    ticket_id,
-                    client_name,
-                    outage_type,
-                    target_severity,
-                    has_faulty_digi_link,
-                    has_faulty_byob_link,
-                    faulty_link_types,
-                )
+                # removing for now, since we're keeping in ipa queue for grace period and then forwarding to work queue
+                # await self._attempt_forward_to_asr(
+                #     cached_edge,
+                #     edge_status,
+                #     ticket_id,
+                #     client_name,
+                #     outage_type,
+                #     target_severity,
+                #     has_faulty_digi_link,
+                #     has_faulty_byob_link,
+                #     faulty_link_types,
+                # )
             elif ticket_creation_response_status == 471:
                 logger.info(
                     f"[{outage_type.value}] Faulty edge {serial_number} has a resolved outage ticket "
