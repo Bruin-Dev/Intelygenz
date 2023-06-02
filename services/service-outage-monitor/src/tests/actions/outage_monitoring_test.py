@@ -6963,8 +6963,6 @@ class TestServiceOutageMonitor:
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
         outage_monitor._schedule_forward_to_hnoc_queue = Mock()
-        # removing for now, since we're keeping in ipa queue for grace period and then forwarding to work queue
-        # 
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
@@ -7223,7 +7221,7 @@ class TestServiceOutageMonitor:
         outage_monitor._has_faulty_blacklisted_link = Mock(return_value=has_faulty_byob_link)
         outage_monitor._get_faulty_link_types = Mock(return_value=faulty_link_types)
         outage_monitor._schedule_forward_to_hnoc_queue = Mock()
-        
+
         with patch.object(outage_monitor._config, "CURRENT_ENVIRONMENT", "production"):
             await outage_monitor._recheck_edges_for_ticket_creation(outage_edges, outage_type)
 
