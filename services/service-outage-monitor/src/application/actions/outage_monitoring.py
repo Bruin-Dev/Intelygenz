@@ -1769,6 +1769,7 @@ class OutageMonitor:
                 )
                 await self._notifications_repository.send_slack_message(slack_message)
 
+                await asyncio.sleep(2)
                 ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
 
                 open_ticket_line_details = await self._get_open_ticket_line_details(
@@ -1869,7 +1870,7 @@ class OutageMonitor:
                     f"progress (ID = {ticket_id}). Skipping outage ticket creation for "
                     "this edge..."
                 )
-
+                await asyncio.sleep(2)
                 ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
                 await self._change_ticket_severity(
                     ticket_id=ticket_id,
@@ -1957,7 +1958,7 @@ class OutageMonitor:
                     f"[{outage_type.value}] Faulty edge {serial_number} has a resolved outage ticket "
                     f"(ID = {ticket_id}). Re-opening ticket..."
                 )
-
+                await asyncio.sleep(2)
                 ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
                 open_ticket_line_details = await self._get_open_ticket_line_details(
                     ticket_id,
@@ -2060,6 +2061,7 @@ class OutageMonitor:
                     link_types=faulty_link_types,
                 )
 
+                await asyncio.sleep(2)
                 ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
                 open_ticket_line_details = await self._get_open_ticket_line_details(
                     ticket_id,
@@ -2158,6 +2160,7 @@ class OutageMonitor:
                     link_types=faulty_link_types,
                 )
 
+                await asyncio.sleep(2)
                 ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
                 open_ticket_line_details = await self._get_open_ticket_line_details(
                     ticket_id,

@@ -149,7 +149,7 @@ class TriageRepository:
             ticket_note_lines.append("")
 
         for link in edge_links:
-            if not link:
+            if not link or not link["interface"]:
                 continue
 
             interface_name = link["interface"]
