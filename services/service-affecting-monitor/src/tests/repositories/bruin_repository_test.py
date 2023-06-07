@@ -893,13 +893,24 @@ class TestBruinRepository:
 
         assert subscribers == expected
 
-    def get_ticket_contact_additional_subscribers__no_email(
+    def get_ticket_contact_additional_subscribers__no_email_test(
         self, bruin_repository, make_ticket_contact_additional_subscribers
     ):
         ticket_contact_additional_subscriber_email = None
 
         ticket_contact_additional_subscribers = make_ticket_contact_additional_subscribers(
             email=ticket_contact_additional_subscriber_email)
+
+        subscribers = bruin_repository.get_ticket_contact_additional_subscribers(ticket_contact_additional_subscribers)
+
+        expected = []
+
+        assert subscribers == expected
+
+    def get_ticket_contact_additional_subscribers__no_subscribers_test(
+        self, bruin_repository
+    ):
+        ticket_contact_additional_subscribers = None
 
         subscribers = bruin_repository.get_ticket_contact_additional_subscribers(ticket_contact_additional_subscribers)
 
