@@ -243,7 +243,10 @@ class RefreshCache:
                 )
 
                 if not self._bruin_repository.is_management_status_active(management_status):
-                    logger.warning(f"Management status is not active for {edge_identifier}. Skipping...")
+                    logger.warning(
+                        f"Management status is not active for {edge_identifier}, "
+                        f"serial_number {serial_number}. Skipping..."
+                    )
                     self._invalid_edges[host].append(edge_identifier)
                     return
                 else:
