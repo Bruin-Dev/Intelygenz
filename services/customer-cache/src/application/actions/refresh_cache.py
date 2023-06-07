@@ -279,7 +279,7 @@ class RefreshCache:
                 if ticket_contact_response["status"] not in range(200, 300):
                     logger.error(
                         f"Error while fetching ticket contact details for edge {serial_number}: "
-                        f"{ticket_contact_response}"
+                        f"{ticket_contact_response}. Defaulting to None."
                     )
                 else:
                     ticket_contact_details: dict = next(iter(ticket_contact_response["body"]), None)
