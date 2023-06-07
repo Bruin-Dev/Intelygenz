@@ -639,6 +639,8 @@ class BruinRepository:
     @staticmethod
     def get_ticket_contact_additional_subscribers(ticket_contact_additional_subscribers):
         subscribers = []
+        if not ticket_contact_additional_subscribers:
+            return subscribers
 
         for subscriber in ticket_contact_additional_subscribers:
             if subscriber["email"]:
