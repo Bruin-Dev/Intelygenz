@@ -274,15 +274,16 @@ class RefreshCache:
                 site_details["tzOffset"] = self._get_tz_offset(site_details)
 
                 ticket_contact_response = await self._bruin_repository.get_ticket_contact(client_id)
+                ticket_contact_details = None
+                ticket_contact_additional_subscribers = None
                 if ticket_contact_response["status"] not in range(200, 300):
                     logger.error(
                         f"Error while fetching ticket contact details for edge {serial_number}: "
                         f"{ticket_contact_response}"
                     )
-                    return
-
-                ticket_contact_details: dict = next(iter(ticket_contact_response["body"]), None)
-                ticket_contact_additional_subscribers = ticket_contact_response["body"][1:]
+                else:
+                    ticket_contact_details: dict = next(iter(ticket_contact_response["body"]), None)
+                    ticket_contact_additional_subscribers = ticket_contact_response["body"][1:]
 
                 return {
                     "edge": edge_with_serial["edge"],

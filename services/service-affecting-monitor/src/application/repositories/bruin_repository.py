@@ -573,6 +573,9 @@ class BruinRepository:
 
     @staticmethod
     def _get_ticket_contact_from_ticket_contact_details(ticket_contact_details):
+        if not ticket_contact_details:
+            return None
+
         ticket_contact_detail_first_name = ticket_contact_details["firstName"]
         ticket_contact_detail_last_name = ticket_contact_details["lastName"]
         ticket_contact_detail_email = ticket_contact_details["email"]

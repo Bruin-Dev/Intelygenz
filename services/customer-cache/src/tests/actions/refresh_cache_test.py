@@ -822,6 +822,81 @@ class TestRefreshCache:
         assert instance_refresh_cache._invalid_edges == {}
 
     @pytest.mark.asyncio
+    async def filter_edge_list_ok_ticket_contacts_404_test(
+        self, instance_refresh_cache, instance_cache_edges, instance_edges_refresh_cache
+    ):
+        client_info = {
+            "client_id": 30000,
+            "client_name": "MetTel",
+            "site_id": 12345,
+        }
+        site_details = {
+            # Some fields omitted for simplicity
+            "primaryContactName": "Test",
+            "primaryContactPhone": "123-456-7890",
+            "primaryContactEmail": "test@mail.com",
+        }
+        logical_ids = ["list of logical ids"]
+
+        last_contact = str(datetime.now())
+        instance_edges_refresh_cache[0]["last_contact"] = last_contact
+        instance_edges_refresh_cache[0]["serial_number"] = "VC01"
+        instance_edges_refresh_cache[0]["ha_serial_number"] = "VC011"
+        instance_cache_edges[0]["edge"]["host"] = "metvco02.mettel.net"
+        instance_cache_edges[0]["last_contact"] = last_contact
+        instance_cache_edges[0]["site_details"] = site_details
+        instance_cache_edges[0]["ticket_contact_details"] = None
+        instance_cache_edges[0]["ticket_contact_additional_subscribers"] = None
+        instance_cache_edges[0]["logical_ids"] = logical_ids
+        instance_edges_refresh_cache[0]["bruin_client_info"] = [client_info]
+        instance_edges_refresh_cache[0]["edge_name"] = "Big Boss"
+        links_configuration = [
+            {
+                "interfaces": ["GE1"],
+                "internal_id": "00000001-ac48-47a0-81a7-80c8c320f486",
+                "mode": "PUBLIC",
+                "type": "WIRED",
+                "last_active": "2020-09-29T04:45:15.000Z",
+            }
+        ]
+        instance_edges_refresh_cache[0]["links_configuration"] = links_configuration
+        instance_cache_edges[0]["links_configuration"] = links_configuration
+
+        instance_refresh_cache._bruin_repository.get_client_info = AsyncMock(
+            return_value={"body": [client_info, client_info], "status": 200}
+        )
+        instance_refresh_cache._bruin_repository.get_inventory_attributes = AsyncMock(
+            return_value={"body": ["some attributes"], "status": 200}
+        )
+        instance_refresh_cache._bruin_repository.get_management_status_from_inventory_attributes = Mock(
+            return_value="active"
+        )
+        instance_refresh_cache._add_access_type_to_logical_ids = Mock(return_value=logical_ids)
+        instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
+        instance_refresh_cache._bruin_repository.get_site_details = AsyncMock(
+            return_value={"body": site_details, "status": 200}
+        )
+        instance_refresh_cache._bruin_repository.get_ticket_contact = AsyncMock(
+            return_value={"status": 404}
+        )
+
+        instance_refresh_cache._storage_repository.set_cache = Mock()
+        instance_refresh_cache._get_tz_offset = Mock(return_value=0)
+
+        cache_return = await instance_refresh_cache._filter_edge_list(instance_edges_refresh_cache[0])
+
+        instance_refresh_cache._bruin_repository.get_client_info.assert_awaited()
+        instance_refresh_cache._bruin_repository.get_inventory_attributes.assert_awaited()
+        instance_refresh_cache._bruin_repository.get_management_status_from_inventory_attributes.assert_called()
+        instance_refresh_cache._add_access_type_to_logical_ids.assert_called()
+        instance_refresh_cache._bruin_repository.is_management_status_active.assert_called()
+        instance_refresh_cache._bruin_repository.get_site_details.assert_awaited()
+        instance_refresh_cache._get_tz_offset.assert_called_with(site_details)
+
+        assert cache_return == instance_cache_edges[0]
+        assert instance_refresh_cache._invalid_edges == {}
+
+    @pytest.mark.asyncio
     async def filter_edge_list_exception_test(self, instance_refresh_cache, instance_edges_refresh_cache):
         last_contact = str(datetime.now())
         instance_edges_refresh_cache[0]["last_contact"] = last_contact
