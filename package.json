@@ -10,7 +10,7 @@
     "doc": "docs"
   },
   "scripts": {
-    "bootstrap": "npx lerna bootstrap --use-workspaces"
+    "bootstrap": "npx npm install --use-workspaces"
   },
   "repository": {
     "type": "git",
@@ -56,7 +56,7 @@
         }
       ],
       [
-        "@semantic-release/gitlab", 
+        "@semantic-release/gitlab",
         {
           "gitlabUrl": "https://gitlab.intelygenz.com"
         }
