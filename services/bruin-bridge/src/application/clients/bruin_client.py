@@ -528,6 +528,8 @@ class BruinClient:
             status_code = response.status
             if status_code in range(200, 300):
                 response_json = await response.json()
+                logger.info(f"Got HTTP {status_code} from Bruin when posting outage ticket with payload "
+                            f"{json.dumps(payload)}. Response body: {response_json}")
                 # The root key may differ depending on the status code...
                 ticket_data = response_json.get("assets", response_json.get("items"))[0]
 
