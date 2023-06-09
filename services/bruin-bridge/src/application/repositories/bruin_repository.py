@@ -232,7 +232,9 @@ class BruinRepository:
         return response
 
     async def post_outage_ticket_full_response(self, client_id, service_number, ticket_contact, interfaces):
-        return await self._bruin_client.post_outage_ticket_full_response(client_id, service_number, ticket_contact, interfaces)
+        return await self._bruin_client.post_outage_ticket_full_response(
+            client_id, service_number, ticket_contact, interfaces
+        )
 
     async def get_client_info(self, filters):
         response = await self._bruin_client.get_client_info(filters)

@@ -230,7 +230,9 @@ class TestPostOutageTicket:
                     'ticketId': 7586785,
                     'inventoryId': 14517364,
                     'wtn': '7BJR363',
-                    'errorMessage': "Warning: Ticket already exists. We'll add an additional line.\n Failed to add additional line: The item already exists in 7586785, could not add another dulplicate one",
+                    'errorMessage': ("Warning: Ticket already exists. We'll add an additional line.\n "
+                                     "Failed to add additional line: The item already exists in 7586785, "
+                                     "could not add another dulplicate one"),
                     'errorCode': 409
                 }
             ]
