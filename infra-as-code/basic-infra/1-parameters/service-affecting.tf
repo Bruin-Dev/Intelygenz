@@ -237,6 +237,26 @@ resource "aws_ssm_parameter" "parameter-service-affecting-monitor-customers-with
   })
 }
 
+resource "aws_ssm_parameter" "parameter-service-affecting-monitor-customers-with-bandwidth-over-utilization-monitoring-disabled" {
+  count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
+  name        = "/automation-engine/common/service-affecting/monitor/customers-with-bandwidth-over-utilization-monitoring-disabled"
+  description = "List of client IDs for which Bandwidth Over Utilization checks are disabled"
+  type        = "SecureString"
+  value       = "-" # to edit go to parameter store dashboard.
+  key_id      = aws_kms_alias.kms_key.name
+
+  lifecycle {
+    ignore_changes = [
+      value,
+    ]
+  }
+
+  tags = merge(var.common_info, {
+    Name = "MONITORING__CUSTOMERS_WITH_BANDWIDTH_MONITORING_DISABLED"
+    note = "can be updated from the parameter store dashboard"
+  })
+}
+
 resource "aws_ssm_parameter" "parameter-service-affecting-monitor-default-contact-info-per-customer" {
   count       = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0 # -> use this to deploy a "common" parameter only in one environment, if not when merging to master will fail for duplicity
   name        = "/automation-engine/common/service-affecting/monitor/default-contact-info-per-customer"

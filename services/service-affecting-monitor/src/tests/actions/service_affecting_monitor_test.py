@@ -1526,6 +1526,75 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._process_bandwidth_trouble.assert_awaited_once_with(link_complete_info)
 
     @pytest.mark.asyncio
+    async def bandwidth_check__client_disabled_test(
+        self,
+        service_affecting_monitor,
+        make_cached_edge,
+        make_bruin_client_info,
+        make_customer_cache,
+        make_edge,
+        make_metrics,
+        make_link_with_edge_info,
+        make_metrics_for_link,
+        make_list_of_link_metrics,
+        make_structured_metrics_object,
+        make_list_of_structured_metrics_objects,
+        make_rpc_response,
+        make_site_and_ticket_contact_info,
+    ):
+        edge_contact_info = make_site_and_ticket_contact_info()
+        service_affecting_monitor._bruin_repository.get_contact_info_for_site.return_value = edge_contact_info
+
+        edge_serial_number = "VCO123"
+        client_id = 12345
+
+        edge = make_edge(serial_number=edge_serial_number)
+        edge_link_with_edge_info = make_link_with_edge_info(edge_info=edge)
+        edge_link_metrics = make_metrics(
+            bytes_tx=999999,
+            bytes_rx=999999,
+            bps_of_best_path_tx=100,
+            bps_of_best_path_rx=100,
+        )
+        edge_link_metric_set = make_metrics_for_link(
+            link_with_edge_info=edge_link_with_edge_info,
+            metrics=edge_link_metrics,
+        )
+
+        links_metric_sets = make_list_of_link_metrics(edge_link_metric_set)
+
+        structured_metrics_object = make_structured_metrics_object(
+            edge_info=edge,
+            metrics=edge_link_metrics,
+        )
+        structured_metrics_objects = make_list_of_structured_metrics_objects(structured_metrics_object)
+
+        edge_bruin_client_info = make_bruin_client_info(client_id=client_id)
+        edge_cache_info = make_cached_edge(serial_number=edge_serial_number, bruin_client_info=edge_bruin_client_info)
+        customer_cache = make_customer_cache(edge_cache_info)
+
+        service_affecting_monitor._customer_cache = customer_cache
+        service_affecting_monitor._velocloud_repository.get_links_metrics_for_bandwidth_checks.return_value = (
+            make_rpc_response(
+                body=links_metric_sets,
+                status=200,
+            )
+        )
+        contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
+        service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
+
+        custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
+        custom_monitor_config["customers_with_bandwidth_disabled"] = [client_id]
+        with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
+            await service_affecting_monitor._bandwidth_check()
+
+        service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets)
+        service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
+            structured_metrics_objects,
+        )
+        service_affecting_monitor._process_bandwidth_trouble.assert_not_called()
+
+    @pytest.mark.asyncio
     async def bouncing_check__no_metrics_found_test(
         self, service_affecting_monitor, make_list_of_link_metrics, make_rpc_response
     ):

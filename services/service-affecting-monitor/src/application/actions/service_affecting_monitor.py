@@ -302,7 +302,7 @@ class ServiceAffectingMonitor:
 
             logger.info(f"Starting autoresolve for edge {serial_number}...")
 
-            check_bandwidth_troubles = host != "metvco04.mettel.net"
+            check_bandwidth_troubles = self._trouble_repository.should_check_bandwidth_troubles(host, client_id)
             metrics_lookup_interval = self._config.MONITOR_CONFIG["autoresolve"]["metrics_lookup_interval_minutes"]
             all_metrics_within_thresholds = self._trouble_repository.are_all_metrics_within_thresholds(
                 edge,
@@ -639,13 +639,13 @@ class ServiceAffectingMonitor:
             await asyncio.sleep(0)
 
             cached_info = elem["cached_info"]
+            client_id = cached_info["bruin_client_info"]["client_id"]
             link_status = elem["link_status"]
             metrics = elem["link_metrics"]
             host = cached_info["edge"]["host"]
 
-            if host == "metvco04.mettel.net":
-                # TODO: Remove this check as soon as the customer asks to release Bandwidth check for all edges
-                logger.warning(f"Bandwidth checks are not enabled for vco04. Skipping...")
+            if not self._trouble_repository.should_check_bandwidth_troubles(host, client_id):
+                logger.warning(f"Bandwidth checks are not enabled for host {host}, or client {client_id}. Skipping...")
                 continue
 
             tx_bandwidth = metrics["bpsOfBestPathTx"]

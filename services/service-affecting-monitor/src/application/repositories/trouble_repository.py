@@ -163,3 +163,7 @@ class TroubleRepository:
         link_last_active_date = datetime.strptime(link_last_active, date_format).replace(tzinfo=utc)
 
         return link_last_active_date > lookback_window_date
+
+    def should_check_bandwidth_troubles(self, host, client_id) -> bool:
+        return (host != "metvco04.mettel.net"
+                and client_id not in self._config.MONITOR_CONFIG["customers_with_bandwidth_disabled"])

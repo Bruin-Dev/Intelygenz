@@ -129,6 +129,7 @@ MONITOR_CONFIG = {
         },
     },
     "customers_with_bandwidth_enabled": [1, 2, 3],
+    "customers_with_bandwidth_disabled": [6, 7, 8],
     "wait_time_before_sending_new_milestone_reminder": 86400,
 }
 
