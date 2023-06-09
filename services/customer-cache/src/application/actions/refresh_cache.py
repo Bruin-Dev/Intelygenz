@@ -263,7 +263,7 @@ class RefreshCache:
                     logger.info(f"Management status for {serial_number} seems active")
 
                 logical_ids = edge_with_serial["logical_ids"]
-                logical_ids_with_access_types = self._add_access_type_to_logical_ids(
+                logical_ids_with_access_types = self._add_access_type_and_service_number_to_logical_ids(
                     inventory_attributes_response_body, logical_ids
                 )
 
@@ -307,22 +307,34 @@ class RefreshCache:
         except Exception as e:
             logger.error(f"An error occurred while checking if edge {serial_number} should be cached or not -> {e}")
 
-    def _add_access_type_to_logical_ids(self, inventory_attributes_response_body, logical_ids):
+    def _add_access_type_and_service_number_to_logical_ids(self, inventory_attributes_response_body, logical_ids):
         logical_ids_with_access_types = []
         for logical_id in logical_ids:
-            attr_key = f'{logical_id["interface_name"]} Access Type'
+            access_type_attr_key = f'{logical_id["interface_name"]} Access Type'
             access_type = [
                 attribute["value"]
                 for attribute in inventory_attributes_response_body["attributes"]
-                if attribute["key"] == attr_key
+                if attribute["key"] == access_type_attr_key
             ]
             if len(access_type) > 0:
                 access_type = access_type[0]
             else:
                 access_type = None
 
+            service_number_attr_key = f'{logical_id["interface_name"]} Service Number'
+            service_number = [
+                attribute["value"]
+                for attribute in inventory_attributes_response_body["attributes"]
+                if attribute["key"] == service_number_attr_key
+            ]
+            if len(service_number) > 0:
+                service_number = service_number[0]
+            else:
+                service_number = None
+
             logical_id_with_access_type = logical_id
             logical_id_with_access_type["access_type"] = access_type
+            logical_id_with_access_type["service_number"] = service_number
             logical_ids_with_access_types.append(logical_id_with_access_type)
 
         return logical_ids_with_access_types

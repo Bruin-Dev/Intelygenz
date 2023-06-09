@@ -796,7 +796,7 @@ class TestRefreshCache:
         instance_refresh_cache._bruin_repository.get_management_status_from_inventory_attributes = Mock(
             return_value="active"
         )
-        instance_refresh_cache._add_access_type_to_logical_ids = Mock(return_value=logical_ids)
+        instance_refresh_cache._add_access_type_and_service_number_to_logical_ids = Mock(return_value=logical_ids)
         instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
         instance_refresh_cache._bruin_repository.get_site_details = AsyncMock(
             return_value={"body": site_details, "status": 200}
@@ -813,7 +813,7 @@ class TestRefreshCache:
         instance_refresh_cache._bruin_repository.get_client_info.assert_awaited()
         instance_refresh_cache._bruin_repository.get_inventory_attributes.assert_awaited()
         instance_refresh_cache._bruin_repository.get_management_status_from_inventory_attributes.assert_called()
-        instance_refresh_cache._add_access_type_to_logical_ids.assert_called()
+        instance_refresh_cache._add_access_type_and_service_number_to_logical_ids.assert_called()
         instance_refresh_cache._bruin_repository.is_management_status_active.assert_called()
         instance_refresh_cache._bruin_repository.get_site_details.assert_awaited()
         instance_refresh_cache._get_tz_offset.assert_called_with(site_details)
@@ -871,7 +871,7 @@ class TestRefreshCache:
         instance_refresh_cache._bruin_repository.get_management_status_from_inventory_attributes = Mock(
             return_value="active"
         )
-        instance_refresh_cache._add_access_type_to_logical_ids = Mock(return_value=logical_ids)
+        instance_refresh_cache._add_access_type_and_service_number_to_logical_ids = Mock(return_value=logical_ids)
         instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
         instance_refresh_cache._bruin_repository.get_site_details = AsyncMock(
             return_value={"body": site_details, "status": 200}
@@ -888,7 +888,7 @@ class TestRefreshCache:
         instance_refresh_cache._bruin_repository.get_client_info.assert_awaited()
         instance_refresh_cache._bruin_repository.get_inventory_attributes.assert_awaited()
         instance_refresh_cache._bruin_repository.get_management_status_from_inventory_attributes.assert_called()
-        instance_refresh_cache._add_access_type_to_logical_ids.assert_called()
+        instance_refresh_cache._add_access_type_and_service_number_to_logical_ids.assert_called()
         instance_refresh_cache._bruin_repository.is_management_status_active.assert_called()
         instance_refresh_cache._bruin_repository.get_site_details.assert_awaited()
         instance_refresh_cache._get_tz_offset.assert_called_with(site_details)
@@ -994,7 +994,7 @@ class TestRefreshCache:
         instance_refresh_cache._bruin_repository.get_management_status_from_inventory_attributes = Mock(
             return_value="active"
         )
-        instance_refresh_cache._add_access_type_to_logical_ids = Mock()
+        instance_refresh_cache._add_access_type_and_service_number_to_logical_ids = Mock()
         instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
 
         instance_refresh_cache._storage_repository.set_cache = Mock()
@@ -1004,7 +1004,7 @@ class TestRefreshCache:
         instance_refresh_cache._bruin_repository.get_inventory_attributes.assert_awaited()
         instance_refresh_cache._bruin_repository.get_management_status_from_inventory_attributes.assert_called()
         instance_refresh_cache._bruin_repository.is_management_status_active.assert_called()
-        instance_refresh_cache._add_access_type_to_logical_ids.assert_called()
+        instance_refresh_cache._add_access_type_and_service_number_to_logical_ids.assert_called()
 
         assert cache_return is None
         assert instance_refresh_cache._invalid_edges == {}
@@ -1064,7 +1064,7 @@ class TestRefreshCache:
         instance_refresh_cache._bruin_repository.get_management_status_from_inventory_attributes = Mock(
             return_value="active"
         )
-        instance_refresh_cache._add_access_type_to_logical_ids = Mock()
+        instance_refresh_cache._add_access_type_and_service_number_to_logical_ids = Mock()
         instance_refresh_cache._bruin_repository.is_management_status_active = Mock(return_value=True)
         instance_refresh_cache._bruin_repository.get_site_details = AsyncMock(
             return_value={
@@ -1079,7 +1079,7 @@ class TestRefreshCache:
         instance_refresh_cache._bruin_repository.get_inventory_attributes.assert_awaited()
         instance_refresh_cache._bruin_repository.get_management_status_from_inventory_attributes.assert_called()
         instance_refresh_cache._bruin_repository.is_management_status_active.assert_called()
-        instance_refresh_cache._add_access_type_to_logical_ids.assert_called()
+        instance_refresh_cache._add_access_type_and_service_number_to_logical_ids.assert_called()
         instance_refresh_cache._bruin_repository.get_site_details.assert_awaited()
 
         assert cache_return is None
@@ -1227,7 +1227,7 @@ class TestRefreshCache:
             tz_offset = instance_refresh_cache._get_offset_from_tz_name("UTC")
             assert tz_offset == 0
 
-    def _add_access_type_to_logical_ids_test(self, instance_refresh_cache):
+    def _add_access_type_and_service_number_to_logical_ids_test(self, instance_refresh_cache):
         logical_ids = [
             {
                 "interface_name": "GE2",
@@ -1248,8 +1248,16 @@ class TestRefreshCache:
                     "value": "Ethernet/T1/MPLS"
                 },
                 {
+                    "key": "GE2 Service Number",
+                    "value": "33.RBCB.138736"
+                },
+                {
                     "key": "GE1 Access Type",
                     "value": "Wireless"
+                },
+                {
+                    "key": "GE1 Service Number",
+                    "value": "33.RBCB.138735"
                 }
             ]
         }
@@ -1258,16 +1266,18 @@ class TestRefreshCache:
             {
                 "interface_name": "GE2",
                 "logical_id": "00:04:2d:0c:27:ab:0000",
-                "access_type": "Ethernet/T1/MPLS"
+                "access_type": "Ethernet/T1/MPLS",
+                "service_number": "33.RBCB.138736",
             },
             {
                 "interface_name": "GE1",
                 "logical_id": "ac:8f:a9:ef:78:82:0000",
-                "access_type": "Wireless"
+                "access_type": "Wireless",
+                "service_number": "33.RBCB.138735",
             }
         ]
 
-        result = instance_refresh_cache._add_access_type_to_logical_ids(
+        result = instance_refresh_cache._add_access_type_and_service_number_to_logical_ids(
             inventory_attributes_response_body, logical_ids
         )
 
