@@ -1348,6 +1348,57 @@ class TestPostOutageTicket:
         assert result == expected
 
     @pytest.mark.asyncio
+    async def post_outage_ticket_full_response_with_ticket_contact_test(self):
+        client_id = 9994
+        ticket_contact = {"email": "testmail@test.com"}
+        service_number = ["VC05400002265"]
+        interfaces = ["GE1", "GE2"]
+
+        request_params = {
+            "ClientID": client_id,
+            "WTNs": service_number,
+            "RequestDescription": "MetTel's IPA -- Service Outage Trouble",
+            "ticketContact": ticket_contact,
+            "WtnInterfaces": {service_number[0]: interfaces}
+        }
+
+        ticket_data = {
+            "ticketId": 4503440,
+            "inventoryId": 12796795,
+            "wtn": service_number,
+            "errorMessage": None,
+            "errorCode": 0,
+        }
+        bruin_response_body = {"assets": [ticket_data]}
+        bruin_response_status = 200
+
+        bruin_response = AsyncMock()
+        bruin_response.status = bruin_response_status
+        bruin_response.json = AsyncMock(return_value=bruin_response_body)
+
+        bruin_client = BruinClient(config)
+        bruin_client._session = Mock(spec_set=ClientSession)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client._session, "post", new=AsyncMock(return_value=bruin_response)):
+            result = await bruin_client.post_outage_ticket_full_response(
+                client_id, service_number, ticket_contact, interfaces
+            )
+
+            bruin_client._session.post.assert_awaited_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
+                headers=bruin_client._get_request_headers(),
+                json=request_params,
+                ssl=False,
+            )
+
+        expected = {
+            "body": bruin_response_body,
+            "status": bruin_response_status,
+        }
+        assert result == expected
+
+    @pytest.mark.asyncio
     async def post_outage_ticket_with_http_2XX_response_test(self):
         client_id = (9994,)
         ticket_contact = None

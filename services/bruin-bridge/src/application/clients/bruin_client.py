@@ -609,6 +609,89 @@ class BruinClient:
         except Exception as e:
             return {"body": e.args[0], "status": 500}
 
+    async def post_outage_ticket_full_response(self, client_id, service_number, ticket_contact, interfaces):
+        try:
+            logger.info(f"Posting outage ticket full response for client with ID {client_id}, "
+                        f"service number {service_number}")
+
+            if not isinstance(service_number, list):
+                service_number = [service_number]
+
+            payload = {
+                "ClientID": client_id,
+                "WTNs": service_number,
+                "RequestDescription": "MetTel's IPA -- Service Outage Trouble",
+            }
+            if ticket_contact:
+                payload["ticketContact"] = ticket_contact
+
+            if interfaces:
+                payload["WtnInterfaces"] = {service_number[0]: interfaces}
+
+            logger.info(f"Posting payload {json.dumps(payload)} to create new outage ticket...")
+
+            return_response = dict.fromkeys(["body", "status"])
+            url = f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair'
+
+            try:
+                response = await self._session.post(url, json=payload, headers=self._get_request_headers(), ssl=False)
+            except aiohttp.ClientConnectionError as err:
+                logger.error(f"A connection error happened while trying to connect to Bruin API. Cause: {err}")
+                return_response["body"] = f"Connection error in Bruin API. Cause: {err}"
+                return_response["status"] = 500
+                return return_response
+
+            status_code = response.status
+            if status_code in range(200, 300):
+                response_json = await response.json()
+                logger.info(f"Got HTTP {status_code} from Bruin when posting outage ticket with payload "
+                            f"{json.dumps(payload)}. Response body: {response_json}")
+
+                return_response["body"] = response_json
+                return_response["status"] = status_code
+
+            if status_code == 400:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = status_code
+                logger.error(
+                    f"Got HTTP 400 from Bruin when posting outage ticket with payload {json.dumps(payload)}. "
+                    f"Reason: {response_json}"
+                )
+
+            if status_code == 401:
+                logger.info("Got HTTP 401 from Bruin.")
+                await self.login()
+                return_response["body"] = BRUIN_401_RESPONSE
+                return_response["status"] = response.status
+
+            if status_code == 403:
+                return_response[
+                    "body"
+                ] = f"Permissions to create a new outage ticket with payload {json.dumps(payload)} were not granted"
+                return_response["status"] = status_code
+                logger.error(
+                    "Got HTTP 403 from Bruin. Bruin client doesn't have permissions to post a new outage ticket with "
+                    f"payload {json.dumps(payload)}"
+                )
+
+            if status_code == 404:
+                logger.error(f"Got HTTP 404 from Bruin when posting outage ticket. Payload: {json.dumps(payload)}")
+                return_response["body"] = f"Check mistypings in URL: {url}"
+                return_response["status"] = status_code
+
+            if status_code in range(500, 514):
+                logger.error(
+                    f"Got HTTP {status_code} from Bruin when posting outage ticket with payload {json.dumps(payload)}. "
+                )
+                return_response["body"] = BRUIN_500_RESPONSE
+                return_response["status"] = 500
+
+            return return_response
+
+        except Exception as e:
+            return {"body": e.args[0], "status": 500}
+
     async def get_client_info(self, filters):
         try:
             logger.info(f"Getting Bruin client ID for filters: {filters}")

@@ -46,11 +46,17 @@ class PostOutageTicket:
 
         ticket_contact = msg_data.get("ticket_contact")
         interfaces = msg_data.get("interfaces")
+        get_full_response = msg_data.get("get_full_response", False)
 
         logger.info(f"Posting outage ticket with payload: {json.dumps(payload)}")
-        outage_ticket = await self._bruin_repository.post_outage_ticket(
-            client_id, service_number, ticket_contact=ticket_contact, interfaces=interfaces
-        )
+        if get_full_response:
+            outage_ticket = await self._bruin_repository.post_outage_ticket_full_response(
+                client_id, service_number, ticket_contact=ticket_contact, interfaces=interfaces
+            )
+        else:
+            outage_ticket = await self._bruin_repository.post_outage_ticket(
+                client_id, service_number, ticket_contact=ticket_contact, interfaces=interfaces
+            )
 
         logger.info(f"Outage ticket posted using parameters {json.dumps(payload)}")
         response["body"] = outage_ticket["body"]
