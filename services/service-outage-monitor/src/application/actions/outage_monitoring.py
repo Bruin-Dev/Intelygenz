@@ -1746,6 +1746,13 @@ class OutageMonitor:
             ticket_id = edge_item["ticketId"]
             ticket_creation_response_status = edge_item["errorCode"]
 
+            if not ticket_creation_response_status and ticket_id == 0:
+                logger.error(
+                    f"Bruin reported a ticket ID = 0 after SO ticket creation for device {serial_number}."
+                    f" This functionality might be temporarily unavailable."
+                )
+                return
+
             ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
 
             if (ticket_creation_response_status in range(200, 300)
@@ -2115,11 +2122,6 @@ class OutageMonitor:
                                 f"Reminder note of edge {serial_number} could not be appended to ticket"
                                 f" {ticket_id}!"
                             )
-            elif not ticket_creation_response_status and ticket_id == 0:
-                logger.error(
-                    f"Bruin reported a ticket ID = 0 after SO ticket creation for device {serial_number}."
-                    f" This functionality might be temporarily unavailable."
-                )
 
             if interface_items:
                 if ticket_details_response["status"] not in range(200, 300):
