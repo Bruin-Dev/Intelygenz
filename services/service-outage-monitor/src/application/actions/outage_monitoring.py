@@ -1748,7 +1748,8 @@ class OutageMonitor:
 
             ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
 
-            if ticket_creation_response_status in range(200, 300) or (ticket_creation_response_status is None and ticket_id != 0):
+            if (ticket_creation_response_status in range(200, 300)
+                    or (ticket_creation_response_status is None and ticket_id != 0)):
                 logger.info(
                     f"[{outage_type.value}] Successfully created outage ticket for edge {edge}. Ticket ID: {ticket_id}"
                 )
