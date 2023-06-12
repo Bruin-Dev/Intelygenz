@@ -351,6 +351,7 @@ class BruinRepository:
                 "client_id": client_id,
                 "service_number": service_number,
                 "interfaces": interfaces,
+                "get_full_response": True,
             },
         }
 

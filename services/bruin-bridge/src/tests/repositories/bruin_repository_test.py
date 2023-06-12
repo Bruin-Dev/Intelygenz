@@ -900,6 +900,42 @@ class TestBruinRepository:
         assert result == {"body": ticket_id, "status": response_status}
 
     @pytest.mark.asyncio
+    async def post_outage_ticket_full_response_with_2XX_status_code_test(self):
+        client_id = 9994
+        ticket_contact = None
+        service_number = "VC05400002265"
+        interfaces = ["GE1", "GE2"]
+
+        ticket_id = 4503440
+        response_status = 200
+        client_response = {
+            "body": {
+                "ticketId": ticket_id,
+                "inventoryId": 12796795,
+                "wtn": service_number,
+                "errorMessage": None,
+                "errorCode": 0,
+            },
+            "status": response_status,
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.post_outage_ticket_full_response = AsyncMock(return_value=client_response)
+
+        bruin_repository = BruinRepository(config, bruin_client)
+
+        result = await bruin_repository.post_outage_ticket_full_response(
+            client_id, service_number, ticket_contact, interfaces
+        )
+
+        bruin_client.post_outage_ticket_full_response.assert_awaited_once_with(
+            client_id, service_number, ticket_contact, interfaces
+        )
+        assert result == {"body": client_response["body"], "status": response_status}
+
+    @pytest.mark.asyncio
     async def post_outage_ticket_with_2xx_status_code_and_ticket_id_value_zero_test(self):
         client_id = 9994
         ticket_contact = None

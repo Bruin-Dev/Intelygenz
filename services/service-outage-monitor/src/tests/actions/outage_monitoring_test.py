@@ -1700,10 +1700,22 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = AsyncMock()
         forward_time = outage_monitor._config.MONITOR_CONFIG["jobs_intervals"]["forward_to_hnoc_edge_down"]
         outage_monitor._get_hnoc_forward_time_by_outage_type = Mock(return_value=forward_time)
-        ticket_id = 12345
-        create_outage_ticket_response = {"status": 200, "body": ticket_id}
+        create_outage_ticket_response_body = {
+            'message': None,
+            'items': [
+                {
+                    'ticketId': 12345,
+                    'inventoryId': 13556288,
+                    'wtn': edge_1_serial,
+                    'errorMessage': None,
+                    'errorCode': None
+                }
+            ]
+        }
+        create_outage_ticket_response = {"status": 200, "body": create_outage_ticket_response_body}
         outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(
             return_value=create_outage_ticket_response)
+        outage_monitor._bruin_repository.get_ticket_details = AsyncMock()
         send_edge_is_down_email_notification_response = {"status": 200, "body": {}}
         outage_monitor._bruin_repository.send_edge_is_down_email_notification = AsyncMock(
             return_value=send_edge_is_down_email_notification_response)
@@ -1736,7 +1748,7 @@ class TestServiceOutageMonitor:
             )
             outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
             outage_monitor._bruin_repository.send_edge_is_down_email_notification.assert_awaited_once_with(
-                ticket_id, edge_1_serial
+                create_outage_ticket_response_body["items"][0]["ticketId"], edge_1_serial
             )
 
     @pytest.mark.asyncio
@@ -3538,7 +3550,8 @@ class TestServiceOutageMonitor:
                     {
                         "interface_name": "REX",
                         "logical_id": "00:22:83:45:e8:fe:0000",
-                        "access_type": "Wireless"
+                        "access_type": "Wireless",
+                        "service_number": serial_number_1,
                     }
                 ]
             },
@@ -3697,7 +3710,8 @@ class TestServiceOutageMonitor:
                     {
                         "interface_name": "REX",
                         "logical_id": "00:22:83:45:e8:fe:0000",
-                        "access_type": "Wireless"
+                        "access_type": "Wireless",
+                        "service_number": serial_number_1,
                     }
                 ]
             },
@@ -3863,7 +3877,8 @@ class TestServiceOutageMonitor:
                     {
                         "interface_name": "REX",
                         "logical_id": "00:22:83:45:e8:fe:0000",
-                        "access_type": "Wireless"
+                        "access_type": "Wireless",
+                        "service_number": serial_number_1,
                     }
                 ]
             },
@@ -4026,7 +4041,8 @@ class TestServiceOutageMonitor:
                     {
                         "interface_name": "REX",
                         "logical_id": "00:22:83:45:e8:fe:0000",
-                        "access_type": "Wireless"
+                        "access_type": "Wireless",
+                        "service_number": serial_number_1,
                     }
                 ]
             },
@@ -4200,7 +4216,8 @@ class TestServiceOutageMonitor:
                     {
                         "interface_name": "REX",
                         "logical_id": "00:22:83:45:e8:fe:0000",
-                        "access_type": "Wireless"
+                        "access_type": "Wireless",
+                        "service_number": serial_number_1,
                     }
                 ]
             },
@@ -4337,24 +4354,11 @@ class TestServiceOutageMonitor:
             "body": "Got internal error from Bruin",
             "status": 500,
         }
-        get_ticket_detail_ids_by_ticket_detail_interfaces_response = {
-            "status": 200,
-            "body": {
-                "results": [
-                    {
-                        "ticketDetailId": outage_ticket_detail_2_id,
-                        "interface": interface,
-                    }
-                ]
-            }
-        }
         outage_monitor._bruin_repository.get_open_outage_tickets = AsyncMock(return_value=outage_ticket_response)
         outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         outage_monitor._bruin_repository.unpause_ticket_detail = AsyncMock()
         outage_monitor._bruin_repository.resolve_ticket = AsyncMock(return_value=resolve_outage_ticket_response)
         outage_monitor._bruin_repository.append_autoresolve_note_to_ticket = AsyncMock()
-        outage_monitor._bruin_repository.get_ticket_detail_ids_by_ticket_detail_interfaces = AsyncMock(
-            return_value=get_ticket_detail_ids_by_ticket_detail_interfaces_response)
         outage_monitor._outage_repository.is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
@@ -4413,7 +4417,8 @@ class TestServiceOutageMonitor:
                     {
                         "interface_name": "REX",
                         "logical_id": "00:22:83:45:e8:fe:0000",
-                        "access_type": "Wireless"
+                        "access_type": "Wireless",
+                        "service_number": serial_number_2,
                     }
                 ]
             },
@@ -4544,17 +4549,6 @@ class TestServiceOutageMonitor:
             "body": "ok",
             "status": 200,
         }
-        get_ticket_detail_ids_by_ticket_detail_interfaces_response = {
-            "status": 200,
-            "body": {
-                "results": [
-                    {
-                        "ticketDetailId": outage_ticket_detail_2_id,
-                        "interface": interface,
-                    }
-                ]
-            }
-        }
         task_type = TaskTypes.TICKET_FORWARDS
         task_key = f"{outage_ticket_1_id}-{serial_number_1}-{outage_ticket_detail_2_id}-{ForwardQueues.WORKER.name}"
 
@@ -4563,8 +4557,6 @@ class TestServiceOutageMonitor:
         outage_monitor._bruin_repository.unpause_ticket_detail = AsyncMock()
         outage_monitor._bruin_repository.resolve_ticket = AsyncMock(return_value=resolve_outage_ticket_response)
         outage_monitor._bruin_repository.append_autoresolve_note_to_ticket = AsyncMock()
-        outage_monitor._bruin_repository.get_ticket_detail_ids_by_ticket_detail_interfaces = AsyncMock(
-            return_value=get_ticket_detail_ids_by_ticket_detail_interfaces_response)
         outage_monitor._outage_repository.is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
@@ -4616,7 +4608,8 @@ class TestServiceOutageMonitor:
                     {
                         "interface_name": "REX",
                         "logical_id": "00:22:83:45:e8:fe:0000",
-                        "access_type": "Wireless"
+                        "access_type": "Wireless",
+                        "service_number": "VC9999998"
                     }
                 ]
             },
@@ -4753,10 +4746,6 @@ class TestServiceOutageMonitor:
             "body": "ok",
             "status": 200,
         }
-        get_ticket_detail_ids_by_ticket_detail_interfaces_response = {
-            "status": 500,
-            "body": "Bruin Internal Server Error",
-        }
         resolved_interfaces = []
         task_type = TaskTypes.TICKET_FORWARDS
         task_key = f"{outage_ticket_1_id}-{serial_number_1}-{ForwardQueues.HNOC.name}"
@@ -4766,8 +4755,6 @@ class TestServiceOutageMonitor:
         outage_monitor._bruin_repository.unpause_ticket_detail = AsyncMock()
         outage_monitor._bruin_repository.resolve_ticket = AsyncMock(return_value=resolve_outage_ticket_response)
         outage_monitor._bruin_repository.append_autoresolve_note_to_ticket = AsyncMock()
-        outage_monitor._bruin_repository.get_ticket_detail_ids_by_ticket_detail_interfaces = AsyncMock(
-            return_value=get_ticket_detail_ids_by_ticket_detail_interfaces_response)
         outage_monitor._outage_repository.is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
@@ -4829,7 +4816,8 @@ class TestServiceOutageMonitor:
                     {
                         "interface_name": "REX",
                         "logical_id": "00:22:83:45:e8:fe:0000",
-                        "access_type": "Wireless"
+                        "access_type": "Wireless",
+                        "service_number": serial_number_2,
                     }
                 ]
             },
@@ -4966,17 +4954,6 @@ class TestServiceOutageMonitor:
             "body": "ok",
             "status": 200,
         }
-        get_ticket_detail_ids_by_ticket_detail_interfaces_response = {
-            "status": 200,
-            "body": {
-                "results": [
-                    {
-                        "ticketDetailId": outage_ticket_detail_2_id,
-                        "interface": interface,
-                    }
-                ]
-            }
-        }
         task_type = TaskTypes.TICKET_FORWARDS
         task_key = f"{outage_ticket_1_id}-{serial_number_1}-{outage_ticket_detail_2_id}-{ForwardQueues.WORKER.name}"
 
@@ -4985,8 +4962,6 @@ class TestServiceOutageMonitor:
         outage_monitor._bruin_repository.unpause_ticket_detail = AsyncMock()
         outage_monitor._bruin_repository.resolve_ticket = AsyncMock(return_value=resolve_outage_ticket_response)
         outage_monitor._bruin_repository.append_autoresolve_note_to_ticket = AsyncMock()
-        outage_monitor._bruin_repository.get_ticket_detail_ids_by_ticket_detail_interfaces = AsyncMock(
-            return_value=get_ticket_detail_ids_by_ticket_detail_interfaces_response)
         outage_monitor._outage_repository.is_outage_ticket_detail_auto_resolvable = Mock(return_value=True)
         outage_monitor._autoresolve_serials_whitelist = {serial_number_1}
         outage_monitor._was_ticket_created_by_automation_engine = Mock(return_value=True)
@@ -6000,11 +5975,10 @@ class TestServiceOutageMonitor:
         enterprise_id = 1
         edge_id = 1
         edge_full_id = {"host": velocloud_host, "enterprise_id": enterprise_id, "edge_id": edge_id}
-        logical_id_list = [{"interface_name": "REX", "logical_id": "123"}]
+        logical_id_list = [{"interface_name": "REX", "logical_id": "123", "service_number": edge_standby_serial}]
         links_configuration = []
         client_id = 9994
         client_name = "METTEL/NEW YORK"
-        serial_number_2 = "VC9999999"
         bruin_client_info = {
             "client_id": client_id,
             "client_name": client_name,
@@ -6145,11 +6119,27 @@ class TestServiceOutageMonitor:
 
         edges_in_same_outage_state = [new_primary_edge_full_info]
         ticket_id = 12345
-        ticket_creation_response = {
-            "request_id": uuid_,
-            "body": ticket_id,
-            "status": 200,
+        create_outage_ticket_response_body = {
+            'message': None,
+            'items': [
+                {
+                    'ticketId': ticket_id,
+                    'inventoryId': 13556288,
+                    'wtn': edge_primary_serial,
+                    'errorMessage': None,
+                    'errorCode': None
+                },
+                {
+                    'ticketId': ticket_id,
+                    'inventoryId': 13556289,
+                    'wtn': edge_standby_serial,
+                    'errorMessage': None,
+                    'errorCode': None
+                }
+            ]
         }
+        interface_items = [create_outage_ticket_response_body["items"][1]]
+        create_outage_ticket_response = {"status": 200, "body": create_outage_ticket_response_body}
 
         outage_ticket_detail_1_id = 2746937
         outage_ticket_detail_2_id = 2746938
@@ -6162,7 +6152,7 @@ class TestServiceOutageMonitor:
         }
         outage_ticket_detail_2 = {
             "detailID": outage_ticket_detail_2_id,
-            "detailValue": serial_number_2,
+            "detailValue": edge_standby_serial,
             "detailStatus": "I",
             "currentTaskName": "IPA Investigate",
             "assignedToName": "0",
@@ -6171,17 +6161,6 @@ class TestServiceOutageMonitor:
             outage_ticket_detail_1,
             outage_ticket_detail_2,
         ]
-        get_ticket_detail_ids_by_ticket_detail_interfaces_response = {
-            "status": 200,
-            "body": {
-                "results": [
-                    {
-                        "ticketDetailId": outage_ticket_detail_2_id,
-                        "interface": interface,
-                    }
-                ]
-            }
-        }
         ticket_details_response = {
             "body": {
                 "ticketDetails": ticketDetails,
@@ -6189,7 +6168,6 @@ class TestServiceOutageMonitor:
             },
             "status": 200,
         }
-        open_ticket_line_details = [outage_ticket_detail_2]
         outage_monitor._velocloud_repository.get_links_with_edge_info = AsyncMock(
             return_value=links_with_edge_info_response
         )
@@ -6197,11 +6175,9 @@ class TestServiceOutageMonitor:
             return_value=network_enterprises_response
         )
         outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
-        outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=ticket_creation_response)
+        outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=create_outage_ticket_response)
         outage_monitor._bruin_repository.send_initial_email_milestone_notification = AsyncMock()
         outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
-        outage_monitor._bruin_repository.get_ticket_detail_ids_by_ticket_detail_interfaces = AsyncMock(
-            return_value=get_ticket_detail_ids_by_ticket_detail_interfaces_response)
         outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
         outage_monitor._outage_repository.is_edge_up = Mock(return_value=False)
         outage_monitor._notifications_repository.send_slack_message = AsyncMock()
@@ -6268,18 +6244,7 @@ class TestServiceOutageMonitor:
             has_faulty_byob_link,
             faulty_link_types,
             ticket_details_response,
-            open_ticket_line_details,
-        )
-        outage_monitor._bruin_repository.get_ticket_detail_ids_by_ticket_detail_interfaces.assert_awaited_once_with(
-            ticket_id,
-            outage_ticket_detail_1_id,
-            faulty_link_interfaces,
-        )
-        outage_monitor._get_open_ticket_line_details.assert_awaited_once_with(
-            ticket_id,
-            edge_primary_serial,
-            faulty_link_interfaces,
-            ticket_details_response,
+            interface_items,
         )
         outage_monitor._task_dispatcher_client.schedule_task.assert_called_once()
         outage_monitor._check_for_digi_reboot.assert_awaited_once_with(
@@ -6313,7 +6278,7 @@ class TestServiceOutageMonitor:
         enterprise_id = 1
         edge_id = 1
         edge_full_id = {"host": velocloud_host, "enterprise_id": enterprise_id, "edge_id": edge_id}
-        logical_id_list = [{"interface_name": "REX", "logical_id": "123"}]
+        logical_id_list = [{"interface_name": "REX", "logical_id": "123", "service_number": edge_standby_serial}]
         links_configuration = []
 
         client_id = 9994
@@ -6453,11 +6418,26 @@ class TestServiceOutageMonitor:
         ]
         edges_in_same_outage_state = [new_primary_edge_full_info]
         ticket_id = 12345
-        ticket_creation_response = {
-            "request_id": uuid_,
-            "body": ticket_id,
-            "status": 200,
+        create_outage_ticket_response_body = {
+            'message': None,
+            'items': [
+                {
+                    'ticketId': ticket_id,
+                    'inventoryId': 13556288,
+                    'wtn': edge_primary_serial,
+                    'errorMessage': None,
+                    'errorCode': None
+                },
+                {
+                    'ticketId': ticket_id,
+                    'inventoryId': 13556289,
+                    'wtn': edge_standby_serial,
+                    'errorMessage': None,
+                    'errorCode': None
+                }
+            ]
         }
+        create_outage_ticket_response = {"status": 200, "body": create_outage_ticket_response_body}
         ticket_details_response = {"status": 200, }
         outage_monitor._velocloud_repository.get_links_with_edge_info = AsyncMock(
             return_value=links_with_edge_info_response
@@ -6466,7 +6446,7 @@ class TestServiceOutageMonitor:
             return_value=network_enterprises_response
         )
         outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
-        outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=ticket_creation_response)
+        outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=create_outage_ticket_response)
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = (
             bruin_generic_200_response
         )
@@ -6547,7 +6527,7 @@ class TestServiceOutageMonitor:
         enterprise_id = 1
         edge_id = 1
         edge_full_id = {"host": velocloud_host, "enterprise_id": enterprise_id, "edge_id": edge_id}
-        logical_id_list = [{"interface_name": "REX", "logical_id": "123"}]
+        logical_id_list = [{"interface_name": "REX", "logical_id": "123", "service_number": edge_standby_serial}]
         links_configuration = []
 
         client_id = 9994
@@ -6687,11 +6667,26 @@ class TestServiceOutageMonitor:
         ]
         edges_in_same_outage_state = [new_primary_edge_full_info]
         ticket_id = 12345
-        ticket_creation_response = {
-            "request_id": uuid_,
-            "body": ticket_id,
-            "status": 200,
+        create_outage_ticket_response_body = {
+            'message': None,
+            'items': [
+                {
+                    'ticketId': ticket_id,
+                    'inventoryId': 13556288,
+                    'wtn': edge_primary_serial,
+                    'errorMessage': None,
+                    'errorCode': None
+                },
+                {
+                    'ticketId': ticket_id,
+                    'inventoryId': 13556289,
+                    'wtn': edge_standby_serial,
+                    'errorMessage': None,
+                    'errorCode': None
+                }
+            ]
         }
+        create_outage_ticket_response = {"status": 200, "body": create_outage_ticket_response_body}
         ticket_details_response = {"status": 200, }
         outage_monitor._velocloud_repository.get_links_with_edge_info = AsyncMock(
             return_value=links_with_edge_info_response
@@ -6700,7 +6695,7 @@ class TestServiceOutageMonitor:
             return_value=network_enterprises_response
         )
         outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
-        outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=ticket_creation_response)
+        outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=create_outage_ticket_response)
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = bruin_500_response
         outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
@@ -6780,7 +6775,7 @@ class TestServiceOutageMonitor:
         enterprise_id = 1
         edge_id = 1
         edge_full_id = {"host": velocloud_host, "enterprise_id": enterprise_id, "edge_id": edge_id}
-        logical_id_list = [{"interface_name": "REX", "logical_id": "123"}]
+        logical_id_list = [{"interface_name": "REX", "logical_id": "123", "service_number": edge_standby_serial}]
         links_configuration = []
 
         client_id = 9994
@@ -6925,11 +6920,26 @@ class TestServiceOutageMonitor:
 
         edges_in_same_outage_state = [new_primary_edge_full_info]
         ticket_id = 12345
-        ticket_creation_response = {
-            "request_id": uuid_,
-            "body": ticket_id,
-            "status": 409,
+        create_outage_ticket_response_body = {
+            'message': None,
+            'items': [
+                {
+                    'ticketId': ticket_id,
+                    'inventoryId': 13556288,
+                    'wtn': edge_primary_serial,
+                    'errorMessage': "Warning: Ticket already exists. We'll add an additional line",
+                    'errorCode': 409
+                },
+                {
+                    'ticketId': ticket_id,
+                    'inventoryId': 13556289,
+                    'wtn': edge_standby_serial,
+                    'errorMessage': None,
+                    'errorCode': None
+                }
+            ]
         }
+        create_outage_ticket_response = {"status": 200, "body": create_outage_ticket_response_body}
         ticket_details_response = {"status": 200, }
         wait_seconds_until_forward = outage_monitor._config.MONITOR_CONFIG["autoresolve"]["last_outage_seconds"]["day"]
         forward_time = wait_seconds_until_forward / 60
@@ -6940,7 +6950,7 @@ class TestServiceOutageMonitor:
             return_value=network_enterprises_response
         )
         outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
-        outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=ticket_creation_response)
+        outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=create_outage_ticket_response)
         outage_monitor._bruin_repository.send_initial_email_milestone_notification = AsyncMock()
         outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
@@ -7037,7 +7047,7 @@ class TestServiceOutageMonitor:
         enterprise_id = 1
         edge_id = 1
         edge_full_id = {"host": velocloud_host, "enterprise_id": enterprise_id, "edge_id": edge_id}
-        logical_id_list = [{"interface_name": "REX", "logical_id": "123"}]
+        logical_id_list = [{"interface_name": "REX", "logical_id": "123", "service_number": edge_standby_serial}]
         links_configuration = []
 
         client_id = 9994
@@ -7178,11 +7188,26 @@ class TestServiceOutageMonitor:
         ]
         edges_in_same_outage_state = [new_primary_edge_full_info]
         ticket_id = 12345
-        ticket_creation_response = {
-            "request_id": uuid_,
-            "body": ticket_id,
-            "status": 409,
+        create_outage_ticket_response_body = {
+            'message': None,
+            'items': [
+                {
+                    'ticketId': ticket_id,
+                    'inventoryId': 13556288,
+                    'wtn': edge_primary_serial,
+                    'errorMessage': "Warning: Ticket already exists. We'll add an additional line",
+                    'errorCode': 409
+                },
+                {
+                    'ticketId': ticket_id,
+                    'inventoryId': 13556289,
+                    'wtn': edge_standby_serial,
+                    'errorMessage': "Warning: Ticket already exists. We'll add an additional line",
+                    'errorCode': 409
+                }
+            ]
         }
+        create_outage_ticket_response = {"status": 200, "body": create_outage_ticket_response_body}
         ticket_details_response = {
             "request_id": uuid_,
             "body": {"ticketDetails": [], "ticketNotes": []},
@@ -7196,7 +7221,7 @@ class TestServiceOutageMonitor:
             return_value=network_enterprises_response
         )
         outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
-        outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=ticket_creation_response)
+        outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=create_outage_ticket_response)
         outage_monitor._bruin_repository.send_initial_email_milestone_notification = AsyncMock()
         outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
@@ -7276,7 +7301,7 @@ class TestServiceOutageMonitor:
         enterprise_id = 1
         edge_id = 1
         edge_full_id = {"host": velocloud_host, "enterprise_id": enterprise_id, "edge_id": edge_id}
-        logical_id_list = [{"interface_name": "REX", "logical_id": "123"}]
+        logical_id_list = [{"interface_name": "REX", "logical_id": "123", "service_number": edge_standby_serial}]
         links_configuration = []
 
         client_id = 9994
@@ -7420,11 +7445,26 @@ class TestServiceOutageMonitor:
         ]
         edges_in_same_outage_state = [new_primary_edge_full_info]
         ticket_id = 12345
-        ticket_creation_response = {
-            "request_id": uuid_,
-            "body": ticket_id,
-            "status": 471,
+        create_outage_ticket_response_body = {
+            'message': None,
+            'items': [
+                {
+                    'ticketId': ticket_id,
+                    'inventoryId': 13556288,
+                    'wtn': edge_primary_serial,
+                    'errorMessage': "Message here",
+                    'errorCode': 471
+                },
+                {
+                    'ticketId': ticket_id,
+                    'inventoryId': 13556289,
+                    'wtn': edge_standby_serial,
+                    'errorMessage': "Message here",
+                    'errorCode': 471
+                }
+            ]
         }
+        create_outage_ticket_response = {"status": 200, "body": create_outage_ticket_response_body}
         ticket_details_response = {"status": 200, }
         outage_monitor._velocloud_repository.get_links_with_edge_info = AsyncMock(
             return_value=links_with_edge_info_response
@@ -7433,7 +7473,7 @@ class TestServiceOutageMonitor:
             return_value=network_enterprises_response
         )
         outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
-        outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=ticket_creation_response)
+        outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=create_outage_ticket_response)
         outage_monitor._bruin_repository.send_initial_email_milestone_notification = AsyncMock()
         outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
@@ -7515,7 +7555,7 @@ class TestServiceOutageMonitor:
         enterprise_id = 1
         edge_id = 1
         edge_full_id = {"host": velocloud_host, "enterprise_id": enterprise_id, "edge_id": edge_id}
-        logical_id_list = [{"interface_name": "REX", "logical_id": "123"}]
+        logical_id_list = [{"interface_name": "REX", "logical_id": "123", "service_number": edge_standby_serial}]
         links_configuration = []
 
         client_id = 9994
@@ -7655,11 +7695,26 @@ class TestServiceOutageMonitor:
         ]
         edges_in_same_outage_state = [new_primary_edge_full_info]
         ticket_id = 12345
-        ticket_creation_response = {
-            "request_id": uuid_,
-            "body": ticket_id,
-            "status": 471,
+        create_outage_ticket_response_body = {
+            'message': None,
+            'items': [
+                {
+                    'ticketId': ticket_id,
+                    'inventoryId': 13556288,
+                    'wtn': edge_primary_serial,
+                    'errorMessage': "Warning",
+                    'errorCode': 471
+                },
+                {
+                    'ticketId': ticket_id,
+                    'inventoryId': 13556289,
+                    'wtn': edge_standby_serial,
+                    'errorMessage': None,
+                    'errorCode': None
+                }
+            ]
         }
+        create_outage_ticket_response = {"status": 200, "body": create_outage_ticket_response_body}
         ticket_details_response = {"status": 200, }
         outage_monitor._velocloud_repository.get_links_with_edge_info = AsyncMock(
             return_value=links_with_edge_info_response
@@ -7668,7 +7723,7 @@ class TestServiceOutageMonitor:
             return_value=network_enterprises_response
         )
         outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
-        outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=ticket_creation_response)
+        outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=create_outage_ticket_response)
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = (
             bruin_generic_200_response
         )
@@ -7745,7 +7800,7 @@ class TestServiceOutageMonitor:
         enterprise_id = 1
         edge_id = 1
         edge_full_id = {"host": velocloud_host, "enterprise_id": enterprise_id, "edge_id": edge_id}
-        logical_id_list = [{"interface_name": "REX", "logical_id": "123"}]
+        logical_id_list = [{"interface_name": "REX", "logical_id": "123", "service_number": edge_standby_serial}]
         links_configuration = []
 
         client_id = 9994
@@ -7886,11 +7941,26 @@ class TestServiceOutageMonitor:
         ]
         edges_in_same_outage_state = [new_primary_edge_full_info]
         ticket_id = 12345
-        ticket_creation_response = {
-            "request_id": uuid_,
-            "body": ticket_id,
-            "status": 472,
+        create_outage_ticket_response_body = {
+            'message': None,
+            'items': [
+                {
+                    'ticketId': ticket_id,
+                    'inventoryId': 13556288,
+                    'wtn': edge_primary_serial,
+                    'errorMessage': 'Warning: We unresolved this line',
+                    'errorCode': 472
+                },
+                {
+                    'ticketId': ticket_id,
+                    'inventoryId': 13556289,
+                    'wtn': edge_standby_serial,
+                    'errorMessage': None,
+                    'errorCode': None
+                }
+            ]
         }
+        create_outage_ticket_response = {"status": 200, "body": create_outage_ticket_response_body}
         ticket_details_response = {"status": 200, }
         wait_seconds_until_forward = testconfig.MONITOR_CONFIG["autoresolve"]["last_outage_seconds"]["day"]
         forward_time = wait_seconds_until_forward / 60
@@ -7901,7 +7971,7 @@ class TestServiceOutageMonitor:
             return_value=network_enterprises_response
         )
         outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
-        outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=ticket_creation_response)
+        outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=create_outage_ticket_response)
         outage_monitor._bruin_repository.send_initial_email_milestone_notification = AsyncMock()
         outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
@@ -7983,7 +8053,7 @@ class TestServiceOutageMonitor:
         enterprise_id = 1
         edge_id = 1
         edge_full_id = {"host": velocloud_host, "enterprise_id": enterprise_id, "edge_id": edge_id}
-        logical_id_list = [{"interface_name": "REX", "logical_id": "123"}]
+        logical_id_list = [{"interface_name": "REX", "logical_id": "123", "service_number": edge_standby_serial}]
         links_configuration = []
 
         client_id = 9994
@@ -8123,11 +8193,26 @@ class TestServiceOutageMonitor:
         ]
         edges_in_same_outage_state = [new_primary_edge_full_info]
         ticket_id = 12345
-        ticket_creation_response = {
-            "request_id": uuid_,
-            "body": ticket_id,
-            "status": 472,
+        create_outage_ticket_response_body = {
+            'message': None,
+            'items': [
+                {
+                    'ticketId': ticket_id,
+                    'inventoryId': 13556288,
+                    'wtn': edge_primary_serial,
+                    'errorMessage': 'Warning: We unresolved this line',
+                    'errorCode': 472
+                },
+                {
+                    'ticketId': ticket_id,
+                    'inventoryId': 13556289,
+                    'wtn': edge_standby_serial,
+                    'errorMessage': None,
+                    'errorCode': None
+                }
+            ]
         }
+        create_outage_ticket_response = {"status": 200, "body": create_outage_ticket_response_body}
         ticket_details_response = {"status": 200, }
         wait_seconds_until_forward = testconfig.MONITOR_CONFIG["autoresolve"]["last_outage_seconds"]["day"]
         outage_monitor._velocloud_repository.get_links_with_edge_info = AsyncMock(
@@ -8137,7 +8222,7 @@ class TestServiceOutageMonitor:
             return_value=network_enterprises_response
         )
         outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
-        outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=ticket_creation_response)
+        outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=create_outage_ticket_response)
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = (
             bruin_generic_200_response
         )
@@ -8212,7 +8297,7 @@ class TestServiceOutageMonitor:
         enterprise_id = 1
         edge_id = 1
         edge_full_id = {"host": velocloud_host, "enterprise_id": enterprise_id, "edge_id": edge_id}
-        logical_id_list = [{"interface_name": "REX", "logical_id": "123"}]
+        logical_id_list = [{"interface_name": "REX", "logical_id": "123", "service_number": edge_standby_serial}]
         links_configuration = []
 
         client_id = 9994
@@ -8353,11 +8438,26 @@ class TestServiceOutageMonitor:
         ]
         edges_in_same_outage_state = [new_primary_edge_full_info]
         ticket_id = 12345
-        ticket_creation_response = {
-            "request_id": uuid_,
-            "body": ticket_id,
-            "status": 473,
+        create_outage_ticket_response_body = {
+            'message': None,
+            'items': [
+                {
+                    'ticketId': ticket_id,
+                    'inventoryId': 13556288,
+                    'wtn': edge_primary_serial,
+                    'errorMessage': 'Warning: We unresolved this line',
+                    'errorCode': 473
+                },
+                {
+                    'ticketId': ticket_id,
+                    'inventoryId': 13556289,
+                    'wtn': edge_standby_serial,
+                    'errorMessage': None,
+                    'errorCode': None
+                }
+            ]
         }
+        create_outage_ticket_response = {"status": 200, "body": create_outage_ticket_response_body}
         ticket_details_response = {"status": 200, }
         outage_monitor._velocloud_repository.get_links_with_edge_info = AsyncMock(
             return_value=links_with_edge_info_response
@@ -8366,7 +8466,7 @@ class TestServiceOutageMonitor:
             return_value=network_enterprises_response
         )
         outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
-        outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=ticket_creation_response)
+        outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=create_outage_ticket_response)
         outage_monitor._bruin_repository.send_initial_email_milestone_notification = AsyncMock()
         outage_monitor._bruin_repository.get_ticket_details = AsyncMock(return_value=ticket_details_response)
         outage_monitor._outage_repository.filter_edges_by_outage_type = Mock(return_value=edges_in_same_outage_state)
@@ -8446,7 +8546,7 @@ class TestServiceOutageMonitor:
         enterprise_id = 1
         edge_id = 1
         edge_full_id = {"host": velocloud_host, "enterprise_id": enterprise_id, "edge_id": edge_id}
-        logical_id_list = [{"interface_name": "REX", "logical_id": "123"}]
+        logical_id_list = [{"interface_name": "REX", "logical_id": "123", "service_number": edge_standby_serial}]
         links_configuration = []
 
         client_id = 9994
@@ -8586,11 +8686,26 @@ class TestServiceOutageMonitor:
         ]
         edges_in_same_outage_state = [new_primary_edge_full_info]
         ticket_id = 12345
-        ticket_creation_response = {
-            "request_id": uuid_,
-            "body": ticket_id,
-            "status": 473,
+        create_outage_ticket_response_body = {
+            'message': None,
+            'items': [
+                {
+                    'ticketId': ticket_id,
+                    'inventoryId': 13556288,
+                    'wtn': edge_primary_serial,
+                    'errorMessage': 'Warning: We unresolved this line',
+                    'errorCode': 473
+                },
+                {
+                    'ticketId': ticket_id,
+                    'inventoryId': 13556289,
+                    'wtn': edge_standby_serial,
+                    'errorMessage': None,
+                    'errorCode': None
+                }
+            ]
         }
+        create_outage_ticket_response = {"status": 200, "body": create_outage_ticket_response_body}
         ticket_details_response = {"status": 200, }
         outage_monitor._velocloud_repository.get_links_with_edge_info = AsyncMock(
             return_value=links_with_edge_info_response
@@ -8599,7 +8714,7 @@ class TestServiceOutageMonitor:
             return_value=network_enterprises_response
         )
         outage_monitor._velocloud_repository.group_links_by_edge = Mock(return_value=new_links_grouped_by_edge)
-        outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=ticket_creation_response)
+        outage_monitor._bruin_repository.create_outage_ticket = AsyncMock(return_value=create_outage_ticket_response)
         outage_monitor._bruin_repository.send_initial_email_milestone_notification.return_value = (
             bruin_generic_200_response
         )
@@ -12886,28 +13001,15 @@ class TestServiceOutageMonitor:
         serial_number_1 = "VC1234567"
         serial_number_2 = "VC9999999"
         interface = "REX"
-        edge = {
-            "status": {
-                "host": "mettel.velocloud.net",
-                "enterpriseName": "Militaires Sans Frontières",
-                "enterpriseId": 1,
-                "enterpriseProxyId": None,
-                "enterpriseProxyName": None,
-                "edgeName": "Big Boss",
-                "edgeState": "CONNECTED",
-                "edgeId": 1,
-                "links": [
-                    {
-                        "displayName": "test name",
-                        "isp": None,
-                        "interface": "REX",
-                        "internalId": "00000001-ac48-47a0-81a7-80c8c320f486",
-                        "linkState": "DISCONNECTED",
-                    },
-                ],
-            },
-        }
-        outage_ticket_1_id = 1234
+        logical_ids_list = [
+            {
+                "interface_name": "REX",
+                "logical_id": "00:22:83:45:e8:fe:0000",
+                "access_type": "Wireless",
+                "service_number": serial_number_2,
+            }
+        ]
+
         outage_ticket_detail_1_id = 2746937
         outage_ticket_detail_2_id = 2746938
         outage_ticket_detail_1 = {
@@ -12928,17 +13030,6 @@ class TestServiceOutageMonitor:
             outage_ticket_detail_1,
             outage_ticket_detail_2,
         ]
-        get_ticket_detail_ids_by_ticket_detail_interfaces_response = {
-            "status": 200,
-            "body": {
-                "results": [
-                    {
-                        "ticketDetailId": outage_ticket_detail_2_id,
-                        "interface": interface,
-                    }
-                ]
-            }
-        }
 
         expexted_output = [
             {
@@ -12948,12 +13039,8 @@ class TestServiceOutageMonitor:
             }
         ]
 
-        outage_monitor._bruin_repository.get_ticket_detail_ids_by_ticket_detail_interfaces = AsyncMock(
-            return_value=get_ticket_detail_ids_by_ticket_detail_interfaces_response)
-
-        result = (await outage_monitor._get_detailIds_service_numbers_and_interfaces_mapping(
-            outage_ticket_1_id, outage_ticket_detail_1_id, edge["status"]["links"],
-            ticketDetails))
+        result = (outage_monitor._get_detailIds_service_numbers_and_interfaces_mapping(
+            logical_ids_list, [interface], ticketDetails))
 
         assert result == expexted_output
 
