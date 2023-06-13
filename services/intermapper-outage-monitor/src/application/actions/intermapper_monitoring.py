@@ -65,8 +65,9 @@ class InterMapperMonitor:
         ]
         logger.info(f"Scheduling InterMapper Monitor job for {observed_emails_list}")
 
-        try:
-            for observed_email in observed_emails_list:
+        for observed_email in observed_emails_list:
+            job_id = f"_intermapper_monitor_process_{observed_email}"
+            try:
                 self._scheduler.add_job(
                     self._intermapper_monitoring_process,
                     trigger="interval",
@@ -74,15 +75,15 @@ class InterMapperMonitor:
                     seconds=self._config.INTERMAPPER_CONFIG["monitoring_interval"],
                     next_run_time=next_run_time,
                     replace_existing=False,
-                    id=f"_intermapper_monitor_process_{observed_email}",
+                    id=job_id,
                 )
-        except ConflictingIdError as conflict:
-            logger.info(f"Skipping start of InterMapper Monitoring job. Reason: {conflict}")
+            except ConflictingIdError as conflict:
+                logger.info(f"Skipping start of InterMapper Monitoring job - {job_id}. Reason: {conflict}")
 
     async def _intermapper_monitoring_process(self, observed_email):
         logger.info(f'Processing all unread email from {observed_email}')
         start = time.time()
-        unread_emails_response = await self._email_repository.get_unread_emails()
+        unread_emails_response = await self._email_repository.get_unread_emails(observed_email)
         unread_emails_body = unread_emails_response["body"]
         unread_emails_status = unread_emails_response["status"]
 
