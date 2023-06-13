@@ -43,13 +43,16 @@ class TestInterMapperMonitor:
 
         await intermapper_monitor.start_intermapper_outage_monitoring()
 
+        observed_email = config.INTERMAPPER_CONFIG["inbox_email"]
+
         intermapper_monitor._scheduler.add_job.assert_called_once_with(
             intermapper_monitor._intermapper_monitoring_process,
-            "interval",
+            trigger="interval",
+            args=[observed_email],
             seconds=config.INTERMAPPER_CONFIG["monitoring_interval"],
             next_run_time=undefined,
             replace_existing=False,
-            id="_intermapper_monitor_process",
+            id=f"_intermapper_monitor_process_{observed_email}",
         )
 
     @pytest.mark.asyncio
@@ -63,13 +66,16 @@ class TestInterMapperMonitor:
             with patch.object(intermapper_monitor_module, "timezone", new=Mock()):
                 await intermapper_monitor.start_intermapper_outage_monitoring(exec_on_start=True)
 
+        observed_email = config.INTERMAPPER_CONFIG["inbox_email"]
+
         intermapper_monitor._scheduler.add_job.assert_called_once_with(
             intermapper_monitor._intermapper_monitoring_process,
-            "interval",
+            trigger="interval",
+            args=[observed_email],
             seconds=config.INTERMAPPER_CONFIG["monitoring_interval"],
             next_run_time=next_run_time,
             replace_existing=False,
-            id="_intermapper_monitor_process",
+            id=f"_intermapper_monitor_process_{observed_email}",
         )
 
     @pytest.mark.asyncio
@@ -82,17 +88,22 @@ class TestInterMapperMonitor:
         try:
             await intermapper_monitor.start_intermapper_outage_monitoring()
         except ConflictingIdError:
+            observed_email = config.INTERMAPPER_CONFIG["inbox_email"]
+
             intermapper_monitor._scheduler.add_job.assert_called_once_with(
                 intermapper_monitor._intermapper_monitoring_process,
-                "interval",
+                trigger="interval",
+                args=[observed_email],
                 seconds=config.INTERMAPPER_CONFIG["monitoring_interval"],
                 next_run_time=undefined,
                 replace_existing=False,
-                id="_intermapper_monitor_process",
+                id=f"_intermapper_monitor_process_{observed_email}",
             )
 
     @pytest.mark.asyncio
     async def intermapper_monitoring_process_test(self, intermapper_monitor):
+        config = testconfig
+        observed_email = config.INTERMAPPER_CONFIG["inbox_email"]
         circuit_id = "123"
 
         email_1 = {
@@ -115,10 +126,11 @@ class TestInterMapperMonitor:
         intermapper_monitor._email_repository.get_unread_emails = AsyncMock(return_value=response)
         intermapper_monitor._process_email_batch = AsyncMock()
 
-        await intermapper_monitor._intermapper_monitoring_process()
+        await intermapper_monitor._intermapper_monitoring_process(observed_email)
 
         intermapper_monitor._email_repository.get_unread_emails.assert_awaited_once()
-        intermapper_monitor._process_email_batch.assert_has_awaits([call(emails, circuit_id)], any_order=True)
+        intermapper_monitor._process_email_batch.assert_has_awaits(
+            [call(emails, circuit_id, observed_email)], any_order=True)
 
     def _group_emails_by_circuit_id_test(self, intermapper_monitor):
         circuit_id_1 = "123"
@@ -148,6 +160,8 @@ class TestInterMapperMonitor:
 
     @pytest.mark.asyncio
     async def process_email_batch_test(self, intermapper_monitor):
+        config = testconfig
+        observed_email = config.INTERMAPPER_CONFIG["inbox_email"]
         circuit_id = 3214
         client_id = 83959
 
@@ -174,18 +188,20 @@ class TestInterMapperMonitor:
         intermapper_monitor._bruin_repository.get_service_number_by_circuit_id = AsyncMock(return_value=response)
         intermapper_monitor._process_email = AsyncMock()
 
-        await intermapper_monitor._process_email_batch(emails, circuit_id)
+        await intermapper_monitor._process_email_batch(emails, circuit_id, observed_email)
 
         intermapper_monitor._bruin_repository.get_service_number_by_circuit_id.assert_awaited_with(circuit_id)
         intermapper_monitor._process_email.assert_has_awaits(
             [
-                call(email_1, circuit_id, client_id),
-                call(email_2, circuit_id, client_id),
+                call(email_1, circuit_id, client_id, observed_email),
+                call(email_2, circuit_id, client_id, observed_email),
             ]
         )
 
     @pytest.mark.asyncio
     async def process_email_batch_no_circuit_id_test(self, intermapper_monitor):
+        config = testconfig
+        observed_email = config.INTERMAPPER_CONFIG["inbox_email"]
         circuit_id = None
 
         email_1 = {
@@ -204,18 +220,20 @@ class TestInterMapperMonitor:
         intermapper_monitor._bruin_repository.get_service_number_by_circuit_id = AsyncMock()
 
         with config_mock:
-            await intermapper_monitor._process_email_batch(emails, circuit_id)
+            await intermapper_monitor._process_email_batch(emails, circuit_id, observed_email)
 
         intermapper_monitor._email_repository.mark_email_as_read.assert_has_awaits(
             [
-                call(email_1["msg_uid"]),
-                call(email_2["msg_uid"]),
+                call(email_1["msg_uid"], observed_email),
+                call(email_2["msg_uid"], observed_email),
             ]
         )
         intermapper_monitor._bruin_repository.get_service_number_by_circuit_id.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def process_email_batch_non_2xx_test(self, intermapper_monitor):
+        config = testconfig
+        observed_email = config.INTERMAPPER_CONFIG["inbox_email"]
         circuit_id = 123
 
         email_1 = {
@@ -239,13 +257,15 @@ class TestInterMapperMonitor:
         intermapper_monitor._email_repository.mark_email_as_read = AsyncMock()
 
         with config_mock:
-            await intermapper_monitor._process_email_batch(emails, circuit_id)
+            await intermapper_monitor._process_email_batch(emails, circuit_id, observed_email)
 
         intermapper_monitor._bruin_repository.get_service_number_by_circuit_id.assert_awaited_with(circuit_id)
         intermapper_monitor._email_repository.mark_email_as_read.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def process_email_batch_204_test(self, intermapper_monitor):
+        config = testconfig
+        observed_email = config.INTERMAPPER_CONFIG["inbox_email"]
         circuit_id = 123
 
         email_1 = {
@@ -269,18 +289,20 @@ class TestInterMapperMonitor:
         intermapper_monitor._email_repository.mark_email_as_read = AsyncMock()
 
         with config_mock:
-            await intermapper_monitor._process_email_batch(emails, circuit_id)
+            await intermapper_monitor._process_email_batch(emails, circuit_id, observed_email)
 
         intermapper_monitor._bruin_repository.get_service_number_by_circuit_id.assert_awaited_with(circuit_id)
         intermapper_monitor._email_repository.mark_email_as_read.assert_has_awaits(
             [
-                call(email_1["msg_uid"]),
-                call(email_2["msg_uid"]),
+                call(email_1["msg_uid"], observed_email),
+                call(email_2["msg_uid"], observed_email),
             ]
         )
 
     @pytest.mark.asyncio
     async def process_email_invalid_test(self, intermapper_monitor):
+        config = testconfig
+        observed_email = config.INTERMAPPER_CONFIG["inbox_email"]
         circuit_id = 3214
         client_id = 83959
 
@@ -294,12 +316,14 @@ class TestInterMapperMonitor:
         intermapper_monitor._email_repository.mark_email_as_read = AsyncMock()
 
         with config_mock:
-            await intermapper_monitor._process_email(email, circuit_id, client_id)
+            await intermapper_monitor._process_email(email, circuit_id, client_id, observed_email)
 
         intermapper_monitor._email_repository.mark_email_as_read.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def process_email_down_event_non_PIAB_device_test(self, intermapper_monitor):
+        config = testconfig
+        observed_email = config.INTERMAPPER_CONFIG["inbox_email"]
         circuit_id = 3214
         client_id = 83959
 
@@ -322,16 +346,19 @@ class TestInterMapperMonitor:
         parsed_email_dict = intermapper_monitor._parse_email_body(email["body"])
 
         with config_mock:
-            await intermapper_monitor._process_email(email, circuit_id, client_id)
+            await intermapper_monitor._process_email(email, circuit_id, client_id, observed_email)
 
         intermapper_monitor._get_dri_parameters.assert_not_awaited()
         intermapper_monitor._create_outage_ticket.assert_awaited_once_with(
             circuit_id, client_id, parsed_email_dict, dri_parameters
         )
-        intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(email["msg_uid"])
+        intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(
+            email["msg_uid"], observed_email)
 
     @pytest.mark.asyncio
     async def process_email_down_event_PIAB_device_test(self, intermapper_monitor):
+        config = testconfig
+        observed_email = config.INTERMAPPER_CONFIG["inbox_email"]
         circuit_id = 3214
         client_id = 83959
 
@@ -361,16 +388,19 @@ class TestInterMapperMonitor:
         parsed_email_dict = intermapper_monitor._parse_email_body(email["body"])
 
         with config_mock:
-            await intermapper_monitor._process_email(email, circuit_id, client_id)
+            await intermapper_monitor._process_email(email, circuit_id, client_id, observed_email)
 
         intermapper_monitor._get_dri_parameters.assert_awaited_once_with(circuit_id, client_id)
         intermapper_monitor._create_outage_ticket.assert_awaited_once_with(
             circuit_id, client_id, parsed_email_dict, dri_parameters
         )
-        intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(email["msg_uid"])
+        intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(
+            email["msg_uid"], observed_email)
 
     @pytest.mark.asyncio
     async def process_email_up_event_test(self, intermapper_monitor):
+        config = testconfig
+        observed_email = config.INTERMAPPER_CONFIG["inbox_email"]
         circuit_id = 3214
         client_id = 83959
 
@@ -388,13 +418,16 @@ class TestInterMapperMonitor:
         parsed_email_dict = intermapper_monitor._parse_email_body(email["body"])
 
         with config_mock:
-            await intermapper_monitor._process_email(email, circuit_id, client_id)
+            await intermapper_monitor._process_email(email, circuit_id, client_id, observed_email)
 
         intermapper_monitor._autoresolve_ticket.assert_awaited_once_with(circuit_id, client_id, parsed_email_dict)
-        intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(email["msg_uid"])
+        intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(
+            email["msg_uid"], observed_email)
 
     @pytest.mark.asyncio
     async def process_email_irrelevant_event_test(self, intermapper_monitor):
+        config = testconfig
+        observed_email = config.INTERMAPPER_CONFIG["inbox_email"]
         circuit_id = 3214
         client_id = 83959
 
@@ -412,14 +445,17 @@ class TestInterMapperMonitor:
         intermapper_monitor._autoresolve_ticket = AsyncMock()
 
         with config_mock:
-            await intermapper_monitor._process_email(email, circuit_id, client_id)
+            await intermapper_monitor._process_email(email, circuit_id, client_id, observed_email)
 
         intermapper_monitor._create_outage_ticket.assert_not_awaited()
         intermapper_monitor._autoresolve_ticket.assert_not_awaited()
-        intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(email["msg_uid"])
+        intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(
+            email["msg_uid"], observed_email)
 
     @pytest.mark.asyncio
     async def process_email_failed_test(self, intermapper_monitor):
+        config = testconfig
+        observed_email = config.INTERMAPPER_CONFIG["inbox_email"]
         circuit_id = 3214
         client_id = 83959
 
@@ -434,7 +470,7 @@ class TestInterMapperMonitor:
         intermapper_monitor._autoresolve_ticket = AsyncMock(return_value=False)
 
         with config_mock:
-            await intermapper_monitor._process_email(email, circuit_id, client_id)
+            await intermapper_monitor._process_email(email, circuit_id, client_id, observed_email)
 
         intermapper_monitor._email_repository.mark_email_as_read.assert_not_awaited()
 
@@ -2209,27 +2245,31 @@ class TestInterMapperMonitor:
 
     @pytest.mark.asyncio
     async def mark_email_as_read_test(self, intermapper_monitor):
+        config = testconfig
+        observed_email = config.INTERMAPPER_CONFIG["inbox_email"]
         msg_uid = 123
         response = {"body": None, "status": 204}
 
         intermapper_monitor._email_repository.mark_email_as_read = AsyncMock(return_value=response)
 
         with config_mock:
-            await intermapper_monitor._mark_email_as_read(msg_uid)
+            await intermapper_monitor._mark_email_as_read(msg_uid, observed_email)
 
-        intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(msg_uid)
+        intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(msg_uid, observed_email)
 
     @pytest.mark.asyncio
     async def mark_email_as_read_non_2xx_test(self, intermapper_monitor):
+        config = testconfig
+        observed_email = config.INTERMAPPER_CONFIG["inbox_email"]
         msg_uid = 123
         response = {"body": None, "status": 400}
 
         intermapper_monitor._email_repository.mark_email_as_read = AsyncMock(return_value=response)
 
         with config_mock:
-            await intermapper_monitor._mark_email_as_read(msg_uid)
+            await intermapper_monitor._mark_email_as_read(msg_uid, observed_email)
 
-        intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(msg_uid)
+        intermapper_monitor._email_repository.mark_email_as_read.assert_awaited_once_with(msg_uid, observed_email)
 
     def get_tz_offset_test(self, intermapper_monitor):
         datetime_mock = Mock()

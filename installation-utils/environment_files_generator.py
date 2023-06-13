@@ -140,6 +140,7 @@ HAWKEYE_OUTAGE_MONITOR__GRACE_PERIOD_TO_AUTORESOLVE_AFTER_LAST_DOCUMENTED_OUTAGE
 # InterMapper Outage Monitor variables
 INTERMAPPER_OUTAGE_MONITOR__MONITORING_JOB_INTERVAL = parameters["common"]["intermapper-outage-monitor"]["monitoring-job-interval"]
 INTERMAPPER_OUTAGE_MONITOR__OBSERVED_INBOX_EMAIL_ADDRESS = parameters["dev"]["intermapper-outage-monitor"]["observed-inbox-email-address"]
+INTERMAPPER_OUTAGE_MONITOR__OBSERVED_INBOX_EMAIL_ADDRESSES = parameters["dev"]["intermapper-outage-monitor"]["observed-inbox-email-addresses"]
 INTERMAPPER_OUTAGE_MONITOR__OBSERVED_INBOX_SENDERS = json.dumps(json.loads(parameters["common"]["intermapper-outage-monitor"]["observed-inbox-senders"]))
 INTERMAPPER_OUTAGE_MONITOR__MONITORED_DOWN_EVENTS = json.dumps(json.loads(parameters["common"]["intermapper-outage-monitor"]["monitored-down-events"]))
 INTERMAPPER_OUTAGE_MONITOR__MONITORED_UP_EVENTS = json.dumps(json.loads(parameters["common"]["intermapper-outage-monitor"]["monitored-up-events"]))
@@ -604,6 +605,7 @@ env_dict = {
         f"TIMEZONE={TIMEZONE}",
         f"MONITORING_JOB_INTERVAL={INTERMAPPER_OUTAGE_MONITOR__MONITORING_JOB_INTERVAL}",
         f"OBSERVED_INBOX_EMAIL_ADDRESS={INTERMAPPER_OUTAGE_MONITOR__OBSERVED_INBOX_EMAIL_ADDRESS}",
+        f"OBSERVED_INBOX_EMAIL_ADDRESSES={INTERMAPPER_OUTAGE_MONITOR__OBSERVED_INBOX_EMAIL_ADDRESSES}",
         f"OBSERVED_INBOX_SENDERS={INTERMAPPER_OUTAGE_MONITOR__OBSERVED_INBOX_SENDERS}",
         f"MONITORED_DOWN_EVENTS={INTERMAPPER_OUTAGE_MONITOR__MONITORED_DOWN_EVENTS}",
         f"MONITORED_UP_EVENTS={INTERMAPPER_OUTAGE_MONITOR__MONITORED_UP_EVENTS}",

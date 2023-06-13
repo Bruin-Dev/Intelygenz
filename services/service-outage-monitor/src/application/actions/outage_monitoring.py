@@ -1733,8 +1733,8 @@ class OutageMonitor:
             ticket_creation_response_message = ticket_creation_response_breakdown["response_message"]
             if ticket_creation_response_message:
                 logger.warning(
-                    f"[{outage_type.value}] Bruin response message for ticket creation for edge {edge}: "
-                    f"{ticket_creation_response_message}"
+                    f"[{outage_type.value}] Bruin response message for ticket"
+                    f" creation for device {serial_number}: {ticket_creation_response_message}"
                 )
 
             interface_items = ticket_creation_response_breakdown["interface_items"]

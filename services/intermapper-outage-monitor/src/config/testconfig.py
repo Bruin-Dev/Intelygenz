@@ -30,6 +30,7 @@ TIMEZONE = "US/Eastern"
 INTERMAPPER_CONFIG = {
     "monitoring_interval": 30,
     "inbox_email": "fake@gmail.com",
+    "observed_emails_list": [],
     "sender_emails_list": ["fakesender@email.com"],
     "concurrent_email_batches": 10,
     "max_emails_to_retrieve": 100,

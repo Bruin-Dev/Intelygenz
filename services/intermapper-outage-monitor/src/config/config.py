@@ -23,6 +23,7 @@ TIMEZONE = os.environ["TIMEZONE"]
 INTERMAPPER_CONFIG = {
     "monitoring_interval": int(os.environ["MONITORING_JOB_INTERVAL"]),
     "inbox_email": os.environ["OBSERVED_INBOX_EMAIL_ADDRESS"],
+    "observed_emails_list": json.loads(os.environ["OBSERVED_INBOX_EMAIL_ADDRESSES"]),
     "sender_emails_list": json.loads(os.environ["OBSERVED_INBOX_SENDERS"]),
     "concurrent_email_batches": int(os.environ["MAX_CONCURRENT_EMAIL_BATCHES"]),
     "max_emails_to_retrieve": int(os.environ["MAX_EMAILS_TO_RETRIEVE"]),

@@ -20,10 +20,11 @@ class TestEmailRepository:
 
     @pytest.mark.asyncio
     async def get_unread_emails_test(self, email_repository):
+        email_account = email_repository._config.INTERMAPPER_CONFIG["sender_emails_list"][0]
         request = {
             "request_id": uuid_,
             "body": {
-                "email_account": email_repository._config.INTERMAPPER_CONFIG["inbox_email"],
+                "email_account": email_account,
                 "email_filter": email_repository._config.INTERMAPPER_CONFIG["sender_emails_list"],
                 "lookup_days": email_repository._config.INTERMAPPER_CONFIG["events_lookup_days"],
                 "max_messages": email_repository._config.INTERMAPPER_CONFIG["max_emails_to_retrieve"],
@@ -55,7 +56,7 @@ class TestEmailRepository:
         email_repository._nats_client.request = AsyncMock(return_value=response_msg)
 
         with uuid_mock:
-            result = await email_repository.get_unread_emails()
+            result = await email_repository.get_unread_emails(email_account)
         email_repository._nats_client.request.assert_awaited_once_with(
             "get.email.request", encoded_request, timeout=150
         )
@@ -63,10 +64,11 @@ class TestEmailRepository:
 
     @pytest.mark.asyncio
     async def get_unread_emails_failing_rpc_test(self, email_repository):
+        email_account = email_repository._config.INTERMAPPER_CONFIG["sender_emails_list"][0]
         request = {
             "request_id": uuid_,
             "body": {
-                "email_account": email_repository._config.INTERMAPPER_CONFIG["inbox_email"],
+                "email_account": email_account,
                 "email_filter": email_repository._config.INTERMAPPER_CONFIG["sender_emails_list"],
                 "lookup_days": email_repository._config.INTERMAPPER_CONFIG["events_lookup_days"],
                 "max_messages": email_repository._config.INTERMAPPER_CONFIG["max_emails_to_retrieve"],
@@ -78,7 +80,7 @@ class TestEmailRepository:
 
         email_repository._notifications_repository.send_slack_message = AsyncMock()
         with uuid_mock:
-            result = await email_repository.get_unread_emails()
+            result = await email_repository.get_unread_emails(email_account)
         email_repository._nats_client.request.assert_awaited_once_with(
             "get.email.request", encoded_request, timeout=150
         )
@@ -87,10 +89,11 @@ class TestEmailRepository:
 
     @pytest.mark.asyncio
     async def get_unread_emails_non_2xx_test(self, email_repository):
+        email_account = email_repository._config.INTERMAPPER_CONFIG["sender_emails_list"][0]
         request = {
             "request_id": uuid_,
             "body": {
-                "email_account": email_repository._config.INTERMAPPER_CONFIG["inbox_email"],
+                "email_account": email_account,
                 "email_filter": email_repository._config.INTERMAPPER_CONFIG["sender_emails_list"],
                 "lookup_days": email_repository._config.INTERMAPPER_CONFIG["events_lookup_days"],
                 "max_messages": email_repository._config.INTERMAPPER_CONFIG["max_emails_to_retrieve"],
@@ -107,7 +110,7 @@ class TestEmailRepository:
 
         email_repository._notifications_repository.send_slack_message = AsyncMock()
         with uuid_mock:
-            result = await email_repository.get_unread_emails()
+            result = await email_repository.get_unread_emails(email_account)
         email_repository._nats_client.request.assert_awaited_once_with(
             "get.email.request", encoded_request, timeout=150
         )
@@ -116,10 +119,11 @@ class TestEmailRepository:
 
     @pytest.mark.asyncio
     async def mark_email_as_read_test(self, email_repository):
+        email_account = email_repository._config.INTERMAPPER_CONFIG["sender_emails_list"][0]
         msg_uid = "1234"
         request = {
             "request_id": uuid_,
-            "body": {"email_account": email_repository._config.INTERMAPPER_CONFIG["inbox_email"], "msg_uid": msg_uid},
+            "body": {"email_account": email_account, "msg_uid": msg_uid},
         }
         encoded_request = to_json_bytes(request)
 
@@ -131,7 +135,7 @@ class TestEmailRepository:
         email_repository._nats_client.request = AsyncMock(return_value=response_msg)
 
         with uuid_mock:
-            result = await email_repository.mark_email_as_read(msg_uid)
+            result = await email_repository.mark_email_as_read(msg_uid, email_account)
         email_repository._nats_client.request.assert_awaited_once_with(
             "mark.email.read.request", encoded_request, timeout=150
         )
@@ -139,10 +143,11 @@ class TestEmailRepository:
 
     @pytest.mark.asyncio
     async def mark_email_as_read_failed_rpc_test(self, email_repository):
+        email_account = email_repository._config.INTERMAPPER_CONFIG["sender_emails_list"][0]
         msg_uid = "1234"
         request = {
             "request_id": uuid_,
-            "body": {"email_account": email_repository._config.INTERMAPPER_CONFIG["inbox_email"], "msg_uid": msg_uid},
+            "body": {"email_account": email_account, "msg_uid": msg_uid},
         }
         encoded_request = to_json_bytes(request)
 
@@ -150,7 +155,7 @@ class TestEmailRepository:
 
         email_repository._notifications_repository.send_slack_message = AsyncMock()
         with uuid_mock:
-            result = await email_repository.mark_email_as_read(msg_uid)
+            result = await email_repository.mark_email_as_read(msg_uid, email_account)
         email_repository._nats_client.request.assert_awaited_once_with(
             "mark.email.read.request", encoded_request, timeout=150
         )
@@ -159,10 +164,11 @@ class TestEmailRepository:
 
     @pytest.mark.asyncio
     async def mark_email_as_read_non_2xx_test(self, email_repository):
+        email_account = email_repository._config.INTERMAPPER_CONFIG["sender_emails_list"][0]
         msg_uid = "1234"
         request = {
             "request_id": uuid_,
-            "body": {"email_account": email_repository._config.INTERMAPPER_CONFIG["inbox_email"], "msg_uid": msg_uid},
+            "body": {"email_account": email_account, "msg_uid": msg_uid},
         }
         encoded_request = to_json_bytes(request)
 
@@ -175,7 +181,7 @@ class TestEmailRepository:
 
         email_repository._notifications_repository.send_slack_message = AsyncMock()
         with uuid_mock:
-            result = await email_repository.mark_email_as_read(msg_uid)
+            result = await email_repository.mark_email_as_read(msg_uid, email_account)
         email_repository._nats_client.request.assert_awaited_once_with(
             "mark.email.read.request", encoded_request, timeout=150
         )

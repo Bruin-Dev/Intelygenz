@@ -14,9 +14,9 @@ class EmailRepository:
         self._config = config
         self._notifications_repository = notifications_repository
 
-    async def get_unread_emails(self):
+    async def get_unread_emails(self, observed_email):
         err_msg = None
-        email_account = self._config.INTERMAPPER_CONFIG["inbox_email"]
+        email_account = observed_email
         email_filter = self._config.INTERMAPPER_CONFIG["sender_emails_list"]
         lookup_days = self._config.INTERMAPPER_CONFIG["events_lookup_days"]
         max_messages = self._config.INTERMAPPER_CONFIG["max_emails_to_retrieve"]
@@ -60,9 +60,8 @@ class EmailRepository:
 
         return response
 
-    async def mark_email_as_read(self, msg_uid):
+    async def mark_email_as_read(self, msg_uid, email_account):
         err_msg = None
-        email_account = self._config.INTERMAPPER_CONFIG["inbox_email"]
         request = {
             "request_id": uuid(),
             "body": {"email_account": email_account, "msg_uid": msg_uid},

@@ -59,20 +59,28 @@ class InterMapperMonitor:
             next_run_time = datetime.now(tz)
             logger.info("InterMapper Monitor job is going to be executed immediately")
 
+        observed_emails_list = [
+            self._config.INTERMAPPER_CONFIG["inbox_email"],
+            *self._config.INTERMAPPER_CONFIG["observed_emails_list"]
+        ]
+        logger.info(f"Scheduling InterMapper Monitor job for {observed_emails_list}")
+
         try:
-            self._scheduler.add_job(
-                self._intermapper_monitoring_process,
-                "interval",
-                seconds=self._config.INTERMAPPER_CONFIG["monitoring_interval"],
-                next_run_time=next_run_time,
-                replace_existing=False,
-                id="_intermapper_monitor_process",
-            )
+            for observed_email in observed_emails_list:
+                self._scheduler.add_job(
+                    self._intermapper_monitoring_process,
+                    trigger="interval",
+                    args=[observed_email],
+                    seconds=self._config.INTERMAPPER_CONFIG["monitoring_interval"],
+                    next_run_time=next_run_time,
+                    replace_existing=False,
+                    id=f"_intermapper_monitor_process_{observed_email}",
+                )
         except ConflictingIdError as conflict:
             logger.info(f"Skipping start of InterMapper Monitoring job. Reason: {conflict}")
 
-    async def _intermapper_monitoring_process(self):
-        logger.info(f'Processing all unread email from {self._config.INTERMAPPER_CONFIG["inbox_email"]}')
+    async def _intermapper_monitoring_process(self, observed_email):
+        logger.info(f'Processing all unread email from {observed_email}')
         start = time.time()
         unread_emails_response = await self._email_repository.get_unread_emails()
         unread_emails_body = unread_emails_response["body"]
@@ -83,13 +91,14 @@ class InterMapperMonitor:
             return
 
         emails_by_circuit_id = self._group_emails_by_circuit_id(unread_emails_body)
-        tasks = [self._process_email_batch(emails, circuit_id) for circuit_id, emails in emails_by_circuit_id.items()]
+        tasks = [self._process_email_batch(emails, circuit_id, observed_email)
+                 for circuit_id, emails in emails_by_circuit_id.items()]
 
         await asyncio.gather(*tasks)
 
         stop = time.time()
         logger.info(
-            f'Finished processing unread emails from {self._config.INTERMAPPER_CONFIG["inbox_email"]}. '
+            f'Finished processing unread emails from {observed_email}. '
             f"Elapsed time: {round((stop - start) / 60, 2)} minutes"
         )
 
@@ -103,13 +112,13 @@ class InterMapperMonitor:
 
         return emails_by_circuit_id
 
-    async def _process_email_batch(self, emails, circuit_id):
+    async def _process_email_batch(self, emails, circuit_id, email_account):
         async with self._semaphore:
             logger.info(f"Processing {len(emails)} email(s) with circuit ID {circuit_id}...")
 
             if not circuit_id or circuit_id == "SD-WAN":
                 for email in emails:
-                    await self._mark_email_as_read(email["msg_uid"])
+                    await self._mark_email_as_read(email["msg_uid"], email_account)
 
                 logger.info(f"Invalid circuit_id. Skipping emails with circuit_id {circuit_id}...")
                 return
@@ -131,7 +140,7 @@ class InterMapperMonitor:
                 )
 
                 for email in emails:
-                    await self._mark_email_as_read(email["msg_uid"])
+                    await self._mark_email_as_read(email["msg_uid"], email_account)
 
                 return
 
@@ -139,11 +148,11 @@ class InterMapperMonitor:
             client_id = response_body["clientID"]
 
             for email in emails:
-                await self._process_email(email, service_number, client_id)
+                await self._process_email(email, service_number, client_id, email_account)
 
             logger.info(f"Finished processing all emails with circuit_id {circuit_id}!")
 
-    async def _process_email(self, email, service_number, client_id):
+    async def _process_email(self, email, service_number, client_id, email_account):
         message = email["message"]
         body = email["body"]
         msg_uid = email["msg_uid"]
@@ -162,7 +171,7 @@ class InterMapperMonitor:
                 f'Skipping {parsed_email_dict["event"]} event for device "{parsed_email_dict["name"]}" '
                 f'with condition {parsed_email_dict["condition"]} since PIAB monitoring is disabled'
             )
-            await self._mark_email_as_read(msg_uid)
+            await self._mark_email_as_read(msg_uid, email_account)
             return
 
         if parsed_email_dict["event"] in self._config.INTERMAPPER_CONFIG["intermapper_up_events"]:
@@ -194,7 +203,7 @@ class InterMapperMonitor:
             event_processed_successfully = True
 
         if event_processed_successfully:
-            await self._mark_email_as_read(msg_uid)
+            await self._mark_email_as_read(msg_uid, email_account)
 
         if event_processed_successfully:
             logger.info(f"Processed email: {msg_uid}")
@@ -579,11 +588,11 @@ class InterMapperMonitor:
 
         return True
 
-    async def _mark_email_as_read(self, msg_uid):
+    async def _mark_email_as_read(self, msg_uid, email_account):
         if self._config.CURRENT_ENVIRONMENT != "production":
             return
 
-        mark_email_as_read_response = await self._email_repository.mark_email_as_read(msg_uid)
+        mark_email_as_read_response = await self._email_repository.mark_email_as_read(msg_uid, email_account)
         mark_email_as_read_status = mark_email_as_read_response["status"]
 
         if mark_email_as_read_status not in range(200, 300):
