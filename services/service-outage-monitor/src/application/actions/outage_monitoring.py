@@ -723,7 +723,8 @@ class OutageMonitor:
             if interface_item["ticketId"] != 0
             and (interface_item["errorCode"] in (471, 472, 473, None)
                  or (interface_item["errorCode"] == 0
-                     and "We'll add an additional line" in interface_item["errorMessage"]))
+                     and "We'll add an additional line" in interface_item["errorMessage"]
+                     and "Failed to add additional line" not in interface_item["errorMessage"]))
         ]
         for interface_item in interface_items_to_forward:
             detail = self._utils_repository.get_first_element_matching(
