@@ -128,6 +128,8 @@ class TemplateRepository:
         recipients = self._config.MONITOR_REPORT_CONFIG["default_contacts"]
         if client_id in recipients_by_client:
             recipients = recipients + recipients_by_client[client_id]
+        elif "*" in recipients_by_client:
+            recipients = recipients + recipients_by_client["*"]
         return recipients
 
     def get_recipients_for_bandwidth_report(self, client_id):

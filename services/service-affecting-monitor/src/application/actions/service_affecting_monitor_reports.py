@@ -65,6 +65,10 @@ class ServiceAffectingMonitorReports:
 
         affecting_tickets_per_client = {}
 
+        clients_id = self.get_client_ids(customer_cache, clients_id)
+
+        logger.info(f"Running Reoccurring Trouble Reports job for host {host} and clients {clients_id}")
+
         for client_id in clients_id:
             logger.info(f"Getting Service Affecting ticket for client {client_id}...")
             tickets = await self._bruin_repository.get_affecting_ticket_for_report(
@@ -198,9 +202,19 @@ class ServiceAffectingMonitorReports:
 
         for cached_info in customer_cache:
             if (
-                cached_info["bruin_client_info"]["client_id"] in clients_id
+                ("*" in clients_id
+                    or cached_info["bruin_client_info"]["client_id"] in clients_id)
                 and cached_info["serial_number"] not in serials_and_name
             ):
                 serials_and_name[cached_info["serial_number"]] = cached_info["edge_name"]
 
         return serials_and_name
+
+    @staticmethod
+    def get_client_ids(customer_cache, clients_id):
+        if "*" not in clients_id:
+            return clients_id
+
+        return list(set([
+            cached_info["bruin_client_info"]["client_id"]
+            for cached_info in customer_cache]))
