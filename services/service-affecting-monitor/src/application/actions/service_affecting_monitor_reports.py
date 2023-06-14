@@ -54,6 +54,10 @@ class ServiceAffectingMonitorReports:
             logger.error("[service-affecting-monitor-reports] Got an empty customer cache. Process cannot keep going.")
             return
 
+        clients_id = self.get_client_ids(customer_cache, clients_id)
+
+        logger.info(f"Running Reoccurring Trouble Reports job for host {host} and clients {clients_id}")
+
         cached_names_by_serial = self.get_serial_and_name_for_cached_edges_with_client_id(customer_cache, clients_id)
 
         monitor_report_init_time = datetime.utcnow()
@@ -64,10 +68,6 @@ class ServiceAffectingMonitorReports:
         end_date_str = self.get_format_to_string_date(trailing_interval["end"])
 
         affecting_tickets_per_client = {}
-
-        clients_id = self.get_client_ids(customer_cache, clients_id)
-
-        logger.info(f"Running Reoccurring Trouble Reports job for host {host} and clients {clients_id}")
 
         for client_id in clients_id:
             logger.info(f"Getting Service Affecting ticket for client {client_id}...")
@@ -202,8 +202,7 @@ class ServiceAffectingMonitorReports:
 
         for cached_info in customer_cache:
             if (
-                ("*" in clients_id
-                    or cached_info["bruin_client_info"]["client_id"] in clients_id)
+                cached_info["bruin_client_info"]["client_id"] in clients_id
                 and cached_info["serial_number"] not in serials_and_name
             ):
                 serials_and_name[cached_info["serial_number"]] = cached_info["edge_name"]
