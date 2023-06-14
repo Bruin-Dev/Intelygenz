@@ -37,9 +37,12 @@ class DiGiClient:
         return {"authorization": f"Bearer {self.bearer_token}", **params}
 
     def get_auth_header_for_login(self):
+        client_id = '920822df8d59df399de3'
+        client_secret = '3fc6a6d98e7936f14b01cbe415ab7d243a6796f06cafa019cb64658855bf'
         encoded_token = base64.b64encode(
-            f'{self.config.DIGI_CONFIG["client_id"]}:{self.config.DIGI_CONFIG["client_secret"]}'.encode()
+            f'{client_id}:{client_secret}'.encode()
         ).decode()
+        print(encoded_token)
         return f"basic {encoded_token}"
 
     @staticmethod
@@ -54,7 +57,7 @@ class DiGiClient:
         logger.info("Logging into DiGi...")
         try:
             response = await self.session.post(
-                f'{self.config.DIGI_CONFIG["base_url"]}/Identity/rest/oauth/token',
+                f'https://luci.mettel.net/Identity/rest/oauth/token',
                 data={"grant_type": "client_credentials", "scope": "write:dms"},
                 headers={
                     "authorization": self.get_auth_header_for_login(),

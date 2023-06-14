@@ -56,7 +56,7 @@ def bail_out():
 
 class Container:
     def __init__(self):
-        app_logger.info("DiGi bridge starting...")
+        app_logger.info(f"DiGi bridge starting... {config.ENVIRONMENT_NAME}")
 
         redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         redis_client.ping()
