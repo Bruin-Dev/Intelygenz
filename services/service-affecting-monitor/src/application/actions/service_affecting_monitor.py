@@ -94,11 +94,19 @@ class ServiceAffectingMonitor:
             if edge["bruin_client_info"]["client_id"] in self._default_contact_info_by_client_id
         ]
 
-        await self._latency_check()
-        await self._packet_loss_check()
-        await self._jitter_check()
-        await self._bandwidth_check()
-        await self._bouncing_check()
+        # for_wireless
+        await self._latency_check(for_wireless=False)
+        await self._packet_loss_check(for_wireless=False)
+        await self._jitter_check(for_wireless=False)
+        await self._bandwidth_check(for_wireless=False)
+        await self._bouncing_check(for_wireless=False)
+
+        # for_wired
+        await self._latency_check(for_wireless=True)
+        await self._packet_loss_check(for_wireless=True)
+        await self._jitter_check(for_wireless=True)
+        await self._bandwidth_check(for_wireless=True)
+        await self._bouncing_check(for_wireless=True)
 
         await self._run_autoresolve_process()
 
@@ -228,7 +236,7 @@ class ServiceAffectingMonitor:
 
         return result
 
-    async def _map_cached_edges_with_links_metrics_and_contact_info(self, links_metrics: list) -> list:
+    def _map_cached_edges_with_links_metrics_and_contact_info(self, links_metrics: list) -> list:
         result = []
 
         cached_edges_by_serial = {elem["serial_number"]: elem for elem in self._customer_cache}
@@ -280,7 +288,7 @@ class ServiceAffectingMonitor:
 
         events = await self._velocloud_repository.get_events_by_serial_and_interface(self._customer_cache)
         links_metrics = self._structure_links_metrics(links_metrics, events)
-        metrics_with_cache_and_contact_info = await self._map_cached_edges_with_links_metrics_and_contact_info(
+        metrics_with_cache_and_contact_info = self._map_cached_edges_with_links_metrics_and_contact_info(
             links_metrics
         )
         edges_with_links_info = self._group_links_by_edge(metrics_with_cache_and_contact_info)
@@ -489,10 +497,12 @@ class ServiceAffectingMonitor:
 
         return list(edge_info_by_serial.values())
 
-    async def _latency_check(self):
-        logger.info("Looking for latency issues...")
+    async def _latency_check(self, for_wireless: bool):
+        logger.info(f"Looking for latency issues (for_wireless={for_wireless})...")
 
-        links_metrics_response = await self._velocloud_repository.get_links_metrics_for_latency_checks()
+        links_metrics_response = await self._velocloud_repository.get_links_metrics_for_latency_checks(
+            for_wireless=for_wireless
+        )
         links_metrics: list = links_metrics_response["body"]
 
         if not links_metrics:
@@ -500,7 +510,7 @@ class ServiceAffectingMonitor:
             return
 
         links_metrics = self._structure_links_metrics(links_metrics)
-        metrics_with_cache_and_contact_info = await self._map_cached_edges_with_links_metrics_and_contact_info(
+        metrics_with_cache_and_contact_info = self._map_cached_edges_with_links_metrics_and_contact_info(
             links_metrics
         )
 
@@ -512,16 +522,12 @@ class ServiceAffectingMonitor:
             metrics = elem["link_metrics"]
             interface = link_status["interface"]
             links_configuration = cached_info["links_configuration"]
-            link_last_active = link_status["linkLastActive"]
 
             is_wireless_link = self._utils_repository.get_is_wireless_link(interface, links_configuration)
 
             serial_number = cached_info["serial_number"]
 
-            if not self._trouble_repository.is_within_lookback_window(
-                    link_last_active, is_wireless_link, AffectingTroubles.LATENCY):
-                logger.info(f"Link {interface} from {serial_number} is not within lookback window. "
-                            + f"link_last_active: {link_last_active}. is_wireless_link: {is_wireless_link}")
+            if (is_wireless_link and not for_wireless) or (not is_wireless_link and for_wireless):
                 continue
 
             if self._trouble_repository.are_latency_metrics_within_threshold(metrics, is_wireless_link):
@@ -532,10 +538,12 @@ class ServiceAffectingMonitor:
 
         logger.info("Finished looking for latency issues!")
 
-    async def _packet_loss_check(self):
-        logger.info("Looking for packet loss issues...")
+    async def _packet_loss_check(self, for_wireless: bool):
+        logger.info(f"Looking for packet loss issues (for_wireless={for_wireless})...")
 
-        links_metrics_response = await self._velocloud_repository.get_links_metrics_for_packet_loss_checks()
+        links_metrics_response = await self._velocloud_repository.get_links_metrics_for_packet_loss_checks(
+            for_wireless=for_wireless
+        )
         links_metrics: list = links_metrics_response["body"]
 
         if not links_metrics:
@@ -543,7 +551,7 @@ class ServiceAffectingMonitor:
             return
 
         links_metrics = self._structure_links_metrics(links_metrics)
-        metrics_with_cache_and_contact_info = await self._map_cached_edges_with_links_metrics_and_contact_info(
+        metrics_with_cache_and_contact_info = self._map_cached_edges_with_links_metrics_and_contact_info(
             links_metrics
         )
 
@@ -555,16 +563,12 @@ class ServiceAffectingMonitor:
             metrics = elem["link_metrics"]
             interface = link_status["interface"]
             links_configuration = cached_info["links_configuration"]
-            link_last_active = link_status["linkLastActive"]
 
             is_wireless_link = self._utils_repository.get_is_wireless_link(interface, links_configuration)
 
             serial_number = cached_info["serial_number"]
 
-            if not self._trouble_repository.is_within_lookback_window(
-                    link_last_active, is_wireless_link, AffectingTroubles.PACKET_LOSS):
-                logger.info(f"Link {interface} from {serial_number} is not within lookback window. "
-                            + f"link_last_active: {link_last_active}. is_wireless_link: {is_wireless_link}")
+            if (is_wireless_link and not for_wireless) or (not is_wireless_link and for_wireless):
                 continue
 
             if self._trouble_repository.are_packet_loss_metrics_within_threshold(metrics, is_wireless_link):
@@ -577,10 +581,12 @@ class ServiceAffectingMonitor:
 
         logger.info("Finished looking for packet loss issues!")
 
-    async def _jitter_check(self):
-        logger.info("Looking for jitter issues...")
+    async def _jitter_check(self, for_wireless: bool):
+        logger.info(f"Looking for jitter issues (for_wireless={for_wireless})...")
 
-        links_metrics_response = await self._velocloud_repository.get_links_metrics_for_jitter_checks()
+        links_metrics_response = await self._velocloud_repository.get_links_metrics_for_jitter_checks(
+            for_wireless=for_wireless
+        )
         links_metrics: list = links_metrics_response["body"]
 
         if not links_metrics:
@@ -588,7 +594,7 @@ class ServiceAffectingMonitor:
             return
 
         links_metrics = self._structure_links_metrics(links_metrics)
-        metrics_with_cache_and_contact_info = await self._map_cached_edges_with_links_metrics_and_contact_info(
+        metrics_with_cache_and_contact_info = self._map_cached_edges_with_links_metrics_and_contact_info(
             links_metrics
         )
 
@@ -600,16 +606,12 @@ class ServiceAffectingMonitor:
             metrics = elem["link_metrics"]
             interface = link_status["interface"]
             links_configuration = cached_info["links_configuration"]
-            link_last_active = link_status["linkLastActive"]
 
             is_wireless_link = self._utils_repository.get_is_wireless_link(interface, links_configuration)
 
             serial_number = cached_info["serial_number"]
 
-            if not self._trouble_repository.is_within_lookback_window(
-                    link_last_active, is_wireless_link, AffectingTroubles.JITTER):
-                logger.info(f"Link {interface} from {serial_number} is not within lookback window. "
-                            + f"link_last_active: {link_last_active}. is_wireless_link: {is_wireless_link}")
+            if (is_wireless_link and not for_wireless) or (not is_wireless_link and for_wireless):
                 continue
 
             if self._trouble_repository.are_jitter_metrics_within_threshold(metrics, is_wireless_link):
@@ -620,10 +622,12 @@ class ServiceAffectingMonitor:
 
         logger.info("Finished looking for jitter issues!")
 
-    async def _bandwidth_check(self):
-        logger.info("Looking for bandwidth issues...")
+    async def _bandwidth_check(self, for_wireless: bool):
+        logger.info(f"Looking for bandwidth issues (for_wireless={for_wireless})...")
 
-        links_metrics_response = await self._velocloud_repository.get_links_metrics_for_bandwidth_checks()
+        links_metrics_response = await self._velocloud_repository.get_links_metrics_for_bandwidth_checks(
+            for_wireless=for_wireless
+        )
         links_metrics: list = links_metrics_response["body"]
 
         if not links_metrics:
@@ -631,7 +635,7 @@ class ServiceAffectingMonitor:
             return
 
         links_metrics = self._structure_links_metrics(links_metrics)
-        metrics_with_cache_and_contact_info = await self._map_cached_edges_with_links_metrics_and_contact_info(
+        metrics_with_cache_and_contact_info = self._map_cached_edges_with_links_metrics_and_contact_info(
             links_metrics
         )
 
@@ -643,6 +647,13 @@ class ServiceAffectingMonitor:
             link_status = elem["link_status"]
             metrics = elem["link_metrics"]
             host = cached_info["edge"]["host"]
+            interface = link_status["interface"]
+            links_configuration = cached_info["links_configuration"]
+
+            is_wireless_link = self._utils_repository.get_is_wireless_link(interface, links_configuration)
+
+            if (is_wireless_link and not for_wireless) or (not is_wireless_link and for_wireless):
+                continue
 
             if not self._trouble_repository.should_check_bandwidth_troubles(host, client_id):
                 logger.warning(f"Bandwidth checks are not enabled for host {host}, or client {client_id}. Skipping...")
@@ -656,21 +667,10 @@ class ServiceAffectingMonitor:
 
             serial_number = cached_info["serial_number"]
 
-            interface = link_status["interface"]
-            links_configuration = cached_info["links_configuration"]
-            link_last_active = link_status["linkLastActive"]
-
-            is_wireless_link = self._utils_repository.get_is_wireless_link(interface, links_configuration)
-
             trouble = AffectingTroubles.BANDWIDTH_OVER_UTILIZATION
             monitoring_minutes_per_trouble = self._utils_repository.monitoring_minutes_per_trouble_metric_to_use(
                 is_wireless_link)
             scan_interval = self._config.MONITOR_CONFIG[monitoring_minutes_per_trouble][trouble]
-
-            if not self._trouble_repository.is_within_lookback_window(link_last_active, is_wireless_link, trouble):
-                logger.info(f"Link {interface} from {serial_number} is not within lookback window. "
-                            + f"link_last_active: {link_last_active}. is_wireless_link: {is_wireless_link}")
-                continue
 
             if is_tx_bandwidth_valid and is_rx_bandwidth_valid:
                 within_threshold = self._trouble_repository.are_bandwidth_metrics_within_threshold(
@@ -695,19 +695,27 @@ class ServiceAffectingMonitor:
 
         logger.info("Finished looking for bandwidth issues!")
 
-    async def _bouncing_check(self):
-        logger.info("Looking for bouncing issues...")
+    async def _bouncing_check(self, for_wireless: bool):
+        logger.info(f"Looking for bouncing issues (for_wireless={for_wireless})...")
 
-        links_metrics_response = await self._velocloud_repository.get_links_metrics_for_bouncing_checks()
+        if for_wireless:
+            logger.info("Skipping bouncing check for wireless links")
+            return
+
+        links_metrics_response = await self._velocloud_repository.get_links_metrics_for_bouncing_checks(
+            for_wireless=for_wireless
+        )
         links_metrics: list = links_metrics_response["body"]
 
         if not links_metrics:
             logger.warning("List of links arrived empty while checking bouncing issues. Skipping...")
             return
 
-        events = await self._velocloud_repository.get_events_by_serial_and_interface(self._customer_cache)
+        events = await self._velocloud_repository.get_events_by_serial_and_interface(
+            self._customer_cache, for_wireless
+        )
         links_metrics = self._structure_links_metrics(links_metrics, events)
-        metrics_with_cache_and_contact_info = await self._map_cached_edges_with_links_metrics_and_contact_info(
+        metrics_with_cache_and_contact_info = self._map_cached_edges_with_links_metrics_and_contact_info(
             links_metrics
         )
 
@@ -719,21 +727,10 @@ class ServiceAffectingMonitor:
             events = elem["link_events"]
             interface = link_status["interface"]
             links_configuration = cached_info["links_configuration"]
-            link_last_active = link_status["linkLastActive"]
 
             is_wireless_link = self._utils_repository.get_is_wireless_link(interface, links_configuration)
 
             serial_number = cached_info["serial_number"]
-
-            if is_wireless_link:
-                logger.info(f"Link {interface} from {serial_number} is wireless. Skipping bouncing check...")
-                continue
-
-            if not self._trouble_repository.is_within_lookback_window(
-                    link_last_active, is_wireless_link, AffectingTroubles.BOUNCING):
-                logger.info(f"Link {interface} from {serial_number} is not within lookback window. "
-                            + f"link_last_active: {link_last_active}. is_wireless_link: {is_wireless_link}")
-                continue
 
             if not events:
                 logger.warning(
