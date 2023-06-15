@@ -132,6 +132,7 @@ class BandwidthReports:
                         "edge_id": edge_info["edge"]["edge_id"],
                         "serial_number": edge_info["serial_number"],
                         "edge_name": edge_info["edge_name"],
+                        "logical_ids": edge_info["logical_ids"],
                     }
                 )
 

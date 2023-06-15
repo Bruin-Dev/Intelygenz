@@ -910,13 +910,34 @@ class BruinRepository:
                 continue
 
             interface = link_metrics["interface"]
-            enterprise_info = [
+            enterprise_infos = [
                 {
                     "id" : edge["enterprise_id"],
-                    "name": edge["enterprise_name"]
+                    "name": edge["enterprise_name"],
+                    "logical_ids": edge["logical_ids"] if "logical_ids" in edge else []
                 }
                 for edge in enterprise_id_edge_id_relation
-                if edge["serial_number"] == serial_number][0]
+                if edge["serial_number"] == serial_number]
+            enterprise_info = enterprise_infos[0]
+
+            logical_ids_lists = [
+                enterprise_info["logical_ids"]
+                for enterprise_info in enterprise_infos
+                if any(logical_id
+                       for logical_id in enterprise_info["logical_ids"]
+                       if logical_id["interface_name"] == interface)
+            ]
+
+            logical_ids = [item for sublist in logical_ids_lists for item in sublist]
+
+            interface_logical_ids = [
+                logical_id
+                for logical_id in logical_ids
+                if logical_id["interface_name"] == interface
+            ]
+
+            logical_id = interface_logical_ids[0] if interface_logical_ids else {}
+
             report_item = self.build_bandwidth_report_item(
                 enterprise_id=enterprise_info["id"],
                 enterprise_name=enterprise_info["name"],
@@ -936,6 +957,7 @@ class BruinRepository:
                 peak_time_down=link_metrics["peak_time_down"],
                 peak_time_up=link_metrics["peak_time_up"],
                 link_name=link_metrics["link_name"],
+                access_type=logical_id["access_type"] if "access_type" in logical_id else None,
             )
             report_items.append(report_item)
 
@@ -961,6 +983,7 @@ class BruinRepository:
         peak_time_down,
         peak_time_up,
         link_name,
+        access_type,
     ):
         logger.info(f"[bandwidth-reports] Building bandwidth report item for edge {serial_number} and \
                       interface {interface}")
@@ -971,6 +994,7 @@ class BruinRepository:
             "edge_name": edge_name,
             "interface": interface,
             "link_name": link_name,
+            "access_type": access_type,
             "down_Mbps_total_min": down_Mbps_total_min,
             "down_Mbps_total_max": down_Mbps_total_max,
             "up_Mbps_total_min": up_Mbps_total_min,

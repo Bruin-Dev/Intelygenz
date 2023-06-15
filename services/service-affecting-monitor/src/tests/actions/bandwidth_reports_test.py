@@ -121,12 +121,22 @@ class TestBandwidthReports:
         interface = "GE1"
         link_name = "Verizon Wireless( MTL- 544825157)"
         should_send_email = True
+        access_type = "Ethernet/T1/MPLS"
+        logical_ids = [
+            {
+                "interface_name": interface,
+                "logical_id": "10:e8:78:ab:56:a7:0000",
+                "access_type": access_type,
+                "service_number": "26.RBBT.117960"
+            }
+        ]
 
         edge_full_id = make_edge_full_id(
             host=host, enterprise_id=enterprise_id, enterprise_name=enterprise_name, edge_id=edge_id)
         bruin_client_info = make_bruin_client_info(client_id=client_id, client_name=client_name)
         cached_edge = make_cached_edge(
-            serial_number=serial_number, full_id=edge_full_id, bruin_client_info=bruin_client_info
+            serial_number=serial_number, full_id=edge_full_id, bruin_client_info=bruin_client_info,
+            logical_ids=logical_ids
         )
         customer_cache = make_customer_cache(cached_edge)
 
@@ -137,9 +147,7 @@ class TestBandwidthReports:
 
         enterprise_id_edge_id = bandwidth_reports.get_enterprise_id_and_edge_id_relation_from_customer_cache_response(
             customer_cache, host)
-        link_with_edge = make_link_with_edge_info(link_info=link, edge_info=edge)
-        # link_metrics = make_metrics_for_link(link_with_edge_info=link_with_edge)
-        # links_metrics = [link_metrics]
+
         link_series = [
             {
                 "series": [
@@ -250,6 +258,7 @@ class TestBandwidthReports:
                 "edge_name": edge_name,
                 "interface": interface,
                 "link_name": link_name,
+                "access_type": access_type,
                 "down_Mbps_total_min": "0.000 Mbps",
                 "down_Mbps_total_max": "0.000 Mbps",
                 "up_Mbps_total_min": "0.000 Mbps",
