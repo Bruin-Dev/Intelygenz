@@ -82,11 +82,13 @@ class VelocloudRepository:
         }
         return return_response
 
-    async def get_links_metrics_for_latency_checks(self) -> dict:
+    async def get_links_metrics_for_latency_checks(self, for_wireless: bool) -> dict:
         trouble = AffectingTroubles.LATENCY
 
         now = datetime.now(utc)
-        past_moment = now - timedelta(minutes=self._get_greater_lookback(trouble))
+        minutes = self._config.MONITOR_CONFIG[self._utils_repository.monitoring_minutes_per_trouble_metric_to_use(
+            for_wireless)][trouble]
+        past_moment = now - timedelta(minutes=minutes)
 
         scan_interval_for_metrics = {
             "start": past_moment,
@@ -94,11 +96,13 @@ class VelocloudRepository:
         }
         return await self.get_all_links_metrics(interval=scan_interval_for_metrics)
 
-    async def get_links_metrics_for_packet_loss_checks(self) -> dict:
+    async def get_links_metrics_for_packet_loss_checks(self, for_wireless: bool) -> dict:
         trouble = AffectingTroubles.PACKET_LOSS
 
         now = datetime.now(utc)
-        past_moment = now - timedelta(minutes=self._get_greater_lookback(trouble))
+        minutes = self._config.MONITOR_CONFIG[self._utils_repository.monitoring_minutes_per_trouble_metric_to_use(
+            for_wireless)][trouble]
+        past_moment = now - timedelta(minutes=minutes)
 
         scan_interval_for_metrics = {
             "start": past_moment,
@@ -106,11 +110,13 @@ class VelocloudRepository:
         }
         return await self.get_all_links_metrics(interval=scan_interval_for_metrics)
 
-    async def get_links_metrics_for_jitter_checks(self) -> dict:
+    async def get_links_metrics_for_jitter_checks(self, for_wireless: bool) -> dict:
         trouble = AffectingTroubles.JITTER
 
         now = datetime.now(utc)
-        past_moment = now - timedelta(minutes=self._get_greater_lookback(trouble))
+        minutes = self._config.MONITOR_CONFIG[self._utils_repository.monitoring_minutes_per_trouble_metric_to_use(
+            for_wireless)][trouble]
+        past_moment = now - timedelta(minutes=minutes)
 
         scan_interval_for_metrics = {
             "start": past_moment,
@@ -118,11 +124,13 @@ class VelocloudRepository:
         }
         return await self.get_all_links_metrics(interval=scan_interval_for_metrics)
 
-    async def get_links_metrics_for_bandwidth_checks(self) -> dict:
+    async def get_links_metrics_for_bandwidth_checks(self, for_wireless: bool) -> dict:
         trouble = AffectingTroubles.BANDWIDTH_OVER_UTILIZATION
 
         now = datetime.now(utc)
-        past_moment = now - timedelta(minutes=self._get_greater_lookback(trouble))
+        minutes = self._config.MONITOR_CONFIG[self._utils_repository.monitoring_minutes_per_trouble_metric_to_use(
+            for_wireless)][trouble]
+        past_moment = now - timedelta(minutes=minutes)
 
         scan_interval_for_metrics = {
             "start": past_moment,
@@ -130,11 +138,13 @@ class VelocloudRepository:
         }
         return await self.get_all_links_metrics(interval=scan_interval_for_metrics)
 
-    async def get_links_metrics_for_bouncing_checks(self) -> dict:
+    async def get_links_metrics_for_bouncing_checks(self, for_wireless: bool) -> dict:
         trouble = AffectingTroubles.BOUNCING
 
         now = datetime.now(utc)
-        past_moment = now - timedelta(minutes=self._get_greater_lookback(trouble))
+        minutes = self._config.MONITOR_CONFIG[self._utils_repository.monitoring_minutes_per_trouble_metric_to_use(
+            for_wireless)][trouble]
+        past_moment = now - timedelta(minutes=minutes)
 
         scan_interval_for_metrics = {
             "start": past_moment,
@@ -223,10 +233,11 @@ class VelocloudRepository:
 
         return response
 
-    async def get_enterprise_events(self, host, enterprise_id):
+    async def get_enterprise_events(self, host, enterprise_id, for_wireless: bool):
         err_msg = None
         now = datetime.now(utc)
-        minutes = self._get_greater_lookback(AffectingTroubles.BOUNCING)
+        minutes = self._config.MONITOR_CONFIG[self._utils_repository.monitoring_minutes_per_trouble_metric_to_use(
+            for_wireless)][AffectingTroubles.BOUNCING]
         past_moment = now - timedelta(minutes=minutes)
         event_types = ["LINK_DEAD"]
 
@@ -278,7 +289,7 @@ class VelocloudRepository:
 
         return response
 
-    async def get_events_by_serial_and_interface(self, customer_cache):
+    async def get_events_by_serial_and_interface(self, customer_cache, for_wireless: bool = False):
         edges_by_host_and_enterprise = self._structure_edges_by_host_and_enterprise(customer_cache)
         events = defaultdict(lambda: defaultdict(list))
 
@@ -287,7 +298,7 @@ class VelocloudRepository:
 
             for enterprise_id in edges_by_enterprise:
                 edges = edges_by_enterprise[enterprise_id]
-                enterprise_events_response = await self.get_enterprise_events(host, enterprise_id)
+                enterprise_events_response = await self.get_enterprise_events(host, enterprise_id, for_wireless)
                 enterprise_events = enterprise_events_response["body"]
 
                 if enterprise_events_response["status"] not in range(200, 300):
@@ -347,9 +358,3 @@ class VelocloudRepository:
                 filtered_links_metrics.append(link_metrics)
 
         return filtered_links_metrics
-
-    def _get_greater_lookback(self, trouble: AffectingTroubles) -> int:
-        wired_lookback = self._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
-        wireless_lookback = self._config.MONITOR_CONFIG["wireless_monitoring_minutes_per_trouble"][trouble]
-
-        return wired_lookback if wired_lookback > wireless_lookback else wireless_lookback

@@ -151,19 +151,6 @@ class TroubleRepository:
 
         return all_metrics_within_thresholds
 
-    def is_within_lookback_window(self, link_last_active: str,
-                                  is_wireless_link: bool, trouble: AffectingTroubles) -> bool:
-        lookback_window_minutes = self._config.MONITOR_CONFIG[
-            self._utils_repository.monitoring_minutes_per_trouble_metric_to_use(is_wireless_link)][trouble]
-
-        now = datetime.now(utc)
-        lookback_window_date = now - timedelta(minutes=lookback_window_minutes)
-
-        date_format = "%Y-%m-%dT%H:%M:%S.%fZ"
-        link_last_active_date = datetime.strptime(link_last_active, date_format).replace(tzinfo=utc)
-
-        return link_last_active_date > lookback_window_date
-
     def should_check_bandwidth_troubles(self, host, client_id) -> bool:
         return (host != "metvco04.mettel.net"
                 and client_id not in self._config.MONITOR_CONFIG["customers_with_bandwidth_disabled"])

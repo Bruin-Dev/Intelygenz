@@ -2,7 +2,7 @@ import json
 import os
 from datetime import datetime, timedelta
 from typing import Any
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, Mock, patch, call
 
 import pytest
 from application import REMINDER_NOTE_REGEX, AffectingTroubles, ForwardQueues
@@ -171,11 +171,13 @@ class TestServiceAffectingMonitor:
         with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
             await service_affecting_monitor._service_affecting_monitor_process()
 
+        expected_calls = [call(for_wireless=True), call(for_wireless=False)]
+
         service_affecting_monitor._customer_cache_repository.get_cache_for_affecting_monitoring.assert_awaited_once()
-        service_affecting_monitor._latency_check.assert_awaited_once()
-        service_affecting_monitor._packet_loss_check.assert_awaited_once()
-        service_affecting_monitor._jitter_check.assert_awaited_once()
-        service_affecting_monitor._bandwidth_check.assert_awaited_once()
+        service_affecting_monitor._latency_check.assert_has_calls(expected_calls, any_order=True)
+        service_affecting_monitor._packet_loss_check.assert_has_calls(expected_calls, any_order=True)
+        service_affecting_monitor._jitter_check.assert_has_calls(expected_calls, any_order=True)
+        service_affecting_monitor._bandwidth_check.assert_has_calls(expected_calls, any_order=True)
         service_affecting_monitor._run_autoresolve_process.assert_awaited_once()
         assert service_affecting_monitor._customer_cache == customer_cache
 
@@ -374,7 +376,7 @@ class TestServiceAffectingMonitor:
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
-        result = await service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(
+        result = service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(
             structured_metrics
         )
 
@@ -453,7 +455,7 @@ class TestServiceAffectingMonitor:
         }
         service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
-        result = await service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(
+        result = service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(
             structured_metrics
         )
 
@@ -542,7 +544,7 @@ class TestServiceAffectingMonitor:
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
-        result = await service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(
+        result = service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(
             structured_metrics
         )
 
@@ -633,7 +635,7 @@ class TestServiceAffectingMonitor:
         }
         service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
-        result = await service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(
+        result = service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(
             structured_metrics
         )
 
@@ -699,7 +701,7 @@ class TestServiceAffectingMonitor:
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
-        result = await service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(
+        result = service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info(
             structured_metrics
         )
 
@@ -720,7 +722,7 @@ class TestServiceAffectingMonitor:
             )
         )
 
-        await service_affecting_monitor._latency_check()
+        await service_affecting_monitor._latency_check(for_wireless=False)
 
         service_affecting_monitor._structure_links_metrics.assert_not_called()
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_not_called()
@@ -753,7 +755,7 @@ class TestServiceAffectingMonitor:
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
-        await service_affecting_monitor._latency_check()
+        await service_affecting_monitor._latency_check(for_wireless=False)
 
         service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
@@ -804,7 +806,7 @@ class TestServiceAffectingMonitor:
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
-        await service_affecting_monitor._latency_check()
+        await service_affecting_monitor._latency_check(for_wireless=False)
 
         service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
@@ -866,7 +868,7 @@ class TestServiceAffectingMonitor:
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
-        await service_affecting_monitor._latency_check()
+        await service_affecting_monitor._latency_check(for_wireless=False)
 
         service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
@@ -887,7 +889,7 @@ class TestServiceAffectingMonitor:
             )
         )
 
-        await service_affecting_monitor._packet_loss_check()
+        await service_affecting_monitor._packet_loss_check(for_wireless=False)
 
         service_affecting_monitor._structure_links_metrics.assert_not_called()
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_not_called()
@@ -920,7 +922,7 @@ class TestServiceAffectingMonitor:
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
-        await service_affecting_monitor._packet_loss_check()
+        await service_affecting_monitor._packet_loss_check(for_wireless=False)
 
         service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
@@ -971,7 +973,7 @@ class TestServiceAffectingMonitor:
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
-        await service_affecting_monitor._packet_loss_check()
+        await service_affecting_monitor._packet_loss_check(for_wireless=False)
 
         service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
@@ -1032,7 +1034,7 @@ class TestServiceAffectingMonitor:
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
-        await service_affecting_monitor._packet_loss_check()
+        await service_affecting_monitor._packet_loss_check(for_wireless=False)
 
         service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
@@ -1053,7 +1055,7 @@ class TestServiceAffectingMonitor:
             )
         )
 
-        await service_affecting_monitor._jitter_check()
+        await service_affecting_monitor._jitter_check(for_wireless=False)
 
         service_affecting_monitor._structure_links_metrics.assert_not_called()
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_not_called()
@@ -1086,7 +1088,7 @@ class TestServiceAffectingMonitor:
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
-        await service_affecting_monitor._jitter_check()
+        await service_affecting_monitor._jitter_check(for_wireless=False)
 
         service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
@@ -1137,7 +1139,7 @@ class TestServiceAffectingMonitor:
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
-        await service_affecting_monitor._jitter_check()
+        await service_affecting_monitor._jitter_check(for_wireless=False)
 
         service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
@@ -1198,7 +1200,7 @@ class TestServiceAffectingMonitor:
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
-        await service_affecting_monitor._jitter_check()
+        await service_affecting_monitor._jitter_check(for_wireless=False)
 
         service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
@@ -1219,7 +1221,7 @@ class TestServiceAffectingMonitor:
             )
         )
 
-        await service_affecting_monitor._bandwidth_check()
+        await service_affecting_monitor._bandwidth_check(for_wireless=False)
 
         service_affecting_monitor._structure_links_metrics.assert_not_called()
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_not_called()
@@ -1252,7 +1254,7 @@ class TestServiceAffectingMonitor:
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
-        await service_affecting_monitor._bandwidth_check()
+        await service_affecting_monitor._bandwidth_check(for_wireless=False)
 
         service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
@@ -1313,7 +1315,7 @@ class TestServiceAffectingMonitor:
         custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
         custom_monitor_config["customers_with_bandwidth_enabled"] = []
         with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
-            await service_affecting_monitor._bandwidth_check()
+            await service_affecting_monitor._bandwidth_check(for_wireless=False)
 
         service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
@@ -1374,7 +1376,7 @@ class TestServiceAffectingMonitor:
         custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
         custom_monitor_config["customers_with_bandwidth_enabled"] = [client_id]
         with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
-            await service_affecting_monitor._bandwidth_check()
+            await service_affecting_monitor._bandwidth_check(for_wireless=False)
 
         service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
@@ -1438,7 +1440,7 @@ class TestServiceAffectingMonitor:
         custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
         custom_monitor_config["customers_with_bandwidth_enabled"] = [client_id]
         with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
-            await service_affecting_monitor._bandwidth_check()
+            await service_affecting_monitor._bandwidth_check(for_wireless=False)
 
         service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
@@ -1517,7 +1519,7 @@ class TestServiceAffectingMonitor:
         custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
         custom_monitor_config["customers_with_bandwidth_enabled"] = [client_id]
         with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
-            await service_affecting_monitor._bandwidth_check()
+            await service_affecting_monitor._bandwidth_check(for_wireless=False)
 
         service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
@@ -1586,7 +1588,7 @@ class TestServiceAffectingMonitor:
         custom_monitor_config = service_affecting_monitor._config.MONITOR_CONFIG.copy()
         custom_monitor_config["customers_with_bandwidth_disabled"] = [client_id]
         with patch.dict(service_affecting_monitor._config.MONITOR_CONFIG, custom_monitor_config):
-            await service_affecting_monitor._bandwidth_check()
+            await service_affecting_monitor._bandwidth_check(for_wireless=False)
 
         service_affecting_monitor._structure_links_metrics.assert_called_once_with(links_metric_sets)
         service_affecting_monitor._map_cached_edges_with_links_metrics_and_contact_info.assert_called_once_with(
@@ -1607,7 +1609,7 @@ class TestServiceAffectingMonitor:
             )
         )
 
-        await service_affecting_monitor._bouncing_check()
+        await service_affecting_monitor._bouncing_check(for_wireless=False)
 
         service_affecting_monitor._velocloud_repository.get_events_by_serial_and_interface.assert_not_called()
         service_affecting_monitor._structure_links_metrics.assert_not_called()
@@ -1643,7 +1645,7 @@ class TestServiceAffectingMonitor:
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
-        await service_affecting_monitor._bouncing_check()
+        await service_affecting_monitor._bouncing_check(for_wireless=False)
 
         service_affecting_monitor._structure_links_metrics.assert_called_once_with(
             links_metric_sets, events_by_serial_and_interface
@@ -1708,7 +1710,7 @@ class TestServiceAffectingMonitor:
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
-        await service_affecting_monitor._bouncing_check()
+        await service_affecting_monitor._bouncing_check(for_wireless=False)
 
         service_affecting_monitor._structure_links_metrics.assert_called_once_with(
             links_metric_sets, events_by_serial_and_interface
@@ -1785,7 +1787,7 @@ class TestServiceAffectingMonitor:
         contact_info_by_client_id = {55555: [], 33333: [], 11111: [], 66666: [], 44444: [], 22222: [], 1324: []}
         service_affecting_monitor._default_contact_info_by_client_id = contact_info_by_client_id
 
-        await service_affecting_monitor._bouncing_check()
+        await service_affecting_monitor._bouncing_check(for_wireless=False)
 
         service_affecting_monitor._structure_links_metrics.assert_called_once_with(
             links_metric_sets, events_by_serial_and_interface

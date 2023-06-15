@@ -247,14 +247,14 @@ class TestVelocloudRepository:
         trouble = AffectingTroubles.LATENCY
         current_datetime = frozen_datetime.now()
 
-        lookup_interval = velocloud_repository._get_greater_lookback(trouble)
+        lookup_interval = velocloud_repository._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
         interval = {
             "start": current_datetime - timedelta(minutes=lookup_interval),
             "end": current_datetime,
         }
 
         with patch.object(velocloud_repository_module, "datetime", new=frozen_datetime):
-            await velocloud_repository.get_links_metrics_for_latency_checks()
+            await velocloud_repository.get_links_metrics_for_latency_checks(for_wireless=False)
 
         velocloud_repository.get_all_links_metrics.assert_awaited_once_with(interval=interval)
 
@@ -263,14 +263,14 @@ class TestVelocloudRepository:
         trouble = AffectingTroubles.PACKET_LOSS
         current_datetime = frozen_datetime.now()
 
-        lookup_interval = velocloud_repository._get_greater_lookback(trouble)
+        lookup_interval = velocloud_repository._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
         interval = {
             "start": current_datetime - timedelta(minutes=lookup_interval),
             "end": current_datetime,
         }
 
         with patch.object(velocloud_repository_module, "datetime", new=frozen_datetime):
-            await velocloud_repository.get_links_metrics_for_packet_loss_checks()
+            await velocloud_repository.get_links_metrics_for_packet_loss_checks(for_wireless=False)
 
         velocloud_repository.get_all_links_metrics.assert_awaited_once_with(interval=interval)
 
@@ -279,14 +279,14 @@ class TestVelocloudRepository:
         trouble = AffectingTroubles.JITTER
         current_datetime = frozen_datetime.now()
 
-        lookup_interval = velocloud_repository._get_greater_lookback(trouble)
+        lookup_interval = velocloud_repository._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
         interval = {
             "start": current_datetime - timedelta(minutes=lookup_interval),
             "end": current_datetime,
         }
 
         with patch.object(velocloud_repository_module, "datetime", new=frozen_datetime):
-            await velocloud_repository.get_links_metrics_for_jitter_checks()
+            await velocloud_repository.get_links_metrics_for_jitter_checks(for_wireless=False)
 
         velocloud_repository.get_all_links_metrics.assert_awaited_once_with(interval=interval)
 
@@ -295,14 +295,14 @@ class TestVelocloudRepository:
         trouble = AffectingTroubles.BANDWIDTH_OVER_UTILIZATION
         current_datetime = frozen_datetime.now()
 
-        lookup_interval = velocloud_repository._get_greater_lookback(trouble)
+        lookup_interval = velocloud_repository._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
         interval = {
             "start": current_datetime - timedelta(minutes=lookup_interval),
             "end": current_datetime,
         }
 
         with patch.object(velocloud_repository_module, "datetime", new=frozen_datetime):
-            await velocloud_repository.get_links_metrics_for_bandwidth_checks()
+            await velocloud_repository.get_links_metrics_for_bandwidth_checks(for_wireless=False)
 
         velocloud_repository.get_all_links_metrics.assert_awaited_once_with(interval=interval)
 
@@ -311,14 +311,14 @@ class TestVelocloudRepository:
         trouble = AffectingTroubles.BOUNCING
         current_datetime = frozen_datetime.now()
 
-        lookup_interval = velocloud_repository._get_greater_lookback(trouble)
+        lookup_interval = velocloud_repository._config.MONITOR_CONFIG["monitoring_minutes_per_trouble"][trouble]
         interval = {
             "start": current_datetime - timedelta(minutes=lookup_interval),
             "end": current_datetime,
         }
 
         with patch.object(velocloud_repository_module, "datetime", new=frozen_datetime):
-            await velocloud_repository.get_links_metrics_for_bouncing_checks()
+            await velocloud_repository.get_links_metrics_for_bouncing_checks(for_wireless=False)
 
         velocloud_repository.get_all_links_metrics.assert_awaited_once_with(interval=interval)
 
@@ -387,7 +387,7 @@ class TestVelocloudRepository:
 
         with uuid_mock:
             with patch.object(velocloud_repository_module, "datetime", new=frozen_datetime):
-                result = await velocloud_repository.get_enterprise_events(host, enterprise_id)
+                result = await velocloud_repository.get_enterprise_events(host, enterprise_id, for_wireless=False)
 
         velocloud_repository._nats_client.request.assert_awaited_once_with(
             "alert.request.event.enterprise", to_json_bytes(request), timeout=240
@@ -421,7 +421,7 @@ class TestVelocloudRepository:
 
         with uuid_mock:
             with patch.object(velocloud_repository_module, "datetime", new=frozen_datetime):
-                result = await velocloud_repository.get_enterprise_events(host, enterprise_id)
+                result = await velocloud_repository.get_enterprise_events(host, enterprise_id, for_wireless=False)
 
         velocloud_repository._nats_client.request.assert_awaited_once_with(
             "alert.request.event.enterprise", to_json_bytes(request), timeout=240
@@ -457,7 +457,7 @@ class TestVelocloudRepository:
 
         with uuid_mock:
             with patch.object(velocloud_repository_module, "datetime", new=frozen_datetime):
-                result = await velocloud_repository.get_enterprise_events(host, enterprise_id)
+                result = await velocloud_repository.get_enterprise_events(host, enterprise_id, for_wireless=False)
 
         velocloud_repository._nats_client.request.assert_awaited_once_with(
             "alert.request.event.enterprise", to_json_bytes(request), timeout=240
@@ -490,9 +490,9 @@ class TestVelocloudRepository:
         with uuid_mock:
             result = await velocloud_repository.get_events_by_serial_and_interface(customer_cache)
 
-        velocloud_repository.get_enterprise_events.assert_any_await(host_1, enterprise_id_1)
-        velocloud_repository.get_enterprise_events.assert_any_await(host_1, enterprise_id_2)
-        velocloud_repository.get_enterprise_events.assert_any_await(host_2, enterprise_id_1)
+        velocloud_repository.get_enterprise_events.assert_any_await(host_1, enterprise_id_1, False)
+        velocloud_repository.get_enterprise_events.assert_any_await(host_1, enterprise_id_2, False)
+        velocloud_repository.get_enterprise_events.assert_any_await(host_2, enterprise_id_1, False)
 
         expected = {}
 
@@ -547,9 +547,9 @@ class TestVelocloudRepository:
         with uuid_mock:
             result = await velocloud_repository.get_events_by_serial_and_interface(customer_cache)
 
-        velocloud_repository.get_enterprise_events.assert_any_await(host_1, enterprise_id_1)
-        velocloud_repository.get_enterprise_events.assert_any_await(host_1, enterprise_id_2)
-        velocloud_repository.get_enterprise_events.assert_any_await(host_2, enterprise_id_1)
+        velocloud_repository.get_enterprise_events.assert_any_await(host_1, enterprise_id_1, False)
+        velocloud_repository.get_enterprise_events.assert_any_await(host_1, enterprise_id_2, False)
+        velocloud_repository.get_enterprise_events.assert_any_await(host_2, enterprise_id_1, False)
 
         expected = {
             edge_1_serial: {"GE1": [event_1]},
@@ -615,12 +615,3 @@ class TestVelocloudRepository:
         result = velocloud_repository.filter_links_metrics_by_client(links_metrics, client_id, customer_cache)
         expected = [link_1_metrics]
         assert result == expected
-
-    def get_greater_lookback_test(self, velocloud_repository):
-        trouble = AffectingTroubles.JITTER
-
-        wireless_monitoring_minutes_per_jitter = 90
-
-        result = velocloud_repository._get_greater_lookback(trouble)
-
-        assert result == wireless_monitoring_minutes_per_jitter
