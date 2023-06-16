@@ -363,9 +363,9 @@ class TicketRepository:
                 rx_threshold = (metrics_threshold / 100) * rx_bandwidth
 
                 note_lines += [
-                    f"Throughput (Receive): {self._utils_repository.humanize_bps(rx_throughput)}",
-                    f"Bandwidth (Receive): {self._utils_repository.humanize_bps(rx_bandwidth)}",
-                    f"Threshold (Receive): {metrics_threshold}% ({self._utils_repository.humanize_bps(rx_threshold)})",
+                    f"Upload Throughput: {self._utils_repository.humanize_bps(rx_throughput)}",
+                    f"Upload Bandwidth: {self._utils_repository.humanize_bps(rx_bandwidth)}",
+                    f"Upload Threshold: {metrics_threshold}% ({self._utils_repository.humanize_bps(rx_threshold)})",
                 ]
 
         tx_bandwidth = link_metrics["bpsOfBestPathTx"]
@@ -379,9 +379,9 @@ class TicketRepository:
                 tx_threshold = (metrics_threshold / 100) * tx_bandwidth
 
                 note_lines += [
-                    f"Throughput (Transfer): {self._utils_repository.humanize_bps(tx_throughput)}",
-                    f"Bandwidth (Transfer): {self._utils_repository.humanize_bps(tx_bandwidth)}",
-                    f"Threshold (Transfer): {metrics_threshold}% ({self._utils_repository.humanize_bps(tx_threshold)})",
+                    f"Download Throughput: {self._utils_repository.humanize_bps(tx_throughput)}",
+                    f"Download Bandwidth: {self._utils_repository.humanize_bps(tx_bandwidth)}",
+                    f"Download Threshold: {metrics_threshold}% ({self._utils_repository.humanize_bps(tx_threshold)})",
                 ]
 
         note_lines += [
