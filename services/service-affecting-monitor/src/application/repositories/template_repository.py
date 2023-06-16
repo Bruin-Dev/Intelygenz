@@ -160,7 +160,7 @@ class TemplateRepository:
             "Edge Name",
             "Interface",
             "Link Name",
-            "Access Type",
+            "Link Access Type",
             "Available Bandwidth Down Min",
             "Available Bandwidth Down Max",
             "Peak Utilization Down",
