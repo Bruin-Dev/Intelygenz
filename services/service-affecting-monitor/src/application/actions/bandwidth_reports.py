@@ -167,12 +167,12 @@ class BandwidthReports:
             links_metrics, grouped_ticket_details, enterprise_id_edge_id_relation, serial_numbers)
         report_items.sort(key=lambda item: (item["serial_number"], item["interface"]))
 
-        if self._config.CURRENT_ENVIRONMENT != "production":
-            logger.info(
-                f"[bandwidth-reports] No report will be sent for client {client_id} "
-                f"since the current environment is not production"
-            )
-            return
+        # if self._config.CURRENT_ENVIRONMENT != "production":
+        #     logger.info(
+        #         f"[bandwidth-reports] No report will be sent for client {client_id} "
+        #         f"since the current environment is not production"
+        #     )
+        #     return
 
         email = self._template_repository.compose_bandwidth_report_email(
             client_id=client_id,

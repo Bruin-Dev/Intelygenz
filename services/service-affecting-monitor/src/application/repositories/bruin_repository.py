@@ -957,7 +957,10 @@ class BruinRepository:
                 peak_time_down=link_metrics["peak_time_down"],
                 peak_time_up=link_metrics["peak_time_up"],
                 link_name=link_metrics["link_name"],
-                access_type=logical_id["access_type"] if "access_type" in logical_id else '',
+                access_type=(logical_id["access_type"]
+                             if "access_type" in logical_id
+                             and logical_id["access_type"]
+                             else ''),
             )
             report_items.append(report_item)
 

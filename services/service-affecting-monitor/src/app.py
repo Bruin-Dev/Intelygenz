@@ -179,20 +179,20 @@ class Container:
         await self._init_nats_conn()
         await self._init_subscriptions()
 
-        await self._service_affecting_monitor.start_service_affecting_monitor(exec_on_start=True)
+        # await self._service_affecting_monitor.start_service_affecting_monitor(exec_on_start=True)
 
-        if config.VELOCLOUD_HOST in config.MONITOR_REPORT_CONFIG["recipients_by_host_and_client_id"]:
-            await self._service_affecting_monitor_reports.start_service_affecting_monitor_reports_job(
-                exec_on_start=config.MONITOR_REPORT_CONFIG["exec_on_start"]
-            )
-        else:
-            app_logger.warning(
-                f"Job for Reoccurring Affecting Trouble Reports will not be scheduled for {config.VELOCLOUD_HOST} "
-                "as these reports are disabled for this host"
-            )
+        # if config.VELOCLOUD_HOST in config.MONITOR_REPORT_CONFIG["recipients_by_host_and_client_id"]:
+        #     await self._service_affecting_monitor_reports.start_service_affecting_monitor_reports_job(
+        #         exec_on_start=config.MONITOR_REPORT_CONFIG["exec_on_start"]
+        #     )
+        # else:
+        #     app_logger.warning(
+        #         f"Job for Reoccurring Affecting Trouble Reports will not be scheduled for {config.VELOCLOUD_HOST} "
+        #         "as these reports are disabled for this host"
+        #     )
 
         await self._bandwidth_reports.start_bandwidth_reports_job(
-            exec_on_start=config.BANDWIDTH_REPORT_CONFIG["exec_on_start"]
+            exec_on_start=True  # config.BANDWIDTH_REPORT_CONFIG["exec_on_start"]
         )
 
         self._scheduler.start()
