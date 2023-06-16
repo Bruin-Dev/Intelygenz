@@ -53,6 +53,9 @@ class DiGiClient:
     async def login(self):
         logger.info("Logging into DiGi...")
         try:
+            google_test = await self.session.get('https://www.google.com')
+            logger.info(f'Google test: {google_test}')
+
             response = await self.session.post(
                 f'{self.config.DIGI_CONFIG["base_url"]}/Identity/rest/oauth/token',
                 data={"grant_type": "client_credentials", "scope": "write:dms"},
