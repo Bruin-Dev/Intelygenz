@@ -53,9 +53,6 @@ class DiGiClient:
     async def login(self):
         logger.info("Logging into DiGi...")
         try:
-            google_test = await self.session.get('https://www.google.com')
-            logger.info(f'Google test: {google_test}')
-
             response = await self.session.post(
                 f'{self.config.DIGI_CONFIG["base_url"]}/Identity/rest/oauth/token',
                 data={"grant_type": "client_credentials", "scope": "write:dms"},
@@ -63,7 +60,7 @@ class DiGiClient:
                     "authorization": self.get_auth_header_for_login(),
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
-                ssl=False,
+                ssl=True,
             )
             login_response_in_json_format = await response.json()
             self.bearer_token = login_response_in_json_format["access_token"]
@@ -90,7 +87,7 @@ class DiGiClient:
             response = await self.session.post(
                 f"{self.config.DIGI_CONFIG['base_url']}/DeviceManagement_API/rest/Recovery/RecoverDevice",
                 headers=self.get_request_headers(request_filters),
-                ssl=False,
+                ssl=True,
             )
             response_json = await response.json()
 
@@ -132,7 +129,7 @@ class DiGiClient:
             response = await self.session.get(
                 f"{self.config.DIGI_CONFIG['base_url']}/DeviceManagement_API/rest/Recovery/Logs",
                 headers=self.get_request_headers(request_filters),
-                ssl=False,
+                ssl=True,
             )
             response_json = await response.json()
 
