@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from types import ModuleType
 
 import aiohttp
+import traceback
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +71,7 @@ class DiGiClient:
         except Exception as err:
             logger.error("An error occurred while trying to login to DiGi")
             logger.error(f"Error: {err}")
+            logger.error(f"Traceback: {traceback.format_exc()}")
 
     async def reboot(self, request_filters):
         try:
