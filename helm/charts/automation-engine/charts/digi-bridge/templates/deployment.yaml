@@ -66,7 +66,7 @@ spec:
             initialDelaySeconds: 15
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-      hostAliases:
+      {% comment %} hostAliases:
         - ip: {{ .Values.config.digi_api_ip }}
           hostnames:
             - {{ .Values.config.digi_api_dns_record_name }}
@@ -74,7 +74,7 @@ spec:
         - ip: {{ .Values.config.digi_api_test_ip | quote }}
           hostnames:
             - {{ .Values.config.digi_api_test_dns_record_name | quote }}
-        {{- end }}
+        {{- end }} {% endcomment %}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

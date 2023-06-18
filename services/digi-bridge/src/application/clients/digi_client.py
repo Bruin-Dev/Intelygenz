@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 from types import ModuleType
 
 import aiohttp
-import traceback
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +60,7 @@ class DiGiClient:
                     "authorization": self.get_auth_header_for_login(),
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
-                ssl=True,
+                ssl=False,
             )
             login_response_in_json_format = await response.json()
             self.bearer_token = login_response_in_json_format["access_token"]
@@ -71,7 +70,6 @@ class DiGiClient:
         except Exception as err:
             logger.error("An error occurred while trying to login to DiGi")
             logger.error(f"Error: {err}")
-            logger.error(f"Traceback: {traceback.format_exc()}")
 
     async def reboot(self, request_filters):
         try:
@@ -89,7 +87,7 @@ class DiGiClient:
             response = await self.session.post(
                 f"{self.config.DIGI_CONFIG['base_url']}/DeviceManagement_API/rest/Recovery/RecoverDevice",
                 headers=self.get_request_headers(request_filters),
-                ssl=True,
+                ssl=False,
             )
             response_json = await response.json()
 
@@ -131,7 +129,7 @@ class DiGiClient:
             response = await self.session.get(
                 f"{self.config.DIGI_CONFIG['base_url']}/DeviceManagement_API/rest/Recovery/Logs",
                 headers=self.get_request_headers(request_filters),
-                ssl=True,
+                ssl=False,
             )
             response_json = await response.json()
 
