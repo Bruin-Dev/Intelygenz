@@ -48,7 +48,10 @@ class DiGiClient:
 
     @staticmethod
     def get_list_of_error_messages_from_json(response_json):
-        return [message for message in response_json if message.get("error") is not None]
+        return [message
+                for message in response_json
+                if not isinstance(message, str)
+                and message.get("error") is not None]
 
     async def login(self):
         logger.info("Logging into DiGi...")
