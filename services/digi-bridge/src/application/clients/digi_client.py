@@ -87,12 +87,17 @@ class DiGiClient:
                 return_response["status"] = 401
                 return return_response
 
+            headers = self.get_request_headers(request_filters)
+
             response = await self.session.post(
                 f"{self.config.DIGI_CONFIG['base_url']}/DeviceManagement_API/rest/Recovery/RecoverDevice",
-                headers=self.get_request_headers(request_filters),
+                headers=headers,
                 ssl=False,
             )
             response_json = await response.json()
+
+            logger.info(f"Got response from DiGi with params {request_filters}, "
+                        f"and with headers: {headers}. Response: {response_json}")
 
             response_error_list = self.get_list_of_error_messages_from_json(response_json)
             response_abort_messages_list = self.get_list_aborted_messages_from_json(response_json)
